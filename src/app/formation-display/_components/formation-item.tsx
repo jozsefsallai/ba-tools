@@ -81,7 +81,7 @@ export function FormationItem({
     });
   }
 
-  function handleUELevelUpdate(newValue: UELevel) {
+  function handleUELevelUpdate(newValue: UELevel | undefined) {
     onWantsToUpdate(item, { ueLevel: newValue });
     addOrUpdateStudentInStorage({
       id: item.student.id,
@@ -152,7 +152,11 @@ export function FormationItem({
               <Select
                 value={item.ueLevel?.toString() ?? ""}
                 onValueChange={(value) =>
-                  handleUELevelUpdate(Number.parseInt(value, 10) as UELevel)
+                  handleUELevelUpdate(
+                    value === "-"
+                      ? undefined
+                      : (Number.parseInt(value, 10) as UELevel),
+                  )
                 }
               >
                 <SelectTrigger>
@@ -160,6 +164,7 @@ export function FormationItem({
                 </SelectTrigger>
 
                 <SelectContent>
+                  <SelectItem value="-">None</SelectItem>
                   <SelectItem value="1">1</SelectItem>
                   <SelectItem value="2">2</SelectItem>
                   <SelectItem value="3">3</SelectItem>
