@@ -30,7 +30,7 @@ export function StudentStar({
 
       <div
         className={cn(
-          "absolute top-0 left-0 w-full h-full flex items-center justify-center font-nexon-football-gothic font-bold text-[18px] leading-0 skew-x-[-11deg]",
+          "absolute top-0 left-0 w-full h-full flex items-center justify-center font-nexon-football-gothic font-bold text-[17px] leading-0 skew-x-[-11deg]",
           {
             "text-[#592c13]": !ueLevel,
             "text-[#273c60]": !!ueLevel,
