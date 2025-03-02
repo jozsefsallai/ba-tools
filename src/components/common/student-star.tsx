@@ -8,6 +8,7 @@ export type StudentStarProps = {
   ueLevel?: UELevel;
   containerClassName?: string;
   imageClassName?: string;
+  textClassName?: string;
 };
 
 export function StudentStar({
@@ -15,6 +16,7 @@ export function StudentStar({
   ueLevel,
   containerClassName,
   imageClassName,
+  textClassName,
 }: StudentStarProps) {
   if (!starLevel && !ueLevel) {
     return null;
@@ -33,6 +35,7 @@ export function StudentStar({
             "text-[#592c13]": !ueLevel,
             "text-[#273c60]": !!ueLevel,
           },
+          textClassName,
         )}
       >
         {ueLevel ?? starLevel}

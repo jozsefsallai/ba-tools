@@ -16,6 +16,7 @@ export type StudentCardProps = {
   ueLevel?: UELevel;
   borrowed?: boolean;
   starter?: boolean;
+  busy?: boolean;
 };
 
 export function StudentCard({
@@ -26,6 +27,7 @@ export function StudentCard({
   ueLevel,
   borrowed,
   starter,
+  busy,
 }: StudentCardProps) {
   return (
     <div className="flex relative">
@@ -74,6 +76,9 @@ export function StudentCard({
               starLevel={starLevel}
               ueLevel={ueLevel}
               containerClassName="w-[24px] h-[24px] absolute bottom-[2px] left-[2px] skew-x-[11deg]"
+              textClassName={cn({
+                "mt-[2px]": !busy,
+              })}
             />
           )}
 

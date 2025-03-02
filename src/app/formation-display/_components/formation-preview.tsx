@@ -20,6 +20,7 @@ export type FormationPreviewProps = {
   specials: StudentItem[];
   displayOverline?: boolean;
   noDisplayRole?: boolean;
+  busy?: boolean;
 };
 
 function Overline({
@@ -45,6 +46,7 @@ export function FormationPreview({
   specials,
   displayOverline,
   noDisplayRole,
+  busy,
 }: FormationPreviewProps) {
   if (strikers.length === 0 && specials.length === 0) {
     return (
@@ -70,6 +72,7 @@ export function FormationPreview({
               <StudentCard
                 key={student.student.id}
                 noDisplayRole={noDisplayRole}
+                busy={busy}
                 {...student}
               />
             ))}
@@ -89,6 +92,7 @@ export function FormationPreview({
               <StudentCard
                 key={student.student.id}
                 noDisplayRole={noDisplayRole}
+                busy={busy}
                 {...student}
               />
             ))}

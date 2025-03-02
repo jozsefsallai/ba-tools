@@ -37,6 +37,7 @@ import { getStudentFromStorage } from "@/lib/student-storage";
 
 import { ExportStudentDataDialog } from "@/components/dialogs/export-student-data-dialog";
 import { ImportStudentDataDialog } from "@/components/dialogs/import-student-data-dialog";
+import { sleep } from "@/lib/sleep";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -194,6 +195,8 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
     setGenerationInProgress(true);
 
+    await sleep(50); // HACK! Wait for the state to update before taking the screenshot.
+
     const canvas = await html2canvas(containerRef.current, {
       backgroundColor: null,
       scale,
@@ -216,6 +219,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         specials={specials}
         displayOverline={displayOverline}
         noDisplayRole={!displayRoleIcon}
+        busy={generationInProgress}
       />
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
