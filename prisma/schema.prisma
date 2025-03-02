@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model banners {
+  id                             String      @id @db.VarChar
+  name                           String      @db.VarChar
+  date                           String      @db.VarChar
+  three_star_rate                Int         @default(30)
+  pickup_rate                    Int         @default(0)
+  extra_rate                     Int         @default(0)
+  pickup_pool_students           String[]    @db.VarChar
+  extra_pool_students            String[]    @db.VarChar
+  additional_three_star_students String[]    @db.VarChar
+  base_one_star_rate             Int         @default(785)
+  base_two_star_rate             Int         @default(185)
+  base_three_star_rate           Int         @default(30)
+  kind                           banner_kind
+  sort_key                       Int         @default(0)
+}
+
+model gifts {
+  id                Int      @id @default(autoincrement())
+  name              String   @db.VarChar
+  icon_url          String?
+  description       String?
+  rarity            Int      @default(1)
+  students_favorite String[] @db.VarChar
+  students_liked    String[] @db.VarChar
+}
+
+model missions {
+  id                Int         @id @default(autoincrement())
+  name              String      @db.VarChar
+  cost              Int
+  difficulty        difficulty?
+  terrain           terrain?
+  recommended_level Int
+  drops             String[]
+  stage_image_url   String?
+}
+
+model skills {
+  id          Int        @id @default(autoincrement())
+  student_id  String     @db.VarChar
+  kind        skill_type
+  name        String     @db.VarChar
+  description String
+  cost        String?    @db.VarChar
+  students    students   @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "skills_student_id_students_id_fk")
+}
+
+model students {
+  id              String           @id @db.VarChar
+  name            String           @db.VarChar
+  full_name       String           @db.VarChar
+  school          school
+  age             String           @db.VarChar
+  birthday        String           @db.VarChar
+  height          String           @db.VarChar
+  hobbies         String?
+  wiki_image      String?
+  attack_type     attack_type?
+  defense_type    defense_type?
+  combat_class    combat_class?
+  combat_role     combat_role?
+  combat_position combat_position?
+  uses_cover      Boolean          @default(false)
+  weapon_type     weapon_type?
+  rarity          Int
+  is_welfare      Boolean          @default(false)
+  is_limited      Boolean          @default(false)
+  release_date    DateTime?        @db.Date
+  recorobi_level  Int?
+  base_variant_id String?          @db.VarChar
+  skills          skills[]
+  students        students?        @relation("studentsTostudents", fields: [base_variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "students_base_variant_id_students_id_fk")
+  other_students  students[]       @relation("studentsTostudents")
+}
+
+enum attack_type {
+  explosive
+  piercing
+  mystic
+  sonic
+}
+
+enum banner_kind {
+  global
+  jp
+  chroma
+}
+
+enum combat_class {
+  striker
+  special
+}
+
+enum combat_position {
+  front
+  middle
+  back
+}
+
+enum combat_role {
+  attacker
+  healer
+  support
+  t_s_     @map("t.s.")
+  tank
+}
+
+enum defense_type {
+  light
+  heavy
+  special
+  elastic
+}
+
+enum difficulty {
+  normal
+  hard
+  veryhard
+  hardcode
+  extreme
+  insane
+  torment
+}
+
+enum school {
+  abydos
+  arius
+  gehenna
+  hyakkiyako
+  millennium
+  redwinter
+  shanhaijing
+  srt
+  trinity
+  valkyrie
+  tokiwadai
+  sakugawa
+  etc
+}
+
+enum skill_type {
+  ex
+  basic
+  enhanced
+  sub
+}
+
+enum terrain {
+  indoors
+  outdoors
+  urban
+}
+
+enum weapon_type {
+  AR
+  FT
+  GL
+  HG
+  MG
+  MT
+  RG
+  RL
+  SG
+  SMG
+  SR
+}
