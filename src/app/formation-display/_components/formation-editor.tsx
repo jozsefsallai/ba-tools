@@ -35,6 +35,9 @@ import {
 import { FormationItem } from "@/app/formation-display/_components/formation-item";
 import { getStudentFromStorage } from "@/lib/student-storage";
 
+import { ExportStudentDataDialog } from "@/components/dialogs/export-student-data-dialog";
+import { ImportStudentDataDialog } from "@/components/dialogs/import-student-data-dialog";
+
 export type FormationEditorProps = {
   allStudents: Student[];
 };
@@ -268,55 +271,70 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
       <Separator />
 
-      <div className="flex gap-4 items-center justify-center">
-        <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-[200px] md:w-[250px] justify-between"
-            >
-              {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
-              <ChevronsUpDownIcon />
-            </Button>
-          </PopoverTrigger>
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 items-center justify-center">
+          <Popover
+            open={studentPopoverOpen}
+            onOpenChange={setStudentPopoverOpen}
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-[200px] md:w-[250px] justify-between"
+              >
+                {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
+                <ChevronsUpDownIcon />
+              </Button>
+            </PopoverTrigger>
 
-          <PopoverContent className="w-[200px] md:w-[250px] p-0">
-            <Command>
-              <CommandInput placeholder="Search student..." className="h-9" />
-              <CommandList>
-                <CommandEmpty>No such student.</CommandEmpty>
-                <CommandGroup>
-                  {allStudents.map((student) => (
-                    <CommandItem
-                      key={student.id}
-                      value={student.name}
-                      onSelect={() => {
-                        setSelectedStudent(student);
-                        setStudentPopoverOpen(false);
-                      }}
-                    >
-                      {student.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+            <PopoverContent className="w-[200px] md:w-[250px] p-0">
+              <Command>
+                <CommandInput placeholder="Search student..." className="h-9" />
+                <CommandList>
+                  <CommandEmpty>No such student.</CommandEmpty>
+                  <CommandGroup>
+                    {allStudents.map((student) => (
+                      <CommandItem
+                        key={student.id}
+                        value={student.name}
+                        onSelect={() => {
+                          setSelectedStudent(student);
+                          setStudentPopoverOpen(false);
+                        }}
+                      >
+                        {student.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
-        <Button
-          onClick={() => {
-            if (!selectedStudent) {
-              return;
-            }
+          <Button
+            onClick={() => {
+              if (!selectedStudent) {
+                return;
+              }
 
-            addStudent(selectedStudent);
-            setSelectedStudent(null);
-          }}
-          disabled={!selectedStudent}
-        >
-          Add Student
-        </Button>
+              addStudent(selectedStudent);
+              setSelectedStudent(null);
+            }}
+            disabled={!selectedStudent}
+          >
+            Add Student
+          </Button>
+        </div>
+
+        <div className="flex gap-4 items-center justify-center">
+          <ExportStudentDataDialog>
+            <Button variant="outline">Export cached student data</Button>
+          </ExportStudentDataDialog>
+
+          <ImportStudentDataDialog>
+            <Button variant="outline">Import cached student data</Button>
+          </ImportStudentDataDialog>
+        </div>
       </div>
 
       <Separator />

@@ -8,11 +8,19 @@ export type StudentStorageItem = {
 };
 
 export function getStudentStorage(): StudentStorageItem[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
   const data = localStorage.getItem("jbat_students");
   return data ? JSON.parse(data) : [];
 }
 
 export function setStudentStorage(data: StudentStorageItem[]): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   localStorage.setItem("jbat_students", JSON.stringify(data));
 }
 
