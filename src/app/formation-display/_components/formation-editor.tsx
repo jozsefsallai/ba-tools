@@ -33,6 +33,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { FormationItem } from "@/app/formation-display/_components/formation-item";
+import { getStudentFromStorage } from "@/lib/student-storage";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -56,17 +57,23 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
   function addStudent(student: Student) {
+    const item: StudentItem = {
+      student,
+    };
+
+    const storedStudent = getStudentFromStorage(student.id);
+    if (storedStudent) {
+      item.level = storedStudent.level;
+      item.starLevel = storedStudent.starLevel;
+      item.ueLevel = storedStudent.ueLevel;
+    }
+
     if (student.combat_class === "striker") {
       if (strikers.find((item) => item.student === student)) {
         return;
       }
 
-      setStrikers((prev) => [
-        ...prev,
-        {
-          student,
-        },
-      ]);
+      setStrikers((prev) => [...prev, item]);
     }
 
     if (student.combat_class === "special") {
@@ -74,12 +81,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         return;
       }
 
-      setSpecials((prev) => [
-        ...prev,
-        {
-          student,
-        },
-      ]);
+      setSpecials((prev) => [...prev, item]);
     }
   }
 

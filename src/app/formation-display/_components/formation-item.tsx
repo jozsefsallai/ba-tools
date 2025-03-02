@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { addOrUpdateStudentInStorage } from "@/lib/student-storage";
 import type { StarLevel, UELevel } from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
 import { ChevronDown, ChevronUpIcon } from "lucide-react";
@@ -66,14 +67,26 @@ export function FormationItem({
     }
 
     onWantsToUpdate(item, { level });
+    addOrUpdateStudentInStorage({
+      id: item.student.id,
+      level,
+    });
   }
 
   function handleStarLevelUpdate(newValue: StarLevel) {
     onWantsToUpdate(item, { starLevel: newValue });
+    addOrUpdateStudentInStorage({
+      id: item.student.id,
+      starLevel: newValue,
+    });
   }
 
   function handleUELevelUpdate(newValue: UELevel) {
     onWantsToUpdate(item, { ueLevel: newValue });
+    addOrUpdateStudentInStorage({
+      id: item.student.id,
+      ueLevel: newValue,
+    });
   }
 
   function handleBorrowedUpdate(newValue: boolean) {

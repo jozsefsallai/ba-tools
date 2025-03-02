@@ -28,6 +28,12 @@ export default async function FormationDisplayPage() {
           <strong>Note:</strong> This tool might not work well on mobile
           devices.
         </p>
+        <p className="text-muted-foreground">
+          <strong>Note:</strong> Dark mode extensions and zoom levels may cause
+          rendering issues in the resulting image. If the generated image looks
+          weird, try disabling any dark mode extensions you may have and using
+          100% zoom.
+        </p>
       </div>
 
       <FormationEditor allStudents={allStudents} />
