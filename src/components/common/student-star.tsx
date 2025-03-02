@@ -28,7 +28,7 @@ export function StudentStar({
 
       <div
         className={cn(
-          "flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-bold skew-x-[-11deg] ml-[1px] mt-[1px]",
+          "flex absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-bold skew-x-[-11deg] mt-[1px]",
           {
             "text-[#592c13]": !ueLevel,
             "text-[#273c60]": !!ueLevel,

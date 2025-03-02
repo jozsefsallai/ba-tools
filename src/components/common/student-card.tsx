@@ -31,13 +31,13 @@ export function StudentCard({
     <div className="flex relative">
       <div
         className={cn("skew-x-[-11deg] p-[2px] rounded-[11%]", {
-          "p-[2px] bg-yellow-300": starter,
+          "p-[2px] bg-[#ffff4d]": starter,
           "p-[1px] bg-white": !starter,
         })}
       >
         <div
           className={cn(
-            "flex relative h-[93px] w-[93px] rounded-[11%] p-[2px] pb-[10px] overflow-hidden",
+            "flex relative h-[86px] w-[93px] rounded-[11%] p-[2px] pb-[10px] overflow-hidden",
             {
               "bg-type-red": student.attack_type === "explosive",
               "bg-type-yellow": student.attack_type === "piercing",
@@ -51,13 +51,14 @@ export function StudentCard({
             style={{ backgroundImage: `url(${charBg.src})` }}
           />
 
-          <img
-            src={buildStudentIconUrl(student)}
-            alt={student.name}
-            width={100}
-            height={81}
-            className="absolute top-[2px] left-1/2 -translate-x-1/2 max-w-none skew-x-[11deg]"
-          />
+          <div className="absolute top-[2px] left-[2px] right-[2px] bottom-[10px] overflow-hidden rounded-[11%]">
+            <img
+              src={buildStudentIconUrl(student)}
+              alt={student.name}
+              width={102}
+              className="max-w-none skew-x-[11deg] ml-[-6px]"
+            />
+          </div>
 
           {!noDisplayRole && (
             <div className="absolute bottom-[2px] right-[2px] bg-white rounded-tl-[8px] rounded-br-[8px] flex items-center justify-center w-6 h-6">
