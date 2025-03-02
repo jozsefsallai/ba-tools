@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm run db:generate && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "biome lint . --write",
