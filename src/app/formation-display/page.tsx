@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Formation Display - Joe's Blue Archive Tools",
   description:
     "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
+  twitter: {
+    card: "summary",
+  },
 };
 
 export default async function FormationDisplayPage() {

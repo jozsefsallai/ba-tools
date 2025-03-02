@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
   description: "Various tools and utilities for Blue Archive",
+  twitter: {
+    card: "summary",
+  },
 };
 
 export default function Home() {
