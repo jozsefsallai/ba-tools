@@ -24,6 +24,10 @@ export default async function FormationDisplayPage() {
           This tool allows you to generate an image of a student formation. This
           can be useful for cases such as designing clean YouTube thumbnails.
         </p>
+        <p className="md:hidden text-muted-foreground">
+          <strong>Note:</strong> This tool might not work well on mobile
+          devices.
+        </p>
       </div>
 
       <FormationEditor allStudents={allStudents} />

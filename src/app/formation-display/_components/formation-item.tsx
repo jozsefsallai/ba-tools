@@ -85,18 +85,18 @@ export function FormationItem({
   }
 
   return (
-    <article className="border rounded-md p-4 flex items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
+    <article className="border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex md:items-center gap-4">
         <img
           src={buildStudentIconUrl(item.student)}
           alt={item.student.name}
-          className="h-24"
+          className="h-12 md:h-24"
         />
 
         <div className="flex flex-col gap-2">
           <div className="text-xl font-bold">{item.student.name}</div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex items-center gap-2">
               <Label htmlFor="level">Level:</Label>
 
@@ -175,7 +175,7 @@ export function FormationItem({
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
         <Button variant="outline" onClick={handleMoveUp} disabled={index === 0}>
           <ChevronUpIcon /> Move Up
         </Button>

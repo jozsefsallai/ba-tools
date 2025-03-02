@@ -213,7 +213,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         noDisplayRole={!displayRoleIcon}
       />
 
-      <div className="flex gap-12 items-center justify-center">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
         <div className="flex gap-2 items-center">
           <Label>Scale</Label>
 
@@ -269,13 +269,16 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
       <div className="flex gap-4 items-center justify-center">
         <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[250px] justify-between">
+            <Button
+              variant="outline"
+              className="w-[200px] md:w-[250px] justify-between"
+            >
               {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
               <ChevronsUpDownIcon />
             </Button>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[250px] p-0">
+          <PopoverContent className="w-[200px] md:w-[250px] p-0">
             <Command>
               <CommandInput placeholder="Search student..." className="h-9" />
               <CommandList>

@@ -21,7 +21,9 @@ export function TheHeader() {
           <div className="flex items-center gap-4">
             <Image src={plana} alt="Plana" width={48} height={48} />
 
-            <h1 className="text-2xl font-bold">Joe's Blue Archive Tools</h1>
+            <h1 className="hidden md:block text-2xl font-bold">
+              Joe's Blue Archive Tools
+            </h1>
           </div>
         </Link>
 

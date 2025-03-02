@@ -56,7 +56,7 @@ export function FormationPreview({
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center">
-      <div className="flex items-center gap-3 flex-wrap p-4" ref={containerRef}>
+      <div className="flex items-center gap-3 p-4" ref={containerRef}>
         <div className="flex flex-col gap-1">
           {displayOverline && strikers.length > 0 && (
             <Overline
