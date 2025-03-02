@@ -18,7 +18,7 @@ export default async function FormationDisplayPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="w-2/3 mx-auto flex flex-col gap-4">
+      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <h1 className="text-xl font-bold">Formation Display</h1>
         <p>
           This tool allows you to generate an image of a student formation. This

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <article className="flex flex-col gap-4 w-2/3 mx-auto">
+    <article className="flex flex-col gap-4 md:w-2/3 mx-auto">
       <h1 className="text-4xl">Welcome!</h1>
 
       <p>
