@@ -11,6 +11,7 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-nexon-football-gothic: var(--font-nexon-football-gothic);
 }
 
 :root {

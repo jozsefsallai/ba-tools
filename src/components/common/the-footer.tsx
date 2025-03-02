@@ -16,6 +16,9 @@ export function TheFooter() {
         is in no way affiliated or endorsed by the previously mentioned
         companies.
         <br />
+        The font "NEXON Football Gothic" used in certain places on the website
+        belongs to NEXON Korea.
+        <br />
         <a
           href="https://github.com/jozsefsallai/ba-tools"
           target="_blank"
