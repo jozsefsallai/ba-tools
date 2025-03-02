@@ -5,11 +5,11 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { getStudentStorage } from "@/lib/student-storage";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import type { PropsWithChildren } from "react";
 
 export type ExportStudentDataDialogProps = PropsWithChildren;
