@@ -1,3 +1,4 @@
+import { Plana } from "@/components/plana";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -41,6 +42,8 @@ export default function Home() {
         </a>
         .
       </p>
+
+      <Plana />
     </article>
   );
 }

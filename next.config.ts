@@ -9,6 +9,9 @@ if (!IMAGE_CDN_URL) {
 const url = new URL(IMAGE_CDN_URL);
 
 const nextConfig: NextConfig = {
+  // strict mode messes with the Spine renderer
+  reactStrictMode: false,
+
   images: {
     remotePatterns: [
       {
