@@ -18,6 +18,9 @@ export class Plana {
 
   private scaleModifier = 1;
 
+  private blinkIntervalId: NodeJS.Timeout | number | null = null;
+  private heartHaloTimeoutId: NodeJS.Timeout | number | null = null;
+
   static CANVAS_WIDTH = 500;
   static CANVAS_HEIGHT = 850;
 
@@ -30,6 +33,8 @@ export class Plana {
 
   static HEADPAT_INCREMENT = 2;
   static HEADPAT_CLAMP = 30;
+  static BLINK_INTERVAL = 10000;
+  static HEART_HALO_TIMEOUT = 6000;
 
   constructor(canvas: HTMLCanvasElement) {
     this.updateScaleModifier();
@@ -69,6 +74,11 @@ export class Plana {
     document.addEventListener("mouseup", this.handleMouseUp.bind(this));
 
     window.addEventListener("resize", this.handleResize.bind(this));
+
+    this.blinkIntervalId = setInterval(
+      this.blink.bind(this),
+      Plana.BLINK_INTERVAL,
+    );
   }
 
   deinit() {
@@ -85,6 +95,10 @@ export class Plana {
     document.removeEventListener("mouseup", this.handleMouseUp.bind(this));
 
     window.removeEventListener("resize", this.handleResize.bind(this));
+
+    if (this.blinkIntervalId) {
+      clearInterval(this.blinkIntervalId);
+    }
   }
 
   private get width() {
@@ -152,6 +166,10 @@ export class Plana {
     this.renderer.playAnimation(2, "Pat_01_A", false);
 
     this.canvas.style.cursor = "grab";
+
+    this.heartHaloTimeoutId = setTimeout(() => {
+      this.renderer.playAnimation(3, "Dev_Halo_love", true);
+    }, Plana.HEART_HALO_TIMEOUT);
   }
 
   private rub(_x: number, _y: number, dx: number, dy: number) {
@@ -189,6 +207,11 @@ export class Plana {
 
     this.canvas.style.cursor = "default";
 
+    if (this.heartHaloTimeoutId) {
+      clearTimeout(this.heartHaloTimeoutId);
+      this.renderer.stopAnimation(3);
+    }
+
     // slowly reset head position
     const interval = setInterval(() => {
       if (!this.touchPoint) {
@@ -221,5 +244,13 @@ export class Plana {
         this.touchPoint.y -= Plana.HEADPAT_INCREMENT;
       }
     }, 10);
+  }
+
+  private blink() {
+    if (this.isPatting) {
+      return;
+    }
+
+    this.renderer.playAnimation(1, "Eye_Close_01", false);
   }
 }
