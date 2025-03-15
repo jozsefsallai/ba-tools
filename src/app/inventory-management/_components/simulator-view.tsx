@@ -307,7 +307,7 @@ export function InventoryManagementSimulatorView() {
           onWantsToUnblockCell={handleWantsToUnblockCell}
         />
 
-        <div className="flex flex-col md:flex-row gap-4 w-full">
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
           <Button onClick={startSimulation} disabled={requestInProgress}>
             Simulate
           </Button>
