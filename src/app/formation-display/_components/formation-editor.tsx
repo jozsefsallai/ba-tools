@@ -33,11 +33,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { FormationItem } from "@/app/formation-display/_components/formation-item";
-import { getStudentFromStorage } from "@/lib/student-storage";
 
 import { ExportStudentDataDialog } from "@/components/dialogs/export-student-data-dialog";
 import { ImportStudentDataDialog } from "@/components/dialogs/import-student-data-dialog";
 import { sleep } from "@/lib/sleep";
+import { studentStorage } from "@/lib/storage/students";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -65,7 +65,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
       student,
     };
 
-    const storedStudent = getStudentFromStorage(student.id);
+    const storedStudent = studentStorage.getStudent(student.id);
     if (storedStudent) {
       item.level = storedStudent.level;
       item.starLevel = storedStudent.starLevel;

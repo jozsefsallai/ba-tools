@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { getStudentStorage } from "@/lib/student-storage";
+import { studentStorage } from "@/lib/storage/students";
 import type { PropsWithChildren } from "react";
 
 export type ExportStudentDataDialogProps = PropsWithChildren;
@@ -32,7 +32,7 @@ export function ExportStudentDataDialog({
         </DialogHeader>
 
         <Textarea
-          value={JSON.stringify(getStudentStorage())}
+          value={JSON.stringify(studentStorage.get())}
           onClick={(e) => e.currentTarget.select()}
           readOnly
           autoFocus

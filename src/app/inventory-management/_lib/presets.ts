@@ -1,0 +1,307 @@
+export type InventoryManagementPresetItem = {
+  name: string;
+
+  width: number;
+  height: number;
+  count: number;
+};
+
+export type InventoryManagementPreset = {
+  name: string;
+  rounds: [
+    InventoryManagementPresetItem,
+    InventoryManagementPresetItem,
+    InventoryManagementPresetItem,
+  ][];
+};
+
+function withCounts(
+  item: Omit<InventoryManagementPresetItem, "count">,
+  count: number,
+): InventoryManagementPresetItem {
+  return {
+    ...item,
+    count,
+  };
+}
+
+export const ITEMS = {
+  // Aoi event
+  shoppingBag: {
+    name: "Shopping Bag",
+    width: 3,
+    height: 2,
+  },
+
+  receipt: {
+    name: "Receipt",
+    width: 1,
+    height: 3,
+  },
+
+  luxuryFountainPen: {
+    name: "Luxury Fountain Pen",
+    width: 2,
+    height: 1,
+  },
+
+  toyBox: {
+    name: "Toy Box",
+    width: 4,
+    height: 2,
+  },
+
+  pollackRoeFlavoredSnack: {
+    name: "Pollack Roe Flavored Snack",
+    width: 2,
+    height: 2,
+  },
+
+  gamingMagazine: {
+    name: "Gaming Magazine",
+    width: 3,
+    height: 3,
+  },
+
+  umbrella: {
+    name: "Umbrella",
+    width: 1,
+    height: 4,
+  },
+
+  // Kisaki event
+  dragonsBeardCandy: {
+    name: "Dragon's Beard Candy",
+    width: 3,
+    height: 2,
+  },
+
+  ludagun: {
+    name: "Ludagun",
+    width: 3,
+    height: 1,
+  },
+
+  mooncake: {
+    name: "Mooncake",
+    width: 2,
+    height: 1,
+  },
+
+  mahua: {
+    name: "Mahua",
+    width: 4,
+    height: 2,
+  },
+
+  almondTofu: {
+    name: "Almond Tofu",
+    width: 2,
+    height: 2,
+  },
+
+  banji: {
+    name: "Banji",
+    width: 3,
+    height: 3,
+  },
+
+  tanghulu: {
+    name: "Tanghulu",
+    width: 1,
+    height: 4,
+  },
+} as const satisfies Record<
+  string,
+  Omit<InventoryManagementPresetItem, "count">
+>;
+
+export const inventoryManagementPresets: InventoryManagementPreset[] = [
+  {
+    name: "Balancing Schale's Books with the General Student Council (S7)",
+    rounds: [
+      [
+        withCounts(ITEMS.shoppingBag, 1),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.luxuryFountainPen, 5),
+      ],
+
+      [
+        withCounts(ITEMS.toyBox, 1),
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 2),
+        withCounts(ITEMS.receipt, 3),
+      ],
+
+      [
+        withCounts(ITEMS.gamingMagazine, 1),
+        withCounts(ITEMS.umbrella, 2),
+        withCounts(ITEMS.luxuryFountainPen, 4),
+      ],
+
+      [
+        withCounts(ITEMS.shoppingBag, 1),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.luxuryFountainPen, 5),
+      ],
+
+      [
+        withCounts(ITEMS.toyBox, 1),
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 2),
+        withCounts(ITEMS.receipt, 3),
+      ],
+
+      [
+        withCounts(ITEMS.gamingMagazine, 1),
+        withCounts(ITEMS.umbrella, 2),
+        withCounts(ITEMS.luxuryFountainPen, 4),
+      ],
+
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 2),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.luxuryFountainPen, 6),
+      ],
+    ],
+  },
+
+  {
+    name: "Balancing Schale's Books with the General Student Council (S8)",
+    rounds: [
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 2),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+      ],
+
+      [
+        withCounts(ITEMS.receipt, 2),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+
+      [
+        withCounts(ITEMS.luxuryFountainPen, 5),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.umbrella, 2),
+      ],
+
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 2),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+      ],
+
+      [
+        withCounts(ITEMS.receipt, 2),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+
+      [
+        withCounts(ITEMS.luxuryFountainPen, 5),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.umbrella, 2),
+      ],
+
+      [
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+    ],
+  },
+
+  {
+    name: "The Senses Descend (Kisaki & Reijo Event)",
+    rounds: [
+      [
+        withCounts(ITEMS.dragonsBeardCandy, 1),
+        withCounts(ITEMS.ludagun, 5),
+        withCounts(ITEMS.mooncake, 2),
+      ],
+
+      [
+        withCounts(ITEMS.mahua, 1),
+        withCounts(ITEMS.almondTofu, 2),
+        withCounts(ITEMS.ludagun, 3),
+      ],
+
+      [
+        withCounts(ITEMS.banji, 1),
+        withCounts(ITEMS.tanghulu, 3),
+        withCounts(ITEMS.mooncake, 2),
+      ],
+
+      [
+        withCounts(ITEMS.dragonsBeardCandy, 1),
+        withCounts(ITEMS.ludagun, 5),
+        withCounts(ITEMS.mooncake, 2),
+      ],
+
+      [
+        withCounts(ITEMS.mahua, 1),
+        withCounts(ITEMS.almondTofu, 2),
+        withCounts(ITEMS.ludagun, 3),
+      ],
+
+      [
+        withCounts(ITEMS.banji, 1),
+        withCounts(ITEMS.tanghulu, 3),
+        withCounts(ITEMS.mooncake, 2),
+      ],
+
+      [
+        withCounts(ITEMS.almondTofu, 2),
+        withCounts(ITEMS.ludagun, 3),
+        withCounts(ITEMS.mooncake, 6),
+      ],
+    ],
+  },
+
+  {
+    name: "Balancing Schale's Books with the General Student Council (S12)",
+    rounds: [
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 3),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+      ],
+
+      [
+        withCounts(ITEMS.receipt, 2),
+        withCounts(ITEMS.shoppingBag, 3),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+
+      [
+        withCounts(ITEMS.luxuryFountainPen, 6),
+        withCounts(ITEMS.receipt, 4),
+        withCounts(ITEMS.umbrella, 2),
+      ],
+
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 3),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+      ],
+
+      [
+        withCounts(ITEMS.receipt, 2),
+        withCounts(ITEMS.shoppingBag, 3),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+
+      [
+        withCounts(ITEMS.luxuryFountainPen, 6),
+        withCounts(ITEMS.receipt, 4),
+        withCounts(ITEMS.umbrella, 2),
+      ],
+
+      [
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+    ],
+  },
+];

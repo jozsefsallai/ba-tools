@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  setStudentStorage,
+  studentStorage,
   type StudentStorageItem,
-} from "@/lib/student-storage";
+} from "@/lib/storage/students";
 import { useRef, useState, type PropsWithChildren } from "react";
 import { toast } from "sonner";
 
@@ -36,7 +36,7 @@ export function ImportStudentDataDialog({
         throw new Error("Invalid data format");
       }
 
-      setStudentStorage(data);
+      studentStorage.set(data);
       closeRef.current?.click();
 
       toast.success("Student data imported successfully");
