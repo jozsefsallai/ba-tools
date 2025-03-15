@@ -16,7 +16,7 @@ export function Tile({ value, blocked, onClick, highlight }: TileProps) {
       onClick={onClick}
       variant="secondary"
       className={cn(
-        "size-16 flex items-center justify-center hover:opacity-90",
+        "size-8 text-[10px] md:size-16 md:text-base flex items-center justify-center hover:opacity-90",
         {
           "opacity-40 hover:opacity-30": blocked,
           "ring-2": highlight,

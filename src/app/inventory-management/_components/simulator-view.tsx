@@ -307,7 +307,7 @@ export function InventoryManagementSimulatorView() {
           onWantsToUnblockCell={handleWantsToUnblockCell}
         />
 
-        <div className="flex gap-4">
+        <div className="flex flex-col md:flex-row gap-4 w-full">
           <Button onClick={startSimulation} disabled={requestInProgress}>
             Simulate
           </Button>
@@ -326,7 +326,7 @@ export function InventoryManagementSimulatorView() {
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <ItemSetup
           title="First Item"
           item={firstItem}
@@ -350,7 +350,7 @@ export function InventoryManagementSimulatorView() {
         <Button variant="outline">Load Preset</Button>
       </LoadInventoryPresetDialog>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-center gap-4">
         <Label>Displayed Items:</Label>
 
         <ToggleGroup

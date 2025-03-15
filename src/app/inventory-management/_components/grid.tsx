@@ -122,9 +122,9 @@ export function Grid({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2 md:gap-1">
       {grid.map((row, y) => (
-        <div key={y} className="flex gap-1">
+        <div key={y} className="flex gap-2 md:gap-1">
           {row.map((item, x) => (
             <Tile
               key={x}
