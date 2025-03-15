@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "./build-native-modules.sh && next dev",
-    "build": "./build-native-modules.sh --prod && pnpm run db:generate && next build",
+    "dev": ".next dev",
+    "build": "pnpm run db:generate && next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "biome lint . --write",
