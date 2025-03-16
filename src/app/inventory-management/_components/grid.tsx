@@ -11,17 +11,24 @@ export type BlockedCoords = {
   y: number;
 };
 
+export type SelectRegion = {
+  width: number;
+  height: number;
+};
+
 export type GridProps = {
   probabilities?: NonNullable<InventoryManagementResult["result"]>;
   displayedItem?: DisplayedItem;
   blockedCells: BlockedCoords[];
   onWantsToBlockCell?: (coords: BlockedCoords) => void;
   onWantsToUnblockCell?: (coords: BlockedCoords) => void;
+  selectRegion?: SelectRegion;
 };
 
 type GridItem = {
   value?: number;
   blocked?: boolean;
+  hovered?: boolean;
 };
 
 type GridConfig = Array<Array<GridItem>>;
@@ -48,6 +55,7 @@ export function Grid({
   blockedCells,
   onWantsToBlockCell,
   onWantsToUnblockCell,
+  selectRegion = { width: 1, height: 1 },
 }: GridProps) {
   const [grid, setGrid] = useState<GridConfig>([]);
   const [maxValue, setMaxValue] = useState<number | null>(null);
@@ -113,12 +121,52 @@ export function Grid({
     });
   }, [blockedCells]);
 
+  function is1x1Region() {
+    return selectRegion.width === 1 && selectRegion.height === 1;
+  }
+
   function toggleGridItem(x: number, y: number) {
-    if (grid[y][x].blocked) {
+    if (grid[y][x].blocked && is1x1Region()) {
       onWantsToUnblockCell?.({ x, y });
     } else {
       onWantsToBlockCell?.({ x, y });
     }
+  }
+
+  function onHover(fromX: number, fromY: number) {
+    setGrid((oldGrid) => {
+      const newGrid = oldGrid.map((row) => [...row]);
+
+      for (let y = 0; y < newGrid.length; y++) {
+        for (let x = 0; x < newGrid[y].length; x++) {
+          newGrid[y][x].hovered = false;
+        }
+      }
+
+      for (let y = fromY; y < fromY + selectRegion.height; y++) {
+        for (let x = fromX; x < fromX + selectRegion.width; x++) {
+          if (newGrid[y]?.[x]) {
+            newGrid[y][x].hovered = true;
+          }
+        }
+      }
+
+      return newGrid;
+    });
+  }
+
+  function onUnhover() {
+    setGrid((oldGrid) => {
+      const newGrid = oldGrid.map((row) => [...row]);
+
+      for (let y = 0; y < newGrid.length; y++) {
+        for (let x = 0; x < newGrid[y].length; x++) {
+          newGrid[y][x].hovered = false;
+        }
+      }
+
+      return newGrid;
+    });
   }
 
   return (
@@ -131,7 +179,10 @@ export function Grid({
               value={item.value ?? undefined}
               blocked={item.blocked}
               highlight={item.value === maxValue}
+              hovered={item.hovered}
               onClick={() => toggleGridItem(x, y)}
+              onHover={() => onHover(x, y)}
+              onUnhover={onUnhover}
             />
           ))}
         </div>

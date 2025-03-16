@@ -4,6 +4,7 @@ import {
   type BlockedCoords,
   type DisplayedItem,
   Grid,
+  type SelectRegion,
 } from "@/app/inventory-management/_components/grid";
 import {
   inventoryManagementPresets,
@@ -23,6 +24,7 @@ import type {
   SimulateInventoryManagementEvent,
   WorkerResponse,
 } from "@/workers/types";
+import { MoveIcon, XIcon } from "lucide-react";
 import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -30,10 +32,14 @@ function ItemSetup({
   title,
   item,
   onChange,
+  isPlacing,
+  onPlacingToggled,
 }: {
   title: string;
   item: InventoryManagementItem;
   onChange: (newItem: Partial<InventoryManagementItem>) => void;
+  isPlacing?: boolean;
+  onPlacingToggled?: (rotated: boolean) => void;
 }) {
   return (
     <Card>
@@ -41,50 +47,88 @@ function ItemSetup({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex gap-2">
-        <div className="flex flex-col gap-2">
-          <Label>Width</Label>
-          <Input
-            type="number"
-            min={1}
-            max={4}
-            value={item.width}
-            onChange={(e) =>
-              onChange({
-                width: Number(e.target.value),
-              })
-            }
-          />
+      <CardContent className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
+            <Label>Width</Label>
+            <Input
+              type="number"
+              min={1}
+              max={4}
+              value={item.width}
+              onChange={(e) =>
+                onChange({
+                  width: Number(e.target.value),
+                })
+              }
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Height</Label>
+            <Input
+              type="number"
+              min={1}
+              max={4}
+              value={item.height}
+              onChange={(e) =>
+                onChange({
+                  height: Number(e.target.value),
+                })
+              }
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Count</Label>
+            <Input
+              type="number"
+              min={0}
+              max={6}
+              value={item.count}
+              onChange={(e) =>
+                onChange({
+                  count: Number(e.target.value),
+                })
+              }
+            />
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label>Height</Label>
-          <Input
-            type="number"
-            min={1}
-            max={4}
-            value={item.height}
-            onChange={(e) =>
-              onChange({
-                height: Number(e.target.value),
-              })
-            }
-          />
-        </div>
+          {item.width === item.height && item.count > 0 && (
+            <Button
+              variant={isPlacing ? "destructive" : "outline"}
+              onClick={() => onPlacingToggled?.(false)}
+            >
+              {isPlacing && <XIcon />}
+              {!isPlacing && <MoveIcon />}
+              {isPlacing ? "Cancel" : "Place"}
+            </Button>
+          )}
 
-        <div className="flex flex-col gap-2">
-          <Label>Count</Label>
-          <Input
-            type="number"
-            min={0}
-            max={6}
-            value={item.count}
-            onChange={(e) =>
-              onChange({
-                count: Number(e.target.value),
-              })
-            }
-          />
+          {item.width !== item.height && item.count > 0 && (
+            <>
+              <Button
+                variant={isPlacing ? "destructive" : "outline"}
+                onClick={() => onPlacingToggled?.(false)}
+              >
+                {isPlacing && <XIcon />}
+                {!isPlacing && <MoveIcon />}
+                {isPlacing ? "Cancel" : "Place Horizontally"}
+              </Button>
+
+              {!isPlacing && (
+                <Button
+                  variant="outline"
+                  onClick={() => onPlacingToggled?.(true)}
+                >
+                  {!isPlacing && <MoveIcon />}
+                  {isPlacing ? "Cancel" : "Place Vertically"}
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -130,8 +174,62 @@ export function InventoryManagementSimulatorView() {
 
   const [blockedCells, setBlockedCells] = useState<BlockedCoords[]>([]);
 
+  const [selectRegion, setSelectRegion] = useState<SelectRegion>({
+    width: 1,
+    height: 1,
+  });
+
+  const [placingItem, setPlacingItem] =
+    useState<InventoryManagementItem | null>(null);
+
   function handleWantsToBlockCell(coords: BlockedCoords) {
-    setBlockedCells((oldBlockedCells) => [...oldBlockedCells, coords]);
+    const endX = coords.x + selectRegion.width - 1;
+    const endY = coords.y + selectRegion.height - 1;
+
+    if (endX >= 9 || endY >= 5) {
+      toast.error("Cannot block cells outside the grid.");
+      return;
+    }
+
+    setBlockedCells((oldBlockedCells) => {
+      const newBlockedCells = [...oldBlockedCells];
+
+      for (let x = coords.x; x <= endX; x++) {
+        for (let y = coords.y; y <= endY; y++) {
+          if (oldBlockedCells.some((cell) => cell.x === x && cell.y === y)) {
+            continue;
+          }
+
+          newBlockedCells.push({ x, y });
+        }
+      }
+
+      return newBlockedCells;
+    });
+
+    if (placingItem === firstItem) {
+      setFirstItem((oldItem) => ({
+        ...oldItem,
+        count: Math.max(oldItem.count - 1, 0),
+      }));
+    }
+
+    if (placingItem === secondItem) {
+      setSecondItem((oldItem) => ({
+        ...oldItem,
+        count: Math.max(oldItem.count - 1, 0),
+      }));
+    }
+
+    if (placingItem === thirdItem) {
+      setThirdItem((oldItem) => ({
+        ...oldItem,
+        count: Math.max(oldItem.count - 1, 0),
+      }));
+    }
+
+    setSelectRegion({ width: 1, height: 1 });
+    setPlacingItem(null);
   }
 
   function handleWantsToUnblockCell(coords: BlockedCoords) {
@@ -256,6 +354,20 @@ export function InventoryManagementSimulatorView() {
     toast.success(`Preset "${name}" loaded successfully.`);
   }
 
+  function onPlacingToggled(item: InventoryManagementItem, rotated: boolean) {
+    if (placingItem === item) {
+      setPlacingItem(null);
+      setSelectRegion({ width: 1, height: 1 });
+      return;
+    }
+
+    const width = rotated ? item.height : item.width;
+    const height = rotated ? item.width : item.height;
+
+    setPlacingItem(item);
+    setSelectRegion({ width, height });
+  }
+
   useEffect(() => {
     const worker = new Worker(
       new URL("../../../workers/native-modules", import.meta.url),
@@ -311,6 +423,7 @@ export function InventoryManagementSimulatorView() {
           probabilities={results}
           displayedItem={displayedItem}
           blockedCells={blockedCells}
+          selectRegion={selectRegion}
           onWantsToBlockCell={handleWantsToBlockCell}
           onWantsToUnblockCell={handleWantsToUnblockCell}
         />
@@ -339,18 +452,24 @@ export function InventoryManagementSimulatorView() {
           title="First Item"
           item={firstItem}
           onChange={(newItem) => handleItemChange(setFirstItem, newItem)}
+          isPlacing={placingItem === firstItem}
+          onPlacingToggled={(rotated) => onPlacingToggled(firstItem, rotated)}
         />
 
         <ItemSetup
           title="Second Item"
           item={secondItem}
           onChange={(newItem) => handleItemChange(setSecondItem, newItem)}
+          isPlacing={placingItem === secondItem}
+          onPlacingToggled={(rotated) => onPlacingToggled(secondItem, rotated)}
         />
 
         <ItemSetup
           title="Third Item"
           item={thirdItem}
           onChange={(newItem) => handleItemChange(setThirdItem, newItem)}
+          isPlacing={placingItem === thirdItem}
+          onPlacingToggled={(rotated) => onPlacingToggled(thirdItem, rotated)}
         />
       </div>
 
