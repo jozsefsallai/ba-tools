@@ -183,6 +183,7 @@ export function Grid({
               onClick={() => toggleGridItem(x, y)}
               onHover={() => onHover(x, y)}
               onUnhover={onUnhover}
+              isMultiSelect={!is1x1Region()}
             />
           ))}
         </div>
