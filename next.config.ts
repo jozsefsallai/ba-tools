@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createMDX from "@next/mdx";
 
 const IMAGE_CDN_URL = process.env.IMAGE_CDN_URL;
 
@@ -11,6 +12,8 @@ const url = new URL(IMAGE_CDN_URL);
 const nextConfig: NextConfig = {
   // strict mode messes with the Spine renderer
   reactStrictMode: false,
+
+  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
 
   images: {
     remotePatterns: [
@@ -32,4 +35,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withMDX = createMDX({});
+
+export default withMDX(nextConfig);

@@ -289,11 +289,19 @@ export function InventoryManagementSimulatorView() {
   }, []);
 
   if (initError) {
-    return <div>Error: {initError}</div>;
+    return (
+      <div className="border border-destructive bg-destructive/10 rounded-md px-4 py-10 text-center text-xl">
+        <strong>Error:</strong> {initError}
+      </div>
+    );
   }
 
   if (!ready) {
-    return <div>Loading...</div>;
+    return (
+      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
+        Loading native modules...
+      </div>
+    );
   }
 
   return (

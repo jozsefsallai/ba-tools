@@ -1,4 +1,6 @@
 export function TheFooter() {
+  const commitHash = process.env.VERCEL_GIT_COMMIT_SHA ?? "development";
+
   return (
     <footer className="border-t px-2 py-12 text-muted-foreground text-center text-sm">
       <div className="container">
@@ -27,7 +29,11 @@ export function TheFooter() {
             className="underline"
           >
             Source code
-          </a>
+          </a>{" "}
+          -{" "}
+          {commitHash === "development"
+            ? "development"
+            : commitHash.slice(0, 7)}
         </div>
       </div>
     </footer>

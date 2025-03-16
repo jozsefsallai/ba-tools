@@ -1,5 +1,8 @@
 import { FormationEditor } from "@/app/formation-display/_components/formation-editor";
+import { HelpSheet } from "@/components/sheets/help-sheet";
+import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
+import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
 
@@ -22,7 +25,14 @@ export default async function FormationDisplayPage() {
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
-        <h1 className="text-xl font-bold">Formation Display</h1>
+        <div className="flex gap-2 items-center">
+          <h1 className="text-xl font-bold">Formation Display</h1>
+          <HelpSheet document="formation-display">
+            <Button variant="ghost">
+              <HelpCircleIcon />
+            </Button>
+          </HelpSheet>
+        </div>
         <p>
           This tool allows you to generate an image of a student formation. This
           can be useful for cases such as designing clean YouTube thumbnails.

@@ -1,0 +1,92 @@
+This tool allows you to simulate the probability of each cell in the 9x5 grid
+containing an item in Blue Archive's inventory management minigames. You can use
+this tool to figure out the most likely spots to reveal in order to minimize the
+amount of currency you spend revealing cells.
+
+## How It Works
+
+The tool does what we in the gacha gaming industry like to call "gambling". More
+specifically, it performs a Monte Carlo simulation in which it repeatedly places
+items all over the board and counts how many times each cell contains an item in
+a valid configuration. Once that's done, it does the probability calculation and
+displays the results.
+
+**Note:** While the tool does have some biases and multiple checks in place to
+finetune the probabilities, at the end of the day, it can still result in false
+positives, especially when the board contains many small items. Use the results
+as a guideline, not as a guarantee.
+
+## Getting Started
+
+1. Open the inventory management minigame in Blue Archive.
+2. Look at the item dimensions and counts for the current round in the bottom
+   left corner. You can find the item dimensions by clicking the **All Rewards**
+   button in the top left.
+3. Input the item dimensions and counts in the tool.
+4. Click on the cells in the grid that you've already revealed in-game. The tool
+   will not try to place an item in these cells.
+5. Click on the **Simulate** button to run the simulation. Please note that this
+   process can take a few seconds.
+
+Once you've run the simulation, the tool will display the probabilities within
+each cell and it will also color code them depending on the probability value.
+The cell with the highest likelihood (and thus the one you should most likely
+reveal next) will be highlighted with a thick border.
+
+When you reveal items in the game, make sure to update both the count and the
+grid's revealed cells in the tool before running another simulation.
+
+You can use the buttons in the **Displayed Items** section to toggle displaying
+the probabilities for each item in particular (or **All** to display the
+cumulative probabilities).
+
+You can use the **Reset** button to clear the grid. This will not reset the
+items.
+
+## Load/Save
+
+Once you've run out of currency in-game, you can click on the **Save** button to
+save your progress. Later on, you can use the **Load** button to load the last
+saved state. Please note that none of these actions will ask for confirmation
+and that your progress will be lost if you clear your browser's local storage.
+Since this data is saved locally, you cannot sync it across devices/browsers.
+
+## Presets
+
+You can use the **Load Preset** button to choose an inventory management event
+(such as Aoi's "Balancing Schale's Books with the General Student Council") and
+a round to automatically load the item dimensions and counts.
+
+## Troubleshooting
+
+**Q:** The tool is stuck on "Loading native modules."
+
+**A:** The tool uses WebAssembly to perform the simulation. This message is
+displayed when you load the page because the browser has to set up the web
+workers and load the WebAssembly module (which can be pretty large). If you see
+this for more than 10 seconds, try refreshing the page, and if the issue still
+persists, make sure your browser supports WebAssembly.
+
+**Q:** The tool displays an error in a large red box.
+
+**A:** This means the WebAssembly module failed to load. Please let me know
+about the issue on [GitHub][github-issues-link].
+
+**Q:** The tool says "No successful simulations" even though my configuration is
+valid.
+
+**A:** If you're extra sure your item and grid configuration is valid and still
+see this error, please let me know about the issue on [GitHub][github-issues-link].
+Make sure to include the exact item and grid configuration in your report (a
+screenshot of the tool's state would suffice).
+
+**Q:** I've been waiting for several seconds and still nothing.
+
+**A:** The tool runs tens of thousands of simulations and analyzes each of them.
+This process can take a while depending on your device's performance and the
+complexity of the configuration. If you've been waiting here for a long time, it
+is also possible it got stuck somewhere. If the issue persists across reloads,
+please create a [GitHub issue][github-issues-link] with the exact item and grid
+configuration.
+
+[github-issues-link]: https://github.com/jozsefsallai/ba-tools/issues

@@ -1,0 +1,74 @@
+The Formation Display tool can be used to generate a clean, scaled, and
+transparent image of a Blue Archive student formation (e.g. for use in YouTube
+thumbnails).
+
+## Getting Started
+
+To begin, select a student using the **Select Student** dropdown. Once selected,
+click on the **Add Student** button to add the student to the formation. The
+tool will automatically figure out whether the student is a striker or a special
+unit and place her in the correct group.
+
+Once you've added all the students you want, you can change their attributes:
+- **Level**: Once specified, the student's level will appear in the top left
+  corner of her portrait.
+- **Stars**: Star value which will be displayed in the bottom left corner.
+- **UE**: The star level of the student's unique weapon. If provided, it will
+  override the star value in the bottom left corner.
+- **Borrowed**: If set to true, the "A" icon will appear in the top right,
+  indicating that the student is a borrowed assistant in this formation.
+- **Starter**: If set to true, the card of the student will get a golden border
+  to indicate that she is one of the starter units in this formation.
+
+**Note:** Changing a student's level, stars, and UE will also save these values
+in your browser's storage, so next time you add the same student in a formation,
+you won't have to re-configure these parameters.
+
+You also have the option to move the student up and down in the formation using
+the buttons on the right side of the student configuration area. This is also
+where you can remove the student.
+
+## Options
+
+The tool also provides a few more options that you can play around with:
+- **Scale**: Specifies the scale of the resulting image, going from 1x to 5x.
+- **Display Overline**: If set to true, a line will be displayed above the
+  striker and special student groups. This more accurately resembles how
+  formations are displayed in-game, but it's disabled by default because some
+  people don't like it.
+- **Display Role Icon**: You may choose to not display the role icon of the
+  student. Not sure why you'd do this, but the option is there.
+
+Once you're happy with the formation, click on the **Download Image** button.
+This will generate a transparent PNG image of the formation with the specified
+scale and display a download popup once done. Please note that generating the
+image may take a few seconds, especially if the image is massive.
+
+## Export/Import
+
+If you want to copy your student data (i.e. levels, stars, UE, etc. for every
+student you've used with the tool) to another device or browser, you can do so
+using the **Export cached student data** button. This will display a window with
+a JSON object that you can copy and paste somewhere else using the **Import
+cached student data** button.
+
+## Troubleshooting
+
+**Q:** The tool just hangs when I click on the **Download Image** button.
+
+**A:** The amount of time it takes to generate the image depends on the number
+of students in the formation, the scale of the image, and the browser you're
+using. Ideally, it should never take longer than 15 seconds, so if you're
+waiting longer than that, try refreshing the page or using a different browser.
+You may also check the browser's developer console for any errors and let me
+know about the error on [GitHub][github-issues-link].
+
+**Q:** The image is not transparent or looks weird.
+
+**A:** This is most likely a browser issue. The tool was developed and tested in
+the latest versions of Chromium and Firefox, so try using one of these. I would
+still appreciate it if you could let me know about the issue on
+[GitHub][github-issues-link] (please specify the browser and browser version
+you're using).
+
+[github-issues-link]: https://github.com/jozsefsallai/ba-tools/issues
