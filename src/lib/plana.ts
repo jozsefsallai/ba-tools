@@ -172,18 +172,18 @@ export class Plana {
     }, Plana.HEART_HALO_TIMEOUT);
   }
 
-  private rub(_x: number, _y: number, dx: number, dy: number) {
+  private rub(x: number, _y: number, dx: number, _dy: number) {
     if (!this.touchPoint || !this.isPatting) {
       return;
     }
 
-    if (dy < 0 || dx > 0) {
+    if (x >= this.width / 3 && dx > 0) {
       this.touchPoint.y = clamp(
         this.touchPoint.y - Plana.HEADPAT_INCREMENT,
         this.originalY - Plana.HEADPAT_CLAMP,
         this.originalY + Plana.HEADPAT_CLAMP,
       );
-    } else if (dy > 0 || dx < 0) {
+    } else if (x < (2 * this.width) / 3 && dx < 0) {
       this.touchPoint.y = clamp(
         this.touchPoint.y + Plana.HEADPAT_INCREMENT,
         this.originalY - Plana.HEADPAT_CLAMP,
