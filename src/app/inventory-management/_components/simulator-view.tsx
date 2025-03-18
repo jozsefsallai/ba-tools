@@ -441,6 +441,10 @@ export function InventoryManagementSimulatorView() {
             Save
           </Button>
 
+          <LoadInventoryPresetDialog onFinish={handlePresetLoaded}>
+            <Button variant="outline">Load Preset</Button>
+          </LoadInventoryPresetDialog>
+
           <Button variant="destructive" onClick={handleReset}>
             Reset
           </Button>
@@ -472,10 +476,6 @@ export function InventoryManagementSimulatorView() {
           onPlacingToggled={(rotated) => onPlacingToggled(thirdItem, rotated)}
         />
       </div>
-
-      <LoadInventoryPresetDialog onFinish={handlePresetLoaded}>
-        <Button variant="outline">Load Preset</Button>
-      </LoadInventoryPresetDialog>
 
       <div className="flex flex-col md:flex-row items-center gap-4">
         <Label>Displayed Items:</Label>
