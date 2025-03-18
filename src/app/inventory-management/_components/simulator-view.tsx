@@ -15,8 +15,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { aoiInventoryStorage } from "@/lib/storage/aoi-inventory";
+import {
+  type AoiInventoryData,
+  type AoiInventorySlot,
+  aoiInventoryStorage,
+} from "@/lib/storage/aoi-inventory";
 import type {
   InventoryManagementItem,
   InitEvent,
@@ -27,6 +37,7 @@ import type {
 import { MoveIcon, XIcon } from "lucide-react";
 import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 function ItemSetup({
   title,
@@ -182,6 +193,8 @@ export function InventoryManagementSimulatorView() {
   const [placingItem, setPlacingItem] =
     useState<InventoryManagementItem | null>(null);
 
+  const [saveData, setSaveData] = useState<AoiInventoryData | null>(null);
+
   function handleWantsToBlockCell(coords: BlockedCoords) {
     const endX = coords.x + selectRegion.width - 1;
     const endY = coords.y + selectRegion.height - 1;
@@ -292,28 +305,44 @@ export function InventoryManagementSimulatorView() {
     setBlockedCells([]);
   }
 
-  function handleLoad() {
+  function handleLoad(slot: AoiInventorySlot) {
     const data = aoiInventoryStorage.get();
-    if (!data) {
+    if (!data || !data[slot]) {
       toast.warning("No saved data found.");
       return;
     }
 
-    setFirstItem(data.first);
-    setSecondItem(data.second);
-    setThirdItem(data.third);
-    setBlockedCells(data.blockedCells);
+    const { first, second, third, blockedCells } = data[slot];
+
+    setFirstItem(first);
+    setSecondItem(second);
+    setThirdItem(third);
+    setBlockedCells(blockedCells);
 
     toast.success("Data loaded successfully.");
   }
 
-  function handleSave() {
+  function handleSave(slot: AoiInventorySlot) {
     aoiInventoryStorage.set({
-      first: firstItem,
-      second: secondItem,
-      third: thirdItem,
-      blockedCells,
+      [slot]: {
+        savedAt: Date.now(),
+        first: firstItem,
+        second: secondItem,
+        third: thirdItem,
+        blockedCells,
+      },
     });
+
+    setSaveData((oldData) => ({
+      ...oldData,
+      [slot]: {
+        savedAt: Date.now(),
+        first: firstItem,
+        second: secondItem,
+        third: thirdItem,
+        blockedCells,
+      },
+    }));
 
     toast.success("Data saved successfully.");
   }
@@ -394,6 +423,9 @@ export function InventoryManagementSimulatorView() {
 
     worker.postMessage({ type: "init" } satisfies InitEvent);
 
+    const saveData = aoiInventoryStorage.get();
+    setSaveData(saveData);
+
     return () => {
       worker.terminate();
       workerRef.current = null;
@@ -433,13 +465,89 @@ export function InventoryManagementSimulatorView() {
             Simulate
           </Button>
 
-          <Button variant="outline" onClick={handleLoad}>
-            Load
-          </Button>
+          <Select
+            value=""
+            onValueChange={(val) => handleLoad(val as AoiInventorySlot)}
+          >
+            <SelectTrigger>Load</SelectTrigger>
 
-          <Button variant="outline" onClick={handleSave}>
-            Save
-          </Button>
+            <SelectContent>
+              <SelectItem value="slot1" disabled={!saveData?.slot1}>
+                {saveData?.slot1
+                  ? `Slot 1 - last save: ${formatDistanceToNow(
+                      saveData.slot1.savedAt,
+                      {
+                        addSuffix: true,
+                      },
+                    )}`
+                  : "Slot 1 - (empty)"}
+              </SelectItem>
+
+              <SelectItem value="slot2" disabled={!saveData?.slot2}>
+                {saveData?.slot2
+                  ? `Slot 2 - last save: ${formatDistanceToNow(
+                      saveData.slot2.savedAt,
+                      {
+                        addSuffix: true,
+                      },
+                    )}`
+                  : "Slot 2 - (empty)"}
+              </SelectItem>
+
+              <SelectItem value="slot3" disabled={!saveData?.slot3}>
+                {saveData?.slot3
+                  ? `Slot 3 - last save: ${formatDistanceToNow(
+                      saveData.slot3.savedAt,
+                      {
+                        addSuffix: true,
+                      },
+                    )}`
+                  : "Slot 3 - (empty)"}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value=""
+            onValueChange={(val) => handleSave(val as AoiInventorySlot)}
+          >
+            <SelectTrigger>Save</SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="slot1">
+                {saveData?.slot1
+                  ? `Slot 1 - last save: ${formatDistanceToNow(
+                      saveData.slot1.savedAt,
+                      {
+                        addSuffix: true,
+                      },
+                    )}`
+                  : "Slot 1 - (empty)"}
+              </SelectItem>
+
+              <SelectItem value="slot2">
+                {saveData?.slot2
+                  ? `Slot 2 - last save: ${formatDistanceToNow(
+                      saveData.slot2.savedAt,
+                      {
+                        addSuffix: true,
+                      },
+                    )}`
+                  : "Slot 2 - (empty)"}
+              </SelectItem>
+
+              <SelectItem value="slot3">
+                {saveData?.slot3
+                  ? `Slot 3 - last save: ${formatDistanceToNow(
+                      saveData.slot3.savedAt,
+                      {
+                        addSuffix: true,
+                      },
+                    )}`
+                  : "Slot 3 - (empty)"}
+              </SelectItem>
+            </SelectContent>
+          </Select>
 
           <LoadInventoryPresetDialog onFinish={handlePresetLoaded}>
             <Button variant="outline">Load Preset</Button>
