@@ -323,7 +323,10 @@ export function InventoryManagementSimulatorView() {
   }
 
   function handleSave(slot: AoiInventorySlot) {
+    const oldStorage = aoiInventoryStorage.get() ?? {};
+
     aoiInventoryStorage.set({
+      ...oldStorage,
       [slot]: {
         savedAt: Date.now(),
         first: firstItem,
