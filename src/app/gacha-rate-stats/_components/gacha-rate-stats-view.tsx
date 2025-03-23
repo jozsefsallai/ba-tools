@@ -47,12 +47,12 @@ interface CounterProps {
   attempts: number[];
 }
 
-function RealRate({ attempts }: CounterProps) {
+function ThreeStarRate({ attempts }: CounterProps) {
   const total = attempts.length * 10;
   const totalThreeStars = attempts.reduce((acc, curr) => acc + curr, 0);
   const rate = total === 0 ? 0 : (totalThreeStars / total) * 100;
 
-  return <InfoBox main={`${rate.toFixed(2)}%`} description="real rate" />;
+  return <InfoBox main={`${rate.toFixed(2)}%`} description="3* rate" />;
 }
 
 function TotalPulls({ attempts }: CounterProps) {
@@ -71,7 +71,7 @@ function TotalThreeStars({ attempts }: CounterProps) {
 function Statistics({ attempts }: CounterProps) {
   return (
     <div className="flex gap-8 p-8 border-2 rounded-lg bg-accent/40">
-      <RealRate attempts={attempts} />
+      <ThreeStarRate attempts={attempts} />
       <TotalPulls attempts={attempts} />
       <TotalThreeStars attempts={attempts} />
     </div>
