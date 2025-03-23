@@ -1,5 +1,9 @@
-import { Plana } from "@/components/plana";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+
+import { Plana } from "@/components/plana";
+
+import checkMobile from "ismobilejs";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -9,7 +13,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const headerStore = await headers();
+  const userAgent = headerStore.get("user-agent");
+
+  const isMobile = userAgent && checkMobile(userAgent).any;
+
   return (
     <article className="flex flex-col gap-4 md:w-2/3 mx-auto">
       <h1 className="text-4xl">Welcome!</h1>
@@ -43,7 +52,7 @@ export default function Home() {
         .
       </p>
 
-      <Plana />
+      {!isMobile && <Plana />}
     </article>
   );
 }
