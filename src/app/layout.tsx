@@ -53,7 +53,9 @@ export default function RootLayout({
             <section className="container px-4 md:px-0 flex-1">
               {children}
             </section>
-            <TheFooter />
+            <TheFooter
+              commitHash={process.env.VERCEL_GIT_COMMIT_SHA ?? "development"}
+            />
           </main>
 
           <Toaster />

@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { Plana } from "@/components/plana";
 
 import checkMobile from "ismobilejs";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -53,6 +55,12 @@ export default async function Home() {
       </p>
 
       {!isMobile && <Plana />}
+
+      {isMobile && (
+        <Button variant="outline" asChild>
+          <Link href="/plana">Ok, I just wanna headpat Plana</Link>
+        </Button>
+      )}
     </article>
   );
 }

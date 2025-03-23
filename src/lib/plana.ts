@@ -16,6 +16,9 @@ export class Plana {
   private originalX = 0;
   private originalY = 0;
 
+  private lastTouchX: number | null = null;
+  private lastTouchY: number | null = null;
+
   private scaleModifier = 1;
 
   private blinkIntervalId: NodeJS.Timeout | number | null = null;
@@ -30,6 +33,9 @@ export class Plana {
     dx: 310,
     dy: 220,
   };
+
+  // Set this to true to draw the headpat hitbox for debugging
+  private debugHeadpats = false;
 
   static HEADPAT_INCREMENT = 2;
   static HEADPAT_CLAMP = 30;
@@ -73,12 +79,22 @@ export class Plana {
     this.canvas.addEventListener("mousemove", this.handleMouseMove.bind(this));
     document.addEventListener("mouseup", this.handleMouseUp.bind(this));
 
+    this.canvas.addEventListener(
+      "touchstart",
+      this.handleTouchStart.bind(this),
+    );
+    this.canvas.addEventListener("touchmove", this.handleTouchMove.bind(this));
+    document.addEventListener("touchend", this.handleTouchEnd.bind(this));
+    document.addEventListener("touchcancel", this.handleTouchEnd.bind(this));
+
     window.addEventListener("resize", this.handleResize.bind(this));
 
     this.blinkIntervalId = setInterval(
       this.blink.bind(this),
       Plana.BLINK_INTERVAL,
     );
+
+    this.drawHeadpatHitboxForDebugging();
   }
 
   deinit() {
@@ -93,6 +109,17 @@ export class Plana {
       this.handleMouseMove.bind(this),
     );
     document.removeEventListener("mouseup", this.handleMouseUp.bind(this));
+
+    this.canvas.removeEventListener(
+      "touchstart",
+      this.handleTouchStart.bind(this),
+    );
+    this.canvas.removeEventListener(
+      "touchmove",
+      this.handleTouchMove.bind(this),
+    );
+    document.removeEventListener("touchend", this.handleTouchEnd.bind(this));
+    document.removeEventListener("touchcancel", this.handleTouchEnd.bind(this));
 
     window.removeEventListener("resize", this.handleResize.bind(this));
 
@@ -144,6 +171,48 @@ export class Plana {
 
   private handleMouseUp() {
     this.unpat();
+  }
+
+  private getTouchPos(touchEvent: TouchEvent) {
+    const rect = this.canvas.getBoundingClientRect();
+    const touch = touchEvent.touches[0];
+    return {
+      x: (touch.clientX - rect.left) / (rect.width / this.canvas.width),
+      y: (touch.clientY - rect.top) / (rect.height / this.canvas.height),
+    };
+  }
+
+  private handleTouchStart(e: TouchEvent) {
+    e.preventDefault();
+
+    const { x, y } = this.getTouchPos(e);
+    const hitbox = this.getHeadpatHitbox();
+
+    if (x >= hitbox.x && x <= hitbox.dx && y >= hitbox.y && y <= hitbox.dy) {
+      this.pat();
+    }
+  }
+
+  private handleTouchMove(e: TouchEvent) {
+    e.preventDefault();
+
+    const { x, y } = this.getTouchPos(e);
+
+    if (this.lastTouchX !== null && this.lastTouchY !== null) {
+      const dx = x - this.lastTouchX;
+      const dy = y - this.lastTouchY;
+
+      this.rub(x, y, dx, dy);
+    }
+
+    this.lastTouchX = x;
+    this.lastTouchY = y;
+  }
+
+  private handleTouchEnd() {
+    this.unpat();
+    this.lastTouchX = null;
+    this.lastTouchY = null;
   }
 
   private handleResize() {
@@ -252,5 +321,20 @@ export class Plana {
     }
 
     this.renderer.playAnimation(1, "Eye_Close_01", false);
+  }
+
+  private drawHeadpatHitboxForDebugging() {
+    if (!this.debugHeadpats) {
+      return;
+    }
+
+    const hitbox = this.getHeadpatHitbox();
+    this.renderer.drawDebugRect(
+      hitbox.x,
+      hitbox.y,
+      hitbox.dx - hitbox.x,
+      hitbox.dy - hitbox.y,
+      0xff0000,
+    );
   }
 }

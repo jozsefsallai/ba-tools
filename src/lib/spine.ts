@@ -193,4 +193,29 @@ export class SpineRenderer {
       this.center(this.chara);
     }
   }
+
+  drawDebugRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    color: number,
+    filled = false,
+  ) {
+    const graphics = new PIXI.Graphics();
+
+    graphics.lineStyle(1, color);
+
+    if (filled) {
+      graphics.beginFill(color);
+    }
+
+    graphics.drawRect(x, y, width, height);
+
+    if (filled) {
+      graphics.endFill();
+    }
+
+    this.pixi.stage.addChild(graphics);
+  }
 }

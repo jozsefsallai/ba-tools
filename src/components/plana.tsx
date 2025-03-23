@@ -4,8 +4,13 @@ import { useEffect, useRef, useState } from "react";
 
 import { Plana as PlanaInstance } from "@/lib/plana";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export function Plana() {
+export function Plana({
+  centered,
+}: {
+  centered?: boolean;
+}) {
   const [visible, setVisible] = useState(true);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,7 +45,12 @@ export function Plana() {
         </Button>
       </div>
 
-      <div className="hidden md:block fixed bottom-0 -right-8">
+      <div
+        className={cn("fixed select-none bottom-0", {
+          "-right-8": !centered,
+          "left-1/2 transform -translate-x-1/2": centered,
+        })}
+      >
         {visible && <canvas ref={canvasRef} />}
       </div>
     </>

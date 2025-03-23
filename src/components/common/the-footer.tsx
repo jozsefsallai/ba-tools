@@ -1,5 +1,17 @@
-export function TheFooter() {
-  const commitHash = process.env.VERCEL_GIT_COMMIT_SHA ?? "development";
+"use client";
+
+import { usePathname } from "next/navigation";
+
+export function TheFooter({
+  commitHash,
+}: {
+  commitHash: string;
+}) {
+  const pathname = usePathname();
+
+  if (pathname === "/plana") {
+    return;
+  }
 
   return (
     <footer className="border-t px-2 py-12 text-muted-foreground text-center text-sm">
