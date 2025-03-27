@@ -454,6 +454,10 @@ export function InventoryManagementSimulatorView() {
   return (
     <div className="flex flex-col gap-8 items-center justify-center">
       <div className="flex flex-col gap-4 justify-center items-center">
+        <div className="text-muted-foreground text-sm">
+          <strong>Remaining Slots:</strong> {45 - blockedCells.length} / 45
+        </div>
+
         <Grid
           probabilities={results}
           displayedItem={displayedItem}
