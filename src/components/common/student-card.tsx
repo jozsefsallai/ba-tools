@@ -29,6 +29,10 @@ export function StudentCard({
   starter,
   busy,
 }: StudentCardProps) {
+  const isFirefox =
+    typeof window !== "undefined" &&
+    /firefox/i.test(window.navigator.userAgent);
+
   return (
     <div className="flex relative">
       <div
@@ -77,7 +81,8 @@ export function StudentCard({
               ueLevel={ueLevel}
               containerClassName="w-[24px] h-[24px] absolute bottom-[2px] left-[2px] skew-x-[11deg]"
               textClassName={cn({
-                "mt-[2px]": !busy,
+                "mt-[2px]": !isFirefox || !busy,
+                "mt-[3px]": !isFirefox && busy,
               })}
             />
           )}
