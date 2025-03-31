@@ -7,8 +7,8 @@ import checkMobile from "ismobilejs";
 import { Plana } from "@/components/plana";
 
 export const metadata: Metadata = {
-  title: "Plana Headpat Room - Joe's Blue Archive Tools",
-  description: "Stare at Plana and headpat her.",
+  title: "Arona Headpat Room - Joe's Blue Archive Tools",
+  description: "Stare at Arona and headpat her.",
   twitter: {
     card: "summary",
   },
