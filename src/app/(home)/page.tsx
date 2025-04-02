@@ -58,7 +58,7 @@ export default async function Home() {
 
       {isMobile && (
         <Button variant="outline" asChild>
-          <Link href="/plana">Ok, I just wanna headpat Arona</Link>
+          <Link href="/plana">Ok, I just wanna headpat Plana</Link>
         </Button>
       )}
     </article>

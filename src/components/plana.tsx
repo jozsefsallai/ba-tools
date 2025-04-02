@@ -41,7 +41,7 @@ export function Plana({
     <>
       <div className="hidden md:block">
         <Button variant="outline" onClick={() => setVisible(!visible)}>
-          {visible ? "Hide" : "Show"} Arona
+          {visible ? "Hide" : "Show"} Plana
         </Button>
       </div>
 

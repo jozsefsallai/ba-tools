@@ -64,8 +64,8 @@ export class Plana {
 
   async init() {
     await this.renderer.addChara({
-      charaId: "arona",
-      charaName: "Arona",
+      charaId: "NP0035",
+      charaName: "Plana",
       startAnim: "Idle_01",
     });
 
@@ -237,7 +237,7 @@ export class Plana {
     this.canvas.style.cursor = "grab";
 
     this.heartHaloTimeoutId = setTimeout(() => {
-      this.renderer.playAnimation(3, "11", true);
+      this.renderer.playAnimation(3, "Dev_Halo_love", true);
     }, Plana.HEART_HALO_TIMEOUT);
   }
 
