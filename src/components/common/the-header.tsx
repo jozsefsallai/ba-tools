@@ -6,9 +6,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
+  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
@@ -18,16 +20,34 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const LINKS = [
+type NavLink = {
+  href: string;
+  text: string;
+};
+
+const GAMEPLAY_TOOLS: NavLink[] = [
+  {
+    href: "/inventory-management",
+    text: "Inventory Management",
+  },
+  {
+    href: "/bond",
+    text: "Relationship Rank Calculator",
+  },
+];
+
+const MISC_TOOLS: NavLink[] = [
   {
     href: "/formation-display",
     text: "Formation Display",
   },
   {
-    href: "/inventory-management",
-    text: "Inventory Management",
+    href: "/gacha-rate-stats",
+    text: "Gacha Rate Stats",
   },
 ];
+
+const LINKS: NavLink[] = [...GAMEPLAY_TOOLS, ...MISC_TOOLS];
 
 export function TheHeader() {
   const [open, setOpen] = useState(false);
@@ -53,17 +73,61 @@ export function TheHeader() {
         <div className="flex gap-2 items-center">
           <NavigationMenu className="hidden md:block">
             <NavigationMenuList>
-              {LINKS.map((link) => (
-                <NavigationMenuItem key={link.href}>
-                  <Link href={link.href} passHref legacyBehavior>
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                    >
-                      {link.text}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              ))}
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="cursor-pointer">
+                  Gameplay Tools
+                </NavigationMenuTrigger>
+
+                <NavigationMenuContent>
+                  <div className="w-[300px] p-1 flex flex-col gap-2">
+                    {GAMEPLAY_TOOLS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        passHref
+                        legacyBehavior
+                      >
+                        <NavigationMenuLink
+                          className={cn(
+                            navigationMenuTriggerStyle(),
+                            "block w-full",
+                          )}
+                        >
+                          {link.text}
+                        </NavigationMenuLink>
+                      </Link>
+                    ))}
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuTrigger className="cursor-pointer">
+                  Misc Tools
+                </NavigationMenuTrigger>
+
+                <NavigationMenuContent>
+                  <div className="w-[300px] p-1 flex flex-col gap-2">
+                    {MISC_TOOLS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        passHref
+                        legacyBehavior
+                      >
+                        <NavigationMenuLink
+                          className={cn(
+                            navigationMenuTriggerStyle(),
+                            "block w-full",
+                          )}
+                        >
+                          {link.text}
+                        </NavigationMenuLink>
+                      </Link>
+                    ))}
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
 
