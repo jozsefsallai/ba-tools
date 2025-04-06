@@ -7,6 +7,7 @@ export type ItemCardProps = {
   iconName: string;
   description?: string | null;
   rarity: ItemRarity;
+  displayName?: boolean;
   className?: string;
 };
 
@@ -15,6 +16,7 @@ export function ItemCard({
   iconName,
   description,
   rarity,
+  displayName = true,
   className,
 }: ItemCardProps) {
   return (
@@ -42,9 +44,11 @@ export function ItemCard({
         </div>
       </div>
 
-      <div className="text-xs font-semibold text-center line-clamp-2">
-        {name}
-      </div>
+      {displayName && (
+        <div className="text-xs font-semibold text-center line-clamp-2">
+          {name}
+        </div>
+      )}
     </article>
   );
 }

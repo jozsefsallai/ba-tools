@@ -28,9 +28,21 @@ export default async function BondPage() {
 
   const gifts = await db.gift.findMany({
     include: {
-      adoredBy: true,
-      lovedBy: true,
-      likedBy: true,
+      adoredBy: {
+        orderBy: {
+          name: "asc",
+        },
+      },
+      lovedBy: {
+        orderBy: {
+          name: "asc",
+        },
+      },
+      likedBy: {
+        orderBy: {
+          name: "asc",
+        },
+      },
     },
   });
 

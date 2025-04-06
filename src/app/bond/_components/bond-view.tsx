@@ -34,14 +34,15 @@ import Image from "next/image";
 import { BondProgress } from "@/app/bond/_components/bond-progress";
 import { favorTable } from "@/lib/favor-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
 
-type StudentWithGifts = Student & {
+export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
   giftsLoved: Gift[];
   giftsLiked: Gift[];
 };
 
-type GiftWithStudents = Gift & {
+export type GiftWithStudents = Gift & {
   adoredBy: Student[];
   lovedBy: Student[];
   likedBy: Student[];
@@ -183,6 +184,8 @@ export function BondView({ students, gifts }: BondViewProps) {
 
   const [currentBond, setCurrentBond] = useState(1);
 
+  const [giftBoxesUsed, setGiftBoxesUsed] = useState(0);
+
   const displayedGifts = useMemo(() => {
     if (!onlyDisplayRelevantGifts || !selectedStudent) {
       return gifts;
@@ -250,8 +253,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     }
 
+    total += giftBoxesUsed * 60;
+
     return total;
-  }, [giftCounts, selectedStudent, expOffset]);
+  }, [giftCounts, selectedStudent, expOffset, giftBoxesUsed]);
 
   const hasIrrelevantGifts = useMemo(() => {
     if (!selectedStudent || !onlyDisplayRelevantGifts) {
@@ -291,7 +296,6 @@ export function BondView({ students, gifts }: BondViewProps) {
               <Popover>
                 <PopoverTrigger className="flex-1 flex">
                   <ItemCard
-                    key={gift.id}
                     name={gift.name}
                     iconName={gift.iconName}
                     description={gift.description}
@@ -307,7 +311,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
               <Input
                 type="number"
-                value={giftCounts[gift.id]}
+                defaultValue={giftCounts[gift.id]}
                 min={0}
                 onClick={(e) => {
                   e.currentTarget.select();
@@ -361,6 +365,38 @@ export function BondView({ students, gifts }: BondViewProps) {
               )}
             </div>
           ))}
+
+          <div className="flex flex-col items-center gap-2 relative">
+            <ItemCard
+              name="Gift Choice Box"
+              iconName="item_icon_favor_selection"
+              description="A gift box that lets you choose the gift you want."
+              rarity="SR"
+              className="cursor-pointer"
+            />
+
+            <Input
+              type="number"
+              defaultValue={giftBoxesUsed}
+              min={0}
+              onClick={(e) => {
+                e.currentTarget.select();
+              }}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+
+                if (Number.isNaN(value)) {
+                  setGiftBoxesUsed(0);
+                } else {
+                  setGiftBoxesUsed(Math.max(0, value));
+                }
+              }}
+              className={cn("w-16 no-arrows", {
+                "border-yellow-200 shadow-yellow-200 focus-visible:ring-yellow-200/50":
+                  giftBoxesUsed > 0,
+              })}
+            />
+          </div>
         </div>
       </div>
 
@@ -465,6 +501,16 @@ export function BondView({ students, gifts }: BondViewProps) {
             </div>
 
             <BondProgress startingExp={expOffset} exp={totalExp} />
+
+            <GiftBreakdown
+              gifts={gifts}
+              giftCounts={giftCounts}
+              giftBoxesUsed={giftBoxesUsed}
+              selectedStudentId={selectedStudent.id}
+              exp={totalExp}
+            >
+              <Button variant="outline">View Gift Breakdown</Button>
+            </GiftBreakdown>
           </>
         )}
       </div>
