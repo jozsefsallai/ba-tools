@@ -72,7 +72,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
       item.ueLevel = storedStudent.ueLevel;
     }
 
-    if (student.combat_class === "striker") {
+    if (student.combatClass === "Main") {
       if (strikers.find((item) => item.student === student)) {
         return;
       }
@@ -80,7 +80,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
       setStrikers((prev) => [...prev, item]);
     }
 
-    if (student.combat_class === "special") {
+    if (student.combatClass === "Support") {
       if (specials.find((item) => item.student === student)) {
         return;
       }

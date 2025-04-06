@@ -13,20 +13,20 @@ export type StudentRoleIconProps = {
 export function StudentRoleIcon({ student, ...props }: StudentRoleIconProps) {
   let roleIcon = null;
 
-  switch (student.combat_role) {
-    case "attacker":
+  switch (student.combatRole) {
+    case "DamageDealer":
       roleIcon = attacker;
       break;
-    case "healer":
+    case "Healer":
       roleIcon = healer;
       break;
-    case "support":
+    case "Supporter":
       roleIcon = support;
       break;
-    case "tank":
+    case "Tanker":
       roleIcon = tank;
       break;
-    case "t_s_":
+    case "Vehicle":
       roleIcon = ts;
       break;
   }
@@ -35,5 +35,5 @@ export function StudentRoleIcon({ student, ...props }: StudentRoleIconProps) {
     return null;
   }
 
-  return <img {...props} src={roleIcon.src} alt={student.combat_role ?? ""} />;
+  return <img {...props} src={roleIcon.src} alt={student.combatRole ?? ""} />;
 }

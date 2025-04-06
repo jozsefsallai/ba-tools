@@ -5,5 +5,5 @@ export function buildCDNUrl(key: string) {
 }
 
 export function buildStudentIconUrl(student: Student) {
-  return buildCDNUrl(`images/students/icons/${student.id}.png`);
+  return buildCDNUrl(`v2/images/students/icons/${student.id}.png`);
 }

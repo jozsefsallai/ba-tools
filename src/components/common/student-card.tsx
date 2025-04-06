@@ -45,10 +45,10 @@ export function StudentCard({
           className={cn(
             "flex relative h-[86px] w-[93px] rounded-[11%] p-[2px] pb-[10px] overflow-hidden",
             {
-              "bg-type-red": student.attack_type === "explosive",
-              "bg-type-yellow": student.attack_type === "piercing",
-              "bg-type-blue": student.attack_type === "mystic",
-              "bg-type-purple": student.attack_type === "sonic",
+              "bg-type-red": student.attackType === "Explosion",
+              "bg-type-yellow": student.attackType === "Pierce",
+              "bg-type-blue": student.attackType === "Mystic",
+              "bg-type-purple": student.attackType === "Sonic",
             },
           )}
         >

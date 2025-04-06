@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function FormationDisplayPage() {
-  const allStudents = await db.students.findMany({
+  const allStudents = await db.student.findMany({
     orderBy: {
       name: "asc",
     },

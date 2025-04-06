@@ -7,170 +7,276 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model banners {
-  id                             String      @id @db.VarChar
-  name                           String      @db.VarChar
-  date                           String      @db.VarChar
-  three_star_rate                Int         @default(30)
-  pickup_rate                    Int         @default(0)
-  extra_rate                     Int         @default(0)
-  pickup_pool_students           String[]    @db.VarChar
-  extra_pool_students            String[]    @db.VarChar
-  additional_three_star_students String[]    @db.VarChar
-  base_one_star_rate             Int         @default(785)
-  base_two_star_rate             Int         @default(185)
-  base_three_star_rate           Int         @default(30)
-  kind                           banner_kind
-  sort_key                       Int         @default(0)
+enum School {
+  Abydos
+  Arius
+  Gehenna
+  Hyakkiyako
+  Millennium
+  RedWinter
+  Shanhaijing
+  SRT
+  Trinity
+  Valkyrie
+  ETC
+  Tokiwadai
+  Sakugawa
 }
 
-model gifts {
-  id                Int      @id @default(autoincrement())
-  name              String   @db.VarChar
-  icon_url          String?
-  description       String?
-  rarity            Int      @default(1)
-  students_favorite String[] @db.VarChar
-  students_liked    String[] @db.VarChar
+enum Club {
+  Kohshinjo68
+  Justice
+  CleanNClearing
+  BookClub
+  Countermeasure
+  Engineer
+  FoodService
+  Fuuki
+  GourmetClub
+  HoukagoDessert
+  KnightsHospitaller
+  MatsuriOffice
+  Meihuayuan
+  Onmyobu
+  RemedialClass
+  SPTF
+  Shugyobu
+  Endanbou
+  TheSeminar
+  TrainingClub
+  TrinityVigilance
+  Veritas
+  NinpoKenkyubu
+  GameDev
+  RedwinterSecretary
+  anzenkyoku
+  SisterHood
+  Class227
+  Emergentology
+  RabbitPlatoon
+  PandemoniumSociety
+  AriusSqud
+  HotSpringsDepartment
+  TeaParty
+  PublicPeaceBureau
+  BlackTortoisePromenade
+  Genryumon
+  LaborParty
+  KnowledgeLiberationFront
+  Hyakkayouran
+  ShinySparkleSociety
+  AbydosStudentCouncil
+  EmptyClub
 }
 
-model missions {
-  id                Int         @id @default(autoincrement())
-  name              String      @db.VarChar
-  cost              Int
-  difficulty        difficulty?
-  terrain           terrain?
-  recommended_level Int
-  drops             String[]
-  stage_image_url   String?
+enum CombatClass {
+  Main
+  Support
 }
 
-model skills {
-  id          Int        @id @default(autoincrement())
-  student_id  String     @db.VarChar
-  kind        skill_type
-  name        String     @db.VarChar
-  description String
-  cost        String?    @db.VarChar
-  students    students   @relation(fields: [student_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "skills_student_id_students_id_fk")
+enum AttackType {
+  Explosion
+  Pierce
+  Mystic
+  Normal
+  Sonic
+  Mixed
 }
 
-model students {
-  id              String           @id @db.VarChar
-  name            String           @db.VarChar
-  full_name       String           @db.VarChar
-  school          school
-  age             String           @db.VarChar
-  birthday        String           @db.VarChar
-  height          String           @db.VarChar
-  hobbies         String?
-  wiki_image      String?
-  attack_type     attack_type?
-  defense_type    defense_type?
-  combat_class    combat_class?
-  combat_role     combat_role?
-  combat_position combat_position?
-  uses_cover      Boolean          @default(false)
-  weapon_type     weapon_type?
-  rarity          Int
-  is_welfare      Boolean          @default(false)
-  is_limited      Boolean          @default(false)
-  release_date    DateTime?        @db.Date
-  recorobi_level  Int?
-  base_variant_id String?          @db.VarChar
-  skills          skills[]
-  students        students?        @relation("studentsTostudents", fields: [base_variant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "students_base_variant_id_students_id_fk")
-  other_students  students[]       @relation("studentsTostudents")
+enum DefenseType {
+  LightArmor
+  HeavyArmor
+  Unarmed
+  ElasticArmor
+  Normal
+  Mixed
 }
 
-enum attack_type {
-  explosive
-  piercing
-  mystic
-  sonic
+enum CombatRole {
+  DamageDealer
+  Tanker
+  Healer
+  Supporter
+  Vehicle
 }
 
-enum banner_kind {
-  global
-  jp
-  chroma
+enum CombatPosition {
+  Back
+  Front
+  Middle
 }
 
-enum combat_class {
-  striker
-  special
-}
-
-enum combat_position {
-  front
-  middle
-  back
-}
-
-enum combat_role {
-  attacker
-  healer
-  support
-  t_s_     @map("t.s.")
-  tank
-}
-
-enum defense_type {
-  light
-  heavy
-  special
-  elastic
-}
-
-enum difficulty {
-  normal
-  hard
-  veryhard
-  hardcode
-  extreme
-  insane
-  torment
-}
-
-enum school {
-  abydos
-  arius
-  gehenna
-  hyakkiyako
-  millennium
-  redwinter
-  shanhaijing
-  srt
-  trinity
-  valkyrie
-  tokiwadai
-  sakugawa
-  etc
-}
-
-enum skill_type {
-  ex
-  basic
-  enhanced
-  sub
-}
-
-enum terrain {
-  indoors
-  outdoors
-  urban
-}
-
-enum weapon_type {
-  AR
-  FT
-  GL
-  HG
-  MG
-  MT
-  RG
-  RL
-  SG
-  SMG
+enum WeaponType {
   SR
+  SG
+  AR
+  MG
+  SMG
+  RG
+  HG
+  GL
+  RL
+  FT
+  MT
+}
+
+enum EquipmentKind {
+  Hat
+  Hairpin
+  Watch
+  Shoes
+  Bag
+  Charm
+  Necklace
+  Gloves
+  Badge
+}
+
+enum Terrain {
+  Street
+  Outdoor
+  Indoor
+}
+
+enum SkillType {
+  EX
+  Basic
+  Enhanced
+  Sub
+}
+
+enum ItemRarity {
+  N
+  R
+  SR
+  SSR
+}
+
+enum MissionDifficulty {
+  Normal
+  Hard
+}
+
+enum BannerKind {
+  Global
+  JP
+}
+
+model Student {
+  id         String @id
+  devName    String
+  schaleDbId Int
+
+  // Basic info and trivia
+  name          String
+  lastName      String
+  firstName     String
+  school        School
+  club          Club
+  age           String
+  birthday      String
+  introduction  String?
+  hobbies       String?
+  voiceActor    String?
+  illustrator   String?
+  designer      String?
+  height        String?
+  memorobiLevel Int     @default(0)
+
+  // Combat info
+  combatClass             CombatClass
+  combatRole              CombatRole
+  combatPosition          CombatPosition
+  attackType              AttackType
+  defenseType             DefenseType
+  streetBattleAdaptation  Int
+  outdoorBattleAdaptation Int
+  indoorBattleAdaptation  Int
+  weaponType              WeaponType
+  usesCover               Boolean
+  equipment               EquipmentKind[]
+
+  // Gacha
+  rarity    Int
+  isWelfare Boolean
+  isLimited Boolean
+  isFest    Boolean
+
+  isReleasedJP     Boolean @default(false)
+  isReleasedGlobal Boolean @default(false)
+  isReleasedCN     Boolean @default(false)
+
+  baseVariantId String?
+  baseVariant   Student?  @relation("BaseVariant", fields: [baseVariantId], references: [id])
+  variants      Student[] @relation("BaseVariant")
+
+  skills Skill[]
+
+  giftsAdored Gift[] @relation("GiftAdoredBy")
+  giftsLoved  Gift[] @relation("GiftLovedBy")
+  giftsLiked  Gift[] @relation("GiftLikedBy")
+
+  bannersPickup              Banner[] @relation("PickupPoolStudents")
+  bannersExtra               Banner[] @relation("ExtraPoolStudents")
+  bannersAdditionalThreeStar Banner[] @relation("AdditionalThreeStarStudents")
+}
+
+model Skill {
+  id Int @id @default(autoincrement())
+
+  type        SkillType
+  name        String
+  description String
+  cost        String?
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Gift {
+  id                Int        @id
+  name              String
+  description       String?
+  rarity            ItemRarity
+  expValue          Int        @default(0)
+  iconName          String
+  isLovedByEveryone Boolean    @default(false)
+
+  adoredBy Student[] @relation("GiftAdoredBy")
+  lovedBy  Student[] @relation("GiftLovedBy")
+  likedBy  Student[] @relation("GiftLikedBy")
+}
+
+model Mission {
+  id               Int                @id @default(autoincrement())
+  name             String
+  cost             Int
+  difficulty       MissionDifficulty?
+  terrain          Terrain?
+  recommendedLevel Int
+  drops            String[]
+  stageImageUrl    String?
+}
+
+model Banner {
+  id   String @id
+  name String
+
+  sortKey Int @default(0)
+
+  date String
+
+  threeStarRate Int @default(30)
+  pickupRate    Int @default(0)
+  extraRate     Int @default(0)
+
+  pickupPoolStudents          Student[] @relation("PickupPoolStudents")
+  extraPoolStudents           Student[] @relation("ExtraPoolStudents")
+  additionalThreeStarStudents Student[] @relation("AdditionalThreeStarStudents")
+
+  baseOneStarRate   Int @default(785)
+  baseTwoStarRate   Int @default(185)
+  baseThreeStarRate Int @default(30)
+
+  kind BannerKind
 }
