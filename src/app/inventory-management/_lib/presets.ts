@@ -35,8 +35,8 @@ export const ITEMS = {
 
   receipt: {
     name: "Receipt",
-    width: 1,
-    height: 3,
+    width: 3,
+    height: 1,
   },
 
   luxuryFountainPen: {
@@ -65,8 +65,8 @@ export const ITEMS = {
 
   umbrella: {
     name: "Umbrella",
-    width: 1,
-    height: 4,
+    width: 4,
+    height: 1,
   },
 
   // Kisaki event
@@ -108,8 +108,51 @@ export const ITEMS = {
 
   tanghulu: {
     name: "Tanghulu",
-    width: 1,
-    height: 4,
+    width: 4,
+    height: 1,
+  },
+
+  // PJ Seminar event
+  slippers: {
+    name: "Slippers",
+    width: 3,
+    height: 2,
+  },
+
+  characterToothbrush: {
+    name: "Character Toothbrush",
+    width: 3,
+    height: 1,
+  },
+
+  purpleScarf: {
+    name: "Purple Scarf",
+    width: 2,
+    height: 1,
+  },
+
+  kivopoly: {
+    name: 'Board Game "KIVOPOLY"',
+    width: 4,
+    height: 2,
+  },
+
+  dakimakura: {
+    name: "Dakimakura",
+    width: 4,
+    height: 1,
+  },
+
+  characterCushion: {
+    name: "Character Cushion",
+    width: 3,
+    height: 3,
+  },
+
+  hairband: {
+    name: "Hairband",
+    width: 2,
+    height: 2,
   },
 } as const satisfies Record<
   string,
@@ -254,6 +297,53 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
         withCounts(ITEMS.almondTofu, 2),
         withCounts(ITEMS.ludagun, 3),
         withCounts(ITEMS.mooncake, 6),
+      ],
+    ],
+  },
+
+  {
+    name: "Secret Midnight Party: Ringing of the Tagger's Bell (PJ Seminar Event)",
+    rounds: [
+      [
+        withCounts(ITEMS.slippers, 2),
+        withCounts(ITEMS.characterToothbrush, 5),
+        withCounts(ITEMS.purpleScarf, 2),
+      ],
+
+      [
+        withCounts(ITEMS.kivopoly, 1),
+        withCounts(ITEMS.dakimakura, 2),
+        withCounts(ITEMS.characterToothbrush, 5),
+      ],
+
+      [
+        withCounts(ITEMS.characterCushion, 1),
+        withCounts(ITEMS.hairband, 4),
+        withCounts(ITEMS.purpleScarf, 3),
+      ],
+
+      [
+        withCounts(ITEMS.slippers, 2),
+        withCounts(ITEMS.characterToothbrush, 5),
+        withCounts(ITEMS.purpleScarf, 2),
+      ],
+
+      [
+        withCounts(ITEMS.kivopoly, 1),
+        withCounts(ITEMS.dakimakura, 2),
+        withCounts(ITEMS.characterToothbrush, 5),
+      ],
+
+      [
+        withCounts(ITEMS.characterCushion, 1),
+        withCounts(ITEMS.hairband, 4),
+        withCounts(ITEMS.purpleScarf, 3),
+      ],
+
+      [
+        withCounts(ITEMS.kivopoly, 2),
+        withCounts(ITEMS.characterToothbrush, 3),
+        withCounts(ITEMS.purpleScarf, 6),
       ],
     ],
   },
