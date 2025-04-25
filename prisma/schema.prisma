@@ -18,6 +18,7 @@ enum School {
   SRT
   Trinity
   Valkyrie
+  Highlander
   ETC
   Tokiwadai
   Sakugawa
@@ -66,6 +67,8 @@ enum Club {
   Hyakkayouran
   ShinySparkleSociety
   AbydosStudentCouncil
+  CentralControlCenter
+  FreightLogisticsDepartment
   EmptyClub
 }
 
