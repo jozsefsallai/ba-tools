@@ -44,6 +44,9 @@ export default async function BondPage() {
         },
       },
     },
+    orderBy: {
+      id: "asc",
+    },
   });
 
   return (
