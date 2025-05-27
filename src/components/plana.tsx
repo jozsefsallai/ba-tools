@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Plana as PlanaInstance } from "@/lib/plana";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function Plana({
@@ -11,14 +10,12 @@ export function Plana({
 }: {
   centered?: boolean;
 }) {
-  const [visible, setVisible] = useState(true);
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const planaRef = useRef<PlanaInstance | null>(null);
 
   useEffect(() => {
     async function initPlana() {
-      if (!visible || !canvasRef.current) {
+      if (!canvasRef.current) {
         return;
       }
 
@@ -27,7 +24,7 @@ export function Plana({
     }
 
     initPlana();
-  }, [visible, canvasRef]);
+  }, [canvasRef]);
 
   useEffect(() => {
     return () => {
@@ -38,21 +35,13 @@ export function Plana({
   }, []);
 
   return (
-    <>
-      <div className="hidden md:block">
-        <Button variant="outline" onClick={() => setVisible(!visible)}>
-          {visible ? "Hide" : "Show"} Plana
-        </Button>
-      </div>
-
-      <div
-        className={cn("fixed select-none bottom-0", {
-          "-right-8": !centered,
-          "left-1/2 transform -translate-x-1/2": centered,
-        })}
-      >
-        {visible && <canvas ref={canvasRef} />}
-      </div>
-    </>
+    <div
+      className={cn("fixed select-none bottom-0", {
+        "-right-8": !centered,
+        "left-1/2 transform -translate-x-1/2": centered,
+      })}
+    >
+      <canvas ref={canvasRef} />
+    </div>
   );
 }
