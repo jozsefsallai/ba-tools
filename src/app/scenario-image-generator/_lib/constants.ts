@@ -1,0 +1,5 @@
+export const SCENARIO_VIEW_WIDTH = 1920;
+export const SCENARIO_VIEW_HEIGHT = 1080;
+
+export const SCENARIO_LINE_WIDTH = 1548;
+export const SCENARIO_LINE_HEIGHT = 3;

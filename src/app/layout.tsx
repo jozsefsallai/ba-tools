@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -16,6 +16,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const notoSans = Noto_Sans({
+  variable: "--font-noto-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const nexonFootballGothic = localFont({
@@ -40,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${nexonFootballGothic.variable} antialiased h-full`}
+        className={`${geistSans.variable} ${geistMono.variable} ${nexonFootballGothic.variable} ${notoSans.variable} antialiased h-full`}
       >
         <ThemeProvider
           attribute="class"

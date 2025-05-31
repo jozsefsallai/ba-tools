@@ -2,7 +2,7 @@ import "pixi-spine";
 
 import { Spine as PixiSpine } from "pixi-spine";
 
-import * as PIXI from "pixi.js";
+import * as PIXI from "pixi.js-v7";
 
 const CHARA_BASE_PATH = "/assets/{charaId}/";
 const CHARA_SKEL_PATH = `${CHARA_BASE_PATH}/{charaId}_spr.skel`;
