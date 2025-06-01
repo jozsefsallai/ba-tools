@@ -1,0 +1,64 @@
+The scenario image generator tool can be used to generate fake scenario/story
+screenshots that resemble the ones you can see in Blue Archive. The tool tries
+to replicate the in-game visual novel engine as closely as possible. This tool
+doesn't currently offer a "playback" mode, so whatever you create here will act
+like a screenshot you'd take in the game.
+
+## Getting Started
+
+Scroll down until you see the **Settings** section. Here, you can configure the
+following settings:
+
+- **Character Name**: The name that will be displayed above the dialogue.
+- **Affiliation**: Optionally, you can specify the affiliation of the character.
+  This will be displayed in blue text next to the name.
+- **Dialogue Content**: The actual content of the dialogue. The text will wrap
+  automatically, but you can also press enter to create a new line manually.
+- **Font Size**: The size of the font used in the dialogue. Default is 41.
+- **Background Image**: The background image that will be used in the scenario
+  screenshot. It supports any modern image format. The image you select will
+  automatically be resized and centered to fit the screen.
+- **Display Buttons**: Whether or not to display the AUTO and MENU buttons in
+  the top right corner.
+- **Auto Enabled**: Whether or not the AUTO button should appear as selected.
+- **Display Horizontal Line**: Whether or not to display the horizontal line
+  between the character name/affiliation and the dialogue content.
+- **Display Gradient**: Whether or not to display the gradient overlay of the
+  text box. Note that disabling this can reduce the readability of the text
+  depending on the background image you choose.
+- **Display Triangle**: Whether or not to display the small blue triangle in the
+  bottom right corner of the text box.
+
+Additionally, you can add one or more characters to the scene. To do this, click
+on the **Add Character** button in the **Characters** section. This will prompt
+you to select a file with the character's image. Once selected, you can
+configure the following settings for each character:
+
+- **Sprite**: The iamge of the character, if you'd like to replace it.
+- **X**: The horizontal position of the character in the scene relative to the
+  scene's center. The anchor point is the center of the character's image.
+- **Y**: The vertical position of the character in the scene relative to the top
+  of the scene (with a bit of artificial top padding). The anchor point is the
+  top of the character's image.
+- **Scale**: The scale of the character's image (1 menas 100% scale). Supports
+  decimal values.
+
+You can also remove a character by clicking on the **Remove Character** button
+underneath the character's settings.
+
+Once you're happy with your creation, you can either **Copy to Clipboard** or
+**Download Image**. These buttons are located at the bottom of the page.
+
+## Where To Get Images
+
+You can use any image you like as background or character images. If you want
+Blue Archive-related images, I recommend using the [wiki][wiki-url].
+
+- [CG (cutscene) images][wiki-cg-url]
+- [Background images][wiki-bg-url]
+- For character images, go to the character's page on the wiki and find a sprite
+  in the character gallery.
+
+[wiki-url]: https://bluearchive.wiki/
+[wiki-cg-url]: https://bluearchive.wiki/wiki/Category:Cutscenes
+[wiki-bg-url]: https://bluearchive.wiki/wiki/Category:Background_images

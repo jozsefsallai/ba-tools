@@ -168,11 +168,11 @@ export function ScenarioEditorView() {
 
       <Separator />
 
-      <div className="grid grid-cols-2 gap-10 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
         <div className="flex flex-col gap-4">
           <div className="text-2xl font-semibold">Settings</div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Label htmlFor="name">Character Name</Label>
             <Input
               id="name"
@@ -311,6 +311,8 @@ export function ScenarioEditorView() {
           />
         </div>
       </div>
+
+      <Separator />
 
       <div className="flex gap-4">
         <Button onClick={handleCopyToClipboard}>Copy to Clipboard</Button>

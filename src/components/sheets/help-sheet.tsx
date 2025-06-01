@@ -5,6 +5,7 @@ import type { PropsWithChildren } from "react";
 import FormationDisplay from "@/how-to-use/formation-display.mdx";
 import InventoryManagement from "@/how-to-use/inventory-management.mdx";
 import Bond from "@/how-to-use/bond.mdx";
+import ScenarioImageGenerator from "@/how-to-use/scenario-image-generator.mdx";
 
 import {
   Sheet,
@@ -15,7 +16,11 @@ import {
 } from "@/components/ui/sheet";
 
 export type HelpSheetProps = PropsWithChildren<{
-  document: "formation-display" | "inventory-management" | "bond";
+  document:
+    | "formation-display"
+    | "inventory-management"
+    | "bond"
+    | "scenario-image-generator";
 }>;
 
 function getTitle(document: HelpSheetProps["document"]) {
@@ -26,6 +31,8 @@ function getTitle(document: HelpSheetProps["document"]) {
       return "Inventory Management";
     case "bond":
       return "Relationship Rank Calculator";
+    case "scenario-image-generator":
+      return "Scenario Image Generator";
   }
 }
 
@@ -43,6 +50,9 @@ export function HelpSheet({ document, children }: HelpSheetProps) {
           {document === "formation-display" && <FormationDisplay />}
           {document === "inventory-management" && <InventoryManagement />}
           {document === "bond" && <Bond />}
+          {document === "scenario-image-generator" && (
+            <ScenarioImageGenerator />
+          )}
         </article>
       </SheetContent>
     </Sheet>

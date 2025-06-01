@@ -45,6 +45,10 @@ const MISC_TOOLS: NavLink[] = [
     href: "/gacha-rate-stats",
     text: "Gacha Rate Stats",
   },
+  {
+    href: "/scenario-image-generator",
+    text: "Scenario Image Generator",
+  },
 ];
 
 const LINKS: NavLink[] = [...GAMEPLAY_TOOLS, ...MISC_TOOLS];
