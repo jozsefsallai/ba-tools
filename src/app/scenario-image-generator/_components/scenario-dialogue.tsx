@@ -18,13 +18,14 @@ export function ScenarioDialogue({
     <pixiText
       text={content}
       x={(SCENARIO_VIEW_WIDTH - SCENARIO_LINE_WIDTH) / 2 + 4}
-      y={865}
+      y={861}
       style={{
         fontFamily: "Noto Sans",
         fontSize: fontSize,
         fill: "#ffffff",
         align: "left",
         letterSpacing: 0.4,
+        lineHeight: 1.4 * fontSize,
         stroke: {
           width: 4,
           color: "#2b435b",
