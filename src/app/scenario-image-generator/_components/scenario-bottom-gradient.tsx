@@ -5,7 +5,7 @@ import * as PIXI from "pixi.js";
 import { useMemo } from "react";
 
 const WIDTH = SCENARIO_VIEW_WIDTH;
-const HEIGHT = 370;
+const HEIGHT = 410;
 
 export function ScenarioBottomGradient() {
   const texture = useMemo(() => {
@@ -19,9 +19,10 @@ export function ScenarioBottomGradient() {
     }
 
     const gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-    gradient.addColorStop(0, "rgba(0, 11, 34, 0)");
-    gradient.addColorStop(0.2, "rgba(0, 18, 28, 0.7)");
-    gradient.addColorStop(1, "rgba(0, 18, 28, 0.7)");
+    gradient.addColorStop(0, "rgba(17, 37, 54, 0)");
+    gradient.addColorStop(0.33, "rgba(17, 37, 54, 0.75)");
+    gradient.addColorStop(0.55, "rgba(17, 37, 54, 0.86)");
+    gradient.addColorStop(1, "rgba(17, 37, 54, 0.86)");
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);

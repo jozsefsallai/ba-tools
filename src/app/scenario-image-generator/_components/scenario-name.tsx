@@ -18,16 +18,16 @@ export function ScenarioName({ name, nameRef }: ScenarioNameProps) {
       ref={nameRef}
       text={name}
       x={(SCENARIO_VIEW_WIDTH - SCENARIO_LINE_WIDTH) / 2}
-      y={760}
+      y={765}
       style={{
         fontFamily: "Noto Sans",
-        fontSize: 63,
-        fontWeight: "600",
+        fontSize: 57,
+        fontWeight: "700",
         fill: "#ffffff",
         align: "left",
         stroke: {
-          width: 2,
-          color: "#00204c",
+          width: 4,
+          color: "#2b435b",
         },
       }}
     />
