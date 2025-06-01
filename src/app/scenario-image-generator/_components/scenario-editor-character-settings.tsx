@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type ScenarioEditorCharacterSettingsProps = {
   spriteUrl: string;
@@ -34,6 +34,10 @@ export function ScenarioEditorCharacterSettings({
 }: ScenarioEditorCharacterSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [xStr, setXStr] = useState(x.toString());
+  const [yStr, setYStr] = useState(y.toString());
+  const [scaleStr, setScaleStr] = useState(scale.toString());
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -59,6 +63,16 @@ export function ScenarioEditorCharacterSettings({
       fileInputRef.current.click();
     }
   }
+
+  useEffect(() => {
+    const newX = Number.parseFloat(xStr);
+    const newY = Number.parseFloat(yStr);
+    const newScale = Number.parseFloat(scaleStr);
+
+    if (!Number.isNaN(newX) && !Number.isNaN(newY) && !Number.isNaN(newScale)) {
+      onChange({ spriteUrl, filename, x: newX, y: newY, scale: newScale });
+    }
+  }, [xStr, yStr, scaleStr]);
 
   return (
     <div className="border rounded-md px-6 py-4 flex flex-col gap-2">
@@ -87,10 +101,8 @@ export function ScenarioEditorCharacterSettings({
         <Input
           id="x"
           type="number"
-          value={x.toString()}
-          onChange={(e) =>
-            onChange({ spriteUrl, filename, x: +e.target.value, y, scale })
-          }
+          value={xStr}
+          onChange={(e) => setXStr(e.target.value)}
           className="col-span-2"
         />
 
@@ -98,10 +110,8 @@ export function ScenarioEditorCharacterSettings({
         <Input
           id="y"
           type="number"
-          value={y.toString()}
-          onChange={(e) =>
-            onChange({ spriteUrl, filename, x, y: +e.target.value, scale })
-          }
+          value={yStr}
+          onChange={(e) => setYStr(e.target.value)}
           className="col-span-2"
         />
 
@@ -109,10 +119,8 @@ export function ScenarioEditorCharacterSettings({
         <Input
           id="scale"
           type="number"
-          value={scale.toString()}
-          onChange={(e) =>
-            onChange({ spriteUrl, filename, x, y, scale: +e.target.value })
-          }
+          value={scaleStr}
+          onChange={(e) => setScaleStr(e.target.value)}
           className="col-span-2"
         />
       </div>

@@ -22,6 +22,7 @@ export function ScenarioEditorView() {
   const [name, setName] = useState("Name");
   const [affiliation, setAffiliation] = useState<string>("Affiliation");
   const [content, setContent] = useState("Dialogue text goes here...");
+  const [fontSize, setFontSize] = useState(41);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [characters, setCharacters] = useState<
     (ScenarioCharacterData & {
@@ -30,6 +31,9 @@ export function ScenarioEditorView() {
   >([]);
   const [displayButtons, setDisplayButtons] = useState(true);
   const [autoEnabled, setAutoEnabled] = useState(false);
+  const [displayLine, setDisplayLine] = useState(true);
+  const [displayGradient, setDisplayGradient] = useState(true);
+  const [displayTriangle, setDisplayTriangle] = useState(true);
 
   const [backgroundName, setBackgroundName] = useState<string | null>(null);
 
@@ -149,9 +153,13 @@ export function ScenarioEditorView() {
         <ScenarioView
           applicationRef={applicationRef}
           content={content}
+          fontSize={fontSize}
           name={name}
           affiliation={affiliation.length > 0 ? affiliation : undefined}
           displayButtons={displayButtons}
+          displayLine={displayLine}
+          displayGradient={displayGradient}
+          displayTriangle={displayTriangle}
           autoEnabled={autoEnabled}
           backgroundImage={backgroundImage || undefined}
           characters={characters}
@@ -192,6 +200,16 @@ export function ScenarioEditorView() {
               className="h-24 col-span-2"
             />
 
+            <Label htmlFor="fontSize">Font Size (default: 41)</Label>
+            <Input
+              id="fontSize"
+              type="number"
+              value={fontSize}
+              onChange={(e) => setFontSize(Number(e.target.value))}
+              placeholder="Enter font size"
+              className="col-span-2"
+            />
+
             <Label htmlFor="backgroundImage">Background Image</Label>
             <div className="flex gap-2 col-span-2">
               <Button variant="outline" onClick={handleBackgroundImageClick}>
@@ -226,6 +244,30 @@ export function ScenarioEditorView() {
               id="autoEnabled"
               checked={autoEnabled}
               onCheckedChange={(checked) => setAutoEnabled(checked)}
+              className="col-span-2"
+            />
+
+            <Label htmlFor="displayLine">Display Horizontal Line</Label>
+            <Switch
+              id="displayLine"
+              checked={displayLine}
+              onCheckedChange={(checked) => setDisplayLine(checked)}
+              className="col-span-2"
+            />
+
+            <Label htmlFor="displayGradient">Display Gradient</Label>
+            <Switch
+              id="displayGradient"
+              checked={displayGradient}
+              onCheckedChange={(checked) => setDisplayGradient(checked)}
+              className="col-span-2"
+            />
+
+            <Label htmlFor="displayTriangle">Display Triangle</Label>
+            <Switch
+              id="displayTriangle"
+              checked={displayTriangle}
+              onCheckedChange={(checked) => setDisplayTriangle(checked)}
               className="col-span-2"
             />
           </div>

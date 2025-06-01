@@ -27,10 +27,14 @@ export type ScenarioCharacterData = {
 export type ScenarioViewProps = {
   applicationRef?: RefObject<ApplicationRef | null>;
   content: string;
+  fontSize?: number;
   name?: string;
   affiliation?: string;
   displayButtons?: boolean;
   autoEnabled?: boolean;
+  displayLine?: boolean;
+  displayGradient?: boolean;
+  displayTriangle?: boolean;
   backgroundImage?: string;
   characters?: ScenarioCharacterData[];
 };
@@ -45,10 +49,14 @@ extend({
 export function ScenarioView({
   applicationRef,
   content,
+  fontSize,
   name,
   affiliation,
   displayButtons = true,
   autoEnabled = false,
+  displayLine = true,
+  displayGradient = true,
+  displayTriangle = true,
   backgroundImage,
   characters = [],
 }: ScenarioViewProps) {
@@ -67,16 +75,16 @@ export function ScenarioView({
           <ScenarioCharacter key={idx} {...character} />
         ))}
 
-      <ScenarioBottomGradient />
+      {displayGradient && <ScenarioBottomGradient />}
       {displayButtons && <ScenarioButtons autoEnabled={autoEnabled} />}
-      <ScenarioTriangle />
-      <ScenarioLine />
+      {displayTriangle && <ScenarioTriangle />}
+      {displayLine && <ScenarioLine />}
 
       {name && (
         <ScenarioNameAndAffiliation name={name} affiliation={affiliation} />
       )}
 
-      <ScenarioDialogue content={content} />
+      <ScenarioDialogue content={content} fontSize={fontSize} />
     </Application>
   );
 }
