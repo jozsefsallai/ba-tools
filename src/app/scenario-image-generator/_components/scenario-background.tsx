@@ -15,9 +15,18 @@ export function ScenarioBackground({ background }: ScenarioBackgroundProps) {
   const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
 
   useEffect(() => {
-    Assets.load(background).then((result) => {
-      setTexture(result);
-    });
+    Assets.load(background)
+      .then((result) => {
+        if (!result) {
+          return;
+        }
+
+        setTexture(result);
+      })
+      .catch(() => {
+        // ignore error
+        setTexture(Texture.EMPTY);
+      });
   }, [background]);
 
   const { x, y, width, height } = useMemo(() => {

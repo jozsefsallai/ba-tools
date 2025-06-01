@@ -20,9 +20,18 @@ export function ScenarioCharacter({
   const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
 
   useEffect(() => {
-    Assets.load(spriteUrl).then((result) => {
-      setTexture(result);
-    });
+    Assets.load(spriteUrl)
+      .then((result) => {
+        if (!result) {
+          return;
+        }
+
+        setTexture(result);
+      })
+      .catch(() => {
+        // ignore error
+        setTexture(Texture.EMPTY);
+      });
   }, [spriteUrl]);
 
   const { width, height } = useMemo(() => {

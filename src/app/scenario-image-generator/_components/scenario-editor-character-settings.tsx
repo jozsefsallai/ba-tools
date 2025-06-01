@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useRef, useState } from "react";
 
+type SpriteMode = "image" | "url";
+
 export type ScenarioEditorCharacterSettingsProps = {
   spriteUrl: string;
   filename: string;
@@ -33,6 +35,10 @@ export function ScenarioEditorCharacterSettings({
   onDelete,
 }: ScenarioEditorCharacterSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [spriteMode, setSpriteMode] = useState<SpriteMode>(
+    filename ? "image" : "url",
+  );
 
   const [xStr, setXStr] = useState(x.toString());
   const [yStr, setYStr] = useState(y.toString());
@@ -79,13 +85,27 @@ export function ScenarioEditorCharacterSettings({
       <div className="grid grid-cols-3 gap-4">
         <Label htmlFor="spriteUrl">Sprite</Label>
         <div className="col-span-2">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleFileInputClick}
-          >
-            {filename ?? "Select Sprite"}
-          </Button>
+          {spriteMode === "image" && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleFileInputClick}
+            >
+              {filename ?? "Select Sprite"}
+            </Button>
+          )}
+
+          {spriteMode === "url" && (
+            <Input
+              id="spriteUrl"
+              type="url"
+              value={spriteUrl}
+              onChange={(e) =>
+                onChange({ spriteUrl: e.target.value, filename, x, y, scale })
+              }
+              placeholder="Enter image URL"
+            />
+          )}
 
           <input
             id="spriteUrl"

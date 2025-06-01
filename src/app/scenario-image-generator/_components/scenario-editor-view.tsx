@@ -12,18 +12,23 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ApplicationRef } from "@pixi/react";
-import { PlusIcon, XIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+
+type BackgroundMode = "image" | "url";
 
 export function ScenarioEditorView() {
   const applicationRef = useRef<ApplicationRef | null>(null);
+
+  const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("image");
 
   const [name, setName] = useState("Name");
   const [affiliation, setAffiliation] = useState<string>("Affiliation");
   const [content, setContent] = useState("Dialogue text goes here...");
   const [fontSize, setFontSize] = useState(41);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
   const [characters, setCharacters] = useState<
     (ScenarioCharacterData & {
       filename: string;
@@ -39,6 +44,15 @@ export function ScenarioEditorView() {
 
   const backgroundInputRef = useRef<HTMLInputElement | null>(null);
   const characterInputRef = useRef<HTMLInputElement | null>(null);
+
+  const background = useMemo(() => {
+    switch (backgroundMode) {
+      case "image":
+        return backgroundImage;
+      case "url":
+        return backgroundUrl;
+    }
+  }, [backgroundMode, backgroundImage, backgroundUrl]);
 
   function handleBackgroundImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
@@ -105,6 +119,19 @@ export function ScenarioEditorView() {
     }
   }
 
+  function handleAddCharacterUrl() {
+    setCharacters((prev) => [
+      ...prev,
+      {
+        spriteUrl: "",
+        x: 0,
+        y: 0,
+        scale: 1,
+        filename: "",
+      },
+    ]);
+  }
+
   function renderCanvas() {
     const application = applicationRef.current?.getApplication();
     if (!application) {
@@ -161,7 +188,7 @@ export function ScenarioEditorView() {
           displayGradient={displayGradient}
           displayTriangle={displayTriangle}
           autoEnabled={autoEnabled}
-          backgroundImage={backgroundImage || undefined}
+          backgroundImage={background ?? undefined}
           characters={characters}
         />
       </div>
@@ -210,17 +237,53 @@ export function ScenarioEditorView() {
               className="col-span-2"
             />
 
-            <Label htmlFor="backgroundImage">Background Image</Label>
+            <Label
+              htmlFor={
+                backgroundMode === "image" ? "backgroundImage" : "backgroundUrl"
+              }
+            >
+              Background Image
+            </Label>
             <div className="flex gap-2 col-span-2">
-              <Button variant="outline" onClick={handleBackgroundImageClick}>
-                {backgroundName || "Select Background Image"}
-              </Button>
+              {backgroundMode === "image" && (
+                <Button
+                  variant="outline"
+                  onClick={handleBackgroundImageClick}
+                  className="flex-1"
+                >
+                  {backgroundName || "Select Background Image"}
+                </Button>
+              )}
 
-              {backgroundImage && (
+              {backgroundMode === "image" && backgroundImage && (
                 <Button variant="outline" onClick={handleRemoveBackgroundImage}>
                   <XIcon />
                 </Button>
               )}
+
+              {backgroundMode === "url" && (
+                <Input
+                  id="backgroundUrl"
+                  type="url"
+                  value={backgroundUrl ?? ""}
+                  onChange={(e) => setBackgroundUrl(e.target.value)}
+                  placeholder="Enter background image URL"
+                  className="flex-1"
+                />
+              )}
+
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setBackgroundMode((prev) =>
+                    prev === "image" ? "url" : "image",
+                  )
+                }
+                className="flex-shrink-0"
+              >
+                {backgroundMode === "image" && <GlobeIcon />}
+                {backgroundMode === "url" && <ImageIcon />}
+              </Button>
 
               <input
                 type="file"
@@ -297,10 +360,17 @@ export function ScenarioEditorView() {
             />
           ))}
 
-          <Button variant="outline" onClick={handleAddCharacter}>
-            <PlusIcon className="mr-2" />
-            Add Character
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button variant="outline" onClick={handleAddCharacter}>
+              <PlusIcon className="mr-2" />
+              Add Character (file)
+            </Button>
+
+            <Button variant="outline" onClick={handleAddCharacterUrl}>
+              <PlusIcon className="mr-2" />
+              Add Character (URL)
+            </Button>
+          </div>
 
           <input
             ref={characterInputRef}
