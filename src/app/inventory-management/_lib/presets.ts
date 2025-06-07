@@ -302,7 +302,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
-    name: "Secret Midnight Party: Ringing of the Tagger's Bell (PJ Seminar Event)",
+    name: "Secret Midnight Party: The Chimes of Tag (PJ Seminar Event)",
     rounds: [
       [
         withCounts(ITEMS.slippers, 2),
