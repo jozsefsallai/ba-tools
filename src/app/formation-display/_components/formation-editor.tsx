@@ -19,7 +19,6 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ChevronsUpDownIcon } from "lucide-react";
-import { FormationItem } from "@/app/formation-display/_components/formation-item";
 
 import { ExportStudentDataDialog } from "@/components/dialogs/export-student-data-dialog";
 import { ImportStudentDataDialog } from "@/components/dialogs/import-student-data-dialog";
@@ -27,6 +26,7 @@ import { sleep } from "@/lib/sleep";
 import { studentStorage } from "@/lib/storage/students";
 import { StudentPicker } from "@/components/common/student-picker";
 import { ImportJustinPlannerDataDialog } from "@/components/dialogs/import-justin-planner-data-dialog";
+import { FormationItemContainer } from "@/app/formation-display/_components/formation-item-container";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -48,6 +48,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
   function addStudent(student: Student) {
     const item: StudentItem = {
+      id: student.id,
       student,
     };
 
@@ -88,60 +89,10 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     }
   }
 
-  function moveStudentItem(
-    combatClass: CombatClass,
-    studentItem: StudentItem,
-    direction: -1 | 1,
-  ) {
-    if (combatClass === "striker") {
-      const index = strikers.indexOf(studentItem);
-      const newIndex = index + direction;
-
-      if (newIndex < 0 || newIndex >= strikers.length) {
-        return;
-      }
-
-      const newStrikers = [...strikers];
-      newStrikers[index] = strikers[newIndex];
-      newStrikers[newIndex] = studentItem;
-
-      setStrikers(newStrikers);
-    }
-
-    if (combatClass === "special") {
-      const index = specials.indexOf(studentItem);
-      const newIndex = index + direction;
-
-      if (newIndex < 0 || newIndex >= specials.length) {
-        return;
-      }
-
-      const newSpecials = [...specials];
-      newSpecials[index] = specials[newIndex];
-      newSpecials[newIndex] = studentItem;
-
-      setSpecials(newSpecials);
-    }
-  }
-
-  function moveStudentItemUp(
-    combatClass: CombatClass,
-    studentItem: StudentItem,
-  ) {
-    moveStudentItem(combatClass, studentItem, -1);
-  }
-
-  function moveStudentItemDown(
-    combatClass: CombatClass,
-    studentItem: StudentItem,
-  ) {
-    moveStudentItem(combatClass, studentItem, 1);
-  }
-
   function updateStudentItem(
     combatClass: CombatClass,
     studentItem: StudentItem,
-    newData: Omit<StudentItem, "student">,
+    newData: Omit<StudentItem, "student" | "id">,
   ) {
     if (combatClass === "striker") {
       setStrikers((prev) =>
@@ -302,20 +253,16 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
           <p className="text-muted-foreground">No strikers in formation.</p>
         )}
 
-        {strikers.map((striker, idx) => (
-          <FormationItem
-            key={idx}
-            item={striker}
-            totalCount={strikers.length}
-            index={idx}
+        {strikers.length > 0 && (
+          <FormationItemContainer
+            items={strikers}
+            setItems={setStrikers}
             onWantsToRemove={(item) => removeStudentItem("striker", item)}
-            onWantsToMoveUp={(item) => moveStudentItemUp("striker", item)}
-            onWantsToMoveDown={(item) => moveStudentItemDown("striker", item)}
             onWantsToUpdate={(item, newData) =>
               updateStudentItem("striker", item, newData)
             }
           />
-        ))}
+        )}
       </div>
 
       <Separator />
@@ -327,20 +274,16 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
           <p className="text-muted-foreground">No specials in formation.</p>
         )}
 
-        {specials.map((special, idx) => (
-          <FormationItem
-            key={idx}
-            item={special}
-            index={idx}
-            totalCount={specials.length}
+        {specials.length > 0 && (
+          <FormationItemContainer
+            items={specials}
+            setItems={setSpecials}
             onWantsToRemove={(item) => removeStudentItem("special", item)}
-            onWantsToMoveUp={(item) => moveStudentItemUp("special", item)}
-            onWantsToMoveDown={(item) => moveStudentItemDown("special", item)}
             onWantsToUpdate={(item, newData) =>
               updateStudentItem("special", item, newData)
             }
           />
-        ))}
+        )}
       </div>
     </div>
   );

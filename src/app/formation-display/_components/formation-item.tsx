@@ -15,45 +15,34 @@ import { Switch } from "@/components/ui/switch";
 import { studentStorage } from "@/lib/storage/students";
 import type { StarLevel, UELevel } from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
-import { ChevronDown, ChevronUpIcon } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { GripVerticalIcon } from "lucide-react";
+import { CSS } from "@dnd-kit/utilities";
 
 export type FormationItemProps = {
   item: StudentItem;
-  index: number;
-  totalCount: number;
   onWantsToRemove(item: StudentItem): void;
-  onWantsToMoveUp(item: StudentItem): void;
-  onWantsToMoveDown(item: StudentItem): void;
-  onWantsToUpdate(item: StudentItem, data: Omit<StudentItem, "student">): void;
+  onWantsToUpdate(
+    item: StudentItem,
+    data: Omit<StudentItem, "student" | "id">,
+  ): void;
 };
 
 export function FormationItem({
   item,
-  index,
-  totalCount,
   onWantsToRemove,
-  onWantsToMoveUp,
-  onWantsToMoveDown,
   onWantsToUpdate,
 }: FormationItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: item.id, animateLayoutChanges: () => false });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   function handleRemove() {
     onWantsToRemove(item);
-  }
-
-  function handleMoveUp() {
-    if (index === 0) {
-      return;
-    }
-
-    onWantsToMoveUp(item);
-  }
-
-  function handleMoveDown() {
-    if (index === totalCount - 1) {
-      return;
-    }
-
-    onWantsToMoveDown(item);
   }
 
   function handleLevelUpdate(event: React.ChangeEvent<HTMLInputElement>) {
@@ -98,8 +87,17 @@ export function FormationItem({
   }
 
   return (
-    <article className="border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <article
+      ref={setNodeRef}
+      className="bg-background border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      style={style}
+      {...attributes}
+    >
       <div className="flex md:items-center gap-4">
+        <Button className="cursor-move" variant="ghost" {...listeners}>
+          <GripVerticalIcon />
+        </Button>
+
         <img
           src={buildStudentIconUrl(item.student)}
           alt={item.student.name}
@@ -196,18 +194,6 @@ export function FormationItem({
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <Button variant="outline" onClick={handleMoveUp} disabled={index === 0}>
-          <ChevronUpIcon /> Move Up
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleMoveDown}
-          disabled={index === totalCount - 1}
-        >
-          <ChevronDown /> Move Down
-        </Button>
-
         <Button variant="destructive" onClick={handleRemove}>
           Remove
         </Button>

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { RefObject } from "react";
 
 export type StudentItem = {
+  id: string;
   student: Student;
   starter?: boolean;
   starLevel?: StarLevel;
