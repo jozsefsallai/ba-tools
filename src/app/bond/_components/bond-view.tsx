@@ -3,14 +3,6 @@
 import { ItemCard } from "@/components/common/item-card";
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import { buildStudentIconUrl, buildStudentPortraitUrl } from "@/lib/url";
+import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Gift, Student } from "@prisma/client";
 import { AlertCircleIcon, ChevronsUpDownIcon } from "lucide-react";
@@ -35,6 +27,7 @@ import { BondProgress } from "@/app/bond/_components/bond-progress";
 import { favorTable } from "@/lib/favor-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
+import { StudentPicker } from "@/components/common/student-picker";
 
 export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
@@ -172,8 +165,6 @@ function GiftInfo({
 export function BondView({ students, gifts }: BondViewProps) {
   const [onlyDisplayRelevantGifts, setOnlyDisplayRelevantGifts] =
     useState(false);
-
-  const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
 
   const [selectedStudent, setSelectedStudent] =
     useState<StudentWithGifts | null>(null);
@@ -401,44 +392,16 @@ export function BondView({ students, gifts }: BondViewProps) {
       </div>
 
       <div className="flex flex-col gap-8 items-center md:basis-1/3">
-        <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-between">
-              {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
-              <ChevronsUpDownIcon />
-            </Button>
-          </PopoverTrigger>
-
-          <PopoverContent className="w-[90vw] md:w-[450px] p-0">
-            <Command>
-              <CommandInput placeholder="Search student..." className="h-9" />
-              <CommandList>
-                <CommandEmpty>No such student.</CommandEmpty>
-                <CommandGroup>
-                  {students.map((student) => (
-                    <CommandItem
-                      key={student.id}
-                      value={student.name}
-                      onSelect={() => {
-                        setSelectedStudent(student);
-                        setStudentPopoverOpen(false);
-                      }}
-                    >
-                      <div className="flex gap-2 items-center">
-                        <img
-                          src={buildStudentIconUrl(student)}
-                          alt={student.name}
-                          className="w-12"
-                        />
-                        {student.name}
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <StudentPicker
+          students={students}
+          onStudentSelected={(student) => setSelectedStudent(student)}
+          className="w-[90vw] md:w-[450px]"
+        >
+          <Button variant="outline" className="w-full justify-between">
+            {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
+            <ChevronsUpDownIcon />
+          </Button>
+        </StudentPicker>
 
         {!selectedStudent && (
           <div className="text-sm text-muted-foreground border rounded-md w-full p-6 text-center">

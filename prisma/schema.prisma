@@ -209,6 +209,8 @@ model Student {
   isReleasedGlobal Boolean @default(false)
   isReleasedCN     Boolean @default(false)
 
+  searchTags String[]
+
   baseVariantId String?
   baseVariant   Student?  @relation("BaseVariant", fields: [baseVariantId], references: [id])
   variants      Student[] @relation("BaseVariant")

@@ -18,26 +18,15 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ChevronsUpDownIcon } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { FormationItem } from "@/app/formation-display/_components/formation-item";
 
 import { ExportStudentDataDialog } from "@/components/dialogs/export-student-data-dialog";
 import { ImportStudentDataDialog } from "@/components/dialogs/import-student-data-dialog";
 import { sleep } from "@/lib/sleep";
 import { studentStorage } from "@/lib/storage/students";
+import { StudentPicker } from "@/components/common/student-picker";
+import { ImportJustinPlannerDataDialog } from "@/components/dialogs/import-justin-planner-data-dialog";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -54,9 +43,6 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
   const [scale, setScale] = useState(1);
   const [displayOverline, setDisplayOverline] = useState(false);
   const [displayRoleIcon, setDisplayRoleIcon] = useState(true);
-
-  const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
@@ -277,57 +263,19 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
       <div className="flex flex-col gap-4">
         <div className="flex gap-4 items-center justify-center">
-          <Popover
-            open={studentPopoverOpen}
-            onOpenChange={setStudentPopoverOpen}
+          <StudentPicker
+            students={allStudents}
+            onStudentSelected={addStudent}
+            className="w-[200px] md:w-[250px]"
           >
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[200px] md:w-[250px] justify-between"
-              >
-                {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
-                <ChevronsUpDownIcon />
-              </Button>
-            </PopoverTrigger>
-
-            <PopoverContent className="w-[200px] md:w-[250px] p-0">
-              <Command>
-                <CommandInput placeholder="Search student..." className="h-9" />
-                <CommandList>
-                  <CommandEmpty>No such student.</CommandEmpty>
-                  <CommandGroup>
-                    {allStudents.map((student) => (
-                      <CommandItem
-                        key={student.id}
-                        value={student.name}
-                        onSelect={() => {
-                          setSelectedStudent(student);
-                          setStudentPopoverOpen(false);
-                        }}
-                      >
-                        {student.name}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          <Button
-            onClick={() => {
-              if (!selectedStudent) {
-                return;
-              }
-
-              addStudent(selectedStudent);
-              setSelectedStudent(null);
-            }}
-            disabled={!selectedStudent}
-          >
-            Add Student
-          </Button>
+            <Button
+              variant="outline"
+              className="w-[200px] md:w-[250px] justify-between"
+            >
+              Select Student
+              <ChevronsUpDownIcon />
+            </Button>
+          </StudentPicker>
         </div>
 
         <div className="flex gap-4 items-center justify-center">
@@ -338,6 +286,10 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
           <ImportStudentDataDialog>
             <Button variant="outline">Import cached student data</Button>
           </ImportStudentDataDialog>
+
+          <ImportJustinPlannerDataDialog students={allStudents}>
+            <Button variant="outline">Import Justin planner data</Button>
+          </ImportJustinPlannerDataDialog>
         </div>
       </div>
 
