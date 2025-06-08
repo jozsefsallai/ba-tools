@@ -175,6 +175,7 @@ export function FormationItem({
             <div className="flex items-center gap-2">
               <Switch
                 id="borrowed"
+                key={`${item.student.id}:borrowed`}
                 checked={item.borrowed}
                 onCheckedChange={handleBorrowedUpdate}
               />
@@ -184,6 +185,7 @@ export function FormationItem({
             <div className="flex items-center gap-2">
               <Switch
                 id="starter"
+                key={`${item.student.id}:starter`}
                 checked={item.starter}
                 onCheckedChange={handleStaterUpdate}
               />
