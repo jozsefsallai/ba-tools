@@ -28,6 +28,7 @@ import { favorTable } from "@/lib/favor-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
 import { StudentPicker } from "@/components/common/student-picker";
+import { studentStorage } from "@/lib/storage/students";
 
 export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
@@ -275,6 +276,30 @@ export function BondView({ students, gifts }: BondViewProps) {
     }));
   }
 
+  function updateCurrentBond(value: number) {
+    const clampedValue = Math.max(1, Math.min(value, 100));
+
+    setCurrentBond(clampedValue);
+
+    if (!selectedStudent) {
+      return;
+    }
+
+    studentStorage.addOrUpdateStudent({
+      id: selectedStudent.id,
+      bond: clampedValue,
+    });
+  }
+
+  function updateStudent(student: StudentWithGifts) {
+    setSelectedStudent(student);
+
+    const storedStudent = studentStorage.getStudent(student.id);
+    if (storedStudent?.bond) {
+      setCurrentBond(storedStudent.bond);
+    }
+  }
+
   return (
     <div className="flex flex-col-reverse md:flex-row gap-6">
       <div className="md:basis-2/3">
@@ -394,7 +419,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       <div className="flex flex-col gap-8 items-center md:basis-1/3">
         <StudentPicker
           students={students}
-          onStudentSelected={(student) => setSelectedStudent(student)}
+          onStudentSelected={updateStudent}
           className="w-[90vw] md:w-[450px]"
         >
           <Button variant="outline" className="w-full justify-between">
@@ -455,9 +480,9 @@ export function BondView({ students, gifts }: BondViewProps) {
                   const value = Number(e.target.value);
 
                   if (Number.isNaN(value)) {
-                    setCurrentBond(1);
+                    updateCurrentBond(1);
                   } else {
-                    setCurrentBond(Math.max(1, Math.min(value, 100)));
+                    updateCurrentBond(value);
                   }
                 }}
               />
