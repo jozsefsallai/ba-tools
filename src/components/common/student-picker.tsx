@@ -9,11 +9,18 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { commandScore } from "@/lib/text-score";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Student } from "@prisma/client";
 import { PopoverContent } from "@radix-ui/react-popover";
-import { type PropsWithChildren, useState } from "react";
+import {
+  type PropsWithChildren,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export type StudentPickerProps<T extends Student> = PropsWithChildren<{
   students: T[];
@@ -32,21 +39,80 @@ export function StudentPicker<T extends Student>({
   children,
 }: StudentPickerProps<T>) {
   const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+
+  const hackRef = useRef<HTMLDivElement>(null);
+
+  const filteredStudents = useMemo(() => {
+    if (!searchInput) {
+      return students;
+    }
+
+    const scores = new Map<string, number>();
+
+    return students
+      .filter((student) => {
+        const score = commandScore(
+          student.name,
+          searchInput,
+          student.searchTags,
+        );
+
+        if (score > 0.15) {
+          scores.set(student.id, score);
+          return true;
+        }
+
+        return false;
+      })
+      .sort((a, b) => {
+        const scoreA = scores.get(a.id) ?? 0;
+        const scoreB = scores.get(b.id) ?? 0;
+
+        if (scoreA === scoreB) {
+          return a.name.localeCompare(b.name);
+        }
+
+        return scoreB - scoreA;
+      });
+  }, [students, searchInput]);
+
+  function handleInputChange(value: string) {
+    setTimeout(() => {
+      hackRef.current?.scrollIntoView();
+    }, 0);
+
+    setSearchInput(value);
+  }
+
+  useEffect(() => {
+    if (!studentPopoverOpen) {
+      setSearchInput("");
+    }
+  }, [studentPopoverOpen]);
 
   return (
     <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
 
       <PopoverContent className={cn("p-0 border rounded-md mt-1", className)}>
-        <Command>
-          <CommandInput placeholder={placeholder} className="h-9" />
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={placeholder}
+            className="h-9"
+            value={searchInput}
+            onValueChange={handleInputChange}
+          />
           <CommandList>
+            <div ref={hackRef} />
+
             <CommandEmpty>{noStudentText}</CommandEmpty>
             <CommandGroup>
-              {students.map((student) => (
+              {filteredStudents.map((student) => (
                 <CommandItem
                   key={student.id}
-                  value={[student.name, ...student.searchTags].join(":")}
+                  value={student.name}
+                  keywords={student.searchTags}
                   onSelect={() => {
                     onStudentSelected?.(student);
                     setStudentPopoverOpen(false);
