@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 export type TileProps = {
   value?: number;
@@ -24,18 +25,20 @@ export function Tile({
   hovered,
   isMultiSelect,
 }: TileProps) {
+  const { resolvedTheme } = useTheme();
+
   return (
     <Button
       onClick={onClick}
       onMouseOver={onHover}
       onMouseLeave={onUnhover}
-      variant="secondary"
+      variant={resolvedTheme === "dark" ? "secondary" : "default"}
       className={cn(
         "size-8 text-[10px] md:size-16 md:text-base flex items-center justify-center hover:opacity-90",
         {
           "ring-2": highlight,
-          "bg-secondary/80 opacity-90": hovered,
-          "ring-2 ring-yellow-700 dark:ring-yellow-400":
+          "bg-secondary/80 opacity-90": resolvedTheme === "dark" && hovered,
+          "ring-2 ring-yellow-500 dark:ring-yellow-400":
             hovered && isMultiSelect,
           "opacity-40 hover:opacity-30": blocked,
         },
