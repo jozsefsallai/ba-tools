@@ -95,7 +95,9 @@ export function StudentPicker<T extends Student>({
     <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
 
-      <PopoverContent className={cn("p-0 border rounded-md mt-1", className)}>
+      <PopoverContent
+        className={cn("z-10 p-0 border rounded-md mt-1", className)}
+      >
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={placeholder}
