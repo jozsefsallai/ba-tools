@@ -40,14 +40,22 @@ export function ScenarioBackground({ background }: ScenarioBackgroundProps) {
     }
 
     const aspectRatio = texture.width / texture.height;
+    const isWider = aspectRatio > SCENARIO_VIEW_WIDTH / SCENARIO_VIEW_HEIGHT;
+
+    const scaledWidth = SCENARIO_VIEW_HEIGHT * aspectRatio;
     const scaledHeight = SCENARIO_VIEW_WIDTH / aspectRatio;
-    const y = (SCENARIO_VIEW_HEIGHT - scaledHeight) / 2;
+
+    const x = isWider ? (SCENARIO_VIEW_WIDTH - scaledWidth) / 2 : 0;
+    const y = isWider ? 0 : (SCENARIO_VIEW_HEIGHT - scaledHeight) / 2;
+
+    const width = isWider ? scaledWidth : SCENARIO_VIEW_WIDTH;
+    const height = isWider ? SCENARIO_VIEW_HEIGHT : scaledHeight;
 
     return {
-      x: 0,
+      x,
       y,
-      width: SCENARIO_VIEW_WIDTH,
-      height: scaledHeight,
+      width,
+      height,
     };
   }, [texture]);
 
