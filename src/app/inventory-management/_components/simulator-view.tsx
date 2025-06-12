@@ -295,6 +295,8 @@ export function InventoryManagementSimulatorView() {
   function changeDisplayedItem(value: string) {
     if (value === "all") {
       setDisplayedItem(undefined);
+    } else if (value.includes("+")) {
+      setDisplayedItem(value as DisplayedItem);
     } else {
       setDisplayedItem(Number(value) as DisplayedItem);
     }
@@ -615,6 +617,18 @@ export function InventoryManagementSimulatorView() {
 
           <ToggleGroupItem className="px-4" value="3">
             3
+          </ToggleGroupItem>
+
+          <ToggleGroupItem className="px-4" value="1+2">
+            1 + 2
+          </ToggleGroupItem>
+
+          <ToggleGroupItem className="px-4" value="1+3">
+            1 + 3
+          </ToggleGroupItem>
+
+          <ToggleGroupItem className="px-4" value="2+3">
+            2 + 3
           </ToggleGroupItem>
         </ToggleGroup>
       </div>

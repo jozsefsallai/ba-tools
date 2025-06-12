@@ -4,7 +4,7 @@ import { Tile } from "@/app/inventory-management/_components/tile";
 import type { InventoryManagementResult } from "@/workers/types";
 import { useEffect, useState } from "react";
 
-export type DisplayedItem = 1 | 2 | 3;
+export type DisplayedItem = 1 | 2 | 3 | "1+2" | "1+3" | "2+3";
 
 export type BlockedCoords = {
   x: number;
@@ -75,8 +75,16 @@ export function Grid({
           }
 
           if (displayedItem) {
-            newGrid[y][x].value =
-              probabilities[y][x].itemTypes[displayedItem - 1];
+            if (typeof displayedItem === "number") {
+              newGrid[y][x].value =
+                probabilities[y][x].itemTypes[displayedItem - 1];
+            } else {
+              const indexes = displayedItem.split("+").map((v) => Number(v) - 1);
+              newGrid[y][x].value = indexes.reduce(
+                (acc, idx) => acc + probabilities[y][x].itemTypes[idx],
+                0,
+              );
+            }
           } else {
             newGrid[y][x].value = probabilities[y][x].total;
           }
