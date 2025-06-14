@@ -37,6 +37,7 @@ export function Tile({
         "size-8 text-[10px] md:size-16 md:text-base flex items-center justify-center hover:opacity-90",
         {
           "ring-2": highlight,
+          "ring-black": resolvedTheme === "light" && highlight,
           "bg-secondary/80 opacity-90": resolvedTheme === "dark" && hovered,
           "ring-2 ring-yellow-500 dark:ring-yellow-400":
             hovered && isMultiSelect,
