@@ -13,7 +13,7 @@ export default function NotFound() {
         <p>The page you are looking for does not exist.</p>
       </div>
 
-      <div className="absolute -bottom-50 md:-bottom-10 left-1/2 -translate-x-1/2">
+      <div className="fixed md:absolute z-20 md:z-0 -bottom-30 md:-bottom-10 left-1/2 -translate-x-1/2">
         <Plana expression="confused" inline />
       </div>
     </div>
