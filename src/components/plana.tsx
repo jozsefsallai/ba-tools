@@ -42,7 +42,7 @@ export function Plana({
 
   return (
     <div
-      className={cn("select-none bottom-0", {
+      className={cn("select-none z-20 bottom-0", {
         fixed: !inline,
         "-right-8": !centered,
         "left-1/2 transform -translate-x-1/2": centered,
