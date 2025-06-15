@@ -5,6 +5,12 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+export type PlanaExpression = "idle" | "confused";
+
+export type PlanaOpts = {
+  expression?: PlanaExpression;
+};
+
 export class Plana {
   private renderer: SpineRenderer;
   private canvas: HTMLCanvasElement;
@@ -42,16 +48,31 @@ export class Plana {
   static BLINK_INTERVAL = 10000;
   static HEART_HALO_TIMEOUT = 6000;
 
-  constructor(canvas: HTMLCanvasElement) {
+  private expression: PlanaExpression = "idle";
+
+  static EXPRESSION_ANIM_MAP: Record<PlanaExpression, string> = {
+    idle: "Idle_01",
+    confused: "13",
+  };
+
+  constructor(canvas: HTMLCanvasElement, opts: PlanaOpts = {}) {
     this.updateScaleModifier();
 
     this.canvas = canvas;
+
+    if (opts.expression) {
+      this.expression = opts.expression;
+    }
 
     this.renderer = new SpineRenderer({
       canvas: this.canvas,
       width: this.width,
       height: this.height,
     });
+  }
+
+  private get expressionAnim() {
+    return Plana.EXPRESSION_ANIM_MAP[this.expression];
   }
 
   updateScaleModifier() {
@@ -66,8 +87,12 @@ export class Plana {
     await this.renderer.addChara({
       charaId: "NP0035",
       charaName: "Plana",
-      startAnim: "Idle_01",
+      startAnim: Plana.EXPRESSION_ANIM_MAP.idle,
     });
+
+    if (this.expression !== "idle") {
+      this.renderer.playAnimation(1, this.expressionAnim, true);
+    }
 
     this.touchPoint = this.renderer.findBone("Touch_Point") as Bone | null;
     if (this.touchPoint) {
@@ -89,10 +114,12 @@ export class Plana {
 
     window.addEventListener("resize", this.handleResize.bind(this));
 
-    this.blinkIntervalId = setInterval(
-      this.blink.bind(this),
-      Plana.BLINK_INTERVAL,
-    );
+    if (this.expression !== "confused") {
+      this.blinkIntervalId = setInterval(
+        this.blink.bind(this),
+        Plana.BLINK_INTERVAL,
+      );
+    }
 
     this.drawHeadpatHitboxForDebugging();
   }
@@ -231,13 +258,13 @@ export class Plana {
   private pat() {
     this.isPatting = true;
 
-    this.renderer.playAnimation(1, "Pat_01_M", false);
-    this.renderer.playAnimation(2, "Pat_01_A", false);
+    this.renderer.playAnimation(2, "Pat_01_M", false);
+    this.renderer.playAnimation(3, "Pat_01_A", false);
 
     this.canvas.style.cursor = "grab";
 
     this.heartHaloTimeoutId = setTimeout(() => {
-      this.renderer.playAnimation(3, "Dev_Halo_love", true);
+      this.renderer.playAnimation(4, "Dev_Halo_love", true);
     }, Plana.HEART_HALO_TIMEOUT);
   }
 
@@ -268,17 +295,19 @@ export class Plana {
 
     this.isPatting = false;
 
-    this.renderer.playAnimation(1, "PatEnd_01_M", false);
-    this.renderer.playAnimation(2, "PatEnd_01_A", false);
+    if (this.expression !== "confused") {
+      this.renderer.playAnimation(2, "PatEnd_01_M", false);
+      this.renderer.playAnimation(3, "PatEnd_01_A", false);
+    }
 
-    this.renderer.stopAnimation(1, 0.1);
     this.renderer.stopAnimation(2, 0.1);
+    this.renderer.stopAnimation(3, 0.1);
 
     this.canvas.style.cursor = "default";
 
     if (this.heartHaloTimeoutId) {
       clearTimeout(this.heartHaloTimeoutId);
-      this.renderer.stopAnimation(3);
+      this.renderer.stopAnimation(4);
     }
 
     // slowly reset head position
@@ -320,7 +349,7 @@ export class Plana {
       return;
     }
 
-    this.renderer.playAnimation(1, "Eye_Close_01", false);
+    this.renderer.playAnimation(2, "Eye_Close_01", false);
   }
 
   private drawHeadpatHitboxForDebugging() {

@@ -14,7 +14,7 @@ export function TheFooter({
   }
 
   return (
-    <footer className="border-t px-2 py-12 text-muted-foreground text-center text-sm">
+    <footer className="border-t px-2 py-12 bg-background text-muted-foreground text-center text-sm relative z-10">
       <div className="container">
         <div className="md:w-2/3 mx-auto">
           Made by{" "}

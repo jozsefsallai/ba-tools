@@ -57,7 +57,7 @@ export default function RootLayout({
         >
           <main className="flex flex-col gap-10 h-full">
             <TheHeader />
-            <section className="container px-4 md:px-0 flex-1">
+            <section className="relative container px-4 md:px-0 flex-1">
               {children}
             </section>
             <TheFooter

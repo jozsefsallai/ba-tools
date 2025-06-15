@@ -2,13 +2,17 @@
 
 import { useEffect, useRef } from "react";
 
-import { Plana as PlanaInstance } from "@/lib/plana";
+import { type PlanaExpression, Plana as PlanaInstance } from "@/lib/plana";
 import { cn } from "@/lib/utils";
 
 export function Plana({
   centered,
+  expression,
+  inline = false,
 }: {
   centered?: boolean;
+  expression?: PlanaExpression;
+  inline?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const planaRef = useRef<PlanaInstance | null>(null);
@@ -19,7 +23,9 @@ export function Plana({
         return;
       }
 
-      planaRef.current = new PlanaInstance(canvasRef.current);
+      planaRef.current = new PlanaInstance(canvasRef.current, {
+        expression,
+      });
       await planaRef.current.init();
     }
 
@@ -36,7 +42,8 @@ export function Plana({
 
   return (
     <div
-      className={cn("fixed select-none bottom-0", {
+      className={cn("select-none bottom-0", {
+        fixed: !inline,
         "-right-8": !centered,
         "left-1/2 transform -translate-x-1/2": centered,
       })}
