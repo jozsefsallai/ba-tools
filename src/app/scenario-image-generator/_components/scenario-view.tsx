@@ -11,7 +11,7 @@ import { ScenarioNameAndAffiliation } from "@/app/scenario-image-generator/_comp
 import { ScenarioDialogue } from "@/app/scenario-image-generator/_components/scenario-dialogue";
 import { ScenarioBackground } from "@/app/scenario-image-generator/_components/scenario-background";
 import { ScenarioCharacter } from "@/app/scenario-image-generator/_components/scenario-character";
-import type { RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import {
   SCENARIO_VIEW_HEIGHT,
   SCENARIO_VIEW_WIDTH,
@@ -26,6 +26,7 @@ export type ScenarioCharacterData = {
 
 export type ScenarioViewProps = {
   applicationRef?: RefObject<ApplicationRef | null>;
+  animate?: boolean;
   content: string;
   fontSize?: number;
   name?: string;
@@ -48,6 +49,7 @@ extend({
 
 export function ScenarioView({
   applicationRef,
+  animate,
   content,
   fontSize,
   name,
@@ -60,6 +62,13 @@ export function ScenarioView({
   backgroundImage,
   characters = [],
 }: ScenarioViewProps) {
+  const [dialogueFinishedRendering, setDialogueFinishedRendering] =
+    useState(true);
+
+  useEffect(() => {
+    setDialogueFinishedRendering(!animate);
+  }, [animate]);
+
   return (
     <Application
       ref={applicationRef}
@@ -77,14 +86,21 @@ export function ScenarioView({
 
       {displayGradient && <ScenarioBottomGradient />}
       {displayButtons && <ScenarioButtons autoEnabled={autoEnabled} />}
-      {displayTriangle && <ScenarioTriangle />}
+      {displayTriangle && dialogueFinishedRendering && (
+        <ScenarioTriangle animate={animate} />
+      )}
       {displayLine && <ScenarioLine />}
 
       {name && (
         <ScenarioNameAndAffiliation name={name} affiliation={affiliation} />
       )}
 
-      <ScenarioDialogue content={content} fontSize={fontSize} />
+      <ScenarioDialogue
+        animate={animate}
+        content={content}
+        fontSize={fontSize}
+        onTextFinishedRendering={() => setDialogueFinishedRendering(true)}
+      />
     </Application>
   );
 }

@@ -40,6 +40,8 @@ export function ScenarioEditorView() {
   const [displayGradient, setDisplayGradient] = useState(true);
   const [displayTriangle, setDisplayTriangle] = useState(true);
 
+  const [animate, setAnimate] = useState(false);
+
   const [backgroundName, setBackgroundName] = useState<string | null>(null);
 
   const backgroundInputRef = useRef<HTMLInputElement | null>(null);
@@ -174,11 +176,16 @@ export function ScenarioEditorView() {
     });
   }
 
+  function handleRecord() {
+    toast.error("Coming soon... (maybe)");
+  }
+
   return (
     <div className="flex flex-col gap-6 items-center min-w-0">
       <div className="min-w-0">
         <ScenarioView
           applicationRef={applicationRef}
+          animate={animate}
           content={content}
           fontSize={fontSize}
           name={name}
@@ -191,6 +198,18 @@ export function ScenarioEditorView() {
           backgroundImage={background ?? undefined}
           characters={characters}
         />
+      </div>
+
+      <Separator />
+
+      <div className="flex gap-4">
+        <Button onClick={() => setAnimate((prev) => !prev)}>
+          {animate ? "Stop Animation" : "Start Animation"}
+        </Button>
+
+        <Button disabled={animate} onClick={handleRecord}>
+          Record Video
+        </Button>
       </div>
 
       <Separator />
