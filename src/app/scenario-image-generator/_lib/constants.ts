@@ -3,3 +3,6 @@ export const SCENARIO_VIEW_HEIGHT = 1080;
 
 export const SCENARIO_LINE_WIDTH = 1548;
 export const SCENARIO_LINE_HEIGHT = 3;
+
+export const SCENARIO_TEXT_FONT_SIZE = 41;
+export const SCENARIO_TEXT_SCROLL_SPEED = 0.35;

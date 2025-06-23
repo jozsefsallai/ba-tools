@@ -5,6 +5,10 @@ import {
   type ScenarioCharacterData,
   ScenarioView,
 } from "@/app/scenario-image-generator/_components/scenario-view";
+import {
+  SCENARIO_TEXT_FONT_SIZE,
+  SCENARIO_TEXT_SCROLL_SPEED,
+} from "@/app/scenario-image-generator/_lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,7 +30,8 @@ export function ScenarioEditorView() {
   const [name, setName] = useState("Name");
   const [affiliation, setAffiliation] = useState<string>("Affiliation");
   const [content, setContent] = useState("Dialogue text goes here...");
-  const [fontSize, setFontSize] = useState(41);
+  const [fontSize, setFontSize] = useState(SCENARIO_TEXT_FONT_SIZE);
+  const [scrollSpeed, setScrollSpeed] = useState(SCENARIO_TEXT_SCROLL_SPEED);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
   const [characters, setCharacters] = useState<
@@ -188,6 +193,7 @@ export function ScenarioEditorView() {
           animate={animate}
           content={content}
           fontSize={fontSize}
+          scrollSpeed={scrollSpeed}
           name={name}
           affiliation={affiliation.length > 0 ? affiliation : undefined}
           displayButtons={displayButtons}
@@ -246,13 +252,30 @@ export function ScenarioEditorView() {
               className="h-24 col-span-2"
             />
 
-            <Label htmlFor="fontSize">Font Size (default: 41)</Label>
+            <Label htmlFor="fontSize">
+              Font Size (default: {SCENARIO_TEXT_FONT_SIZE})
+            </Label>
             <Input
               id="fontSize"
               type="number"
               value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
               placeholder="Enter font size"
+              className="col-span-2"
+            />
+
+            <Label htmlFor="scrollSpeed">
+              Text Scroll Speed (0-1, default: {SCENARIO_TEXT_SCROLL_SPEED})
+            </Label>
+            <Input
+              id="scrollSpeed"
+              type="number"
+              value={scrollSpeed}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={(e) => setScrollSpeed(Number(e.target.value))}
+              placeholder="Enter scroll speed"
               className="col-span-2"
             />
 

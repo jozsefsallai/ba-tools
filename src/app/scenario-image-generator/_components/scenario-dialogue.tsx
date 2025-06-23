@@ -2,19 +2,19 @@
 
 import {
   SCENARIO_LINE_WIDTH,
+  SCENARIO_TEXT_SCROLL_SPEED,
   SCENARIO_VIEW_WIDTH,
 } from "@/app/scenario-image-generator/_lib/constants";
 import { useTick } from "@pixi/react";
 import { CanvasTextMetrics, TextStyle } from "pixi.js";
 import { useEffect, useRef, useState } from "react";
 
-const TEXT_SPEED = 0.35;
-
 export type ScenarioDialogueProps = {
   content: string;
   fontSize?: number;
   onTextFinishedRendering?: () => void;
   animate?: boolean;
+  scrollSpeed?: number;
 };
 
 export function ScenarioDialogue({
@@ -22,6 +22,7 @@ export function ScenarioDialogue({
   fontSize = 41,
   onTextFinishedRendering,
   animate,
+  scrollSpeed = SCENARIO_TEXT_SCROLL_SPEED,
 }: ScenarioDialogueProps) {
   const [progress, setProgress] = useState(0);
   const [text, setText] = useState("");
@@ -56,7 +57,7 @@ export function ScenarioDialogue({
       }
 
       setProgress((prev) => {
-        return Math.min(prev + tick.deltaTime * TEXT_SPEED, content.length);
+        return Math.min(prev + tick.deltaTime * scrollSpeed, content.length);
       });
     },
   });

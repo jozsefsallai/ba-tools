@@ -29,6 +29,7 @@ export type ScenarioViewProps = {
   animate?: boolean;
   content: string;
   fontSize?: number;
+  scrollSpeed?: number;
   name?: string;
   affiliation?: string;
   displayButtons?: boolean;
@@ -52,6 +53,7 @@ export function ScenarioView({
   animate,
   content,
   fontSize,
+  scrollSpeed,
   name,
   affiliation,
   displayButtons = true,
@@ -99,6 +101,7 @@ export function ScenarioView({
         animate={animate}
         content={content}
         fontSize={fontSize}
+        scrollSpeed={scrollSpeed}
         onTextFinishedRendering={() => setDialogueFinishedRendering(true)}
       />
     </Application>
