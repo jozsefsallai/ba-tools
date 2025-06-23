@@ -16,6 +16,7 @@ import {
   SCENARIO_VIEW_HEIGHT,
   SCENARIO_VIEW_WIDTH,
 } from "@/app/scenario-image-generator/_lib/constants";
+import { cn } from "@/lib/utils";
 
 export type ScenarioCharacterData = {
   spriteUrl: string;
@@ -39,6 +40,7 @@ export type ScenarioViewProps = {
   displayTriangle?: boolean;
   backgroundImage?: string;
   characters?: ScenarioCharacterData[];
+  recordingMode?: boolean;
 };
 
 extend({
@@ -63,6 +65,7 @@ export function ScenarioView({
   displayTriangle = true,
   backgroundImage,
   characters = [],
+  recordingMode = false,
 }: ScenarioViewProps) {
   const [dialogueFinishedRendering, setDialogueFinishedRendering] =
     useState(true);
@@ -77,7 +80,9 @@ export function ScenarioView({
       width={SCENARIO_VIEW_WIDTH}
       height={SCENARIO_VIEW_HEIGHT}
       backgroundColor={0x00000000}
-      className="max-w-full"
+      className={cn("max-w-full", {
+        "fixed top-1/2 -translate-y-1/2 left-0 w-full z-50": recordingMode,
+      })}
     >
       {backgroundImage && <ScenarioBackground background={backgroundImage} />}
 

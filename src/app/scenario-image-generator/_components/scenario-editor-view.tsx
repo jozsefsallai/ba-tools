@@ -17,8 +17,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ApplicationRef } from "@pixi/react";
 import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useHotkeys } from "react-hotkeys-hook";
 
 type BackgroundMode = "image" | "url";
 
@@ -46,6 +47,7 @@ export function ScenarioEditorView() {
   const [displayTriangle, setDisplayTriangle] = useState(true);
 
   const [animate, setAnimate] = useState(false);
+  const [recordingMode, setRecordingMode] = useState(false);
 
   const [backgroundName, setBackgroundName] = useState<string | null>(null);
 
@@ -181,9 +183,32 @@ export function ScenarioEditorView() {
     });
   }
 
-  function handleRecord() {
-    toast.error("Coming soon... (maybe)");
-  }
+  useEffect(() => {
+    if (recordingMode) {
+      document.body.style.overflow = "hidden";
+
+      document.documentElement.requestFullscreen?.().catch((err) => {
+        console.error("Error attempting to enable full-screen mode:", err);
+      });
+    } else {
+      document.body.style.overflow = "auto";
+
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch((err) => {
+          console.error("Error exiting full-screen mode:", err);
+        });
+      }
+
+      setAnimate(false);
+    }
+  }, [recordingMode]);
+
+  useHotkeys("esc", () => setRecordingMode(false), {
+    enabled: recordingMode,
+    enableOnFormTags: true,
+    enableOnContentEditable: true,
+    preventDefault: true,
+  });
 
   return (
     <div className="flex flex-col gap-6 items-center min-w-0">
@@ -203,6 +228,7 @@ export function ScenarioEditorView() {
           autoEnabled={autoEnabled}
           backgroundImage={background ?? undefined}
           characters={characters}
+          recordingMode={recordingMode}
         />
       </div>
 
@@ -213,8 +239,8 @@ export function ScenarioEditorView() {
           {animate ? "Stop Animation" : "Start Animation"}
         </Button>
 
-        <Button disabled={animate} onClick={handleRecord}>
-          Record Video
+        <Button disabled={animate} onClick={() => setRecordingMode(true)}>
+          Recording Mode
         </Button>
       </div>
 
@@ -430,6 +456,36 @@ export function ScenarioEditorView() {
         <Button onClick={handleCopyToClipboard}>Copy to Clipboard</Button>
         <Button onClick={handleDownloadImage}>Download Image</Button>
       </div>
+
+      {recordingMode && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black z-40" />
+      )}
+
+      {recordingMode && !animate && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-amber-800/60 text-white z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center text-center gap-4 w-lg">
+            <h2 className="text-3xl font-semibold">Recording Mode</h2>
+
+            <p>
+              You're about to enter recording mode. Prepare your screen
+              recording software to capture the browser window. Click on the
+              following button when you feel ready to start recording.
+            </p>
+
+            <p>
+              You can quit recording mode by pressing the Esc key (twice if
+              you're in full screen).
+            </p>
+
+            <Button
+              onClick={() => setAnimate(true)}
+              className="bg-amber-500 hover:bg-amber-600"
+            >
+              Start Recording
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
