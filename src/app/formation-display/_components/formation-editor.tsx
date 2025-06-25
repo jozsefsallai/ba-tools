@@ -43,6 +43,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
   const [scale, setScale] = useState(1);
   const [displayOverline, setDisplayOverline] = useState(false);
   const [displayRoleIcon, setDisplayRoleIcon] = useState(true);
+  const [groupsVertical, setGroupsVertical] = useState(false);
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
@@ -156,6 +157,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         specials={specials}
         displayOverline={displayOverline}
         noDisplayRole={!displayRoleIcon}
+        groupsVertical={groupsVertical}
         busy={generationInProgress}
       />
 
@@ -197,6 +199,15 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
             onCheckedChange={setDisplayRoleIcon}
           />
           <Label htmlFor="display-role-icon">Display Role Icon</Label>
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <Switch
+            id="groups-vertical"
+            checked={groupsVertical}
+            onCheckedChange={setGroupsVertical}
+          />
+          <Label htmlFor="groups-vertical">Vertical Groups</Label>
         </div>
 
         <Button

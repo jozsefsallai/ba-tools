@@ -21,6 +21,7 @@ export type FormationPreviewProps = {
   specials: StudentItem[];
   displayOverline?: boolean;
   noDisplayRole?: boolean;
+  groupsVertical?: boolean;
   busy?: boolean;
 };
 
@@ -47,6 +48,7 @@ export function FormationPreview({
   specials,
   displayOverline,
   noDisplayRole,
+  groupsVertical = false,
   busy,
 }: FormationPreviewProps) {
   if (strikers.length === 0 && specials.length === 0) {
@@ -59,7 +61,12 @@ export function FormationPreview({
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center">
-      <div className="flex items-center gap-3 p-4" ref={containerRef}>
+      <div
+        className={cn("flex items-center gap-3 p-4", {
+          "flex-col": groupsVertical,
+        })}
+        ref={containerRef}
+      >
         <div className="flex flex-col gap-1">
           {displayOverline && strikers.length > 0 && (
             <Overline

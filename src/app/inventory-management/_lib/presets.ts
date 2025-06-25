@@ -154,6 +154,49 @@ export const ITEMS = {
     width: 2,
     height: 2,
   },
+
+  // Swimsuit Hyakkaryouran Event
+  watergun: {
+    name: "Water Gun",
+    width: 3,
+    height: 2,
+  },
+
+  waterproofPhoneCase: {
+    name: "Waterproof Phone Case",
+    width: 3,
+    height: 1,
+  },
+
+  sunscreen: {
+    name: "Sunscreen",
+    width: 2,
+    height: 1,
+  },
+
+  surfboard: {
+    name: "Surfboard",
+    width: 4,
+    height: 2,
+  },
+
+  parasol: {
+    name: "Parasol",
+    width: 4,
+    height: 1,
+  },
+
+  floaty: {
+    name: "Floaty",
+    width: 3,
+    height: 3,
+  },
+
+  bandana: {
+    name: "Bandana",
+    width: 2,
+    height: 2,
+  },
 } as const satisfies Record<
   string,
   Omit<InventoryManagementPresetItem, "count">
@@ -391,6 +434,53 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
         withCounts(ITEMS.shoppingBag, 2),
         withCounts(ITEMS.toyBox, 1),
         withCounts(ITEMS.gamingMagazine, 1),
+      ],
+    ],
+  },
+
+  {
+    name: "The Flower That Blooms: Waterborne Contest! (Swimsuit Hyakkaryouran Event)",
+    rounds: [
+      [
+        withCounts(ITEMS.watergun, 2),
+        withCounts(ITEMS.waterproofPhoneCase, 5),
+        withCounts(ITEMS.sunscreen, 2),
+      ],
+
+      [
+        withCounts(ITEMS.surfboard, 1),
+        withCounts(ITEMS.parasol, 2),
+        withCounts(ITEMS.waterproofPhoneCase, 5),
+      ],
+
+      [
+        withCounts(ITEMS.floaty, 1),
+        withCounts(ITEMS.bandana, 4),
+        withCounts(ITEMS.sunscreen, 3),
+      ],
+
+      [
+        withCounts(ITEMS.watergun, 2),
+        withCounts(ITEMS.waterproofPhoneCase, 5),
+        withCounts(ITEMS.sunscreen, 2),
+      ],
+
+      [
+        withCounts(ITEMS.surfboard, 1),
+        withCounts(ITEMS.parasol, 2),
+        withCounts(ITEMS.waterproofPhoneCase, 5),
+      ],
+
+      [
+        withCounts(ITEMS.floaty, 1),
+        withCounts(ITEMS.bandana, 4),
+        withCounts(ITEMS.sunscreen, 3),
+      ],
+
+      [
+        withCounts(ITEMS.surfboard, 2),
+        withCounts(ITEMS.waterproofPhoneCase, 3),
+        withCounts(ITEMS.sunscreen, 6),
       ],
     ],
   },
