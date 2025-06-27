@@ -5,6 +5,9 @@ import { favorTable, type FavorTableEntry } from "@/lib/favor-table";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
+import bondImage from "@/assets/images/bond.png";
+import Image from "next/image";
+
 export type BondProgressProps = {
   startingExp: number;
   exp: number;
@@ -52,8 +55,11 @@ export function BondProgress({ startingExp = 0, exp }: BondProgressProps) {
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      <div className="text-3xl font-bold">
-        🩷{startingLevel.level} → 🩷{currentLevel.level}
+      <div className="text-3xl font-bold flex items-center gap-2">
+        <Image src={bondImage} alt="🩷" className="size-8" />{" "}
+        {startingLevel.level} →{" "}
+        <Image src={bondImage} alt="🩷" className="size-8" />{" "}
+        {currentLevel.level}
       </div>
 
       <Progress
