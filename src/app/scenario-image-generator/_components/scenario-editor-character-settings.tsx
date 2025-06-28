@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type SpriteMode = "image" | "url";
@@ -15,6 +16,7 @@ export type ScenarioEditorCharacterSettingsProps = {
   y: number;
   scale: number;
   darken?: boolean;
+  timestamp: number;
 
   onChange: (settings: {
     spriteUrl: string;
@@ -26,6 +28,12 @@ export type ScenarioEditorCharacterSettingsProps = {
   }) => void;
 
   onDelete?: () => void;
+
+  index: number;
+  total: number;
+
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
 };
 
 export function ScenarioEditorCharacterSettings({
@@ -35,8 +43,13 @@ export function ScenarioEditorCharacterSettings({
   y,
   scale,
   darken,
+  timestamp,
   onChange,
   onDelete,
+  index,
+  total,
+  onMoveUp,
+  onMoveDown,
 }: ScenarioEditorCharacterSettingsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -148,9 +161,10 @@ export function ScenarioEditorCharacterSettings({
           className="col-span-2"
         />
 
-        <Label htmlFor="autoEnabled">Darken</Label>
+        <Label htmlFor="darken">Darken</Label>
         <Switch
-          id="autoEnabled"
+          id="darken"
+          key={`${timestamp}-darken`}
           checked={darken}
           onCheckedChange={(checked) => {
             onChange({
@@ -167,6 +181,18 @@ export function ScenarioEditorCharacterSettings({
       </div>
 
       <div className="flex justify-end mt-4">
+        {index > 0 && (
+          <Button variant="secondary" onClick={onMoveUp} className="mr-2">
+            <ChevronUp />
+          </Button>
+        )}
+
+        {index < total - 1 && (
+          <Button variant="secondary" onClick={onMoveDown} className="mr-2">
+            <ChevronDown />
+          </Button>
+        )}
+
         <Button variant="destructive" onClick={onDelete}>
           Delete Character
         </Button>

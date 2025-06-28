@@ -38,6 +38,7 @@ export function ScenarioEditorView() {
   const [characters, setCharacters] = useState<
     (ScenarioCharacterData & {
       filename: string;
+      timestamp: number;
     })[]
   >([]);
   const [displayButtons, setDisplayButtons] = useState(true);
@@ -111,6 +112,7 @@ export function ScenarioEditorView() {
             y: 0,
             scale: 1,
             filename: file.name,
+            timestamp: Date.now(),
           },
         ]);
       }
@@ -137,6 +139,7 @@ export function ScenarioEditorView() {
         y: 0,
         scale: 1,
         filename: "",
+        timestamp: Date.now(),
       },
     ]);
   }
@@ -409,9 +412,12 @@ export function ScenarioEditorView() {
 
           {characters.map((character, idx) => (
             <ScenarioEditorCharacterSettings
-              key={idx}
+              key={character.timestamp}
+              index={idx}
+              total={characters.length}
               spriteUrl={character.spriteUrl}
               filename={character.filename}
+              timestamp={character.timestamp}
               x={character.x}
               y={character.y}
               scale={character.scale}
@@ -424,6 +430,28 @@ export function ScenarioEditorView() {
               }}
               onDelete={() => {
                 setCharacters((prev) => prev.filter((_, i) => i !== idx));
+              }}
+              onMoveUp={() => {
+                setCharacters((prev) => {
+                  const newCharacters = [...prev];
+                  if (idx > 0) {
+                    const temp = newCharacters[idx - 1];
+                    newCharacters[idx - 1] = newCharacters[idx];
+                    newCharacters[idx] = temp;
+                  }
+                  return newCharacters;
+                });
+              }}
+              onMoveDown={() => {
+                setCharacters((prev) => {
+                  const newCharacters = [...prev];
+                  if (idx < newCharacters.length - 1) {
+                    const temp = newCharacters[idx + 1];
+                    newCharacters[idx + 1] = newCharacters[idx];
+                    newCharacters[idx] = temp;
+                  }
+                  return newCharacters;
+                });
               }}
             />
           ))}
