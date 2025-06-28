@@ -46,6 +46,7 @@ export function ScenarioEditorView() {
   const [displayLine, setDisplayLine] = useState(true);
   const [displayGradient, setDisplayGradient] = useState(true);
   const [displayTriangle, setDisplayTriangle] = useState(true);
+  const [transparentBackground, setTransparentBackground] = useState(false);
 
   const [animate, setAnimate] = useState(false);
   const [recordingMode, setRecordingMode] = useState(false);
@@ -228,6 +229,7 @@ export function ScenarioEditorView() {
           displayLine={displayLine}
           displayGradient={displayGradient}
           displayTriangle={displayTriangle}
+          transparentBackground={transparentBackground}
           autoEnabled={autoEnabled}
           backgroundImage={background ?? undefined}
           characters={characters}
@@ -402,6 +404,16 @@ export function ScenarioEditorView() {
               id="displayTriangle"
               checked={displayTriangle}
               onCheckedChange={(checked) => setDisplayTriangle(checked)}
+              className="col-span-2"
+            />
+
+            <Label htmlFor="transparentBackground">
+              Transparent Background
+            </Label>
+            <Switch
+              id="transparentBackground"
+              checked={transparentBackground}
+              onCheckedChange={(checked) => setTransparentBackground(checked)}
               className="col-span-2"
             />
           </div>

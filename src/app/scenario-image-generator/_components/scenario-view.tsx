@@ -41,6 +41,7 @@ export type ScenarioViewProps = {
   backgroundImage?: string;
   characters?: ScenarioCharacterData[];
   recordingMode?: boolean;
+  transparentBackground?: boolean;
 };
 
 extend({
@@ -66,7 +67,10 @@ export function ScenarioView({
   backgroundImage,
   characters = [],
   recordingMode = false,
+  transparentBackground = false,
 }: ScenarioViewProps) {
+  const [shouldRender, setShouldRender] = useState(true);
+
   const [dialogueFinishedRendering, setDialogueFinishedRendering] =
     useState(true);
 
@@ -74,11 +78,27 @@ export function ScenarioView({
     setDialogueFinishedRendering(!animate);
   }, [animate]);
 
+  useEffect(() => {
+    // hack to fully re-render the pixi application once we change the
+    // background alpha
+
+    setShouldRender(false);
+
+    setTimeout(() => {
+      setShouldRender(true);
+    });
+  }, [transparentBackground]);
+
+  if (!shouldRender) {
+    return null;
+  }
+
   return (
     <Application
       ref={applicationRef}
       width={SCENARIO_VIEW_WIDTH}
       height={SCENARIO_VIEW_HEIGHT}
+      backgroundAlpha={transparentBackground ? 0 : 1}
       backgroundColor={0x00000000}
       className={cn("max-w-full", {
         "fixed top-1/2 -translate-y-1/2 left-0 w-full z-50": recordingMode,
