@@ -433,6 +433,8 @@ export function ScenarioEditorView() {
               x={character.x}
               y={character.y}
               scale={character.scale}
+              darken={character.darken}
+              hologram={character.hologram}
               onChange={(updatedCharacter) => {
                 setCharacters((prev) =>
                   prev.map((c, i) =>

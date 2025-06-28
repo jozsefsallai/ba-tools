@@ -16,6 +16,7 @@ export type ScenarioEditorCharacterSettingsProps = {
   y: number;
   scale: number;
   darken?: boolean;
+  hologram?: boolean;
   timestamp: number;
 
   onChange: (settings: {
@@ -25,6 +26,7 @@ export type ScenarioEditorCharacterSettingsProps = {
     y: number;
     scale: number;
     darken?: boolean;
+    hologram?: boolean;
   }) => void;
 
   onDelete?: () => void;
@@ -43,6 +45,7 @@ export function ScenarioEditorCharacterSettings({
   y,
   scale,
   darken,
+  hologram,
   timestamp,
   onChange,
   onDelete,
@@ -174,6 +177,24 @@ export function ScenarioEditorCharacterSettings({
               y,
               scale,
               darken: checked,
+            });
+          }}
+          className="col-span-2"
+        />
+
+        <Label htmlFor="hologram">Hologram</Label>
+        <Switch
+          id="hologram"
+          key={`${timestamp}-hologram`}
+          checked={hologram}
+          onCheckedChange={(checked) => {
+            onChange({
+              spriteUrl,
+              filename,
+              x,
+              y,
+              scale,
+              hologram: checked,
             });
           }}
           className="col-span-2"

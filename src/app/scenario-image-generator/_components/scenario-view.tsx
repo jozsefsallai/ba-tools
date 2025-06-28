@@ -23,6 +23,8 @@ export type ScenarioCharacterData = {
   x: number;
   y: number;
   scale: number;
+  darken?: boolean;
+  hologram?: boolean;
 };
 
 export type ScenarioViewProps = {

@@ -1,8 +1,8 @@
 "use client";
 
 import { SCENARIO_VIEW_WIDTH } from "@/app/scenario-image-generator/_lib/constants";
-import { AdjustmentFilter } from "pixi-filters";
-import { Assets, Texture } from "pixi.js";
+import { AdjustmentFilter, ColorOverlayFilter, CRTFilter } from "pixi-filters";
+import { Assets, type Filter, Texture } from "pixi.js";
 import { useEffect, useMemo, useState } from "react";
 
 export type ScenarioCharacterProps = {
@@ -11,6 +11,7 @@ export type ScenarioCharacterProps = {
   y: number;
   scale: number;
   darken?: boolean;
+  hologram?: boolean;
 };
 
 export function ScenarioCharacter({
@@ -19,6 +20,7 @@ export function ScenarioCharacter({
   y,
   scale,
   darken = false,
+  hologram = false,
 }: ScenarioCharacterProps) {
   const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
 
@@ -45,6 +47,33 @@ export function ScenarioCharacter({
     return { width: texture.width * scale, height: texture.height * scale };
   }, [texture, scale]);
 
+  const filters = useMemo<Filter[]>(() => {
+    const filters: Filter[] = [];
+
+    if (hologram) {
+      filters.push(
+        new ColorOverlayFilter({ color: 0x71c5ff, alpha: 0.35 }),
+        new AdjustmentFilter({
+          contrast: 1.1,
+          saturation: 0.6,
+          brightness: 1.1,
+          gamma: 0.8,
+        }),
+        new CRTFilter({
+          lineWidth: 3.6,
+          vignetting: 0,
+          lineContrast: 0.15,
+        }),
+      );
+    }
+
+    if (darken) {
+      filters.push(new AdjustmentFilter({ brightness: 0.67 }));
+    }
+
+    return filters;
+  }, [darken, hologram]);
+
   return (
     <pixiSprite
       texture={texture}
@@ -53,7 +82,7 @@ export function ScenarioCharacter({
       width={width}
       height={height}
       anchor={{ x: 0.5, y: 0 }}
-      filters={darken ? [new AdjustmentFilter({ brightness: 0.67 })] : []}
+      filters={filters}
     />
   );
 }
