@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useEffect, useRef, useState } from "react";
 
 type SpriteMode = "image" | "url";
@@ -13,6 +14,7 @@ export type ScenarioEditorCharacterSettingsProps = {
   x: number;
   y: number;
   scale: number;
+  darken?: boolean;
 
   onChange: (settings: {
     spriteUrl: string;
@@ -20,6 +22,7 @@ export type ScenarioEditorCharacterSettingsProps = {
     x: number;
     y: number;
     scale: number;
+    darken?: boolean;
   }) => void;
 
   onDelete?: () => void;
@@ -31,6 +34,7 @@ export function ScenarioEditorCharacterSettings({
   x,
   y,
   scale,
+  darken,
   onChange,
   onDelete,
 }: ScenarioEditorCharacterSettingsProps) {
@@ -141,6 +145,23 @@ export function ScenarioEditorCharacterSettings({
           type="number"
           value={scaleStr}
           onChange={(e) => setScaleStr(e.target.value)}
+          className="col-span-2"
+        />
+
+        <Label htmlFor="autoEnabled">Darken</Label>
+        <Switch
+          id="autoEnabled"
+          checked={darken}
+          onCheckedChange={(checked) => {
+            onChange({
+              spriteUrl,
+              filename,
+              x,
+              y,
+              scale,
+              darken: checked,
+            });
+          }}
           className="col-span-2"
         />
       </div>

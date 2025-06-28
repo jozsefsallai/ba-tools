@@ -1,6 +1,7 @@
 "use client";
 
 import { SCENARIO_VIEW_WIDTH } from "@/app/scenario-image-generator/_lib/constants";
+import { AdjustmentFilter } from "pixi-filters";
 import { Assets, Texture } from "pixi.js";
 import { useEffect, useMemo, useState } from "react";
 
@@ -9,6 +10,7 @@ export type ScenarioCharacterProps = {
   x: number;
   y: number;
   scale: number;
+  darken?: boolean;
 };
 
 export function ScenarioCharacter({
@@ -16,6 +18,7 @@ export function ScenarioCharacter({
   x,
   y,
   scale,
+  darken = false,
 }: ScenarioCharacterProps) {
   const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
 
@@ -50,6 +53,7 @@ export function ScenarioCharacter({
       width={width}
       height={height}
       anchor={{ x: 0.5, y: 0 }}
+      filters={darken ? [new AdjustmentFilter({ brightness: 0.67 })] : []}
     />
   );
 }
