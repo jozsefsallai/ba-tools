@@ -50,6 +50,10 @@ export function ScenarioCharacter({
   const filters = useMemo<Filter[]>(() => {
     const filters: Filter[] = [];
 
+    if (darken) {
+      filters.push(new ColorOverlayFilter({ color: 0x000000, alpha: 0.33 }));
+    }
+
     if (hologram) {
       filters.push(
         new ColorOverlayFilter({ color: 0x71c5ff, alpha: 0.35 }),
@@ -65,10 +69,6 @@ export function ScenarioCharacter({
           lineContrast: 0.15,
         }),
       );
-    }
-
-    if (darken) {
-      filters.push(new AdjustmentFilter({ brightness: 0.67 }));
     }
 
     return filters;
