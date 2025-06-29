@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 export type ScenarioDialogueProps = {
   content: string;
   fontSize?: number;
+  onTextRendered?: () => void;
   onTextFinishedRendering?: () => void;
   animate?: boolean;
   scrollSpeed?: number;
@@ -20,6 +21,7 @@ export type ScenarioDialogueProps = {
 export function ScenarioDialogue({
   content,
   fontSize = 41,
+  onTextRendered,
   onTextFinishedRendering,
   animate,
   scrollSpeed = SCENARIO_TEXT_SCROLL_SPEED,
@@ -56,6 +58,7 @@ export function ScenarioDialogue({
         return;
       }
 
+      onTextRendered?.();
       setProgress((prev) => {
         return Math.min(prev + tick.deltaTime * scrollSpeed, content.length);
       });

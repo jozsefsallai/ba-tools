@@ -1,10 +1,7 @@
 "use client";
 
 import { ScenarioEditorCharacterSettings } from "@/app/scenario-image-generator/_components/scenario-editor-character-settings";
-import {
-  type ScenarioCharacterData,
-  ScenarioView,
-} from "@/app/scenario-image-generator/_components/scenario-view";
+import { ScenarioView } from "@/app/scenario-image-generator/_components/scenario-view";
 import {
   SCENARIO_TEXT_FONT_SIZE,
   SCENARIO_TEXT_SCROLL_SPEED,
@@ -15,55 +12,59 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type { ApplicationRef } from "@pixi/react";
 import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { useHotkeys } from "react-hotkeys-hook";
-
-type BackgroundMode = "image" | "url";
+import { useScenarioData } from "@/app/scenario-image-generator/_hooks/use-scenario-data";
 
 export function ScenarioEditorView() {
-  const applicationRef = useRef<ApplicationRef | null>(null);
+  const {
+    applicationRef,
+    backgroundMode,
+    setBackgroundMode,
+    name,
+    setName,
+    affiliation,
+    setAffiliation,
+    content,
+    setContent,
+    fontSize,
+    setFontSize,
+    scrollSpeed,
+    setScrollSpeed,
+    backgroundImage,
+    setBackgroundImage,
+    backgroundUrl,
+    setBackgroundUrl,
+    characters,
+    setCharacters,
+    displayButtons,
+    setDisplayButtons,
+    autoEnabled,
+    setAutoEnabled,
+    displayLine,
+    setDisplayLine,
+    displayGradient,
+    setDisplayGradient,
+    displayTriangle,
+    setDisplayTriangle,
+    transparentBackground,
+    setTransparentBackground,
 
-  const [backgroundMode, setBackgroundMode] = useState<BackgroundMode>("image");
+    animate,
+    setAnimate,
+    recordingMode,
+    setRecordingMode,
 
-  const [name, setName] = useState("Name");
-  const [affiliation, setAffiliation] = useState<string>("Affiliation");
-  const [content, setContent] = useState("Dialogue text goes here...");
-  const [fontSize, setFontSize] = useState(SCENARIO_TEXT_FONT_SIZE);
-  const [scrollSpeed, setScrollSpeed] = useState(SCENARIO_TEXT_SCROLL_SPEED);
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-  const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
-  const [characters, setCharacters] = useState<
-    (ScenarioCharacterData & {
-      filename: string;
-      timestamp: number;
-    })[]
-  >([]);
-  const [displayButtons, setDisplayButtons] = useState(true);
-  const [autoEnabled, setAutoEnabled] = useState(false);
-  const [displayLine, setDisplayLine] = useState(true);
-  const [displayGradient, setDisplayGradient] = useState(true);
-  const [displayTriangle, setDisplayTriangle] = useState(true);
-  const [transparentBackground, setTransparentBackground] = useState(false);
+    backgroundName,
+    setBackgroundName,
 
-  const [animate, setAnimate] = useState(false);
-  const [recordingMode, setRecordingMode] = useState(false);
+    backgroundInputRef,
+    characterInputRef,
 
-  const [backgroundName, setBackgroundName] = useState<string | null>(null);
-
-  const backgroundInputRef = useRef<HTMLInputElement | null>(null);
-  const characterInputRef = useRef<HTMLInputElement | null>(null);
-
-  const background = useMemo(() => {
-    switch (backgroundMode) {
-      case "image":
-        return backgroundImage;
-      case "url":
-        return backgroundUrl;
-    }
-  }, [backgroundMode, backgroundImage, backgroundUrl]);
+    background,
+  } = useScenarioData();
 
   function handleBackgroundImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;

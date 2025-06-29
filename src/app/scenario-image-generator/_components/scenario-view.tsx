@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export type ScenarioCharacterData = {
+  id?: string;
   spriteUrl: string;
   x: number;
   y: number;
@@ -113,24 +114,27 @@ export function ScenarioView({
           <ScenarioCharacter key={idx} {...character} />
         ))}
 
-      {displayGradient && <ScenarioBottomGradient />}
+      {content.length > 0 && displayGradient && <ScenarioBottomGradient />}
       {displayButtons && <ScenarioButtons autoEnabled={autoEnabled} />}
-      {displayTriangle && dialogueFinishedRendering && (
+      {content.length > 0 && displayTriangle && dialogueFinishedRendering && (
         <ScenarioTriangle animate={animate} />
       )}
-      {displayLine && <ScenarioLine />}
+      {content.length > 0 && displayLine && <ScenarioLine />}
 
-      {name && (
+      {content.length > 0 && name && (
         <ScenarioNameAndAffiliation name={name} affiliation={affiliation} />
       )}
 
-      <ScenarioDialogue
-        animate={animate}
-        content={content}
-        fontSize={fontSize}
-        scrollSpeed={scrollSpeed}
-        onTextFinishedRendering={() => setDialogueFinishedRendering(true)}
-      />
+      {content.length > 0 && (
+        <ScenarioDialogue
+          animate={animate}
+          content={content}
+          fontSize={fontSize}
+          scrollSpeed={scrollSpeed}
+          onTextRendered={() => setDialogueFinishedRendering(false)}
+          onTextFinishedRendering={() => setDialogueFinishedRendering(true)}
+        />
+      )}
     </Application>
   );
 }
