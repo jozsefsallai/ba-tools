@@ -26,6 +26,8 @@ export type ScenarioCharacterData = {
   scale: number;
   darken?: boolean;
   hologram?: boolean;
+  silhouette?: boolean;
+  silhouetteColor?: number;
 };
 
 export type ScenarioViewProps = {

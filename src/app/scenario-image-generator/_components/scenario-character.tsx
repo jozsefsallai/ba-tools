@@ -12,6 +12,8 @@ export type ScenarioCharacterProps = {
   scale: number;
   darken?: boolean;
   hologram?: boolean;
+  silhouette?: boolean;
+  silhouetteColor?: number;
 };
 
 export function ScenarioCharacter({
@@ -21,6 +23,8 @@ export function ScenarioCharacter({
   scale,
   darken = false,
   hologram = false,
+  silhouette = false,
+  silhouetteColor = 0x000000,
 }: ScenarioCharacterProps) {
   const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
 
@@ -50,6 +54,12 @@ export function ScenarioCharacter({
   const filters = useMemo<Filter[]>(() => {
     const filters: Filter[] = [];
 
+    if (silhouette) {
+      filters.push(
+        new ColorOverlayFilter({ color: silhouetteColor, alpha: 1 }),
+      );
+    }
+
     if (darken) {
       filters.push(new ColorOverlayFilter({ color: 0x000000, alpha: 0.33 }));
     }
@@ -72,7 +82,7 @@ export function ScenarioCharacter({
     }
 
     return filters;
-  }, [darken, hologram]);
+  }, [darken, hologram, silhouette, silhouetteColor]);
 
   return (
     <pixiSprite

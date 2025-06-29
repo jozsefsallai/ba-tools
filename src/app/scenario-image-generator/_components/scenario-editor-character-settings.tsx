@@ -17,6 +17,8 @@ export type ScenarioEditorCharacterSettingsProps = {
   scale: number;
   darken?: boolean;
   hologram?: boolean;
+  silhouette?: boolean;
+  silhouetteColor?: number;
   timestamp: number;
 
   onChange: (settings: {
@@ -27,6 +29,8 @@ export type ScenarioEditorCharacterSettingsProps = {
     scale: number;
     darken?: boolean;
     hologram?: boolean;
+    silhouette?: boolean;
+    silhouetteColor?: number;
   }) => void;
 
   onDelete?: () => void;
@@ -46,6 +50,8 @@ export function ScenarioEditorCharacterSettings({
   scale,
   darken,
   hologram,
+  silhouette,
+  silhouetteColor = 0x000000,
   timestamp,
   onChange,
   onDelete,
@@ -199,6 +205,49 @@ export function ScenarioEditorCharacterSettings({
           }}
           className="col-span-2"
         />
+
+        <Label htmlFor="silhouette">Silhouette</Label>
+        <Switch
+          id="silhouette"
+          key={`${timestamp}-silhouette`}
+          checked={silhouette}
+          onCheckedChange={(checked) => {
+            onChange({
+              spriteUrl,
+              filename,
+              x,
+              y,
+              scale,
+              silhouette: checked,
+              silhouetteColor: checked ? silhouetteColor : undefined,
+            });
+          }}
+          className="col-span-2"
+        />
+
+        {silhouette && (
+          <>
+            <Label htmlFor="silhouetteColor">Silhouette Color</Label>
+            <Input
+              id="silhouetteColor"
+              type="color"
+              value={`#${silhouetteColor.toString(16).padStart(6, "0")}`}
+              onChange={(e) => {
+                const color = Number.parseInt(e.target.value.slice(1), 16);
+                onChange({
+                  spriteUrl,
+                  filename,
+                  x,
+                  y,
+                  scale,
+                  silhouette: true,
+                  silhouetteColor: color,
+                });
+              }}
+              className="col-span-2"
+            />
+          </>
+        )}
       </div>
 
       <div className="flex justify-end mt-4">

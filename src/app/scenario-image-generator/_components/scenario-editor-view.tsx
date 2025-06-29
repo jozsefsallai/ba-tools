@@ -436,6 +436,8 @@ export function ScenarioEditorView() {
               scale={character.scale}
               darken={character.darken}
               hologram={character.hologram}
+              silhouette={character.silhouette}
+              silhouetteColor={character.silhouetteColor}
               onChange={(updatedCharacter) => {
                 setCharacters((prev) =>
                   prev.map((c, i) =>
