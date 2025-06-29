@@ -17,6 +17,7 @@ export type StudentCardProps = {
   borrowed?: boolean;
   starter?: boolean;
   busy?: boolean;
+  style?: React.CSSProperties;
 };
 
 export function StudentCard({
@@ -28,13 +29,14 @@ export function StudentCard({
   borrowed,
   starter,
   busy,
+  style,
 }: StudentCardProps) {
   const isFirefox =
     typeof window !== "undefined" &&
     /firefox/i.test(window.navigator.userAgent);
 
   return (
-    <div className="flex relative">
+    <div className="flex relative" style={style}>
       <div
         className={cn("skew-x-[-11deg] p-[2px] rounded-[11%]", {
           "p-[2px] bg-[#ffff4d]": starter,
