@@ -6,6 +6,7 @@ import FormationDisplay from "@/how-to-use/formation-display.mdx";
 import InventoryManagement from "@/how-to-use/inventory-management.mdx";
 import Bond from "@/how-to-use/bond.mdx";
 import ScenarioImageGenerator from "@/how-to-use/scenario-image-generator.mdx";
+import TimelineVisualizer from "@/how-to-use/timeline-visualizer.mdx";
 
 import {
   Sheet,
@@ -20,7 +21,8 @@ export type HelpSheetProps = PropsWithChildren<{
     | "formation-display"
     | "inventory-management"
     | "bond"
-    | "scenario-image-generator";
+    | "scenario-image-generator"
+    | "timeline-visualizer";
 }>;
 
 function getTitle(document: HelpSheetProps["document"]) {
@@ -33,6 +35,8 @@ function getTitle(document: HelpSheetProps["document"]) {
       return "Relationship Rank Calculator";
     case "scenario-image-generator":
       return "Scenario Image Generator";
+    case "timeline-visualizer":
+      return "Timeline Visualizer";
   }
 }
 
@@ -53,6 +57,7 @@ export function HelpSheet({ document, children }: HelpSheetProps) {
           {document === "scenario-image-generator" && (
             <ScenarioImageGenerator />
           )}
+          {document === "timeline-visualizer" && <TimelineVisualizer />}
         </article>
       </SheetContent>
     </Sheet>

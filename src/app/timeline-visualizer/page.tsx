@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function FormationDisplayPage() {
+export default async function TimelineVisualizerPage() {
   const allStudents = await db.student.findMany({
     orderBy: {
       name: "asc",
@@ -26,7 +26,7 @@ export default async function FormationDisplayPage() {
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <h1 className="text-xl font-bold">Timeline Visualizer</h1>
-          <HelpSheet document="formation-display">
+          <HelpSheet document="timeline-visualizer">
             <Button variant="ghost">
               <HelpCircleIcon />
             </Button>

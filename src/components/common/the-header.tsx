@@ -34,6 +34,10 @@ const GAMEPLAY_TOOLS: NavLink[] = [
     href: "/bond",
     text: "Relationship Rank Calculator",
   },
+  {
+    href: "/timeline-visualizer",
+    text: "Timeline Visualizer",
+  },
 ];
 
 const MISC_TOOLS: NavLink[] = [

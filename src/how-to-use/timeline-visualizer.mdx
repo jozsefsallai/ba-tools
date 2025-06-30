@@ -1,0 +1,65 @@
+The Timeline Visualizer tool allows you to create a visual timeline of a Blue
+Archive comp rotation. The tool works very similarly to the
+[Formation Display][formation-tool] tool. The main goal of the tool is to help
+in creating a visual representation of a rotation (i.e. for a raid), either for
+personal reference or for use in YouTube videos.
+
+## Getting Started
+
+To begin, select a student using the **Select Student** dropdown. Unlike the
+Formation Display tool, you can select the same student multiple times, since
+you'll very likely be using their EX skill multiple times. Once selected, you
+can specify a **Trigger**. A trigger can be any reference point for when you'd
+want to use this particular student's EX skill (e.g. skill cost, timer, etc.).
+If the student can target another student (e.g. buffer or healer), you can also
+specify a **Target** student.
+
+If the rotation has it so you'll use certain EX skills in quick succession, you
+can omit the Trigger field and assume you'll be using their EX skills one after
+the other.
+
+To help you separate the "streaks" of EX skills, you can add separators.
+You may use a **Horizontal Separator** to separate two groups of EX skills
+horizontally, or a **Vertical Separator** to put the new EX skills on a new row.
+It is generally recommended to use vertical separators when the rows are getting
+too long, as it makes the timeline easier to read.
+
+## Options
+
+The tool provides a few more options that you can play around with:
+- **Scale**: Specifies the scale of the resulting image, going from 1x to 5x. It
+  is generally recommended to not use high scale, as it makes the image take
+  longer to generate for really long rotations.
+- **Item Spacing**: The space between student cards in the timeline, in pixels.
+  You can use negative values here and the cards will overlap (-30 is a good
+  value for this in my opinion).
+- **Vertical Separator Size**: The height of the vertical separator in pixels.
+  In other words, the space between two individual rows.
+- **Horizontal Separator Size**: The width of the horizontal separator in
+  pixels. In other words, the space between two individual groups of EX skills.
+
+Once you're happy with the setup, click on the **Download Image** button. Please
+note that generating the image may take a few seconds, especially if the scale
+setting is high and/or the rotation is long.
+
+## Troubleshooting
+
+**Q:** The tool just hangs when I click on the **Download Image** button.
+
+**A:** The amount of time it takes to generate the image depends on the number
+of students in the timeline, the scale of the image, and the browser you're
+using. Ideally, it should never take longer than 15 seconds, so if you're
+waiting longer than that, try refreshing the page or using a different browser.
+You may also check the browser's developer console for any errors and let me
+know about the error on [GitHub][github-issues-link].
+
+**Q:** The image is not transparent or looks weird.
+
+**A:** This is most likely a browser issue. The tool was developed and tested in
+the latest versions of Chromium and Firefox, so try using one of these. I would
+still appreciate it if you could let me know about the issue on
+[GitHub][github-issues-link] (please specify the browser and browser version
+you're using).
+
+[github-issues-link]: https://github.com/jozsefsallai/ba-tools/issues
+[formation-tool]: https://ba.joexyz.online/formation-display
