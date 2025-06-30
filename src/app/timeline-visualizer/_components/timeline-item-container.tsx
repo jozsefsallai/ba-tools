@@ -72,7 +72,7 @@ export function TimelineItemContainer({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col-reverse gap-4">
           {items.map((item, idx) => (
             <TimelineItem
               key={idx}

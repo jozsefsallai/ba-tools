@@ -21,7 +21,7 @@ import { sleep } from "@/lib/sleep";
 import type { Student } from "@prisma/client";
 import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 export type TimelineEditorProps = {
@@ -37,6 +37,14 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const [itemSpacing, setItemSpacing] = useState(10);
   const [verticalSeparatorSize, setVerticalSeparatorSize] = useState(20);
   const [horizontalSeparatorSize, setHorizontalSeparatorSize] = useState(20);
+
+  const [itemSpacingStr, setItemSpacingStr] = useState(itemSpacing.toString());
+  const [verticalSeparatorSizeStr, setVerticalSeparatorSizeStr] = useState(
+    verticalSeparatorSize.toString(),
+  );
+  const [horizontalSeparatorSizeStr, setHorizontalSeparatorSizeStr] = useState(
+    horizontalSeparatorSize.toString(),
+  );
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
@@ -98,6 +106,27 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     setGenerationInProgress(false);
   }
 
+  useEffect(() => {
+    const value = Number.parseInt(itemSpacingStr, 10);
+    if (!Number.isNaN(value)) {
+      setItemSpacing(value);
+    }
+  }, [itemSpacingStr]);
+
+  useEffect(() => {
+    const value = Number.parseInt(verticalSeparatorSizeStr, 10);
+    if (!Number.isNaN(value)) {
+      setVerticalSeparatorSize(value);
+    }
+  }, [verticalSeparatorSizeStr]);
+
+  useEffect(() => {
+    const value = Number.parseInt(horizontalSeparatorSizeStr, 10);
+    if (!Number.isNaN(value)) {
+      setHorizontalSeparatorSize(value);
+    }
+  }, [horizontalSeparatorSizeStr]);
+
   return (
     <div className="flex flex-col gap-10">
       <TimelinePreview
@@ -136,10 +165,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
           <Input
             type="number"
-            value={itemSpacing.toString()}
-            onChange={(e) =>
-              setItemSpacing(Number.parseInt(e.target.value, 10))
-            }
+            value={itemSpacingStr}
+            onChange={(e) => setItemSpacingStr(e.target.value)}
             className="w-20"
           />
         </div>
@@ -149,10 +176,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
           <Input
             type="number"
-            value={verticalSeparatorSize.toString()}
-            onChange={(e) =>
-              setVerticalSeparatorSize(Number.parseInt(e.target.value, 10))
-            }
+            value={verticalSeparatorSizeStr}
+            onChange={(e) => setVerticalSeparatorSizeStr(e.target.value)}
             className="w-20"
           />
         </div>
@@ -162,37 +187,12 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
           <Input
             type="number"
-            value={horizontalSeparatorSize.toString()}
-            onChange={(e) =>
-              setHorizontalSeparatorSize(Number.parseInt(e.target.value, 10))
-            }
+            value={horizontalSeparatorSizeStr}
+            onChange={(e) => setHorizontalSeparatorSizeStr(e.target.value)}
             className="w-20"
           />
         </div>
       </div>
-
-      <div className="flex items-center justify-center">
-        <Button
-          onClick={getTimelineImage}
-          disabled={items.length === 0 || generationInProgress}
-        >
-          Download Image
-        </Button>
-      </div>
-
-      {items.length > 0 && <Separator />}
-
-      {items.length > 0 && (
-        <div className="flex flex-col gap-4">
-          <TimelineItemContainer
-            items={items}
-            setItems={setItems}
-            onWantsToRemove={removeItem}
-            onWantsToUpdate={updateItem}
-            allStudents={allStudents}
-          />
-        </div>
-      )}
 
       <Separator />
 
@@ -221,6 +221,29 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
           </Button>
         </div>
       </div>
+
+      <div className="flex items-center justify-center">
+        <Button
+          onClick={getTimelineImage}
+          disabled={items.length === 0 || generationInProgress}
+        >
+          Download Image
+        </Button>
+      </div>
+
+      {items.length > 0 && <Separator />}
+
+      {items.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <TimelineItemContainer
+            items={items}
+            setItems={setItems}
+            onWantsToRemove={removeItem}
+            onWantsToUpdate={updateItem}
+            allStudents={allStudents}
+          />
+        </div>
+      )}
     </div>
   );
 }

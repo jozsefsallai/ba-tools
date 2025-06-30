@@ -58,7 +58,17 @@ export function TimelinePreview({
                 return (
                   <div className="relative" key={item.id}>
                     {item.target && (
-                      <div className="scale-75 absolute -bottom-16 left-1/2 -translate-x-1/2 -ml-2">
+                      <div
+                        className="scale-75 absolute -bottom-16 left-1/2 -translate-x-1/2"
+                        style={{
+                          marginLeft:
+                            idx === 0 || items[idx - 1].type === "separator"
+                              ? "-8px"
+                              : itemSpacing < 0
+                                ? `${itemSpacing + 8}px`
+                                : "-8px",
+                        }}
+                      >
                         <StudentCard
                           noDisplayRole
                           busy={busy}
@@ -85,6 +95,12 @@ export function TimelinePreview({
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
+                          marginLeft:
+                            idx === 0 || items[idx - 1].type === "separator"
+                              ? undefined
+                              : itemSpacing < 0
+                                ? `${itemSpacing + 8}px`
+                                : undefined,
                         }}
                       >
                         {item.trigger}
