@@ -14,6 +14,7 @@ export type StudentItem = BaseItem & {
   student: Student;
   trigger?: string;
   target?: Student;
+  copy?: boolean;
 };
 
 export type SeparatorItem = BaseItem & {
@@ -56,7 +57,16 @@ export function TimelinePreview({
             {items.map((item, idx) => {
               if (item.type === "student") {
                 return (
-                  <div className="relative" key={item.id}>
+                  <div
+                    className="relative"
+                    key={item.id}
+                    style={{
+                      marginLeft:
+                        idx === 0 || items[idx - 1].type === "separator"
+                          ? undefined
+                          : `${itemSpacing}px`,
+                    }}
+                  >
                     {item.target && (
                       <div
                         className="scale-75 absolute -bottom-16 left-1/2 -translate-x-1/2"
@@ -81,17 +91,11 @@ export function TimelinePreview({
                       noDisplayRole
                       busy={busy}
                       student={item.student}
-                      style={{
-                        marginLeft:
-                          idx === 0 || items[idx - 1].type === "separator"
-                            ? undefined
-                            : `${itemSpacing}px`,
-                      }}
                     />
 
                     {item.trigger && (
                       <div
-                        className="absolute -top-3 -left-2 font-nexon-football-gothic font-bold text-xl px-1.5 py-0.5 bg-[#4b8fff] rounded-md z-10"
+                        className="absolute -top-3 -left-2 font-nexon-football-gothic font-bold text-xl px-1.5 py-0.5 bg-[#4b8fff] rounded-md z-10 text-white text-nowrap"
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
@@ -104,6 +108,24 @@ export function TimelinePreview({
                         }}
                       >
                         {item.trigger}
+                      </div>
+                    )}
+
+                    {item.copy && (
+                      <div
+                        className="absolute -bottom-1 -left-2 font-nexon-football-gothic font-bold text-lg px-1.5 py-0.5 bg-[#ffa24b] rounded-md z-10 text-white"
+                        style={{
+                          textShadow:
+                            "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
+                          marginLeft:
+                            idx === 0 || items[idx - 1].type === "separator"
+                              ? undefined
+                              : itemSpacing < 0
+                                ? `${itemSpacing + 8}px`
+                                : undefined,
+                        }}
+                      >
+                        C
                       </div>
                     )}
                   </div>

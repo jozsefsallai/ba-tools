@@ -35,8 +35,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
   const [scale, setScale] = useState(1);
   const [itemSpacing, setItemSpacing] = useState(10);
-  const [verticalSeparatorSize, setVerticalSeparatorSize] = useState(20);
-  const [horizontalSeparatorSize, setHorizontalSeparatorSize] = useState(20);
+  const [verticalSeparatorSize, setVerticalSeparatorSize] = useState(70);
+  const [horizontalSeparatorSize, setHorizontalSeparatorSize] = useState(50);
 
   const [itemSpacingStr, setItemSpacingStr] = useState(itemSpacing.toString());
   const [verticalSeparatorSizeStr, setVerticalSeparatorSizeStr] = useState(

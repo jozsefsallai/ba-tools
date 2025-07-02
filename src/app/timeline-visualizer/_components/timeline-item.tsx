@@ -5,6 +5,7 @@ import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { buildStudentIconUrl } from "@/lib/url";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -75,50 +76,65 @@ export function TimelineItem({
               <img
                 src={buildStudentIconUrl(item.student)}
                 alt={item.student.name}
-                className="h-12"
+                className="h-14"
               />
 
-              <div className="text-xl font-bold">{item.student.name}</div>
+              <div className="flex flex-col gap-1">
+                <div className="text-xl font-bold">{item.student.name}</div>
 
-              <div className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor={`trigger-${item.id}`}>Trigger</Label>
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`trigger-${item.id}`}>Trigger:</Label>
 
-                  <Input
-                    id={`trigger-${item.id}`}
-                    value={item.trigger ?? ""}
-                    onChange={handleTriggerUpdate}
-                    className="w-32"
-                  />
-                </div>
+                    <Input
+                      id={`trigger-${item.id}`}
+                      value={item.trigger ?? ""}
+                      placeholder="Cost, time, etc."
+                      onChange={handleTriggerUpdate}
+                      className="w-32"
+                    />
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <Label htmlFor={`target-${item.id}`}>Target</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`target-${item.id}`}>Target:</Label>
 
-                  <StudentPicker
-                    students={allStudents}
-                    onStudentSelected={handleTargetUpdate}
-                    className="w-[90vw] md:w-[450px]"
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between"
+                    <StudentPicker
+                      students={allStudents}
+                      onStudentSelected={handleTargetUpdate}
+                      className="w-[90vw] md:w-[450px]"
                     >
-                      {item.target
-                        ? `${item.target.name}`
-                        : "Select Target Student"}
-                      <ChevronsUpDownIcon />
-                    </Button>
-                  </StudentPicker>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                      >
+                        {item.target
+                          ? `${item.target.name}`
+                          : "Select Target Student"}
+                        <ChevronsUpDownIcon />
+                      </Button>
+                    </StudentPicker>
 
-                  {item.target && (
-                    <Button
-                      variant="outline"
-                      onClick={() => handleTargetUpdate(null)}
-                    >
-                      <XIcon />
-                    </Button>
-                  )}
+                    {item.target && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleTargetUpdate(null)}
+                      >
+                        <XIcon />
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-12">
+                    <Switch
+                      id={`copy-${item.id}`}
+                      checked={!!item.copy}
+                      onCheckedChange={(checked) =>
+                        onWantsToUpdate(item, { copy: checked })
+                      }
+                    />
+
+                    <Label htmlFor={`copy-${item.id}`}>Copy</Label>
+                  </div>
                 </div>
               </div>
             </>
