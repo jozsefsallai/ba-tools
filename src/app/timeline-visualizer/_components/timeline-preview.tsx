@@ -99,12 +99,6 @@ export function TimelinePreview({
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
-                          marginLeft:
-                            idx === 0 || items[idx - 1].type === "separator"
-                              ? undefined
-                              : itemSpacing < 0
-                                ? `${itemSpacing + 8}px`
-                                : undefined,
                         }}
                       >
                         {item.trigger}
@@ -117,12 +111,6 @@ export function TimelinePreview({
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
-                          marginLeft:
-                            idx === 0 || items[idx - 1].type === "separator"
-                              ? undefined
-                              : itemSpacing < 0
-                                ? `${itemSpacing + 8}px`
-                                : undefined,
                         }}
                       >
                         C
