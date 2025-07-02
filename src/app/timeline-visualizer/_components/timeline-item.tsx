@@ -146,6 +146,19 @@ export function TimelineItem({
               separator
             </div>
           )}
+
+          {item.type === "text" && (
+            <div className="flex-1">
+              <Input
+                value={item.text}
+                placeholder="Enter text"
+                onChange={(e) =>
+                  onWantsToUpdate(item, { text: e.target.value })
+                }
+                className="w-full"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-4">

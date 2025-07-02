@@ -70,6 +70,17 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     ]);
   }
 
+  function addText() {
+    setItems((prev) => [
+      ...prev,
+      {
+        type: "text",
+        id: uuid(),
+        text: "Enter text",
+      },
+    ]);
+  }
+
   function removeItem(item: TimelineItem) {
     setItems((prev) => prev.filter((i) => i !== item));
   }
@@ -218,6 +229,10 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
           <Button variant="outline" onClick={() => addSeparator("vertical")}>
             Add Vertical Separator
+          </Button>
+
+          <Button variant="outline" onClick={addText}>
+            Add Text
           </Button>
         </div>
       </div>

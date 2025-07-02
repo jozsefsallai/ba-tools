@@ -5,7 +5,7 @@ import type { Student } from "@prisma/client";
 import type { RefObject } from "react";
 
 type BaseItem = {
-  type: "student" | "separator";
+  type: "student" | "separator" | "text";
   id: string;
 };
 
@@ -22,7 +22,12 @@ export type SeparatorItem = BaseItem & {
   orientation: "horizontal" | "vertical";
 };
 
-export type TimelineItem = StudentItem | SeparatorItem;
+export type TextItem = BaseItem & {
+  type: "text";
+  text: string;
+};
+
+export type TimelineItem = StudentItem | SeparatorItem | TextItem;
 
 export type TimelinePreviewProps = {
   containerRef?: RefObject<HTMLDivElement | null>;
@@ -62,7 +67,7 @@ export function TimelinePreview({
                     key={item.id}
                     style={{
                       marginLeft:
-                        idx === 0 || items[idx - 1].type === "separator"
+                        idx === 0 || items[idx - 1].type !== "student"
                           ? undefined
                           : `${itemSpacing}px`,
                     }}
@@ -72,7 +77,7 @@ export function TimelinePreview({
                         className="scale-75 absolute -bottom-16 left-1/2 -translate-x-1/2"
                         style={{
                           marginLeft:
-                            idx === 0 || items[idx - 1].type === "separator"
+                            idx === 0 || items[idx - 1].type !== "student"
                               ? "-8px"
                               : itemSpacing < 0
                                 ? `${itemSpacing + 8}px`
@@ -137,6 +142,21 @@ export function TimelinePreview({
                         item.orientation === "vertical" ? "100%" : undefined,
                     }}
                   />
+                );
+              }
+
+              if (item.type === "text") {
+                return (
+                  <div
+                    key={item.id}
+                    className="font-nexon-football-gothic font-bold text-lg text-white px-3"
+                    style={{
+                      textShadow:
+                        "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
+                    }}
+                  >
+                    {item.text}
+                  </div>
                 );
               }
 
