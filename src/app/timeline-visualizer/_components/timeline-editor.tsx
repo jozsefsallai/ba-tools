@@ -7,6 +7,8 @@ import {
 } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
 import { StudentPicker } from "@/components/common/student-picker";
+import { ExportTimelineDataDialog } from "@/components/dialogs/export-timeline-data-dialog";
+import { ImportTimelineDataDialog } from "@/components/dialogs/import-timeline-data-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,10 +21,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { sleep } from "@/lib/sleep";
+import { timelineStorage } from "@/lib/storage/timeline";
 import type { Student } from "@prisma/client";
 import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 
 export type TimelineEditorProps = {
@@ -128,6 +132,80 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     link.click();
 
     setGenerationInProgress(false);
+  }
+
+  function loadTimelineFromStorage() {
+    const storedData = timelineStorage.get();
+    if (!storedData) {
+      toast.warning("Nothing to load.");
+      return;
+    }
+
+    const newItems: TimelineItem[] = [];
+
+    for (const item of storedData.items) {
+      if (item.type === "student" && item.studentId) {
+        const student = allStudents.find((s) => s.id === item.studentId);
+        if (!student) {
+          continue;
+        }
+
+        let target: Student | undefined = undefined;
+        if (item.targetId) {
+          target = allStudents.find((s) => s.id === item.targetId);
+        }
+
+        newItems.push({
+          type: "student",
+          id: item.id,
+          student,
+          target,
+          copy: item.copy,
+        });
+      } else if (item.type !== "student") {
+        newItems.push(item);
+      }
+    }
+
+    setItems(newItems);
+    setScale(storedData.scale || 1);
+    setItemSpacing(storedData.itemSpacing || 10);
+    setVerticalSeparatorSize(storedData.verticalSeparatorSize || 70);
+    setHorizontalSeparatorSize(storedData.horizontalSeparatorSize || 50);
+    setItemSpacingStr((storedData.itemSpacing || 10).toString());
+    setVerticalSeparatorSizeStr(
+      (storedData.verticalSeparatorSize || 70).toString(),
+    );
+    setHorizontalSeparatorSizeStr(
+      (storedData.horizontalSeparatorSize || 50).toString(),
+    );
+  }
+
+  function saveTimelineToStorage(showToast = true) {
+    const data = {
+      items: items.map((item) => {
+        if (item.type === "student") {
+          return {
+            type: "student" as const,
+            id: item.id,
+            studentId: item.student.id,
+            targetId: item.target?.id,
+            copy: item.copy,
+          };
+        }
+        return item;
+      }),
+      scale,
+      itemSpacing,
+      verticalSeparatorSize,
+      horizontalSeparatorSize,
+    };
+
+    timelineStorage.set(data);
+
+    if (showToast) {
+      toast.success("Timeline saved successfully.");
+    }
   }
 
   useEffect(() => {
@@ -252,7 +330,25 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-center">
+      <div className="flex gap-4 items-center justify-center">
+        <Button variant="outline" onClick={loadTimelineFromStorage}>
+          Load
+        </Button>
+
+        <Button variant="outline" onClick={() => saveTimelineToStorage()}>
+          Save
+        </Button>
+
+        <ExportTimelineDataDialog
+          onBeforeLoad={() => saveTimelineToStorage(false)}
+        >
+          <Button variant="outline">Export</Button>
+        </ExportTimelineDataDialog>
+
+        <ImportTimelineDataDialog onComplete={loadTimelineFromStorage}>
+          <Button variant="outline">Import</Button>
+        </ImportTimelineDataDialog>
+
         <Button
           onClick={getTimelineImage}
           disabled={items.length === 0 || generationInProgress}
