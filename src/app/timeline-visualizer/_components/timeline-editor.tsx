@@ -5,6 +5,7 @@ import {
   type TimelineItem,
   TimelinePreview,
 } from "@/app/timeline-visualizer/_components/timeline-preview";
+import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ import { sleep } from "@/lib/sleep";
 import type { Student } from "@prisma/client";
 import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 export type TimelineEditorProps = {
@@ -47,6 +48,18 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   );
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
+
+  const uniqueStudents = useMemo(() => {
+    const studentsSet = new Set<Student>();
+
+    items.forEach((item) => {
+      if (item.type === "student" && item.student) {
+        studentsSet.add(item.student);
+      }
+    });
+
+    return Array.from(studentsSet);
+  }, [items]);
 
   function addStudent(student: Student) {
     setItems((prev) => [
@@ -207,6 +220,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
       <Separator />
 
+      <TimelineQuickAdd students={uniqueStudents} onStudentClick={addStudent} />
+
       <div className="flex gap-4 justify-center items-center">
         <StudentPicker
           students={allStudents}
@@ -256,6 +271,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             onWantsToRemove={removeItem}
             onWantsToUpdate={updateItem}
             allStudents={allStudents}
+            uniqueStudents={uniqueStudents}
           />
         </div>
       )}

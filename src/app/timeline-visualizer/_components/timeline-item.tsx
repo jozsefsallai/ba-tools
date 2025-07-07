@@ -1,12 +1,14 @@
 "use client";
 
 import type { TimelineItem as TimelineItemType } from "@/app/timeline-visualizer/_components/timeline-preview";
+import { StudentCard } from "@/components/common/student-card";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { buildStudentIconUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
@@ -20,6 +22,7 @@ export type TimelineItemProps = {
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
   allStudents?: Student[];
+  uniqueStudents?: Student[];
 };
 
 export function TimelineItem({
@@ -27,6 +30,7 @@ export function TimelineItem({
   onWantsToRemove,
   onWantsToUpdate,
   allStudents = [],
+  uniqueStudents = [],
 }: TimelineItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id, animateLayoutChanges: () => false });
@@ -105,7 +109,7 @@ export function TimelineItem({
                     >
                       <Button
                         variant="outline"
-                        className="w-full justify-between"
+                        className="w-[220px] justify-between"
                       >
                         {item.target
                           ? `${item.target.name}`
@@ -113,6 +117,29 @@ export function TimelineItem({
                         <ChevronsUpDownIcon />
                       </Button>
                     </StudentPicker>
+
+                    {uniqueStudents.length > 0 && (
+                      <div className="px-1 flex gap-1">
+                        {uniqueStudents.map((student) => (
+                          <button
+                            key={student.id}
+                            type="button"
+                            className={cn("cursor-pointer", {
+                              "opacity-50":
+                                !!item.target && item.target.id !== student.id,
+                            })}
+                            style={{ zoom: 0.4 }}
+                            onClick={() =>
+                              handleTargetUpdate(
+                                item.target?.id === student.id ? null : student,
+                              )
+                            }
+                          >
+                            <StudentCard student={student} busy={false} />
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
                     {item.target && (
                       <Button
@@ -124,7 +151,7 @@ export function TimelineItem({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 ml-12">
+                  <div className="flex items-center gap-2">
                     <Switch
                       id={`copy-${item.id}`}
                       checked={!!item.copy}

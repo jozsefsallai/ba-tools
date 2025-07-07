@@ -32,6 +32,7 @@ export type TimelineItemContainerProps = {
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
   allStudents?: Student[];
+  uniqueStudents?: Student[];
 };
 
 export function TimelineItemContainer({
@@ -40,6 +41,7 @@ export function TimelineItemContainer({
   onWantsToRemove,
   onWantsToUpdate,
   allStudents = [],
+  uniqueStudents = [],
 }: TimelineItemContainerProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -80,6 +82,7 @@ export function TimelineItemContainer({
               onWantsToRemove={onWantsToRemove}
               onWantsToUpdate={onWantsToUpdate}
               allStudents={allStudents}
+              uniqueStudents={uniqueStudents}
             />
           ))}
         </div>
