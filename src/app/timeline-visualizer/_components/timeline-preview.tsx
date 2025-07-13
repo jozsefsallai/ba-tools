@@ -46,6 +46,23 @@ export function TimelinePreview({
   horizontalSeparatorSize = 20,
   busy = false,
 }: TimelinePreviewProps) {
+  function scrollToItem(item: TimelineItem) {
+    return () => {
+      const element = document.getElementById(item.id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+  }
+
+  function handleItemKeyUp(item: TimelineItem) {
+    return (event: React.KeyboardEvent) => {
+      if (event.key === "Enter") {
+        scrollToItem(item);
+      }
+    };
+  }
+
   if (items.length === 0) {
     return (
       <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
@@ -63,7 +80,7 @@ export function TimelinePreview({
               if (item.type === "student") {
                 return (
                   <div
-                    className="relative"
+                    className="relative cursor-pointer"
                     key={item.id}
                     style={{
                       marginLeft:
@@ -71,6 +88,8 @@ export function TimelinePreview({
                           ? undefined
                           : `${itemSpacing}px`,
                     }}
+                    onClick={scrollToItem(item)}
+                    onKeyUp={handleItemKeyUp(item)}
                   >
                     {item.target && (
                       <div
@@ -129,6 +148,9 @@ export function TimelinePreview({
                 return (
                   <div
                     key={item.id}
+                    className="cursor-pointer"
+                    onClick={scrollToItem(item)}
+                    onKeyUp={handleItemKeyUp(item)}
                     style={{
                       width:
                         item.orientation === "horizontal"
@@ -149,7 +171,9 @@ export function TimelinePreview({
                 return (
                   <div
                     key={item.id}
-                    className="font-nexon-football-gothic font-bold text-lg text-white px-3"
+                    className="font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer"
+                    onClick={scrollToItem(item)}
+                    onKeyUp={handleItemKeyUp(item)}
                     style={{
                       textShadow:
                         "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",

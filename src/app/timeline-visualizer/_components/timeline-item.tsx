@@ -67,6 +67,7 @@ export function TimelineItem({
       ref={setNodeRef}
       className="bg-background border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       style={style}
+      id={item.id}
       {...attributes}
     >
       <div className="flex md:items-center gap-4 flex-1">
