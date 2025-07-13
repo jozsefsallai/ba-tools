@@ -12,7 +12,9 @@ you'll very likely be using their EX skill multiple times. Once selected, you
 can specify a **Trigger**. A trigger can be any reference point for when you'd
 want to use this particular student's EX skill (e.g. skill cost, timer, etc.).
 If the student can target another student (e.g. buffer or healer), you can also
-specify a **Target** student.
+specify a **Target** student. If a copied skill card is used (i.e. the card you
+got from Rio, not the original card), you can enable the **Copy** toggle, which
+will add a small indicator in the bottom left corner of the card.
 
 If the rotation has it so you'll use certain EX skills in quick succession, you
 can omit the Trigger field and assume you'll be using their EX skills one after
@@ -23,6 +25,10 @@ You may use a **Horizontal Separator** to separate two groups of EX skills
 horizontally, or a **Vertical Separator** to put the new EX skills on a new row.
 It is generally recommended to use vertical separators when the rows are getting
 too long, as it makes the timeline easier to read.
+
+You can also add text to your timeline (e.g.: for specifying skill procs or
+phase transitions). Generally, you want these texts to be short, so they don't
+take up valuable space on the canvas.
 
 ## Options
 
@@ -38,9 +44,37 @@ The tool provides a few more options that you can play around with:
 - **Horizontal Separator Size**: The width of the horizontal separator in
   pixels. In other words, the space between two individual groups of EX skills.
 
+## Helpful Tips
+
+1. Once you add a student to a timeline, she'll be added to the a section called
+**Quick Add Student**. From here, you can click on the student to quickly add
+her skill card again to the queue.
+1. Similarly to Quick Add Student, the students you've added to the timeline can
+also be selected as targets by clicking on the small icon next to the **Target**
+dropdown. Clicking on the icon again will remove the target.
+1. You can drag and drop the items in the timeline (not the preview) by clicking
+on and dragging the leftmost button.
+1. You can click on a skill card in the timeline preview to quickly jump to the
+corresponding item in the timeline.
+
 Once you're happy with the setup, click on the **Download Image** button. Please
 note that generating the image may take a few seconds, especially if the scale
 setting is high and/or the rotation is long.
+
+## Save/Load
+
+You can quickly save your session by clicking on the **Save** button. This will
+override your existing save without any confirmation. You can then load your
+previous session by clicking on the **Load** button, but do note that this will
+override your current timeline immediately.
+
+## Import/Export
+
+You can click on the **Export** button to export your timeline session as a JSON
+object. Then you can import it back on another browser/device by clicking on the
+**Import** button and pasting the JSON object into the input field. This will
+override both your current timeline and your saved session. The Export function
+will also automatically save your session.
 
 ## Troubleshooting
 
