@@ -9,9 +9,17 @@ import { useEffect, useMemo, useState } from "react";
 
 export type ScenarioBackgroundProps = {
   background: string;
+  scale?: number;
+  xOffset?: number;
+  yOffset?: number;
 };
 
-export function ScenarioBackground({ background }: ScenarioBackgroundProps) {
+export function ScenarioBackground({
+  background,
+  scale = 1,
+  xOffset,
+  yOffset,
+}: ScenarioBackgroundProps) {
   const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
 
   useEffect(() => {
@@ -42,24 +50,34 @@ export function ScenarioBackground({ background }: ScenarioBackgroundProps) {
     const aspectRatio = texture.width / texture.height;
     const isWider = aspectRatio > SCENARIO_VIEW_WIDTH / SCENARIO_VIEW_HEIGHT;
 
-    const scaledWidth = SCENARIO_VIEW_HEIGHT * aspectRatio;
-    const scaledHeight = SCENARIO_VIEW_WIDTH / aspectRatio;
+    const baseScaledWidth = SCENARIO_VIEW_HEIGHT * aspectRatio;
+    const baseScaledHeight = SCENARIO_VIEW_WIDTH / aspectRatio;
 
-    const x = isWider ? (SCENARIO_VIEW_WIDTH - scaledWidth) / 2 : 0;
-    const y = isWider ? 0 : (SCENARIO_VIEW_HEIGHT - scaledHeight) / 2;
+    const scaledWidth = isWider
+      ? baseScaledWidth * scale
+      : SCENARIO_VIEW_WIDTH * scale;
+    const scaledHeight = isWider
+      ? SCENARIO_VIEW_HEIGHT * scale
+      : baseScaledHeight * scale;
 
-    const width = isWider ? scaledWidth : SCENARIO_VIEW_WIDTH;
-    const height = isWider ? SCENARIO_VIEW_HEIGHT : scaledHeight;
+    const x = (SCENARIO_VIEW_WIDTH - scaledWidth) / 2;
+    const y = (SCENARIO_VIEW_HEIGHT - scaledHeight) / 2;
 
     return {
       x,
       y,
-      width,
-      height,
+      width: scaledWidth,
+      height: scaledHeight,
     };
-  }, [texture]);
+  }, [texture, scale]);
 
   return (
-    <pixiSprite texture={texture} x={x} y={y} width={width} height={height} />
+    <pixiSprite
+      texture={texture}
+      x={x + (xOffset ?? 0)}
+      y={y + (yOffset ?? 0)}
+      width={width}
+      height={height}
+    />
   );
 }

@@ -44,6 +44,9 @@ export type ScenarioViewProps = {
   displayGradient?: boolean;
   displayTriangle?: boolean;
   backgroundImage?: string;
+  backgroundScale?: number;
+  backgroundXOffset?: number;
+  backgroundYOffset?: number;
   characters?: ScenarioCharacterData[];
   recordingMode?: boolean;
   transparentBackground?: boolean;
@@ -70,6 +73,9 @@ export function ScenarioView({
   displayGradient = true,
   displayTriangle = true,
   backgroundImage,
+  backgroundScale = 1,
+  backgroundXOffset = 0,
+  backgroundYOffset = 0,
   characters = [],
   recordingMode = false,
   transparentBackground = false,
@@ -109,7 +115,14 @@ export function ScenarioView({
         "fixed top-1/2 -translate-y-1/2 left-0 w-full z-50": recordingMode,
       })}
     >
-      {backgroundImage && <ScenarioBackground background={backgroundImage} />}
+      {backgroundImage && (
+        <ScenarioBackground
+          background={backgroundImage}
+          scale={backgroundScale}
+          xOffset={backgroundXOffset}
+          yOffset={backgroundYOffset}
+        />
+      )}
 
       {characters.length > 0 &&
         characters.map((character, idx) => (

@@ -22,6 +22,9 @@ export function ScenarioDataProvider({ children }: PropsWithChildren) {
   const [scrollSpeed, setScrollSpeed] = useState(SCENARIO_TEXT_SCROLL_SPEED);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+  const [backgroundScale, setBackgroundScale] = useState(1);
+  const [backgroundXOffset, setBackgroundXOffset] = useState(0);
+  const [backgroundYOffset, setBackgroundYOffset] = useState(0);
   const [characters, setCharacters] = useState<
     (ScenarioCharacterData & {
       filename: string;
@@ -99,6 +102,13 @@ export function ScenarioDataProvider({ children }: PropsWithChildren) {
         characterInputRef,
 
         background,
+
+        backgroundScale,
+        setBackgroundScale,
+        backgroundXOffset,
+        setBackgroundXOffset,
+        backgroundYOffset,
+        setBackgroundYOffset,
       }}
     >
       {children}

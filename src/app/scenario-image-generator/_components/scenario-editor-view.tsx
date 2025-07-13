@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useScenarioData } from "@/app/scenario-image-generator/_hooks/use-scenario-data";
@@ -64,7 +64,26 @@ export function ScenarioEditorView() {
     characterInputRef,
 
     background,
+
+    backgroundScale,
+    backgroundXOffset,
+    backgroundYOffset,
+    setBackgroundScale,
+    setBackgroundXOffset,
+    setBackgroundYOffset,
   } = useScenarioData();
+
+  const [backgroundScaleStr, setBackgroundScaleStr] = useState(
+    backgroundScale.toString(),
+  );
+
+  const [backgroundXOffsetStr, setBackgroundXOffsetStr] = useState(
+    backgroundXOffset.toString(),
+  );
+
+  const [backgroundYOffsetStr, setBackgroundYOffsetStr] = useState(
+    backgroundYOffset.toString(),
+  );
 
   function handleBackgroundImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
@@ -215,6 +234,22 @@ export function ScenarioEditorView() {
     preventDefault: true,
   });
 
+  useEffect(() => {
+    const newScale = Number.parseFloat(backgroundScaleStr);
+    const newXOffset = Number.parseFloat(backgroundXOffsetStr);
+    const newYOffset = Number.parseFloat(backgroundYOffsetStr);
+
+    if (
+      !Number.isNaN(newScale) &&
+      !Number.isNaN(newXOffset) &&
+      !Number.isNaN(newYOffset)
+    ) {
+      setBackgroundScale(newScale);
+      setBackgroundXOffset(newXOffset);
+      setBackgroundYOffset(newYOffset);
+    }
+  }, [backgroundScaleStr, backgroundXOffsetStr, backgroundYOffsetStr]);
+
   return (
     <div className="flex flex-col gap-6 items-center min-w-0">
       <div className="min-w-0">
@@ -233,6 +268,9 @@ export function ScenarioEditorView() {
           transparentBackground={transparentBackground}
           autoEnabled={autoEnabled}
           backgroundImage={background ?? undefined}
+          backgroundScale={backgroundScale}
+          backgroundXOffset={backgroundXOffset}
+          backgroundYOffset={backgroundYOffset}
           characters={characters}
           recordingMode={recordingMode}
         />
@@ -367,6 +405,39 @@ export function ScenarioEditorView() {
                 className="hidden"
               />
             </div>
+
+            <Label htmlFor="backgroundScale">
+              Background Scale (default: 1)
+            </Label>
+
+            <Input
+              id="backgroundScale"
+              type="number"
+              value={backgroundScaleStr}
+              onChange={(e) => setBackgroundScaleStr(e.target.value)}
+              placeholder="Enter background scale"
+              className="col-span-2"
+            />
+
+            <Label htmlFor="backgroundXOffset">Background X Offset</Label>
+            <Input
+              id="backgroundXOffset"
+              type="number"
+              value={backgroundXOffsetStr}
+              onChange={(e) => setBackgroundXOffsetStr(e.target.value)}
+              placeholder="Enter background X offset"
+              className="col-span-2"
+            />
+
+            <Label htmlFor="backgroundYOffset">Background Y Offset</Label>
+            <Input
+              id="backgroundYOffset"
+              type="number"
+              value={backgroundYOffsetStr}
+              onChange={(e) => setBackgroundYOffsetStr(e.target.value)}
+              placeholder="Enter background Y offset"
+              className="col-span-2"
+            />
 
             <Label htmlFor="displayButtons">Display Buttons</Label>
             <Switch

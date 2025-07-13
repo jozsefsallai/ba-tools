@@ -34,6 +34,12 @@ export type ScenarioDataContext = {
   setBackgroundImage: Dispatch<SetStateAction<string | null>>;
   backgroundUrl: string | null;
   setBackgroundUrl: Dispatch<SetStateAction<string | null>>;
+  backgroundScale: number;
+  setBackgroundScale: Dispatch<SetStateAction<number>>;
+  backgroundXOffset: number;
+  setBackgroundXOffset: Dispatch<SetStateAction<number>>;
+  backgroundYOffset: number;
+  setBackgroundYOffset: Dispatch<SetStateAction<number>>;
   characters: (ScenarioCharacterData & {
     filename: string;
     timestamp: number;
@@ -87,6 +93,12 @@ export const scenarioDataContext = createContext<ScenarioDataContext>({
   setBackgroundImage: () => {},
   backgroundUrl: null,
   setBackgroundUrl: () => {},
+  backgroundScale: 1,
+  setBackgroundScale: () => {},
+  backgroundXOffset: 0,
+  setBackgroundXOffset: () => {},
+  backgroundYOffset: 0,
+  setBackgroundYOffset: () => {},
   characters: [],
   setCharacters: () => {},
   displayButtons: true,
