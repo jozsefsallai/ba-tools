@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { trimTransparentPixels } from "@/lib/canvas";
 import { sleep } from "@/lib/sleep";
 import { timelineStorage } from "@/lib/storage/timeline";
 import type { Student } from "@prisma/client";
@@ -125,7 +126,9 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       backgroundColor: null,
     });
 
-    const src = canvas.toDataURL("image/png");
+    const trimmedCanvas = trimTransparentPixels(canvas);
+
+    const src = trimmedCanvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = src;
     link.download = "timeline.png";
