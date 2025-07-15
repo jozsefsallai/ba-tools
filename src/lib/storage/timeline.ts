@@ -6,12 +6,10 @@ import { Storage } from "@/lib/storage";
 
 type RawBaseItem = {
   type: "student" | "separator" | "text";
-  id: string;
 };
 
 type RawTimelineStudentItem = RawBaseItem & {
   type: "student";
-  id: string;
   studentId: string;
   targetId?: string;
   trigger?: string;

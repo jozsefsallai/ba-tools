@@ -160,10 +160,11 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
         newItems.push({
           type: "student",
-          id: item.id,
+          id: uuid(),
           student,
           target,
           copy: item.copy,
+          trigger: item.trigger,
         });
       } else if (item.type !== "student") {
         newItems.push(item);
@@ -189,11 +190,12 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       items: items.map((item) => {
         if (item.type === "student") {
           return {
-            type: "student" as const,
-            id: item.id,
+            ...item,
+            id: undefined,
+            student: undefined,
+            target: undefined,
             studentId: item.student.id,
             targetId: item.target?.id,
-            copy: item.copy,
           };
         }
         return item;
