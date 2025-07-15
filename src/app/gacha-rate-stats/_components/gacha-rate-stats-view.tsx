@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 interface AttemptProps {
@@ -80,11 +79,9 @@ function Statistics({ attempts }: CounterProps) {
 
 export function GachaRateStatsView() {
   const [attempts, setAttempts] = useState<number[]>([]);
-  const [threeStarCount, setThreeStarCount] = useState<number>(0);
 
-  function addAttempt() {
-    setAttempts([...attempts, threeStarCount]);
-    setThreeStarCount(0);
+  function addAttempt(count: number) {
+    setAttempts([...attempts, count]);
   }
 
   function removeAttempt(idx: number) {
@@ -96,18 +93,15 @@ export function GachaRateStatsView() {
       <div className="flex flex-col gap-20 items-center">
         <Statistics attempts={attempts} />
 
-        <div>
+        <div className="flex flex-col items-center">
           <p className="mb-3">How many 3*s did you get on this attempt?</p>
 
           <div className="flex gap-3">
-            <Input
-              type="number"
-              value={threeStarCount}
-              onChange={(e) =>
-                setThreeStarCount(Number.parseInt(e.target.value))
-              }
-            />
-            <Button onClick={addAttempt}>Add attempt</Button>
+            {Array.from({ length: 11 }, (_, i) => (
+              <Button key={`add-${i}`} size="sm" onClick={() => addAttempt(i)}>
+                {i}
+              </Button>
+            ))}
           </div>
         </div>
 
