@@ -23,6 +23,7 @@ export type TimelineItemProps = {
   ): void;
   allStudents?: Student[];
   uniqueStudents?: Student[];
+  highlighted?: boolean;
 };
 
 export function TimelineItem({
@@ -31,6 +32,7 @@ export function TimelineItem({
   onWantsToUpdate,
   allStudents = [],
   uniqueStudents = [],
+  highlighted = false,
 }: TimelineItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id, animateLayoutChanges: () => false });
@@ -65,12 +67,16 @@ export function TimelineItem({
   return (
     <article
       ref={setNodeRef}
-      className="bg-background border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      className="bg-background relative border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       style={style}
       id={item.id}
       {...attributes}
     >
-      <div className="flex md:items-center gap-4 flex-1">
+      {highlighted && (
+        <div className="absolute inset-0 border-2 bg-yellow-300 opacity-20 rounded-md pointer-events-none" />
+      )}
+
+      <div className="relative flex md:items-center gap-4 flex-1">
         <Button className="cursor-move" variant="ghost" {...listeners}>
           <GripVerticalIcon />
         </Button>

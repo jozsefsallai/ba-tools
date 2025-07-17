@@ -36,6 +36,7 @@ export type TimelinePreviewProps = {
   verticalSeparatorSize?: number;
   horizontalSeparatorSize?: number;
   busy?: boolean;
+  onItemClicked?: (item: TimelineItem) => void;
 };
 
 export function TimelinePreview({
@@ -45,20 +46,18 @@ export function TimelinePreview({
   verticalSeparatorSize = 20,
   horizontalSeparatorSize = 20,
   busy = false,
+  onItemClicked,
 }: TimelinePreviewProps) {
-  function scrollToItem(item: TimelineItem) {
+  function handleItemClicked(item: TimelineItem) {
     return () => {
-      const element = document.getElementById(item.id);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
+      onItemClicked?.(item);
     };
   }
 
   function handleItemKeyUp(item: TimelineItem) {
     return (event: React.KeyboardEvent) => {
       if (event.key === "Enter") {
-        scrollToItem(item);
+        onItemClicked?.(item);
       }
     };
   }
@@ -88,7 +87,7 @@ export function TimelinePreview({
                           ? undefined
                           : `${itemSpacing}px`,
                     }}
-                    onClick={scrollToItem(item)}
+                    onClick={handleItemClicked(item)}
                     onKeyUp={handleItemKeyUp(item)}
                   >
                     {item.target && (
@@ -149,7 +148,7 @@ export function TimelinePreview({
                   <div
                     key={item.id}
                     className="cursor-pointer"
-                    onClick={scrollToItem(item)}
+                    onClick={handleItemClicked(item)}
                     onKeyUp={handleItemKeyUp(item)}
                     style={{
                       width:
@@ -172,7 +171,7 @@ export function TimelinePreview({
                   <div
                     key={item.id}
                     className="font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer"
-                    onClick={scrollToItem(item)}
+                    onClick={handleItemClicked(item)}
                     onKeyUp={handleItemKeyUp(item)}
                     style={{
                       textShadow:

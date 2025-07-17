@@ -33,6 +33,7 @@ export type TimelineItemContainerProps = {
   ): void;
   allStudents?: Student[];
   uniqueStudents?: Student[];
+  highlightedId?: string | null;
 };
 
 export function TimelineItemContainer({
@@ -42,6 +43,7 @@ export function TimelineItemContainer({
   onWantsToUpdate,
   allStudents = [],
   uniqueStudents = [],
+  highlightedId,
 }: TimelineItemContainerProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -83,6 +85,7 @@ export function TimelineItemContainer({
               onWantsToUpdate={onWantsToUpdate}
               allStudents={allStudents}
               uniqueStudents={uniqueStudents}
+              highlighted={highlightedId === item.id}
             />
           ))}
         </div>

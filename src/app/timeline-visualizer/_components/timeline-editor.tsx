@@ -25,7 +25,7 @@ import { sleep } from "@/lib/sleep";
 import { timelineStorage } from "@/lib/storage/timeline";
 import type { Student } from "@prisma/client";
 import html2canvas from "html2canvas-pro";
-import { ChevronsUpDownIcon } from "lucide-react";
+import { ChevronsUpDownIcon, ChevronUpIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
@@ -53,6 +53,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   );
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
+
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const uniqueStudents = useMemo(() => {
     const studentsSet = new Set<Student>();
@@ -213,6 +215,19 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     }
   }
 
+  function handlePreviewItemClicked(item: TimelineItem) {
+    setHighlightedId(item.id);
+
+    const element = document.getElementById(item.id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  }
+
+  function goToTop() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   useEffect(() => {
     const value = Number.parseInt(itemSpacingStr, 10);
     if (!Number.isNaN(value)) {
@@ -243,6 +258,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         verticalSeparatorSize={verticalSeparatorSize}
         horizontalSeparatorSize={horizontalSeparatorSize}
         busy={generationInProgress}
+        onItemClicked={handlePreviewItemClicked}
       />
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
@@ -373,9 +389,18 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             onWantsToUpdate={updateItem}
             allStudents={allStudents}
             uniqueStudents={uniqueStudents}
+            highlightedId={highlightedId}
           />
         </div>
       )}
+
+      <Button
+        size="sm"
+        className="rounded-full fixed bottom-4 right-4 z-50 w-12 h-12 cursor-pointer"
+        onClick={goToTop}
+      >
+        <ChevronUpIcon className="size-6" />
+      </Button>
     </div>
   );
 }
