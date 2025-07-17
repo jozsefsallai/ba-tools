@@ -17,7 +17,9 @@ type RawTimelineStudentItem = RawBaseItem & {
 };
 
 export type TimelineStorageData = {
-  items: Array<RawTimelineStudentItem | SeparatorItem | TextItem>;
+  items: Array<
+    RawTimelineStudentItem | Omit<SeparatorItem, "id"> | Omit<TextItem, "id">
+  >;
   scale: number;
   itemSpacing: number;
   verticalSeparatorSize: number;

@@ -169,7 +169,10 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
           trigger: item.trigger,
         });
       } else if (item.type !== "student") {
-        newItems.push(item);
+        newItems.push({
+          ...item,
+          id: uuid(),
+        });
       }
     }
 
@@ -200,7 +203,11 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             targetId: item.target?.id,
           };
         }
-        return item;
+
+        return {
+          ...item,
+          id: undefined,
+        };
       }),
       scale,
       itemSpacing,
