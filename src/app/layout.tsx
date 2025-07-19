@@ -7,6 +7,7 @@ import { TheFooter } from "@/components/common/the-footer";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,17 +56,19 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main className="flex flex-col gap-10 h-full">
-            <TheHeader />
-            <section className="relative container px-4 md:px-0 flex-1">
-              {children}
-            </section>
-            <TheFooter
-              commitHash={process.env.VERCEL_GIT_COMMIT_SHA ?? "development"}
-            />
-          </main>
+          <ThemedClerkProvider>
+            <main className="flex flex-col gap-10 h-full">
+              <TheHeader />
+              <section className="relative container px-4 md:px-0 flex-1">
+                {children}
+              </section>
+              <TheFooter
+                commitHash={process.env.VERCEL_GIT_COMMIT_SHA ?? "development"}
+              />
+            </main>
 
-          <Toaster />
+            <Toaster />
+          </ThemedClerkProvider>
         </ThemeProvider>
       </body>
     </html>

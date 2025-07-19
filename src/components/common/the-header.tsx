@@ -14,6 +14,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { MenuIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -78,7 +79,7 @@ export function TheHeader() {
           </div>
         </Link>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-6 items-center">
           <NavigationMenu className="hidden md:block">
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -141,6 +142,16 @@ export function TheHeader() {
 
           <ThemeToggle />
 
+          <SignedOut>
+            <Button asChild>
+              <SignInButton />
+            </Button>
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+
           <Button
             variant="outline"
             onClick={() => setOpen((prev) => !prev)}
@@ -151,7 +162,7 @@ export function TheHeader() {
 
           <nav
             className={cn(
-              "absolute border top-18 left-0 w-full bg-background p-4 flex flex-col gap-4",
+              "absolute border top-18 left-0 w-full bg-background z-50 p-4 flex flex-col gap-4",
               {
                 hidden: !open,
               },
