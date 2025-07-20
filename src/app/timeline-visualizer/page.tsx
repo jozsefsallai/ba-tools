@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { TimelineEditor } from "@/app/timeline-visualizer/_components/timeline-editor";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
@@ -50,7 +51,9 @@ export default async function TimelineVisualizerPage() {
         </p>
       </div>
 
-      <TimelineEditor allStudents={allStudents} />
+      <Suspense>
+        <TimelineEditor allStudents={allStudents} />
+      </Suspense>
     </div>
   );
 }
