@@ -17,6 +17,7 @@ type RawTimelineStudentItem = RawBaseItem & {
 };
 
 export type TimelineStorageData = {
+  name?: string;
   items: Array<
     RawTimelineStudentItem | Omit<SeparatorItem, "id"> | Omit<TextItem, "id">
   >;

@@ -21,14 +21,19 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { trimTransparentPixels } from "@/lib/canvas";
+import { useQueryWithStatus } from "@/lib/convex";
 import { sleep } from "@/lib/sleep";
 import { timelineStorage } from "@/lib/storage/timeline";
 import type { Student } from "@prisma/client";
+import { Authenticated, useMutation } from "convex/react";
 import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon, ChevronUpIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -36,6 +41,8 @@ export type TimelineEditorProps = {
 
 export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [name, setName] = useState("");
 
   const [items, setItems] = useState<TimelineItem[]>([]);
 
@@ -55,6 +62,23 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const timelineId = searchParams.get("id");
+
+  const query = useQueryWithStatus(
+    api.timeline.getById,
+    timelineId && timelineId.length > 0
+      ? {
+          id: timelineId as Id<"timeline">,
+        }
+      : "skip",
+  );
+
+  const createMutation = useMutation(api.timeline.create);
+  const updateMutation = useMutation(api.timeline.update);
 
   const uniqueStudents = useMemo(() => {
     const studentsSet = new Set<Student>();
@@ -139,6 +163,55 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     setGenerationInProgress(false);
   }
 
+  async function createOrUpdateCloudTimeline() {
+    if (items.length === 0) {
+      toast.error("Cannot create empty timeline.");
+      return;
+    }
+
+    const data = {
+      items: items.map((item) => {
+        if (item.type === "student") {
+          return {
+            ...item,
+            id: undefined,
+            student: undefined,
+            target: undefined,
+            studentId: item.student.id,
+            targetId: item.target?.id,
+          };
+        }
+
+        return {
+          ...item,
+          id: undefined,
+        };
+      }),
+      itemSpacing,
+      verticalSeparatorSize,
+      horizontalSeparatorSize,
+      name: name.length > 0 ? name : undefined,
+    };
+
+    if (timelineId) {
+      await updateMutation({
+        id: timelineId as Id<"timeline">,
+        ...data,
+      });
+
+      toast.success("Timeline saved successfully.");
+    } else {
+      const newTimeline = await createMutation(data);
+
+      if (newTimeline) {
+        router.push(`/timeline-visualizer?id=${newTimeline._id}`);
+        toast.success("Timeline created successfully.");
+      } else {
+        toast.error("Failed to create timeline.");
+      }
+    }
+  }
+
   function loadTimelineFromStorage() {
     const storedData = timelineStorage.get();
     if (!storedData) {
@@ -176,6 +249,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       }
     }
 
+    setName(storedData.name ?? "");
     setItems(newItems);
     setScale(storedData.scale || 1);
     setItemSpacing(storedData.itemSpacing || 10);
@@ -190,7 +264,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     );
   }
 
-  function saveTimelineToStorage(showToast = true) {
+  function saveTimelineToLocalStorage(showToast = true) {
     const data = {
       items: items.map((item) => {
         if (item.type === "student") {
@@ -213,6 +287,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       itemSpacing,
       verticalSeparatorSize,
       horizontalSeparatorSize,
+      name: name.length > 0 ? name : undefined,
     };
 
     timelineStorage.set(data);
@@ -256,6 +331,80 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     }
   }, [horizontalSeparatorSizeStr]);
 
+  useEffect(() => {
+    if (!timelineId) {
+      // reset
+      setName("");
+      setItems([]);
+      setScale(1);
+      setItemSpacing(10);
+      setVerticalSeparatorSize(70);
+      setHorizontalSeparatorSize(50);
+      setItemSpacingStr("10");
+      setVerticalSeparatorSizeStr("70");
+      setHorizontalSeparatorSizeStr("50");
+      return;
+    }
+
+    if (query.status === "success") {
+      const newItems: TimelineItem[] = [];
+
+      for (const item of query.data.items) {
+        if (item.type === "student") {
+          const student = allStudents.find((s) => s.id === item.studentId);
+          if (!student) {
+            continue;
+          }
+
+          let target: Student | undefined = undefined;
+          if (item.targetId) {
+            target = allStudents.find((s) => s.id === item.targetId);
+          }
+
+          newItems.push({
+            type: "student",
+            id: uuid(),
+            student,
+            target,
+            copy: item.copy,
+            trigger: item.trigger,
+          });
+        } else {
+          newItems.push({
+            ...item,
+            id: uuid(),
+          });
+        }
+      }
+
+      setName(query.data.name ?? "");
+      setItems(newItems);
+      setItemSpacing(query.data.itemSpacing || 10);
+      setVerticalSeparatorSize(query.data.verticalSeparatorSize || 70);
+      setHorizontalSeparatorSize(query.data.horizontalSeparatorSize || 50);
+      setItemSpacingStr((query.data.itemSpacing || 10).toString());
+      setVerticalSeparatorSizeStr(
+        (query.data.verticalSeparatorSize || 70).toString(),
+      );
+      setHorizontalSeparatorSizeStr(
+        (query.data.horizontalSeparatorSize || 50).toString(),
+      );
+    }
+
+    if (query.status === "error") {
+      toast.error("Failed to load timeline data.");
+      router.push("/timeline-visualizer");
+    }
+  }, [timelineId, query.status]);
+
+  if (timelineId && query.status === "pending") {
+    return (
+      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
+        <p>Loading timeline...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-10">
       <TimelinePreview
@@ -267,6 +416,17 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         busy={generationInProgress}
         onItemClicked={handlePreviewItemClicked}
       />
+
+      <div className="flex gap-2 items-center justify-center">
+        <Label>Timeline Name</Label>
+        <Input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Untitled Timeline"
+          className="w-full max-w-md"
+        />
+      </div>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
         <div className="flex gap-2 items-center">
@@ -360,15 +520,25 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
       <div className="flex gap-4 items-center justify-center">
         <Button variant="outline" onClick={loadTimelineFromStorage}>
-          Load
+          Load Local
         </Button>
 
-        <Button variant="outline" onClick={() => saveTimelineToStorage()}>
-          Save
+        <Button variant="outline" onClick={() => saveTimelineToLocalStorage()}>
+          Save Local
         </Button>
+
+        <Authenticated>
+          <Button
+            variant="outline"
+            onClick={createOrUpdateCloudTimeline}
+            disabled={generationInProgress}
+          >
+            {timelineId ? "Update Cloud Data" : "Save to Cloud"}
+          </Button>
+        </Authenticated>
 
         <ExportTimelineDataDialog
-          onBeforeLoad={() => saveTimelineToStorage(false)}
+          onBeforeLoad={() => saveTimelineToLocalStorage(false)}
         >
           <Button variant="outline">Export</Button>
         </ExportTimelineDataDialog>

@@ -11,6 +11,7 @@ export function ThemedClerkProvider({ children }: PropsWithChildren) {
 
   return (
     <ClerkProvider
+      dynamic
       appearance={{
         baseTheme: resolvedTheme === "dark" ? clerkDark : undefined,
       }}

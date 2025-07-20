@@ -6,6 +6,7 @@ import { Plana } from "@/components/plana";
 import checkMobile from "ismobilejs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { UserCorner } from "@/app/(home)/_components/user-corner";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -61,6 +62,8 @@ export default async function Home() {
           <Link href="/plana">Ok, I just wanna headpat Plana</Link>
         </Button>
       )}
+
+      <UserCorner />
     </article>
   );
 }

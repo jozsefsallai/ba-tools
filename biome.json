@@ -32,6 +32,6 @@
     "enabled": true
   },
   "files": {
-    "ignore": [".react-email", ".next", "node_modules/*"]
+    "ignore": [".react-email", ".next", "node_modules/*", "convex/_generated/*"]
   }
 }

@@ -14,7 +14,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { Authenticated, Unauthenticated } from "convex/react";
+import { SignInButton, UserButton } from "@clerk/nextjs";
 import { MenuIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -142,15 +143,15 @@ export function TheHeader() {
 
           <ThemeToggle />
 
-          <SignedOut>
+          <Unauthenticated>
             <Button asChild>
               <SignInButton />
             </Button>
-          </SignedOut>
+          </Unauthenticated>
 
-          <SignedIn>
+          <Authenticated>
             <UserButton />
-          </SignedIn>
+          </Authenticated>
 
           <Button
             variant="outline"
