@@ -38,6 +38,7 @@ import { MoveIcon, XIcon } from "lucide-react";
 import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { MessageBox } from "@/components/common/message-box";
 
 function ItemSetup({
   title,
@@ -439,18 +440,14 @@ export function InventoryManagementSimulatorView() {
 
   if (initError) {
     return (
-      <div className="border border-destructive bg-destructive/10 rounded-md px-4 py-10 text-center text-xl">
+      <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
         <strong>Error:</strong> {initError}
-      </div>
+      </MessageBox>
     );
   }
 
   if (!ready) {
-    return (
-      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
-        Loading native modules...
-      </div>
-    );
+    return <MessageBox>Loading native modules...</MessageBox>;
   }
 
   return (

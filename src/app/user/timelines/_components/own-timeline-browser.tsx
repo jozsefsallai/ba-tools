@@ -1,6 +1,7 @@
 "use client";
 
 import { OwnTimelineEntry } from "@/app/user/timelines/_components/own-timeline-entry";
+import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
 import type { Student } from "@prisma/client";
 import { api } from "~convex/api";
@@ -13,26 +14,22 @@ export function OwnTimelineBrowser({ allStudents }: OwnTimelineBrowserProps) {
   const query = useQueryWithStatus(api.timeline.getOwn);
 
   if (query.status === "pending") {
-    return (
-      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
-        <p>Loading...</p>
-      </div>
-    );
+    return <MessageBox>Loading...</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
-      <div className="border border-destructive bg-destructive/10 rounded-md px-4 py-10 text-center text-xl">
+      <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
         Failed to load timelines.
-      </div>
+      </MessageBox>
     );
   }
 
   if (query.status === "success" && query.data.length === 0) {
     return (
-      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
+      <MessageBox>
         <p>You have no timelines saved.</p>
-      </div>
+      </MessageBox>
     );
   }
 

@@ -6,6 +6,7 @@ import {
   TimelinePreview,
 } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
+import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
 import { ExportTimelineDataDialog } from "@/components/dialogs/export-timeline-data-dialog";
 import { ImportTimelineDataDialog } from "@/components/dialogs/import-timeline-data-dialog";
@@ -43,6 +44,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [name, setName] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "private">("private");
 
   const [items, setItems] = useState<TimelineItem[]>([]);
 
@@ -191,6 +193,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       verticalSeparatorSize,
       horizontalSeparatorSize,
       name: name.length > 0 ? name : undefined,
+      visibility,
     };
 
     if (timelineId) {
@@ -310,6 +313,15 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  async function copyLink() {
+    const url = new URL(
+      `/timeline-visualizer/${timelineId}`,
+      window.location.origin,
+    );
+    await navigator.clipboard.writeText(url.toString());
+    toast.success("Link copied to clipboard.");
+  }
+
   useEffect(() => {
     const value = Number.parseInt(itemSpacingStr, 10);
     if (!Number.isNaN(value)) {
@@ -378,6 +390,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       }
 
       setName(query.data.name ?? "");
+      setVisibility(query.data.visibility || "private");
       setItems(newItems);
       setItemSpacing(query.data.itemSpacing || 10);
       setVerticalSeparatorSize(query.data.verticalSeparatorSize || 70);
@@ -398,11 +411,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   }, [timelineId, query.status]);
 
   if (timelineId && query.status === "pending") {
-    return (
-      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
-        <p>Loading timeline...</p>
-      </div>
-    );
+    return <MessageBox>Loading timeline...</MessageBox>;
   }
 
   return (
@@ -417,15 +426,43 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         onItemClicked={handlePreviewItemClicked}
       />
 
-      <div className="flex gap-2 items-center justify-center">
-        <Label>Timeline Name</Label>
-        <Input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Untitled Timeline"
-          className="w-full max-w-md"
-        />
+      <div className="flex gap-6 items-center justify-center">
+        <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
+          <Label className="shrink-0">Timeline Name</Label>
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Untitled Timeline"
+          />
+        </div>
+
+        <Authenticated>
+          <div className="flex gap-2 items-center">
+            <Label>Visibility</Label>
+
+            <Select
+              value={visibility}
+              onValueChange={(val) =>
+                setVisibility(val as "public" | "private")
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="private">Private</SelectItem>
+                <SelectItem value="public">Public</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {query.data?.visibility === "public" && (
+              <Button variant="outline" onClick={copyLink}>
+                Copy Link
+              </Button>
+            )}
+          </div>
+        </Authenticated>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
