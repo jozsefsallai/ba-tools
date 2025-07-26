@@ -8,19 +8,23 @@ import {
 export type ScenarioAffiliationProps = {
   affiliation: string;
   nameOffset: number;
+  fontFamily: string;
+  y?: number;
 };
 
 export function ScenarioAffiliation({
   affiliation,
   nameOffset,
+  fontFamily,
+  y,
 }: ScenarioAffiliationProps) {
   return (
     <pixiText
       text={affiliation}
       x={(SCENARIO_VIEW_WIDTH - SCENARIO_LINE_WIDTH) / 2 + nameOffset + 13}
-      y={781}
+      y={y ?? 781}
       style={{
-        fontFamily: "Noto Sans",
+        fontFamily,
         fontSize: 41,
         fontWeight: "700",
         letterSpacing: -0.4,

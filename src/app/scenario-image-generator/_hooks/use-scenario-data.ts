@@ -1,6 +1,10 @@
 "use client";
 
-import type { ScenarioCharacterData } from "@/app/scenario-image-generator/_components/scenario-view";
+import {
+  SCENARIO_FONT_EN,
+  type ScenarioCharacterData,
+  type ScennarioFontData,
+} from "@/app/scenario-image-generator/_components/scenario-view";
 import {
   SCENARIO_TEXT_FONT_SIZE,
   SCENARIO_TEXT_SCROLL_SPEED,
@@ -26,6 +30,8 @@ export type ScenarioDataContext = {
   setAffiliation: Dispatch<SetStateAction<string>>;
   content: string;
   setContent: Dispatch<SetStateAction<string>>;
+  font: ScennarioFontData;
+  setFont: Dispatch<SetStateAction<ScennarioFontData>>;
   fontSize: number;
   setFontSize: Dispatch<SetStateAction<number>>;
   scrollSpeed: number;
@@ -85,6 +91,8 @@ export const scenarioDataContext = createContext<ScenarioDataContext>({
   setAffiliation: () => {},
   content: "Dialogue text goes here...",
   setContent: () => {},
+  font: SCENARIO_FONT_EN,
+  setFont: () => {},
   fontSize: SCENARIO_TEXT_FONT_SIZE,
   setFontSize: () => {},
   scrollSpeed: SCENARIO_TEXT_SCROLL_SPEED,

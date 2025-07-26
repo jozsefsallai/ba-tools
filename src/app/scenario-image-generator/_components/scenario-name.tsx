@@ -10,17 +10,24 @@ import type { RefObject } from "react";
 export type ScenarioNameProps = {
   name: string;
   nameRef?: RefObject<Text | null>;
+  fontFamily: string;
+  y?: number;
 };
 
-export function ScenarioName({ name, nameRef }: ScenarioNameProps) {
+export function ScenarioName({
+  name,
+  nameRef,
+  fontFamily,
+  y,
+}: ScenarioNameProps) {
   return (
     <pixiText
       ref={nameRef}
       text={name}
       x={(SCENARIO_VIEW_WIDTH - SCENARIO_LINE_WIDTH) / 2}
-      y={765}
+      y={y ?? 765}
       style={{
-        fontFamily: "Noto Sans",
+        fontFamily,
         fontSize: 57,
         fontWeight: "700",
         fill: "#ffffff",

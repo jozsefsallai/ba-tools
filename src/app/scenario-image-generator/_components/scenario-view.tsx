@@ -1,7 +1,7 @@
 "use client";
 
 import { Application, type ApplicationRef, extend } from "@pixi/react";
-import { Container, Graphics, Sprite, Text } from "pixi.js";
+import { Assets, Container, Graphics, Sprite, Text } from "pixi.js";
 
 import { ScenarioBottomGradient } from "@/app/scenario-image-generator/_components/scenario-bottom-gradient";
 import { ScenarioButtons } from "@/app/scenario-image-generator/_components/scenario-buttons";
@@ -17,6 +17,7 @@ import {
   SCENARIO_VIEW_WIDTH,
 } from "@/app/scenario-image-generator/_lib/constants";
 import { cn } from "@/lib/utils";
+import { MessageBox } from "@/components/common/message-box";
 
 export type ScenarioCharacterData = {
   id?: string;
@@ -30,10 +31,41 @@ export type ScenarioCharacterData = {
   silhouetteColor?: number;
 };
 
+export type ScennarioFontData = {
+  label: string;
+  family: string;
+  nameY?: number;
+  affiliationY?: number;
+};
+
+export const SCENARIO_FONT_EN = {
+  label: "Noto Sans (EN)",
+  family: "Noto Sans",
+};
+
+export const SCENARIO_FONT_KR = {
+  label: "경기천년제목 (KR)",
+  family: "GyeonggiTitle",
+};
+
+export const SCENARIO_FONT_JP = {
+  label: "Shin Maru Go (JP)",
+  family: "ShinMGoUpr",
+  nameY: 748,
+  affiliationY: 765,
+};
+
+export const SCENARIO_FONTS: ScennarioFontData[] = [
+  SCENARIO_FONT_EN,
+  SCENARIO_FONT_KR,
+  SCENARIO_FONT_JP,
+];
+
 export type ScenarioViewProps = {
   applicationRef?: RefObject<ApplicationRef | null>;
   animate?: boolean;
   content: string;
+  font: ScennarioFontData;
   fontSize?: number;
   scrollSpeed?: number;
   name?: string;
@@ -63,6 +95,7 @@ export function ScenarioView({
   applicationRef,
   animate,
   content,
+  font = SCENARIO_FONT_EN,
   fontSize,
   scrollSpeed,
   name,
@@ -81,6 +114,7 @@ export function ScenarioView({
   transparentBackground = false,
 }: ScenarioViewProps) {
   const [shouldRender, setShouldRender] = useState(true);
+  const [assetBundlesLoaded, setAssetBundlesLoaded] = useState(false);
 
   const [dialogueFinishedRendering, setDialogueFinishedRendering] =
     useState(true);
@@ -99,6 +133,46 @@ export function ScenarioView({
       setShouldRender(true);
     });
   }, [transparentBackground]);
+
+  useEffect(() => {
+    async function loadAssetBundles() {
+      Assets.addBundle("fonts", [
+        {
+          alias: "Noto Sans",
+          src: "/assets/fonts/noto-sans/NotoSans-Regular.ttf",
+          data: {
+            family: "Noto Sans",
+          },
+        },
+        {
+          alias: "GyeonggiTitle",
+          src: "/assets/fonts/gyeonggi/Gyeonggi-Medium.woff",
+          data: {
+            family: "GyeonggiTitle",
+          },
+        },
+        {
+          alias: "ShinMGoUpr",
+          src: "/assets/fonts/shinmgoupr/U-OTF-ShinMGoUpr-Medium.otf",
+          data: {
+            family: "ShinMGoUpr",
+          },
+        },
+      ]);
+
+      await Assets.loadBundle("fonts");
+
+      setAssetBundlesLoaded(true);
+    }
+
+    if (!assetBundlesLoaded) {
+      loadAssetBundles();
+    }
+  }, []);
+
+  if (!assetBundlesLoaded) {
+    return <MessageBox className="px-10">Loading asset bundles...</MessageBox>;
+  }
 
   if (!shouldRender) {
     return null;
@@ -137,13 +211,20 @@ export function ScenarioView({
       {content.length > 0 && displayLine && <ScenarioLine />}
 
       {content.length > 0 && name && (
-        <ScenarioNameAndAffiliation name={name} affiliation={affiliation} />
+        <ScenarioNameAndAffiliation
+          name={name}
+          affiliation={affiliation}
+          fontFamily={font.family}
+          nameY={font.nameY}
+          affiliationY={font.affiliationY}
+        />
       )}
 
       {content.length > 0 && (
         <ScenarioDialogue
           animate={animate}
           content={content}
+          fontFamily={font.family}
           fontSize={fontSize}
           scrollSpeed={scrollSpeed}
           onTextRendered={() => setDialogueFinishedRendering(false)}

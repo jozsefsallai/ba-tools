@@ -1,6 +1,9 @@
 "use client";
 
-import type { ScenarioCharacterData } from "@/app/scenario-image-generator/_components/scenario-view";
+import {
+  SCENARIO_FONT_EN,
+  type ScenarioCharacterData,
+} from "@/app/scenario-image-generator/_components/scenario-view";
 import type { BackgroundMode } from "@/app/scenario-image-generator/_hooks/use-scenario-data";
 import {
   SCENARIO_TEXT_FONT_SIZE,
@@ -18,6 +21,7 @@ export function ScenarioDataProvider({ children }: PropsWithChildren) {
   const [name, setName] = useState("Name");
   const [affiliation, setAffiliation] = useState<string>("Affiliation");
   const [content, setContent] = useState("Dialogue text goes here...");
+  const [font, setFont] = useState(SCENARIO_FONT_EN);
   const [fontSize, setFontSize] = useState(SCENARIO_TEXT_FONT_SIZE);
   const [scrollSpeed, setScrollSpeed] = useState(SCENARIO_TEXT_SCROLL_SPEED);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -67,6 +71,8 @@ export function ScenarioDataProvider({ children }: PropsWithChildren) {
         setAffiliation,
         content,
         setContent,
+        font,
+        setFont,
         fontSize,
         setFontSize,
         scrollSpeed,

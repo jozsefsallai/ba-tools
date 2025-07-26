@@ -1,7 +1,11 @@
 "use client";
 
 import { ScenarioEditorCharacterSettings } from "@/app/scenario-image-generator/_components/scenario-editor-character-settings";
-import { ScenarioView } from "@/app/scenario-image-generator/_components/scenario-view";
+import {
+  SCENARIO_FONT_EN,
+  SCENARIO_FONTS,
+  ScenarioView,
+} from "@/app/scenario-image-generator/_components/scenario-view";
 import {
   SCENARIO_TEXT_FONT_SIZE,
   SCENARIO_TEXT_SCROLL_SPEED,
@@ -17,6 +21,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useScenarioData } from "@/app/scenario-image-generator/_hooks/use-scenario-data";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ScenarioEditorView() {
   const {
@@ -29,6 +40,8 @@ export function ScenarioEditorView() {
     setAffiliation,
     content,
     setContent,
+    font,
+    setFont,
     fontSize,
     setFontSize,
     scrollSpeed,
@@ -257,6 +270,7 @@ export function ScenarioEditorView() {
           applicationRef={applicationRef}
           animate={animate}
           content={content}
+          font={font}
           fontSize={fontSize}
           scrollSpeed={scrollSpeed}
           name={name}
@@ -321,6 +335,31 @@ export function ScenarioEditorView() {
               placeholder="Enter dialogue content"
               className="h-24 col-span-2"
             />
+
+            <Label>Font</Label>
+            <div className="col-span-2">
+              <Select
+                value={font.family}
+                onValueChange={(value) =>
+                  setFont(
+                    SCENARIO_FONTS.find((f) => f.family === value) ||
+                      SCENARIO_FONT_EN,
+                  )
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue>{font.label}</SelectValue>
+                </SelectTrigger>
+
+                <SelectContent>
+                  {SCENARIO_FONTS.map((f) => (
+                    <SelectItem key={f.family} value={f.family}>
+                      {f.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             <Label htmlFor="fontSize">
               Font Size (default: {SCENARIO_TEXT_FONT_SIZE})

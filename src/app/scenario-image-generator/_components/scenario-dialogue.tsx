@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 
 export type ScenarioDialogueProps = {
   content: string;
+  fontFamily: string;
   fontSize?: number;
   onTextRendered?: () => void;
   onTextFinishedRendering?: () => void;
@@ -20,6 +21,7 @@ export type ScenarioDialogueProps = {
 
 export function ScenarioDialogue({
   content,
+  fontFamily,
   fontSize = 41,
   onTextRendered,
   onTextFinishedRendering,
@@ -36,7 +38,7 @@ export function ScenarioDialogue({
     }
 
     const style = new TextStyle({
-      fontFamily: "Noto Sans",
+      fontFamily,
       fontSize,
       wordWrap: true,
       wordWrapWidth: SCENARIO_LINE_WIDTH,
@@ -102,7 +104,7 @@ export function ScenarioDialogue({
       x={(SCENARIO_VIEW_WIDTH - SCENARIO_LINE_WIDTH) / 2 + 4}
       y={861}
       style={{
-        fontFamily: "Noto Sans",
+        fontFamily,
         fontSize: fontSize,
         fill: "#ffffff",
         align: "left",
