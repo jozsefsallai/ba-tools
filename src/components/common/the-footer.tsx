@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function TheFooter({
@@ -14,7 +15,7 @@ export function TheFooter({
   }
 
   return (
-    <footer className="border-t px-2 py-12 bg-background text-muted-foreground text-center text-sm relative z-10">
+    <footer className="border-t px-2 py-8 bg-background text-muted-foreground text-center text-sm relative z-10">
       <div className="container">
         <div className="md:w-2/3 mx-auto">
           Made by{" "}
@@ -26,14 +27,13 @@ export function TheFooter({
           >
             joexyz
           </a>
-          . Blue Archive, as well as the graphic assets displayed on this
-          website are the property of NEXON Games Co., Ltd. and Yostar, Inc.
-          This website is in no way affiliated or endorsed by the previously
-          mentioned companies.
+          . This website is in no way affiliated or endorsed by NEXON Games Co.,
+          Ltd. or Yostar, Inc.
           <br />
-          The font "NEXON Football Gothic" used in certain places on the website
-          belongs to NEXON Korea.
-          <br />
+          <Link href="/credits" className="underline">
+            Credits
+          </Link>{" "}
+          &middot;{" "}
           <a
             href="https://github.com/jozsefsallai/ba-tools"
             target="_blank"
@@ -42,7 +42,7 @@ export function TheFooter({
           >
             Source code
           </a>{" "}
-          -{" "}
+          &middot;{" "}
           {commitHash === "development"
             ? "development"
             : commitHash.slice(0, 7)}
