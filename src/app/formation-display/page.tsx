@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Formation Display - Joe's Blue Archive Tools",
@@ -49,7 +50,9 @@ export default async function FormationDisplayPage() {
         </p>
       </div>
 
-      <FormationEditor allStudents={allStudents} />
+      <Suspense>
+        <FormationEditor allStudents={allStudents} />
+      </Suspense>
     </div>
   );
 }
