@@ -14,7 +14,11 @@ export function UserCorner() {
         <h2 className="text-2xl">User Corner</h2>
 
         <nav className="flex gap-4">
-          <Button asChild>
+          <Button variant="outline" asChild>
+            <Link href="/user/formations">My Formations</Link>
+          </Button>
+
+          <Button variant="outline" asChild>
             <Link href="/user/timelines">My Timelines</Link>
           </Button>
         </nav>

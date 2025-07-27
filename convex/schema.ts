@@ -1,5 +1,17 @@
+import { STAR_LEVELS, UE_LEVELS } from "@/lib/types";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+
+export const formationStudentItem = v.object({
+  studentId: v.string(),
+  starter: v.optional(v.boolean()),
+  starLevel: v.optional(
+    v.union(...STAR_LEVELS.map((level) => v.literal(level))),
+  ),
+  ueLevel: v.optional(v.union(...UE_LEVELS.map((level) => v.literal(level)))),
+  borrowed: v.optional(v.boolean()),
+  level: v.optional(v.number()),
+});
 
 export const timelineStudentItem = v.object({
   type: v.literal("student"),
@@ -42,6 +54,16 @@ export default defineSchema({
     avatar: v.optional(v.string()),
     externalId: v.string(),
   }).index("by_externalId", ["externalId"]),
+
+  formation: defineTable({
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    strikers: v.array(formationStudentItem),
+    specials: v.array(formationStudentItem),
+    displayOverline: v.optional(v.boolean()),
+    noDisplayRole: v.optional(v.boolean()),
+    groupsVertical: v.optional(v.boolean()),
+  }).index("by_userId", ["userId"]),
 
   timeline: defineTable({
     userId: v.id("users"),

@@ -5,7 +5,7 @@ import {
   type StudentItem,
 } from "@/app/formation-display/_components/formation-preview";
 import type { Student } from "@/lib/types";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import html2canvas from "html2canvas-pro";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,6 +24,14 @@ import { sleep } from "@/lib/sleep";
 import { StudentPicker } from "@/components/common/student-picker";
 
 import { FormationItemContainer } from "@/app/formation-display/_components/formation-item-container";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryWithStatus } from "@/lib/convex";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
+import { Authenticated, useMutation } from "convex/react";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { MessageBox } from "@/components/common/message-box";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -34,6 +42,8 @@ type CombatClass = "striker" | "special";
 export function FormationEditor({ allStudents }: FormationEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [name, setName] = useState("");
+
   const [strikers, setStrikers] = useState<StudentItem[]>([]);
   const [specials, setSpecials] = useState<StudentItem[]>([]);
 
@@ -43,6 +53,23 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
   const [groupsVertical, setGroupsVertical] = useState(false);
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const formationId = searchParams.get("id");
+
+  const query = useQueryWithStatus(
+    api.formation.getById,
+    formationId && formationId.length > 0
+      ? {
+          id: formationId as Id<"formation">,
+        }
+      : "skip",
+  );
+
+  const createMutation = useMutation(api.formation.create);
+  const updateMutation = useMutation(api.formation.update);
 
   function addStudent(student: Student) {
     const item: StudentItem = {
@@ -139,6 +166,122 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     setGenerationInProgress(false);
   }
 
+  async function createOrUpdateCloudFormation() {
+    if (strikers.length === 0 && specials.length === 0) {
+      toast.error("You must add at least one student to the formation.");
+      return;
+    }
+
+    const data = {
+      name: name.length > 0 ? name : undefined,
+      strikers: strikers.map((item) => ({
+        studentId: item.student.id,
+        starter: item.starter,
+        starLevel: item.starLevel,
+        ueLevel: item.ueLevel,
+        borrowed: item.borrowed,
+        level: item.level,
+      })),
+      specials: specials.map((item) => ({
+        studentId: item.student.id,
+        starter: item.starter,
+        starLevel: item.starLevel,
+        ueLevel: item.ueLevel,
+        borrowed: item.borrowed,
+        level: item.level,
+      })),
+      displayOverline,
+      noDisplayRole: !displayRoleIcon,
+      groupsVertical,
+    };
+
+    if (formationId) {
+      await updateMutation({
+        id: formationId as Id<"formation">,
+        ...data,
+      });
+
+      toast.success("Formation updated successfully.");
+    } else {
+      const newFormation = await createMutation(data);
+
+      if (newFormation) {
+        toast.success("Formation created successfully.");
+        router.push(`/formation-display?id=${newFormation._id}`);
+      } else {
+        toast.error("Failed to create formation.");
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (!formationId) {
+      // reset
+      setName("");
+      setStrikers([]);
+      setSpecials([]);
+      setScale(1);
+      setDisplayOverline(false);
+      setDisplayRoleIcon(true);
+      setGroupsVertical(false);
+      return;
+    }
+
+    if (query.status === "success") {
+      const newStrikers: StudentItem[] = [];
+      const newSpecials: StudentItem[] = [];
+
+      for (const item of query.data.strikers) {
+        const student = allStudents.find((s) => s.id === item.studentId);
+
+        if (student) {
+          newStrikers.push({
+            id: student.id,
+            student,
+            starter: item.starter,
+            starLevel: item.starLevel,
+            ueLevel: item.ueLevel,
+            borrowed: item.borrowed,
+            level: item.level,
+          });
+        }
+      }
+
+      for (const item of query.data.specials) {
+        const student = allStudents.find((s) => s.id === item.studentId);
+
+        if (student) {
+          newSpecials.push({
+            id: student.id,
+            student,
+            starter: item.starter,
+            starLevel: item.starLevel,
+            ueLevel: item.ueLevel,
+            borrowed: item.borrowed,
+            level: item.level,
+          });
+        }
+      }
+
+      setName(query.data.name || "");
+      setStrikers(newStrikers);
+      setSpecials(newSpecials);
+      setScale(1);
+      setDisplayOverline(query.data.displayOverline || false);
+      setDisplayRoleIcon(!query.data.noDisplayRole);
+      setGroupsVertical(query.data.groupsVertical || false);
+    }
+
+    if (query.status === "error") {
+      toast.error("Echelon load fail");
+      router.push("/formation-display");
+    }
+  }, [formationId, query.status]);
+
+  if (formationId && query.status === "pending") {
+    return <MessageBox>Loading formation...</MessageBox>;
+  }
+
   return (
     <div className="flex flex-col gap-10">
       <FormationPreview
@@ -230,6 +373,26 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
           </StudentPicker>
         </div>
       </div>
+
+      <Authenticated>
+        <div className="flex gap-6 items-center justify-center">
+          <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
+            <Label className="shrink-0">Formation Name</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Untitled Formation"
+            />
+          </div>
+
+          <Button
+            onClick={createOrUpdateCloudFormation}
+            disabled={generationInProgress}
+          >
+            {formationId ? "Update Formation" : "Save Formation"}
+          </Button>
+        </div>
+      </Authenticated>
 
       <Separator />
 
