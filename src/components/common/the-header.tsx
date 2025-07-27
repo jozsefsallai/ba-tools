@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Authenticated, Unauthenticated } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/nextjs";
-import { MenuIcon } from "lucide-react";
+import { ChartNoAxesGanttIcon, MenuIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -150,7 +150,21 @@ export function TheHeader() {
           </Unauthenticated>
 
           <Authenticated>
-            <UserButton />
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  href="/user/formations"
+                  label="My formations"
+                  labelIcon={<UsersIcon className="size-4" />}
+                />
+
+                <UserButton.Link
+                  href="/user/timelines"
+                  label="My timelines"
+                  labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
+                />
+              </UserButton.MenuItems>
+            </UserButton>
           </Authenticated>
 
           <Button
