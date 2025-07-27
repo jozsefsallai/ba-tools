@@ -20,12 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ChevronsUpDownIcon } from "lucide-react";
 
-import { ExportStudentDataDialog } from "@/components/dialogs/export-student-data-dialog";
-import { ImportStudentDataDialog } from "@/components/dialogs/import-student-data-dialog";
 import { sleep } from "@/lib/sleep";
-import { studentStorage } from "@/lib/storage/students";
 import { StudentPicker } from "@/components/common/student-picker";
-import { ImportJustinPlannerDataDialog } from "@/components/dialogs/import-justin-planner-data-dialog";
+
 import { FormationItemContainer } from "@/app/formation-display/_components/formation-item-container";
 
 export type FormationEditorProps = {
@@ -52,13 +49,6 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
       id: student.id,
       student,
     };
-
-    const storedStudent = studentStorage.getStudent(student.id);
-    if (storedStudent) {
-      item.level = storedStudent.level;
-      item.starLevel = storedStudent.starLevel;
-      item.ueLevel = storedStudent.ueLevel;
-    }
 
     if (student.combatClass === "Main") {
       if (strikers.find((item) => item.student === student)) {
@@ -238,20 +228,6 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
               <ChevronsUpDownIcon />
             </Button>
           </StudentPicker>
-        </div>
-
-        <div className="flex gap-4 items-center justify-center">
-          <ExportStudentDataDialog>
-            <Button variant="outline">Export cached student data</Button>
-          </ExportStudentDataDialog>
-
-          <ImportStudentDataDialog>
-            <Button variant="outline">Import cached student data</Button>
-          </ImportStudentDataDialog>
-
-          <ImportJustinPlannerDataDialog students={allStudents}>
-            <Button variant="outline">Import Justin planner data</Button>
-          </ImportJustinPlannerDataDialog>
         </div>
       </div>
 

@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { studentStorage } from "@/lib/storage/students";
 import type { StarLevel, UELevel } from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
 import { useSortable } from "@dnd-kit/sortable";
@@ -56,26 +55,14 @@ export function FormationItem({
     }
 
     onWantsToUpdate(item, { level });
-    studentStorage.addOrUpdateStudent({
-      id: item.student.id,
-      level,
-    });
   }
 
   function handleStarLevelUpdate(newValue: StarLevel) {
     onWantsToUpdate(item, { starLevel: newValue });
-    studentStorage.addOrUpdateStudent({
-      id: item.student.id,
-      starLevel: newValue,
-    });
   }
 
   function handleUELevelUpdate(newValue: UELevel | undefined) {
     onWantsToUpdate(item, { ueLevel: newValue });
-    studentStorage.addOrUpdateStudent({
-      id: item.student.id,
-      ueLevel: newValue,
-    });
   }
 
   function handleBorrowedUpdate(newValue: boolean) {

@@ -89,7 +89,7 @@ export function StudentCard({
             />
           )}
 
-          {level && (
+          {(level ?? 0) > 0 && (
             <div
               className="flex absolute top-0 left-[5px] text-[15px] text-white font-bold"
               style={{
