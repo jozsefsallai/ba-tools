@@ -3,10 +3,12 @@ import iconAssist from "@/assets/images/icon_assist.png";
 
 import { StudentRoleIcon } from "@/components/common/student-role-icon";
 import { StudentStar } from "@/components/common/student-star";
+import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 
 import type { StarLevel, Student, UELevel } from "@/lib/types";
-import { buildStudentIconUrl } from "@/lib/url";
+import { buildSkillPortraitUrl, buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 
 export type StudentCardProps = {
   student: Student;
@@ -17,7 +19,9 @@ export type StudentCardProps = {
   borrowed?: boolean;
   starter?: boolean;
   busy?: boolean;
+  variantId?: string;
   style?: React.CSSProperties;
+  isSkillCard?: boolean;
 };
 
 export function StudentCard({
@@ -29,24 +33,48 @@ export function StudentCard({
   borrowed,
   starter,
   busy,
+  variantId,
   style,
+  isSkillCard,
 }: StudentCardProps) {
   const isFirefox =
     typeof window !== "undefined" &&
     /firefox/i.test(window.navigator.userAgent);
 
+  const iconUrl = useMemo(() => {
+    const fallback = isSkillCard
+      ? buildSkillPortraitUrl(student)
+      : buildStudentIconUrl(student);
+
+    if (!variantId) {
+      return fallback;
+    }
+
+    const variant = skillCardVariantMap[student.id as SkillCardVariant];
+    if (!variant) {
+      return fallback;
+    }
+
+    return variant.find((v) => v.id === variantId)?.image ?? fallback;
+  }, [student, variantId]);
+
   return (
     <div className="flex relative" style={style}>
       <div
-        className={cn("skew-x-[-11deg] p-[2px] rounded-[11%]", {
+        className={cn("skew-x-[-11deg] p-[2px]", {
+          "rounded-[11%]": !isSkillCard,
+          "rounded-[2px]": isSkillCard,
           "p-[2px] bg-[#ffff4d]": starter,
           "p-[1px] bg-white": !starter,
+          "p-[2px]": isSkillCard,
         })}
       >
         <div
           className={cn(
-            "flex relative h-[86px] w-[93px] rounded-[11%] p-[2px] pb-[10px] overflow-hidden",
+            "flex relative h-[86px] w-[93px] p-[2px] overflow-hidden",
             {
+              "rounded-[11%] pb-[10px]": !isSkillCard,
+              "rounded-[2px]": isSkillCard,
               "bg-type-red": student.attackType === "Explosion",
               "bg-type-yellow": student.attackType === "Pierce",
               "bg-type-blue": student.attackType === "Mystic",
@@ -54,17 +82,28 @@ export function StudentCard({
             },
           )}
         >
-          <div
-            className="flex w-full h-full bg-cover rounded-[11%]"
-            style={{ backgroundImage: `url(${charBg.src})` }}
-          />
+          {!isSkillCard && (
+            <div
+              className="flex w-full h-full bg-cover rounded-[11%]"
+              style={{ backgroundImage: `url(${charBg.src})` }}
+            />
+          )}
 
-          <div className="absolute top-[2px] left-[2px] right-[2px] bottom-[10px] overflow-hidden rounded-[11%]">
+          <div
+            className={cn("absolute  overflow-hidden", {
+              "top-[2px] left-[2px] right-[2px] bottom-[10px] rounded-[11%]":
+                !isSkillCard,
+              "top-0 left-0 right-0 bottom-0 rounded-[2px]": isSkillCard,
+            })}
+          >
             <img
-              src={buildStudentIconUrl(student)}
+              src={iconUrl}
               alt={student.name}
-              width={102}
-              className="max-w-none skew-x-[11deg] ml-[-6px]"
+              width={isSkillCard ? 107 : 102}
+              className={cn("max-w-none skew-x-[11deg]", {
+                "ml-[-6px]": !isSkillCard,
+                "ml-[-8px]": isSkillCard,
+              })}
             />
           </div>
 

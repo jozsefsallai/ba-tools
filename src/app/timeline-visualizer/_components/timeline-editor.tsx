@@ -243,6 +243,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
           target,
           copy: item.copy,
           trigger: item.trigger,
+          variantId: item.variantId,
         });
       } else if (item.type !== "student") {
         newItems.push({
@@ -380,6 +381,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             target,
             copy: item.copy,
             trigger: item.trigger,
+            variantId: item.variantId,
           });
         } else {
           newItems.push({

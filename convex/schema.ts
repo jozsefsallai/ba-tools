@@ -19,6 +19,7 @@ export const timelineStudentItem = v.object({
   trigger: v.optional(v.string()),
   targetId: v.optional(v.string()),
   copy: v.optional(v.boolean()),
+  variantId: v.optional(v.string()),
 });
 
 export const timelineSeparatorOrientation = v.union(

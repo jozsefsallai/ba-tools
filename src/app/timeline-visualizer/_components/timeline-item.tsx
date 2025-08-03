@@ -6,13 +6,21 @@ import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
 import { ChevronsUpDownIcon, GripVerticalIcon, XIcon } from "lucide-react";
+import { useMemo } from "react";
 
 export type TimelineItemProps = {
   item: TimelineItemType;
@@ -64,6 +72,19 @@ export function TimelineItem({
     onWantsToUpdate(item, { target: student });
   }
 
+  const skillVariants = useMemo(() => {
+    if (item.type !== "student") {
+      return [];
+    }
+
+    const variants = skillCardVariantMap[item.student.id as SkillCardVariant];
+    if (!variants) {
+      return [];
+    }
+
+    return variants;
+  }, [item]);
+
   return (
     <article
       ref={setNodeRef}
@@ -91,7 +112,35 @@ export function TimelineItem({
               />
 
               <div className="flex flex-col gap-1">
-                <div className="text-xl font-bold">{item.student.name}</div>
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="text-xl font-bold">{item.student.name}</div>
+
+                  {skillVariants.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={`variant-${item.id}`}>Variant:</Label>
+
+                      <Select
+                        value={item.variantId ?? "default"}
+                        onValueChange={(value) =>
+                          onWantsToUpdate(item, { variantId: value })
+                        }
+                      >
+                        <SelectTrigger>
+                          {skillVariants.find((v) => v.id === item.variantId)
+                            ?.name ?? "Default"}
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          {skillVariants.map((variant) => (
+                            <SelectItem key={variant.id} value={variant.id}>
+                              {variant.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex items-center gap-2">

@@ -15,6 +15,7 @@ export type StudentItem = BaseItem & {
   trigger?: string;
   target?: Student;
   copy?: boolean;
+  variantId?: string;
 };
 
 export type SeparatorItem = BaseItem & {
@@ -111,32 +112,35 @@ export function TimelinePreview({
                     )}
 
                     <StudentCard
+                      isSkillCard
                       noDisplayRole
                       busy={busy}
                       student={item.student}
+                      variantId={item.variantId}
+                      starter={item.copy}
                     />
 
                     {item.trigger && (
                       <div
-                        className="absolute -top-3 -left-2 font-nexon-football-gothic font-bold text-xl px-1.5 py-0.5 bg-[#4b8fff] rounded-md z-10 text-white text-nowrap"
+                        className="absolute border-2 border-white top-0 left-[6px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#4b8fff] rounded-[2px] rounded-br-md z-10 text-white text-nowrap"
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
                         }}
                       >
-                        {item.trigger}
+                        <div className="skew-x-[11deg]">{item.trigger}</div>
                       </div>
                     )}
 
                     {item.copy && (
                       <div
-                        className="absolute -bottom-1 -left-2 font-nexon-football-gothic font-bold text-lg px-1.5 py-0.5 bg-[#ffa24b] rounded-md z-10 text-white"
+                        className="absolute border-2 border-white bottom-0 left-[-5px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#ffa24b] rounded-[2px] rounded-tr-md z-10 text-white"
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
                         }}
                       >
-                        C
+                        <div className="skew-x-[11deg]">C</div>
                       </div>
                     )}
                   </div>

@@ -14,6 +14,7 @@ type RawTimelineStudentItem = RawBaseItem & {
   targetId?: string;
   trigger?: string;
   copy?: boolean;
+  variantId?: string;
 };
 
 export type TimelineStorageData = {
