@@ -4,6 +4,8 @@ import { StudentCard } from "@/components/common/student-card";
 import type { Student } from "@prisma/client";
 import type { RefObject } from "react";
 
+import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
+
 type BaseItem = {
   type: "student" | "separator" | "text";
   id: string;
@@ -108,8 +110,15 @@ export function TimelinePreview({
                       busy={busy}
                       student={item.student}
                       variantId={item.variantId}
-                      starter={item.copy}
                     />
+
+                    {item.copy && (
+                      <img
+                        src={skillcardCopyGlow.src}
+                        alt=""
+                        className="absolute top-0 left-0 right-0 bottom-0 skew-x-[-11deg]"
+                      />
+                    )}
 
                     {item.trigger && (
                       <div
@@ -120,18 +129,6 @@ export function TimelinePreview({
                         }}
                       >
                         <div className="skew-x-[11deg]">{item.trigger}</div>
-                      </div>
-                    )}
-
-                    {item.copy && (
-                      <div
-                        className="absolute border-2 border-primary bottom-0 left-[-5px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#ffa24b] rounded-[2px] rounded-tr-md z-10 text-white"
-                        style={{
-                          textShadow:
-                            "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
-                        }}
-                      >
-                        <div className="skew-x-[11deg]">C</div>
                       </div>
                     )}
                   </div>
