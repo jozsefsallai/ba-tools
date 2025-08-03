@@ -72,7 +72,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const timelineId = searchParams.get("id");
 
   const query = useQueryWithStatus(
-    api.timeline.getById,
+    api.timeline.getOwnById,
     timelineId && timelineId.length > 0
       ? {
           id: timelineId as Id<"timeline">,

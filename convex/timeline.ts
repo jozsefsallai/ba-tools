@@ -89,6 +89,18 @@ export const destroy = authenticatedMutation({
   },
 });
 
+export const getOwnById = authenticatedQuery({
+  args: { id: v.id("timeline") },
+  handler: async (ctx, { id }) => {
+    const timeline = await ctx.db.get(id);
+    if (!timeline || timeline.userId !== ctx.user._id) {
+      throw new Error("Timeline not found");
+    }
+
+    return timeline;
+  },
+});
+
 export const getById = query({
   args: { id: v.id("timeline") },
   handler: async (ctx, { id }) => {
