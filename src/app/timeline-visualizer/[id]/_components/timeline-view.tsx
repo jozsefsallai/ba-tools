@@ -65,6 +65,7 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
           target,
           copy: item.copy,
           trigger: item.trigger,
+          variantId: item.variantId,
         });
       } else {
         items.push({
