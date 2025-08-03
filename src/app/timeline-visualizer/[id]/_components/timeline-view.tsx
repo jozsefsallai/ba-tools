@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import slugify from "slugify";
 
 export type TimelineViewProps = {
   id: string;
@@ -94,10 +95,18 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
 
     const trimmedCanvas = trimTransparentPixels(canvas);
 
+    const trimmedName = (query.data?.name ?? "").trim();
+    const filename =
+      trimmedName.length > 0
+        ? slugify(trimmedName, {
+            lower: true,
+          })
+        : "timeline";
+
     const src = trimmedCanvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = src;
-    link.download = "timeline.png";
+    link.download = `${filename}.png`;
     link.click();
 
     setGenerationInProgress(false);
