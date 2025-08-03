@@ -61,6 +61,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hotkeys-hook": "^5.1.0",
+    "slugify": "^1.6.6",
     "sonner": "^2.0.1",
     "svix": "^1.69.0",
     "tailwind-merge": "^3.0.2",

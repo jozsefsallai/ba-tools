@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
+import slugify from "slugify";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -156,10 +157,18 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
     const trimmedCanvas = trimTransparentPixels(canvas);
 
+    const trimmedName = name.trim();
+    const filename =
+      trimmedName.length > 0
+        ? slugify(trimmedName, {
+            lower: true,
+          })
+        : "timeline";
+
     const src = trimmedCanvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = src;
-    link.download = "timeline.png";
+    link.download = `${filename}.png`;
     link.click();
 
     setGenerationInProgress(false);

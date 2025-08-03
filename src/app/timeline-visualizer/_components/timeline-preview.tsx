@@ -92,18 +92,9 @@ export function TimelinePreview({
                     onKeyUp={handleItemKeyUp(item)}
                   >
                     {item.target && (
-                      <div
-                        className="scale-75 absolute -bottom-16 left-1/2 -translate-x-1/2"
-                        style={{
-                          marginLeft:
-                            idx === 0 || items[idx - 1].type !== "student"
-                              ? "-8px"
-                              : itemSpacing < 0
-                                ? `${itemSpacing + 8}px`
-                                : "-8px",
-                        }}
-                      >
+                      <div className="scale-75 absolute -bottom-14 left-1/2 -translate-x-1/2 -ml-2">
                         <StudentCard
+                          isSkillCard
                           noDisplayRole
                           busy={busy}
                           student={item.target}
@@ -122,7 +113,7 @@ export function TimelinePreview({
 
                     {item.trigger && (
                       <div
-                        className="absolute border-2 border-white top-0 left-[6px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#4b8fff] rounded-[2px] rounded-br-md z-10 text-white text-nowrap"
+                        className="absolute border-2 border-primary top-0 left-[6px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#4b8fff] rounded-[2px] rounded-br-md z-10 text-white text-nowrap"
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
@@ -134,7 +125,7 @@ export function TimelinePreview({
 
                     {item.copy && (
                       <div
-                        className="absolute border-2 border-white bottom-0 left-[-5px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#ffa24b] rounded-[2px] rounded-tr-md z-10 text-white"
+                        className="absolute border-2 border-primary bottom-0 left-[-5px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#ffa24b] rounded-[2px] rounded-tr-md z-10 text-white"
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
