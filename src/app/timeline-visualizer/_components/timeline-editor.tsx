@@ -36,6 +36,7 @@ import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import slugify from "slugify";
+import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -536,71 +537,83 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
       <TimelineQuickAdd students={uniqueStudents} onStudentClick={addStudent} />
 
-      <div className="flex gap-4 justify-center items-center">
-        <StudentPicker
-          students={allStudents}
-          onStudentSelected={addStudent}
-          className="w-[200px] md:w-[250px]"
-        >
-          <Button
-            variant="outline"
-            className="w-[200px] md:w-[250px] justify-between"
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-4 justify-center items-center">
+          <StudentPicker
+            students={allStudents}
+            onStudentSelected={addStudent}
+            className="w-[200px] md:w-[250px]"
           >
-            Add Student
-            <ChevronsUpDownIcon />
-          </Button>
-        </StudentPicker>
+            <Button
+              variant="outline"
+              className="w-[200px] md:w-[250px] justify-between"
+            >
+              Add Student
+              <ChevronsUpDownIcon />
+            </Button>
+          </StudentPicker>
+
+          <div className="flex gap-4 items-center justify-center">
+            <Button
+              variant="outline"
+              onClick={() => addSeparator("horizontal")}
+            >
+              Add Horizontal Separator
+            </Button>
+
+            <Button variant="outline" onClick={() => addSeparator("vertical")}>
+              Add Vertical Separator
+            </Button>
+
+            <Button variant="outline" onClick={addText}>
+              Add Text
+            </Button>
+          </div>
+        </div>
 
         <div className="flex gap-4 items-center justify-center">
-          <Button variant="outline" onClick={() => addSeparator("horizontal")}>
-            Add Horizontal Separator
+          <Button variant="outline" onClick={loadTimelineFromStorage}>
+            Load Local
           </Button>
 
-          <Button variant="outline" onClick={() => addSeparator("vertical")}>
-            Add Vertical Separator
-          </Button>
-
-          <Button variant="outline" onClick={addText}>
-            Add Text
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex gap-4 items-center justify-center">
-        <Button variant="outline" onClick={loadTimelineFromStorage}>
-          Load Local
-        </Button>
-
-        <Button variant="outline" onClick={() => saveTimelineToLocalStorage()}>
-          Save Local
-        </Button>
-
-        <Authenticated>
           <Button
             variant="outline"
-            onClick={createOrUpdateCloudTimeline}
-            disabled={generationInProgress}
+            onClick={() => saveTimelineToLocalStorage()}
           >
-            {timelineId ? "Update Cloud Data" : "Save to Cloud"}
+            Save Local
           </Button>
-        </Authenticated>
 
-        <ExportTimelineDataDialog
-          onBeforeLoad={() => saveTimelineToLocalStorage(false)}
-        >
-          <Button variant="outline">Export</Button>
-        </ExportTimelineDataDialog>
+          <Authenticated>
+            <Button
+              variant="outline"
+              onClick={createOrUpdateCloudTimeline}
+              disabled={generationInProgress}
+            >
+              {timelineId ? "Update Cloud Data" : "Save to Cloud"}
+            </Button>
+          </Authenticated>
 
-        <ImportTimelineDataDialog onComplete={loadTimelineFromStorage}>
-          <Button variant="outline">Import</Button>
-        </ImportTimelineDataDialog>
+          <ExportTimelineDataDialog
+            onBeforeLoad={() => saveTimelineToLocalStorage(false)}
+          >
+            <Button variant="outline">Export</Button>
+          </ExportTimelineDataDialog>
 
-        <Button
-          onClick={getTimelineImage}
-          disabled={items.length === 0 || generationInProgress}
-        >
-          Download Image
-        </Button>
+          <ImportTimelineDataDialog onComplete={loadTimelineFromStorage}>
+            <Button variant="outline">Import</Button>
+          </ImportTimelineDataDialog>
+        </div>
+
+        <div className="flex gap-4 items-center justify-center">
+          <CopyTextTimelineButton items={items} />
+
+          <Button
+            onClick={getTimelineImage}
+            disabled={items.length === 0 || generationInProgress}
+          >
+            Download Image
+          </Button>
+        </div>
       </div>
 
       {items.length > 0 && <Separator />}

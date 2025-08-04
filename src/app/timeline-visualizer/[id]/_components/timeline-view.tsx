@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import slugify from "slugify";
+import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 
 export type TimelineViewProps = {
   id: string;
@@ -165,12 +166,16 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
           </Select>
         </div>
 
-        <Button
-          onClick={getTimelineImage}
-          disabled={items.length === 0 || generationInProgress}
-        >
-          Download Image
-        </Button>
+        <div className="flex gap-4 items-center justify-center">
+          <CopyTextTimelineButton items={items} />
+
+          <Button
+            onClick={getTimelineImage}
+            disabled={items.length === 0 || generationInProgress}
+          >
+            Download Image
+          </Button>
+        </div>
       </div>
     </div>
   );
