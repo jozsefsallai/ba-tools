@@ -6,14 +6,62 @@ import { db } from "@/lib/db";
 import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
+import { auth } from "@clerk/nextjs/server";
 
-export const metadata: Metadata = {
-  title: "Timeline Visualizer - Joe's Blue Archive Tools",
-  description: "Create a visual rotation timeline.",
-  twitter: {
-    card: "summary",
-  },
+type PageSearchParams = {
+  id?: string;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<PageSearchParams>;
+}): Promise<Metadata> {
+  const fallback: Metadata = {
+    title: "Timeline Visualizer - Joe's Blue Archive Tools",
+    description: "Create a visual rotation timeline.",
+    twitter: {
+      card: "summary",
+    },
+  };
+
+  const params = await searchParams;
+
+  if (!params.id) {
+    return fallback;
+  }
+
+  try {
+    const token = await (await auth()).getToken({ template: "convex" });
+
+    if (!token) {
+      return fallback;
+    }
+
+    const timeline = await fetchQuery(
+      api.timeline.getOwnById,
+      {
+        id: params.id as Id<"timeline">,
+      },
+      {
+        token,
+      },
+    );
+
+    return {
+      title: `${timeline.name ?? "Untitled Timeline"} - Joe's Blue Archive Tools`,
+      description: "Create a visual rotation timeline.",
+      twitter: {
+        card: "summary",
+      },
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 export default async function TimelineVisualizerPage() {
   const allStudents = await db.student.findMany({

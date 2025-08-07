@@ -2,19 +2,68 @@ import { FormationEditor } from "@/app/formation-display/_components/formation-e
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
+import { auth } from "@clerk/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
 import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
 
-export const metadata: Metadata = {
-  title: "Formation Display - Joe's Blue Archive Tools",
-  description:
-    "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
-  twitter: {
-    card: "summary",
-  },
+type PageSearchParams = {
+  id?: string;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<PageSearchParams>;
+}): Promise<Metadata> {
+  const fallback: Metadata = {
+    title: "Formation Display - Joe's Blue Archive Tools",
+    description:
+      "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
+    twitter: {
+      card: "summary",
+    },
+  };
+
+  const params = await searchParams;
+
+  if (!params.id) {
+    return fallback;
+  }
+
+  try {
+    const token = await (await auth()).getToken({ template: "convex" });
+
+    if (!token) {
+      return fallback;
+    }
+
+    const formation = await fetchQuery(
+      api.formation.getById,
+      {
+        id: params.id as Id<"formation">,
+      },
+      {
+        token,
+      },
+    );
+
+    return {
+      title: `${formation.name ?? "Untitled Formation"} - Joe's Blue Archive Tools`,
+      description:
+        "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
+      twitter: {
+        card: "summary",
+      },
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 export default async function FormationDisplayPage() {
   const allStudents = await db.student.findMany({

@@ -32,6 +32,7 @@ import { Authenticated, useMutation } from "convex/react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { MessageBox } from "@/components/common/message-box";
+import { clearCache } from "@/lib/cache";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -200,6 +201,8 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         id: formationId as Id<"formation">,
         ...data,
       });
+
+      await clearCache(`/formation-display?id=${formationId}`);
 
       toast.success("Formation updated successfully.");
     } else {

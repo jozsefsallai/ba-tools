@@ -37,6 +37,7 @@ import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
+import { clearCache } from "@/lib/cache";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -211,6 +212,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         id: timelineId as Id<"timeline">,
         ...data,
       });
+
+      await clearCache(`/timeline-visualizer?id=${timelineId}`);
 
       toast.success("Timeline saved successfully.");
     } else {
