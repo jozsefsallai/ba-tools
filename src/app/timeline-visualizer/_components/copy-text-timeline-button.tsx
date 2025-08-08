@@ -35,14 +35,18 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
         let ex = "";
 
         if (item.trigger) {
-          ex += `\n${item.trigger} `;
+          if (item.trigger.includes(" ")) {
+            ex += `\n[${item.trigger}] `;
+          } else {
+            ex += `\n${item.trigger} `;
+          }
         }
-
-        ex += `${shorthand} `;
 
         if (item.target) {
           const targetShorthand = getShorthand(item.target);
-          ex += `(${targetShorthand}) `;
+          ex += `(${shorthand} → ${targetShorthand}) `;
+        } else {
+          ex += `${shorthand} `;
         }
 
         if (item.copy) {
