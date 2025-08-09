@@ -1,6 +1,7 @@
 "use client";
 
 import type { TimelineItem as TimelineItemType } from "@/app/timeline-visualizer/_components/timeline-preview";
+import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
 import { StudentCard } from "@/components/common/student-card";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
 import { ChevronsUpDownIcon, GripVerticalIcon, XIcon } from "lucide-react";
 import { useMemo } from "react";
+import { v4 as uuid } from "uuid";
 
 export type TimelineItemProps = {
   item: TimelineItemType;
@@ -29,6 +31,7 @@ export type TimelineItemProps = {
     item: TimelineItemType,
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
+  onWantsToAddBelow?(below: TimelineItemType, item: TimelineItemType): void;
   allStudents?: Student[];
   uniqueStudents?: Student[];
   highlighted?: boolean;
@@ -38,6 +41,7 @@ export function TimelineItem({
   item,
   onWantsToRemove,
   onWantsToUpdate,
+  onWantsToAddBelow,
   allStudents = [],
   uniqueStudents = [],
   highlighted = false,
@@ -72,6 +76,30 @@ export function TimelineItem({
     onWantsToUpdate(item, { target: student });
   }
 
+  function insertStudentBelow(student: Student) {
+    return onWantsToAddBelow?.(item, {
+      type: "student",
+      id: uuid(),
+      student,
+    });
+  }
+
+  function insertSeparatorBelow(orientation: "horizontal" | "vertical") {
+    return onWantsToAddBelow?.(item, {
+      type: "separator",
+      id: uuid(),
+      orientation,
+    });
+  }
+
+  function insertTextBelow() {
+    return onWantsToAddBelow?.(item, {
+      type: "text",
+      id: uuid(),
+      text: "Enter text",
+    });
+  }
+
   const skillVariants = useMemo(() => {
     if (item.type !== "student") {
       return [];
@@ -88,7 +116,7 @@ export function TimelineItem({
   return (
     <article
       ref={setNodeRef}
-      className="bg-background relative border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      className="bg-background relative border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 group"
       style={style}
       id={item.id}
       {...attributes}
@@ -249,6 +277,43 @@ export function TimelineItem({
             Remove
           </Button>
         </div>
+      </div>
+
+      <div className="hidden group-hover:flex items-center gap-2 absolute -top-4 right-4 border rounded-md shadow-md bg-background py-1 px-3 text-xs">
+        <strong>Add Below</strong>
+
+        <TimelineQuickAdd
+          students={uniqueStudents}
+          onStudentClick={insertStudentBelow}
+          small
+        />
+
+        <button
+          type="button"
+          className="skew-x-[-11deg] rounded-[11%] w-[30px] h-[26px] hover:bg-secondary border flex items-center justify-center cursor-pointer"
+          onClick={() => insertSeparatorBelow("horizontal")}
+          title="Insert Horizontal Separator"
+        >
+          <div className="skew-x-[11deg] text-xs font-bold">HS</div>
+        </button>
+
+        <button
+          type="button"
+          className="skew-x-[-11deg] rounded-[11%] w-[30px] h-[26px] hover:bg-secondary border flex items-center justify-center cursor-pointer"
+          onClick={() => insertSeparatorBelow("vertical")}
+          title="Insert Vertical Separator"
+        >
+          <div className="skew-x-[11deg] text-xs font-bold">VS</div>
+        </button>
+
+        <button
+          type="button"
+          className="skew-x-[-11deg] rounded-[11%] w-[30px] h-[26px] hover:bg-secondary border flex items-center justify-center cursor-pointer"
+          onClick={insertTextBelow}
+          title="Insert Text Item"
+        >
+          <div className="skew-x-[11deg] text-xs font-bold">T</div>
+        </button>
       </div>
     </article>
   );

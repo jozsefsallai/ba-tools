@@ -31,6 +31,7 @@ export type TimelineItemContainerProps = {
     item: TimelineItemType,
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
+  addItemBelow?: (below: TimelineItemType, item: TimelineItemType) => void;
   allStudents?: Student[];
   uniqueStudents?: Student[];
   highlightedId?: string | null;
@@ -41,6 +42,7 @@ export function TimelineItemContainer({
   setItems,
   onWantsToRemove,
   onWantsToUpdate,
+  addItemBelow,
   allStudents = [],
   uniqueStudents = [],
   highlightedId,
@@ -76,13 +78,14 @@ export function TimelineItemContainer({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col-reverse gap-4">
+        <div className="flex flex-col-reverse gap-5">
           {items.map((item, idx) => (
             <TimelineItem
               key={idx}
               item={item}
               onWantsToRemove={onWantsToRemove}
               onWantsToUpdate={onWantsToUpdate}
+              onWantsToAddBelow={addItemBelow}
               allStudents={allStudents}
               uniqueStudents={uniqueStudents}
               highlighted={highlightedId === item.id}

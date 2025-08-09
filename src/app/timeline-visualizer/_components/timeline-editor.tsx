@@ -143,6 +143,19 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     );
   }
 
+  function addItemBelow(below: TimelineItem, item: TimelineItem) {
+    setItems((prev) => {
+      const index = prev.findIndex((i) => i.id === below.id);
+      if (index === -1) {
+        return prev;
+      }
+
+      const newItems = [...prev];
+      newItems.splice(index, 0, item);
+      return newItems;
+    });
+  }
+
   async function getTimelineImage() {
     if (!containerRef.current || generationInProgress) {
       return;
@@ -628,6 +641,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             setItems={setItems}
             onWantsToRemove={removeItem}
             onWantsToUpdate={updateItem}
+            addItemBelow={addItemBelow}
             allStudents={allStudents}
             uniqueStudents={uniqueStudents}
             highlightedId={highlightedId}
