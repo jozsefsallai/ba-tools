@@ -23,6 +23,7 @@ export type StudentItem = BaseItem & {
 export type SeparatorItem = BaseItem & {
   type: "separator";
   orientation: "horizontal" | "vertical";
+  size?: number;
 };
 
 export type TextItem = BaseItem & {
@@ -145,11 +146,11 @@ export function TimelinePreview({
                     style={{
                       width:
                         item.orientation === "horizontal"
-                          ? `${horizontalSeparatorSize}px`
+                          ? `${item.size ?? horizontalSeparatorSize}px`
                           : undefined,
                       height:
                         item.orientation === "vertical"
-                          ? `${verticalSeparatorSize}px`
+                          ? `${item.size ?? verticalSeparatorSize}px`
                           : undefined,
                       flexBasis:
                         item.orientation === "vertical" ? "100%" : undefined,

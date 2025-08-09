@@ -21,7 +21,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
 import { ChevronsUpDownIcon, GripVerticalIcon, XIcon } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 export type TimelineItemProps = {
@@ -53,6 +53,13 @@ export function TimelineItem({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  const [separatorOverride, setSeparatorOverride] = useState(
+    item.type === "separator" && typeof item.size === "number",
+  );
+  const [separatorSizeStr, setSeparatorSizeStr] = useState<string | undefined>(
+    item.type === "separator" ? item.size?.toString() : undefined,
+  );
 
   function handleRemove() {
     onWantsToRemove(item);
@@ -112,6 +119,28 @@ export function TimelineItem({
 
     return variants;
   }, [item]);
+
+  useEffect(() => {
+    if (!separatorOverride) {
+      onWantsToUpdate(item, { size: undefined });
+    } else if (typeof separatorSizeStr === "string") {
+      const value = Number.parseInt(separatorSizeStr, 10);
+      if (!Number.isNaN(value)) {
+        onWantsToUpdate(item, { size: value });
+      }
+    }
+  }, [separatorOverride]);
+
+  useEffect(() => {
+    if (item.type !== "separator" || !separatorOverride) {
+      return;
+    }
+
+    const value = Number.parseInt(separatorSizeStr ?? "", 10);
+    if (!Number.isNaN(value)) {
+      onWantsToUpdate(item, { size: value });
+    }
+  }, [separatorSizeStr]);
 
   return (
     <article
@@ -252,10 +281,32 @@ export function TimelineItem({
           )}
 
           {item.type === "separator" && (
-            <div className="text-center text-xl text-muted-foreground">
-              {item.orientation === "horizontal" ? "Horizontal" : "Vertical"}{" "}
-              separator
-            </div>
+            <>
+              <div className="text-center text-xl text-muted-foreground">
+                {item.orientation === "horizontal" ? "Horizontal" : "Vertical"}{" "}
+                separator
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id={`sizeOverride-${item.id}`}
+                  checked={separatorOverride}
+                  onCheckedChange={(checked) => setSeparatorOverride(checked)}
+                />
+
+                <Label htmlFor={`sizeOverride-${item.id}`}>Override Size</Label>
+              </div>
+
+              {separatorOverride && (
+                <Input
+                  type="number"
+                  value={separatorSizeStr ?? ""}
+                  placeholder="Size in pixels"
+                  onChange={(e) => setSeparatorSizeStr(e.target.value)}
+                  className="w-32"
+                />
+              )}
+            </>
           )}
 
           {item.type === "text" && (

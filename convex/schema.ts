@@ -30,6 +30,7 @@ export const timelineSeparatorOrientation = v.union(
 export const timelineSeparatorItem = v.object({
   type: v.literal("separator"),
   orientation: timelineSeparatorOrientation,
+  size: v.optional(v.number()),
 });
 
 export const timelineTextItem = v.object({
