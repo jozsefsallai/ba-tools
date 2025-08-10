@@ -20,12 +20,18 @@ import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
-import { ChevronsUpDownIcon, GripVerticalIcon, XIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import {
+  ChevronsUpDownIcon,
+  CopyIcon,
+  GripVerticalIcon,
+  XIcon,
+} from "lucide-react";
+import { type SetStateAction, useEffect, useMemo, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 export type TimelineItemProps = {
   item: TimelineItemType;
+  setItems: React.Dispatch<SetStateAction<TimelineItemType[]>>;
   onWantsToRemove(item: TimelineItemType): void;
   onWantsToUpdate(
     item: TimelineItemType,
@@ -39,6 +45,7 @@ export type TimelineItemProps = {
 
 export function TimelineItem({
   item,
+  setItems,
   onWantsToRemove,
   onWantsToUpdate,
   onWantsToAddBelow,
@@ -105,6 +112,15 @@ export function TimelineItem({
       id: uuid(),
       text: "Enter text",
     });
+  }
+
+  function duplicate() {
+    const newItem: TimelineItemType = {
+      ...item,
+      id: uuid(),
+    };
+
+    setItems((prev) => [...prev, newItem]);
   }
 
   const skillVariants = useMemo(() => {
@@ -324,6 +340,10 @@ export function TimelineItem({
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <Button variant="outline" onClick={duplicate} title="Duplicate">
+            <CopyIcon />
+          </Button>
+
           <Button variant="destructive" onClick={handleRemove}>
             Remove
           </Button>

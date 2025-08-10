@@ -18,14 +18,11 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { Student } from "@prisma/client";
+import type { SetStateAction } from "react";
 
 export type TimelineItemContainerProps = {
   items: TimelineItemType[];
-  setItems: (
-    items:
-      | TimelineItemType[]
-      | ((items: TimelineItemType[]) => TimelineItemType[]),
-  ) => void;
+  setItems: React.Dispatch<SetStateAction<TimelineItemType[]>>;
   onWantsToRemove(item: TimelineItemType): void;
   onWantsToUpdate(
     item: TimelineItemType,
@@ -83,6 +80,7 @@ export function TimelineItemContainer({
             <TimelineItem
               key={idx}
               item={item}
+              setItems={setItems}
               onWantsToRemove={onWantsToRemove}
               onWantsToUpdate={onWantsToUpdate}
               onWantsToAddBelow={addItemBelow}
