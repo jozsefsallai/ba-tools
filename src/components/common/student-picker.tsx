@@ -9,7 +9,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
-import { getShorthand } from "@/lib/student-utils";
 import { commandScore } from "@/lib/text-score";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
@@ -127,7 +126,7 @@ export function StudentPicker<T extends Student>({
                       alt={student.name}
                       className="w-12"
                     />
-                    {getShorthand(student)}
+                    {student.name}
                   </div>
                 </CommandItem>
               ))}
