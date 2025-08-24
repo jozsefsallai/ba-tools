@@ -202,14 +202,27 @@ model Student {
   equipment               EquipmentKind[]
 
   // Gacha
-  rarity    Int
-  isWelfare Boolean
-  isLimited Boolean
-  isFest    Boolean
+  rarity Int
 
   isReleasedJP     Boolean @default(false)
   isReleasedGlobal Boolean @default(false)
   isReleasedCN     Boolean @default(false)
+
+  isWelfareJP     Boolean @default(false)
+  isWelfareGlobal Boolean @default(false)
+  isWelfareCN     Boolean @default(false)
+
+  isLimitedJP     Boolean @default(false)
+  isLimitedGlobal Boolean @default(false)
+  isLimitedCN     Boolean @default(false)
+
+  isFestJP     Boolean @default(false)
+  isFestGlobal Boolean @default(false)
+  isFestCN     Boolean @default(false)
+
+  isArchiveJP     Boolean @default(false)
+  isArchiveGlobal Boolean @default(false)
+  isArchiveCN     Boolean @default(false)
 
   searchTags String[]
 
