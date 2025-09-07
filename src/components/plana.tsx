@@ -33,6 +33,16 @@ export function Plana({
   }, [canvasRef]);
 
   useEffect(() => {
+    if (!expression) {
+      return;
+    }
+
+    if (planaRef.current) {
+      planaRef.current.setExpression(expression);
+    }
+  }, [expression]);
+
+  useEffect(() => {
     return () => {
       if (planaRef.current) {
         planaRef.current.deinit();

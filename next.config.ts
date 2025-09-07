@@ -25,6 +25,19 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback.fs = false;
+    }
+
+    config.module.rules.push({
+      test: /\.node$/,
+      use: "node-loader",
+    });
+
+    return config;
+  },
+
   async rewrites() {
     return [
       {

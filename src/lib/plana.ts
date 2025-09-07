@@ -1,11 +1,38 @@
 import { SpineRenderer } from "@/lib/spine";
 import type { Bone } from "@esotericsoftware/spine-pixi-v7";
 
+import { z } from "zod";
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-export type PlanaExpression = "idle" | "confused";
+export const planaExpressions = z.enum([
+  "idle", // 01
+  "slight_smile", // 03
+  "serious", // 04
+  "yelling", // 05
+  "worried", // 06
+  "shocked", // 07
+  "shocked_normal_halo", // 08
+  "sparkly_eyes", // 09
+  "loudly_yelling", // 10
+  "attentive", // 11
+  "sad", // 12
+  "disappointed", // 12
+  "confused", // 13
+  "embarrassed", // 14
+  "mouth_open", // 15
+  "happy", // 16
+  "loved", // 17
+  "intense_stare", // 19
+  "mad", // 20
+  "sleeping", // 99
+  "thinking", // 99
+  "closed_eyes", // 99
+]);
+
+export type PlanaExpression = z.infer<typeof planaExpressions>;
 
 export type PlanaOpts = {
   expression?: PlanaExpression;
@@ -52,7 +79,27 @@ export class Plana {
 
   static EXPRESSION_ANIM_MAP: Record<PlanaExpression, string> = {
     idle: "Idle_01",
+    slight_smile: "03",
+    serious: "04",
+    yelling: "05",
+    worried: "06",
+    shocked: "07",
+    shocked_normal_halo: "08",
+    sparkly_eyes: "09",
+    loudly_yelling: "10",
+    attentive: "11",
+    sad: "12",
+    disappointed: "12",
     confused: "13",
+    embarrassed: "14",
+    mouth_open: "15",
+    happy: "16",
+    loved: "17",
+    intense_stare: "19",
+    mad: "20",
+    sleeping: "99",
+    thinking: "99",
+    closed_eyes: "99",
   };
 
   constructor(canvas: HTMLCanvasElement, opts: PlanaOpts = {}) {
@@ -90,10 +137,6 @@ export class Plana {
       startAnim: Plana.EXPRESSION_ANIM_MAP.idle,
     });
 
-    if (this.expression !== "idle") {
-      this.renderer.playAnimation(1, this.expressionAnim, true);
-    }
-
     this.touchPoint = this.renderer.findBone("Touch_Point") as Bone | null;
     if (this.touchPoint) {
       this.originalX = this.touchPoint.x;
@@ -114,12 +157,7 @@ export class Plana {
 
     window.addEventListener("resize", this.handleResize.bind(this));
 
-    if (this.expression !== "confused") {
-      this.blinkIntervalId = setInterval(
-        this.blink.bind(this),
-        Plana.BLINK_INTERVAL,
-      );
-    }
+    this.refreshExpression();
 
     this.drawHeadpatHitboxForDebugging();
   }
@@ -153,6 +191,38 @@ export class Plana {
     if (this.blinkIntervalId) {
       clearInterval(this.blinkIntervalId);
     }
+  }
+
+  async refreshExpression() {
+    if (this.expression !== "idle") {
+      this.renderer.playAnimation(1, this.expressionAnim, true);
+    } else {
+      this.renderer.stopAnimation(1);
+    }
+
+    if (this.expression === "idle") {
+      this.blinkIntervalId = setInterval(
+        this.blink.bind(this),
+        Plana.BLINK_INTERVAL,
+      );
+    } else if (this.blinkIntervalId) {
+      clearInterval(this.blinkIntervalId);
+      this.blinkIntervalId = null;
+    }
+  }
+
+  async setExpression(expression: PlanaExpression) {
+    if (this.expression === expression) {
+      return;
+    }
+
+    this.expression = expression;
+
+    if (this.isPatting) {
+      this.unpat();
+    }
+
+    await this.refreshExpression();
   }
 
   private get width() {
@@ -295,7 +365,7 @@ export class Plana {
 
     this.isPatting = false;
 
-    if (this.expression !== "confused") {
+    if (this.expression === "idle") {
       this.renderer.playAnimation(2, "PatEnd_01_M", false);
       this.renderer.playAnimation(3, "PatEnd_01_A", false);
     }
