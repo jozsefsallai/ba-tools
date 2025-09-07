@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -7,7 +8,7 @@ import type { RefObject } from "react";
 
 export type StudentItem = {
   id: string;
-  student: Student;
+  student?: Student;
   starter?: boolean;
   starLevel?: StarLevel;
   ueLevel?: UELevel;
@@ -76,14 +77,19 @@ export function FormationPreview({
           )}
 
           <div className="flex items-center gap-[2px]">
-            {strikers.map((student) => (
-              <StudentCard
-                key={student.student.id}
-                noDisplayRole={noDisplayRole}
-                busy={busy}
-                {...student}
-              />
-            ))}
+            {strikers.map((entry) =>
+              entry.student ? (
+                <StudentCard
+                  key={entry.id}
+                  noDisplayRole={noDisplayRole}
+                  busy={busy}
+                  student={entry.student}
+                  {...entry}
+                />
+              ) : (
+                <EmptyCard key={entry.id} />
+              ),
+            )}
           </div>
         </div>
 
@@ -96,14 +102,19 @@ export function FormationPreview({
           )}
 
           <div className="flex items-center gap-[2px]">
-            {specials.map((student) => (
-              <StudentCard
-                key={student.student.id}
-                noDisplayRole={noDisplayRole}
-                busy={busy}
-                {...student}
-              />
-            ))}
+            {specials.map((entry) =>
+              entry.student ? (
+                <StudentCard
+                  key={entry.id}
+                  noDisplayRole={noDisplayRole}
+                  busy={busy}
+                  student={entry.student}
+                  {...entry}
+                />
+              ) : (
+                <EmptyCard key={entry.id} />
+              ),
+            )}
           </div>
         </div>
       </div>

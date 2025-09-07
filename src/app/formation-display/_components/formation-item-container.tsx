@@ -55,10 +55,8 @@ export function FormationItemContainer({
     }
 
     setItems((current) => {
-      const oldIndex = current.findIndex(
-        (item) => item.student.id === active.id,
-      );
-      const newIndex = current.findIndex((item) => item.student.id === over.id);
+      const oldIndex = current.findIndex((item) => item.id === active.id);
+      const newIndex = current.findIndex((item) => item.id === over.id);
 
       return arrayMove(current, oldIndex, newIndex);
     });

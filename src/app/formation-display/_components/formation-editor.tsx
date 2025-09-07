@@ -18,7 +18,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChevronsUpDownIcon } from "lucide-react";
+import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
 
 import { sleep } from "@/lib/sleep";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { MessageBox } from "@/components/common/message-box";
 import { clearCache } from "@/lib/cache";
+import { v4 as uuid } from "uuid";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -74,12 +75,12 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
   function addStudent(student: Student) {
     const item: StudentItem = {
-      id: student.id,
+      id: uuid(),
       student,
     };
 
     if (student.combatClass === "Main") {
-      if (strikers.find((item) => item.student === student)) {
+      if (strikers.find((item) => item.student?.id === student.id)) {
         return;
       }
 
@@ -87,7 +88,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     }
 
     if (student.combatClass === "Support") {
-      if (specials.find((item) => item.student === student)) {
+      if (specials.find((item) => item.student?.id === student.id)) {
         return;
       }
 
@@ -100,11 +101,11 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     studentItem: StudentItem,
   ) {
     if (combatClass === "striker") {
-      setStrikers((prev) => prev.filter((item) => item !== studentItem));
+      setStrikers((prev) => prev.filter((item) => item.id !== studentItem.id));
     }
 
     if (combatClass === "special") {
-      setSpecials((prev) => prev.filter((item) => item !== studentItem));
+      setSpecials((prev) => prev.filter((item) => item.id !== studentItem.id));
     }
   }
 
@@ -116,7 +117,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     if (combatClass === "striker") {
       setStrikers((prev) =>
         prev.map((item) => {
-          if (item === studentItem) {
+          if (item.id === studentItem.id) {
             return {
               ...item,
               ...newData,
@@ -131,7 +132,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     if (combatClass === "special") {
       setSpecials((prev) =>
         prev.map((item) => {
-          if (item === studentItem) {
+          if (item.id === studentItem.id) {
             return {
               ...item,
               ...newData,
@@ -141,6 +142,20 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
           return item;
         }),
       );
+    }
+  }
+
+  function addEmptyCard(combatClass: CombatClass) {
+    const item: StudentItem = {
+      id: uuid(),
+    };
+
+    if (combatClass === "striker") {
+      setStrikers((prev) => [...prev, item]);
+    }
+
+    if (combatClass === "special") {
+      setSpecials((prev) => [...prev, item]);
     }
   }
 
@@ -176,7 +191,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
     const data = {
       name: name.length > 0 ? name : undefined,
       strikers: strikers.map((item) => ({
-        studentId: item.student.id,
+        studentId: item.student?.id,
         starter: item.starter,
         starLevel: item.starLevel,
         ueLevel: item.ueLevel,
@@ -184,7 +199,7 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         level: item.level,
       })),
       specials: specials.map((item) => ({
-        studentId: item.student.id,
+        studentId: item.student?.id,
         starter: item.starter,
         starLevel: item.starLevel,
         ueLevel: item.ueLevel,
@@ -239,13 +254,17 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
         if (student) {
           newStrikers.push({
-            id: student.id,
+            id: uuid(),
             student,
             starter: item.starter,
             starLevel: item.starLevel,
             ueLevel: item.ueLevel,
             borrowed: item.borrowed,
             level: item.level,
+          });
+        } else {
+          newStrikers.push({
+            id: uuid(),
           });
         }
       }
@@ -255,13 +274,17 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
 
         if (student) {
           newSpecials.push({
-            id: student.id,
+            id: uuid(),
             student,
             starter: item.starter,
             starLevel: item.starLevel,
             ueLevel: item.ueLevel,
             borrowed: item.borrowed,
             level: item.level,
+          });
+        } else {
+          newSpecials.push({
+            id: uuid(),
           });
         }
       }
@@ -374,6 +397,16 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
               <ChevronsUpDownIcon />
             </Button>
           </StudentPicker>
+
+          <Button variant="outline" onClick={() => addEmptyCard("striker")}>
+            <PlusIcon />
+            Empty Striker
+          </Button>
+
+          <Button variant="outline" onClick={() => addEmptyCard("special")}>
+            <PlusIcon />
+            Empty Special
+          </Button>
         </div>
       </div>
 

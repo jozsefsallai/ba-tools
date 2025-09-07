@@ -11,6 +11,7 @@ import type { FunctionReturnType } from "convex/server";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
+import { v4 as uuid } from "uuid";
 
 export type FormationEntryProps = {
   allStudents: Student[];
@@ -29,13 +30,17 @@ export function FormationEntry({ allStudents, entry }: FormationEntryProps) {
       const student = allStudents.find((s) => s.id === item.studentId);
       if (student) {
         output.push({
-          id: student.id,
+          id: uuid(),
           student,
           starter: item.starter,
           starLevel: item.starLevel,
           ueLevel: item.ueLevel,
           borrowed: item.borrowed,
           level: item.level,
+        });
+      } else {
+        output.push({
+          id: uuid(),
         });
       }
     }
@@ -50,13 +55,17 @@ export function FormationEntry({ allStudents, entry }: FormationEntryProps) {
       const student = allStudents.find((s) => s.id === item.studentId);
       if (student) {
         output.push({
-          id: student.id,
+          id: uuid(),
           student,
           starter: item.starter,
           starLevel: item.starLevel,
           ueLevel: item.ueLevel,
           borrowed: item.borrowed,
           level: item.level,
+        });
+      } else {
+        output.push({
+          id: uuid(),
         });
       }
     }

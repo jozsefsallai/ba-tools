@@ -3,7 +3,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export const formationStudentItem = v.object({
-  studentId: v.string(),
+  studentId: v.optional(v.string()),
   starter: v.optional(v.boolean()),
   starLevel: v.optional(
     v.union(...STAR_LEVELS.map((level) => v.literal(level))),
