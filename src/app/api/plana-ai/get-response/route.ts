@@ -2,6 +2,10 @@ import { getPlanaResponse } from "@/lib/ai/chat";
 import type { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
+  if (process.env.PLANA_AI_ENABLED !== "true") {
+    return new Response("Plana AI is disabled", { status: 503 });
+  }
+
   const { input } = await req.json();
 
   if (!input || typeof input !== "string") {
