@@ -63,7 +63,7 @@ export function StudentCard({
       <div
         className={cn("skew-x-[-11deg] p-[2px]", {
           "rounded-[11%]": !isSkillCard,
-          "rounded-[2px] p-[2px] bg-primary": isSkillCard,
+          "rounded-[2px] p-[2px] bg-black dark:bg-white": isSkillCard,
           "p-[2px] bg-[#ffff4d]": starter && !isSkillCard,
           "p-[1px] bg-white": !starter && !isSkillCard,
         })}
