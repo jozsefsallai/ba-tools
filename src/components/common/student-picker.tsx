@@ -85,6 +85,17 @@ export function StudentPicker<T extends Student>({
     setSearchInput(value);
   }
 
+  function openAndStartTyping(e: React.KeyboardEvent) {
+    if (studentPopoverOpen) {
+      return;
+    }
+
+    if (e.key.length === 1 && e.key.match(/\S/)) {
+      setStudentPopoverOpen(true);
+      setSearchInput(e.key);
+    }
+  }
+
   useEffect(() => {
     if (!studentPopoverOpen) {
       setSearchInput("");
@@ -93,7 +104,9 @@ export function StudentPicker<T extends Student>({
 
   return (
     <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverTrigger asChild onKeyDown={openAndStartTyping}>
+        {children}
+      </PopoverTrigger>
 
       <PopoverContent
         className={cn("z-10 p-0 border rounded-md mt-1", className)}
