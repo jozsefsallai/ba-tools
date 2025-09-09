@@ -239,6 +239,8 @@ model Student {
   bannersPickup              Banner[] @relation("PickupPoolStudents")
   bannersExtra               Banner[] @relation("ExtraPoolStudents")
   bannersAdditionalThreeStar Banner[] @relation("AdditionalThreeStarStudents")
+
+  gameBanners GameBanner[] @relation("GameBannerPickup")
 }
 
 model Skill {
@@ -299,4 +301,16 @@ model Banner {
   baseThreeStarRate Int @default(30)
 
   kind BannerKind
+}
+
+model GameBanner {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  id String @id @default(cuid())
+
+  startDate DateTime
+  endDate   DateTime
+
+  pickupStudents Student[] @relation("GameBannerPickup")
 }
