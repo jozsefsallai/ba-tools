@@ -57,6 +57,13 @@ export default defineSchema({
     externalId: v.string(),
   }).index("by_externalId", ["externalId"]),
 
+  settings: defineTable({
+    userId: v.id("users"),
+    timelineVisualizer: v.object({
+      triggerAutoFocus: v.boolean(),
+    }),
+  }).index("by_userId", ["userId"]),
+
   formation: defineTable({
     userId: v.id("users"),
     name: v.optional(v.string()),
