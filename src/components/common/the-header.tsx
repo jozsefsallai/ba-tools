@@ -55,6 +55,10 @@ const MISC_TOOLS: NavLink[] = [
     href: "/scenario-image-generator",
     text: "Scenario Image Generator",
   },
+  {
+    href: "/global/banners",
+    text: "Upcoming Global Banners",
+  },
 ];
 
 const LINKS: NavLink[] = [...GAMEPLAY_TOOLS, ...MISC_TOOLS];

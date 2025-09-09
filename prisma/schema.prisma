@@ -312,5 +312,7 @@ model GameBanner {
   startDate DateTime
   endDate   DateTime
 
+  freePulls Int @default(0)
+
   pickupStudents Student[] @relation("GameBannerPickup")
 }
