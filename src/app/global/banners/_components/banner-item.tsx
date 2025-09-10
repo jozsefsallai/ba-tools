@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { GameBanner, Student } from "@prisma/client";
 import { InfoIcon } from "lucide-react";
 
@@ -26,8 +27,23 @@ export function BannerItem({ banner }: BannerItemProps) {
         >
           <TooltipProvider>
             <div className="flex items-center gap-4 md:gap-6">
-              <div style={{ zoom: 0.85 }}>
-                <StudentCard student={student} />
+              <div className="relative">
+                <div style={{ zoom: 0.85 }}>
+                  <StudentCard student={student} />
+                </div>
+
+                <Badge
+                  className={cn(
+                    "absolute -top-2 -left-2 border-2 border-white shadow-md",
+                    {
+                      "bg-purple-700": student.rarity === 3,
+                      "bg-yellow-700": student.rarity === 2,
+                      "bg-blue-700": student.rarity === 1,
+                    },
+                  )}
+                >
+                  {student.rarity}★
+                </Badge>
               </div>
 
               <div className="flex flex-col gap-2">
