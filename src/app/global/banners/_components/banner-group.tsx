@@ -60,9 +60,11 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
 
       <CardContent className="flex-1">
         <div className="flex flex-col gap-4">
-          {banners.map((banner) => (
-            <BannerItem key={banner.id} banner={banner} />
-          ))}
+          {banners
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+            .map((banner) => (
+              <BannerItem key={banner.id} banner={banner} />
+            ))}
         </div>
       </CardContent>
 
