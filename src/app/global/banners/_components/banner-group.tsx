@@ -37,8 +37,8 @@ function distanceFromNow(date: number) {
 }
 
 export function BannerGroup({ dates, banners }: BannerGroupProps) {
-  const formattedStartDate = format(new Date(dates[0]), "MMMM d, yyyy");
-  const formattedEndDate = format(new Date(dates[1]), "MMMM d, yyyy");
+  const formattedStartDate = format(new Date(dates[0]), "MMM d, yyyy");
+  const formattedEndDate = format(new Date(dates[1]), "MMM d, yyyy");
 
   const distanceDays = distanceFromNow(dates[0]);
 
@@ -47,12 +47,14 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm md:text-lg flex justify-between gap-4">
-          <div>
+        <CardTitle className="flex items-center justify-between gap-4">
+          <div className="text-sm md:text-lg">
             {formattedStartDate} - {formattedEndDate}
           </div>
 
-          <div>{distanceDays}</div>
+          <div className="text-sm md:text-base text-muted-foreground">
+            {distanceDays}
+          </div>
         </CardTitle>
       </CardHeader>
 
@@ -65,7 +67,8 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
       </CardContent>
 
       <CardFooter className="text-sm text-muted-foreground self-end">
-        This banner lasts for&nbsp;<strong>{durationDays} days</strong>.
+        {banners.length === 1 ? "This banner lasts" : "These banners last"}{" "}
+        for&nbsp;<strong>{durationDays} days</strong>.
       </CardFooter>
     </Card>
   );

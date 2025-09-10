@@ -1,7 +1,14 @@
 import { StudentCard } from "@/components/common/student-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { GameBanner, Student } from "@prisma/client";
+import { InfoIcon } from "lucide-react";
 
 export type BannerItemProps = {
   banner: GameBanner & {
@@ -17,31 +24,90 @@ export function BannerItem({ banner }: BannerItemProps) {
           key={student.id}
           className="flex flex-col md:flex-row gap-4 md:items-center justify-between"
         >
-          <div className="flex items-center gap-4 md:gap-6">
-            <StudentCard student={student} />
+          <TooltipProvider>
+            <div className="flex items-center gap-4 md:gap-6">
+              <div style={{ zoom: 0.85 }}>
+                <StudentCard student={student} />
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="md:text-xl font-bold">{student.name}</div>
+              <div className="flex flex-col gap-2">
+                <div className="md:text-xl font-bold">{student.name}</div>
 
-              <div className="flex items-center gap-4">
-                {student.isLimitedGlobal && <Badge>Limited</Badge>}
+                <div className="flex items-center gap-4">
+                  {student.isFestGlobal && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge>FEST</Badge>
+                      </TooltipTrigger>
 
-                {banner.freePulls > 0 && (
-                  <Badge variant="outline">{banner.freePulls} Free Pulls</Badge>
-                )}
+                      <TooltipContent className="text-center">
+                        This student is a <strong>FEST</strong> unit.
+                        <br />
+                        The rate of obtaining a 3* student on this banner is{" "}
+                        <strong>doubled (6%)</strong>
+                        <br />
+                        and there is a small chance of obtaining other FEST
+                        students on this banner.
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+
+                  {student.isLimitedGlobal && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge>Limited</Badge>
+                      </TooltipTrigger>
+
+                      <TooltipContent>
+                        This student is a <strong>LIMITED unit</strong> and
+                        cannot be obtained outside of their banner.
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+
+                  {banner.freePulls > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline">
+                          {banner.freePulls} Free Pulls
+                        </Badge>
+                      </TooltipTrigger>
+
+                      <TooltipContent className="text-center">
+                        During the duration of this banner, you will receive{" "}
+                        <strong>daily free pulls</strong> for a total of{" "}
+                        <strong>{banner.freePulls}</strong>.<br />
+                        The free pulls can be used on this banner and{" "}
+                        <strong>
+                          will will not carry over to future banners
+                        </strong>
+                        .
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          <Button asChild variant="outline">
-            <a
-              href={`https://schaledb.com/student/${student.schaleDbId}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              View on SchaleDB
-            </a>
-          </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild variant="outline" size="sm">
+                  <a
+                    href={`https://schaledb.com/student/${student.schaleDbId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <InfoIcon />
+                    <span className="md:hidden">View on SchaleDB</span>
+                  </a>
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent>
+                View <strong>{student.name}</strong> on SchaleDB
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       ))}
     </div>
