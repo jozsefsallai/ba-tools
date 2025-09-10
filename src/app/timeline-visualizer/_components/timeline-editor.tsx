@@ -38,6 +38,8 @@ import type { Id } from "~convex/dataModel";
 import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 import { clearCache } from "@/lib/cache";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -454,182 +456,217 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         onItemClicked={handlePreviewItemClicked}
       />
 
-      <div className="flex gap-6 items-center justify-center">
-        <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-          <Label className="shrink-0">Timeline Name</Label>
-          <Input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Untitled Timeline"
-          />
-        </div>
+      <Card className="md:w-2/3 mx-auto">
+        <CardContent>
+          <Tabs defaultValue="items" className="gap-4">
+            <TabsList className="place-self-center">
+              <TabsTrigger value="items">Items</TabsTrigger>
+              <Authenticated>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </Authenticated>
+              <TabsTrigger value="appearance">Appearance</TabsTrigger>
+              <TabsTrigger value="save">Save/Export</TabsTrigger>
+            </TabsList>
 
-        <Authenticated>
-          <div className="flex gap-2 items-center">
-            <Label>Visibility</Label>
-
-            <Select
-              value={visibility}
-              onValueChange={(val) =>
-                setVisibility(val as "public" | "private")
-              }
+            <TabsContent
+              value="items"
+              className="flex flex-col gap-4 items-center justify-center"
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="private">Private</SelectItem>
-                <SelectItem value="public">Public</SelectItem>
-              </SelectContent>
-            </Select>
+              <TimelineQuickAdd
+                students={uniqueStudents}
+                onStudentClick={addStudent}
+              />
 
-            {query.data?.visibility === "public" && (
-              <Button variant="outline" onClick={copyLink}>
-                Copy Link
-              </Button>
-            )}
-          </div>
-        </Authenticated>
-      </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-4 justify-center items-center">
+                  <StudentPicker
+                    students={allStudents}
+                    onStudentSelected={addStudent}
+                    className="w-[200px] md:w-[250px]"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-[200px] md:w-[250px] justify-between"
+                    >
+                      Add Student
+                      <ChevronsUpDownIcon />
+                    </Button>
+                  </StudentPicker>
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
-        <div className="flex gap-2 items-center">
-          <Label>Scale</Label>
+                  <div className="flex gap-4 items-center justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => addSeparator("horizontal")}
+                    >
+                      Add Horizontal Separator
+                    </Button>
 
-          <Select
-            value={scale.toString()}
-            onValueChange={(val) => setScale(Number.parseInt(val, 10))}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+                    <Button
+                      variant="outline"
+                      onClick={() => addSeparator("vertical")}
+                    >
+                      Add Vertical Separator
+                    </Button>
 
-            <SelectContent>
-              <SelectItem value="1">1x</SelectItem>
-              <SelectItem value="2">2x</SelectItem>
-              <SelectItem value="3">3x</SelectItem>
-              <SelectItem value="4">4x</SelectItem>
-              <SelectItem value="5">5x</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                    <Button variant="outline" onClick={addText}>
+                      Add Text
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
 
-        <div className="flex gap-2 items-center">
-          <Label>Item Spacing</Label>
+            <Authenticated>
+              <TabsContent
+                value="settings"
+                className="flex gap-4 items-center justify-center"
+              >
+                <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
+                  <Label className="shrink-0">Timeline Name</Label>
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Untitled Timeline"
+                  />
+                </div>
 
-          <Input
-            type="number"
-            value={itemSpacingStr}
-            onChange={(e) => setItemSpacingStr(e.target.value)}
-            className="w-20"
-          />
-        </div>
+                <div className="flex gap-2 items-center">
+                  <Label>Visibility</Label>
 
-        <div className="flex gap-2 items-center">
-          <Label>Vertical Separator Size</Label>
+                  <Select
+                    value={visibility}
+                    onValueChange={(val) =>
+                      setVisibility(val as "public" | "private")
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private">Private</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-          <Input
-            type="number"
-            value={verticalSeparatorSizeStr}
-            onChange={(e) => setVerticalSeparatorSizeStr(e.target.value)}
-            className="w-20"
-          />
-        </div>
+                  {query.data?.visibility === "public" && (
+                    <Button variant="outline" onClick={copyLink}>
+                      Copy Link
+                    </Button>
+                  )}
+                </div>
+              </TabsContent>
+            </Authenticated>
 
-        <div className="flex gap-2 items-center">
-          <Label>Horizontal Separator Size</Label>
+            <TabsContent value="appearance">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
+                <div className="flex gap-2 items-center">
+                  <Label>Scale</Label>
 
-          <Input
-            type="number"
-            value={horizontalSeparatorSizeStr}
-            onChange={(e) => setHorizontalSeparatorSizeStr(e.target.value)}
-            className="w-20"
-          />
-        </div>
-      </div>
+                  <Select
+                    value={scale.toString()}
+                    onValueChange={(val) => setScale(Number.parseInt(val, 10))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
 
-      <Separator />
+                    <SelectContent>
+                      <SelectItem value="1">1x</SelectItem>
+                      <SelectItem value="2">2x</SelectItem>
+                      <SelectItem value="3">3x</SelectItem>
+                      <SelectItem value="4">4x</SelectItem>
+                      <SelectItem value="5">5x</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      <TimelineQuickAdd students={uniqueStudents} onStudentClick={addStudent} />
+                <div className="flex gap-2 items-center">
+                  <Label>Item Spacing</Label>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-4 justify-center items-center">
-          <StudentPicker
-            students={allStudents}
-            onStudentSelected={addStudent}
-            className="w-[200px] md:w-[250px]"
-          >
-            <Button
-              variant="outline"
-              className="w-[200px] md:w-[250px] justify-between"
-            >
-              Add Student
-              <ChevronsUpDownIcon />
-            </Button>
-          </StudentPicker>
+                  <Input
+                    type="number"
+                    value={itemSpacingStr}
+                    onChange={(e) => setItemSpacingStr(e.target.value)}
+                    className="w-20"
+                  />
+                </div>
 
-          <div className="flex gap-4 items-center justify-center">
-            <Button
-              variant="outline"
-              onClick={() => addSeparator("horizontal")}
-            >
-              Add Horizontal Separator
-            </Button>
+                <div className="flex gap-2 items-center">
+                  <Label>Vertical Separator Size</Label>
 
-            <Button variant="outline" onClick={() => addSeparator("vertical")}>
-              Add Vertical Separator
-            </Button>
+                  <Input
+                    type="number"
+                    value={verticalSeparatorSizeStr}
+                    onChange={(e) =>
+                      setVerticalSeparatorSizeStr(e.target.value)
+                    }
+                    className="w-20"
+                  />
+                </div>
 
-            <Button variant="outline" onClick={addText}>
-              Add Text
-            </Button>
-          </div>
-        </div>
+                <div className="flex gap-2 items-center">
+                  <Label>Horizontal Separator Size</Label>
 
-        <div className="flex gap-4 items-center justify-center">
-          <Button variant="outline" onClick={loadTimelineFromStorage}>
-            Load Local
-          </Button>
+                  <Input
+                    type="number"
+                    value={horizontalSeparatorSizeStr}
+                    onChange={(e) =>
+                      setHorizontalSeparatorSizeStr(e.target.value)
+                    }
+                    className="w-20"
+                  />
+                </div>
+              </div>
+            </TabsContent>
 
-          <Button
-            variant="outline"
-            onClick={() => saveTimelineToLocalStorage()}
-          >
-            Save Local
-          </Button>
+            <TabsContent value="save">
+              <div className="flex gap-4 items-center justify-center">
+                <Button variant="outline" onClick={loadTimelineFromStorage}>
+                  Load Local
+                </Button>
 
-          <Authenticated>
-            <Button
-              variant="outline"
-              onClick={createOrUpdateCloudTimeline}
-              disabled={generationInProgress}
-            >
-              {timelineId ? "Update Cloud Data" : "Save to Cloud"}
-            </Button>
-          </Authenticated>
+                <Button
+                  variant="outline"
+                  onClick={() => saveTimelineToLocalStorage()}
+                >
+                  Save Local
+                </Button>
 
-          <ExportTimelineDataDialog
-            onBeforeLoad={() => saveTimelineToLocalStorage(false)}
-          >
-            <Button variant="outline">Export</Button>
-          </ExportTimelineDataDialog>
+                <Authenticated>
+                  <Button
+                    variant="outline"
+                    onClick={createOrUpdateCloudTimeline}
+                    disabled={generationInProgress}
+                  >
+                    {timelineId ? "Update Cloud Data" : "Save to Cloud"}
+                  </Button>
+                </Authenticated>
 
-          <ImportTimelineDataDialog onComplete={loadTimelineFromStorage}>
-            <Button variant="outline">Import</Button>
-          </ImportTimelineDataDialog>
-        </div>
+                <ExportTimelineDataDialog
+                  onBeforeLoad={() => saveTimelineToLocalStorage(false)}
+                >
+                  <Button variant="outline">Export</Button>
+                </ExportTimelineDataDialog>
 
-        <div className="flex gap-4 items-center justify-center">
-          <CopyTextTimelineButton items={items} />
+                <ImportTimelineDataDialog onComplete={loadTimelineFromStorage}>
+                  <Button variant="outline">Import</Button>
+                </ImportTimelineDataDialog>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-          <Button
-            onClick={getTimelineImage}
-            disabled={items.length === 0 || generationInProgress}
-          >
-            Download Image
-          </Button>
-        </div>
+      <div className="flex gap-4 items-center justify-center">
+        <CopyTextTimelineButton items={items} />
+
+        <Button
+          onClick={getTimelineImage}
+          disabled={items.length === 0 || generationInProgress}
+        >
+          Download Image
+        </Button>
       </div>
 
       {items.length > 0 && <Separator />}

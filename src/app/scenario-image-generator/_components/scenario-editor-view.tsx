@@ -28,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ScenarioEditorView() {
   const {
@@ -305,304 +307,348 @@ export function ScenarioEditorView() {
       <Separator />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
-        <div className="flex flex-col gap-4">
-          <div className="text-2xl font-semibold">Settings</div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Settings</CardTitle>
+          </CardHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Label htmlFor="name">Character Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter character name"
-              className="col-span-2"
-            />
+          <CardContent>
+            <Tabs defaultValue="content" className="gap-4">
+              <TabsList className="place-self-center">
+                <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="background">Background</TabsTrigger>
+                <TabsTrigger value="font">Font</TabsTrigger>
+                <TabsTrigger value="elements">Elements</TabsTrigger>
+                <TabsTrigger value="behavior">Behavior</TabsTrigger>
+              </TabsList>
 
-            <Label htmlFor="affiliation">Affiliation (optional)</Label>
-            <Input
-              id="affiliation"
-              value={affiliation}
-              onChange={(e) => setAffiliation(e.target.value)}
-              placeholder="Enter affiliation"
-              className="col-span-2"
-            />
+              <TabsContent value="content">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Label htmlFor="name">Character Name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter character name"
+                    className="col-span-2"
+                  />
 
-            <Label htmlFor="content">Dialogue Content</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter dialogue content"
-              className="h-24 col-span-2"
-            />
+                  <Label htmlFor="affiliation">Affiliation (optional)</Label>
+                  <Input
+                    id="affiliation"
+                    value={affiliation}
+                    onChange={(e) => setAffiliation(e.target.value)}
+                    placeholder="Enter affiliation"
+                    className="col-span-2"
+                  />
 
-            <Label>Font</Label>
-            <div className="col-span-2">
-              <Select
-                value={font.family}
-                onValueChange={(value) =>
-                  setFont(
-                    SCENARIO_FONTS.find((f) => f.family === value) ||
-                      SCENARIO_FONT_EN,
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue>{font.label}</SelectValue>
-                </SelectTrigger>
+                  <Label htmlFor="content">Dialogue Content</Label>
+                  <Textarea
+                    id="content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Enter dialogue content"
+                    className="h-24 col-span-2"
+                  />
+                </div>
+              </TabsContent>
 
-                <SelectContent>
-                  {SCENARIO_FONTS.map((f) => (
-                    <SelectItem key={f.family} value={f.family}>
-                      {f.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <TabsContent value="background">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Label
+                    htmlFor={
+                      backgroundMode === "image"
+                        ? "backgroundImage"
+                        : "backgroundUrl"
+                    }
+                  >
+                    Background Image
+                  </Label>
+                  <div className="flex gap-2 col-span-2">
+                    {backgroundMode === "image" && (
+                      <Button
+                        variant="outline"
+                        onClick={handleBackgroundImageClick}
+                        className="flex-1"
+                      >
+                        {backgroundName || "Select Background Image"}
+                      </Button>
+                    )}
 
-            <Label htmlFor="fontSize">
-              Font Size (default: {SCENARIO_TEXT_FONT_SIZE})
-            </Label>
-            <Input
-              id="fontSize"
-              type="number"
-              value={fontSize}
-              onChange={(e) => setFontSize(Number(e.target.value))}
-              placeholder="Enter font size"
-              className="col-span-2"
-            />
+                    {backgroundMode === "image" && backgroundImage && (
+                      <Button
+                        variant="outline"
+                        onClick={handleRemoveBackgroundImage}
+                      >
+                        <XIcon />
+                      </Button>
+                    )}
 
-            <Label htmlFor="scrollSpeed">
-              Text Scroll Speed (0-1, default: {SCENARIO_TEXT_SCROLL_SPEED})
-            </Label>
-            <Input
-              id="scrollSpeed"
-              type="number"
-              value={scrollSpeed}
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={(e) => setScrollSpeed(Number(e.target.value))}
-              placeholder="Enter scroll speed"
-              className="col-span-2"
-            />
+                    {backgroundMode === "url" && (
+                      <Input
+                        id="backgroundUrl"
+                        type="url"
+                        value={backgroundUrl ?? ""}
+                        onChange={(e) => setBackgroundUrl(e.target.value)}
+                        placeholder="Enter background image URL"
+                        className="flex-1"
+                      />
+                    )}
 
-            <Label
-              htmlFor={
-                backgroundMode === "image" ? "backgroundImage" : "backgroundUrl"
-              }
-            >
-              Background Image
-            </Label>
-            <div className="flex gap-2 col-span-2">
-              {backgroundMode === "image" && (
-                <Button
-                  variant="outline"
-                  onClick={handleBackgroundImageClick}
-                  className="flex-1"
-                >
-                  {backgroundName || "Select Background Image"}
-                </Button>
-              )}
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        setBackgroundMode((prev) =>
+                          prev === "image" ? "url" : "image",
+                        )
+                      }
+                      className="flex-shrink-0"
+                    >
+                      {backgroundMode === "image" && <GlobeIcon />}
+                      {backgroundMode === "url" && <ImageIcon />}
+                    </Button>
 
-              {backgroundMode === "image" && backgroundImage && (
-                <Button variant="outline" onClick={handleRemoveBackgroundImage}>
-                  <XIcon />
-                </Button>
-              )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackgroundImageChange}
+                      ref={backgroundInputRef}
+                      className="hidden"
+                    />
+                  </div>
 
-              {backgroundMode === "url" && (
-                <Input
-                  id="backgroundUrl"
-                  type="url"
-                  value={backgroundUrl ?? ""}
-                  onChange={(e) => setBackgroundUrl(e.target.value)}
-                  placeholder="Enter background image URL"
-                  className="flex-1"
-                />
-              )}
+                  <Label htmlFor="backgroundScale">
+                    Background Scale (default: 1)
+                  </Label>
 
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setBackgroundMode((prev) =>
-                    prev === "image" ? "url" : "image",
-                  )
-                }
-                className="flex-shrink-0"
-              >
-                {backgroundMode === "image" && <GlobeIcon />}
-                {backgroundMode === "url" && <ImageIcon />}
+                  <Input
+                    id="backgroundScale"
+                    type="number"
+                    value={backgroundScaleStr}
+                    onChange={(e) => setBackgroundScaleStr(e.target.value)}
+                    placeholder="Enter background scale"
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="backgroundXOffset">Background X Offset</Label>
+                  <Input
+                    id="backgroundXOffset"
+                    type="number"
+                    value={backgroundXOffsetStr}
+                    onChange={(e) => setBackgroundXOffsetStr(e.target.value)}
+                    placeholder="Enter background X offset"
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="backgroundYOffset">Background Y Offset</Label>
+                  <Input
+                    id="backgroundYOffset"
+                    type="number"
+                    value={backgroundYOffsetStr}
+                    onChange={(e) => setBackgroundYOffsetStr(e.target.value)}
+                    placeholder="Enter background Y offset"
+                    className="col-span-2"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="font">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Label>Font</Label>
+                  <div className="col-span-2">
+                    <Select
+                      value={font.family}
+                      onValueChange={(value) =>
+                        setFont(
+                          SCENARIO_FONTS.find((f) => f.family === value) ||
+                            SCENARIO_FONT_EN,
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue>{font.label}</SelectValue>
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        {SCENARIO_FONTS.map((f) => (
+                          <SelectItem key={f.family} value={f.family}>
+                            {f.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Label htmlFor="fontSize">
+                    Font Size (default: {SCENARIO_TEXT_FONT_SIZE})
+                  </Label>
+                  <Input
+                    id="fontSize"
+                    type="number"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                    placeholder="Enter font size"
+                    className="col-span-2"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="elements">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Label htmlFor="displayButtons">Display Buttons</Label>
+                  <Switch
+                    id="displayButtons"
+                    checked={displayButtons}
+                    onCheckedChange={(checked) => setDisplayButtons(checked)}
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="autoEnabled">Auto Enabled</Label>
+                  <Switch
+                    id="autoEnabled"
+                    checked={autoEnabled}
+                    onCheckedChange={(checked) => setAutoEnabled(checked)}
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="displayLine">Display Horizontal Line</Label>
+                  <Switch
+                    id="displayLine"
+                    checked={displayLine}
+                    onCheckedChange={(checked) => setDisplayLine(checked)}
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="displayGradient">Display Gradient</Label>
+                  <Switch
+                    id="displayGradient"
+                    checked={displayGradient}
+                    onCheckedChange={(checked) => setDisplayGradient(checked)}
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="displayTriangle">Display Triangle</Label>
+                  <Switch
+                    id="displayTriangle"
+                    checked={displayTriangle}
+                    onCheckedChange={(checked) => setDisplayTriangle(checked)}
+                    className="col-span-2"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="behavior">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Label htmlFor="scrollSpeed">
+                    Text Scroll Speed (0-1, default:{" "}
+                    {SCENARIO_TEXT_SCROLL_SPEED})
+                  </Label>
+                  <Input
+                    id="scrollSpeed"
+                    type="number"
+                    value={scrollSpeed}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={(e) => setScrollSpeed(Number(e.target.value))}
+                    placeholder="Enter scroll speed"
+                    className="col-span-2"
+                  />
+
+                  <Label htmlFor="transparentBackground">
+                    Transparent Background
+                  </Label>
+                  <Switch
+                    id="transparentBackground"
+                    checked={transparentBackground}
+                    onCheckedChange={(checked) =>
+                      setTransparentBackground(checked)
+                    }
+                    className="col-span-2"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Characters</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            {characters.map((character, idx) => (
+              <ScenarioEditorCharacterSettings
+                key={character.timestamp}
+                index={idx}
+                total={characters.length}
+                spriteUrl={character.spriteUrl}
+                filename={character.filename}
+                timestamp={character.timestamp}
+                x={character.x}
+                y={character.y}
+                scale={character.scale}
+                darken={character.darken}
+                hologram={character.hologram}
+                silhouette={character.silhouette}
+                silhouetteColor={character.silhouetteColor}
+                onChange={(updatedCharacter) => {
+                  setCharacters((prev) =>
+                    prev.map((c, i) =>
+                      i === idx ? { ...c, ...updatedCharacter } : c,
+                    ),
+                  );
+                }}
+                onDelete={() => {
+                  setCharacters((prev) => prev.filter((_, i) => i !== idx));
+                }}
+                onMoveUp={() => {
+                  setCharacters((prev) => {
+                    const newCharacters = [...prev];
+                    if (idx > 0) {
+                      const temp = newCharacters[idx - 1];
+                      newCharacters[idx - 1] = newCharacters[idx];
+                      newCharacters[idx] = temp;
+                    }
+                    return newCharacters;
+                  });
+                }}
+                onMoveDown={() => {
+                  setCharacters((prev) => {
+                    const newCharacters = [...prev];
+                    if (idx < newCharacters.length - 1) {
+                      const temp = newCharacters[idx + 1];
+                      newCharacters[idx + 1] = newCharacters[idx];
+                      newCharacters[idx] = temp;
+                    }
+                    return newCharacters;
+                  });
+                }}
+              />
+            ))}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button variant="outline" onClick={handleAddCharacter}>
+                <PlusIcon className="mr-2" />
+                Add Character (file)
               </Button>
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleBackgroundImageChange}
-                ref={backgroundInputRef}
-                className="hidden"
-              />
+              <Button variant="outline" onClick={handleAddCharacterUrl}>
+                <PlusIcon className="mr-2" />
+                Add Character (URL)
+              </Button>
             </div>
 
-            <Label htmlFor="backgroundScale">
-              Background Scale (default: 1)
-            </Label>
-
-            <Input
-              id="backgroundScale"
-              type="number"
-              value={backgroundScaleStr}
-              onChange={(e) => setBackgroundScaleStr(e.target.value)}
-              placeholder="Enter background scale"
-              className="col-span-2"
+            <input
+              ref={characterInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleCharacterImageSelect}
             />
-
-            <Label htmlFor="backgroundXOffset">Background X Offset</Label>
-            <Input
-              id="backgroundXOffset"
-              type="number"
-              value={backgroundXOffsetStr}
-              onChange={(e) => setBackgroundXOffsetStr(e.target.value)}
-              placeholder="Enter background X offset"
-              className="col-span-2"
-            />
-
-            <Label htmlFor="backgroundYOffset">Background Y Offset</Label>
-            <Input
-              id="backgroundYOffset"
-              type="number"
-              value={backgroundYOffsetStr}
-              onChange={(e) => setBackgroundYOffsetStr(e.target.value)}
-              placeholder="Enter background Y offset"
-              className="col-span-2"
-            />
-
-            <Label htmlFor="displayButtons">Display Buttons</Label>
-            <Switch
-              id="displayButtons"
-              checked={displayButtons}
-              onCheckedChange={(checked) => setDisplayButtons(checked)}
-              className="col-span-2"
-            />
-
-            <Label htmlFor="autoEnabled">Auto Enabled</Label>
-            <Switch
-              id="autoEnabled"
-              checked={autoEnabled}
-              onCheckedChange={(checked) => setAutoEnabled(checked)}
-              className="col-span-2"
-            />
-
-            <Label htmlFor="displayLine">Display Horizontal Line</Label>
-            <Switch
-              id="displayLine"
-              checked={displayLine}
-              onCheckedChange={(checked) => setDisplayLine(checked)}
-              className="col-span-2"
-            />
-
-            <Label htmlFor="displayGradient">Display Gradient</Label>
-            <Switch
-              id="displayGradient"
-              checked={displayGradient}
-              onCheckedChange={(checked) => setDisplayGradient(checked)}
-              className="col-span-2"
-            />
-
-            <Label htmlFor="displayTriangle">Display Triangle</Label>
-            <Switch
-              id="displayTriangle"
-              checked={displayTriangle}
-              onCheckedChange={(checked) => setDisplayTriangle(checked)}
-              className="col-span-2"
-            />
-
-            <Label htmlFor="transparentBackground">
-              Transparent Background
-            </Label>
-            <Switch
-              id="transparentBackground"
-              checked={transparentBackground}
-              onCheckedChange={(checked) => setTransparentBackground(checked)}
-              className="col-span-2"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="text-2xl font-semibold">Characters</div>
-
-          {characters.map((character, idx) => (
-            <ScenarioEditorCharacterSettings
-              key={character.timestamp}
-              index={idx}
-              total={characters.length}
-              spriteUrl={character.spriteUrl}
-              filename={character.filename}
-              timestamp={character.timestamp}
-              x={character.x}
-              y={character.y}
-              scale={character.scale}
-              darken={character.darken}
-              hologram={character.hologram}
-              silhouette={character.silhouette}
-              silhouetteColor={character.silhouetteColor}
-              onChange={(updatedCharacter) => {
-                setCharacters((prev) =>
-                  prev.map((c, i) =>
-                    i === idx ? { ...c, ...updatedCharacter } : c,
-                  ),
-                );
-              }}
-              onDelete={() => {
-                setCharacters((prev) => prev.filter((_, i) => i !== idx));
-              }}
-              onMoveUp={() => {
-                setCharacters((prev) => {
-                  const newCharacters = [...prev];
-                  if (idx > 0) {
-                    const temp = newCharacters[idx - 1];
-                    newCharacters[idx - 1] = newCharacters[idx];
-                    newCharacters[idx] = temp;
-                  }
-                  return newCharacters;
-                });
-              }}
-              onMoveDown={() => {
-                setCharacters((prev) => {
-                  const newCharacters = [...prev];
-                  if (idx < newCharacters.length - 1) {
-                    const temp = newCharacters[idx + 1];
-                    newCharacters[idx + 1] = newCharacters[idx];
-                    newCharacters[idx] = temp;
-                  }
-                  return newCharacters;
-                });
-              }}
-            />
-          ))}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button variant="outline" onClick={handleAddCharacter}>
-              <PlusIcon className="mr-2" />
-              Add Character (file)
-            </Button>
-
-            <Button variant="outline" onClick={handleAddCharacterUrl}>
-              <PlusIcon className="mr-2" />
-              Add Character (URL)
-            </Button>
-          </div>
-
-          <input
-            ref={characterInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleCharacterImageSelect}
-          />
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Separator />

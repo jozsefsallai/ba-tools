@@ -34,6 +34,8 @@ import { toast } from "sonner";
 import { MessageBox } from "@/components/common/message-box";
 import { clearCache } from "@/lib/cache";
 import { v4 as uuid } from "uuid";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -320,55 +322,131 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
         busy={generationInProgress}
       />
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
-        <div className="flex gap-2 items-center">
-          <Label>Scale</Label>
+      <Card className="md:w-2/3 mx-auto">
+        <CardContent>
+          <Tabs defaultValue="items" className="gap-4">
+            <TabsList className="place-self-center">
+              <TabsTrigger value="items">Items</TabsTrigger>
+              <TabsTrigger value="appearance">Appearance</TabsTrigger>
+              <Authenticated>
+                <TabsTrigger value="cloud">Cloud</TabsTrigger>
+              </Authenticated>
+            </TabsList>
 
-          <Select
-            value={scale.toString()}
-            onValueChange={(val) => setScale(Number.parseInt(val, 10))}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+            <TabsContent value="items">
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-4 items-center justify-center">
+                  <StudentPicker
+                    students={allStudents}
+                    onStudentSelected={addStudent}
+                    className="w-[200px] md:w-[250px]"
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-[200px] md:w-[250px] justify-between"
+                    >
+                      Select Student
+                      <ChevronsUpDownIcon />
+                    </Button>
+                  </StudentPicker>
 
-            <SelectContent>
-              <SelectItem value="1">1x</SelectItem>
-              <SelectItem value="2">2x</SelectItem>
-              <SelectItem value="3">3x</SelectItem>
-              <SelectItem value="4">4x</SelectItem>
-              <SelectItem value="5">5x</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => addEmptyCard("striker")}
+                  >
+                    <PlusIcon />
+                    Empty Striker
+                  </Button>
 
-        <div className="flex gap-2 items-center">
-          <Switch
-            id="display-overline"
-            checked={displayOverline}
-            onCheckedChange={setDisplayOverline}
-          />
-          <Label htmlFor="display-overline">Display Overline</Label>
-        </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => addEmptyCard("special")}
+                  >
+                    <PlusIcon />
+                    Empty Special
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
 
-        <div className="flex gap-2 items-center">
-          <Switch
-            id="display-role-icon"
-            checked={displayRoleIcon}
-            onCheckedChange={setDisplayRoleIcon}
-          />
-          <Label htmlFor="display-role-icon">Display Role Icon</Label>
-        </div>
+            <TabsContent value="appearance">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
+                <div className="flex gap-2 items-center">
+                  <Label>Scale</Label>
 
-        <div className="flex gap-2 items-center">
-          <Switch
-            id="groups-vertical"
-            checked={groupsVertical}
-            onCheckedChange={setGroupsVertical}
-          />
-          <Label htmlFor="groups-vertical">Vertical Groups</Label>
-        </div>
+                  <Select
+                    value={scale.toString()}
+                    onValueChange={(val) => setScale(Number.parseInt(val, 10))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
 
+                    <SelectContent>
+                      <SelectItem value="1">1x</SelectItem>
+                      <SelectItem value="2">2x</SelectItem>
+                      <SelectItem value="3">3x</SelectItem>
+                      <SelectItem value="4">4x</SelectItem>
+                      <SelectItem value="5">5x</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Switch
+                    id="display-overline"
+                    checked={displayOverline}
+                    onCheckedChange={setDisplayOverline}
+                  />
+                  <Label htmlFor="display-overline">Display Overline</Label>
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Switch
+                    id="display-role-icon"
+                    checked={displayRoleIcon}
+                    onCheckedChange={setDisplayRoleIcon}
+                  />
+                  <Label htmlFor="display-role-icon">Display Role Icon</Label>
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <Switch
+                    id="groups-vertical"
+                    checked={groupsVertical}
+                    onCheckedChange={setGroupsVertical}
+                  />
+                  <Label htmlFor="groups-vertical">Vertical Groups</Label>
+                </div>
+              </div>
+            </TabsContent>
+
+            <Authenticated>
+              <TabsContent value="cloud">
+                <div className="flex gap-6 items-center justify-center">
+                  <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
+                    <Label className="shrink-0">Formation Name</Label>
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Untitled Formation"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={createOrUpdateCloudFormation}
+                    disabled={generationInProgress}
+                  >
+                    {formationId ? "Update Formation" : "Save Formation"}
+                  </Button>
+                </div>
+              </TabsContent>
+            </Authenticated>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-4 items-center justify-center">
         <Button
           onClick={getFormationImage}
           disabled={
@@ -379,56 +457,6 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
           Download Image
         </Button>
       </div>
-
-      <Separator />
-
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-4 items-center justify-center">
-          <StudentPicker
-            students={allStudents}
-            onStudentSelected={addStudent}
-            className="w-[200px] md:w-[250px]"
-          >
-            <Button
-              variant="outline"
-              className="w-[200px] md:w-[250px] justify-between"
-            >
-              Select Student
-              <ChevronsUpDownIcon />
-            </Button>
-          </StudentPicker>
-
-          <Button variant="outline" onClick={() => addEmptyCard("striker")}>
-            <PlusIcon />
-            Empty Striker
-          </Button>
-
-          <Button variant="outline" onClick={() => addEmptyCard("special")}>
-            <PlusIcon />
-            Empty Special
-          </Button>
-        </div>
-      </div>
-
-      <Authenticated>
-        <div className="flex gap-6 items-center justify-center">
-          <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-            <Label className="shrink-0">Formation Name</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Untitled Formation"
-            />
-          </div>
-
-          <Button
-            onClick={createOrUpdateCloudFormation}
-            disabled={generationInProgress}
-          >
-            {formationId ? "Update Formation" : "Save Formation"}
-          </Button>
-        </div>
-      </Authenticated>
 
       <Separator />
 
