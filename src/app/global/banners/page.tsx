@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getBannerGroups(): Promise<BannerGroups> {
   const banners = await db.gameBanner.findMany({
     where: {
