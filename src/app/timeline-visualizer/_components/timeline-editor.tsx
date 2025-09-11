@@ -40,6 +40,7 @@ import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/co
 import { clearCache } from "@/lib/cache";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -446,6 +447,29 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
   return (
     <div className="flex flex-col gap-10">
+      <div
+        className={cn("md:w-2/3 mx-auto -mt-6 flex flex-col gap-4", {
+          hidden: items.length > 0,
+        })}
+      >
+        <p>
+          This tool allows you to create a visual rotation timeline (e.g. for a
+          raid). You can select students, adjust the spacing between them, set
+          the cost/timestamp at which the student's skill cost should be used,
+          and more.
+        </p>
+        <p className="md:hidden text-muted-foreground">
+          <strong>Note:</strong> This tool might not work well on mobile
+          devices.
+        </p>
+        <p className="text-muted-foreground">
+          <strong>Note:</strong> Dark mode extensions and zoom levels may cause
+          rendering issues in the resulting image. If the generated image looks
+          weird, try disabling any dark mode extensions you may have and using
+          100% zoom.
+        </p>
+      </div>
+
       <TimelinePreview
         containerRef={containerRef}
         items={items}

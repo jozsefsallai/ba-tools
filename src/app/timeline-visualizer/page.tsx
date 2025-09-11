@@ -81,22 +81,6 @@ export default async function TimelineVisualizerPage() {
             </Button>
           </HelpSheet>
         </div>
-        <p>
-          This tool allows you to create a visual rotation timeline (e.g. for a
-          raid). You can select students, adjust the spacing between them, set
-          the cost/timestamp at which the student's skill cost should be used,
-          and more.
-        </p>
-        <p className="md:hidden text-muted-foreground">
-          <strong>Note:</strong> This tool might not work well on mobile
-          devices.
-        </p>
-        <p className="text-muted-foreground">
-          <strong>Note:</strong> Dark mode extensions and zoom levels may cause
-          rendering issues in the resulting image. If the generated image looks
-          weird, try disabling any dark mode extensions you may have and using
-          100% zoom.
-        </p>
       </div>
 
       <Suspense>

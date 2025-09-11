@@ -83,20 +83,6 @@ export default async function FormationDisplayPage() {
             </Button>
           </HelpSheet>
         </div>
-        <p>
-          This tool allows you to generate an image of a student formation. This
-          can be useful for cases such as designing clean YouTube thumbnails.
-        </p>
-        <p className="md:hidden text-muted-foreground">
-          <strong>Note:</strong> This tool might not work well on mobile
-          devices.
-        </p>
-        <p className="text-muted-foreground">
-          <strong>Note:</strong> Dark mode extensions and zoom levels may cause
-          rendering issues in the resulting image. If the generated image looks
-          weird, try disabling any dark mode extensions you may have and using
-          100% zoom.
-        </p>
       </div>
 
       <Suspense>
