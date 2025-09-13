@@ -1,0 +1,60 @@
+The railroad puzzle solver tool helps you solve/visualize the path to take when
+placing your railroad tracks in the Highlander event's minigame. If you want to
+minimize your event currency use, you can also generate a list of the most
+optimal combinations of railroad pieces to use.
+
+## Getting Started
+
+All you have to do is select the map you're currently on from the presets. By
+default, the tool will show you the path to take when you use the maximum number
+of railroad pieces available for that map. You can tweak the counts of each
+individual railroad piece type to see if there's a solution for your current
+deck.
+
+If you have the **Solve Instantly** option enabled, the tool will automatically
+recalculate the solution every time you change a map or the rail piece counts.
+If you disable this option, you'll have to manually click on the **Solve**
+button.
+
+## Minimal Rail Configs
+
+When you click on the **Get Minimal Rail Configs** button, the tool will
+calculate the paths that require the least amount of rail pieces. You can then
+select one of the configurations to see the path visualized on the map.
+
+## A Small Note On RNG
+
+In-game, the railroad pieces you draw are random. This means that even if you
+have a specific configuration that can complete the track, the game might give
+you rail pieces that you don't need anymore. When this happens, you can either
+place the useless piece somewhere on the map, on an empty cell that isn't
+blocking your path or you can adjust the rail piece counts to also include the
+useless piece.
+
+Both approaches will result in event currency loss if you're trying to min-max
+your return-on-investment, so it's up to you which one you want to go with.
+
+If you're in a rush, the first approach will be faster, since you won't need to
+re-place the rail pieces on your map.
+
+The second approach is mostly useful if the new path will also cross some
+rewards that you would've otherwise missed. Personally, I don't think the
+rewards are worth the trouble, but your mileage may vary.
+
+## Troubleshooting
+
+**Q:** The tool is laggy when I change settings.
+
+**A:** If you're experiencing lag while changing the map or the rail counts, try
+disabling the **Solve Instantly** option. This will make it so the tool will
+only solve the track when you actually want it to.
+
+**Q:** The tool shows no solution.
+
+**A:** This usually means it's impossible to complete the track with your rail
+piece configuration. Try increasing the counts of some of the pieces. If you're
+100% sure your configuration is valid, please let me know about the issue on
+[GitHub][github-issues-link]. Make sure to include the exact map and rail piece
+configuration in your report (a screenshot of the tool's state would suffice).
+
+[github-issues-link]: https://github.com/jozsefsallai/ba-tools/issues

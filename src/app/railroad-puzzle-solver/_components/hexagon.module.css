@@ -1,0 +1,32 @@
+.railroadCell {
+  height: var(--railroad-cell-height);
+  aspect-ratio: cos(30deg);
+  clip-path: polygon(-50% 50%, 50% 100%, 150% 50%, 50% 0);
+}
+
+.railroadCellContent {
+  box-sizing: border-box;
+  padding: 16px 8px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.mapRow {
+  display: flex;
+  gap: 1px;
+  margin-top: calc(var(--railroad-cell-height) * -0.24);
+}
+
+.mapRow:first-child {
+  margin-top: 0;
+}
+
+.mapRow:nth-child(2n) {
+  padding-left: calc(var(--railroad-cell-height) * 0.44);
+}
+
+@media only screen and (max-width: 600px) {
+  .railroadMap {
+    zoom: 0.8;
+  }
+}

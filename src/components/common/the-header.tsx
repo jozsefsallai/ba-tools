@@ -29,16 +29,20 @@ type NavLink = {
 
 const GAMEPLAY_TOOLS: NavLink[] = [
   {
-    href: "/inventory-management",
-    text: "Inventory Management",
-  },
-  {
     href: "/bond",
     text: "Relationship Rank Calculator",
   },
   {
     href: "/timeline-visualizer",
     text: "Timeline Visualizer",
+  },
+  {
+    href: "/inventory-management",
+    text: "Inventory Management",
+  },
+  {
+    href: "/railroad-puzzle-solver",
+    text: "Railroad Puzzle Solver",
   },
 ];
 

@@ -7,6 +7,7 @@ import InventoryManagement from "@/how-to-use/inventory-management.mdx";
 import Bond from "@/how-to-use/bond.mdx";
 import ScenarioImageGenerator from "@/how-to-use/scenario-image-generator.mdx";
 import TimelineVisualizer from "@/how-to-use/timeline-visualizer.mdx";
+import RailoadPuzzleSolver from "@/how-to-use/railroad-puzzle-solver.mdx";
 
 import {
   Sheet,
@@ -22,7 +23,8 @@ export type HelpSheetProps = PropsWithChildren<{
     | "inventory-management"
     | "bond"
     | "scenario-image-generator"
-    | "timeline-visualizer";
+    | "timeline-visualizer"
+    | "railroad-puzzle-solver";
 }>;
 
 function getTitle(document: HelpSheetProps["document"]) {
@@ -37,6 +39,8 @@ function getTitle(document: HelpSheetProps["document"]) {
       return "Scenario Image Generator";
     case "timeline-visualizer":
       return "Timeline Visualizer";
+    case "railroad-puzzle-solver":
+      return "Railroad Puzzle Solver";
   }
 }
 
@@ -58,6 +62,7 @@ export function HelpSheet({ document, children }: HelpSheetProps) {
             <ScenarioImageGenerator />
           )}
           {document === "timeline-visualizer" && <TimelineVisualizer />}
+          {document === "railroad-puzzle-solver" && <RailoadPuzzleSolver />}
         </article>
       </SheetContent>
     </Sheet>
