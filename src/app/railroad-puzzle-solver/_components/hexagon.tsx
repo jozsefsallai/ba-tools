@@ -18,7 +18,7 @@ export function Hexagon({ state, children }: HexagonProps) {
         "bg-type-blue text-white":
           state.type === "START" || state.type === "GOAL",
         "bg-type-red text-white": state.type === "STATION",
-        "bg-green-600": state.type === "RAIL_PIECE",
+        "bg-green-600 text-white": state.type === "RAIL_PIECE",
       })}
     >
       <div className={cn(styles.railroadCellContent)}>{children}</div>
