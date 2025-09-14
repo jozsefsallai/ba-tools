@@ -29,6 +29,7 @@ import { ResultTileArrow } from "@/app/railroad-puzzle-solver/_components/result
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const RAIL_TYPE_LABELS: Record<RailType, string> = {
   STRAIGHT: "Straight",
@@ -155,32 +156,34 @@ export function RailroadPuzzleView() {
         className={cn(styles.railroadMap, "max-w-full overflow-x-auto")}
         style={{ "--railroad-cell-height": "75px" } as HexagonMapStyles}
       >
-        {selectedPreset.grid.tiles.map((row, rowIndex) => (
-          <div className={cn(styles.mapRow)} key={rowIndex}>
-            {row.map((tile, colIndex) => {
-              const key = `${rowIndex},${colIndex}`;
-              const finalTile = resultMap.get(key) ?? tile;
+        <TooltipProvider>
+          {selectedPreset.grid.tiles.map((row, rowIndex) => (
+            <div className={cn(styles.mapRow)} key={rowIndex}>
+              {row.map((tile, colIndex) => {
+                const key = `${rowIndex},${colIndex}`;
+                const finalTile = resultMap.get(key) ?? tile;
 
-              return (
-                <Hexagon key={key} state={finalTile.state}>
-                  <div className="flex flex-col items-center justify-center text-xs">
-                    <div>{key}</div>
+                return (
+                  <Hexagon key={key} state={finalTile.state}>
+                    <div className="flex flex-col items-center justify-center text-xs">
+                      <div>{key}</div>
 
-                    {finalTile.state.type === "START" && <div>START</div>}
-                    {finalTile.state.type === "GOAL" && <div>GOAL</div>}
-                    {finalTile.state.type === "STATION" && (
-                      <ResultTileArrow tile={finalTile} />
-                    )}
+                      {finalTile.state.type === "START" && <div>START</div>}
+                      {finalTile.state.type === "GOAL" && <div>GOAL</div>}
+                      {finalTile.state.type === "STATION" && (
+                        <ResultTileArrow tile={finalTile} />
+                      )}
 
-                    {finalTile.state.type === "RAIL_PIECE" && (
-                      <ResultTileArrow tile={finalTile} />
-                    )}
-                  </div>
-                </Hexagon>
-              );
-            })}
-          </div>
-        ))}
+                      {finalTile.state.type === "RAIL_PIECE" && (
+                        <ResultTileArrow tile={finalTile} />
+                      )}
+                    </div>
+                  </Hexagon>
+                );
+              })}
+            </div>
+          ))}
+        </TooltipProvider>
       </div>
 
       <Card className="w-full md:w-2/3 mx-auto">
