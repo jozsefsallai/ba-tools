@@ -46,6 +46,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  async redirects() {
+    return [
+      {
+        source: "/aoba-railing-simulator",
+        destination: "/railroad-puzzle-solver",
+        statusCode: 307,
+      },
+    ];
+  },
 };
 
 const withMDX = createMDX({});
