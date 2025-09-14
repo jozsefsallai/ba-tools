@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties, useMemo } from "react";
 import { puzzles, type RailroadPuzzlePreset } from "../_lib/presets";
 
 import { Hexagon } from "./hexagon";
@@ -29,7 +29,14 @@ import { ResultTileArrow } from "@/app/railroad-puzzle-solver/_components/result
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import minigameCurrencyIcon from "../_assets/minigame-currency-icon.png";
+import Image from "next/image";
 
 const RAIL_TYPE_LABELS: Record<RailType, string> = {
   STRAIGHT: "Straight",
@@ -63,6 +70,18 @@ export function RailroadPuzzleView() {
     setResultMap(new Map());
     setMinRailConfigs([]);
   }, [selectedPreset]);
+
+  const railsUsed = useMemo(() => {
+    if (resultMap.size === 0) {
+      return null;
+    }
+
+    const count = Array.from(resultMap.values()).reduce((acc, tile) => {
+      return tile.state.type === "RAIL_PIECE" ? acc + 1 : acc;
+    }, 0);
+
+    return count;
+  }, [resultMap]);
 
   function handleRailCountChange(railType: RailType, count: number): void {
     setRailInventory((prev) => ({
@@ -184,6 +203,36 @@ export function RailroadPuzzleView() {
             </div>
           ))}
         </TooltipProvider>
+      </div>
+
+      <div className="flex gap-4 items-center justify-between text-sm text-muted-foreground w-full md:w-2/3 mx-auto">
+        <div>
+          <strong>Rail pieces used:</strong>{" "}
+          {railsUsed !== null ? railsUsed : "..."}
+        </div>
+        <div>
+          {railsUsed !== null && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center">
+                    <Image
+                      src={minigameCurrencyIcon}
+                      alt="Highlander Commemorative Sticker"
+                      className="w-12"
+                    />
+
+                    <span className="-ml-1">{150 * railsUsed}x</span>
+                  </div>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  Highlander Commemorative Sticker
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       </div>
 
       <Card className="w-full md:w-2/3 mx-auto">
