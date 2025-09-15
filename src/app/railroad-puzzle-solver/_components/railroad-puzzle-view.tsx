@@ -40,6 +40,7 @@ import aobahuh from "../_assets/aobahuh.png";
 import Image from "next/image";
 import { getNeighbor } from "@/app/railroad-puzzle-solver/_lib/utils";
 import { useInterval } from "usehooks-ts";
+import { Howl } from "howler";
 
 const RAIL_TYPE_LABELS: Record<RailType, string> = {
   STRAIGHT: "Straight",
@@ -70,6 +71,7 @@ export function RailroadPuzzleView() {
 
   const [aobaRail, setAobaRail] = useState<Tile | null>(null);
   const [railingAoba, setRailingAoba] = useState(false);
+  const [howls, setHowls] = useState<Howl[]>([]);
 
   useEffect(() => {
     setRailInventory(selectedPreset.defaultAvailableRails);
@@ -247,12 +249,48 @@ export function RailroadPuzzleView() {
     }
 
     setRailingAoba(true);
+
+    const randomHowl = howls[Math.floor(Math.random() * howls.length)];
+    randomHowl.play();
   }
 
   function stopAoba() {
     setAobaRail(null);
     setRailingAoba(false);
+
+    for (const howl of howls) {
+      if (howl.playing()) {
+        howl.stop();
+      }
+    }
   }
+
+  useEffect(() => {
+    if (howls.length > 0) {
+      return;
+    }
+
+    const aobaHowl = new Howl({
+      src: ["/assets/audio/Aoba_Minigame_Train_Start.ogg"],
+    });
+
+    const hikariHowl = new Howl({
+      src: ["/assets/audio/Hikari_Minigame_Train_Start.ogg"],
+    });
+
+    const nozomiHowl = new Howl({
+      src: ["/assets/audio/Nozomi_Minigame_Train_Start.ogg"],
+    });
+
+    setHowls([aobaHowl, hikariHowl, nozomiHowl]);
+
+    return () => {
+      aobaHowl.unload();
+      hikariHowl.unload();
+      nozomiHowl.unload();
+      setHowls([]);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-8 items-center justify-center">
