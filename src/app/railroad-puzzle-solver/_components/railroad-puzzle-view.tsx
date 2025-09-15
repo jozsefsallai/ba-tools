@@ -36,7 +36,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import minigameCurrencyIcon from "../_assets/minigame-currency-icon.png";
+import aobahuh from "../_assets/aobahuh.png";
 import Image from "next/image";
+import { getNeighbor } from "@/app/railroad-puzzle-solver/_lib/utils";
+import { useInterval } from "usehooks-ts";
 
 const RAIL_TYPE_LABELS: Record<RailType, string> = {
   STRAIGHT: "Straight",
@@ -64,6 +67,9 @@ export function RailroadPuzzleView() {
   const [resultMap, setResultMap] = useState<Map<string, Tile>>(new Map());
 
   const [minRailConfigs, setMinRailConfigs] = useState<RailPieceCountMap[]>([]);
+
+  const [aobaRail, setAobaRail] = useState<Tile | null>(null);
+  const [railingAoba, setRailingAoba] = useState(false);
 
   useEffect(() => {
     setRailInventory(selectedPreset.defaultAvailableRails);
@@ -169,6 +175,85 @@ export function RailroadPuzzleView() {
     setMinRailConfigs(minResults);
   }
 
+  const flatTiles = useMemo(
+    () => selectedPreset.grid.tiles.flat(),
+    [selectedPreset],
+  );
+
+  useInterval(
+    () => {
+      if (aobaRail === null) {
+        setRailingAoba(false);
+        return;
+      }
+
+      let nextCoords: [number, number] | null = null;
+
+      switch (aobaRail.state.type) {
+        case "START":
+          nextCoords = getNeighbor(aobaRail.x, aobaRail.y, aobaRail.state.exit);
+          break;
+        case "STATION":
+          nextCoords = getNeighbor(aobaRail.x, aobaRail.y, aobaRail.state.exit);
+          break;
+        case "GOAL":
+          setAobaRail(null);
+          setRailingAoba(false);
+          return;
+        default: {
+          const placedRail = resultMap.get(`${aobaRail.y},${aobaRail.x}`);
+          if (placedRail && placedRail.state.type === "RAIL_PIECE") {
+            nextCoords = getNeighbor(
+              aobaRail.x,
+              aobaRail.y,
+              placedRail.state.exit,
+            );
+          } else {
+            nextCoords = null;
+          }
+        }
+      }
+
+      const nextTile =
+        nextCoords &&
+        flatTiles.find((t) => t.x === nextCoords[0] && t.y === nextCoords[1]);
+
+      if (!nextTile) {
+        setAobaRail(null);
+        setRailingAoba(false);
+        toast.error("Aoba derailed! :(");
+        return;
+      }
+
+      setAobaRail(nextTile);
+    },
+    railingAoba ? 500 : null,
+  );
+
+  function startAoba() {
+    if (resultMap.size === 0) {
+      toast.error("You can only use this function if there's a solution.");
+      return;
+    }
+
+    const startTile = flatTiles.find((t) => t.state.type === "START");
+
+    if (startTile) {
+      setAobaRail(startTile);
+    } else {
+      setRailingAoba(false);
+      toast.error("Start tile not found.");
+      return;
+    }
+
+    setRailingAoba(true);
+  }
+
+  function stopAoba() {
+    setAobaRail(null);
+    setRailingAoba(false);
+  }
+
   return (
     <div className="flex flex-col gap-8 items-center justify-center">
       <div
@@ -197,6 +282,20 @@ export function RailroadPuzzleView() {
                         <ResultTileArrow tile={finalTile} />
                       )}
                     </div>
+
+                    {aobaRail &&
+                      aobaRail.x === colIndex &&
+                      aobaRail.y === rowIndex && (
+                        <div className="absolute top-5 pointer-events-none select-none">
+                          <Image
+                            src={aobahuh}
+                            alt="Aoba"
+                            className="animate-bounce"
+                            width={48}
+                            height={48}
+                          />
+                        </div>
+                      )}
                   </Hexagon>
                 );
               })}
@@ -315,11 +414,33 @@ export function RailroadPuzzleView() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-center">
-              <Button variant="outline" onClick={handleGetMinimalConfigsClick}>
+              {aobaRail === null && (
+                <Button
+                  variant="outline"
+                  onClick={startAoba}
+                  disabled={resultMap.size === 0}
+                >
+                  Launch Aoba
+                </Button>
+              )}
+
+              {aobaRail !== null && (
+                <Button variant="outline" onClick={stopAoba}>
+                  Stop Aoba
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                onClick={handleGetMinimalConfigsClick}
+                disabled={aobaRail !== null}
+              >
                 Get Minimal Rail Configs
               </Button>
 
-              <Button onClick={handleSolveClick}>Solve!</Button>
+              <Button onClick={handleSolveClick} disabled={aobaRail !== null}>
+                Solve!
+              </Button>
             </div>
           </div>
         </CardContent>
