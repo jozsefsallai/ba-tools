@@ -408,8 +408,8 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "W",
-          exit: "SE",
+          entrance: "SE",
+          exit: "W",
         },
       },
     ],
