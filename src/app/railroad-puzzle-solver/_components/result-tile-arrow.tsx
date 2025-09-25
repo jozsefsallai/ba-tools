@@ -18,7 +18,10 @@ export type ResultTileArrowProps = {
 };
 
 export function ResultTileArrow({ tile }: ResultTileArrowProps) {
-  if (tile.state.type !== "RAIL_PIECE" && tile.state.type !== "STATION") {
+  if (
+    tile.state.type !== "RAIL_PIECE" &&
+    tile.state.type !== "STATION_RAIL_PIECE"
+  ) {
     return;
   }
 

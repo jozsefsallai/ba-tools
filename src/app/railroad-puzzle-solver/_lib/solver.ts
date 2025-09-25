@@ -53,7 +53,7 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
     let currentStationsVisited = stationsVisited;
 
     if (tile.state.type === "STATION") {
-      if (tile.state.entrance !== incoming) {
+      if (!incoming || !tile.state.connections.includes(incoming)) {
         return;
       }
 
@@ -73,8 +73,7 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
     }
 
     switch (tile.state.type) {
-      case "START":
-      case "STATION": {
+      case "START": {
         const [nx, ny] = getNeighbor(x, y, tile.state.exit);
 
         if (nx >= 0 && ny >= 0 && nx < grid.width && ny < grid.height) {
@@ -86,6 +85,38 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
             railsLeft,
             currentStationsVisited,
             path,
+          );
+        }
+        break;
+      }
+      case "STATION": {
+        const exitDir = tile.state.connections.find((d) => d !== incoming);
+
+        if (!incoming || !exitDir) {
+          return;
+        }
+
+        const railTile: Tile = {
+          ...tile,
+          state: {
+            type: "STATION_RAIL_PIECE",
+            railType: tile.state.railType,
+            entrance: incoming,
+            exit: exitDir,
+          },
+        };
+
+        const [nx, ny] = getNeighbor(x, y, exitDir);
+
+        if (nx >= 0 && ny >= 0 && nx < grid.width && ny < grid.height) {
+          dfs(
+            gridState,
+            nx,
+            ny,
+            reverseDirection(exitDir),
+            railsLeft,
+            currentStationsVisited,
+            [...path, railTile],
           );
         }
 
@@ -117,9 +148,10 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
 
             const isValidNextStep =
               nextTile.state.type === "EMPTY" ||
-              ((nextTile.state.type === "STATION" ||
-                nextTile.state.type === "GOAL") &&
-                nextTile.state.entrance === nextIncomingDir);
+              (nextTile.state.type === "GOAL" &&
+                nextTile.state.entrance === nextIncomingDir) ||
+              (nextTile.state.type === "STATION" &&
+                nextTile.state.connections.includes(nextIncomingDir));
 
             if (!isValidNextStep) {
               continue;
@@ -223,7 +255,7 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
     let currentStationsVisited = stationsVisited;
 
     if (tile.state.type === "STATION") {
-      if (tile.state.entrance !== incoming) {
+      if (!incoming || !tile.state.connections.includes(incoming)) {
         continue;
       }
 
@@ -253,8 +285,7 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
     }
 
     switch (tile.state.type) {
-      case "START":
-      case "STATION": {
+      case "START": {
         const { exit } = tile.state;
         const [nx, ny] = getNeighbor(x, y, exit);
 
@@ -278,7 +309,45 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
 
         break;
       }
+      case "STATION": {
+        const exitDir = tile.state.connections.find((d) => d !== incoming);
 
+        if (!exitDir || !incoming) {
+          continue;
+        }
+
+        const [nx, ny] = getNeighbor(x, y, exitDir);
+
+        if (nx >= 0 && ny >= 0 && nx < grid.width && ny < grid.height) {
+          const railTile: Tile = {
+            ...tile,
+            state: {
+              type: "STATION_RAIL_PIECE",
+              railType: tile.state.railType,
+              entrance: incoming,
+              exit: exitDir,
+            },
+          };
+
+          const nextState: BFSState = {
+            x: nx,
+            y: ny,
+            incoming: reverseDirection(exitDir),
+            railsLeft,
+            stationsVisited: currentStationsVisited,
+            path: [...path, railTile],
+          };
+
+          const key = getVisitedKey(nextState);
+
+          if (!visited.has(key)) {
+            visited.add(key);
+            queue.push(nextState);
+          }
+        }
+
+        break;
+      }
       case "EMPTY": {
         if (!incoming) {
           continue;
@@ -305,9 +374,10 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
 
             const isValid =
               nextTile.state.type === "EMPTY" ||
-              ((nextTile.state.type === "STATION" ||
-                nextTile.state.type === "GOAL") &&
-                nextTile.state.entrance === nextIncomingDir);
+              (nextTile.state.type === "GOAL" &&
+                nextTile.state.entrance === nextIncomingDir) ||
+              (nextTile.state.type === "STATION" &&
+                nextTile.state.connections.includes(nextIncomingDir));
 
             if (!isValid) {
               continue;

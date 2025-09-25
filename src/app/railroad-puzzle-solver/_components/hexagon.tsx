@@ -56,7 +56,8 @@ export function Hexagon({ state, children }: HexagonProps) {
             "bg-background": state.type === "EMPTY",
             "bg-type-blue text-white":
               state.type === "START" || state.type === "GOAL",
-            "bg-type-red text-white": state.type === "STATION",
+            "bg-type-red text-white":
+              state.type === "STATION" || state.type === "STATION_RAIL_PIECE",
             "bg-green-600 text-white": state.type === "RAIL_PIECE",
           })}
         >
@@ -92,12 +93,21 @@ export function Hexagon({ state, children }: HexagonProps) {
             <div className="text-center">
               <strong className="text-base">Station Tile</strong>
               <br />
+              The train must pass through this tile using a{" "}
+              <strong>{prettyPrintRailType(state.railType)}</strong> piece.
+            </div>
+          )}
+
+          {state.type === "STATION_RAIL_PIECE" && (
+            <div className="text-center">
+              <strong className="text-base">Station Tile</strong>
+              <br />
               The train must pass through this tile
               <br />
               from <strong>{prettyPrintDirection(state.entrance)}</strong> to{" "}
               <strong>{prettyPrintDirection(state.exit)}</strong>
               <br />
-              through a <strong>{prettyPrintRailType(state.railType)}</strong>{" "}
+              using a <strong>{prettyPrintRailType(state.railType)}</strong>{" "}
               piece.
             </div>
           )}
@@ -110,7 +120,7 @@ export function Hexagon({ state, children }: HexagonProps) {
               <strong>{prettyPrintDirection(state.entrance)}</strong> to{" "}
               <strong>{prettyPrintDirection(state.exit)}</strong>
               <br />
-              through a <strong>{prettyPrintRailType(state.railType)}</strong>{" "}
+              using a <strong>{prettyPrintRailType(state.railType)}</strong>{" "}
               piece.
             </div>
           )}

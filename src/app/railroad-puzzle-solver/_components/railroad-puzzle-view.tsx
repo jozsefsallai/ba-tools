@@ -195,16 +195,17 @@ export function RailroadPuzzleView() {
         case "START":
           nextCoords = getNeighbor(aobaRail.x, aobaRail.y, aobaRail.state.exit);
           break;
-        case "STATION":
-          nextCoords = getNeighbor(aobaRail.x, aobaRail.y, aobaRail.state.exit);
-          break;
         case "GOAL":
           setAobaRail(null);
           setRailingAoba(false);
           return;
         default: {
           const placedRail = resultMap.get(`${aobaRail.y},${aobaRail.x}`);
-          if (placedRail && placedRail.state.type === "RAIL_PIECE") {
+          if (
+            placedRail &&
+            (placedRail.state.type === "RAIL_PIECE" ||
+              placedRail.state.type === "STATION_RAIL_PIECE")
+          ) {
             nextCoords = getNeighbor(
               aobaRail.x,
               aobaRail.y,
@@ -312,7 +313,8 @@ export function RailroadPuzzleView() {
 
                       {finalTile.state.type === "START" && <div>START</div>}
                       {finalTile.state.type === "GOAL" && <div>GOAL</div>}
-                      {finalTile.state.type === "STATION" && (
+                      {finalTile.state.type === "STATION" && <div>STATION</div>}
+                      {finalTile.state.type === "STATION_RAIL_PIECE" && (
                         <ResultTileArrow tile={finalTile} />
                       )}
 

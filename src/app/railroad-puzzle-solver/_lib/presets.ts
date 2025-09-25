@@ -116,8 +116,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "NW",
-          exit: "SW",
+          connections: ["NW", "SW"],
         },
       },
       {
@@ -126,8 +125,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "SE",
-          exit: "NW",
+          connections: ["SE", "NW"],
         },
       },
       {
@@ -136,8 +134,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "W",
-          exit: "E",
+          connections: ["W", "E"],
         },
       },
     ],
@@ -179,8 +176,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "E",
-          exit: "NW",
+          connections: ["E", "NW"],
         },
       },
       {
@@ -189,8 +185,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "W",
-          exit: "NW",
+          connections: ["W", "NW"],
         },
       },
       {
@@ -199,8 +194,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "W",
-          exit: "SW",
+          connections: ["W", "SW"],
         },
       },
       {
@@ -209,8 +203,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "NE",
-          exit: "SE",
+          connections: ["NE", "SE"],
         },
       },
     ],
@@ -252,8 +245,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "E",
-          exit: "SW",
+          connections: ["E", "SW"],
         },
       },
       {
@@ -262,8 +254,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "NE",
-          exit: "NW",
+          connections: ["NE", "NW"],
         },
       },
       {
@@ -272,8 +263,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "NW",
-          exit: "E",
+          connections: ["NW", "E"],
         },
       },
     ],
@@ -315,8 +305,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "E",
-          exit: "W",
+          connections: ["E", "W"],
         },
       },
       {
@@ -325,8 +314,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "W",
-          exit: "NW",
+          connections: ["W", "NW"],
         },
       },
       {
@@ -335,8 +323,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "W",
-          exit: "SW",
+          connections: ["W", "SW"],
         },
       },
       {
@@ -345,8 +332,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "NE",
-          exit: "SE",
+          connections: ["NE", "SE"],
         },
       },
     ],
@@ -388,8 +374,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "W",
-          exit: "E",
+          connections: ["W", "E"],
         },
       },
       {
@@ -398,8 +383,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "W",
-          exit: "SW",
+          connections: ["W", "SW"],
         },
       },
       {
@@ -408,8 +392,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "SE",
-          exit: "W",
+          connections: ["SE", "W"],
         },
       },
     ],
@@ -451,8 +434,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "SE",
-          exit: "E",
+          connections: ["SE", "E"],
         },
       },
       {
@@ -461,8 +443,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "W",
-          exit: "NE",
+          connections: ["W", "NE"],
         },
       },
       {
@@ -471,8 +452,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "NW",
-          exit: "E",
+          connections: ["NW", "E"],
         },
       },
     ],
@@ -514,8 +494,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "NE",
-          exit: "SE",
+          connections: ["NE", "SE"],
         },
       },
       {
@@ -524,8 +503,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "SE",
-          exit: "SW",
+          connections: ["SE", "SW"],
         },
       },
       {
@@ -534,8 +512,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "NE",
-          exit: "SW",
+          connections: ["NE", "SW"],
         },
       },
     ],
@@ -577,8 +554,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "SW",
-          exit: "E",
+          connections: ["SW", "E"],
         },
       },
       {
@@ -587,8 +563,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "W",
-          exit: "NE",
+          connections: ["W", "NE"],
         },
       },
       {
@@ -597,8 +572,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "NW",
-          exit: "SE",
+          connections: ["NW", "SE"],
         },
       },
     ],
@@ -640,8 +614,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "E",
-          exit: "W",
+          connections: ["E", "W"],
         },
       },
       {
@@ -650,8 +623,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "W",
-          exit: "SE",
+          connections: ["W", "SE"],
         },
       },
       {
@@ -660,8 +632,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "W",
-          exit: "NE",
+          connections: ["W", "NE"],
         },
       },
     ],
@@ -703,8 +674,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "SLIGHTLY_CURVED",
-          entrance: "SW",
-          exit: "E",
+          connections: ["SW", "E"],
         },
       },
       {
@@ -713,8 +683,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "W",
-          exit: "E",
+          connections: ["W", "E"],
         },
       },
       {
@@ -723,8 +692,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "NE",
-          exit: "SW",
+          connections: ["NE", "SW"],
         },
       },
     ],
@@ -766,8 +734,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "STRAIGHT",
-          entrance: "SW",
-          exit: "NE",
+          connections: ["SW", "NE"],
         },
       },
       {
@@ -776,8 +743,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "SW",
-          exit: "SE",
+          connections: ["SW", "SE"],
         },
       },
       {
@@ -786,8 +752,7 @@ export const puzzles: RailroadPuzzlePreset[] = [
         state: {
           type: "STATION",
           railType: "VERY_CURVED",
-          entrance: "W",
-          exit: "SW",
+          connections: ["W", "SW"],
         },
       },
     ],

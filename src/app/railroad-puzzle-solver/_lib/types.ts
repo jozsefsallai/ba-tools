@@ -13,6 +13,11 @@ export type TileState =
   | {
       type: "STATION";
       railType: RailType;
+      connections: Direction[];
+    }
+  | {
+      type: "STATION_RAIL_PIECE";
+      railType: RailType;
       entrance: Direction;
       exit: Direction;
     }
