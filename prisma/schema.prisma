@@ -71,6 +71,7 @@ enum Club {
   CentralControlCenter
   FreightLogisticsDepartment
   OccultClub
+  FreeTradeCartel
   EmptyClub
 }
 
