@@ -402,7 +402,7 @@ export function RailroadPuzzleView() {
             </div>
 
             <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
-              <strong className="text-sm">Available rail pieces</strong>
+              <strong className="text-sm md:w-[150px]">Used rail pieces</strong>
 
               {Object.keys(railInventory).map((key) => {
                 const railType = key as RailType;
@@ -423,6 +423,49 @@ export function RailroadPuzzleView() {
                             railType,
                             Math.min(
                               Math.max(0, Number.parseInt(e.target.value, 10)),
+                              maxRails,
+                            ),
+                          )
+                        }
+                        className="w-16"
+                      />
+
+                      <div className="text-sm text-muted-foreground shrink-0">
+                        / {maxRails}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
+              <strong className="text-sm md:w-[150px]">
+                Remaining rail pieces
+              </strong>
+
+              {Object.keys(railInventory).map((key) => {
+                const railType = key as RailType;
+                const maxRails = selectedPreset.defaultAvailableRails[railType];
+
+                return (
+                  <div className="flex gap-2 items-center" key={railType}>
+                    <Label>{RAIL_TYPE_LABELS[railType]}</Label>
+                    <div className="flex gap-1 items-center">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={maxRails}
+                        step={1}
+                        value={(maxRails - railInventory[railType]).toString()}
+                        onChange={(e) =>
+                          handleRailCountChange(
+                            railType,
+                            Math.min(
+                              Math.max(
+                                0,
+                                maxRails - Number.parseInt(e.target.value, 10),
+                              ),
                               maxRails,
                             ),
                           )
