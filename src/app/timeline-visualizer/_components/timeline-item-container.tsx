@@ -32,6 +32,8 @@ export type TimelineItemContainerProps = {
   allStudents?: Student[];
   uniqueStudents?: Student[];
   highlightedId?: string | null;
+  onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  autoFocusOnTriggerField?: boolean;
 };
 
 export function TimelineItemContainer({
@@ -43,6 +45,8 @@ export function TimelineItemContainer({
   allStudents = [],
   uniqueStudents = [],
   highlightedId,
+  onTriggerKeyDown,
+  autoFocusOnTriggerField,
 }: TimelineItemContainerProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -87,6 +91,8 @@ export function TimelineItemContainer({
               allStudents={allStudents}
               uniqueStudents={uniqueStudents}
               highlighted={highlightedId === item.id}
+              onTriggerKeyDown={onTriggerKeyDown}
+              autoFocusOnTriggerField={autoFocusOnTriggerField}
             />
           ))}
         </div>

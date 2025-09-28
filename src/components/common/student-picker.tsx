@@ -17,10 +17,15 @@ import { PopoverContent } from "@radix-ui/react-popover";
 import {
   type PropsWithChildren,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from "react";
+
+export type StudentPickerHandle = {
+  open(): void;
+};
 
 export type StudentPickerProps<T extends Student> = PropsWithChildren<{
   students: T[];
@@ -28,6 +33,7 @@ export type StudentPickerProps<T extends Student> = PropsWithChildren<{
   className?: string;
   placeholder?: string;
   noStudentText?: string;
+  ref?: React.Ref<StudentPickerHandle>;
 }>;
 
 export function StudentPicker<T extends Student>({
@@ -37,6 +43,7 @@ export function StudentPicker<T extends Student>({
   placeholder,
   noStudentText = "No such student.",
   children,
+  ref,
 }: StudentPickerProps<T>) {
   const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -95,6 +102,16 @@ export function StudentPicker<T extends Student>({
       setSearchInput(e.key);
     }
   }
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open() {
+        setStudentPopoverOpen(true);
+      },
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (!studentPopoverOpen) {

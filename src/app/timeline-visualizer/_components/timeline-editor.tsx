@@ -7,7 +7,10 @@ import {
 } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
 import { MessageBox } from "@/components/common/message-box";
-import { StudentPicker } from "@/components/common/student-picker";
+import {
+  StudentPicker,
+  type StudentPickerHandle,
+} from "@/components/common/student-picker";
 import { ExportTimelineDataDialog } from "@/components/dialogs/export-timeline-data-dialog";
 import { ImportTimelineDataDialog } from "@/components/dialogs/import-timeline-data-dialog";
 import { Button } from "@/components/ui/button";
@@ -49,6 +52,7 @@ export type TimelineEditorProps = {
 
 export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const studentPickerRef = useRef<StudentPickerHandle>(null);
 
   const { preferences } = useUserPreferences();
 
@@ -365,6 +369,19 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     toast.success("Link copied to clipboard.");
   }
 
+  function handleTriggerKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") {
+      return;
+    }
+
+    if (!preferences.timelineVisualizer.triggerAutoFocus) {
+      return;
+    }
+
+    e.preventDefault();
+    studentPickerRef.current?.open();
+  }
+
   useEffect(() => {
     const value = Number.parseInt(itemSpacingStr, 10);
     if (!Number.isNaN(value)) {
@@ -538,6 +555,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
               <div className="flex flex-col gap-4">
                 <div className="flex gap-4 justify-center items-center">
                   <StudentPicker
+                    ref={studentPickerRef}
                     students={allStudents}
                     onStudentSelected={addStudent}
                     className="w-[200px] md:w-[250px]"
@@ -740,6 +758,10 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             allStudents={allStudents}
             uniqueStudents={uniqueStudents}
             highlightedId={highlightedId}
+            onTriggerKeyDown={handleTriggerKeyDown}
+            autoFocusOnTriggerField={
+              preferences.timelineVisualizer.triggerAutoFocus
+            }
           />
         </div>
       )}

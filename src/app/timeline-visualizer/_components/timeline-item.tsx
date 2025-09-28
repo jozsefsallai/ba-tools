@@ -41,6 +41,8 @@ export type TimelineItemProps = {
   allStudents?: Student[];
   uniqueStudents?: Student[];
   highlighted?: boolean;
+  onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  autoFocusOnTriggerField?: boolean;
 };
 
 export function TimelineItem({
@@ -52,6 +54,8 @@ export function TimelineItem({
   allStudents = [],
   uniqueStudents = [],
   highlighted = false,
+  onTriggerKeyDown,
+  autoFocusOnTriggerField = false,
 }: TimelineItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id, animateLayoutChanges: () => false });
@@ -224,7 +228,9 @@ export function TimelineItem({
                       value={item.trigger ?? ""}
                       placeholder="Cost, time, etc."
                       onChange={handleTriggerUpdate}
+                      onKeyDown={onTriggerKeyDown}
                       className="w-32"
+                      autoFocus={autoFocusOnTriggerField}
                     />
                   </div>
 
