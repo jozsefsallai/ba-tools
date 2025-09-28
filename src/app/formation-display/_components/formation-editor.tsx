@@ -37,6 +37,7 @@ import { v4 as uuid } from "uuid";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useUserPreferences } from "@/hooks/use-preferences";
 
 export type FormationEditorProps = {
   allStudents: Student[];
@@ -47,15 +48,23 @@ type CombatClass = "striker" | "special";
 export function FormationEditor({ allStudents }: FormationEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const { preferences } = useUserPreferences();
+
   const [name, setName] = useState("");
 
   const [strikers, setStrikers] = useState<StudentItem[]>([]);
   const [specials, setSpecials] = useState<StudentItem[]>([]);
 
-  const [scale, setScale] = useState(1);
-  const [displayOverline, setDisplayOverline] = useState(false);
-  const [displayRoleIcon, setDisplayRoleIcon] = useState(true);
-  const [groupsVertical, setGroupsVertical] = useState(false);
+  const [scale, setScale] = useState(preferences.formationDisplay.defaultScale);
+  const [displayOverline, setDisplayOverline] = useState(
+    preferences.formationDisplay.defaultDisplayOverline,
+  );
+  const [displayRoleIcon, setDisplayRoleIcon] = useState(
+    !preferences.formationDisplay.defaultNoDisplayRole,
+  );
+  const [groupsVertical, setGroupsVertical] = useState(
+    preferences.formationDisplay.defaultGroupsVertical,
+  );
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
@@ -306,6 +315,13 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
       router.push("/formation-display");
     }
   }, [formationId, query.status]);
+
+  useEffect(() => {
+    setScale(preferences.formationDisplay.defaultScale);
+    setDisplayOverline(preferences.formationDisplay.defaultDisplayOverline);
+    setDisplayRoleIcon(!preferences.formationDisplay.defaultNoDisplayRole);
+    setGroupsVertical(preferences.formationDisplay.defaultGroupsVertical);
+  }, [preferences]);
 
   if (formationId && query.status === "pending") {
     return <MessageBox>Loading formation...</MessageBox>;

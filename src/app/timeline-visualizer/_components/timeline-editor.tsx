@@ -41,6 +41,7 @@ import { clearCache } from "@/lib/cache";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useUserPreferences } from "@/hooks/use-preferences";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -49,22 +50,34 @@ export type TimelineEditorProps = {
 export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const { preferences } = useUserPreferences();
+
   const [name, setName] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("private");
 
   const [items, setItems] = useState<TimelineItem[]>([]);
 
-  const [scale, setScale] = useState(1);
-  const [itemSpacing, setItemSpacing] = useState(10);
-  const [verticalSeparatorSize, setVerticalSeparatorSize] = useState(70);
-  const [horizontalSeparatorSize, setHorizontalSeparatorSize] = useState(50);
+  const [scale, setScale] = useState(
+    preferences.timelineVisualizer.defaultScale,
+  );
+  const [itemSpacing, setItemSpacing] = useState(
+    preferences.timelineVisualizer.defaultItemSpacing,
+  );
+  const [verticalSeparatorSize, setVerticalSeparatorSize] = useState(
+    preferences.timelineVisualizer.defaultVerticalSeparatorSize,
+  );
+  const [horizontalSeparatorSize, setHorizontalSeparatorSize] = useState(
+    preferences.timelineVisualizer.defaultHorizontalSeparatorSize,
+  );
 
-  const [itemSpacingStr, setItemSpacingStr] = useState(itemSpacing.toString());
+  const [itemSpacingStr, setItemSpacingStr] = useState(
+    preferences.timelineVisualizer.defaultItemSpacing.toString(),
+  );
   const [verticalSeparatorSizeStr, setVerticalSeparatorSizeStr] = useState(
-    verticalSeparatorSize.toString(),
+    preferences.timelineVisualizer.defaultVerticalSeparatorSize.toString(),
   );
   const [horizontalSeparatorSizeStr, setHorizontalSeparatorSizeStr] = useState(
-    horizontalSeparatorSize.toString(),
+    preferences.timelineVisualizer.defaultHorizontalSeparatorSize.toString(),
   );
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
@@ -440,6 +453,27 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       router.push("/timeline-visualizer");
     }
   }, [timelineId, query.status]);
+
+  useEffect(() => {
+    setScale(preferences.timelineVisualizer.defaultScale);
+    setItemSpacing(preferences.timelineVisualizer.defaultItemSpacing);
+    setVerticalSeparatorSize(
+      preferences.timelineVisualizer.defaultVerticalSeparatorSize,
+    );
+    setHorizontalSeparatorSize(
+      preferences.timelineVisualizer.defaultHorizontalSeparatorSize,
+    );
+
+    setItemSpacingStr(
+      preferences.timelineVisualizer.defaultItemSpacing.toString(),
+    );
+    setVerticalSeparatorSizeStr(
+      preferences.timelineVisualizer.defaultVerticalSeparatorSize.toString(),
+    );
+    setHorizontalSeparatorSizeStr(
+      preferences.timelineVisualizer.defaultHorizontalSeparatorSize.toString(),
+    );
+  }, [preferences]);
 
   if (timelineId && query.status === "pending") {
     return <MessageBox>Loading timeline...</MessageBox>;
