@@ -16,11 +16,17 @@ import {
 import { cn } from "@/lib/utils";
 import { Authenticated, Unauthenticated } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/nextjs";
-import { ChartNoAxesGanttIcon, MenuIcon, UsersIcon } from "lucide-react";
+import {
+  ChartNoAxesGanttIcon,
+  CogIcon,
+  MenuIcon,
+  UsersIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { UserPreferences } from "@/components/common/user-preferences";
 
 type NavLink = {
   href: string;
@@ -172,6 +178,14 @@ export function TheHeader() {
                   labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
                 />
               </UserButton.MenuItems>
+
+              <UserButton.UserProfilePage
+                label="Preferences"
+                url="preferences"
+                labelIcon={<CogIcon className="size-4" />}
+              >
+                <UserPreferences />
+              </UserButton.UserProfilePage>
             </UserButton>
           </Authenticated>
 

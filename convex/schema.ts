@@ -57,10 +57,20 @@ export default defineSchema({
     externalId: v.string(),
   }).index("by_externalId", ["externalId"]),
 
-  settings: defineTable({
+  userPreferences: defineTable({
     userId: v.id("users"),
     timelineVisualizer: v.object({
       triggerAutoFocus: v.boolean(),
+      defaultScale: v.number(),
+      defaultItemSpacing: v.number(),
+      defaultVerticalSeparatorSize: v.number(),
+      defaultHorizontalSeparatorSize: v.number(),
+    }),
+    formationDisplay: v.object({
+      defaultScale: v.number(),
+      defaultDisplayOverline: v.boolean(),
+      defaultNoDisplayRole: v.boolean(),
+      defaultGroupsVertical: v.boolean(),
     }),
   }).index("by_userId", ["userId"]),
 

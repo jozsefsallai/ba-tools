@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provider";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
+import { UserPreferencesProvider } from "@/components/providers/user-preferences-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,19 +60,21 @@ export default function RootLayout({
         >
           <ThemedClerkProvider>
             <ConvexClientProvider>
-              <main className="flex flex-col gap-10 h-full">
-                <TheHeader />
-                <section className="relative container px-4 md:px-0 flex-1">
-                  {children}
-                </section>
-                <TheFooter
-                  commitHash={
-                    process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
-                  }
-                />
-              </main>
+              <UserPreferencesProvider>
+                <main className="flex flex-col gap-10 h-full">
+                  <TheHeader />
+                  <section className="relative container px-4 md:px-0 flex-1">
+                    {children}
+                  </section>
+                  <TheFooter
+                    commitHash={
+                      process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
+                    }
+                  />
+                </main>
 
-              <Toaster />
+                <Toaster />
+              </UserPreferencesProvider>
             </ConvexClientProvider>
           </ThemedClerkProvider>
         </ThemeProvider>
