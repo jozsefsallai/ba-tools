@@ -7,6 +7,8 @@ import checkMobile from "ismobilejs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UserCorner } from "@/app/(home)/_components/user-corner";
+import { ToolsAndResources } from "@/app/(home)/_components/tools-and-resources";
+import { DonationBox } from "@/app/(home)/_components/donation-box";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -32,18 +34,18 @@ export default async function Home() {
       </p>
 
       <p>
-        The tools I'm putting on here are mostly things that I'll be using for
-        my own needs, but I decided to make them available for everyone in case
-        they find any of them useful.
-      </p>
-
-      <p>
         If you have any suggestions or feedback, feel free to reach out to me on
-        Discord: <strong>joexyz</strong>.
-      </p>
-
-      <p>
-        The source code is also available on{" "}
+        Discord:{" "}
+        <strong>
+          <a
+            href="discord://open/users/245890903133257730"
+            className="underline"
+          >
+            joexyz
+          </a>
+        </strong>
+        . The website and all the tools on it are open source and the source
+        code is also available on{" "}
         <a
           href="https://github.com/jozsefsallai/ba-tools"
           target="_blank"
@@ -63,7 +65,12 @@ export default async function Home() {
         </Button>
       )}
 
-      <UserCorner />
+      <ToolsAndResources />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <UserCorner />
+        <DonationBox />
+      </div>
     </article>
   );
 }

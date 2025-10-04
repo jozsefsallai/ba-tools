@@ -1,18 +1,33 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Authenticated } from "convex/react";
+import { SignInButton } from "@clerk/nextjs";
+import { Authenticated, Unauthenticated } from "convex/react";
 import Link from "next/link";
 
 export function UserCorner() {
   return (
-    <Authenticated>
-      <Separator />
+    <section className="flex flex-col gap-4">
+      <h2 className="text-2xl">User Corner</h2>
 
-      <section className="flex flex-col gap-4">
-        <h2 className="text-2xl">User Corner</h2>
+      <Unauthenticated>
+        <>
+          <p>
+            Create an account to save your preferences and data to the cloud.
+            With an account, you can save and access various things you create
+            on the site (e.g. timelines and formations) from any device. You can
+            also share your timelines with other people.
+          </p>
 
+          <div>
+            <Button asChild>
+              <SignInButton />
+            </Button>
+          </div>
+        </>
+      </Unauthenticated>
+
+      <Authenticated>
         <nav className="flex gap-4">
           <Button variant="outline" asChild>
             <Link href="/user/formations">My Formations</Link>
@@ -22,7 +37,7 @@ export function UserCorner() {
             <Link href="/user/timelines">My Timelines</Link>
           </Button>
         </nav>
-      </section>
-    </Authenticated>
+      </Authenticated>
+    </section>
   );
 }
