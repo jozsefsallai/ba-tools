@@ -99,6 +99,15 @@ export default defineSchema({
     horizontalSeparatorSize: v.optional(v.number()),
   }).index("by_userId", ["userId"]),
 
+  timelineGroup: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    description: v.optional(v.string()),
+    visibility: v.union(v.literal("private"), v.literal("public")),
+    showCreator: v.optional(v.boolean()),
+    timelines: v.array(v.id("timeline")),
+  }).index("by_userId", ["userId"]),
+
   inventoryManagementGrid: defineTable({
     userId: v.id("users"),
     name: v.optional(v.string()),

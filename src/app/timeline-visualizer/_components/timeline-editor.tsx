@@ -257,7 +257,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       name: name.length > 0 ? name : undefined,
       description: description.length > 0 ? description : undefined,
       visibility,
-      showCreator,
+      showCreator: visibility === "public" ? showCreator : false,
     };
 
     if (timelineId) {
@@ -385,10 +385,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   }
 
   async function copyLink() {
-    const url = new URL(
-      `/timeline-visualizer/${timelineId}`,
-      window.location.origin,
-    );
+    const url = new URL(`/timelines/${timelineId}`, window.location.origin);
     await navigator.clipboard.writeText(url.toString());
     toast.success("Link copied to clipboard.");
   }

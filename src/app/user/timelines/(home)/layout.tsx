@@ -1,9 +1,8 @@
-import { OwnTimelineBrowser } from "@/app/user/timelines/_components/own-timeline-browser";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { PropsWithChildren } from "react";
 
 export const metadata: Metadata = {
   title: "My Timelines - Joe's Blue Archive Tools",
@@ -13,28 +12,31 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function MyTimelinesPage() {
-  const allStudents = await db.student.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
+export default async function MyTimelinesHomeLayout({
+  children,
+}: PropsWithChildren) {
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center justify-between">
           <h1 className="text-xl font-bold">My Timelines</h1>
-          <Button asChild>
-            <Link href="/timeline-visualizer">Create New Timeline</Link>
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline">
+              <Link href="/user/timelines/new-group">New Group</Link>
+            </Button>
+
+            <Button asChild>
+              <Link href="/timeline-visualizer">New Timeline</Link>
+            </Button>
+          </div>
         </div>
         <p>Here you can view and manage your saved timelines.</p>
       </div>
 
       <Separator />
 
-      <OwnTimelineBrowser allStudents={allStudents} />
+      {children}
     </div>
   );
 }

@@ -27,6 +27,7 @@ import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 import Markdown from "react-markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DownloadIcon } from "lucide-react";
 
 export type TimelineViewProps = {
   id: string;
@@ -202,6 +203,7 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
             onClick={getTimelineImage}
             disabled={items.length === 0 || generationInProgress}
           >
+            <DownloadIcon />
             Download Image
           </Button>
         </div>

@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
+import { TimelineGroupView } from "@/app/timelines/g/_components/timeline-group-view";
+import { db } from "@/lib/db";
 import { fetchQuery } from "convex/nextjs";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { TimelineView } from "@/app/timeline-visualizer/[id]/_components/timeline-view";
 
 type PageParams = {
-  id: string;
+  id: Id<"timelineGroup">;
 };
 
 export async function generateMetadata({
@@ -18,12 +18,12 @@ export async function generateMetadata({
   try {
     const { id } = await params;
 
-    const timeline = await fetchQuery(api.timeline.getById, {
-      id: id as Id<"timeline">,
+    const timelineGroup = await fetchQuery(api.timelineGroup.getById, {
+      id,
     });
 
     return {
-      title: `${timeline.name ?? "Untitled Timeline"} - Joe's Blue Archive Tools`,
+      title: `${timelineGroup.name ?? "Untitled Timeline Group"} - Joe's Blue Archive Tools`,
       description: "Create a visual rotation timeline.",
       twitter: {
         card: "summary",
@@ -34,7 +34,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function TimelinePage({
+export default async function TimelineGroupPage({
   params,
 }: {
   params: Promise<PageParams>;
@@ -47,5 +47,5 @@ export default async function TimelinePage({
     },
   });
 
-  return <TimelineView id={id} allStudents={allStudents} />;
+  return <TimelineGroupView id={id} allStudents={allStudents} />;
 }

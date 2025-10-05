@@ -54,6 +54,11 @@ const nextConfig: NextConfig = {
         destination: "/railroad-puzzle-solver",
         statusCode: 307,
       },
+      {
+        source: "/timelines",
+        destination: "/timeline-visualizer",
+        statusCode: 307,
+      },
     ];
   },
 };

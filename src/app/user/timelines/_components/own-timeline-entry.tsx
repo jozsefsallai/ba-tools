@@ -2,10 +2,12 @@
 
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { GlobeIcon, LockIcon } from "lucide-react";
+import { GlobeIcon, GripVerticalIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
@@ -14,12 +16,24 @@ import type { Id } from "~convex/dataModel";
 export type OwnTimelineEntryProps = {
   allStudents: Student[];
   entry: FunctionReturnType<typeof api.timeline.getOwn>[number];
+  isGroupItem?: boolean;
+  onWantsToDeleteFromGroup?: (id: Id<"timeline">) => any;
 };
 
 export function OwnTimelineEntry({
   allStudents,
   entry,
+  isGroupItem,
+  onWantsToDeleteFromGroup,
 }: OwnTimelineEntryProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: entry._id, animateLayoutChanges: () => false });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const uniqueStudents = useMemo<Student[]>(() => {
@@ -52,43 +66,59 @@ export function OwnTimelineEntry({
     });
   }
 
+  function handleDeleteFromGroup() {
+    onWantsToDeleteFromGroup?.(entry._id);
+  }
+
   return (
-    <article className="border rounded-md py-4 px-8 flex items-center justify-between gap-4">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          {entry.name && (
-            <div className="text-lg font-semibold">{entry.name}</div>
-          )}
+    <article
+      ref={setNodeRef}
+      className="border bg-background rounded-md py-4 px-8 flex items-center justify-between gap-4"
+      style={style}
+      id={entry._id}
+      {...attributes}
+    >
+      <div className="flex items-center gap-4">
+        {isGroupItem && (
+          <Button className="cursor-move" variant="ghost" {...listeners}>
+            <GripVerticalIcon />
+          </Button>
+        )}
 
-          {!entry.name && (
-            <div className="text-lg font-semibold text-muted-foreground italic">
-              (Untitled Timeline)
-            </div>
-          )}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            {entry.name && (
+              <div className="text-lg font-semibold">{entry.name}</div>
+            )}
 
-          {entry.visibility === "public" && (
-            <GlobeIcon className="size-4 text-muted-foreground" />
-          )}
-          {entry.visibility === "private" && (
-            <LockIcon className="size-4 text-muted-foreground" />
-          )}
-        </div>
+            {!entry.name && (
+              <div className="text-lg font-semibold text-muted-foreground italic">
+                (Untitled Timeline)
+              </div>
+            )}
 
-        <div className="flex gap-1 items-center">
-          {uniqueStudents.map((student) => (
-            <div style={{ zoom: 0.55 }} key={student.id}>
-              <StudentCard student={student} />
-            </div>
-          ))}
+            {entry.visibility === "public" && (
+              <GlobeIcon className="size-4 text-muted-foreground" />
+            )}
+            {entry.visibility === "private" && (
+              <LockIcon className="size-4 text-muted-foreground" />
+            )}
+          </div>
+
+          <div className="flex gap-1 items-center">
+            {uniqueStudents.map((student) => (
+              <div style={{ zoom: 0.55 }} key={student.id}>
+                <StudentCard student={student} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
         {entry.visibility === "public" && (
           <Button variant="outline" asChild>
-            <Link href={`/timeline-visualizer/${entry._id}`}>
-              View Public Timeline
-            </Link>
+            <Link href={`/timelines/${entry._id}`}>View Public Timeline</Link>
           </Button>
         )}
 
@@ -96,12 +126,18 @@ export function OwnTimelineEntry({
           <Link href={`/timeline-visualizer?id=${entry._id}`}>Edit</Link>
         </Button>
 
+        {isGroupItem && (
+          <Button variant="outline" onClick={handleDeleteFromGroup}>
+            Remove from Group
+          </Button>
+        )}
+
         <Button
           variant="destructive"
           onClick={handleDelete}
           className="flex items-center gap-2"
         >
-          {deleteConfirm ? "Click again to confirm" : "Delete"}
+          {deleteConfirm ? "Click again to confirm" : "Delete Timeline"}
         </Button>
       </div>
     </article>
