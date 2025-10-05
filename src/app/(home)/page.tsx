@@ -9,6 +9,9 @@ import Link from "next/link";
 import { UserCorner } from "@/app/(home)/_components/user-corner";
 import { ToolsAndResources } from "@/app/(home)/_components/tools-and-resources";
 import { DonationBox } from "@/app/(home)/_components/donation-box";
+import { ChangelogItem } from "@/components/common/changelog-item";
+import { CHANGELOG } from "@/changelog";
+import { Separator } from "@/components/ui/separator";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -71,6 +74,18 @@ export default async function Home() {
         <UserCorner />
         <DonationBox />
       </div>
+
+      <Separator />
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-2xl">Last Changelog</h2>
+
+        <ChangelogItem data={CHANGELOG[0]} />
+
+        <Button variant="outline" asChild>
+          <Link href="/changelog">See Full Changelog</Link>
+        </Button>
+      </section>
     </article>
   );
 }

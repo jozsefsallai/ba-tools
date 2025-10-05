@@ -317,6 +317,10 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
   }, [formationId, query.status]);
 
   useEffect(() => {
+    if (strikers.length > 0 || specials.length > 0) {
+      return;
+    }
+
     setScale(preferences.formationDisplay.defaultScale);
     setDisplayOverline(preferences.formationDisplay.defaultDisplayOverline);
     setDisplayRoleIcon(!preferences.formationDisplay.defaultNoDisplayRole);
