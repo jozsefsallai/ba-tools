@@ -5,6 +5,8 @@ import type { Id } from "~convex/dataModel";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { TimelineView } from "@/app/timelines/[id]/_components/timeline-view";
+import removeMD from "remove-markdown";
+import { truncateText } from "@/lib/text-utils";
 
 type PageParams = {
   id: string;
@@ -22,9 +24,20 @@ export async function generateMetadata({
       id: id as Id<"timeline">,
     });
 
+    const description = timeline.description
+      ? truncateText(
+          removeMD(timeline.description)
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0)
+            .join(" "),
+          160,
+        )
+      : "A visual EX skill rotation timeline.";
+
     return {
       title: `${timeline.name ?? "Untitled Timeline"} - Joe's Blue Archive Tools`,
-      description: "Create a visual rotation timeline.",
+      description,
       twitter: {
         card: "summary",
       },

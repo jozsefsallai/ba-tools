@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
+import removeMD from "remove-markdown";
+import { truncateText } from "@/lib/text-utils";
 
 type PageParams = {
   id: Id<"timelineGroup">;
@@ -22,9 +24,20 @@ export async function generateMetadata({
       id,
     });
 
+    const description = timelineGroup.description
+      ? truncateText(
+          removeMD(timelineGroup.description)
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0)
+            .join(" "),
+          160,
+        )
+      : "A group of visual EX skill rotation timelines.";
+
     return {
       title: `${timelineGroup.name ?? "Untitled Timeline Group"} - Joe's Blue Archive Tools`,
-      description: "Create a visual rotation timeline.",
+      description,
       twitter: {
         card: "summary",
       },
