@@ -88,6 +88,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
+  const [autofocusTrigger, setAutofocusTrigger] = useState(false);
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -126,6 +128,13 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         student,
       },
     ]);
+
+    if (preferences.timelineVisualizer.triggerAutoFocus) {
+      setAutofocusTrigger(true);
+      setTimeout(() => {
+        setAutofocusTrigger(false);
+      }, 100);
+    }
   }
 
   function addSeparator(orientation: "horizontal" | "vertical") {
@@ -472,6 +481,10 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   }, [timelineId, query.status]);
 
   useEffect(() => {
+    if (items.length > 0) {
+      return;
+    }
+
     setScale(preferences.timelineVisualizer.defaultScale);
     setItemSpacing(preferences.timelineVisualizer.defaultItemSpacing);
     setVerticalSeparatorSize(
@@ -490,7 +503,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     setHorizontalSeparatorSizeStr(
       preferences.timelineVisualizer.defaultHorizontalSeparatorSize.toString(),
     );
-  }, [preferences]);
+  }, [preferences, items]);
 
   if (timelineId && query.status === "pending") {
     return <MessageBox>Loading timeline...</MessageBox>;
@@ -759,9 +772,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             uniqueStudents={uniqueStudents}
             highlightedId={highlightedId}
             onTriggerKeyDown={handleTriggerKeyDown}
-            autoFocusOnTriggerField={
-              preferences.timelineVisualizer.triggerAutoFocus
-            }
+            autoFocusOnTriggerField={autofocusTrigger}
           />
         </div>
       )}
