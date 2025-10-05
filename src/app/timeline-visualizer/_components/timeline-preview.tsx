@@ -5,6 +5,7 @@ import type { Student } from "@prisma/client";
 import type { RefObject } from "react";
 
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
+import { cn } from "@/lib/utils";
 
 type BaseItem = {
   type: "student" | "separator" | "text";
@@ -18,6 +19,7 @@ export type StudentItem = BaseItem & {
   target?: Student;
   copy?: boolean;
   variantId?: string;
+  notes?: string;
 };
 
 export type SeparatorItem = BaseItem & {
@@ -78,12 +80,12 @@ export function TimelinePreview({
     <div className="flex flex-col gap-4 items-start justify-center">
       <div className="flex items-center gap-3 px-4 py-18" ref={containerRef}>
         <div className="flex flex-col gap-1">
-          <div className="flex items-center flex-wrap">
+          <div className="flex items-start flex-wrap">
             {items.map((item, idx) => {
               if (item.type === "student") {
                 return (
                   <div
-                    className="relative cursor-pointer"
+                    className="cursor-pointer flex flex-col items-center"
                     key={item.id}
                     style={{
                       marginLeft:
@@ -94,42 +96,62 @@ export function TimelinePreview({
                     onClick={handleItemClicked(item)}
                     onKeyUp={handleItemKeyUp(item)}
                   >
-                    {item.target && (
-                      <div className="scale-75 absolute -bottom-14 left-1/2 -translate-x-1/2 -ml-2">
-                        <StudentCard
-                          isSkillCard
-                          noDisplayRole
-                          busy={busy}
-                          student={item.target}
-                        />
-                      </div>
-                    )}
+                    <div className="relative">
+                      {item.target && (
+                        <div className="scale-75 absolute -bottom-14 left-1/2 -translate-x-1/2 -ml-2">
+                          <StudentCard
+                            isSkillCard
+                            noDisplayRole
+                            busy={busy}
+                            student={item.target}
+                          />
+                        </div>
+                      )}
 
-                    <StudentCard
-                      isSkillCard
-                      noDisplayRole
-                      busy={busy}
-                      student={item.student}
-                      variantId={item.variantId}
-                    />
-
-                    {item.copy && (
-                      <img
-                        src={skillcardCopyGlow.src}
-                        alt=""
-                        className="absolute top-0 left-0 right-0 bottom-0 skew-x-[-11deg]"
+                      <StudentCard
+                        isSkillCard
+                        noDisplayRole
+                        busy={busy}
+                        student={item.student}
+                        variantId={item.variantId}
                       />
-                    )}
 
-                    {item.trigger && (
+                      {item.copy && (
+                        <img
+                          src={skillcardCopyGlow.src}
+                          alt=""
+                          className="absolute top-0 left-0 right-0 bottom-0 skew-x-[-11deg]"
+                        />
+                      )}
+
+                      {item.trigger && (
+                        <div
+                          className="absolute border-2 border-black dark:border-white top-0 left-[6px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#4b8fff] rounded-[2px] rounded-br-md z-10 text-white text-nowrap"
+                          style={{
+                            textShadow:
+                              "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
+                          }}
+                        >
+                          <div className="skew-x-[11deg]">{item.trigger}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {item.notes && (
                       <div
-                        className="absolute border-2 border-black dark:border-white top-0 left-[6px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#4b8fff] rounded-[2px] rounded-br-md z-10 text-white text-nowrap"
+                        className={cn(
+                          "font-nexon-football-gothic font-bold text-sm text-white px-3 cursor-pointer -ml-6 whitespace-pre-wrap text-center",
+                          {
+                            "mt-2": !item.target,
+                            "mt-12": !!item.target,
+                          },
+                        )}
                         style={{
                           textShadow:
                             "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
                         }}
                       >
-                        <div className="skew-x-[11deg]">{item.trigger}</div>
+                        {item.notes}
                       </div>
                     )}
                   </div>
@@ -163,7 +185,7 @@ export function TimelinePreview({
                 return (
                   <div
                     key={item.id}
-                    className="font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer"
+                    className="text-center whitespace-pre-wrap h-[88px] flex items-center font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer"
                     onClick={handleItemClicked(item)}
                     onKeyUp={handleItemKeyUp(item)}
                     style={{

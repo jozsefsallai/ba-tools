@@ -25,6 +25,8 @@ import {
 import { Button } from "@/components/ui/button";
 import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
+import Markdown from "react-markdown";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export type TimelineViewProps = {
   id: string;
@@ -68,6 +70,7 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
           copy: item.copy,
           trigger: item.trigger,
           variantId: item.variantId,
+          notes: item.notes,
         });
       } else {
         items.push({
@@ -128,11 +131,37 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">
             {query.data.name ?? "Untitled Timeline"}
           </h1>
+
+          {"user" in query.data && query.data.showCreator && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <span>Created by</span>
+
+              <Avatar className="size-6">
+                <AvatarFallback>
+                  {(query.data.user.name ?? query.data.user.username)[0]}
+                </AvatarFallback>
+
+                <AvatarImage src={query.data.user.avatar} />
+              </Avatar>
+
+              <span className="font-bold">
+                {query.data.user.name ??
+                  query.data.user.username ??
+                  "Unknown User"}
+              </span>
+            </div>
+          )}
         </div>
+
+        {query.data.description && (
+          <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">
+            <Markdown>{query.data.description}</Markdown>
+          </div>
+        )}
       </div>
 
       <TimelinePreview

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,9 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
 import {
+  ChevronDownIcon,
   ChevronsUpDownIcon,
+  ChevronUpIcon,
   CopyIcon,
   GripVerticalIcon,
   XIcon,
@@ -70,6 +73,10 @@ export function TimelineItem({
   );
   const [separatorSizeStr, setSeparatorSizeStr] = useState<string | undefined>(
     item.type === "separator" ? item.size?.toString() : undefined,
+  );
+
+  const [displayNotesField, setDisplayNotesField] = useState(
+    item.type === "student" && !!item.notes,
   );
 
   function handleRemove() {
@@ -188,7 +195,7 @@ export function TimelineItem({
                 className="h-14"
               />
 
-              <div className="flex flex-col gap-1">
+              <div className="flex-1 flex flex-col gap-1">
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="text-xl font-bold">{item.student.name}</div>
 
@@ -234,70 +241,109 @@ export function TimelineItem({
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor={`target-${item.id}`}>Target:</Label>
+                  {(item.student.combatRole === "Supporter" ||
+                    item.student.combatRole === "Healer") && (
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor={`target-${item.id}`}>Target:</Label>
 
-                    <StudentPicker
-                      students={allStudents}
-                      onStudentSelected={handleTargetUpdate}
-                      className="w-[90vw] md:w-[450px]"
+                      <StudentPicker
+                        students={allStudents}
+                        onStudentSelected={handleTargetUpdate}
+                        className="w-[90vw] md:w-[450px]"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-[220px] justify-between"
+                        >
+                          {item.target
+                            ? `${item.target.name}`
+                            : "Select Target Student"}
+                          <ChevronsUpDownIcon />
+                        </Button>
+                      </StudentPicker>
+
+                      {uniqueStudents.length > 0 && (
+                        <div className="px-1 flex gap-1">
+                          {uniqueStudents
+                            .filter((student) => student.id !== item.student.id)
+                            .map((student) => (
+                              <button
+                                key={student.id}
+                                type="button"
+                                className={cn("cursor-pointer", {
+                                  "opacity-50":
+                                    !!item.target &&
+                                    item.target.id !== student.id,
+                                })}
+                                style={{ zoom: 0.4 }}
+                                onClick={() =>
+                                  handleTargetUpdate(
+                                    item.target?.id === student.id
+                                      ? null
+                                      : student,
+                                  )
+                                }
+                              >
+                                <StudentCard student={student} busy={false} />
+                              </button>
+                            ))}
+                        </div>
+                      )}
+
+                      {item.target && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleTargetUpdate(null)}
+                        >
+                          <XIcon />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {item.student.combatClass === "Main" && (
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`copy-${item.id}`}
+                        checked={!!item.copy}
+                        onCheckedChange={(checked) =>
+                          onWantsToUpdate(item, { copy: checked })
+                        }
+                      />
+
+                      <Label htmlFor={`copy-${item.id}`}>Copy</Label>
+                    </div>
+                  )}
+
+                  <div>
+                    <Button
+                      variant="outline"
+                      onClick={() => setDisplayNotesField((prev) => !prev)}
                     >
-                      <Button
-                        variant="outline"
-                        className="w-[220px] justify-between"
-                      >
-                        {item.target
-                          ? `${item.target.name}`
-                          : "Select Target Student"}
-                        <ChevronsUpDownIcon />
-                      </Button>
-                    </StudentPicker>
-
-                    {uniqueStudents.length > 0 && (
-                      <div className="px-1 flex gap-1">
-                        {uniqueStudents.map((student) => (
-                          <button
-                            key={student.id}
-                            type="button"
-                            className={cn("cursor-pointer", {
-                              "opacity-50":
-                                !!item.target && item.target.id !== student.id,
-                            })}
-                            style={{ zoom: 0.4 }}
-                            onClick={() =>
-                              handleTargetUpdate(
-                                item.target?.id === student.id ? null : student,
-                              )
-                            }
-                          >
-                            <StudentCard student={student} busy={false} />
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {item.target && (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleTargetUpdate(null)}
-                      >
-                        <XIcon />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id={`copy-${item.id}`}
-                      checked={!!item.copy}
-                      onCheckedChange={(checked) =>
-                        onWantsToUpdate(item, { copy: checked })
-                      }
-                    />
-
-                    <Label htmlFor={`copy-${item.id}`}>Copy</Label>
+                      {displayNotesField && <ChevronUpIcon />}
+                      {!displayNotesField && <ChevronDownIcon />}
+                      Notes
+                    </Button>
                   </div>
                 </div>
+
+                {displayNotesField && (
+                  <div className="flex items-start gap-2">
+                    <Label htmlFor={`notes-${item.id}`} className="mt-1">
+                      Notes:
+                    </Label>
+
+                    <Textarea
+                      id={`notes-${item.id}`}
+                      value={item.notes ?? ""}
+                      placeholder="Additional notes"
+                      onChange={(e) =>
+                        onWantsToUpdate(item, { notes: e.target.value })
+                      }
+                      className="w-full resize-none"
+                    />
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -333,13 +379,13 @@ export function TimelineItem({
 
           {item.type === "text" && (
             <div className="flex-1">
-              <Input
+              <Textarea
                 value={item.text}
                 placeholder="Enter text"
                 onChange={(e) =>
                   onWantsToUpdate(item, { text: e.target.value })
                 }
-                className="w-full"
+                className="w-full resize-none"
               />
             </div>
           )}

@@ -31,7 +31,12 @@ import { timelineStorage } from "@/lib/storage/timeline";
 import type { Student } from "@prisma/client";
 import { Authenticated, useMutation } from "convex/react";
 import html2canvas from "html2canvas-pro";
-import { ChevronsUpDownIcon, ChevronUpIcon } from "lucide-react";
+import {
+  ChevronsUpDownIcon,
+  ChevronUpIcon,
+  DownloadIcon,
+  ShareIcon,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -45,6 +50,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@/hooks/use-preferences";
+import { Textarea } from "@/components/ui/textarea";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -58,6 +64,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
 
   const [name, setName] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("private");
+  const [showCreator, setShowCreator] = useState(false);
+  const [description, setDescription] = useState("");
 
   const [items, setItems] = useState<TimelineItem[]>([]);
 
@@ -234,6 +242,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             target: undefined,
             studentId: item.student.id,
             targetId: item.target?.id,
+            notes: item.notes,
           };
         }
 
@@ -246,7 +255,9 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       verticalSeparatorSize,
       horizontalSeparatorSize,
       name: name.length > 0 ? name : undefined,
+      description: description.length > 0 ? description : undefined,
       visibility,
+      showCreator,
     };
 
     if (timelineId) {
@@ -299,6 +310,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
           copy: item.copy,
           trigger: item.trigger,
           variantId: item.variantId,
+          notes: item.notes,
         });
       } else if (item.type !== "student") {
         newItems.push({
@@ -309,6 +321,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     }
 
     setName(storedData.name ?? "");
+    setDescription(storedData.description ?? "");
     setItems(newItems);
     setScale(storedData.scale || 1);
     setItemSpacing(storedData.itemSpacing || 10);
@@ -334,6 +347,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             target: undefined,
             studentId: item.student.id,
             targetId: item.target?.id,
+            notes: item.notes,
           };
         }
 
@@ -347,6 +361,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       verticalSeparatorSize,
       horizontalSeparatorSize,
       name: name.length > 0 ? name : undefined,
+      description: description.length > 0 ? description : undefined,
     };
 
     timelineStorage.set(data);
@@ -416,6 +431,9 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     if (!timelineId) {
       // reset
       setName("");
+      setDescription("");
+      setVisibility("private");
+      setShowCreator(false);
       setItems([]);
       setScale(1);
       setItemSpacing(10);
@@ -450,6 +468,7 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             copy: item.copy,
             trigger: item.trigger,
             variantId: item.variantId,
+            notes: item.notes,
           });
         } else {
           newItems.push({
@@ -460,7 +479,9 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       }
 
       setName(query.data.name ?? "");
+      setDescription(query.data.description ?? "");
       setVisibility(query.data.visibility || "private");
+      setShowCreator(query.data.showCreator || false);
       setItems(newItems);
       setItemSpacing(query.data.itemSpacing || 10);
       setVerticalSeparatorSize(query.data.verticalSeparatorSize || 70);
@@ -606,43 +627,72 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             </TabsContent>
 
             <Authenticated>
-              <TabsContent
-                value="settings"
-                className="flex gap-4 items-center justify-center"
-              >
-                <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-                  <Label className="shrink-0">Timeline Name</Label>
-                  <Input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Untitled Timeline"
-                  />
+              <TabsContent value="settings" className="flex flex-col gap-4">
+                <div className="flex gap-4">
+                  <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
+                    <Label className="shrink-0">Timeline Name</Label>
+                    <Input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Untitled Timeline"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <Label>Visibility</Label>
+
+                    <Select
+                      value={visibility}
+                      onValueChange={(val) =>
+                        setVisibility(val as "public" | "private")
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="private">Private</SelectItem>
+                        <SelectItem value="public">Public</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {visibility === "public" && (
+                    <div className="flex gap-2 items-center">
+                      <Label className="shrink-0">Show Creator</Label>
+
+                      <Select
+                        value={showCreator ? "yes" : "no"}
+                        onValueChange={(val) => setShowCreator(val === "yes")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="no">No</SelectItem>
+                          <SelectItem value="yes">Yes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex gap-2 items-center">
-                  <Label>Visibility</Label>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="description">
+                    Description{" "}
+                    <small className="text-muted-foreground text-xs">
+                      (supports Markdown)
+                    </small>
+                  </Label>
 
-                  <Select
-                    value={visibility}
-                    onValueChange={(val) =>
-                      setVisibility(val as "public" | "private")
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="private">Private</SelectItem>
-                      <SelectItem value="public">Public</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {query.data?.visibility === "public" && (
-                    <Button variant="outline" onClick={copyLink}>
-                      Copy Link
-                    </Button>
-                  )}
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter a description for this timeline (optional)"
+                    className="resize-none min-h-24"
+                  />
                 </div>
               </TabsContent>
             </Authenticated>
@@ -748,12 +798,20 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
       </Card>
 
       <div className="flex gap-4 items-center justify-center">
+        {query.data?.visibility === "public" && (
+          <Button variant="outline" onClick={copyLink}>
+            <ShareIcon />
+            Share Timeline
+          </Button>
+        )}
+
         <CopyTextTimelineButton items={items} />
 
         <Button
           onClick={getTimelineImage}
           disabled={items.length === 0 || generationInProgress}
         >
+          <DownloadIcon />
           Download Image
         </Button>
       </div>

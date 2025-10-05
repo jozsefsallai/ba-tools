@@ -20,6 +20,7 @@ export const timelineStudentItem = v.object({
   targetId: v.optional(v.string()),
   copy: v.optional(v.boolean()),
   variantId: v.optional(v.string()),
+  notes: v.optional(v.string()),
 });
 
 export const timelineSeparatorOrientation = v.union(
@@ -87,7 +88,9 @@ export default defineSchema({
   timeline: defineTable({
     userId: v.id("users"),
     name: v.optional(v.string()),
+    description: v.optional(v.string()),
     visibility: v.union(v.literal("private"), v.literal("public")),
+    showCreator: v.optional(v.boolean()),
     items: v.array(
       v.union(timelineStudentItem, timelineSeparatorItem, timelineTextItem),
     ),

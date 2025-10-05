@@ -1,6 +1,7 @@
 import type { TimelineItem } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { Button } from "@/components/ui/button";
 import { getShorthand } from "@/lib/student-utils";
+import { CopyIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -25,7 +26,7 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
       }
 
       if (item.type === "text") {
-        output += `[${item.text}] `;
+        output += `[${item.text.split("\n").join(" ")}] `;
         continue;
       }
 
@@ -49,6 +50,10 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
           ex += `${shorthand} `;
         }
 
+        if (item.notes) {
+          ex += `[${item.notes.split("\n").join(" ")}] `;
+        }
+
         if (item.copy) {
           ex += "(C) ";
         }
@@ -67,6 +72,7 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
 
   return (
     <Button variant="outline" onClick={copyToClipboard} disabled={copied}>
+      <CopyIcon />
       {copied ? "Copied to Clipboard" : "Copy Text Timeline"}
     </Button>
   );

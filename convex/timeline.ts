@@ -20,7 +20,9 @@ export const getOwn = authenticatedQuery({
 export const create = authenticatedMutation({
   args: {
     name: v.optional(v.string()),
+    description: v.optional(v.string()),
     visibility: v.optional(v.union(v.literal("private"), v.literal("public"))),
+    showCreator: v.optional(v.boolean()),
     items: v.array(
       v.union(timelineStudentItem, timelineSeparatorItem, timelineTextItem),
     ),
@@ -32,7 +34,9 @@ export const create = authenticatedMutation({
     const timeline = {
       userId: ctx.user._id,
       name: args.name,
+      description: args.description,
       visibility: args.visibility ?? "private",
+      showCreator: args.showCreator ?? false,
       items: args.items,
       itemSpacing: args.itemSpacing,
       verticalSeparatorSize: args.verticalSeparatorSize,
@@ -48,7 +52,9 @@ export const update = authenticatedMutation({
   args: {
     id: v.id("timeline"),
     name: v.optional(v.string()),
+    description: v.optional(v.string()),
     visibility: v.optional(v.union(v.literal("private"), v.literal("public"))),
+    showCreator: v.optional(v.boolean()),
     items: v.array(
       v.union(timelineStudentItem, timelineSeparatorItem, timelineTextItem),
     ),
@@ -59,7 +65,9 @@ export const update = authenticatedMutation({
   handler: async (ctx, args) => {
     const timeline = {
       name: args.name,
+      description: args.description,
       visibility: args.visibility ?? "private",
+      showCreator: args.showCreator ?? false,
       items: args.items,
       itemSpacing: args.itemSpacing,
       verticalSeparatorSize: args.verticalSeparatorSize,
@@ -109,15 +117,38 @@ export const getById = query({
       throw new Error("Timeline not found");
     }
 
+    const owner = await ctx.db.get(timeline.userId);
+
     if (timeline.visibility === "public") {
+      if (timeline.showCreator && owner) {
+        return {
+          ...timeline,
+          user: {
+            name: owner.name,
+            username: owner.username,
+            avatar: owner.avatar,
+          },
+        };
+      }
+
       return timeline;
     }
 
-    const owner = await ctx.db.get(timeline.userId);
     const identity = await ctx.auth.getUserIdentity();
 
     if (!owner || !identity || owner.externalId !== identity?.subject) {
       throw new Error("Timeline not found");
+    }
+
+    if (timeline.showCreator) {
+      return {
+        ...timeline,
+        user: {
+          name: owner.name,
+          username: owner.username,
+          avatar: owner.avatar,
+        },
+      };
     }
 
     return timeline;

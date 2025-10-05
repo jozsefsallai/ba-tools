@@ -15,10 +15,12 @@ type RawTimelineStudentItem = RawBaseItem & {
   trigger?: string;
   copy?: boolean;
   variantId?: string;
+  notes?: string;
 };
 
 export type TimelineStorageData = {
   name?: string;
+  description?: string;
   items: Array<
     RawTimelineStudentItem | Omit<SeparatorItem, "id"> | Omit<TextItem, "id">
   >;
