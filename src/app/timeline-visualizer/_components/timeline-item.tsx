@@ -241,79 +241,74 @@ export function TimelineItem({
                     />
                   </div>
 
-                  {(item.student.combatRole === "Supporter" ||
-                    item.student.combatRole === "Healer") && (
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor={`target-${item.id}`}>Target:</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`target-${item.id}`}>Target:</Label>
 
-                      <StudentPicker
-                        students={allStudents}
-                        onStudentSelected={handleTargetUpdate}
-                        className="w-[90vw] md:w-[450px]"
+                    <StudentPicker
+                      students={allStudents}
+                      onStudentSelected={handleTargetUpdate}
+                      className="w-[90vw] md:w-[450px]"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-[220px] justify-between"
                       >
-                        <Button
-                          variant="outline"
-                          className="w-[220px] justify-between"
-                        >
-                          {item.target
-                            ? `${item.target.name}`
-                            : "Select Target Student"}
-                          <ChevronsUpDownIcon />
-                        </Button>
-                      </StudentPicker>
+                        {item.target
+                          ? `${item.target.name}`
+                          : "Select Target Student"}
+                        <ChevronsUpDownIcon />
+                      </Button>
+                    </StudentPicker>
 
-                      {uniqueStudents.length > 0 && (
-                        <div className="px-1 flex gap-1">
-                          {uniqueStudents
-                            .filter((student) => student.id !== item.student.id)
-                            .map((student) => (
-                              <button
-                                key={student.id}
-                                type="button"
-                                className={cn("cursor-pointer", {
-                                  "opacity-50":
-                                    !!item.target &&
-                                    item.target.id !== student.id,
-                                })}
-                                style={{ zoom: 0.4 }}
-                                onClick={() =>
-                                  handleTargetUpdate(
-                                    item.target?.id === student.id
-                                      ? null
-                                      : student,
-                                  )
-                                }
-                              >
-                                <StudentCard student={student} busy={false} />
-                              </button>
-                            ))}
-                        </div>
-                      )}
+                    {uniqueStudents.length > 0 && (
+                      <div className="px-1 flex gap-1">
+                        {uniqueStudents
+                          .filter((student) => student.id !== item.student.id)
+                          .map((student) => (
+                            <button
+                              key={student.id}
+                              type="button"
+                              className={cn("cursor-pointer", {
+                                "opacity-50":
+                                  !!item.target &&
+                                  item.target.id !== student.id,
+                              })}
+                              style={{ zoom: 0.4 }}
+                              onClick={() =>
+                                handleTargetUpdate(
+                                  item.target?.id === student.id
+                                    ? null
+                                    : student,
+                                )
+                              }
+                            >
+                              <StudentCard student={student} busy={false} />
+                            </button>
+                          ))}
+                      </div>
+                    )}
 
-                      {item.target && (
-                        <Button
-                          variant="outline"
-                          onClick={() => handleTargetUpdate(null)}
-                        >
-                          <XIcon />
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                    {item.target && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleTargetUpdate(null)}
+                      >
+                        <XIcon />
+                      </Button>
+                    )}
+                  </div>
 
-                  {item.student.combatClass === "Main" && (
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id={`copy-${item.id}`}
-                        checked={!!item.copy}
-                        onCheckedChange={(checked) =>
-                          onWantsToUpdate(item, { copy: checked })
-                        }
-                      />
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`copy-${item.id}`}
+                      checked={!!item.copy}
+                      onCheckedChange={(checked) =>
+                        onWantsToUpdate(item, { copy: checked })
+                      }
+                    />
 
-                      <Label htmlFor={`copy-${item.id}`}>Copy</Label>
-                    </div>
-                  )}
+                    <Label htmlFor={`copy-${item.id}`}>Copy</Label>
+                  </div>
 
                   <div>
                     <Button
