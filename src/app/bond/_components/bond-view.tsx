@@ -245,8 +245,23 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     }
 
-    total += giftBoxesUsed * 60;
+    const hasAdoredSR = selectedStudent.giftsAdored.find(
+      (g) => g.rarity === "SR",
+    );
+    if (hasAdoredSR) {
+      total += giftBoxesUsed * 80;
+      return total;
+    }
 
+    const hasLovedSR = selectedStudent.giftsLoved.find(
+      (g) => g.rarity === "SR",
+    );
+    if (hasLovedSR) {
+      total += giftBoxesUsed * 60;
+      return total;
+    }
+
+    total += giftBoxesUsed * 40;
     return total;
   }, [giftCounts, selectedStudent, expOffset, giftBoxesUsed]);
 

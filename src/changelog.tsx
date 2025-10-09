@@ -1,7 +1,24 @@
 import type { ReactNode } from "react";
 
+export const CHANGELOG_SCOPES = {
+  website: "Website",
+  homePage: "Home Page",
+  userCorner: "User Corner",
+  authentication: "Authentication",
+  bondCalculator: "Bond Calculator",
+  timelineVisualizer: "Timeline Visualizer",
+  formationDisplay: "Formation Display",
+  inventoryManagement: "Inventory Management",
+  railroadPuzzleSolver: "Railroad Puzzle Solver",
+  gachaRateStats: "Gacha Rate Stats",
+  scenarioImageGenerator: "Scenario Image Generator",
+  globalBanners: "Global Banners",
+} as const;
+
+type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
+
 export type Change = {
-  scope?: string;
+  scope?: ChangelogScope;
   description: ReactNode;
 };
 
@@ -14,62 +31,74 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 9, 2025",
+    features: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed a bug where gift choice boxes would always give 60 exp even if a craftable gift with 80 exp exists, or if the student doensn't have any loved gifts.",
+      },
+    ],
+    changes: [],
+  },
+  {
     date: "October 5, 2025",
     features: [
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Added ability to set notes for a student item in a timeline.",
       },
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description: "Added ability to set a description to a timeline.",
       },
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Added a toggle for displaying the creator of the timeline in the shareable view.",
       },
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Added timeline visualizer groups, which can include multiple timelines.",
       },
       {
-        scope: "Website",
+        scope: CHANGELOG_SCOPES.website,
         description:
           "Added changelog page and the latest changelog entry on the homepage.",
       },
     ],
     fixes: [
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Fixed a bug where saved preferences would override a saved timeline's settings on load.",
       },
       {
-        scope: "Formation Editor",
+        scope: CHANGELOG_SCOPES.formationDisplay,
         description:
           "Fixed a bug where saved preferences would override a saved formation's settings on load.",
       },
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Fixed a bug where the trigger autofocus feature would focus when changing certain parameters in a timeline item.",
       },
     ],
     changes: [
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description: "The text item now supports multi-line text.",
       },
       {
-        scope: "Timeline Visualizer",
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Shareable timeline links now use the /timelines/ path instead of /timeline-visualizer/.",
       },
       {
-        scope: "User Corner",
+        scope: CHANGELOG_SCOPES.userCorner,
         description: (
           <div>
             The timelines page will now display a list of timeline groups
@@ -84,12 +113,12 @@ export const CHANGELOG: ChangelogItemData[] = [
     date: "October 4, 2025",
     features: [
       {
-        scope: "Home Page",
+        scope: CHANGELOG_SCOPES.homePage,
         description:
           "Added quick links to various tools and resources on the home page.",
       },
       {
-        scope: "Home Page",
+        scope: CHANGELOG_SCOPES.homePage,
         description: "Added donation box.",
       },
     ],
