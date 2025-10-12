@@ -21,7 +21,7 @@ export default function FlappyPeroroGameContainer() {
           className={cn(
             "mx-auto relative aspect-[10/16] flex items-center justify-center",
             {
-              "h-[960px] max-h-screen": !fullscreen,
+              "w-full md:w-auto h-full md:h-[960px] max-h-screen": !fullscreen,
               "w-full h-full max-w-[62.5vh] max-h-[160vw]": fullscreen,
             },
           )}
@@ -35,7 +35,7 @@ export default function FlappyPeroroGameContainer() {
             variant="ghost"
             onClick={() => setFullscreen(!fullscreen)}
             className={cn({
-              "absolute top-0 -right-14": !fullscreen,
+              "absolute top-2 md:top-0 right-2 md:-right-14": !fullscreen,
               "fixed top-4 right-4 z-50": fullscreen,
             })}
           >
