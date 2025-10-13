@@ -169,9 +169,10 @@ enum BannerKind {
 }
 
 model Student {
-  id         String @id
-  devName    String
-  schaleDbId Int
+  id           String @id
+  devName      String
+  schaleDbId   Int
+  defaultOrder Int    @default(0)
 
   // Basic info and trivia
   name          String
