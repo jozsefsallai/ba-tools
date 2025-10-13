@@ -27,10 +27,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserPreferences } from "@/components/common/user-preferences";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 type NavLink = {
   href: string;
   text: string;
+};
+
+type NavigationGroup = {
+  id: string;
+  name: string;
+  links: NavLink[];
 };
 
 const GAMEPLAY_TOOLS: NavLink[] = [
@@ -65,13 +77,44 @@ const MISC_TOOLS: NavLink[] = [
     href: "/scenario-image-generator",
     text: "Scenario Image Generator",
   },
+];
+
+const RESOURCES: NavLink[] = [
   {
     href: "/global/banners",
     text: "Upcoming Global Banners",
   },
 ];
 
-const LINKS: NavLink[] = [...GAMEPLAY_TOOLS, ...MISC_TOOLS];
+const GAMES: NavLink[] = [
+  {
+    href: "/games/flappy-peroro",
+    text: "Flappy Peroro",
+  },
+];
+
+const NAVIGATION_GROUPS: NavigationGroup[] = [
+  {
+    id: "gameplay-tools",
+    name: "Gameplay Tools",
+    links: GAMEPLAY_TOOLS,
+  },
+  {
+    id: "misc-tools",
+    name: "Misc Tools",
+    links: MISC_TOOLS,
+  },
+  {
+    id: "resources",
+    name: "Resources",
+    links: RESOURCES,
+  },
+  {
+    id: "games",
+    name: "Games",
+    links: GAMES,
+  },
+];
 
 export function TheHeader() {
   const [open, setOpen] = useState(false);
@@ -95,63 +138,38 @@ export function TheHeader() {
         </Link>
 
         <div className="flex gap-6 items-center">
-          <NavigationMenu className="hidden md:block">
+          <NavigationMenu
+            viewport={false}
+            delayDuration={0}
+            skipDelayDuration={0}
+            className="hidden md:block z-10"
+          >
             <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="cursor-pointer">
-                  Gameplay Tools
-                </NavigationMenuTrigger>
+              {NAVIGATION_GROUPS.map((group) => (
+                <NavigationMenuItem key={group.id}>
+                  <NavigationMenuTrigger className="cursor-pointer">
+                    {group.name}
+                  </NavigationMenuTrigger>
 
-                <NavigationMenuContent>
-                  <div className="w-[300px] p-1 flex flex-col gap-2">
-                    {GAMEPLAY_TOOLS.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        passHref
-                        legacyBehavior
-                      >
-                        <NavigationMenuLink
-                          className={cn(
-                            navigationMenuTriggerStyle(),
-                            "block w-full",
-                          )}
-                        >
-                          {link.text}
-                        </NavigationMenuLink>
-                      </Link>
-                    ))}
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="cursor-pointer">
-                  Misc Tools
-                </NavigationMenuTrigger>
-
-                <NavigationMenuContent>
-                  <div className="w-[300px] p-1 flex flex-col gap-2">
-                    {MISC_TOOLS.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        passHref
-                        legacyBehavior
-                      >
-                        <NavigationMenuLink
-                          className={cn(
-                            navigationMenuTriggerStyle(),
-                            "block w-full",
-                          )}
-                        >
-                          {link.text}
-                        </NavigationMenuLink>
-                      </Link>
-                    ))}
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+                  <NavigationMenuContent>
+                    <ul className="w-[300px] flex flex-col gap-2">
+                      {group.links.map((link) => (
+                        <li key={link.href}>
+                          <NavigationMenuLink
+                            asChild
+                            className={cn(
+                              navigationMenuTriggerStyle(),
+                              "block w-full",
+                            )}
+                          >
+                            <Link href={link.href}>{link.text}</Link>
+                          </NavigationMenuLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              ))}
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -199,19 +217,36 @@ export function TheHeader() {
 
           <nav
             className={cn(
-              "absolute border top-18 left-0 w-full bg-background z-50 p-4 flex flex-col gap-4",
+              "absolute border shadow-lg top-18 left-0 w-full bg-secondary z-50",
               {
                 hidden: !open,
               },
             )}
           >
-            {LINKS.map((link) => (
-              <Button key={link.href} variant="outline" asChild>
-                <Link key={link.href} href={link.href}>
-                  {link.text}
-                </Link>
-              </Button>
-            ))}
+            <Accordion type="multiple">
+              {NAVIGATION_GROUPS.map((group) => (
+                <AccordionItem key={group.id} value={group.id}>
+                  <AccordionTrigger className="px-4">
+                    {group.name}
+                  </AccordionTrigger>
+
+                  <AccordionContent className="flex flex-col gap-2 px-4">
+                    {group.links.map((link) => (
+                      <Button
+                        key={link.href}
+                        variant="outline"
+                        className="justify-start bg-background/30 border-border"
+                        asChild
+                      >
+                        <Link key={link.href} href={link.href}>
+                          {link.text}
+                        </Link>
+                      </Button>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </nav>
         </div>
       </div>

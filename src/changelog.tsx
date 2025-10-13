@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export const CHANGELOG_SCOPES = {
@@ -13,6 +14,7 @@ export const CHANGELOG_SCOPES = {
   gachaRateStats: "Gacha Rate Stats",
   scenarioImageGenerator: "Scenario Image Generator",
   globalBanners: "Global Banners",
+  games: "Games",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -30,6 +32,37 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "October 12, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.games,
+        description: (
+          <>
+            Added{" "}
+            <Link
+              href="/games/flappy-peroro"
+              className="font-semibold underline"
+            >
+              Flappy Peroro
+            </Link>{" "}
+            game
+          </>
+        ),
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Better navigation menu categories.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Updated navigation menu UX for mobile devices.",
+      },
+    ],
+  },
   {
     date: "October 9, 2025",
     features: [],
