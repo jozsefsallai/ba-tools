@@ -203,6 +203,10 @@ model Student {
   usesCover               Boolean
   equipment               EquipmentKind[]
 
+  hasBondGearJP     Boolean @default(false)
+  hasBondGearGlobal Boolean @default(false)
+  hasBondGearCN     Boolean @default(false)
+
   // Gacha
   rarity Int
 
