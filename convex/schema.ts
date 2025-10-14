@@ -1,4 +1,9 @@
-import { STAR_LEVELS, UE_LEVELS } from "@/lib/types";
+import {
+  BORROW_SLOT_GAMEMODES,
+  GAME_SERVERS,
+  STAR_LEVELS,
+  UE_LEVELS,
+} from "@/lib/types";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -48,6 +53,28 @@ export const inventoryManagementItem = v.object({
 export const inventoryManagementCoords = v.object({
   x: v.number(),
   y: v.number(),
+});
+
+export const rosterItem = v.object({
+  studentId: v.string(),
+  starLevel: v.union(...STAR_LEVELS.map((level) => v.literal(level))),
+  ueLevel: v.optional(v.union(...UE_LEVELS.map((level) => v.literal(level)))),
+  level: v.number(),
+  relationshipRank: v.number(),
+  ex: v.number(),
+  basic: v.number(),
+  enhanced: v.number(),
+  sub: v.number(),
+  equipmentSlot1: v.optional(v.number()),
+  equipmentSlot2: v.optional(v.number()),
+  equipmentSlot3: v.optional(v.number()),
+  equipmentSlot4: v.optional(v.number()),
+  attackLevel: v.optional(v.number()),
+  hpLevel: v.optional(v.number()),
+  healLevel: v.optional(v.number()),
+  featuredBorrowSlot: v.optional(
+    v.union(...BORROW_SLOT_GAMEMODES.map((mode) => v.literal(mode))),
+  ),
 });
 
 export default defineSchema({
@@ -107,6 +134,21 @@ export default defineSchema({
     showCreator: v.optional(v.boolean()),
     timelines: v.array(v.id("timeline")),
   }).index("by_userId", ["userId"]),
+
+  roster: defineTable({
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    introduction: v.optional(v.string()),
+    accountLevel: v.number(),
+    studentRepId: v.optional(v.string()),
+    visibility: v.union(v.literal("private"), v.literal("public")),
+    gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
+    friendCode: v.string(),
+    students: v.array(rosterItem),
+    lastUpdated: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_gameServerAndFriendCode", ["gameServer", "friendCode"]),
 
   inventoryManagementGrid: defineTable({
     userId: v.id("users"),

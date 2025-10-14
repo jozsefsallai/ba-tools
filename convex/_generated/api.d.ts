@@ -16,6 +16,7 @@ import type {
 import type * as formation from "../formation.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as roster from "../roster.js";
 import type * as timeline from "../timeline.js";
 import type * as timelineGroup from "../timelineGroup.js";
 import type * as userPreferences from "../userPreferences.js";
@@ -33,6 +34,7 @@ declare const fullApi: ApiFromModules<{
   formation: typeof formation;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  roster: typeof roster;
   timeline: typeof timeline;
   timelineGroup: typeof timelineGroup;
   userPreferences: typeof userPreferences;

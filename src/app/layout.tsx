@@ -10,6 +10,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provider";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { UserPreferencesProvider } from "@/components/providers/user-preferences-provider";
+import { db } from "@/lib/db";
+import { StudentsProvider } from "@/components/providers/students-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,11 +44,17 @@ const nexonFootballGothic = localFont({
   variable: "--font-nexon-football-gothic",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const students = await db.student.findMany({
+    orderBy: {
+      defaultOrder: "asc",
+    },
+  });
+
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body
@@ -60,21 +68,23 @@ export default function RootLayout({
         >
           <ThemedClerkProvider>
             <ConvexClientProvider>
-              <UserPreferencesProvider>
-                <main className="flex flex-col gap-10 h-full">
-                  <TheHeader />
-                  <section className="relative container px-4 md:px-0 flex-1">
-                    {children}
-                  </section>
-                  <TheFooter
-                    commitHash={
-                      process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
-                    }
-                  />
-                </main>
+              <StudentsProvider loadedStudents={students}>
+                <UserPreferencesProvider>
+                  <main className="flex flex-col gap-10 h-full">
+                    <TheHeader />
+                    <section className="relative container px-4 md:px-0 flex-1">
+                      {children}
+                    </section>
+                    <TheFooter
+                      commitHash={
+                        process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
+                      }
+                    />
+                  </main>
 
-                <Toaster />
-              </UserPreferencesProvider>
+                  <Toaster />
+                </UserPreferencesProvider>
+              </StudentsProvider>
             </ConvexClientProvider>
           </ThemedClerkProvider>
         </ThemeProvider>
