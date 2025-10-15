@@ -127,7 +127,7 @@ export function RosterItem({ item }: RosterItemProps) {
             <div className="flex items-center gap-2">
               <div className="text-xs font-semibold">Talents:</div>
 
-              {item.attackLevel && (
+              {!!item.attackLevel && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Badge variant="secondary">ATK{item.attackLevel}</Badge>
@@ -137,7 +137,7 @@ export function RosterItem({ item }: RosterItemProps) {
                 </Tooltip>
               )}
 
-              {item.hpLevel && (
+              {!!item.hpLevel && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Badge variant="secondary">HP{item.hpLevel}</Badge>
@@ -147,7 +147,7 @@ export function RosterItem({ item }: RosterItemProps) {
                 </Tooltip>
               )}
 
-              {item.healLevel && (
+              {!!item.healLevel && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Badge variant="secondary">HEAL{item.healLevel}</Badge>
