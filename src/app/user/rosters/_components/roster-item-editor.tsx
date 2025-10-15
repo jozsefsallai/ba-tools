@@ -214,7 +214,7 @@ export const RosterItemEditor = React.memo(
         equipmentSlot1: 10,
         equipmentSlot2: 10,
         equipmentSlot3: 10,
-        equipmentSlot4: 2,
+        equipmentSlot4: hasBondItem ? 2 : undefined,
         attackLevel: 25,
         hpLevel: 25,
         healLevel: 25,

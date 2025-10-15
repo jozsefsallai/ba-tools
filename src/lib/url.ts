@@ -4,12 +4,20 @@ export function buildCDNUrl(key: string) {
   return `/cdn/${key}`;
 }
 
+export function buildStudentIconUrlFromId(studentId: string) {
+  return buildCDNUrl(`v2/images/students/icons/${studentId}.png`);
+}
+
+export function buildStudentPortraitUrlFromId(studentId: string) {
+  return buildCDNUrl(`v2/images/students/portraits/${studentId}.png`);
+}
+
 export function buildStudentIconUrl(student: Student) {
-  return buildCDNUrl(`v2/images/students/icons/${student.id}.png`);
+  return buildStudentIconUrlFromId(student.id);
 }
 
 export function buildStudentPortraitUrl(student: Student) {
-  return buildCDNUrl(`v2/images/students/portraits/${student.id}.png`);
+  return buildStudentPortraitUrlFromId(student.id);
 }
 
 export function buildItemIconUrl(iconName: string) {

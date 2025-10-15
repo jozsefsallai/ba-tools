@@ -20,7 +20,12 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { useQueryWithStatus } from "@/lib/convex";
-import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
+import {
+  GAME_SERVER_NAMES,
+  GAME_SERVERS,
+  type StarLevel,
+  type GameServer,
+} from "@/lib/types";
 import type { Student } from "@prisma/client";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, SaveIcon, XIcon } from "lucide-react";
@@ -105,7 +110,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
           return {
             enabled: !!item,
             student,
-            starLevel: item?.starLevel ?? 1,
+            starLevel: item?.starLevel ?? (student.rarity as StarLevel),
             ueLevel: item?.ueLevel ?? 1,
             level: item?.level ?? 1,
             relationshipRank: item?.relationshipRank ?? 1,
