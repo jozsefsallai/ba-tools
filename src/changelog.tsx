@@ -33,6 +33,33 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 17, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "YouTube and BiliBili links will now autoembed videos on places where Markdown formatting is supported.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "Added tips and a link to a Markdown cheat sheet on places where Markdown formatting is supported.",
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Moved location of the cloud save button.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          'Renamed "Add Below" button to "Add Here" and made it so it shows up in-between items.',
+      },
+    ],
+  },
+  {
     date: "October 12, 2025",
     features: [
       {
@@ -46,7 +73,7 @@ export const CHANGELOG: ChangelogItemData[] = [
             >
               Flappy Peroro
             </Link>{" "}
-            game
+            game.
           </>
         ),
       },
