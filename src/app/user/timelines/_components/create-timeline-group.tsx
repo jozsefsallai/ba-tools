@@ -1,5 +1,6 @@
 "use client";
 
+import { MarkdownTips } from "@/components/common/markdown-tips";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,6 +74,8 @@ export function CreateTimelineGroup() {
           placeholder="A description of this timeline group (optional)"
           className="resize-none min-h-24"
         />
+
+        <MarkdownTips />
       </div>
 
       <div className="flex gap-2 items-center">

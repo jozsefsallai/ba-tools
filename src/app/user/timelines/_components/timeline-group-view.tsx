@@ -4,6 +4,7 @@ import {
   type TimelineDocWithId,
   TimelineGroupItemsContainer,
 } from "@/app/user/timelines/_components/timeline-group-items-container";
+import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
 import {
@@ -158,6 +159,8 @@ export function TimelineGroupView({
             placeholder="A description of this timeline group (optional)"
             className="resize-none min-h-24"
           />
+
+          <MarkdownTips />
         </div>
 
         <div className="flex gap-2 items-center">

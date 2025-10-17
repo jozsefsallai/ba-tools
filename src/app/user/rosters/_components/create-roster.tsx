@@ -1,5 +1,6 @@
 "use client";
 
+import { MarkdownTips } from "@/components/common/markdown-tips";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,6 +91,8 @@ export function CreateRoster() {
           placeholder="Hello."
           className="resize-none min-h-24"
         />
+
+        <MarkdownTips />
       </div>
 
       <div className="flex gap-2 items-center">

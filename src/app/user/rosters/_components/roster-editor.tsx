@@ -4,6 +4,7 @@ import {
   type RosterItem,
   RosterItemEditor,
 } from "@/app/user/rosters/_components/roster-item-editor";
+import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
@@ -232,6 +233,8 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
             placeholder="Hello."
             className="resize-none min-h-24"
           />
+
+          <MarkdownTips />
         </div>
 
         <div className="flex gap-2 items-center">

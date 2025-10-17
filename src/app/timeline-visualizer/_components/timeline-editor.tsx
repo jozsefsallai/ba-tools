@@ -35,6 +35,7 @@ import {
   ChevronsUpDownIcon,
   ChevronUpIcon,
   DownloadIcon,
+  SaveIcon,
   ShareIcon,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -51,6 +52,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { Textarea } from "@/components/ui/textarea";
+import { MarkdownTips } from "@/components/common/markdown-tips";
 
 export type TimelineEditorProps = {
   allStudents: Student[];
@@ -690,6 +692,8 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
                     placeholder="Enter a description for this timeline (optional)"
                     className="resize-none min-h-24"
                   />
+
+                  <MarkdownTips />
                 </div>
               </TabsContent>
             </Authenticated>
@@ -769,16 +773,6 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
                   Save Local
                 </Button>
 
-                <Authenticated>
-                  <Button
-                    variant="outline"
-                    onClick={createOrUpdateCloudTimeline}
-                    disabled={generationInProgress}
-                  >
-                    {timelineId ? "Update Cloud Data" : "Save to Cloud"}
-                  </Button>
-                </Authenticated>
-
                 <ExportTimelineDataDialog
                   onBeforeLoad={() => saveTimelineToLocalStorage(false)}
                 >
@@ -801,6 +795,17 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             Share Timeline
           </Button>
         )}
+
+        <Authenticated>
+          <Button
+            variant="outline"
+            onClick={createOrUpdateCloudTimeline}
+            disabled={generationInProgress}
+          >
+            <SaveIcon />
+            Save to Cloud
+          </Button>
+        </Authenticated>
 
         <CopyTextTimelineButton items={items} />
 
