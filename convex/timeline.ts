@@ -119,6 +119,8 @@ export const getById = query({
 
     const owner = await ctx.db.get(timeline.userId);
 
+    const identity = await ctx.auth.getUserIdentity();
+
     if (timeline.visibility === "public") {
       if (timeline.showCreator && owner) {
         return {
@@ -128,13 +130,15 @@ export const getById = query({
             username: owner.username,
             avatar: owner.avatar,
           },
+          isOwn: identity?.subject === owner.externalId,
         };
       }
 
-      return timeline;
+      return {
+        ...timeline,
+        isOwn: identity?.subject === owner?.externalId,
+      };
     }
-
-    const identity = await ctx.auth.getUserIdentity();
 
     if (!owner || !identity || owner.externalId !== identity?.subject) {
       throw new Error("Timeline not found");
@@ -148,9 +152,13 @@ export const getById = query({
           username: owner.username,
           avatar: owner.avatar,
         },
+        isOwn: true,
       };
     }
 
-    return timeline;
+    return {
+      ...timeline,
+      isOwn: true,
+    };
   },
 });

@@ -45,6 +45,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Added tips and a link to a Markdown cheat sheet on places where Markdown formatting is supported.",
       },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added an edit button to own timelines and timeline groups in the publicly shareable page view.",
+      },
     ],
     fixes: [],
     changes: [

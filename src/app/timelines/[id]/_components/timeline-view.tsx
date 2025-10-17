@@ -26,8 +26,9 @@ import { Button } from "@/components/ui/button";
 import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, PencilIcon } from "lucide-react";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
+import Link from "next/link";
 
 export type TimelineViewProps = {
   id: string;
@@ -133,9 +134,19 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">
-            {query.data.name ?? "Untitled Timeline"}
-          </h1>
+          <div className="flex gap-2 justify-between">
+            <h1 className="text-3xl font-bold">
+              {query.data.name ?? "Untitled Timeline"}
+            </h1>
+
+            {query.data.isOwn && (
+              <Button variant="outline" asChild>
+                <Link href={`/timeline-visualizer?id=${id}`}>
+                  <PencilIcon /> Edit Timeline
+                </Link>
+              </Button>
+            )}
+          </div>
 
           {"user" in query.data && query.data.showCreator && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground">

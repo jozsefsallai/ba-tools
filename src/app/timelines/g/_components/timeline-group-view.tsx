@@ -4,8 +4,11 @@ import { TimelineGroupEntry } from "@/app/timelines/g/_components/timeline-group
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useQueryWithStatus } from "@/lib/convex";
 import type { Student } from "@prisma/client";
+import { PencilIcon } from "lucide-react";
+import Link from "next/link";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -33,7 +36,17 @@ export function TimelineGroupView({ id, allStudents }: TimelineGroupViewProps) {
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">{query.data.name}</h1>
+          <div className="flex gap-2 justify-between">
+            <h1 className="text-3xl font-bold">{query.data.name}</h1>
+
+            {query.data.isOwn && (
+              <Button variant="outline" asChild>
+                <Link href={`/user/timelines/${id}`}>
+                  <PencilIcon /> Edit Group
+                </Link>
+              </Button>
+            )}
+          </div>
 
           {"user" in query.data && query.data.showCreator && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground">

@@ -54,6 +54,8 @@ export const getById = query({
       }
     }
 
+    const identity = await ctx.auth.getUserIdentity();
+
     if (timelineGroup.visibility === "public") {
       if (timelineGroup.showCreator && owner) {
         return {
@@ -64,16 +66,16 @@ export const getById = query({
             username: owner.username,
             avatar: owner.avatar,
           },
+          isOwn: identity?.subject === owner.externalId,
         };
       }
 
       return {
         ...timelineGroup,
         timelines,
+        isOwn: identity?.subject === owner?.externalId,
       };
     }
-
-    const identity = await ctx.auth.getUserIdentity();
 
     if (!owner || !identity || owner.externalId !== identity?.subject) {
       throw new Error("Timeline group not found");
@@ -88,12 +90,14 @@ export const getById = query({
           username: owner.username,
           avatar: owner.avatar,
         },
+        isOwn: true,
       };
     }
 
     return {
       ...timelineGroup,
       timelines,
+      isOwn: true,
     };
   },
 });
