@@ -397,8 +397,8 @@ export function TimelineItem({
         </div>
       </div>
 
-      <div className="hidden group-hover:flex items-center gap-2 absolute -top-4 right-4 border rounded-md shadow-md bg-background py-1 px-3 text-xs">
-        <strong>Add Below</strong>
+      <div className="hidden group-hover:flex items-center gap-2 absolute -bottom-7 right-4 border rounded-md shadow-md bg-background py-1 px-3 text-xs">
+        <strong>Add Here</strong>
 
         <TimelineQuickAdd
           students={uniqueStudents}
