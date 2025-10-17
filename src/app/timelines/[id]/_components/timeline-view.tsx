@@ -25,9 +25,9 @@ import {
 import { Button } from "@/components/ui/button";
 import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
-import Markdown from "react-markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DownloadIcon } from "lucide-react";
+import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 
 export type TimelineViewProps = {
   id: string;
@@ -160,7 +160,7 @@ export function TimelineView({ id, allStudents }: TimelineViewProps) {
 
         {query.data.description && (
           <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">
-            <Markdown>{query.data.description}</Markdown>
+            <MarkdownRenderer>{query.data.description}</MarkdownRenderer>
           </div>
         )}
       </div>

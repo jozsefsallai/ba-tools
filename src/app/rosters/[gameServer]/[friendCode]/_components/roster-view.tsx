@@ -5,6 +5,7 @@ import type {
   RosterStudentsSortOption,
   RosterStudentData,
 } from "@/app/rosters/[gameServer]/[friendCode]/types";
+import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
 import {
   Accordion,
@@ -38,7 +39,6 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import { format } from "date-fns";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import Markdown from "react-markdown";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 
@@ -519,7 +519,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
             {query.data.introduction && (
               <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">
-                <Markdown>{query.data.introduction}</Markdown>
+                <MarkdownRenderer>{query.data.introduction}</MarkdownRenderer>
               </div>
             )}
 

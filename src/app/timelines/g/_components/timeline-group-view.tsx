@@ -1,11 +1,11 @@
 "use client";
 
 import { TimelineGroupEntry } from "@/app/timelines/g/_components/timeline-group-entry";
+import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQueryWithStatus } from "@/lib/convex";
 import type { Student } from "@prisma/client";
-import Markdown from "react-markdown";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -58,7 +58,7 @@ export function TimelineGroupView({ id, allStudents }: TimelineGroupViewProps) {
 
         {query.data.description && (
           <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">
-            <Markdown>{query.data.description}</Markdown>
+            <MarkdownRenderer>{query.data.description}</MarkdownRenderer>
           </div>
         )}
       </div>
