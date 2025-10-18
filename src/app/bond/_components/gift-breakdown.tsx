@@ -199,7 +199,7 @@ export function GiftBreakdown({
         </Table>
 
         <DialogFooter>
-          <DialogClose>
+          <DialogClose asChild>
             <Button>Close</Button>
           </DialogClose>
         </DialogFooter>

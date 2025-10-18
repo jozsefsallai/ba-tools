@@ -21,13 +21,15 @@ function ChangelogGroup({
           <div key={idx} className="flex items-start gap-2">
             <ChevronRightIcon className="shrink-0 text-muted-foreground" />
 
-            {item.scope && (
-              <div className="self-start shrink-0 mt-0.5 text-xs text-muted-foreground px-2 py-0.5 font-bold border rounded-full">
-                {item.scope}
-              </div>
-            )}
+            <div className="flex flex-col md:flex-row items-start gap-1 md:gap-2">
+              {item.scope && (
+                <div className="self-start shrink-0 mt-0.5 text-xs text-muted-foreground px-2 py-0.5 font-bold border rounded-full">
+                  {item.scope}
+                </div>
+              )}
 
-            <div>{item.description}</div>
+              <div>{item.description}</div>
+            </div>
           </div>
         ))}
       </div>

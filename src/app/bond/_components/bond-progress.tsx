@@ -11,9 +11,14 @@ import Image from "next/image";
 export type BondProgressProps = {
   startingExp: number;
   exp: number;
+  targetBond: string;
 };
 
-export function BondProgress({ startingExp = 0, exp }: BondProgressProps) {
+export function BondProgress({
+  startingExp = 0,
+  exp,
+  targetBond,
+}: BondProgressProps) {
   const startingLevel = useMemo(() => {
     let result: FavorTableEntry | undefined;
 
@@ -55,11 +60,19 @@ export function BondProgress({ startingExp = 0, exp }: BondProgressProps) {
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      <div className="text-3xl font-bold flex items-center gap-2">
-        <Image src={bondImage} alt="🩷" className="size-8" />{" "}
+      <div className="text-3xl font-bold flex items-start gap-2">
+        <Image src={bondImage} alt="🩷" className="size-8 mt-1" />{" "}
         {startingLevel.level} →{" "}
-        <Image src={bondImage} alt="🩷" className="size-8" />{" "}
-        {currentLevel.level}
+        <Image src={bondImage} alt="🩷" className="size-8 mt-1" />{" "}
+        <div className="flex flex-col">
+          {currentLevel.level}
+
+          {!!targetBond && (
+            <small className="text-sm text-muted-foreground">
+              (Goal: {targetBond})
+            </small>
+          )}
+        </div>
       </div>
 
       <Progress

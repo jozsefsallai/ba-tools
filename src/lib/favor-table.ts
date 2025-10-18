@@ -511,3 +511,11 @@ export const favorTable = [
     totalExp: 0,
   },
 ] as const satisfies FavorTableEntry[];
+
+export const favorTableMap: Record<number, FavorTableEntry> = favorTable.reduce(
+  (acc, entry) => {
+    acc[entry.level] = entry;
+    return acc;
+  },
+  {} as Record<number, FavorTableEntry>,
+);

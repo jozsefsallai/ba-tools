@@ -40,9 +40,23 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Added target bond rank and remaining EXP calculator + breakdown.",
       },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Added ability to specify current and target bond EXP values.",
+      },
     ],
     fixes: [],
-    changes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description: "Updated Relationship Rank Calculator UI layout.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Improved changelog UI on mobile devices.",
+      },
+    ],
   },
   {
     date: "October 17, 2025",

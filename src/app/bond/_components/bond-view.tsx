@@ -15,7 +15,7 @@ import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Gift, Student } from "@prisma/client";
 import { AlertCircleIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import giftAdoredImage from "@/assets/images/gift_adored.png";
 import giftLovedImage from "@/assets/images/gift_loved.png";
@@ -24,7 +24,7 @@ import giftNormalImage from "@/assets/images/gift_normal.png";
 
 import Image from "next/image";
 import { BondProgress } from "@/app/bond/_components/bond-progress";
-import { favorTable } from "@/lib/favor-table";
+import { favorTable, favorTableMap } from "@/lib/favor-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -179,8 +179,14 @@ export function BondView({ students, gifts }: BondViewProps) {
     Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
   );
 
-  const [currentBond, setCurrentBond] = useState(1);
-  const [targetBond, setTargetBond] = useState<number | null>(null);
+  const [currentBondExp, setCurrentBondExp] = useState<number>(0);
+  const [targetBondExp, setTargetBondExp] = useState<number | null>(null);
+
+  const [currentBondStr, setCurrentBondStr] = useState("1");
+  const [targetBondStr, setTargetBondStr] = useState("");
+
+  const [currentBondExpStr, setCurrentBondExpStr] = useState("0");
+  const [targetBondExpStr, setTargetBondExpStr] = useState("");
 
   const [giftBoxesUsed, setGiftBoxesUsed] = useState(0);
 
@@ -198,15 +204,6 @@ export function BondView({ students, gifts }: BondViewProps) {
       );
     });
   }, [onlyDisplayRelevantGifts, selectedStudent]);
-
-  const expOffset = useMemo(() => {
-    const entry = favorTable.find((e) => e.level === currentBond);
-    if (!entry) {
-      return 0;
-    }
-
-    return entry.totalExp;
-  }, [currentBond]);
 
   const studentGiftKinds = useMemo(() => {
     if (!selectedStudent) {
@@ -252,7 +249,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       return 0;
     }
 
-    let total = expOffset;
+    let total = currentBondExp;
 
     for (const gift of gifts) {
       const isAdored = gift.adoredBy.some((s) => s.id === selectedStudent.id);
@@ -302,7 +299,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
     total += giftBoxesUsed * 40;
     return total;
-  }, [giftCounts, selectedStudent, expOffset, giftBoxesUsed]);
+  }, [giftCounts, selectedStudent, currentBondExp, giftBoxesUsed]);
 
   const hasIrrelevantGifts = useMemo(() => {
     if (!selectedStudent || !onlyDisplayRelevantGifts) {
@@ -323,25 +320,12 @@ export function BondView({ students, gifts }: BondViewProps) {
     });
   }, [onlyDisplayRelevantGifts, selectedStudent, giftCounts, studentGiftKinds]);
 
-  const expForTargetBond = useMemo(() => {
-    if (targetBond === null) {
-      return 0;
-    }
-
-    const entry = favorTable.find((e) => e.level === targetBond);
-    if (!entry) {
-      return 0;
-    }
-
-    return entry.totalExp;
-  }, [targetBond]);
-
   const remainingExpBreakdown = useMemo<RemainingExpBreakdown | null>(() => {
-    if (expForTargetBond === null) {
+    if (targetBondExp === null) {
       return null;
     }
 
-    const difference = expForTargetBond - totalExp;
+    const difference = targetBondExp - totalExp;
     if (difference <= 0) {
       return null;
     }
@@ -386,7 +370,7 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     return result;
-  }, [expForTargetBond, totalExp, studentGiftKinds]);
+  }, [targetBondExp, totalExp, studentGiftKinds]);
 
   function updateCount(giftId: number, count: number) {
     setGiftCounts((prev) => ({
@@ -395,27 +379,170 @@ export function BondView({ students, gifts }: BondViewProps) {
     }));
   }
 
-  function updateCurrentBond(value: number) {
-    const clampedValue = Math.max(1, Math.min(value, 100));
+  const updateCurrentBond = useCallback(
+    (raw: string) => {
+      setCurrentBondStr(raw);
 
-    setCurrentBond(clampedValue);
+      if (raw === "") {
+        return;
+      }
 
-    if (!selectedStudent) {
+      const value = Number.parseInt(raw, 10);
+      if (Number.isNaN(value)) {
+        return;
+      }
+
+      const clampedValue = Math.max(1, Math.min(value, 100));
+
+      const entry = favorTableMap[clampedValue];
+
+      if (!entry) {
+        return;
+      }
+
+      setCurrentBondExp(entry.totalExp);
+
+      if (!selectedStudent) {
+        return;
+      }
+
+      studentStorage.addOrUpdateStudent({
+        id: selectedStudent.id,
+        bondExp: entry.totalExp,
+      });
+
+      setCurrentBondExpStr(entry.totalExp.toString());
+      setCurrentBondStr(clampedValue.toString());
+    },
+    [selectedStudent],
+  );
+
+  const updateCurrentBondExp = useCallback(
+    (raw: string) => {
+      setCurrentBondExpStr(raw);
+
+      const value = Number.parseInt(raw, 10);
+      if (Number.isNaN(value)) {
+        return;
+      }
+
+      let clampedValue = Math.max(
+        0,
+        Math.min(value, favorTable[favorTable.length - 2].totalExp),
+      );
+      if (clampedValue > favorTable[favorTable.length - 2].totalExp) {
+        clampedValue = favorTable[favorTable.length - 2].totalExp;
+      }
+
+      const nextEntry =
+        favorTable.find((entry) => entry.totalExp > clampedValue) ??
+        favorTable[favorTable.length - 2];
+      const entry = favorTableMap[nextEntry.level - 1];
+
+      if (!entry) {
+        return;
+      }
+
+      setCurrentBondExp(clampedValue);
+
+      if (!selectedStudent) {
+        return;
+      }
+
+      studentStorage.addOrUpdateStudent({
+        id: selectedStudent.id,
+        bondExp: clampedValue,
+      });
+
+      setCurrentBondStr(entry.level.toString());
+      setCurrentBondExpStr(clampedValue.toString());
+    },
+    [selectedStudent],
+  );
+
+  const updateTargetBond = useCallback((raw: string) => {
+    setTargetBondStr(raw);
+
+    const value = Number.parseInt(raw, 10);
+    if (Number.isNaN(value)) {
+      setTargetBondExp(null);
       return;
     }
 
-    studentStorage.addOrUpdateStudent({
-      id: selectedStudent.id,
-      bond: clampedValue,
-    });
-  }
+    const clampedValue = Math.max(1, Math.min(value, 100));
+
+    const entry = favorTableMap[clampedValue];
+
+    if (!entry) {
+      setTargetBondExp(null);
+      return;
+    }
+
+    setTargetBondExp(entry.totalExp);
+    setTargetBondExpStr(entry.totalExp.toString());
+    setTargetBondStr(clampedValue.toString());
+  }, []);
+
+  const updateTargetBondExp = useCallback((raw: string) => {
+    setTargetBondExpStr(raw);
+
+    const value = Number.parseInt(raw, 10);
+    if (Number.isNaN(value)) {
+      setTargetBondExp(null);
+      return;
+    }
+
+    let clampedValue = Math.max(
+      0,
+      Math.min(value, favorTable[favorTable.length - 2].totalExp),
+    );
+    if (clampedValue > favorTable[favorTable.length - 2].totalExp) {
+      clampedValue = favorTable[favorTable.length - 2].totalExp;
+    }
+
+    setTargetBondExp(clampedValue);
+    setTargetBondStr(
+      (
+        favorTable.find((entry) => entry.totalExp >= clampedValue)?.level ?? 1
+      ).toString(),
+    );
+    setTargetBondExpStr(clampedValue.toString());
+  }, []);
 
   function updateStudent(student: StudentWithGifts) {
     setSelectedStudent(student);
 
     const storedStudent = studentStorage.getStudent(student.id);
-    if (storedStudent?.bond) {
-      setCurrentBond(storedStudent.bond);
+
+    let bondUpdated = false;
+
+    if (typeof storedStudent?.bondExp !== "undefined") {
+      const bondExp = storedStudent.bondExp;
+      const nextEntry =
+        favorTable.find((entry) => entry.totalExp > bondExp) ??
+        favorTable[favorTable.length - 2];
+      const entry = favorTableMap[nextEntry.level - 1];
+
+      if (entry) {
+        setCurrentBondExp(entry.totalExp);
+        setCurrentBondStr(entry.level.toString());
+        setCurrentBondExpStr(bondExp.toString());
+        bondUpdated = true;
+      }
+    } else if (storedStudent?.bond) {
+      const entry = favorTableMap[storedStudent.bond];
+      if (entry) {
+        setCurrentBondExp(entry.totalExp);
+        setCurrentBondStr(entry.level.toString());
+        setCurrentBondExpStr(entry.totalExp.toString());
+        bondUpdated = true;
+      }
+    }
+
+    if (!bondUpdated) {
+      setCurrentBondExp(0);
+      setCurrentBondStr("1");
+      setCurrentBondExpStr("0");
     }
   }
 
@@ -555,18 +682,78 @@ export function BondView({ students, gifts }: BondViewProps) {
 
         {selectedStudent && (
           <>
-            <div className="flex gap-2 items-center">
-              <Switch
-                id="only-relevant-gifts"
-                checked={onlyDisplayRelevantGifts}
-                onCheckedChange={setOnlyDisplayRelevantGifts}
+            <div className="flex items-center gap-4">
+              <img
+                src={buildStudentPortraitUrl(selectedStudent)}
+                alt={selectedStudent.name}
+                className="shrink-0 w-30 md:w-40"
               />
-              <Label htmlFor="only-relevant-gifts">
-                Only Display Favorite Gifts
-              </Label>
+
+              <div className="flex-1 flex flex-col gap-4">
+                <div className="flex gap-2 items-center">
+                  <Switch
+                    id="only-relevant-gifts"
+                    checked={onlyDisplayRelevantGifts}
+                    onCheckedChange={setOnlyDisplayRelevantGifts}
+                  />
+                  <Label htmlFor="only-relevant-gifts">
+                    Only Display Favorite Gifts
+                  </Label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs">Current Rank</Label>
+
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={currentBondStr}
+                      onChange={(e) => updateCurrentBond(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs">Target Rank</Label>
+
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={targetBondStr}
+                      placeholder="Any"
+                      onChange={(e) => updateTargetBond(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs">Current EXP</Label>
+
+                    <Input
+                      type="number"
+                      min={0}
+                      value={currentBondExpStr}
+                      onChange={(e) => updateCurrentBondExp(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs">Target EXP</Label>
+
+                    <Input
+                      type="number"
+                      min={0}
+                      value={targetBondExpStr}
+                      placeholder="Any"
+                      onChange={(e) => updateTargetBondExp(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {hasIrrelevantGifts && (
+            {selectedStudent && hasIrrelevantGifts && (
               <Alert>
                 <AlertCircleIcon />
                 <AlertTitle>Notice</AlertTitle>
@@ -578,71 +765,11 @@ export function BondView({ students, gifts }: BondViewProps) {
               </Alert>
             )}
 
-            <div className="text-center">
-              <img
-                src={buildStudentPortraitUrl(selectedStudent)}
-                alt={selectedStudent.name}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 w-1/2">
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">Current Rank</Label>
-
-                <Input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={currentBond}
-                  onChange={(e) => {
-                    const value = Number(e.target.value);
-
-                    if (Number.isNaN(value)) {
-                      updateCurrentBond(1);
-                    } else {
-                      updateCurrentBond(value);
-                    }
-                  }}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <Label className="text-xs">Target Rank</Label>
-
-                <Input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={targetBond ?? ""}
-                  placeholder="Any"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === "") {
-                      setTargetBond(null);
-                      return;
-                    }
-
-                    const numValue = Number(value);
-                    if (Number.isNaN(numValue)) {
-                      setTargetBond(null);
-                    } else {
-                      setTargetBond(numValue);
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            <BondProgress startingExp={expOffset} exp={totalExp} />
-
-            {remainingExpBreakdown && (
-              <RemainingExpBreakdownCard
-                currentBond={currentBond}
-                targetBond={targetBond}
-                expNeeded={expForTargetBond - totalExp}
-                breakdown={remainingExpBreakdown}
-              />
-            )}
+            <BondProgress
+              startingExp={currentBondExp}
+              exp={totalExp}
+              targetBond={targetBondStr}
+            />
 
             <GiftBreakdown
               gifts={gifts}
@@ -653,6 +780,15 @@ export function BondView({ students, gifts }: BondViewProps) {
             >
               <Button variant="outline">View Gift Breakdown</Button>
             </GiftBreakdown>
+
+            {remainingExpBreakdown && targetBondExp && (
+              <RemainingExpBreakdownCard
+                currentBond={currentBondStr}
+                targetBond={targetBondStr}
+                expNeeded={targetBondExp - totalExp}
+                breakdown={remainingExpBreakdown}
+              />
+            )}
           </>
         )}
       </div>

@@ -36,10 +36,34 @@ export const EXP_VALUES: RemainingExpBreakdown = {
 };
 
 export type RemainingExpBreakdownCardProps = {
-  currentBond: number;
-  targetBond: number | null;
+  currentBond: string;
+  targetBond: string | null;
   expNeeded: number;
   breakdown: RemainingExpBreakdown;
+};
+
+const ALL_BREAKDOWN_KEYS: (keyof RemainingExpBreakdown)[] = [
+  "headpats",
+  "normalSRGifts",
+  "likedSRGifts",
+  "lovedSRGifts",
+  "adoredSRGifts",
+  "likedSSRGifts",
+  "lovedSSRGifts",
+  "adoredSSRGifts",
+];
+
+const NON_SSR_BREAKDOWN_KEYS: (keyof RemainingExpBreakdown)[] = [
+  "headpats",
+  "normalSRGifts",
+  "likedSRGifts",
+  "lovedSRGifts",
+  "adoredSRGifts",
+];
+
+type WastedEXPResult = {
+  hasWastedEXP: boolean;
+  wastedEXPMap: RemainingExpBreakdown;
 };
 
 function BreakdownItem({
@@ -79,36 +103,40 @@ export function RemainingExpBreakdownCard({
 }: RemainingExpBreakdownCardProps) {
   const [excludeSSRGifts, setExcludeSSRGifts] = useState(false);
 
-  const wastedEXPMap = useMemo<RemainingExpBreakdown>(() => {
-    const map: RemainingExpBreakdown = {
-      headpats: 0,
-      normalSRGifts: 0,
-      likedSRGifts: 0,
-      lovedSRGifts: 0,
-      adoredSRGifts: 0,
-      likedSSRGifts: 0,
-      lovedSSRGifts: 0,
-      adoredSSRGifts: 0,
+  const wastedEXP = useMemo<WastedEXPResult>(() => {
+    const result: WastedEXPResult = {
+      hasWastedEXP: false,
+      wastedEXPMap: {
+        headpats: 0,
+        normalSRGifts: 0,
+        likedSRGifts: 0,
+        lovedSRGifts: 0,
+        adoredSRGifts: 0,
+        likedSSRGifts: 0,
+        lovedSSRGifts: 0,
+        adoredSSRGifts: 0,
+      },
     };
 
-    (Object.keys(breakdown) as (keyof RemainingExpBreakdown)[]).forEach(
-      (key) => {
-        const count = breakdown[key];
-        const expPerUnit = EXP_VALUES[key];
-        const totalExp = count * expPerUnit;
+    ALL_BREAKDOWN_KEYS.forEach((key) => {
+      const count = breakdown[key];
+      const expPerUnit = EXP_VALUES[key];
+      const totalExp = count * expPerUnit;
 
-        if (totalExp >= expNeeded) {
-          map[key] = totalExp - expNeeded;
-        }
-      },
-    );
+      if (totalExp >= expNeeded) {
+        result.hasWastedEXP = true;
+        result.wastedEXPMap[key] = totalExp - expNeeded;
+      }
+    });
 
-    return map;
+    return result;
   }, [expNeeded, breakdown]);
 
-  const hasWastedEXP = useMemo(() => {
-    return Object.values(wastedEXPMap).some((wasted) => wasted > 0);
-  }, [wastedEXPMap]);
+  const paddedExp = useMemo(() => {
+    return expNeeded % 15 === 0
+      ? expNeeded
+      : expNeeded + (15 - (expNeeded % 15));
+  }, [expNeeded]);
 
   const optimalBreakdown = useMemo<RemainingExpBreakdown>(() => {
     const result: RemainingExpBreakdown = {
@@ -122,47 +150,41 @@ export function RemainingExpBreakdownCard({
       adoredSSRGifts: 0,
     };
 
-    const dp = new Array(expNeeded + 1).fill(Number.POSITIVE_INFINITY);
+    const BREAKDOWN_KEYS = (
+      excludeSSRGifts ? NON_SSR_BREAKDOWN_KEYS : ALL_BREAKDOWN_KEYS
+    ).filter((key) => breakdown[key] > 0);
+
+    const localExpValues = BREAKDOWN_KEYS.map((key) => EXP_VALUES[key]);
+
+    const dp = new Array(paddedExp + 1).fill(Number.POSITIVE_INFINITY);
     dp[0] = 0;
 
-    for (const key of Object.keys(
-      breakdown,
-    ) as (keyof RemainingExpBreakdown)[]) {
-      if (excludeSSRGifts && key.endsWith("SSRGifts")) {
-        continue;
-      }
-
-      const expPerUnit = EXP_VALUES[key];
-      const maxCount = breakdown[key];
-
-      for (let count = 1; count <= maxCount; count++) {
-        const totalExp = count * expPerUnit;
-
-        for (let j = expNeeded; j >= totalExp; j--) {
-          if (dp[j - totalExp] + count < dp[j]) {
-            dp[j] = dp[j - totalExp] + count;
-          }
+    for (const expValue of localExpValues) {
+      for (let j = expValue; j <= paddedExp; ++j) {
+        if (dp[j - expValue] !== Number.POSITIVE_INFINITY) {
+          dp[j] = Math.min(dp[j], dp[j - expValue] + 1);
         }
       }
     }
 
-    let remainingExp = expNeeded;
+    if (dp[paddedExp] === Number.POSITIVE_INFINITY) {
+      // should probably never happen tbh
+      return result;
+    }
 
-    for (const key of Object.keys(
-      breakdown,
-    ) as (keyof RemainingExpBreakdown)[]) {
-      const expPerUnit = EXP_VALUES[key];
-      let count = 0;
+    let current = paddedExp;
 
-      while (
-        remainingExp >= expPerUnit &&
-        dp[remainingExp] === dp[remainingExp - expPerUnit] + 1
-      ) {
-        remainingExp -= expPerUnit;
-        count++;
+    while (current > 0) {
+      for (let i = BREAKDOWN_KEYS.length - 1; i >= 0; --i) {
+        const key = BREAKDOWN_KEYS[i];
+        const expValue = EXP_VALUES[key];
+
+        if (current >= expValue && dp[current] === dp[current - expValue] + 1) {
+          result[key]++;
+          current -= expValue;
+          break;
+        }
       }
-
-      result[key] = count;
     }
 
     return result;
@@ -188,62 +210,62 @@ export function RemainingExpBreakdownCard({
             image={headpatImage}
             label="Headpats"
             count={breakdown.headpats}
-            wasted={wastedEXPMap.headpats}
+            wasted={wastedEXP.wastedEXPMap.headpats}
           />
 
           <BreakdownItem
             image={giftLikedImage}
             label="Liked SSR Gifts"
             count={breakdown.likedSSRGifts}
-            wasted={wastedEXPMap.likedSSRGifts}
+            wasted={wastedEXP.wastedEXPMap.likedSSRGifts}
           />
 
           <BreakdownItem
             image={giftLovedImage}
             label="Loved SSR Gifts"
             count={breakdown.lovedSSRGifts}
-            wasted={wastedEXPMap.lovedSSRGifts}
+            wasted={wastedEXP.wastedEXPMap.lovedSSRGifts}
           />
 
           <BreakdownItem
             image={giftAdoredImage}
             label="Adored SSR Gifts"
             count={breakdown.adoredSSRGifts}
-            wasted={wastedEXPMap.adoredSSRGifts}
+            wasted={wastedEXP.wastedEXPMap.adoredSSRGifts}
           />
 
           <BreakdownItem
             image={giftNormalImage}
             label="Normal SR Gifts"
             count={breakdown.normalSRGifts}
-            wasted={wastedEXPMap.normalSRGifts}
+            wasted={wastedEXP.wastedEXPMap.normalSRGifts}
           />
 
           <BreakdownItem
             image={giftLikedImage}
             label="Liked SR Gifts"
             count={breakdown.likedSRGifts}
-            wasted={wastedEXPMap.likedSRGifts}
+            wasted={wastedEXP.wastedEXPMap.likedSRGifts}
           />
 
           <BreakdownItem
             image={giftLovedImage}
             label="Loved SR Gifts"
             count={breakdown.lovedSRGifts}
-            wasted={wastedEXPMap.lovedSRGifts}
+            wasted={wastedEXP.wastedEXPMap.lovedSRGifts}
           />
 
           <BreakdownItem
             image={giftAdoredImage}
             label="Adored SR Gifts"
             count={breakdown.adoredSRGifts}
-            wasted={wastedEXPMap.adoredSRGifts}
+            wasted={wastedEXP.wastedEXPMap.adoredSRGifts}
           />
         </div>
 
-        {hasWastedEXP && <Separator />}
+        {wastedEXP.hasWastedEXP && <Separator />}
 
-        {hasWastedEXP && (
+        {wastedEXP.hasWastedEXP && (
           <div className="flex flex-col gap-4">
             <div className="font-semibold">
               Optimal Gift and Headpat Breakdown
@@ -316,6 +338,13 @@ export function RemainingExpBreakdownCard({
                 wasted={0}
               />
             </div>
+
+            {paddedExp > expNeeded && (
+              <div className="text-xs text-muted-foreground">
+                * Note: The optimal breakdown is calculated based on a total of{" "}
+                {paddedExp} EXP.
+              </div>
+            )}
           </div>
         )}
       </CardContent>

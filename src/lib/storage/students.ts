@@ -7,6 +7,7 @@ export type StudentStorageItem = {
   starLevel?: StarLevel;
   ueLevel?: UELevel;
   bond?: number;
+  bondExp?: number;
 };
 
 export type StudentStorageData = StudentStorageItem[];
