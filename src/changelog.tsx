@@ -36,6 +36,18 @@ export const CHANGELOG: ChangelogItemData[] = [
     date: "October 17, 2025",
     features: [
       {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Added target bond rank and remaining EXP calculator + breakdown.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
+  {
+    date: "October 17, 2025",
+    features: [
+      {
         scope: CHANGELOG_SCOPES.website,
         description:
           "YouTube and BiliBili links will now autoembed videos on places where Markdown formatting is supported.",

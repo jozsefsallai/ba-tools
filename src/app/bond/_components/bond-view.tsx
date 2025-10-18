@@ -29,6 +29,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
 import { StudentPicker } from "@/components/common/student-picker";
 import { studentStorage } from "@/lib/storage/students";
+import {
+  EXP_VALUES,
+  type RemainingExpBreakdown,
+  RemainingExpBreakdownCard,
+} from "@/app/bond/_components/remaining-exp-breakdown-card";
 
 export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
@@ -175,6 +180,7 @@ export function BondView({ students, gifts }: BondViewProps) {
   );
 
   const [currentBond, setCurrentBond] = useState(1);
+  const [targetBond, setTargetBond] = useState<number | null>(null);
 
   const [giftBoxesUsed, setGiftBoxesUsed] = useState(0);
 
@@ -201,6 +207,45 @@ export function BondView({ students, gifts }: BondViewProps) {
 
     return entry.totalExp;
   }, [currentBond]);
+
+  const studentGiftKinds = useMemo(() => {
+    if (!selectedStudent) {
+      return {
+        hasAdoredSSR: false,
+        hasLovedSSR: false,
+        hasLikedSSR: false,
+        hasAdoredSR: false,
+        hasLovedSR: false,
+        hasLikedSR: false,
+        hasNormalSR: false,
+      };
+    }
+
+    const hasAdoredSSR = true; // Everyone adores red and purple bouquets
+    const hasLovedSSR = true; // Everyone loves the normal bouquets
+    const hasLikedSSR = true; // Everyone likes SSR gifts
+
+    const hasAdoredSR = selectedStudent.giftsAdored.some(
+      (g) => g.rarity === "SR",
+    );
+    const hasLovedSR = selectedStudent.giftsLoved.some(
+      (g) => g.rarity === "SR",
+    );
+    const hasLikedSR = selectedStudent.giftsLiked.some(
+      (g) => g.rarity === "SR",
+    );
+    const hasNormalSR = true; // Everyone is content with a gift of any kind
+
+    return {
+      hasAdoredSSR,
+      hasLovedSSR,
+      hasLikedSSR,
+      hasAdoredSR,
+      hasLovedSR,
+      hasLikedSR,
+      hasNormalSR,
+    };
+  }, [gifts, selectedStudent]);
 
   const totalExp = useMemo(() => {
     if (!selectedStudent) {
@@ -245,18 +290,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     }
 
-    const hasAdoredSR = selectedStudent.giftsAdored.find(
-      (g) => g.rarity === "SR",
-    );
-    if (hasAdoredSR) {
+    if (studentGiftKinds.hasAdoredSR) {
       total += giftBoxesUsed * 80;
       return total;
     }
 
-    const hasLovedSR = selectedStudent.giftsLoved.find(
-      (g) => g.rarity === "SR",
-    );
-    if (hasLovedSR) {
+    if (studentGiftKinds.hasLovedSR) {
       total += giftBoxesUsed * 60;
       return total;
     }
@@ -282,7 +321,72 @@ export function BondView({ students, gifts }: BondViewProps) {
         !isGiftLikedByStudent(gift, selectedStudent)
       );
     });
-  }, [onlyDisplayRelevantGifts, selectedStudent, giftCounts]);
+  }, [onlyDisplayRelevantGifts, selectedStudent, giftCounts, studentGiftKinds]);
+
+  const expForTargetBond = useMemo(() => {
+    if (targetBond === null) {
+      return 0;
+    }
+
+    const entry = favorTable.find((e) => e.level === targetBond);
+    if (!entry) {
+      return 0;
+    }
+
+    return entry.totalExp;
+  }, [targetBond]);
+
+  const remainingExpBreakdown = useMemo<RemainingExpBreakdown | null>(() => {
+    if (expForTargetBond === null) {
+      return null;
+    }
+
+    const difference = expForTargetBond - totalExp;
+    if (difference <= 0) {
+      return null;
+    }
+
+    const result: RemainingExpBreakdown = {
+      headpats: Math.ceil(difference / EXP_VALUES.headpats),
+      normalSRGifts: 0,
+      likedSRGifts: 0,
+      lovedSRGifts: 0,
+      adoredSRGifts: 0,
+      likedSSRGifts: 0,
+      lovedSSRGifts: 0,
+      adoredSSRGifts: 0,
+    };
+
+    if (studentGiftKinds.hasNormalSR) {
+      result.normalSRGifts = Math.ceil(difference / EXP_VALUES.normalSRGifts);
+    }
+
+    if (studentGiftKinds.hasLikedSR) {
+      result.likedSRGifts = Math.ceil(difference / EXP_VALUES.likedSRGifts);
+    }
+
+    if (studentGiftKinds.hasLovedSR) {
+      result.lovedSRGifts = Math.ceil(difference / EXP_VALUES.lovedSRGifts);
+    }
+
+    if (studentGiftKinds.hasAdoredSR) {
+      result.adoredSRGifts = Math.ceil(difference / EXP_VALUES.adoredSRGifts);
+    }
+
+    if (studentGiftKinds.hasLikedSSR) {
+      result.likedSSRGifts = Math.ceil(difference / EXP_VALUES.likedSSRGifts);
+    }
+
+    if (studentGiftKinds.hasLovedSSR) {
+      result.lovedSSRGifts = Math.ceil(difference / EXP_VALUES.lovedSSRGifts);
+    }
+
+    if (studentGiftKinds.hasAdoredSSR) {
+      result.adoredSSRGifts = Math.ceil(difference / EXP_VALUES.adoredSSRGifts);
+    }
+
+    return result;
+  }, [expForTargetBond, totalExp, studentGiftKinds]);
 
   function updateCount(giftId: number, count: number) {
     setGiftCounts((prev) => ({
@@ -481,29 +585,64 @@ export function BondView({ students, gifts }: BondViewProps) {
               />
             </div>
 
-            <div className="flex items-center gap-2 w-2/3">
-              <Label className="shrink-0" htmlFor="current-bond">
-                Current Rank:
-              </Label>
+            <div className="grid grid-cols-2 gap-2 w-1/2">
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs">Current Rank</Label>
 
-              <Input
-                type="number"
-                min={1}
-                max={100}
-                value={currentBond}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={currentBond}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
 
-                  if (Number.isNaN(value)) {
-                    updateCurrentBond(1);
-                  } else {
-                    updateCurrentBond(value);
-                  }
-                }}
-              />
+                    if (Number.isNaN(value)) {
+                      updateCurrentBond(1);
+                    } else {
+                      updateCurrentBond(value);
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs">Target Rank</Label>
+
+                <Input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={targetBond ?? ""}
+                  placeholder="Any"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      setTargetBond(null);
+                      return;
+                    }
+
+                    const numValue = Number(value);
+                    if (Number.isNaN(numValue)) {
+                      setTargetBond(null);
+                    } else {
+                      setTargetBond(numValue);
+                    }
+                  }}
+                />
+              </div>
             </div>
 
             <BondProgress startingExp={expOffset} exp={totalExp} />
+
+            {remainingExpBreakdown && (
+              <RemainingExpBreakdownCard
+                currentBond={currentBond}
+                targetBond={targetBond}
+                expNeeded={expForTargetBond - totalExp}
+                breakdown={remainingExpBreakdown}
+              />
+            )}
 
             <GiftBreakdown
               gifts={gifts}
