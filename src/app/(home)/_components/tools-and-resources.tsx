@@ -35,6 +35,7 @@ const RESOURCES: Resource[] = [
     icon: <ListOrderedIcon className="size-10 text-yellow-500 shrink-0" />,
     description:
       "Visualize your EX skill rotation timelines in an intuitive graphical format. Create timelines for yourself, to use in videos, or to share with other players.",
+    isHot: true,
   },
   {
     name: "Inventory Management",
@@ -49,7 +50,6 @@ const RESOURCES: Resource[] = [
     icon: <TrainTrackIcon className="size-10 text-green-500 shrink-0" />,
     description:
       "Find and visualize the optimal paths in the Highlander event's Railroad Puzzle minigame. Specify a custom configuration or find the most minimal ones.",
-    isHot: true,
   },
   {
     name: "Formation Display",
@@ -78,7 +78,6 @@ const RESOURCES: Resource[] = [
     icon: <GemIcon className="size-10 text-blue-300 shrink-0" />,
     description:
       "Track the upcoming rate-up banners that are going to be available in the Global version. Data is based on JP banners and may change.",
-    isNew: true,
   },
 ];
 

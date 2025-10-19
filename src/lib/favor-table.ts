@@ -519,3 +519,63 @@ export const favorTableMap: Record<number, FavorTableEntry> = favorTable.reduce(
   },
   {} as Record<number, FavorTableEntry>,
 );
+
+export type LessonsFavorTableEntry = {
+  minRank: number;
+  maxRank: number;
+  level: number;
+  exp: number;
+  bonusExp: number;
+  bonusChance: number;
+};
+
+export const lessonsFavorTable: LessonsFavorTableEntry[] = [
+  {
+    minRank: 1,
+    maxRank: 3,
+    level: 1,
+    exp: 15,
+    bonusExp: 15,
+    bonusChance: 0.1,
+  },
+  {
+    minRank: 4,
+    maxRank: 6,
+    level: 2,
+    exp: 15,
+    bonusExp: 15,
+    bonusChance: 0.15,
+  },
+  {
+    minRank: 7,
+    maxRank: 9,
+    level: 3,
+    exp: 15,
+    bonusExp: 15,
+    bonusChance: 0.2,
+  },
+  {
+    minRank: 10,
+    maxRank: 10,
+    level: 4,
+    exp: 15,
+    bonusExp: 15,
+    bonusChance: 0.25,
+  },
+  {
+    minRank: 11,
+    maxRank: 11,
+    level: 5,
+    exp: 20,
+    bonusExp: 20,
+    bonusChance: 0.25,
+  },
+  {
+    minRank: 12,
+    maxRank: 12,
+    level: 6,
+    exp: 25,
+    bonusExp: 25,
+    bonusChance: 0.25,
+  },
+];

@@ -12,6 +12,7 @@ import { useMemo, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { LessonsTable } from "@/app/bond/_components/lessons-table";
 
 export type RemainingExpBreakdown = {
   headpats: number;
@@ -347,6 +348,10 @@ export function RemainingExpBreakdownCard({
             )}
           </div>
         )}
+
+        <Separator />
+
+        <LessonsTable exp={expNeeded} />
       </CardContent>
     </Card>
   );
