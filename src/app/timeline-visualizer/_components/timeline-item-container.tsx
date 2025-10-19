@@ -81,9 +81,9 @@ export function TimelineItemContainer({
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col-reverse gap-5">
-          {items.map((item, idx) => (
+          {items.map((item) => (
             <TimelineItem
-              key={idx}
+              key={item.id}
               item={item}
               setItems={setItems}
               onWantsToRemove={onWantsToRemove}
