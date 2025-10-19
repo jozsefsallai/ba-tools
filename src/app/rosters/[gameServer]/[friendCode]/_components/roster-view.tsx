@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,7 +36,6 @@ import {
   type BorrowSlotGameMode,
 } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { AccordionContent } from "@radix-ui/react-accordion";
 import { format } from "date-fns";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";

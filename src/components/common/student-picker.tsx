@@ -8,13 +8,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useStudents } from "@/hooks/use-students";
 import { commandScore } from "@/lib/text-score";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Student } from "@prisma/client";
-import { PopoverContent } from "@radix-ui/react-popover";
 import React, {
   type PropsWithChildren,
   useCallback,
