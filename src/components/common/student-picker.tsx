@@ -24,7 +24,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { List, type RowComponentProps } from "react-window";
+import { VList } from "virtua";
 
 export type StudentPickerHandle = {
   open(): void;
@@ -39,16 +39,12 @@ export type StudentPickerProps = PropsWithChildren<{
 }>;
 
 function StudentItem({
-  students,
+  student,
   handleStudentSelected,
-  index,
-  style,
-}: RowComponentProps<{
-  students: Student[];
+}: {
+  student: Student;
   handleStudentSelected: (student: Student) => void;
-}>) {
-  const student = useMemo(() => students[index], [students, index]);
-
+}) {
   const iconUrl = useMemo(() => {
     return buildStudentIconUrl(student);
   }, [student]);
@@ -58,7 +54,6 @@ function StudentItem({
       value={student.name}
       keywords={student.searchTags}
       onSelect={() => handleStudentSelected(student)}
-      style={style}
     >
       <div className="flex gap-2 items-center">
         <img src={iconUrl} alt={student.name} className="w-12" />
@@ -185,15 +180,15 @@ export const StudentPicker = React.memo(
 
               <CommandEmpty>{noStudentText}</CommandEmpty>
               <CommandGroup>
-                <List
-                  rowComponent={StudentItem}
-                  rowCount={filteredStudents.length}
-                  rowHeight={50}
-                  rowProps={{
-                    students: filteredStudents,
-                    handleStudentSelected: handleStudentSelected,
-                  }}
-                />
+                <VList style={{ height: 290 }}>
+                  {filteredStudents.map((student) => (
+                    <StudentItem
+                      key={student.id}
+                      student={student}
+                      handleStudentSelected={handleStudentSelected}
+                    />
+                  ))}
+                </VList>
               </CommandGroup>
             </CommandList>
           </Command>

@@ -230,7 +230,7 @@ export function TimelineItem({
   return (
     <article
       ref={setNodeRef}
-      className="bg-background relative border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 group"
+      className="bg-background relative border rounded-md p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 group mb-5"
       style={style}
       id={item.id}
       {...attributes}
@@ -427,7 +427,7 @@ export function TimelineItem({
         </div>
       </div>
 
-      <div className="hidden group-hover:flex items-center gap-2 absolute -bottom-7 right-4 border rounded-md shadow-md bg-background py-1 px-3 text-xs">
+      <div className="hidden group-hover:flex items-center gap-2 absolute -bottom-6 right-4 border rounded-md shadow-md bg-background py-1 px-3 text-xs z-50">
         <strong>Add Here</strong>
 
         <TimelineQuickAdd

@@ -54,6 +54,7 @@ import { useUserPreferences } from "@/hooks/use-preferences";
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { useStudents } from "@/hooks/use-students";
+import type { WindowVirtualizerHandle } from "virtua";
 
 export function TimelineEditor() {
   const { students: allStudents } = useStudents();
@@ -69,6 +70,7 @@ export function TimelineEditor() {
   const [description, setDescription] = useState("");
 
   const [items, setItems] = useState<TimelineItem[]>([]);
+  const virtualListHandlerRef = useRef<WindowVirtualizerHandle>(null);
 
   const [scale, setScale] = useState(
     preferences.timelineVisualizer.defaultScale,
@@ -381,10 +383,17 @@ export function TimelineEditor() {
   function handlePreviewItemClicked(item: TimelineItem) {
     setHighlightedId(item.id);
 
-    const element = document.getElementById(item.id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+    const idx = items.findIndex((i) => i.id === item.id);
+    if (idx === -1) {
+      return;
     }
+
+    const virtualIndex = items.length - 1 - idx;
+
+    virtualListHandlerRef.current?.scrollToIndex(virtualIndex, {
+      align: "start",
+      smooth: true,
+    });
   }
 
   function goToTop() {
@@ -827,6 +836,7 @@ export function TimelineEditor() {
       {items.length > 0 && (
         <div className="flex flex-col gap-4">
           <TimelineItemContainer
+            virtualListHandlerRef={virtualListHandlerRef}
             items={items}
             setItems={setItems}
             onWantsToRemove={removeItem}

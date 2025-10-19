@@ -18,9 +18,16 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { Student } from "@prisma/client";
-import { useCallback, type SetStateAction } from "react";
+import {
+  type RefObject,
+  useCallback,
+  useMemo,
+  type SetStateAction,
+} from "react";
+import { WindowVirtualizer, type WindowVirtualizerHandle } from "virtua";
 
 export type TimelineItemContainerProps = {
+  virtualListHandlerRef?: RefObject<WindowVirtualizerHandle | null>;
   items: TimelineItemType[];
   setItems: React.Dispatch<SetStateAction<TimelineItemType[]>>;
   onWantsToRemove(itemId: string): void;
@@ -36,6 +43,7 @@ export type TimelineItemContainerProps = {
 };
 
 export function TimelineItemContainer({
+  virtualListHandlerRef,
   items,
   setItems,
   onWantsToRemove,
@@ -73,6 +81,10 @@ export function TimelineItemContainer({
     [setItems],
   );
 
+  const reversedItems = useMemo(() => {
+    return [...items].reverse();
+  }, [items]);
+
   return (
     <DndContext
       sensors={sensors}
@@ -80,8 +92,8 @@ export function TimelineItemContainer({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col-reverse gap-5">
-          {items.map((item) => (
+        <WindowVirtualizer ref={virtualListHandlerRef}>
+          {reversedItems.map((item) => (
             <TimelineItem
               key={item.id}
               item={item}
@@ -95,7 +107,7 @@ export function TimelineItemContainer({
               autoFocusOnTriggerField={autoFocusOnTriggerField}
             />
           ))}
-        </div>
+        </WindowVirtualizer>
       </SortableContext>
     </DndContext>
   );
