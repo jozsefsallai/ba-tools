@@ -22,11 +22,21 @@ function StudentItem({
   }, [student]);
 
   return (
-    <div className="w-8 h-8">
+    <div
+      className={cn(
+        "w-8 h-8 border border-black dark:border-white overflow-hidden skew-x-[-11deg] rounded-sm",
+        {
+          "bg-type-red": student.attackType === "Explosion",
+          "bg-type-yellow": student.attackType === "Pierce",
+          "bg-type-blue": student.attackType === "Mystic",
+          "bg-type-purple": student.attackType === "Sonic",
+        },
+      )}
+    >
       <img
         src={image}
         alt={student.name}
-        className="w-full h-full object-cover rounded-md"
+        className="w-full h-full object-cover skew-x-[11deg]"
       />
     </div>
   );
