@@ -4,6 +4,8 @@ import { MainContent } from "./_components/main-content";
 import { Separator } from "@/components/ui/separator";
 import { StackContainer } from "@/app/credits/_components/stack-container";
 
+import { LicensesContent } from "@/app/credits/_components/licenses-content";
+
 export const metadata: Metadata = {
   title: "Credits - Joe's Blue Archive Tools",
 };
@@ -19,6 +21,11 @@ export default async function CreditsPage() {
 
         <h2 className="text-2xl font-bold">Tech Stack</h2>
         <StackContainer />
+
+        <Separator />
+
+        <h2 className="text-2xl font-bold">Licenses</h2>
+        <LicensesContent />
       </div>
     </div>
   );

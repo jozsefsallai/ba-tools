@@ -33,7 +33,7 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
-    date: "October 17, 2025",
+    date: "October 18, 2025",
     features: [
       {
         scope: CHANGELOG_SCOPES.bondCalculator,
@@ -55,6 +55,10 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.website,
         description: "Improved changelog UI on mobile devices.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Added Spine Runtime License Agreement to Credits page.",
       },
     ],
   },
