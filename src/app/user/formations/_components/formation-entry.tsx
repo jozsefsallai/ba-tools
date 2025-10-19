@@ -5,20 +5,21 @@ import {
   type StudentItem,
 } from "@/app/formation-display/_components/formation-preview";
 import { Button } from "@/components/ui/button";
-import type { Student } from "@prisma/client";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import { v4 as uuid } from "uuid";
+import { useStudents } from "@/hooks/use-students";
 
 export type FormationEntryProps = {
-  allStudents: Student[];
   entry: FunctionReturnType<typeof api.formation.getOwn>[number];
 };
 
-export function FormationEntry({ allStudents, entry }: FormationEntryProps) {
+export function FormationEntry({ entry }: FormationEntryProps) {
+  const { students: allStudents } = useStudents();
+
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const destroyMutation = useMutation(api.formation.destroy);

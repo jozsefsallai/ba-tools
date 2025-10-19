@@ -29,13 +29,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DownloadIcon, PencilIcon } from "lucide-react";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import Link from "next/link";
+import { useStudents } from "@/hooks/use-students";
 
 export type TimelineViewProps = {
   id: string;
-  allStudents: Student[];
 };
 
-export function TimelineView({ id, allStudents }: TimelineViewProps) {
+export function TimelineView({ id }: TimelineViewProps) {
+  const { students: allStudents } = useStudents();
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [generationInProgress, setGenerationInProgress] = useState(false);

@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { TimelineEditor } from "@/app/timeline-visualizer/_components/timeline-editor";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
 import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
@@ -64,12 +63,6 @@ export async function generateMetadata({
 }
 
 export default async function TimelineVisualizerPage() {
-  const allStudents = await db.student.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
@@ -84,7 +77,7 @@ export default async function TimelineVisualizerPage() {
       </div>
 
       <Suspense>
-        <TimelineEditor allStudents={allStudents} />
+        <TimelineEditor />
       </Suspense>
     </div>
   );

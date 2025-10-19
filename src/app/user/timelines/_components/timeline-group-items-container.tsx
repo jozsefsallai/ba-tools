@@ -16,20 +16,17 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { Student } from "@prisma/client";
 import type { Doc, Id } from "~convex/dataModel";
 
 export type TimelineDocWithId = Doc<"timeline"> & { id: Id<"timeline"> };
 
 export type TimelineGroupItemsContainerProps = {
-  allStudents: Student[];
   items: TimelineDocWithId[];
   setItems: React.Dispatch<React.SetStateAction<TimelineDocWithId[]>>;
   onWantsToRemove(item: TimelineDocWithId): void;
 };
 
 export function TimelineGroupItemsContainer({
-  allStudents,
   items,
   setItems,
   onWantsToRemove,
@@ -77,7 +74,6 @@ export function TimelineGroupItemsContainer({
           {items.map((entry) => (
             <OwnTimelineEntry
               key={entry._id}
-              allStudents={allStudents}
               entry={entry}
               isGroupItem
               onWantsToDeleteFromGroup={handleRemove}

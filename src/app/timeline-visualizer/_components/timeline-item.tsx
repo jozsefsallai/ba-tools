@@ -1,8 +1,8 @@
 "use client";
 
+import { TimelineItemTargetPicker } from "@/app/timeline-visualizer/_components/timeline-item-target-picker";
 import type { TimelineItem as TimelineItemType } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
-import { StudentCard } from "@/components/common/student-card";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
@@ -29,7 +28,13 @@ import {
   GripVerticalIcon,
   XIcon,
 } from "lucide-react";
-import { type SetStateAction, useEffect, useMemo, useState } from "react";
+import {
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { v4 as uuid } from "uuid";
 
 export type TimelineItemProps = {
@@ -54,7 +59,6 @@ export function TimelineItem({
   onWantsToRemove,
   onWantsToUpdate,
   onWantsToAddBelow,
-  allStudents = [],
   uniqueStudents = [],
   highlighted = false,
   onTriggerKeyDown,
@@ -79,60 +83,72 @@ export function TimelineItem({
     item.type === "student" && !!item.notes,
   );
 
-  function handleRemove() {
+  const handleRemove = useCallback(() => {
     onWantsToRemove(item);
-  }
+  }, [item, onWantsToRemove]);
 
-  function handleTriggerUpdate(event: React.ChangeEvent<HTMLInputElement>) {
-    if (event.target.value === "") {
-      onWantsToUpdate(item, { trigger: undefined });
-      return;
-    }
+  const handleTriggerUpdate = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.value === "") {
+        onWantsToUpdate(item, { trigger: undefined });
+        return;
+      }
 
-    onWantsToUpdate(item, { trigger: event.target.value });
-  }
+      onWantsToUpdate(item, { trigger: event.target.value });
+    },
+    [item, onWantsToUpdate],
+  );
 
-  function handleTargetUpdate(student: Student | null) {
-    if (!student) {
-      onWantsToUpdate(item, { target: undefined });
-      return;
-    }
+  const handleTargetUpdate = useCallback(
+    (student: Student | null) => {
+      if (!student) {
+        onWantsToUpdate(item, { target: undefined });
+        return;
+      }
 
-    onWantsToUpdate(item, { target: student });
-  }
+      onWantsToUpdate(item, { target: student });
+    },
+    [item, onWantsToUpdate],
+  );
 
-  function insertStudentBelow(student: Student) {
-    return onWantsToAddBelow?.(item, {
-      type: "student",
-      id: uuid(),
-      student,
-    });
-  }
+  const insertStudentBelow = useCallback(
+    (student: Student) => {
+      return onWantsToAddBelow?.(item, {
+        type: "student",
+        id: uuid(),
+        student,
+      });
+    },
+    [item, onWantsToAddBelow],
+  );
 
-  function insertSeparatorBelow(orientation: "horizontal" | "vertical") {
-    return onWantsToAddBelow?.(item, {
-      type: "separator",
-      id: uuid(),
-      orientation,
-    });
-  }
+  const insertSeparatorBelow = useCallback(
+    (orientation: "horizontal" | "vertical") => {
+      return onWantsToAddBelow?.(item, {
+        type: "separator",
+        id: uuid(),
+        orientation,
+      });
+    },
+    [item, onWantsToAddBelow],
+  );
 
-  function insertTextBelow() {
+  const insertTextBelow = useCallback(() => {
     return onWantsToAddBelow?.(item, {
       type: "text",
       id: uuid(),
       text: "Enter text",
     });
-  }
+  }, [item, onWantsToAddBelow]);
 
-  function duplicate() {
+  const duplicate = useCallback(() => {
     const newItem: TimelineItemType = {
       ...item,
       id: uuid(),
     };
 
     setItems((prev) => [...prev, newItem]);
-  }
+  }, [item, setItems]);
 
   const skillVariants = useMemo(() => {
     if (item.type !== "student") {
@@ -245,7 +261,6 @@ export function TimelineItem({
                     <Label htmlFor={`target-${item.id}`}>Target:</Label>
 
                     <StudentPicker
-                      students={allStudents}
                       onStudentSelected={handleTargetUpdate}
                       className="w-[90vw] md:w-[450px]"
                     >
@@ -261,31 +276,12 @@ export function TimelineItem({
                     </StudentPicker>
 
                     {uniqueStudents.length > 0 && (
-                      <div className="px-1 flex gap-1">
-                        {uniqueStudents
-                          .filter((student) => student.id !== item.student.id)
-                          .map((student) => (
-                            <button
-                              key={student.id}
-                              type="button"
-                              className={cn("cursor-pointer", {
-                                "opacity-50":
-                                  !!item.target &&
-                                  item.target.id !== student.id,
-                              })}
-                              style={{ zoom: 0.4 }}
-                              onClick={() =>
-                                handleTargetUpdate(
-                                  item.target?.id === student.id
-                                    ? null
-                                    : student,
-                                )
-                              }
-                            >
-                              <StudentCard student={student} busy={false} />
-                            </button>
-                          ))}
-                      </div>
+                      <TimelineItemTargetPicker
+                        student={item.student}
+                        uniqueStudents={uniqueStudents}
+                        currentTarget={item.target}
+                        onToggle={handleTargetUpdate}
+                      />
                     )}
 
                     {item.target && (

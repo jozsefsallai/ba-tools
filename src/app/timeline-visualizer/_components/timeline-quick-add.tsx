@@ -3,6 +3,7 @@
 import { StudentCard } from "@/components/common/student-card";
 import { cn } from "@/lib/utils";
 import type { Student } from "@prisma/client";
+import { useCallback } from "react";
 
 export type TimelineQuickAddProps = {
   students: Student[];
@@ -18,6 +19,13 @@ export function TimelineQuickAdd({
   if (students.length === 0) {
     return null;
   }
+
+  const handleStudentClick = useCallback(
+    (student: Student) => {
+      onStudentClick(student);
+    },
+    [onStudentClick],
+  );
 
   return (
     <section
@@ -38,7 +46,7 @@ export function TimelineQuickAdd({
             key={student.id}
             type="button"
             className="cursor-pointer"
-            onClick={() => onStudentClick(student)}
+            onClick={() => handleStudentClick(student)}
             style={{ zoom: small ? 0.3 : 0.75 }}
           >
             <StudentCard student={student} />

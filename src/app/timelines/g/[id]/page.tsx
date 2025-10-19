@@ -1,5 +1,4 @@
 import { TimelineGroupView } from "@/app/timelines/g/_components/timeline-group-view";
-import { db } from "@/lib/db";
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
@@ -54,11 +53,5 @@ export default async function TimelineGroupPage({
 }) {
   const { id } = await params;
 
-  const allStudents = await db.student.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  return <TimelineGroupView id={id} allStudents={allStudents} />;
+  return <TimelineGroupView id={id} />;
 }

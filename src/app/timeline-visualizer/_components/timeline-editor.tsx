@@ -39,7 +39,7 @@ import {
   ShareIcon,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
@@ -53,12 +53,11 @@ import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownTips } from "@/components/common/markdown-tips";
+import { useStudents } from "@/hooks/use-students";
 
-export type TimelineEditorProps = {
-  allStudents: Student[];
-};
+export function TimelineEditor() {
+  const { students: allStudents } = useStudents();
 
-export function TimelineEditor({ allStudents }: TimelineEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const studentPickerRef = useRef<StudentPickerHandle>(null);
 
@@ -129,25 +128,28 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
     return Array.from(studentsSet);
   }, [items]);
 
-  function addStudent(student: Student) {
-    setItems((prev) => [
-      ...prev,
-      {
-        type: "student",
-        id: uuid(),
-        student,
-      },
-    ]);
+  const addStudent = useCallback(
+    (student: Student) => {
+      setItems((prev) => [
+        ...prev,
+        {
+          type: "student",
+          id: uuid(),
+          student,
+        },
+      ]);
 
-    if (preferences.timelineVisualizer.triggerAutoFocus) {
-      setAutofocusTrigger(true);
-      setTimeout(() => {
-        setAutofocusTrigger(false);
-      }, 100);
-    }
-  }
+      if (preferences.timelineVisualizer.triggerAutoFocus) {
+        setAutofocusTrigger(true);
+        setTimeout(() => {
+          setAutofocusTrigger(false);
+        }, 100);
+      }
+    },
+    [preferences.timelineVisualizer.triggerAutoFocus],
+  );
 
-  function addSeparator(orientation: "horizontal" | "vertical") {
+  const addSeparator = useCallback((orientation: "horizontal" | "vertical") => {
     setItems((prev) => [
       ...prev,
       {
@@ -156,9 +158,9 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         orientation,
       },
     ]);
-  }
+  }, []);
 
-  function addText() {
+  const addText = useCallback(() => {
     setItems((prev) => [
       ...prev,
       {
@@ -167,33 +169,39 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
         text: "Enter text",
       },
     ]);
-  }
+  }, []);
 
-  function removeItem(item: TimelineItem) {
+  const removeItem = useCallback((item: TimelineItem) => {
     setItems((prev) => prev.filter((i) => i !== item));
-  }
+  }, []);
 
-  function updateItem(
-    item: TimelineItem,
-    newData: Omit<TimelineItem, "type" | "student" | "id">,
-  ) {
-    setItems((prev) =>
-      prev.map((i) => (i.id === item.id ? { ...i, ...newData } : i)),
-    );
-  }
+  const updateItem = useCallback(
+    (
+      item: TimelineItem,
+      newData: Omit<TimelineItem, "type" | "student" | "id">,
+    ) => {
+      setItems((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, ...newData } : i)),
+      );
+    },
+    [],
+  );
 
-  function addItemBelow(below: TimelineItem, item: TimelineItem) {
-    setItems((prev) => {
-      const index = prev.findIndex((i) => i.id === below.id);
-      if (index === -1) {
-        return prev;
-      }
+  const addItemBelow = useCallback(
+    (below: TimelineItem, item: TimelineItem) => {
+      setItems((prev) => {
+        const index = prev.findIndex((i) => i.id === below.id);
+        if (index === -1) {
+          return prev;
+        }
 
-      const newItems = [...prev];
-      newItems.splice(index, 0, item);
-      return newItems;
-    });
-  }
+        const newItems = [...prev];
+        newItems.splice(index, 0, item);
+        return newItems;
+      });
+    },
+    [],
+  );
 
   async function getTimelineImage() {
     if (!containerRef.current || generationInProgress) {
@@ -589,7 +597,6 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
                 <div className="flex gap-4 justify-center items-center">
                   <StudentPicker
                     ref={studentPickerRef}
-                    students={allStudents}
                     onStudentSelected={addStudent}
                     className="w-[200px] md:w-[250px]"
                   >
@@ -828,7 +835,6 @@ export function TimelineEditor({ allStudents }: TimelineEditorProps) {
             onWantsToRemove={removeItem}
             onWantsToUpdate={updateItem}
             addItemBelow={addItemBelow}
-            allStudents={allStudents}
             uniqueStudents={uniqueStudents}
             highlightedId={highlightedId}
             onTriggerKeyDown={handleTriggerKeyDown}

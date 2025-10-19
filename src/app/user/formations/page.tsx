@@ -1,7 +1,6 @@
 import { FormationsBrowser } from "@/app/user/formations/_components/formations-browser";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -14,12 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default async function MyFormationsPage() {
-  const allStudents = await db.student.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
@@ -34,7 +27,7 @@ export default async function MyFormationsPage() {
 
       <Separator />
 
-      <FormationsBrowser allStudents={allStudents} />
+      <FormationsBrowser />
     </div>
   );
 }

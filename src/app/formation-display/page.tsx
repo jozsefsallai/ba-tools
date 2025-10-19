@@ -1,7 +1,6 @@
 import { FormationEditor } from "@/app/formation-display/_components/formation-editor";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 import { HelpCircleIcon } from "lucide-react";
@@ -66,12 +65,6 @@ export async function generateMetadata({
 }
 
 export default async function FormationDisplayPage() {
-  const allStudents = await db.student.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
@@ -86,7 +79,7 @@ export default async function FormationDisplayPage() {
       </div>
 
       <Suspense>
-        <FormationEditor allStudents={allStudents} />
+        <FormationEditor />
       </Suspense>
     </div>
   );

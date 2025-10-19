@@ -1,19 +1,18 @@
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
+import { useStudents } from "@/hooks/use-students";
 import type { Student } from "@prisma/client";
 import Link from "next/link";
 import { useMemo } from "react";
 import type { Doc } from "~convex/dataModel";
 
 export type OwnTimelineEntryProps = {
-  allStudents: Student[];
   entry: Doc<"timeline">;
 };
 
-export function TimelineGroupEntry({
-  allStudents,
-  entry,
-}: OwnTimelineEntryProps) {
+export function TimelineGroupEntry({ entry }: OwnTimelineEntryProps) {
+  const { students: allStudents } = useStudents();
+
   const uniqueStudents = useMemo<Student[]>(() => {
     const studentIds = new Set<string>();
 

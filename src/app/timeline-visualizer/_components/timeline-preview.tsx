@@ -2,7 +2,7 @@
 
 import { StudentCard } from "@/components/common/student-card";
 import type { Student } from "@prisma/client";
-import type { RefObject } from "react";
+import { useCallback, type RefObject } from "react";
 
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
 import { cn } from "@/lib/utils";
@@ -54,19 +54,25 @@ export function TimelinePreview({
   busy = false,
   onItemClicked,
 }: TimelinePreviewProps) {
-  function handleItemClicked(item: TimelineItem) {
-    return () => {
-      onItemClicked?.(item);
-    };
-  }
-
-  function handleItemKeyUp(item: TimelineItem) {
-    return (event: React.KeyboardEvent) => {
-      if (event.key === "Enter") {
+  const handleItemClicked = useCallback(
+    (item: TimelineItem) => {
+      return () => {
         onItemClicked?.(item);
-      }
-    };
-  }
+      };
+    },
+    [onItemClicked],
+  );
+
+  const handleItemKeyUp = useCallback(
+    (item: TimelineItem) => {
+      return (event: React.KeyboardEvent) => {
+        if (event.key === "Enter") {
+          onItemClicked?.(item);
+        }
+      };
+    },
+    [onItemClicked],
+  );
 
   if (items.length === 0) {
     return (

@@ -38,14 +38,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@/hooks/use-preferences";
-
-export type FormationEditorProps = {
-  allStudents: Student[];
-};
+import { useStudents } from "@/hooks/use-students";
 
 type CombatClass = "striker" | "special";
 
-export function FormationEditor({ allStudents }: FormationEditorProps) {
+export function FormationEditor() {
+  const { students: allStudents } = useStudents();
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { preferences } = useUserPreferences();
@@ -379,7 +378,6 @@ export function FormationEditor({ allStudents }: FormationEditorProps) {
               <div className="flex flex-col gap-4">
                 <div className="flex gap-4 items-center justify-center">
                   <StudentPicker
-                    students={allStudents}
                     onStudentSelected={addStudent}
                     className="w-[200px] md:w-[250px]"
                   >

@@ -273,7 +273,6 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
           <div>
             <StudentPicker
-              students={students}
               onStudentSelected={(student) => setStudentRep(student)}
               className="w-[200px] md:w-[350px]"
             >

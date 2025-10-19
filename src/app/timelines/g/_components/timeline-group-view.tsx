@@ -6,7 +6,6 @@ import { MessageBox } from "@/components/common/message-box";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useQueryWithStatus } from "@/lib/convex";
-import type { Student } from "@prisma/client";
 import { PencilIcon } from "lucide-react";
 import Link from "next/link";
 import { api } from "~convex/api";
@@ -14,10 +13,9 @@ import type { Id } from "~convex/dataModel";
 
 export type TimelineGroupViewProps = {
   id: Id<"timelineGroup">;
-  allStudents: Student[];
 };
 
-export function TimelineGroupView({ id, allStudents }: TimelineGroupViewProps) {
+export function TimelineGroupView({ id }: TimelineGroupViewProps) {
   const query = useQueryWithStatus(api.timelineGroup.getById, { id });
 
   if (query.status === "pending") {
@@ -84,11 +82,7 @@ export function TimelineGroupView({ id, allStudents }: TimelineGroupViewProps) {
         ) : (
           <div className="flex flex-col gap-4">
             {query.data.timelines.map((timeline) => (
-              <TimelineGroupEntry
-                key={timeline._id}
-                entry={timeline}
-                allStudents={allStudents}
-              />
+              <TimelineGroupEntry key={timeline._id} entry={timeline} />
             ))}
           </div>
         )}

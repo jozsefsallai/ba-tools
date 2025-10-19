@@ -2,6 +2,7 @@
 
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
+import { useStudents } from "@/hooks/use-students";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Student } from "@prisma/client";
@@ -14,18 +15,18 @@ import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
 export type OwnTimelineEntryProps = {
-  allStudents: Student[];
   entry: FunctionReturnType<typeof api.timeline.getOwn>[number];
   isGroupItem?: boolean;
   onWantsToDeleteFromGroup?: (id: Id<"timeline">) => any;
 };
 
 export function OwnTimelineEntry({
-  allStudents,
   entry,
   isGroupItem,
   onWantsToDeleteFromGroup,
 }: OwnTimelineEntryProps) {
+  const { students: allStudents } = useStudents();
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: entry._id, animateLayoutChanges: () => false });
 

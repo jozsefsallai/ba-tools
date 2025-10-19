@@ -18,7 +18,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { Student } from "@prisma/client";
-import type { SetStateAction } from "react";
+import { useCallback, type SetStateAction } from "react";
 
 export type TimelineItemContainerProps = {
   items: TimelineItemType[];
@@ -29,7 +29,6 @@ export type TimelineItemContainerProps = {
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
   addItemBelow?: (below: TimelineItemType, item: TimelineItemType) => void;
-  allStudents?: Student[];
   uniqueStudents?: Student[];
   highlightedId?: string | null;
   onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -42,7 +41,6 @@ export function TimelineItemContainer({
   onWantsToRemove,
   onWantsToUpdate,
   addItemBelow,
-  allStudents = [],
   uniqueStudents = [],
   highlightedId,
   onTriggerKeyDown,
@@ -59,18 +57,21 @@ export function TimelineItemContainer({
     }),
   );
 
-  function handleDragEnd({ active, over }: DragEndEvent) {
-    if (!over || active.id === over.id) {
-      return;
-    }
+  const handleDragEnd = useCallback(
+    ({ active, over }: DragEndEvent) => {
+      if (!over || active.id === over.id) {
+        return;
+      }
 
-    setItems((current) => {
-      const oldIndex = current.findIndex((item) => item.id === active.id);
-      const newIndex = current.findIndex((item) => item.id === over.id);
+      setItems((current) => {
+        const oldIndex = current.findIndex((item) => item.id === active.id);
+        const newIndex = current.findIndex((item) => item.id === over.id);
 
-      return arrayMove(current, oldIndex, newIndex);
-    });
-  }
+        return arrayMove(current, oldIndex, newIndex);
+      });
+    },
+    [setItems],
+  );
 
   return (
     <DndContext
@@ -88,7 +89,6 @@ export function TimelineItemContainer({
               onWantsToRemove={onWantsToRemove}
               onWantsToUpdate={onWantsToUpdate}
               onWantsToAddBelow={addItemBelow}
-              allStudents={allStudents}
               uniqueStudents={uniqueStudents}
               highlighted={highlightedId === item.id}
               onTriggerKeyDown={onTriggerKeyDown}

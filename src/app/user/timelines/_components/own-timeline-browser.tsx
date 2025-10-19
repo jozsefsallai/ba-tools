@@ -3,14 +3,9 @@
 import { OwnTimelineEntry } from "@/app/user/timelines/_components/own-timeline-entry";
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
-import type { Student } from "@prisma/client";
 import { api } from "~convex/api";
 
-export type OwnTimelineBrowserProps = {
-  allStudents: Student[];
-};
-
-export function OwnTimelineBrowser({ allStudents }: OwnTimelineBrowserProps) {
+export function OwnTimelineBrowser() {
   const query = useQueryWithStatus(api.timeline.getOwn);
 
   if (query.status === "pending") {
@@ -36,11 +31,7 @@ export function OwnTimelineBrowser({ allStudents }: OwnTimelineBrowserProps) {
   return (
     <div className="flex flex-col gap-4">
       {query.data.map((entry) => (
-        <OwnTimelineEntry
-          key={entry._id}
-          allStudents={allStudents}
-          entry={entry}
-        />
+        <OwnTimelineEntry key={entry._id} entry={entry} />
       ))}
     </div>
   );

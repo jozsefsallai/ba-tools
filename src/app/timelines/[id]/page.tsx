@@ -3,7 +3,6 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
 import { TimelineView } from "@/app/timelines/[id]/_components/timeline-view";
 import removeMD from "remove-markdown";
 import { truncateText } from "@/lib/text-utils";
@@ -54,11 +53,5 @@ export default async function TimelinePage({
 }) {
   const { id } = await params;
 
-  const allStudents = await db.student.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
-  return <TimelineView id={id} allStudents={allStudents} />;
+  return <TimelineView id={id} />;
 }

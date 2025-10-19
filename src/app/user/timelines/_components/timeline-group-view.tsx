@@ -32,7 +32,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryWithStatus } from "@/lib/convex";
-import type { Student } from "@prisma/client";
 import { useMutation } from "convex/react";
 import { SaveIcon, ShareIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -41,14 +40,10 @@ import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
 export type TimelineGroupViewProps = {
-  allStudents: Student[];
   groupId: Id<"timelineGroup">;
 };
 
-export function TimelineGroupView({
-  allStudents,
-  groupId,
-}: TimelineGroupViewProps) {
+export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
   const query = useQueryWithStatus(api.timelineGroup.getOwnById, {
     id: groupId,
   });
@@ -246,7 +241,6 @@ export function TimelineGroupView({
       )}
 
       <TimelineGroupItemsContainer
-        allStudents={allStudents}
         items={items}
         setItems={setItems}
         onWantsToRemove={onWantsToRemove}

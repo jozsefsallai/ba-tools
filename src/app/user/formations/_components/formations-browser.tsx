@@ -3,14 +3,9 @@
 import { FormationEntry } from "@/app/user/formations/_components/formation-entry";
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
-import type { Student } from "@prisma/client";
 import { api } from "~convex/api";
 
-export type FormationsBrowserProps = {
-  allStudents: Student[];
-};
-
-export function FormationsBrowser({ allStudents }: FormationsBrowserProps) {
+export function FormationsBrowser() {
   const query = useQueryWithStatus(api.formation.getOwn);
 
   if (query.status === "pending") {
@@ -36,11 +31,7 @@ export function FormationsBrowser({ allStudents }: FormationsBrowserProps) {
   return (
     <div className="flex flex-col gap-4">
       {query.data.map((formation) => (
-        <FormationEntry
-          key={formation._id}
-          allStudents={allStudents}
-          entry={formation}
-        />
+        <FormationEntry key={formation._id} entry={formation} />
       ))}
     </div>
   );

@@ -509,7 +509,12 @@ export function BondView({ students, gifts }: BondViewProps) {
     setTargetBondExpStr(clampedValue.toString());
   }, []);
 
-  function updateStudent(student: StudentWithGifts) {
+  function updateStudent(baseStudent: Student) {
+    const student = students.find((s) => s.id === baseStudent.id);
+    if (!student) {
+      return;
+    }
+
     setSelectedStudent(student);
 
     const storedStudent = studentStorage.getStudent(student.id);
@@ -664,7 +669,6 @@ export function BondView({ students, gifts }: BondViewProps) {
 
       <div className="flex flex-col gap-8 items-center md:basis-1/3">
         <StudentPicker
-          students={students}
           onStudentSelected={updateStudent}
           className="w-[90vw] md:w-[450px]"
         >
