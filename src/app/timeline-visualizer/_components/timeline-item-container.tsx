@@ -23,12 +23,12 @@ import { useCallback, type SetStateAction } from "react";
 export type TimelineItemContainerProps = {
   items: TimelineItemType[];
   setItems: React.Dispatch<SetStateAction<TimelineItemType[]>>;
-  onWantsToRemove(item: TimelineItemType): void;
+  onWantsToRemove(itemId: string): void;
   onWantsToUpdate(
-    item: TimelineItemType,
+    itemId: string,
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
-  addItemBelow?: (below: TimelineItemType, item: TimelineItemType) => void;
+  addItemBelow?: (belowId: string, item: TimelineItemType) => void;
   uniqueStudents?: Student[];
   highlightedId?: string | null;
   onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;

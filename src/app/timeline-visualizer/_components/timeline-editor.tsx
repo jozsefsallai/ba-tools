@@ -171,37 +171,34 @@ export function TimelineEditor() {
     ]);
   }, []);
 
-  const removeItem = useCallback((item: TimelineItem) => {
-    setItems((prev) => prev.filter((i) => i !== item));
+  const removeItem = useCallback((itemId: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== itemId));
   }, []);
 
   const updateItem = useCallback(
     (
-      item: TimelineItem,
+      itemId: string,
       newData: Omit<TimelineItem, "type" | "student" | "id">,
     ) => {
       setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, ...newData } : i)),
+        prev.map((i) => (i.id === itemId ? { ...i, ...newData } : i)),
       );
     },
     [],
   );
 
-  const addItemBelow = useCallback(
-    (below: TimelineItem, item: TimelineItem) => {
-      setItems((prev) => {
-        const index = prev.findIndex((i) => i.id === below.id);
-        if (index === -1) {
-          return prev;
-        }
+  const addItemBelow = useCallback((belowId: string, item: TimelineItem) => {
+    setItems((prev) => {
+      const index = prev.findIndex((i) => i.id === belowId);
+      if (index === -1) {
+        return prev;
+      }
 
-        const newItems = [...prev];
-        newItems.splice(index, 0, item);
-        return newItems;
-      });
-    },
-    [],
-  );
+      const newItems = [...prev];
+      newItems.splice(index, 0, item);
+      return newItems;
+    });
+  }, []);
 
   async function getTimelineImage() {
     if (!containerRef.current || generationInProgress) {

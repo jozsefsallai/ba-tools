@@ -40,12 +40,12 @@ import { v4 as uuid } from "uuid";
 export type TimelineItemProps = {
   item: TimelineItemType;
   setItems: React.Dispatch<SetStateAction<TimelineItemType[]>>;
-  onWantsToRemove(item: TimelineItemType): void;
+  onWantsToRemove(itemId: string): void;
   onWantsToUpdate(
-    item: TimelineItemType,
+    itemId: string,
     data: Omit<TimelineItemType, "type" | "student" | "id">,
   ): void;
-  onWantsToAddBelow?(below: TimelineItemType, item: TimelineItemType): void;
+  onWantsToAddBelow?(belowId: string, item: TimelineItemType): void;
   allStudents?: Student[];
   uniqueStudents?: Student[];
   highlighted?: boolean;
@@ -84,62 +84,104 @@ export function TimelineItem({
   );
 
   const handleRemove = useCallback(() => {
-    onWantsToRemove(item);
-  }, [item, onWantsToRemove]);
+    onWantsToRemove(item.id);
+  }, [onWantsToRemove]);
 
   const handleTriggerUpdate = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
-        onWantsToUpdate(item, { trigger: undefined });
+        onWantsToUpdate(item.id, { trigger: undefined });
         return;
       }
 
-      onWantsToUpdate(item, { trigger: event.target.value });
+      onWantsToUpdate(item.id, { trigger: event.target.value });
     },
-    [item, onWantsToUpdate],
+    [onWantsToUpdate],
   );
 
   const handleTargetUpdate = useCallback(
     (student: Student | null) => {
-      if (!student) {
-        onWantsToUpdate(item, { target: undefined });
+      if (item.type !== "student") {
         return;
       }
 
-      onWantsToUpdate(item, { target: student });
+      if (!student || student.id === item.target?.id) {
+        onWantsToUpdate(item.id, { target: undefined });
+        return;
+      }
+
+      onWantsToUpdate(item.id, { target: student });
     },
     [item, onWantsToUpdate],
   );
 
+  const handleVariantUpdate = useCallback(
+    (variantId: string) => {
+      if (variantId === "default") {
+        onWantsToUpdate(item.id, { variantId: undefined });
+        return;
+      }
+
+      onWantsToUpdate(item.id, { variantId });
+    },
+    [onWantsToUpdate],
+  );
+
+  const handleCopyUpdate = useCallback(
+    (checked: boolean) => {
+      onWantsToUpdate(item.id, { copy: checked });
+    },
+    [onWantsToUpdate],
+  );
+
+  const handleNotesUpdate = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (event.target.value === "") {
+        onWantsToUpdate(item.id, { notes: undefined });
+        return;
+      }
+
+      onWantsToUpdate(item.id, { notes: event.target.value });
+    },
+    [onWantsToUpdate],
+  );
+
+  const handleTextUpdate = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      onWantsToUpdate(item.id, { text: event.target.value });
+    },
+    [onWantsToUpdate],
+  );
+
   const insertStudentBelow = useCallback(
     (student: Student) => {
-      return onWantsToAddBelow?.(item, {
+      return onWantsToAddBelow?.(item.id, {
         type: "student",
         id: uuid(),
         student,
       });
     },
-    [item, onWantsToAddBelow],
+    [onWantsToAddBelow],
   );
 
   const insertSeparatorBelow = useCallback(
     (orientation: "horizontal" | "vertical") => {
-      return onWantsToAddBelow?.(item, {
+      return onWantsToAddBelow?.(item.id, {
         type: "separator",
         id: uuid(),
         orientation,
       });
     },
-    [item, onWantsToAddBelow],
+    [onWantsToAddBelow],
   );
 
   const insertTextBelow = useCallback(() => {
-    return onWantsToAddBelow?.(item, {
+    return onWantsToAddBelow?.(item.id, {
       type: "text",
       id: uuid(),
       text: "Enter text",
     });
-  }, [item, onWantsToAddBelow]);
+  }, [onWantsToAddBelow]);
 
   const duplicate = useCallback(() => {
     const newItem: TimelineItemType = {
@@ -165,11 +207,11 @@ export function TimelineItem({
 
   useEffect(() => {
     if (!separatorOverride) {
-      onWantsToUpdate(item, { size: undefined });
+      onWantsToUpdate(item.id, { size: undefined });
     } else if (typeof separatorSizeStr === "string") {
       const value = Number.parseInt(separatorSizeStr, 10);
       if (!Number.isNaN(value)) {
-        onWantsToUpdate(item, { size: value });
+        onWantsToUpdate(item.id, { size: value });
       }
     }
   }, [separatorOverride]);
@@ -181,7 +223,7 @@ export function TimelineItem({
 
     const value = Number.parseInt(separatorSizeStr ?? "", 10);
     if (!Number.isNaN(value)) {
-      onWantsToUpdate(item, { size: value });
+      onWantsToUpdate(item.id, { size: value });
     }
   }, [separatorSizeStr]);
 
@@ -221,9 +263,7 @@ export function TimelineItem({
 
                       <Select
                         value={item.variantId ?? "default"}
-                        onValueChange={(value) =>
-                          onWantsToUpdate(item, { variantId: value })
-                        }
+                        onValueChange={handleVariantUpdate}
                       >
                         <SelectTrigger>
                           {skillVariants.find((v) => v.id === item.variantId)
@@ -298,9 +338,7 @@ export function TimelineItem({
                     <Switch
                       id={`copy-${item.id}`}
                       checked={!!item.copy}
-                      onCheckedChange={(checked) =>
-                        onWantsToUpdate(item, { copy: checked })
-                      }
+                      onCheckedChange={handleCopyUpdate}
                     />
 
                     <Label htmlFor={`copy-${item.id}`}>Copy</Label>
@@ -328,9 +366,7 @@ export function TimelineItem({
                       id={`notes-${item.id}`}
                       value={item.notes ?? ""}
                       placeholder="Additional notes"
-                      onChange={(e) =>
-                        onWantsToUpdate(item, { notes: e.target.value })
-                      }
+                      onChange={handleNotesUpdate}
                       className="w-full resize-none"
                     />
                   </div>
@@ -373,9 +409,7 @@ export function TimelineItem({
               <Textarea
                 value={item.text}
                 placeholder="Enter text"
-                onChange={(e) =>
-                  onWantsToUpdate(item, { text: e.target.value })
-                }
+                onChange={handleTextUpdate}
                 className="w-full resize-none"
               />
             </div>

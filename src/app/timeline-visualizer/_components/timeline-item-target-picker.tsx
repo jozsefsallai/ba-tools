@@ -1,6 +1,6 @@
 "use client";
 
-import { StudentCard } from "@/components/common/student-card";
+import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Student } from "@prisma/client";
 import { useMemo } from "react";
@@ -11,6 +11,26 @@ export type TimelineItemTargetPickerProps = {
   currentTarget?: Student;
   onToggle: (student: Student) => void;
 };
+
+function StudentItem({
+  student,
+}: {
+  student: Student;
+}) {
+  const image = useMemo(() => {
+    return buildStudentIconUrl(student);
+  }, [student]);
+
+  return (
+    <div className="w-8 h-8">
+      <img
+        src={image}
+        alt={student.name}
+        className="w-full h-full object-cover rounded-md"
+      />
+    </div>
+  );
+}
 
 export function TimelineItemTargetPicker({
   student,
@@ -29,12 +49,11 @@ export function TimelineItemTargetPicker({
           key={student.id}
           type="button"
           className={cn("cursor-pointer", {
-            "opacity-50": !!currentTarget && currentTarget.id !== student.id,
+            "opacity-40": !!currentTarget && currentTarget.id !== student.id,
           })}
-          style={{ zoom: 0.4 }}
           onClick={() => onToggle(student)}
         >
-          <StudentCard student={student} busy={false} />
+          <StudentItem student={student} />
         </button>
       ))}
     </div>

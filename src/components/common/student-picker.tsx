@@ -47,7 +47,11 @@ function StudentItem({
   students: Student[];
   handleStudentSelected: (student: Student) => void;
 }>) {
-  const student = students[index];
+  const student = useMemo(() => students[index], [students, index]);
+
+  const iconUrl = useMemo(() => {
+    return buildStudentIconUrl(student);
+  }, [student]);
 
   return (
     <CommandItem
@@ -57,11 +61,7 @@ function StudentItem({
       style={style}
     >
       <div className="flex gap-2 items-center">
-        <img
-          src={buildStudentIconUrl(student)}
-          alt={student.name}
-          className="w-12"
-        />
+        <img src={iconUrl} alt={student.name} className="w-12" />
         {student.name}
       </div>
     </CommandItem>
