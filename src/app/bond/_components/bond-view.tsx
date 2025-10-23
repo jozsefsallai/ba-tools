@@ -686,7 +686,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
         {selectedStudent && (
           <>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-center gap-4">
               <img
                 src={buildStudentPortraitUrl(selectedStudent)}
                 alt={selectedStudent.name}
