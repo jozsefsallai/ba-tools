@@ -15,6 +15,7 @@ export const CHANGELOG_SCOPES = {
   scenarioImageGenerator: "Scenario Image Generator",
   globalBanners: "Global Banners",
   games: "Games",
+  content: "Content",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -32,6 +33,40 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "October 23, 2025",
+    features: [],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.content,
+        description: (
+          <>
+            <p>Added students:</p>
+
+            <ul className="list-disc list-inside text-sm">
+              <li>Rabu</li>
+              <li>Reisa (Magical)</li>
+              <li>Suzumi (Magical)</li>
+            </ul>
+          </>
+        ),
+      },
+      {
+        scope: CHANGELOG_SCOPES.content,
+        description: (
+          <>
+            <p>Added upcoming banners:</p>
+
+            <ul className="list-disc list-inside text-sm">
+              <li>Hina (Swimsuit), Iori (Swimsuit), Mimori (Swimsuit)</li>
+              <li>Reisa (Magical), Suzumi (Magical)</li>
+            </ul>
+          </>
+        ),
+      },
+    ],
+  },
   {
     date: "October 18, 2025",
     features: [
