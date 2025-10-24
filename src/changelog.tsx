@@ -55,6 +55,11 @@ export const CHANGELOG: ChangelogItemData[] = [
           </div>
         ),
       },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Added ability to sort gifts based on the selected student's preferences.",
+      },
     ],
     fixes: [
       {

@@ -82,6 +82,8 @@ export type BondViewProps = {
   gifts: GiftWithStudents[];
 };
 
+type GiftSortMethod = "default" | "studentPreference";
+
 function isGiftAdoredByStudent(
   gift: GiftWithStudents,
   student: StudentWithGifts,
@@ -211,6 +213,8 @@ export function BondView({ students, gifts }: BondViewProps) {
   const [onlyDisplayRelevantGifts, setOnlyDisplayRelevantGifts] =
     useState(false);
 
+  const [sortMethod, setSortMethod] = useState<GiftSortMethod>("default");
+
   const [selectedStudent, setSelectedStudent] =
     useState<StudentWithGifts | null>(null);
 
@@ -279,6 +283,44 @@ export function BondView({ students, gifts }: BondViewProps) {
       );
     });
   }, [onlyDisplayRelevantGifts, selectedStudent]);
+
+  const sortedGifts = useMemo(() => {
+    if (sortMethod === "default" || !selectedStudent) {
+      return displayedGifts;
+    }
+
+    const adored = displayedGifts
+      .filter(
+        (gift) =>
+          isGiftAdoredByStudent(gift, selectedStudent) ||
+          (gift.isLovedByEveryone && gift.expValue === 60),
+      )
+      .sort((a, b) => b.expValue - a.expValue);
+
+    const loved = displayedGifts
+      .filter(
+        (gift) =>
+          isGiftLovedByStudent(gift, selectedStudent) ||
+          (gift.isLovedByEveryone && gift.expValue === 20),
+      )
+      .sort((a, b) => b.expValue - a.expValue);
+
+    const liked = displayedGifts
+      .filter((gift) => isGiftLikedByStudent(gift, selectedStudent))
+      .sort((a, b) => b.expValue - a.expValue);
+
+    const ids = new Set([
+      ...adored.map((g) => g.id),
+      ...loved.map((g) => g.id),
+      ...liked.map((g) => g.id),
+    ]);
+
+    const normal = displayedGifts
+      .filter((gift) => !ids.has(gift.id))
+      .sort((a, b) => b.expValue - a.expValue);
+
+    return [...adored, ...loved, ...liked, ...normal];
+  }, [displayedGifts, sortMethod, selectedStudent]);
 
   const studentGiftKinds = useMemo(() => {
     if (!selectedStudent) {
@@ -1106,8 +1148,28 @@ export function BondView({ students, gifts }: BondViewProps) {
           </TooltipProvider>
         </Authenticated>
 
+        <div className="flex items-center gap-2 mb-6">
+          <Label className="shrink-0">Sort by:</Label>
+
+          <Select
+            value={sortMethod}
+            onValueChange={(value) => setSortMethod(value as GiftSortMethod)}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="by-relevance" disabled={!selectedStudent}>
+                {selectedStudent?.name ?? "Selected student"}'s Preferences
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex flex-wrap gap-4 justify-center">
-          {displayedGifts.map((gift) => (
+          {sortedGifts.map((gift) => (
             <div
               key={gift.id}
               className="flex flex-col items-center gap-2 relative"
