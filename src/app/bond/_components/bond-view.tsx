@@ -1162,7 +1162,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             <SelectContent>
               <SelectItem value="default">Default</SelectItem>
               <SelectItem value="by-relevance" disabled={!selectedStudent}>
-                {selectedStudent?.name ?? "Selected student"}'s Preferences
+                {selectedStudent?.name ?? "Student"}'s Preferences
               </SelectItem>
             </SelectContent>
           </Select>
