@@ -1,4 +1,5 @@
 import { BondView } from "@/app/bond/_components/bond-view";
+import { InventoryTip } from "@/app/bond/_components/inventory-tip";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
@@ -68,10 +69,7 @@ export default async function BondPage() {
           progress.
         </p>
 
-        <p className="text-muted-foreground">
-          <strong>Note:</strong> At the moment, the calculator only takes into
-          account gifts. Cafe headpats and lessons are not included.
-        </p>
+        <InventoryTip />
       </div>
 
       <BondView students={students} gifts={gifts} />

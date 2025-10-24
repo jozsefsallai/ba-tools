@@ -158,4 +158,32 @@ export default defineSchema({
     third: inventoryManagementItem,
     blockedCells: v.array(inventoryManagementCoords),
   }).index("by_userId", ["userId"]),
+
+  giftInventory: defineTable({
+    userId: v.id("users"),
+    name: v.optional(v.string()),
+    gifts: v.array(
+      v.object({
+        id: v.number(),
+        count: v.number(),
+      }),
+    ),
+  }).index("by_userId", ["userId"]),
+
+  giftTarget: defineTable({
+    userId: v.id("users"),
+    giftInventoryId: v.id("giftInventory"),
+    studentId: v.string(),
+    currentExp: v.number(),
+    targetExp: v.optional(v.number()),
+    gifts: v.array(
+      v.object({
+        id: v.number(),
+        enabled: v.boolean(),
+      }),
+    ),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_giftInventory", ["giftInventoryId"])
+    .index("by_studentId", ["studentId"]),
 });

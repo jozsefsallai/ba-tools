@@ -34,6 +34,53 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 24, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description: (
+          <div className="flex flex-col gap-1">
+            <div>
+              Added gift inventory (BETA). You can now save your gift inventory
+              in the cloud and use it to create bond targets, eliminating the
+              need to always set up your gifts and bond progress from scratch.
+            </div>
+
+            <div className="text-xs text-muted-foreground">
+              <strong>Note:</strong> During the BETA phase of this feature, it
+              will only be available to users who are logged in. Once the
+              feature is stable, I'll consider adding the ability to use it
+              without an account.
+            </div>
+          </div>
+        ),
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description: "Fixed layout issues on small screens.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "Fixed the site name breaking the header layout on small screens.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Enabled gifts now have a green border and a faint green background, making it easier to identify them.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Gift description popups will now have a faint yellow or purple background depending on the gift's rarity.",
+      },
+    ],
+  },
+  {
     date: "October 23, 2025",
     features: [],
     fixes: [],

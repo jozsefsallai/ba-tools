@@ -3,10 +3,12 @@ import { createContext, useContext } from "react";
 
 export type StudentsContext = {
   students: Student[];
+  studentMap: Record<string, Student>;
 };
 
 export const studentsContext = createContext<StudentsContext>({
   students: [],
+  studentMap: {},
 });
 
 export function useStudents() {
