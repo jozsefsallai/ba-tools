@@ -33,6 +33,7 @@ import Image from "next/image";
 export type GiftBreakdownProps = PropsWithChildren<{
   gifts: GiftWithStudents[];
   giftCounts: Record<number, number>;
+  giftEnabled: Record<number, boolean>;
   giftBoxesUsed: number;
   selectedStudentId: string;
   exp: number;
@@ -113,14 +114,17 @@ function GiftRow({
 export function GiftBreakdown({
   gifts,
   giftCounts,
+  giftEnabled,
   giftBoxesUsed,
   selectedStudentId,
   exp,
   children,
 }: GiftBreakdownProps) {
   const giftsWithCounts = useMemo(() => {
-    return gifts.filter((gift) => giftCounts[gift.id] > 0);
-  }, [gifts, giftCounts]);
+    return gifts.filter(
+      (gift) => giftCounts[gift.id] > 0 && giftEnabled[gift.id],
+    );
+  }, [gifts, giftCounts, giftEnabled]);
 
   return (
     <Dialog>

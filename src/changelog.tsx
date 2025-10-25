@@ -48,6 +48,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Fixed a bug where gift counts won't update after selecting an inventory when opening the bond calculator from a different page.",
       },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description: "Fixed gift breakdown also counting disabled gifts.",
+      },
     ],
     changes: [
       {

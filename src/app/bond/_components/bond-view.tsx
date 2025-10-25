@@ -1411,6 +1411,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             <GiftBreakdown
               gifts={gifts}
               giftCounts={giftCounts}
+              giftEnabled={giftEnabled}
               giftBoxesUsed={giftBoxesUsed}
               selectedStudentId={selectedStudent.id}
               exp={totalExp}
