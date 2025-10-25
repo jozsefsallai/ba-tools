@@ -30,6 +30,24 @@ export function TheFooter({
           . This website is in no way affiliated or endorsed by NEXON Games Co.,
           Ltd. or Yostar, Inc.
           <br />
+          <a
+            href="https://nimblebun.works/en/terms"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="underline"
+          >
+            Terms
+          </a>{" "}
+          &middot;{" "}
+          <a
+            href="https://nimblebun.works/en/privacy"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="underline"
+          >
+            Privacy
+          </a>{" "}
+          &middot;{" "}
           <Link href="/credits" className="underline">
             Credits
           </Link>{" "}

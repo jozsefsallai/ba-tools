@@ -34,6 +34,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 25, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "Added link to Terms of Service and Privacy Policy in footer.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
+  {
     date: "October 24, 2025",
     features: [
       {
