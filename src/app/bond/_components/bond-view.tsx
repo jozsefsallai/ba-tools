@@ -1192,7 +1192,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
               <Input
                 type="number"
-                defaultValue={giftCounts[gift.id]}
+                value={giftCounts[gift.id]}
                 min={0}
                 onClick={(e) => {
                   e.currentTarget.select();
@@ -1270,7 +1270,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
             <Input
               type="number"
-              defaultValue={giftBoxesUsed}
+              value={giftBoxesUsed}
               min={0}
               onClick={(e) => {
                 e.currentTarget.select();

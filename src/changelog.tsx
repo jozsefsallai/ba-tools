@@ -42,7 +42,13 @@ export const CHANGELOG: ChangelogItemData[] = [
           "Added link to Terms of Service and Privacy Policy in footer.",
       },
     ],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed a bug where gift counts won't update after selecting an inventory when opening the bond calculator from a different page.",
+      },
+    ],
     changes: [],
   },
   {
