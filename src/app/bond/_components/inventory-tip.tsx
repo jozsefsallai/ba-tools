@@ -12,7 +12,7 @@ export function InventoryTip() {
         <LightbulbIcon className="inline-block size-4 mr-1 -mt-1" />
         <strong>Tip:</strong>{" "}
         <Button variant="outline" size="sm" asChild className="mx-1">
-          <SignInButton />
+          <SignInButton mode="modal" oauthFlow="popup" />
         </Button>{" "}
         to save your gift inventory and bond targets (BETA).
       </div>

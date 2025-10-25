@@ -21,7 +21,7 @@ export function UserCorner() {
 
           <div>
             <Button asChild>
-              <SignInButton />
+              <SignInButton mode="modal" oauthFlow="popup" />
             </Button>
           </div>
         </>

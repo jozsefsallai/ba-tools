@@ -49,7 +49,13 @@ export const CHANGELOG: ChangelogItemData[] = [
           "Fixed a bug where gift counts won't update after selecting an inventory when opening the bond calculator from a different page.",
       },
     ],
-    changes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.authentication,
+        description:
+          "Authentication will now seamlessly happen on the page via modals. This prevents data loss when logging in after you've made changes in a tool, as it no longer requires a redirect.",
+      },
+    ],
   },
   {
     date: "October 24, 2025",

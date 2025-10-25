@@ -177,7 +177,7 @@ export function TheHeader() {
 
           <Unauthenticated>
             <Button asChild>
-              <SignInButton />
+              <SignInButton mode="modal" oauthFlow="popup" />
             </Button>
           </Unauthenticated>
 
