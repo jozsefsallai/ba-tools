@@ -93,7 +93,7 @@ export function TimelineItemContainer({
     >
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         <WindowVirtualizer ref={virtualListHandlerRef}>
-          {reversedItems.map((item) => (
+          {reversedItems.map((item, idx) => (
             <TimelineItem
               key={item.id}
               item={item}
@@ -104,7 +104,7 @@ export function TimelineItemContainer({
               uniqueStudents={uniqueStudents}
               highlighted={highlightedId === item.id}
               onTriggerKeyDown={onTriggerKeyDown}
-              autoFocusOnTriggerField={autoFocusOnTriggerField}
+              autoFocusOnTriggerField={autoFocusOnTriggerField && idx === 0}
             />
           ))}
         </WindowVirtualizer>
