@@ -4,9 +4,18 @@ rank of a student based on what gifts you give to them.
 ## Getting Started
 
 To begin, select a student using the **Select Student** dropdown. Once selected,
-you'll be able to set the current relationship rank of the student using the
-input field under her portrait. If you don't own the student yet, just leave it
-at rank 1.
+you'll be able to set the following details:
+
+- **Current Rank:** The current relationship rank of the student. If you don't
+  own the student yet, leave this at 1.
+- **Current EXP:** The current relationship EXP of the student. If you don't
+  own the student yet, leave this at 0. There is currently no way to see the
+  exact relationship EXP of a student in-game. You can use external tools like
+  [arona.icu][arona-icu] to get an exact number.
+- **Target Rank:** Setting this value will show you how many gifts you need to
+  give to the student to reach a specific rank. If you don't have a specific
+  rank in mind, leave this field empty.
+- **Target EXP:** The same as **Target Rank**, but for more fine-tuned control.
 
 The tool will display a small icon in the top right corner of every gift the
 student likes, depending on how much she likes it. Under each gift, you can set
@@ -18,6 +27,41 @@ calculate the relationship EXP and rank of the student.
 You can click on a gift's icon to see which students like it and how much EXP
 each student will get for it.
 
+**Authenticated users only:** If you're logged in, setting the gift counts will
+not automatically update the values, as you'll have to toggle the gift on or off
+using the switch underneath the input.
+
+## Inventories
+
+If you have an account on the site, you can create gift inventories. Think of
+them as an account-specific preset of gifts you own. You can create multiple
+inventories in case you have multiple accounts and/or play on multiple servers.
+
+To create an inventory, click on the **New Inventory** button next to the Gift
+Inventory dropdown. Give your inventory a name and click on **Create**. Once
+created, the inventory will automatically be selected. Now you have the option
+to create gift targets for this specific inventory.
+
+Gift targets are essentially students that you want to give gifts to and track
+your relationship progress with. To create a gift target, select a student using
+the **Select Student** dropdown and click on the **New Target** button next to
+the Gift Target dropdown.
+
+When you're logged in, updating the gift counts won't count towards your
+relationship progress, as it's supposed to reflect the gifts you already own,
+not the ones you intend to give. These counts will be saved at the **inventory**
+level, meaning that if you switch gift targets, the counts will remain the same.
+To apply the gift counts to the selected gift target, you need to toggle the
+gift on or off using the switch underneath the input. The state of this toggle
+will be saved at the **target** level. The current rank/EXP and target rank/EXP
+will also be saved at a **target** level.
+
+You also have the option to rename the gift inventory or delete it. You can also
+delete a gift target. All changes you make will require you to click on the
+**Save Inventory** button next to the Gift Inventory dropdown, or else they will
+be lost. The site should prompt you in case you try to navigate away or close
+the tab without saving your changes.
+
 ## Options
 
 The options for the tool are located under the student selector once you select
@@ -27,6 +71,32 @@ a student. The following options are available:
   she doesn't like. Please note that enabling this setting will not remove the
   gift counts you entered for gifts the student doesn't like and those will
   still be counted towards the total EXP.
+
+## Gift Breakdown
+
+Once you've set you gifts up for a student, you'll have the option to see a
+table breakdown of the gifts you intend to give. To see this breakdown, click
+on the **View Gift Breakdown** button located under the relationship progress
+bar.
+
+## Target Relationships
+
+Once you set a target relationship rank or EXP, you'll see a detailed breakdown
+of how many different kinds of gifts or headpats you need to give to the student
+to reach the specific target. This calculation automatically takes into account
+the current rank/EXP as well as the gifts you've currently selected. The
+calculation will ignore any gift type that the student doesn't have (e.g. the
+adored SR type will only be considered for students such as Mutsuki and Swimsuit
+Hanako).
+
+The **Optimal Gift and Headpat Breakdown** section shows you the most efficient
+way to reach the target without wasting EXP. By default, it will include SSR
+gifts as well, however, it's unreasonable to think you can farm these easily.
+That's why you have the option to exclude SSR gifts from the calculation.
+
+This section will also contain a table showing you how many lessons you would
+need to reach the target relationship lessons alone, based on the rank, level,
+and bonus chance.
 
 ## Troubleshooting
 
@@ -48,3 +118,4 @@ give your student one of these gifts, please change the count of one of the
 bouquets in the tool instead (depending on the EXP value of the gift).
 
 [github-issues-link]: https://github.com/jozsefsallai/ba-tools/issues
+[arona-icu]: https://arona.icu/main

@@ -9,32 +9,51 @@ like a screenshot you'd take in the game.
 Scroll down until you see the **Settings** section. Here, you can configure the
 following settings:
 
-- **Character Name**: The name that will be displayed above the dialogue.
-- **Affiliation**: Optionally, you can specify the affiliation of the character.
-  This will be displayed in blue text next to the name.
-- **Dialogue Content**: The actual content of the dialogue. The text will wrap
-  automatically, but you can also press enter to create a new line manually.
-- **Font Size**: The size of the font used in the dialogue. Default is 41.
-- **Background Image**: The background image that will be used in the scenario
-  screenshot. It supports any modern image format. The image you select will
-  automatically be resized and centered to fit the screen.
-- **Display Buttons**: Whether or not to display the AUTO and MENU buttons in
-  the top right corner.
-- **Auto Enabled**: Whether or not the AUTO button should appear as selected.
-- **Display Horizontal Line**: Whether or not to display the horizontal line
-  between the character name/affiliation and the dialogue content.
-- **Display Gradient**: Whether or not to display the gradient overlay of the
-  text box. Note that disabling this can reduce the readability of the text
-  depending on the background image you choose.
-- **Display Triangle**: Whether or not to display the small blue triangle in the
-  bottom right corner of the text box.
+- **Content:**
+  - **Character Name**: The name that will be displayed above the dialogue.
+  - **Affiliation**: Optionally, you can specify the affiliation of the character.
+    This will be displayed in blue text next to the name.
+  - **Dialogue Content**: The actual content of the dialogue. The text will wrap
+    automatically, but you can also press enter to create a new line manually.
+- **Background**:
+  - **Background Image**: The background image that will be used in the scenario
+    screenshot. It supports any modern image format. The image you select will
+    automatically be resized and centered to fit the screen. You can click on
+    the globe icon to use a URL instead of selecting an image from your disk.
+  - **Background Scale**: The scale of the background image. This allows you to
+    zoom in or out of the background image.
+  - **Background X Offset**: The horizontal offset of the background image
+    relative to the center of the screen.
+  - **Background Y Offset**: The vertical offset of the background image
+    relative to the top of the screen.
+- **Font**:
+  - **Font**: The font family used in the scenario view. Each font is identical
+    to the ones used in-game based on region.
+  - **Font Size**: The size of the font used in the dialogue. Default is 41.
+- **Elements**:
+  - **Display Buttons**: Whether or not to display the AUTO and MENU buttons in
+    the top right corner.
+  - **Auto Enabled**: Whether or not the AUTO button should appear as selected.
+  - **Display Horizontal Line**: Whether or not to display the horizontal line
+    between the character name/affiliation and the dialogue content.
+  - **Display Gradient**: Whether or not to display the gradient overlay of the
+    text box. Note that disabling this can reduce the readability of the text
+    depending on the background image you choose.
+  - **Display Triangle**: Whether or not to display the small blue triangle in the
+    bottom right corner of the text box.
+- **Behavior**:
+  - **Text Scroll Speed**: The speed at which the text appears on the screen
+    when you start the animation or recording mode. Higher values mean faster
+    text.
+  - **Transparent Background**: When enabled, the background of the scenario
+    screenshot will be transparent.
 
 Additionally, you can add one or more characters to the scene. To do this, click
-on the **Add Character** button in the **Characters** section. This will prompt
-you to select a file with the character's image. Once selected, you can
-configure the following settings for each character:
+on one of the **Add Character** buttons in the **Characters** section, depending
+on whether you want to select the character's sprite from your computer or a
+URL. Once selected, you can configure the following settings for each character:
 
-- **Sprite**: The iamge of the character, if you'd like to replace it.
+- **Sprite**: The image of the character, if you'd like to replace it.
 - **X**: The horizontal position of the character in the scene relative to the
   scene's center. The anchor point is the center of the character's image.
 - **Y**: The vertical position of the character in the scene relative to the top
@@ -42,12 +61,25 @@ configure the following settings for each character:
   top of the character's image.
 - **Scale**: The scale of the character's image (1 menas 100% scale). Supports
   decimal values.
+- **Darken**: When enabled, the character will have a darker overlay, simulating
+  the "not speaking" state in the game.
+- **Hologram**: When enabled, the character will have a hologram-like effect,
+  simulating the "transmission" effect in the game.
+- **Silhouette**: When enabled, the character will be displayed as a silhouette,
+  simulating the "mysterious character" effect in the game.
 
 You can also remove a character by clicking on the **Remove Character** button
 underneath the character's settings.
 
 Once you're happy with your creation, you can either **Copy to Clipboard** or
 **Download Image**. These buttons are located at the bottom of the page.
+
+To see the text and the triangle animate, you can click on the **Start Animation**
+button. Clicking on **Recording Mode** will make the scenario view full screen
+and will prompt you to start a screen recording software to capture the browser
+window. Once you've done that, you can click on **Start Recording** and the
+animation will start playing. You can press the `Esc` key twice to exit
+Recording Mode.
 
 ## Where To Get Images
 

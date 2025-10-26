@@ -9,12 +9,19 @@ personal reference or for use in YouTube videos.
 To begin, select a student using the **Select Student** dropdown. Unlike the
 Formation Display tool, you can select the same student multiple times, since
 you'll very likely be using their EX skill multiple times. Once selected, you
-can specify a **Trigger**. A trigger can be any reference point for when you'd
-want to use this particular student's EX skill (e.g. skill cost, timer, etc.).
-If the student can target another student (e.g. buffer or healer), you can also
-specify a **Target** student. If a copied skill card is used (i.e. the card you
-got from Rio, not the original card), you can enable the **Copy** toggle, which
-will add a small indicator in the bottom left corner of the card.
+can specify the following options:
+- **Trigger**: A trigger can be any reference point for when you'd want to use
+  this particular student's EX skill (e.g. skill cost, timer, etc.).
+- **Variant**: Some characters have multiple EX skill card variants (e.g. Dress
+  Hina has a different one for every stage of her EX skill).
+- **Target**: If the student can target another student (e.g. buffer or healer),
+  you can specify them here, either from the dropdown, or by clicking on the
+  icon of an already-added student.
+- **Copy**: If a copied skill card is used (i.e. the card you got from Rio, not
+  the original card), you should enable this toggle.
+- **Notes**: You may add short notes that will be displayed underneath the skill
+  card. You can use this to indicate skill procs, damage thresholds, etc. This
+  field supports multiline text.
 
 If the rotation has it so you'll use certain EX skills in quick succession, you
 can omit the Trigger field and assume you'll be using their EX skills one after
@@ -26,11 +33,20 @@ horizontally, or a **Vertical Separator** to put the new EX skills on a new row.
 It is generally recommended to use vertical separators when the rows are getting
 too long, as it makes the timeline easier to read.
 
+Separators also have an optional size override toggle which allows you to set up
+a custom size for them (in pixels) that will differ from the default size
+specified in the **Appearance** tab.
+
 You can also add text to your timeline (e.g.: for specifying skill procs or
 phase transitions). Generally, you want these texts to be short, so they don't
-take up valuable space on the canvas.
+take up valuable space on the canvas. This field supports multiline text.
 
-## Options
+You can click on the **Copy** button to clone a timeline item with all of its
+attributes at the end of the timeline. You can also hover over the timeline
+items and you'll see a Quick Add popup that lets you quickly insert an item
+in-between two existing items.
+
+## Appearance
 
 The tool provides a few more options that you can play around with:
 - **Scale**: Specifies the scale of the resulting image, going from 1x to 5x. It
@@ -61,6 +77,9 @@ Once you're happy with the setup, click on the **Download Image** button. Please
 note that generating the image may take a few seconds, especially if the scale
 setting is high and/or the rotation is long.
 
+Alternatively, you can turn the visual timeline into a text timeline by clicking
+on the **Copy Text Timeline** button.
+
 ## Save/Load
 
 You can quickly save your session by clicking on the **Save** button. This will
@@ -75,6 +94,21 @@ object. Then you can import it back on another browser/device by clicking on the
 **Import** button and pasting the JSON object into the input field. This will
 override both your current timeline and your saved session. The Export function
 will also automatically save your session.
+
+## Cloud Features
+
+If you have an account on the site, you'll get access to the following features:
+- **Cloud Save**: You can save the timeline in your account for access on any
+  device/browser.
+- **Timeline Sharing**: You can give you timeline a name, a description, and
+  select the public visibility option to share it with other people. You may
+  also choose if you want your name and profile picture to be displayed
+  underneath the timeline. The description supports Markdown formatting and will
+  automatically embed YouTube and BiliBili links.
+- **Timeline Groups**: You can organize your timelines into groups (e.g.
+  multiple pans for a single raid, or different colors for Grand Assault).
+  Timeline groups are also shareable and support the same sharing options as
+  plain timelines.
 
 ## Troubleshooting
 

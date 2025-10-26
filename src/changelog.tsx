@@ -16,6 +16,7 @@ export const CHANGELOG_SCOPES = {
   globalBanners: "Global Banners",
   games: "Games",
   content: "Content",
+  docs: "Documentation",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -33,6 +34,49 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "October 26, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "If you're logged in, the site will prompt you to save your changes if you try to leave the page with unsaved changes.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "If you're logged in, the site will prompt you to save your changes if you try to leave the page with unsaved changes.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "The site will now prompt you to save your changes if you try to leave the page with unsaved changes.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Gift choice boxes will now be saved in your gift inventory.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed a bug where the gift breakdown would also count gifts that weren't enabled for a specific student.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Fixed trigger autofocus not working correctly.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.docs,
+        description:
+          "Updated documentation for the following tools: Relationship Rank Calculator, Formation Display, Timeline Visualizer, Scenario Image Generator.",
+      },
+    ],
+  },
   {
     date: "October 25, 2025",
     features: [
@@ -75,10 +119,8 @@ export const CHANGELOG: ChangelogItemData[] = [
             </div>
 
             <div className="text-xs text-muted-foreground">
-              <strong>Note:</strong> During the BETA phase of this feature, it
-              will only be available to users who are logged in. Once the
-              feature is stable, I'll consider adding the ability to use it
-              without an account.
+              <strong>Note:</strong> This feature is only available for users
+              with an account.
             </div>
           </div>
         ),

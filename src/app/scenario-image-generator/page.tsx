@@ -32,13 +32,6 @@ export default async function ScenarioImageGeneratorPage() {
           Create and generate images that resemble fake Blue Archive
           scenario/story screenshots.
         </p>
-
-        <p>
-          Currently, the following scenario elements are supported: dialogue,
-          name, affiliation, background, character sprites. You can configure
-          these settings, as well as the general appearance of the UI under the
-          preview.
-        </p>
       </div>
 
       <ScenarioDataProvider>
