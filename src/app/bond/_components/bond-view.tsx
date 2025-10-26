@@ -649,6 +649,9 @@ export function BondView({ students, gifts }: BondViewProps) {
         setCurrentBondExp(clampedValue);
       }
 
+      setCurrentBondStr(entry.level.toString());
+      setCurrentBondExpStr(clampedValue.toString());
+
       if (!selectedStudent) {
         return;
       }
@@ -657,9 +660,6 @@ export function BondView({ students, gifts }: BondViewProps) {
         id: selectedStudent.id,
         bondExp: clampedValue,
       });
-
-      setCurrentBondStr(entry.level.toString());
-      setCurrentBondExpStr(clampedValue.toString());
     },
     [selectedStudent],
   );
@@ -775,6 +775,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             count,
           }),
         ),
+        giftBoxes: giftBoxesUsed,
       });
 
       markAsSaved();
@@ -809,6 +810,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             count,
           }),
         ),
+        giftBoxes: giftBoxesUsed,
       });
 
       markAsSaved();
@@ -843,6 +845,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             enabled,
           }),
         ),
+        useGiftBoxes: giftBoxesEnabled,
       });
 
       setSelectedTargetId(id);
@@ -879,6 +882,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             enabled,
           }),
         ),
+        useGiftBoxes: giftBoxesEnabled,
       });
 
       markAsSaved();
@@ -1040,6 +1044,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       ...prev,
       ...newGiftCounts,
     }));
+
+    if (typeof inventoryQuery.data.inventory.giftBoxes === "number") {
+      setGiftBoxesUsedUnchecked(inventoryQuery.data.inventory.giftBoxes);
+    }
   }, [inventoryQuery.status]);
 
   useEffect(() => {
@@ -1065,12 +1073,14 @@ export function BondView({ students, gifts }: BondViewProps) {
       ...newGiftEnabled,
     }));
 
+    if (typeof target.useGiftBoxes === "boolean") {
+      setGiftBoxesEnabledUnchecked(target.useGiftBoxes);
+    }
+
     setSelectedStudent(students.find((s) => s.id === target.studentId) || null);
 
     updateCurrentBondExp(target.currentExp.toString(), true);
-    if (typeof target.targetExp === "number") {
-      updateTargetBondExp(target.targetExp.toString(), true);
-    }
+    updateTargetBondExp(target.targetExp?.toString() ?? "", true);
   }, [selectedTargetId]);
 
   useEffect(() => {
@@ -1397,8 +1407,8 @@ export function BondView({ students, gifts }: BondViewProps) {
                 }
               }}
               className={cn("w-16 no-arrows", {
-                "border-yellow-200 shadow-yellow-200 focus-visible:ring-yellow-200/50":
-                  giftBoxesUsed > 0,
+                "border-green-200 shadow-green-200 focus-visible:ring-green-200/50 bg-green-200/10":
+                  giftBoxesUsed > 0 && giftBoxesEnabled,
               })}
             />
 

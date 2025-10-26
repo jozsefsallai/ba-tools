@@ -168,6 +168,7 @@ export default defineSchema({
         count: v.number(),
       }),
     ),
+    giftBoxes: v.optional(v.number()),
   }).index("by_userId", ["userId"]),
 
   giftTarget: defineTable({
@@ -182,6 +183,7 @@ export default defineSchema({
         enabled: v.boolean(),
       }),
     ),
+    useGiftBoxes: v.optional(v.boolean()),
   })
     .index("by_userId", ["userId"])
     .index("by_giftInventory", ["giftInventoryId"])

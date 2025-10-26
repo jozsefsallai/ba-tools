@@ -44,12 +44,14 @@ export const createInventory = authenticatedMutation({
         }),
       ),
     ),
+    giftBoxes: v.optional(v.number()),
   },
-  handler: async (ctx, { name, gifts }) => {
+  handler: async (ctx, { name, gifts, giftBoxes }) => {
     const giftInventoryId = await ctx.db.insert("giftInventory", {
       userId: ctx.user._id,
       name,
       gifts: gifts ?? [],
+      giftBoxes: giftBoxes ?? 0,
     });
 
     return giftInventoryId;
@@ -70,10 +72,11 @@ export const createTarget = authenticatedMutation({
         }),
       ),
     ),
+    useGiftBoxes: v.optional(v.boolean()),
   },
   handler: async (
     ctx,
-    { giftInventoryId, studentId, currentExp, targetExp, gifts },
+    { giftInventoryId, studentId, currentExp, targetExp, gifts, useGiftBoxes },
   ) => {
     const giftInventory = await ctx.db.get(giftInventoryId);
 
@@ -97,6 +100,7 @@ export const createTarget = authenticatedMutation({
       currentExp: currentExp ?? 0,
       targetExp,
       gifts: gifts ?? [],
+      useGiftBoxes: useGiftBoxes ?? false,
     });
 
     return giftTargetId;
@@ -115,8 +119,9 @@ export const updateInventory = authenticatedMutation({
         }),
       ),
     ),
+    giftBoxes: v.optional(v.number()),
   },
-  handler: async (ctx, { id, name, gifts }) => {
+  handler: async (ctx, { id, name, gifts, giftBoxes }) => {
     const giftInventory = await ctx.db.get(id);
 
     if (!giftInventory || giftInventory.userId !== ctx.user._id) {
@@ -126,6 +131,7 @@ export const updateInventory = authenticatedMutation({
     await ctx.db.patch(id, {
       name: name ?? giftInventory.name,
       gifts: [...giftInventory.gifts, ...(gifts ?? [])],
+      giftBoxes: giftBoxes ?? giftInventory.giftBoxes,
     });
   },
 });
@@ -144,8 +150,12 @@ export const updateTarget = authenticatedMutation({
         }),
       ),
     ),
+    useGiftBoxes: v.optional(v.boolean()),
   },
-  handler: async (ctx, { id, studentId, currentExp, targetExp, gifts }) => {
+  handler: async (
+    ctx,
+    { id, studentId, currentExp, targetExp, gifts, useGiftBoxes },
+  ) => {
     const giftTarget = await ctx.db.get(id);
 
     if (!giftTarget || giftTarget.userId !== ctx.user._id) {
@@ -157,6 +167,7 @@ export const updateTarget = authenticatedMutation({
       currentExp: currentExp ?? giftTarget.currentExp,
       targetExp: targetExp ?? giftTarget.targetExp,
       gifts: [...giftTarget.gifts, ...(gifts ?? [])],
+      useGiftBoxes: useGiftBoxes ?? giftTarget.useGiftBoxes,
     });
   },
 });
