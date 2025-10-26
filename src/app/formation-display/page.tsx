@@ -1,4 +1,5 @@
 import { FormationEditor } from "@/app/formation-display/_components/formation-editor";
+import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { auth } from "@clerk/nextjs/server";
@@ -79,7 +80,9 @@ export default async function FormationDisplayPage() {
       </div>
 
       <Suspense>
-        <FormationEditor />
+        <DirtyStateTrackerProvider loggedInOnly>
+          <FormationEditor />
+        </DirtyStateTrackerProvider>
       </Suspense>
     </div>
   );

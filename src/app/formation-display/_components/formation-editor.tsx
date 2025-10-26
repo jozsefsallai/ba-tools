@@ -5,7 +5,7 @@ import {
   type StudentItem,
 } from "@/app/formation-display/_components/formation-preview";
 import type { Student } from "@/lib/types";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import html2canvas from "html2canvas-pro";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,31 +39,89 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
+import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "next-navigation-guard";
+import { SaveDialog } from "@/components/dialogs/save-dialog";
+import { SaveStatus } from "@/components/common/save-status";
 
 type CombatClass = "striker" | "special";
 
 export function FormationEditor() {
   const { students: allStudents } = useStudents();
 
+  const { hasUnsavedChanges, useSaveableState, markAsSaved } =
+    useDirtyStateTracker();
+
+  const [requestInProgress, setRequestInProgress] = useState(false);
+
+  const navigationGuard = useNavigationGuard({
+    enabled: hasUnsavedChanges && !requestInProgress,
+  });
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { preferences } = useUserPreferences();
 
-  const [name, setName] = useState("");
+  const [name, setName, setNameUnchecked] = useSaveableState("");
 
-  const [strikers, setStrikers] = useState<StudentItem[]>([]);
-  const [specials, setSpecials] = useState<StudentItem[]>([]);
+  const [strikers, setStrikers, setStrikersUnchecked] = useSaveableState<
+    StudentItem[]
+  >(
+    [],
+    useCallback((a: StudentItem[], b: StudentItem[]) => {
+      if (a.length !== b.length) {
+        return false;
+      }
 
-  const [scale, setScale] = useState(preferences.formationDisplay.defaultScale);
-  const [displayOverline, setDisplayOverline] = useState(
-    preferences.formationDisplay.defaultDisplayOverline,
+      for (let i = 0; i < a.length; ++i) {
+        const itemA = a[i];
+        const itemB = b[i];
+
+        if (itemA.id !== itemB.id) {
+          return false;
+        }
+
+        if (itemA.student?.id !== itemB.student?.id) {
+          return false;
+        }
+
+        if (itemA.starter !== itemB.starter) {
+          return false;
+        }
+
+        if (itemA.starLevel !== itemB.starLevel) {
+          return false;
+        }
+
+        if (itemA.ueLevel !== itemB.ueLevel) {
+          return false;
+        }
+
+        if (itemA.borrowed !== itemB.borrowed) {
+          return false;
+        }
+
+        if (itemA.level !== itemB.level) {
+          return false;
+        }
+      }
+
+      return true;
+    }, []),
   );
-  const [displayRoleIcon, setDisplayRoleIcon] = useState(
-    !preferences.formationDisplay.defaultNoDisplayRole,
+  const [specials, setSpecials, setSpecialsUnchecked] = useSaveableState<
+    StudentItem[]
+  >([]);
+
+  const [scale, setScale, setScaleUnchecked] = useSaveableState(
+    preferences.formationDisplay.defaultScale,
   );
-  const [groupsVertical, setGroupsVertical] = useState(
-    preferences.formationDisplay.defaultGroupsVertical,
-  );
+  const [displayOverline, setDisplayOverline, setDisplayOverlineUnchecked] =
+    useSaveableState(preferences.formationDisplay.defaultDisplayOverline);
+  const [displayRoleIcon, setDisplayRoleIcon, setDisplayRoleIconUnchecked] =
+    useSaveableState(!preferences.formationDisplay.defaultNoDisplayRole);
+  const [groupsVertical, setGroupsVertical, setGroupsVerticalUnchecked] =
+    useSaveableState(preferences.formationDisplay.defaultGroupsVertical);
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
@@ -199,6 +257,12 @@ export function FormationEditor() {
       return;
     }
 
+    if (requestInProgress) {
+      return;
+    }
+
+    setRequestInProgress(true);
+
     const data = {
       name: name.length > 0 ? name : undefined,
       strikers: strikers.map((item) => ({
@@ -228,6 +292,12 @@ export function FormationEditor() {
         ...data,
       });
 
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
+
       await clearCache(`/formation-display?id=${formationId}`);
 
       toast.success("Formation updated successfully.");
@@ -235,24 +305,33 @@ export function FormationEditor() {
       const newFormation = await createMutation(data);
 
       if (newFormation) {
+        markAsSaved();
+
         toast.success("Formation created successfully.");
-        router.push(`/formation-display?id=${newFormation._id}`);
+
+        if (!navigationGuard.active) {
+          router.push(`/formation-display?id=${newFormation._id}`);
+        } else {
+          navigationGuard.accept();
+        }
       } else {
         toast.error("Failed to create formation.");
       }
     }
+
+    setRequestInProgress(false);
   }
 
   useEffect(() => {
     if (!formationId) {
       // reset
-      setName("");
-      setStrikers([]);
-      setSpecials([]);
-      setScale(1);
-      setDisplayOverline(false);
-      setDisplayRoleIcon(true);
-      setGroupsVertical(false);
+      setNameUnchecked("");
+      setStrikersUnchecked([]);
+      setSpecialsUnchecked([]);
+      setScaleUnchecked(1);
+      setDisplayOverlineUnchecked(false);
+      setDisplayRoleIconUnchecked(true);
+      setGroupsVerticalUnchecked(false);
       return;
     }
 
@@ -300,13 +379,13 @@ export function FormationEditor() {
         }
       }
 
-      setName(query.data.name || "");
-      setStrikers(newStrikers);
-      setSpecials(newSpecials);
-      setScale(1);
-      setDisplayOverline(query.data.displayOverline || false);
-      setDisplayRoleIcon(!query.data.noDisplayRole);
-      setGroupsVertical(query.data.groupsVertical || false);
+      setNameUnchecked(query.data.name || "");
+      setStrikersUnchecked(newStrikers);
+      setSpecialsUnchecked(newSpecials);
+      setScaleUnchecked(1);
+      setDisplayOverlineUnchecked(query.data.displayOverline || false);
+      setDisplayRoleIconUnchecked(!query.data.noDisplayRole);
+      setGroupsVerticalUnchecked(query.data.groupsVertical || false);
     }
 
     if (query.status === "error") {
@@ -320,10 +399,16 @@ export function FormationEditor() {
       return;
     }
 
-    setScale(preferences.formationDisplay.defaultScale);
-    setDisplayOverline(preferences.formationDisplay.defaultDisplayOverline);
-    setDisplayRoleIcon(!preferences.formationDisplay.defaultNoDisplayRole);
-    setGroupsVertical(preferences.formationDisplay.defaultGroupsVertical);
+    setScaleUnchecked(preferences.formationDisplay.defaultScale);
+    setDisplayOverlineUnchecked(
+      preferences.formationDisplay.defaultDisplayOverline,
+    );
+    setDisplayRoleIconUnchecked(
+      !preferences.formationDisplay.defaultNoDisplayRole,
+    );
+    setGroupsVerticalUnchecked(
+      preferences.formationDisplay.defaultGroupsVertical,
+    );
   }, [preferences]);
 
   if (formationId && query.status === "pending") {
@@ -483,6 +568,15 @@ export function FormationEditor() {
               </TabsContent>
             </Authenticated>
           </Tabs>
+
+          <Authenticated>
+            <div className="mt-4 flex items-center justify-center">
+              <SaveStatus
+                isDirty={hasUnsavedChanges}
+                isSaving={requestInProgress}
+              />
+            </div>
+          </Authenticated>
         </CardContent>
       </Card>
 
@@ -539,6 +633,17 @@ export function FormationEditor() {
           />
         )}
       </div>
+
+      <Authenticated>
+        <SaveDialog
+          open={navigationGuard.active}
+          title="Save formation?"
+          description="You have unsaved changes in your formation. Would you like to save it in the cloud before leaving the page?"
+          onYes={createOrUpdateCloudFormation}
+          onNo={navigationGuard.accept}
+          onCancel={navigationGuard.reject}
+        />
+      </Authenticated>
     </div>
   );
 }

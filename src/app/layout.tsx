@@ -12,6 +12,7 @@ import { ConvexClientProvider } from "@/components/providers/convex-client-provi
 import { UserPreferencesProvider } from "@/components/providers/user-preferences-provider";
 import { db } from "@/lib/db";
 import { StudentsProvider } from "@/components/providers/students-provider";
+import { NavigationGuardProvider } from "next-navigation-guard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,23 +69,25 @@ export default async function RootLayout({
         >
           <ThemedClerkProvider>
             <ConvexClientProvider>
-              <StudentsProvider loadedStudents={students}>
-                <UserPreferencesProvider>
-                  <main className="flex flex-col gap-10 h-full">
-                    <TheHeader />
-                    <section className="relative container px-4 md:px-0 flex-1">
-                      {children}
-                    </section>
-                    <TheFooter
-                      commitHash={
-                        process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
-                      }
-                    />
-                  </main>
+              <NavigationGuardProvider>
+                <StudentsProvider loadedStudents={students}>
+                  <UserPreferencesProvider>
+                    <main className="flex flex-col gap-10 h-full">
+                      <TheHeader />
+                      <section className="relative container px-4 md:px-0 flex-1">
+                        {children}
+                      </section>
+                      <TheFooter
+                        commitHash={
+                          process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
+                        }
+                      />
+                    </main>
 
-                  <Toaster />
-                </UserPreferencesProvider>
-              </StudentsProvider>
+                    <Toaster />
+                  </UserPreferencesProvider>
+                </StudentsProvider>
+              </NavigationGuardProvider>
             </ConvexClientProvider>
           </ThemedClerkProvider>
         </ThemeProvider>

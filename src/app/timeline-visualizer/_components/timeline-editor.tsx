@@ -55,33 +55,120 @@ import { Textarea } from "@/components/ui/textarea";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { useStudents } from "@/hooks/use-students";
 import type { WindowVirtualizerHandle } from "virtua";
+import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "next-navigation-guard";
+import { SaveStatus } from "@/components/common/save-status";
+import { SaveDialog } from "@/components/dialogs/save-dialog";
+import { useUser } from "@clerk/nextjs";
 
 export function TimelineEditor() {
   const { students: allStudents } = useStudents();
+
+  const { isSignedIn } = useUser();
+
+  const { hasUnsavedChanges, useSaveableState, markAsSaved } =
+    useDirtyStateTracker();
+
+  const [requestInProgress, setRequestInProgress] = useState(false);
+
+  const navigationGuard = useNavigationGuard({
+    enabled: hasUnsavedChanges && !requestInProgress,
+  });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const studentPickerRef = useRef<StudentPickerHandle>(null);
 
   const { preferences } = useUserPreferences();
 
-  const [name, setName] = useState("");
-  const [visibility, setVisibility] = useState<"public" | "private">("private");
-  const [showCreator, setShowCreator] = useState(false);
-  const [description, setDescription] = useState("");
+  const [name, setName, setNameUnchecked] = useSaveableState("");
+  const [visibility, setVisibility, setVisibilityUnchecked] = useSaveableState<
+    "public" | "private"
+  >("private");
+  const [showCreator, setShowCreator, setShowCreatorUnchecked] =
+    useSaveableState(false);
+  const [description, setDescription, setDescriptionUnchecked] =
+    useSaveableState("");
 
-  const [items, setItems] = useState<TimelineItem[]>([]);
+  const [items, setItems, setItemsUnchecked] = useSaveableState<TimelineItem[]>(
+    [],
+    useCallback((a: TimelineItem[], b: TimelineItem[]) => {
+      if (a.length !== b.length) {
+        return false;
+      }
+
+      for (let i = 0; i < a.length; ++i) {
+        const itemA = a[i];
+        const itemB = b[i];
+
+        if (itemA.id !== itemB.id || itemA.type !== itemB.type) {
+          return false;
+        }
+
+        if (itemA.type === "student" && itemB.type === "student") {
+          if (itemA.student.id !== itemB.student.id) {
+            return false;
+          }
+
+          if (itemA.trigger !== itemB.trigger) {
+            return false;
+          }
+
+          if (itemA.copy !== itemB.copy) {
+            return false;
+          }
+
+          if (itemA.variantId !== itemB.variantId) {
+            return false;
+          }
+
+          if (itemA.target?.id !== itemB.target?.id) {
+            return false;
+          }
+
+          if (itemA.notes !== itemB.notes) {
+            return false;
+          }
+        }
+
+        if (itemA.type === "separator" && itemB.type === "separator") {
+          if (itemA.orientation !== itemB.orientation) {
+            return false;
+          }
+
+          if (itemA.size !== itemB.size) {
+            return false;
+          }
+        }
+
+        if (itemA.type === "text" && itemB.type === "text") {
+          if (itemA.text !== itemB.text) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }, []),
+  );
   const virtualListHandlerRef = useRef<WindowVirtualizerHandle>(null);
 
-  const [scale, setScale] = useState(
+  const [scale, setScale, setScaleUnchecked] = useSaveableState(
     preferences.timelineVisualizer.defaultScale,
   );
-  const [itemSpacing, setItemSpacing] = useState(
-    preferences.timelineVisualizer.defaultItemSpacing,
-  );
-  const [verticalSeparatorSize, setVerticalSeparatorSize] = useState(
+  const [itemSpacing, setItemSpacing, setItemSpacingUnchecked] =
+    useSaveableState(preferences.timelineVisualizer.defaultItemSpacing);
+  const [
+    verticalSeparatorSize,
+    setVerticalSeparatorSize,
+    setVerticalSeparatorSizeUnchecked,
+  ] = useSaveableState(
     preferences.timelineVisualizer.defaultVerticalSeparatorSize,
   );
-  const [horizontalSeparatorSize, setHorizontalSeparatorSize] = useState(
+  const [
+    horizontalSeparatorSize,
+    setHorizontalSeparatorSize,
+    setHorizontalSeparatorSizeUnchecked,
+  ] = useSaveableState(
     preferences.timelineVisualizer.defaultHorizontalSeparatorSize,
   );
 
@@ -241,6 +328,12 @@ export function TimelineEditor() {
       return;
     }
 
+    if (requestInProgress) {
+      return;
+    }
+
+    setRequestInProgress(true);
+
     const data = {
       items: items.map((item) => {
         if (item.type === "student") {
@@ -275,6 +368,12 @@ export function TimelineEditor() {
         ...data,
       });
 
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
+
       await clearCache(`/timeline-visualizer?id=${timelineId}`);
 
       toast.success("Timeline saved successfully.");
@@ -282,12 +381,21 @@ export function TimelineEditor() {
       const newTimeline = await createMutation(data);
 
       if (newTimeline) {
-        router.push(`/timeline-visualizer?id=${newTimeline._id}`);
+        markAsSaved();
+
         toast.success("Timeline created successfully.");
+
+        if (!navigationGuard.active) {
+          router.push(`/timeline-visualizer?id=${newTimeline._id}`);
+        } else {
+          navigationGuard.accept();
+        }
       } else {
         toast.error("Failed to create timeline.");
       }
     }
+
+    setRequestInProgress(false);
   }
 
   function loadTimelineFromStorage() {
@@ -329,13 +437,15 @@ export function TimelineEditor() {
       }
     }
 
-    setName(storedData.name ?? "");
-    setDescription(storedData.description ?? "");
-    setItems(newItems);
-    setScale(storedData.scale || 1);
-    setItemSpacing(storedData.itemSpacing || 10);
-    setVerticalSeparatorSize(storedData.verticalSeparatorSize || 70);
-    setHorizontalSeparatorSize(storedData.horizontalSeparatorSize || 50);
+    setNameUnchecked(storedData.name ?? "");
+    setDescriptionUnchecked(storedData.description ?? "");
+    setItemsUnchecked(newItems);
+    setScaleUnchecked(storedData.scale || 1);
+    setItemSpacingUnchecked(storedData.itemSpacing || 10);
+    setVerticalSeparatorSizeUnchecked(storedData.verticalSeparatorSize || 70);
+    setHorizontalSeparatorSizeUnchecked(
+      storedData.horizontalSeparatorSize || 50,
+    );
     setItemSpacingStr((storedData.itemSpacing || 10).toString());
     setVerticalSeparatorSizeStr(
       (storedData.verticalSeparatorSize || 70).toString(),
@@ -346,6 +456,12 @@ export function TimelineEditor() {
   }
 
   function saveTimelineToLocalStorage(showToast = true) {
+    if (requestInProgress) {
+      return;
+    }
+
+    setRequestInProgress(true);
+
     const data = {
       items: items.map((item) => {
         if (item.type === "student") {
@@ -378,6 +494,14 @@ export function TimelineEditor() {
     if (showToast) {
       toast.success("Timeline saved successfully.");
     }
+
+    markAsSaved();
+
+    if (navigationGuard.active) {
+      navigationGuard.accept();
+    }
+
+    setRequestInProgress(false);
   }
 
   function handlePreviewItemClicked(item: TimelineItem) {
@@ -419,6 +543,12 @@ export function TimelineEditor() {
     studentPickerRef.current?.open();
   }
 
+  async function save() {
+    return isSignedIn
+      ? createOrUpdateCloudTimeline()
+      : saveTimelineToLocalStorage();
+  }
+
   useEffect(() => {
     const value = Number.parseInt(itemSpacingStr, 10);
     if (!Number.isNaN(value)) {
@@ -443,15 +573,15 @@ export function TimelineEditor() {
   useEffect(() => {
     if (!timelineId) {
       // reset
-      setName("");
-      setDescription("");
-      setVisibility("private");
-      setShowCreator(false);
-      setItems([]);
-      setScale(1);
-      setItemSpacing(10);
-      setVerticalSeparatorSize(70);
-      setHorizontalSeparatorSize(50);
+      setNameUnchecked("");
+      setDescriptionUnchecked("");
+      setVisibilityUnchecked("private");
+      setShowCreatorUnchecked(false);
+      setItemsUnchecked([]);
+      setScaleUnchecked(1);
+      setItemSpacingUnchecked(10);
+      setVerticalSeparatorSizeUnchecked(70);
+      setHorizontalSeparatorSizeUnchecked(50);
       setItemSpacingStr("10");
       setVerticalSeparatorSizeStr("70");
       setHorizontalSeparatorSizeStr("50");
@@ -491,14 +621,16 @@ export function TimelineEditor() {
         }
       }
 
-      setName(query.data.name ?? "");
-      setDescription(query.data.description ?? "");
-      setVisibility(query.data.visibility || "private");
-      setShowCreator(query.data.showCreator || false);
-      setItems(newItems);
-      setItemSpacing(query.data.itemSpacing || 10);
-      setVerticalSeparatorSize(query.data.verticalSeparatorSize || 70);
-      setHorizontalSeparatorSize(query.data.horizontalSeparatorSize || 50);
+      setNameUnchecked(query.data.name ?? "");
+      setDescriptionUnchecked(query.data.description ?? "");
+      setVisibilityUnchecked(query.data.visibility || "private");
+      setShowCreatorUnchecked(query.data.showCreator || false);
+      setItemsUnchecked(newItems);
+      setItemSpacingUnchecked(query.data.itemSpacing || 10);
+      setVerticalSeparatorSizeUnchecked(query.data.verticalSeparatorSize || 70);
+      setHorizontalSeparatorSizeUnchecked(
+        query.data.horizontalSeparatorSize || 50,
+      );
       setItemSpacingStr((query.data.itemSpacing || 10).toString());
       setVerticalSeparatorSizeStr(
         (query.data.verticalSeparatorSize || 70).toString(),
@@ -519,12 +651,12 @@ export function TimelineEditor() {
       return;
     }
 
-    setScale(preferences.timelineVisualizer.defaultScale);
-    setItemSpacing(preferences.timelineVisualizer.defaultItemSpacing);
-    setVerticalSeparatorSize(
+    setScaleUnchecked(preferences.timelineVisualizer.defaultScale);
+    setItemSpacingUnchecked(preferences.timelineVisualizer.defaultItemSpacing);
+    setVerticalSeparatorSizeUnchecked(
       preferences.timelineVisualizer.defaultVerticalSeparatorSize,
     );
-    setHorizontalSeparatorSize(
+    setHorizontalSeparatorSizeUnchecked(
       preferences.timelineVisualizer.defaultHorizontalSeparatorSize,
     );
 
@@ -799,6 +931,13 @@ export function TimelineEditor() {
             </TabsContent>
           </Tabs>
         </CardContent>
+
+        <div className="mt-4 flex items-center justify-center">
+          <SaveStatus
+            isDirty={hasUnsavedChanges}
+            isSaving={requestInProgress}
+          />
+        </div>
       </Card>
 
       <div className="flex gap-4 items-center justify-center">
@@ -857,6 +996,15 @@ export function TimelineEditor() {
       >
         <ChevronUpIcon className="size-6" />
       </Button>
+
+      <SaveDialog
+        open={navigationGuard.active}
+        title="Save timeline?"
+        description={`You have unsaved changes in your timeline. Would you like to save it ${isSignedIn ? "in the cloud" : "in your browser"} before leaving the page?`}
+        onYes={save}
+        onNo={navigationGuard.accept}
+        onCancel={navigationGuard.reject}
+      />
     </div>
   );
 }

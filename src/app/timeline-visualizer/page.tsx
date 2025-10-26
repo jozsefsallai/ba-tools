@@ -9,6 +9,7 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import { auth } from "@clerk/nextjs/server";
+import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
 
 type PageSearchParams = {
   id?: string;
@@ -77,7 +78,9 @@ export default async function TimelineVisualizerPage() {
       </div>
 
       <Suspense>
-        <TimelineEditor />
+        <DirtyStateTrackerProvider>
+          <TimelineEditor />
+        </DirtyStateTrackerProvider>
       </Suspense>
     </div>
   );

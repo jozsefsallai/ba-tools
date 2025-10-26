@@ -64,6 +64,10 @@ import {
 import { CreateGiftInventoryDialog } from "@/components/dialogs/create-gift-inventory-dialog";
 import { RenameGiftInventoryDialog } from "@/components/dialogs/rename-gift-inventory-dialog";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
+import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "next-navigation-guard";
+import { SaveDialog } from "@/components/dialogs/save-dialog";
+import { SaveStatus } from "@/components/common/save-status";
 
 export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
@@ -215,19 +219,63 @@ export function BondView({ students, gifts }: BondViewProps) {
 
   const [sortMethod, setSortMethod] = useState<GiftSortMethod>("default");
 
+  const [selectedInvenetoryId, setSelectedInventoryId] =
+    useState<Id<"giftInventory"> | null>(null);
+
+  const [selectedTargetId, setSelectedTargetId] =
+    useState<Id<"giftTarget"> | null>(null);
+
+  const { hasUnsavedChanges, useSaveableState, markAsSaved } =
+    useDirtyStateTracker({
+      enabled: !!selectedInvenetoryId,
+    });
+
+  const navigationGuard = useNavigationGuard({
+    enabled: hasUnsavedChanges,
+  });
+
   const [selectedStudent, setSelectedStudent] =
     useState<StudentWithGifts | null>(null);
 
-  const [giftCounts, setGiftCounts] = useState<Record<number, number>>(
+  const [giftCounts, setGiftCounts, setGiftCountsUnchecked] = useSaveableState<
+    Record<number, number>
+  >(
     Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
+    useCallback(
+      (a: Record<number, number>, b: Record<number, number>) => {
+        for (const gift of gifts) {
+          if ((a[gift.id] || 0) !== (b[gift.id] || 0)) {
+            return false;
+          }
+        }
+
+        return true;
+      },
+      [gifts],
+    ),
   );
 
-  const [giftEnabled, setGiftEnabled] = useState<Record<number, boolean>>(
-    Object.fromEntries(gifts.map((gift) => [gift.id, true])),
-  );
+  const [giftEnabled, setGiftEnabled, setGiftEnabledUnchecked] =
+    useSaveableState<Record<number, boolean>>(
+      Object.fromEntries(gifts.map((gift) => [gift.id, true])),
+      useCallback(
+        (a: Record<number, boolean>, b: Record<number, boolean>) => {
+          for (const gift of gifts) {
+            if ((a[gift.id] || false) !== (b[gift.id] || false)) {
+              return false;
+            }
+          }
 
-  const [currentBondExp, setCurrentBondExp] = useState<number>(0);
-  const [targetBondExp, setTargetBondExp] = useState<number | null>(null);
+          return true;
+        },
+        [gifts],
+      ),
+    );
+
+  const [currentBondExp, setCurrentBondExp, setCurrentBondExpUnchecked] =
+    useSaveableState<number>(0);
+  const [targetBondExp, setTargetBondExp, setTargetBondExpUnchecked] =
+    useSaveableState<number | null>(null);
 
   const [currentBondStr, setCurrentBondStr] = useState("1");
   const [targetBondStr, setTargetBondStr] = useState("");
@@ -235,16 +283,12 @@ export function BondView({ students, gifts }: BondViewProps) {
   const [currentBondExpStr, setCurrentBondExpStr] = useState("0");
   const [targetBondExpStr, setTargetBondExpStr] = useState("");
 
-  const [giftBoxesUsed, setGiftBoxesUsed] = useState(0);
-  const [giftBoxesEnabled, setGiftBoxesEnabled] = useState(true);
+  const [giftBoxesUsed, setGiftBoxesUsed, setGiftBoxesUsedUnchecked] =
+    useSaveableState(0);
+  const [giftBoxesEnabled, setGiftBoxesEnabled, setGiftBoxesEnabledUnchecked] =
+    useSaveableState(true);
 
   const [busy, setBusy] = useState(false);
-
-  const [selectedInvenetoryId, setSelectedInventoryId] =
-    useState<Id<"giftInventory"> | null>(null);
-
-  const [selectedTargetId, setSelectedTargetId] =
-    useState<Id<"giftTarget"> | null>(null);
 
   const inventoriesQuery = useQueryWithStatus(
     api.gifts.getOwn,
@@ -532,7 +576,7 @@ export function BondView({ students, gifts }: BondViewProps) {
   }
 
   const updateCurrentBond = useCallback(
-    (raw: string) => {
+    (raw: string, unchecked = false) => {
       setCurrentBondStr(raw);
 
       if (raw === "") {
@@ -552,7 +596,11 @@ export function BondView({ students, gifts }: BondViewProps) {
         return;
       }
 
-      setCurrentBondExp(entry.totalExp);
+      if (unchecked) {
+        setCurrentBondExpUnchecked(entry.totalExp);
+      } else {
+        setCurrentBondExp(entry.totalExp);
+      }
 
       if (!selectedStudent) {
         return;
@@ -570,7 +618,7 @@ export function BondView({ students, gifts }: BondViewProps) {
   );
 
   const updateCurrentBondExp = useCallback(
-    (raw: string) => {
+    (raw: string, unchecked = false) => {
       setCurrentBondExpStr(raw);
 
       const value = Number.parseInt(raw, 10);
@@ -595,7 +643,11 @@ export function BondView({ students, gifts }: BondViewProps) {
         return;
       }
 
-      setCurrentBondExp(clampedValue);
+      if (unchecked) {
+        setCurrentBondExpUnchecked(clampedValue);
+      } else {
+        setCurrentBondExp(clampedValue);
+      }
 
       if (!selectedStudent) {
         return;
@@ -612,12 +664,14 @@ export function BondView({ students, gifts }: BondViewProps) {
     [selectedStudent],
   );
 
-  const updateTargetBond = useCallback((raw: string) => {
+  const updateTargetBond = useCallback((raw: string, unchecked = false) => {
     setTargetBondStr(raw);
+
+    const setter = unchecked ? setTargetBondExpUnchecked : setTargetBondExp;
 
     const value = Number.parseInt(raw, 10);
     if (Number.isNaN(value)) {
-      setTargetBondExp(null);
+      setter(null);
       return;
     }
 
@@ -626,21 +680,23 @@ export function BondView({ students, gifts }: BondViewProps) {
     const entry = favorTableMap[clampedValue];
 
     if (!entry) {
-      setTargetBondExp(null);
+      setter(null);
       return;
     }
 
-    setTargetBondExp(entry.totalExp);
+    setter(entry.totalExp);
     setTargetBondExpStr(entry.totalExp.toString());
     setTargetBondStr(clampedValue.toString());
   }, []);
 
-  const updateTargetBondExp = useCallback((raw: string) => {
+  const updateTargetBondExp = useCallback((raw: string, unchecked = false) => {
     setTargetBondExpStr(raw);
+
+    const setter = unchecked ? setTargetBondExpUnchecked : setTargetBondExp;
 
     const value = Number.parseInt(raw, 10);
     if (Number.isNaN(value)) {
-      setTargetBondExp(null);
+      setter(null);
       return;
     }
 
@@ -652,7 +708,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       clampedValue = favorTable[favorTable.length - 2].totalExp;
     }
 
-    setTargetBondExp(clampedValue);
+    setter(clampedValue);
     setTargetBondStr(
       (
         favorTable.find((entry) => entry.totalExp >= clampedValue)?.level ?? 1
@@ -721,6 +777,12 @@ export function BondView({ students, gifts }: BondViewProps) {
         ),
       });
 
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
+
       setSelectedInventoryId(id);
     } catch (err) {
       console.error(err);
@@ -748,6 +810,12 @@ export function BondView({ students, gifts }: BondViewProps) {
           }),
         ),
       });
+
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to update gift inventory.");
@@ -778,6 +846,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       });
 
       setSelectedTargetId(id);
+
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to create gift target.");
@@ -806,6 +880,12 @@ export function BondView({ students, gifts }: BondViewProps) {
           }),
         ),
       });
+
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to update gift target.");
@@ -845,6 +925,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       setSelectedStudent(null);
       setGiftCounts(Object.fromEntries(gifts.map((gift) => [gift.id, 0])));
       setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
+
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete gift inventory.");
@@ -872,6 +958,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       updateTargetBondExp("");
       setSelectedStudent(null);
       setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
+
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete gift target.");
@@ -884,11 +976,15 @@ export function BondView({ students, gifts }: BondViewProps) {
     if (value === "_") {
       setSelectedInventoryId(null);
       setSelectedTargetId(null);
-      updateCurrentBondExp("0");
-      updateTargetBondExp("");
+      updateCurrentBondExp("0", true);
+      updateTargetBondExp("", true);
       setSelectedStudent(null);
-      setGiftCounts(Object.fromEntries(gifts.map((gift) => [gift.id, 0])));
-      setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
+      setGiftCountsUnchecked(
+        Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
+      );
+      setGiftEnabledUnchecked(
+        Object.fromEntries(gifts.map((gift) => [gift.id, false])),
+      );
       return;
     }
 
@@ -903,10 +999,12 @@ export function BondView({ students, gifts }: BondViewProps) {
   function handleTargetValueChange(value: string) {
     if (value === "_") {
       setSelectedTargetId(null);
-      updateCurrentBondExp("0");
-      updateTargetBondExp("");
+      updateCurrentBondExp("0", true);
+      updateTargetBondExp("", true);
       setSelectedStudent(null);
-      setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
+      setGiftEnabledUnchecked(
+        Object.fromEntries(gifts.map((gift) => [gift.id, false])),
+      );
       return;
     }
 
@@ -919,10 +1017,12 @@ export function BondView({ students, gifts }: BondViewProps) {
 
   useEffect(() => {
     if (isSignedIn) {
-      setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
-    }
+      setGiftEnabledUnchecked(
+        Object.fromEntries(gifts.map((gift) => [gift.id, false])),
+      );
 
-    setGiftBoxesEnabled(false);
+      setGiftBoxesEnabledUnchecked(false);
+    }
   }, [isSignedIn]);
 
   useEffect(() => {
@@ -930,12 +1030,16 @@ export function BondView({ students, gifts }: BondViewProps) {
       return;
     }
 
+    const newGiftCounts: Record<number, number> = {};
+
     for (const gift of inventoryQuery.data.inventory.gifts) {
-      setGiftCounts((prev) => ({
-        ...prev,
-        [gift.id]: gift.count,
-      }));
+      newGiftCounts[gift.id] = gift.count;
     }
+
+    setGiftCountsUnchecked((prev) => ({
+      ...prev,
+      ...newGiftCounts,
+    }));
   }, [inventoryQuery.status]);
 
   useEffect(() => {
@@ -950,20 +1054,28 @@ export function BondView({ students, gifts }: BondViewProps) {
       return;
     }
 
+    const newGiftEnabled: Record<number, boolean> = {};
+
     for (const gift of target.gifts) {
-      setGiftEnabled((prev) => ({
-        ...prev,
-        [gift.id]: gift.enabled,
-      }));
+      newGiftEnabled[gift.id] = gift.enabled;
     }
+
+    setGiftEnabledUnchecked((prev) => ({
+      ...prev,
+      ...newGiftEnabled,
+    }));
 
     setSelectedStudent(students.find((s) => s.id === target.studentId) || null);
 
-    updateCurrentBondExp(target.currentExp.toString());
+    updateCurrentBondExp(target.currentExp.toString(), true);
     if (typeof target.targetExp === "number") {
-      updateTargetBondExp(target.targetExp.toString());
+      updateTargetBondExp(target.targetExp.toString(), true);
     }
   }, [selectedTargetId]);
+
+  useEffect(() => {
+    console.log("Gift counts changed:", giftCounts);
+  }, [giftCounts]);
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-6">
@@ -1168,7 +1280,7 @@ export function BondView({ students, gifts }: BondViewProps) {
           </Select>
         </div>
 
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-wrap gap-x-4 gap-y-8 justify-center">
           {sortedGifts.map((gift) => (
             <div
               key={gift.id}
@@ -1301,6 +1413,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       </div>
 
       <div className="flex flex-col gap-8 items-center md:basis-1/3">
+        <Authenticated>
+          <div className="flex items-center justify-center">
+            <SaveStatus isDirty={hasUnsavedChanges} isSaving={busy} />
+          </div>
+        </Authenticated>
+
         <StudentPicker
           onStudentSelected={updateStudent}
           className="w-[90vw] md:w-[450px]"
@@ -1430,6 +1548,17 @@ export function BondView({ students, gifts }: BondViewProps) {
           </>
         )}
       </div>
+
+      <Authenticated>
+        <SaveDialog
+          open={navigationGuard.active}
+          title="Save target data?"
+          description="You have unsaved changes in your bond setup. Would you like to save them in the cloud before leaving the page?"
+          onYes={handleSave}
+          onNo={navigationGuard.accept}
+          onCancel={navigationGuard.reject}
+        />
+      </Authenticated>
     </div>
   );
 }

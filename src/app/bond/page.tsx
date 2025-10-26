@@ -1,10 +1,12 @@
 import { BondView } from "@/app/bond/_components/bond-view";
 import { InventoryTip } from "@/app/bond/_components/inventory-tip";
+import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { HelpCircleIcon } from "lucide-react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Relationship Rank Calculator - Joe's Blue Archive Tools",
@@ -72,7 +74,11 @@ export default async function BondPage() {
         <InventoryTip />
       </div>
 
-      <BondView students={students} gifts={gifts} />
+      <Suspense>
+        <DirtyStateTrackerProvider loggedInOnly>
+          <BondView students={students} gifts={gifts} />
+        </DirtyStateTrackerProvider>
+      </Suspense>
     </div>
   );
 }
