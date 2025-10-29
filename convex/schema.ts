@@ -77,6 +77,16 @@ export const rosterItem = v.object({
   ),
 });
 
+export const pvpFormationStudentItem = v.object({
+  studentId: v.optional(v.string()),
+  level: v.optional(v.number()),
+  starLevel: v.optional(
+    v.union(...STAR_LEVELS.map((level) => v.literal(level))),
+  ),
+  ueLevel: v.optional(v.union(...UE_LEVELS.map((level) => v.literal(level)))),
+  damage: v.optional(v.number()),
+});
+
 export default defineSchema({
   users: defineTable({
     name: v.optional(v.string()),
@@ -188,4 +198,27 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_giftInventory", ["giftInventoryId"])
     .index("by_studentId", ["studentId"]),
+
+  pvpSeason: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
+  }).index("by_userId", ["userId"]),
+
+  pvpMatchRecord: defineTable({
+    userId: v.id("users"),
+    seasonId: v.id("pvpSeason"),
+    date: v.number(),
+    ownRank: v.optional(v.number()),
+    opponentName: v.optional(v.string()),
+    opponentStudentRepId: v.optional(v.string()),
+    opponentRank: v.optional(v.number()),
+    matchType: v.union(v.literal("attack"), v.literal("defense")),
+    ownTeam: v.array(pvpFormationStudentItem),
+    opponentTeam: v.array(pvpFormationStudentItem),
+    result: v.union(v.literal("win"), v.literal("loss")),
+    videoUrl: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_seasonId", ["seasonId"]),
 });
