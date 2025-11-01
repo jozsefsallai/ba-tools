@@ -4,6 +4,10 @@ export function buildCDNUrl(key: string) {
   return `/cdn/${key}`;
 }
 
+export function buildCDNAbsoluteUrl(key: string) {
+  return `${process.env.IMAGE_CDN_URL}/${key}`;
+}
+
 export function buildStudentIconUrlFromId(studentId: string) {
   return buildCDNUrl(`v2/images/students/icons/${studentId}.png`);
 }

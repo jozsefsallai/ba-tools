@@ -25,6 +25,8 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  serverExternalPackages: ["@resvg/resvg-js"],
+
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback.fs = false;
