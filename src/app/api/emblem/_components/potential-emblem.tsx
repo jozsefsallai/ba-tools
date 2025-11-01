@@ -42,8 +42,7 @@ export function PotentialEmblem({
               "text-[#4e4f8d]": rank === 50,
             })}
             style={{
-              textShadow:
-                "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
+              WebkitTextStroke: "6px #fff",
               fontSize: `${fontSize}px`,
             }}
           >

@@ -43,8 +43,7 @@ export function FavorEmblem({
               "text-[#844877]": rank === 100,
             })}
             style={{
-              textShadow:
-                "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
+              WebkitTextStroke: "6px #fff",
               fontSize: `${fontSize}px`,
             }}
           >

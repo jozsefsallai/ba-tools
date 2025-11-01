@@ -34,8 +34,7 @@ export function GroupEmblem({ school, club, nameOverride }: GroupEmblemParams) {
               "text-[30px]": name.length > 20,
             })}
             style={{
-              textShadow:
-                "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 4px 4px 1px rgba(39, 74, 122, 0.2)",
+              WebkitTextStroke: "6px #fff",
             }}
           >
             {name}

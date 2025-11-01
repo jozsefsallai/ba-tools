@@ -13,8 +13,7 @@ export function BasicEmblem({ text }: BasicEmblemParams) {
           "text-[30px]": text.length > 20,
         })}
         style={{
-          textShadow:
-            "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
+          WebkitTextStroke: "6px #fff",
         }}
       >
         {text}

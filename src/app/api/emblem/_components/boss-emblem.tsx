@@ -27,7 +27,7 @@ export function BossEmblem({ name, rarity, terrain }: BossEmblemParams) {
         </div>
       }
     >
-      <div tw="flex items-end justify-end w-full pr-[20px]">
+      <div tw="flex items-end justify-end w-full pr-[25px]">
         <div
           tw="flex flex-col items-end justify-end text-right w-[160px] font-semibold"
           style={{
@@ -35,15 +35,15 @@ export function BossEmblem({ name, rarity, terrain }: BossEmblemParams) {
           }}
         >
           <div
-            tw={cn("flex text-[#61201c] text-[22px] pb-[2px]", {
+            tw={cn("flex text-[#61201c] text-[23px] pb-[2px]", {
               "text-[#2e4c66]": rarity === "N",
               "text-[#26466f]": rarity === "R",
               "text-[#572421]": rarity === "SR",
               "text-[#482488]": rarity === "SSR",
             })}
             style={{
-              textShadow:
-                "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
+              letterSpacing: -0.8,
+              WebkitTextStroke: "6px #fff",
             }}
           >
             {bossName?.name ?? name}
@@ -52,8 +52,7 @@ export function BossEmblem({ name, rarity, terrain }: BossEmblemParams) {
           <div
             tw="flex uppercase text-[#9836d9] text-[16px]"
             style={{
-              textShadow:
-                "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
+              WebkitTextStroke: "6px #fff",
             }}
           >
             {bossTerrain?.name ?? terrain} Warfare
@@ -62,8 +61,7 @@ export function BossEmblem({ name, rarity, terrain }: BossEmblemParams) {
           <div
             tw="flex uppercase text-[#9836d9] text-[16px]"
             style={{
-              textShadow:
-                "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
+              WebkitTextStroke: "6px #fff",
             }}
           >
             Defeated!
