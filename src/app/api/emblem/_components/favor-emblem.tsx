@@ -16,8 +16,7 @@ export function FavorEmblem({ rank, student }: FavorEmblemParams) {
     DEVNAME_OVERRIDE[student.id] ?? student.devName,
   );
 
-  const name = "Yabuki Shuro (Coolest Bard Ever)";
-  // const name = `${student.lastName} ${student.firstName}`;
+  const name = `${student.lastName} ${student.firstName}`;
   const fontSize = fitFont(name, 34, MAX_TEXT_WIDTH, 0.7);
 
   return (
