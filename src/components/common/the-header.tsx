@@ -70,6 +70,10 @@ const MISC_TOOLS: NavLink[] = [
     text: "Formation Display",
   },
   {
+    href: "/title-generator",
+    text: "Title Generator",
+  },
+  {
     href: "/gacha-rate-stats",
     text: "Gacha Rate Stats",
   },

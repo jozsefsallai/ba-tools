@@ -1,6 +1,7 @@
 import { FavorEmblem } from "@/app/api/emblem/_components/favor-emblem";
 import { db } from "@/lib/db";
-import { type FavorEmblemRank, makeEmblem } from "@/lib/emblems";
+import type { FavorEmblemRank } from "@/lib/emblems";
+import { makeEmblem } from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {

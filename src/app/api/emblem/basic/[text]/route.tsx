@@ -1,5 +1,5 @@
 import { BasicEmblem } from "@/app/api/emblem/_components/basic-emblem";
-import { makeEmblem } from "@/lib/emblems";
+import { makeEmblem } from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {

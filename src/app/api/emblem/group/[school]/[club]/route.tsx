@@ -3,8 +3,8 @@ import {
   GROUP_EMBLEM_CLUBS,
   GROUP_EMBLEM_SCHOOLS,
   GROUP_EMBLEM_VALID_COMBINATIONS,
-  makeEmblem,
 } from "@/lib/emblems";
+import { makeEmblem } from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {

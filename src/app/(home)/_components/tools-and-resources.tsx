@@ -6,6 +6,7 @@ import {
   Grid2X2Icon,
   HeartIcon,
   ListOrderedIcon,
+  RectangleEllipsisIcon,
   TrainTrackIcon,
   UsersIcon,
 } from "lucide-react";
@@ -57,6 +58,14 @@ const RESOURCES: Resource[] = [
     icon: <UsersIcon className="size-10 text-orange-500 shrink-0" />,
     description:
       "Display a formation of students in a design that's similar to what you'd see in-game. Useful for YouTube thumbnails or spreadsheets.",
+  },
+  {
+    name: "Title Generator",
+    path: "/title-generator",
+    icon: <RectangleEllipsisIcon className="size-10 text-[#8fc9ff] shrink-0" />,
+    description:
+      "Generate fully rendered user titles for boss completions, relationship rank, talent levels, school clubs, as well as generic titles with custom text.",
+    isNew: true,
   },
   {
     name: "Gacha Rate Stats",

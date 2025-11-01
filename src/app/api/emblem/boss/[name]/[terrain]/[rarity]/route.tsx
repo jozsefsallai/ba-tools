@@ -1,9 +1,9 @@
 import { BossEmblem } from "@/app/api/emblem/_components/boss-emblem";
 import {
   BOSS_EMBLEM_RARITIES,
-  makeEmblem,
   VALID_BOSS_EMBLEM_COMBINATIONS,
 } from "@/lib/emblems";
+import { makeEmblem } from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {
