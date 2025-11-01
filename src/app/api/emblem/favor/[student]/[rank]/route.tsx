@@ -57,10 +57,10 @@ export async function GET(
     where: {
       OR: [
         {
-          devName: rawStudent,
+          devName: finalRawStudent,
         },
         {
-          id: rawStudent,
+          id: finalRawStudent,
         },
         ...(Number.isNaN(numberParsedStudent)
           ? []

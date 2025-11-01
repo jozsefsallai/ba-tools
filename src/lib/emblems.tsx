@@ -9,16 +9,25 @@ import * as path from "node:path";
 import * as url from "node:url";
 
 const NOTO_SANS_PATH = path.join(
-  url.fileURLToPath(import.meta.url),
-  "../..",
-  "app/_fonts/noto-sans/NotoSans-Regular.ttf",
+  url.fileURLToPath(
+    path.join(
+      import.meta.url,
+      "../../app/_fonts/noto-sans/NotoSans-Regular.ttf",
+    ),
+  ),
 );
 
 const NOTO_SANS_SEMIBOLD_PATH = path.join(
-  url.fileURLToPath(import.meta.url),
-  "../..",
-  "app/_fonts/noto-sans/NotoSans-SemiBold.ttf",
+  url.fileURLToPath(
+    path.join(
+      import.meta.url,
+      "../../app/_fonts/noto-sans/NotoSans-SemiBold.ttf",
+    ),
+  ),
 );
+
+const NOTO_SANS_DATA = fs.readFileSync(NOTO_SANS_PATH);
+const NOTO_SANS_SEMIBOLD_DATA = fs.readFileSync(NOTO_SANS_SEMIBOLD_PATH);
 
 export const EMBLEM_WIDTH = 558;
 export const EMBLEM_HEIGHT = 106;
@@ -203,21 +212,19 @@ function generatePNG(svgData: string) {
 }
 
 export async function makeEmblem(children: ReactNode, png = false) {
-  const fontData = fs.readFileSync(NOTO_SANS_PATH);
-
   const svg = await satori(children, {
     width: EMBLEM_WIDTH,
     height: EMBLEM_HEIGHT,
     fonts: [
       {
         name: "Noto Sans",
-        data: fontData,
+        data: NOTO_SANS_DATA,
         weight: 400,
         style: "normal",
       },
       {
         name: "Noto Sans",
-        data: fs.readFileSync(NOTO_SANS_SEMIBOLD_PATH),
+        data: NOTO_SANS_SEMIBOLD_DATA,
         weight: 600,
         style: "normal",
       },
