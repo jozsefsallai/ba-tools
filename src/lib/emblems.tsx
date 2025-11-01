@@ -12,7 +12,7 @@ const NOTO_SANS_PATH = path.join(
   url.fileURLToPath(
     path.join(
       import.meta.url,
-      "../../app/_fonts/noto-sans/NotoSans-Regular.ttf",
+      "../../../public/assets/fonts/noto-sans/NotoSans-Regular.ttf",
     ),
   ),
 );
@@ -21,7 +21,7 @@ const NOTO_SANS_SEMIBOLD_PATH = path.join(
   url.fileURLToPath(
     path.join(
       import.meta.url,
-      "../../app/_fonts/noto-sans/NotoSans-SemiBold.ttf",
+      "../../../public/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
     ),
   ),
 );
@@ -236,4 +236,20 @@ export async function makeEmblem(children: ReactNode, png = false) {
   }
 
   return generatePNG(svg);
+}
+
+export function fitFont(
+  text: string,
+  baseFontSize: number,
+  maxWidth: number,
+  averageCharWidth = 0.6,
+): number {
+  const estimatedWidth = text.length * baseFontSize * averageCharWidth;
+
+  if (estimatedWidth <= maxWidth) {
+    return baseFontSize;
+  }
+
+  const adjustedFontSize = (maxWidth / estimatedWidth) * baseFontSize;
+  return Number.parseFloat(adjustedFontSize.toFixed(2));
 }
