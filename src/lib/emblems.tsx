@@ -10,14 +10,14 @@ import * as url from "node:url";
 
 const NOTO_SANS_PATH = path.join(
   url.fileURLToPath(import.meta.url),
-  "../../..",
-  "public/assets/fonts/noto-sans/NotoSans-Regular.ttf",
+  "../..",
+  "app/_fonts/noto-sans/NotoSans-Regular.ttf",
 );
 
 const NOTO_SANS_SEMIBOLD_PATH = path.join(
   url.fileURLToPath(import.meta.url),
-  "../../..",
-  "public/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
+  "../..",
+  "app/_fonts/noto-sans/NotoSans-SemiBold.ttf",
 );
 
 export const EMBLEM_WIDTH = 558;
