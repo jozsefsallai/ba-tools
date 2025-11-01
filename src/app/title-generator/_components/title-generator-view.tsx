@@ -17,6 +17,7 @@ import {
   BOSS_EMBLEM_NAMES,
   BOSS_EMBLEM_TERRAINS,
   type BossEmblemRarity,
+  DEFAULT_BASIC_EMBLEM_TEXTS,
   type FavorEmblemRank,
   GROUP_EMBLEM_CLUBS,
   GROUP_EMBLEM_SCHOOLS,
@@ -40,6 +41,8 @@ export function TitleGeneratorView() {
 
   const [loading, setLoading] = useState(false);
   const [errored, setErrored] = useState(false);
+
+  const [defaultUrls, setDefaultUrls] = useState<string[]>([]);
 
   // basic
   const [basicText, setBasicText] = useState("Hello");
@@ -214,6 +217,52 @@ export function TitleGeneratorView() {
   function handleImageErrored() {
     setLoading(false);
     setErrored(true);
+  }
+
+  function handleViewDefaultsClick() {
+    const newDefaults: string[] = [];
+
+    if (mode === "basic") {
+      for (const text of DEFAULT_BASIC_EMBLEM_TEXTS) {
+        newDefaults.push(`/api/emblem/basic/${encodeURIComponent(text)}.png`);
+      }
+    }
+
+    if (mode === "favor") {
+      for (const student of students) {
+        for (const rank of [20, 50, 100] as FavorEmblemRank[]) {
+          newDefaults.push(`/api/emblem/favor/${student.devName}/${rank}.png`);
+        }
+      }
+    }
+
+    if (mode === "potential") {
+      for (const student of students) {
+        for (const rank of [25, 50] as PotentialEmblemRank[]) {
+          newDefaults.push(
+            `/api/emblem/potential/${student.devName}/${rank}.png`,
+          );
+        }
+      }
+    }
+
+    if (mode === "boss") {
+      for (const combo of VALID_BOSS_EMBLEM_COMBINATIONS) {
+        for (const rarity of ["N", "R", "SR", "SSR"] as BossEmblemRarity[]) {
+          newDefaults.push(
+            `/api/emblem/boss/${combo.name}/${combo.terrain}/${rarity}.png`,
+          );
+        }
+      }
+    }
+
+    if (mode === "group") {
+      for (const combo of GROUP_EMBLEM_VALID_COMBINATIONS) {
+        newDefaults.push(`/api/emblem/group/${combo.school}/${combo.club}.png`);
+      }
+    }
+
+    setDefaultUrls(newDefaults);
   }
 
   useEffect(() => {
@@ -535,6 +584,41 @@ export function TitleGeneratorView() {
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      <Separator />
+
+      <div className="flex flex-col items-center justify-center gap-2 text-center">
+        <Button variant="outline" onClick={handleViewDefaultsClick}>
+          View Default Titles
+        </Button>
+
+        <div className="text-sm text-muted-foreground">
+          <strong>Warning:</strong> It may take a while to load all titles
+          depending on the mode you've selected.
+        </div>
+      </div>
+
+      {defaultUrls.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {defaultUrls.map((defaultUrl, idx) => (
+            <div key={idx} className="flex flex-col items-center gap-2">
+              <img
+                src={defaultUrl}
+                alt={`Default Title ${idx + 1}`}
+                className="max-w-full"
+              />
+
+              <Input
+                type="text"
+                value={new URL(defaultUrl, window.location.href).toString()}
+                readOnly
+                onFocus={(e) => e.target.select()}
+                className="w-9/10"
+              />
+            </div>
+          ))}
         </div>
       )}
     </div>

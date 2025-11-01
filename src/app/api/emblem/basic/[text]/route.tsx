@@ -1,4 +1,5 @@
 import { BasicEmblem } from "@/app/api/emblem/_components/basic-emblem";
+import { DEFAULT_BASIC_EMBLEM_TEXTS } from "@/lib/emblems";
 import { makeEmblem } from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
@@ -7,17 +8,9 @@ type RouteParams = {
 };
 
 export async function generateStaticParams(): Promise<RouteParams[]> {
-  const defaultTexts = [
-    "New Sensei",
-    "Schale's Sensei",
-    "Welcome",
-    "Hello",
-    "A pleasure to meet you",
-  ];
-
   return [
-    ...defaultTexts.map((text) => ({ text })),
-    ...defaultTexts.map((text) => ({ text: `${text}.png` })),
+    ...DEFAULT_BASIC_EMBLEM_TEXTS.map((text) => ({ text })),
+    ...DEFAULT_BASIC_EMBLEM_TEXTS.map((text) => ({ text: `${text}.png` })),
   ];
 }
 

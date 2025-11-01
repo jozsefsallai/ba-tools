@@ -13,7 +13,13 @@ type RouteParams = {
 };
 
 export async function generateStaticParams(): Promise<RouteParams[]> {
-  return GROUP_EMBLEM_VALID_COMBINATIONS;
+  return [
+    ...GROUP_EMBLEM_VALID_COMBINATIONS,
+    ...GROUP_EMBLEM_VALID_COMBINATIONS.map((combo) => ({
+      school: combo.school,
+      club: `${combo.club}.png`,
+    })),
+  ];
 }
 
 export async function GET(

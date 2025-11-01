@@ -275,6 +275,14 @@ export const GROUP_EMBLEM_VALID_COMBINATIONS: {
   { club: "FreeTradeCartel", school: "WildHunt" },
 ];
 
+export const DEFAULT_BASIC_EMBLEM_TEXTS = [
+  "New Sensei",
+  "Schale's Sensei",
+  "Welcome",
+  "Hello",
+  "A pleasure to meet you",
+];
+
 export type BossEmblemParams = {
   name: BossEmblemName;
   rarity: BossEmblemRarity;
