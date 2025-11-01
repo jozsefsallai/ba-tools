@@ -40,10 +40,15 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
 }
 
 export async function GET(
-  _req: Request,
-  { params }: { params: Promise<RouteParams> },
+  req: Request,
+  {
+    params,
+  }: {
+    params: Promise<RouteParams>;
+  },
 ) {
   const { student: rawStudent, rank: rawRank } = await params;
+  const nameOverride = new URL(req.url).searchParams.get("name") ?? undefined;
 
   const numberParsedStudent = Number.parseInt(rawStudent, 10);
 
@@ -104,7 +109,7 @@ export async function GET(
   }
 
   const output = await makeEmblem(
-    <FavorEmblem rank={rank} student={student} />,
+    <FavorEmblem rank={rank} student={student} nameOverride={nameOverride} />,
     png,
   );
 

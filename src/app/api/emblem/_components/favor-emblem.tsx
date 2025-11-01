@@ -10,13 +10,17 @@ import { cn } from "@/lib/utils";
 
 const MAX_TEXT_WIDTH = 400;
 
-export function FavorEmblem({ rank, student }: FavorEmblemParams) {
+export function FavorEmblem({
+  rank,
+  student,
+  nameOverride,
+}: FavorEmblemParams) {
   const backgroundUrl = buildFavorEmblemBackgroundUrl(rank);
   const iconUrl = buildFavorEmblemIconUrl(
     DEVNAME_OVERRIDE[student.id] ?? student.devName,
   );
 
-  const name = `${student.lastName} ${student.firstName}`;
+  const name = nameOverride ?? `${student.lastName} ${student.firstName}`;
   const fontSize = fitFont(name, 34, MAX_TEXT_WIDTH, 0.7);
 
   return (
@@ -42,7 +46,6 @@ export function FavorEmblem({ rank, student }: FavorEmblemParams) {
               textShadow:
                 "-2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff",
               fontSize: `${fontSize}px`,
-              // marginTop: `-${fontSize * 0.82}px`,
             }}
           >
             {name}
