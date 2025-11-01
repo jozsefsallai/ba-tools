@@ -4,10 +4,6 @@ import type { ReactNode } from "react";
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 
-import * as fs from "node:fs";
-import * as path from "node:path";
-import * as url from "node:url";
-
 export const EMBLEM_WIDTH = 558;
 export const EMBLEM_HEIGHT = 106;
 
@@ -26,6 +22,8 @@ export type BossEmblemName =
 export type BossEmblemTerrain = "Indoor" | "Outdoor" | "Street";
 
 export type FavorEmblemRank = 20 | 50 | 100;
+
+export type PotentialEmblemRank = 25 | 50;
 
 export type EmblemConfigItem<T> = {
   name: string;
@@ -139,6 +137,12 @@ export type FavorEmblemParams = {
   nameOverride?: string;
 };
 
+export type PotentialEmblemParams = {
+  student: Student;
+  rank: PotentialEmblemRank;
+  nameOverride?: string;
+};
+
 export type BasicEmblemParams = {
   text: string;
 };
@@ -180,6 +184,12 @@ export function buildFavorEmblemIconUrl(studentDevName: string) {
   );
 }
 
+export function buildPotentialEmblemBackgroundUrl(rank: PotentialEmblemRank) {
+  return buildCDNAbsoluteUrl(
+    `v2/images/emblems/bg/Emblem_BG_Potential_${rank}.png`,
+  );
+}
+
 function generatePNG(svgData: string) {
   const resvg = new Resvg(svgData, {
     fitTo: {
@@ -192,26 +202,18 @@ function generatePNG(svgData: string) {
 }
 
 export async function makeEmblem(children: ReactNode, png = false) {
-  const notoSansPath = path.join(
-    url.fileURLToPath(
-      path.join(
-        import.meta.url,
-        "../../../public/assets/fonts/noto-sans/NotoSans-Regular.ttf",
-      ),
-    ),
+  const notoSansPath = buildCDNAbsoluteUrl(
+    "v2/fonts/noto-sans/NotoSans-Regular.ttf",
   );
 
-  const notoSansSemiboldPath = path.join(
-    url.fileURLToPath(
-      path.join(
-        import.meta.url,
-        "../../../public/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
-      ),
-    ),
+  const notoSansSemiboldPath = buildCDNAbsoluteUrl(
+    "v2/fonts/noto-sans/NotoSans-SemiBold.ttf",
   );
 
-  const notoSans = fs.readFileSync(notoSansPath);
-  const notoSansSemibold = fs.readFileSync(notoSansSemiboldPath);
+  const notoSans = await fetch(notoSansPath).then((res) => res.arrayBuffer());
+  const notoSansSemibold = await fetch(notoSansSemiboldPath).then((res) =>
+    res.arrayBuffer(),
+  );
 
   const svg = await satori(children, {
     width: EMBLEM_WIDTH,
