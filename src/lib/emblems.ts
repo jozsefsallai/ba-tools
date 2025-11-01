@@ -283,6 +283,30 @@ export const DEFAULT_BASIC_EMBLEM_TEXTS = [
   "A pleasure to meet you",
 ];
 
+export type FavorEmblemExtra = {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  devName: string;
+};
+
+export const FAVOR_EMBLEM_EXTRA_ARONA: FavorEmblemExtra = {
+  id: "arona",
+  name: "Arona",
+  firstName: "Arona",
+  lastName: "",
+  devName: "Arona",
+};
+
+export const FAVOR_EMBLEM_EXTRA_PLANA: FavorEmblemExtra = {
+  id: "plana",
+  name: "Plana",
+  firstName: "Plana",
+  lastName: "",
+  devName: "Plana",
+};
+
 export type BossEmblemParams = {
   name: BossEmblemName;
   rarity: BossEmblemRarity;
@@ -290,7 +314,7 @@ export type BossEmblemParams = {
 };
 
 export type FavorEmblemParams = {
-  student: Student;
+  student: Student | FavorEmblemExtra;
   rank: FavorEmblemRank;
   nameOverride?: string;
 };

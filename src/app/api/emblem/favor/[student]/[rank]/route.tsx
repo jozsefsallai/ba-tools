@@ -1,7 +1,13 @@
 import { FavorEmblem } from "@/app/api/emblem/_components/favor-emblem";
 import { db } from "@/lib/db";
-import type { FavorEmblemRank } from "@/lib/emblems";
+import {
+  FAVOR_EMBLEM_EXTRA_ARONA,
+  FAVOR_EMBLEM_EXTRA_PLANA,
+  type FavorEmblemExtra,
+  type FavorEmblemRank,
+} from "@/lib/emblems";
 import { makeEmblem } from "@/lib/emblems.server";
+import type { Student } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 type RouteParams = {
@@ -37,6 +43,16 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
     combinations.push({ student: "hoshino_battle", rank: `${rank}.png` });
   }
 
+  for (const extraStudent of [
+    FAVOR_EMBLEM_EXTRA_ARONA,
+    FAVOR_EMBLEM_EXTRA_PLANA,
+  ]) {
+    for (const rank of ranks) {
+      combinations.push({ student: extraStudent.id, rank: rank.toString() });
+      combinations.push({ student: extraStudent.id, rank: `${rank}.png` });
+    }
+  }
+
   return combinations;
 }
 
@@ -59,25 +75,33 @@ export async function GET(
     finalRawStudent = "hoshino_battle_tank";
   }
 
-  const student = await db.student.findFirst({
-    where: {
-      OR: [
-        {
-          devName: finalRawStudent,
-        },
-        {
-          id: finalRawStudent,
-        },
-        ...(Number.isNaN(numberParsedStudent)
-          ? []
-          : [
-              {
-                schaleDbId: numberParsedStudent,
-              },
-            ]),
-      ],
-    },
-  });
+  let student: Student | FavorEmblemExtra | null;
+
+  if (finalRawStudent === "arona" || finalRawStudent === "Arona") {
+    student = FAVOR_EMBLEM_EXTRA_ARONA;
+  } else if (finalRawStudent === "plana" || finalRawStudent === "Plana") {
+    student = FAVOR_EMBLEM_EXTRA_PLANA;
+  } else {
+    student = await db.student.findFirst({
+      where: {
+        OR: [
+          {
+            devName: finalRawStudent,
+          },
+          {
+            id: finalRawStudent,
+          },
+          ...(Number.isNaN(numberParsedStudent)
+            ? []
+            : [
+                {
+                  schaleDbId: numberParsedStudent,
+                },
+              ]),
+        ],
+      },
+    });
+  }
 
   if (!student) {
     return NextResponse.json(

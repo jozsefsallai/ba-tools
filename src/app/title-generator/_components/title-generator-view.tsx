@@ -18,6 +18,9 @@ import {
   BOSS_EMBLEM_TERRAINS,
   type BossEmblemRarity,
   DEFAULT_BASIC_EMBLEM_TEXTS,
+  FAVOR_EMBLEM_EXTRA_ARONA,
+  FAVOR_EMBLEM_EXTRA_PLANA,
+  type FavorEmblemExtra,
   type FavorEmblemRank,
   GROUP_EMBLEM_CLUBS,
   GROUP_EMBLEM_SCHOOLS,
@@ -49,7 +52,9 @@ export function TitleGeneratorView() {
   const [basicTextStr, setBasicTextStr] = useState("Hello");
 
   // favor
-  const [favorStudent, setFavorStudent] = useState<Student>(students[0]);
+  const [favorStudent, setFavorStudent] = useState<Student | FavorEmblemExtra>(
+    students[0],
+  );
   const [favorRank, setFavorRank] = useState<FavorEmblemRank>(20);
   const [favorNameOverride, setFavorNameOverride] = useState("");
   const [favorNameOverrideStr, setFavorNameOverrideStr] = useState("");
@@ -185,6 +190,14 @@ export function TitleGeneratorView() {
     setBasicText(basicTextStr);
   }
 
+  function handleSetArona() {
+    setFavorStudent(FAVOR_EMBLEM_EXTRA_ARONA);
+  }
+
+  function handleSetPlana() {
+    setFavorStudent(FAVOR_EMBLEM_EXTRA_PLANA);
+  }
+
   function handleSetBossItem(item: string) {
     const [name, terrain] = item.split("_");
 
@@ -232,6 +245,15 @@ export function TitleGeneratorView() {
       for (const student of students) {
         for (const rank of [20, 50, 100] as FavorEmblemRank[]) {
           newDefaults.push(`/api/emblem/favor/${student.devName}/${rank}.png`);
+        }
+      }
+
+      for (const extraStudent of [
+        FAVOR_EMBLEM_EXTRA_ARONA,
+        FAVOR_EMBLEM_EXTRA_PLANA,
+      ]) {
+        for (const rank of [20, 50, 100] as FavorEmblemRank[]) {
+          newDefaults.push(`/api/emblem/favor/${extraStudent.id}/${rank}.png`);
         }
       }
     }
@@ -383,6 +405,18 @@ export function TitleGeneratorView() {
                 <ChevronsUpDownIcon />
               </Button>
             </StudentPicker>
+
+            <div className="flex gap-2">
+              <Label>Extra:</Label>
+
+              <Button variant="outline" size="sm" onClick={handleSetArona}>
+                Arona
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={handleSetPlana}>
+                Plana
+              </Button>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">

@@ -47,7 +47,7 @@ export function FavorEmblem({
               fontSize: `${fontSize}px`,
             }}
           >
-            {name}
+            {name.trim()}
           </div>
         </div>
       </div>
