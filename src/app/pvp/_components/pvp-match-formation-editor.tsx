@@ -6,12 +6,16 @@ import type { PVPFormationStudentItem } from "@/app/pvp/_lib/types";
 export type PVPMatchFormationEditorProps = {
   formation: PVPFormationStudentItem[];
   onUpdate(idx: number, item: Partial<PVPFormationStudentItem>): void;
+  onMoveUp?(idx: number): void;
+  onMoveDown?(idx: number): void;
   strikerPrefix?: "A" | "D";
 };
 
 export function PVPMatchFormationEditor({
   formation,
   onUpdate,
+  onMoveUp,
+  onMoveDown,
   strikerPrefix,
 }: PVPMatchFormationEditorProps) {
   return (
@@ -23,6 +27,8 @@ export function PVPMatchFormationEditor({
           index={idx}
           strikerPrefix={strikerPrefix}
           onUpdate={onUpdate}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
         />
       ))}
     </div>

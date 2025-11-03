@@ -128,6 +128,76 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     [handleItemUpdate],
   );
 
+  const handleItemMoveUp = useCallback(
+    (kind: "own" | "enemy", idx: number) => {
+      const targetTeam = kind === "own" ? ownTeam : opponentTeam;
+      if (idx <= 0 || idx >= targetTeam.length) {
+        return;
+      }
+
+      const updatedTeam = [...targetTeam];
+      const temp = updatedTeam[idx - 1];
+      updatedTeam[idx - 1] = updatedTeam[idx];
+      updatedTeam[idx] = temp;
+
+      if (kind === "own") {
+        setOwnTeam(updatedTeam);
+      } else {
+        setOpponentTeam(updatedTeam);
+      }
+    },
+    [ownTeam, opponentTeam],
+  );
+
+  const handleItemMoveDown = useCallback(
+    (kind: "own" | "enemy", idx: number) => {
+      const targetTeam = kind === "own" ? ownTeam : opponentTeam;
+      if (idx < 0 || idx >= targetTeam.length - 1) {
+        return;
+      }
+
+      const updatedTeam = [...targetTeam];
+      const temp = updatedTeam[idx + 1];
+      updatedTeam[idx + 1] = updatedTeam[idx];
+      updatedTeam[idx] = temp;
+
+      if (kind === "own") {
+        setOwnTeam(updatedTeam);
+      } else {
+        setOpponentTeam(updatedTeam);
+      }
+    },
+    [ownTeam, opponentTeam],
+  );
+
+  const handleOwnItemMoveUp = useCallback(
+    (idx: number) => {
+      handleItemMoveUp("own", idx);
+    },
+    [handleItemMoveUp],
+  );
+
+  const handleOwnItemMoveDown = useCallback(
+    (idx: number) => {
+      handleItemMoveDown("own", idx);
+    },
+    [handleItemMoveDown],
+  );
+
+  const handleOpponentItemMoveUp = useCallback(
+    (idx: number) => {
+      handleItemMoveUp("enemy", idx);
+    },
+    [handleItemMoveUp],
+  );
+
+  const handleOpponentItemMoveDown = useCallback(
+    (idx: number) => {
+      handleItemMoveDown("enemy", idx);
+    },
+    [handleItemMoveDown],
+  );
+
   async function handleWantsToUpdate() {
     setIsSaving(true);
 
@@ -371,6 +441,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             <PVPMatchFormationEditor
               formation={ownTeam}
               onUpdate={handleOwnItemUpdate}
+              onMoveUp={handleOwnItemMoveUp}
+              onMoveDown={handleOwnItemMoveDown}
               strikerPrefix={matchType === "attack" ? "A" : "D"}
             />
           </CardContent>
@@ -459,6 +531,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             <PVPMatchFormationEditor
               formation={opponentTeam}
               onUpdate={handleOpponentItemUpdate}
+              onMoveUp={handleOpponentItemMoveUp}
+              onMoveDown={handleOpponentItemMoveDown}
               strikerPrefix={matchType === "defense" ? "A" : "D"}
             />
           </CardContent>

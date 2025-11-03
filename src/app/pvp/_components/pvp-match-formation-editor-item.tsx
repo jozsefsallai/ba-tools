@@ -22,7 +22,7 @@ import {
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import type { Student } from "@prisma/client";
-import { ChevronDownIcon, XIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import { type FormEvent, useCallback, useState } from "react";
 
 export type PVPMatchFormationEditorItemProps = {
@@ -30,6 +30,8 @@ export type PVPMatchFormationEditorItemProps = {
   index: number;
   strikerPrefix?: "A" | "D";
   onUpdate(idx: number, item: Partial<PVPFormationStudentItem>): any;
+  onMoveUp?(idx: number): void;
+  onMoveDown?(idx: number): void;
 };
 
 export function PVPMatchFormationEditorItem({
@@ -37,6 +39,8 @@ export function PVPMatchFormationEditorItem({
   index,
   strikerPrefix,
   onUpdate,
+  onMoveUp,
+  onMoveDown,
 }: PVPMatchFormationEditorItemProps) {
   const [levelStr, setLevelStr] = useState(item.level?.toString() ?? "");
   const [damageStr, setDamageStr] = useState(item.damage?.toString() ?? "");
@@ -116,6 +120,14 @@ export function PVPMatchFormationEditorItem({
     [onUpdate, index],
   );
 
+  const handleMoveUp = useCallback(() => {
+    onMoveUp?.(index);
+  }, [onMoveUp, index]);
+
+  const handleMoveDown = useCallback(() => {
+    onMoveDown?.(index);
+  }, [onMoveDown, index]);
+
   return (
     <div className="flex gap-6 items-start">
       <div className="shrink-0 relative">
@@ -151,6 +163,18 @@ export function PVPMatchFormationEditorItem({
               <ChevronDownIcon />
             </Button>
           </StudentPicker>
+
+          {index > 0 && index !== 4 && (
+            <Button variant="outline" onClick={handleMoveUp}>
+              <ChevronUpIcon />
+            </Button>
+          )}
+
+          {index < 5 && (
+            <Button variant="outline" onClick={handleMoveDown}>
+              <ChevronDownIcon />
+            </Button>
+          )}
 
           {item.student && (
             <Button variant="outline" onClick={handleStudentClear}>
