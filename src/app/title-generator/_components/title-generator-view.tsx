@@ -130,7 +130,7 @@ export function TitleGeneratorView() {
       case "basic":
         return `/api/emblem/basic/${encodeURIComponent(basicText)}.png`;
       case "favor": {
-        let baseUrl = `/api/emblem/favor/${favorStudent.devName}/${favorRank}.png`;
+        let baseUrl = `/api/emblem/favor/${favorStudent.schaleDbId ?? favorStudent.devName}/${favorRank}.png`;
 
         if (favorNameOverride.trim().length > 0) {
           baseUrl += `?name=${encodeURIComponent(favorNameOverride.trim())}`;
@@ -139,7 +139,7 @@ export function TitleGeneratorView() {
         return baseUrl;
       }
       case "potential": {
-        let baseUrl = `/api/emblem/potential/${potentialStudent.devName}/${potentialRank}.png`;
+        let baseUrl = `/api/emblem/potential/${potentialStudent.schaleDbId ?? potentialStudent.devName}/${potentialRank}.png`;
 
         if (potentialNameOverride.trim().length > 0) {
           baseUrl += `?name=${encodeURIComponent(
@@ -244,7 +244,9 @@ export function TitleGeneratorView() {
     if (mode === "favor") {
       for (const student of students) {
         for (const rank of [20, 50, 100] as FavorEmblemRank[]) {
-          newDefaults.push(`/api/emblem/favor/${student.devName}/${rank}.png`);
+          newDefaults.push(
+            `/api/emblem/favor/${student.schaleDbId ?? student.devName}/${rank}.png`,
+          );
         }
       }
 
@@ -262,7 +264,7 @@ export function TitleGeneratorView() {
       for (const student of students) {
         for (const rank of [25, 50] as PotentialEmblemRank[]) {
           newDefaults.push(
-            `/api/emblem/potential/${student.devName}/${rank}.png`,
+            `/api/emblem/potential/${student.schaleDbId ?? student.devName}/${rank}.png`,
           );
         }
       }

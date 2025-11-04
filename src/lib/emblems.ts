@@ -289,6 +289,7 @@ export type FavorEmblemExtra = {
   firstName: string;
   lastName: string;
   devName: string;
+  schaleDbId?: number;
 };
 
 export const FAVOR_EMBLEM_EXTRA_ARONA: FavorEmblemExtra = {

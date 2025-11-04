@@ -14,6 +14,8 @@ export const CHANGELOG_SCOPES = {
   gachaRateStats: "Gacha Rate Stats",
   scenarioImageGenerator: "Scenario Image Generator",
   globalBanners: "Global Banners",
+  titleGenerator: "Title Generator",
+  pvp: "PVP Tracker",
   games: "Games",
   content: "Content",
   docs: "Documentation",
@@ -34,6 +36,31 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "November 3, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.titleGenerator,
+        description: (
+          <>
+            <strong>New Tool:</strong> Title Generator. You can use this tool to
+            generate rendered relationship rank, talent level, boss, group, and
+            basic titles.{" "}
+            <Link href="/title-generator" className="font-semibold underline">
+              Check it out!
+            </Link>
+          </>
+        ),
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added ability to move formation items up and down.",
+      },
+    ],
+  },
   {
     date: "October 26, 2025",
     features: [
