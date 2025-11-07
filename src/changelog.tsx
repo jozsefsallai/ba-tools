@@ -37,6 +37,26 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 7, 2025",
+    features: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.globalBanners,
+        description: "Fixed appearance of banners with multiple rate-ups.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.globalBanners,
+        description: "Updated styles of banner items.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.globalBanners,
+        description: "Current banners are now highlighted.",
+      },
+    ],
+  },
+  {
     date: "November 3, 2025",
     features: [
       {

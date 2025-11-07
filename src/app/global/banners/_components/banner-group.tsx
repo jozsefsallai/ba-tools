@@ -6,8 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { GameBanner, Student } from "@prisma/client";
 import { format } from "date-fns";
+import { useMemo } from "react";
 
 export type BannerGroupProps = {
   dates: [number, number];
@@ -44,8 +46,17 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
 
   const durationDays = Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24));
 
+  const isCurrent = useMemo(() => {
+    const now = Date.now();
+    return dates[0] <= now && now <= dates[1];
+  }, [dates]);
+
   return (
-    <Card>
+    <Card
+      className={cn("bg-card/60", {
+        "ring-4 ring-yellow-400/40": isCurrent,
+      })}
+    >
       <CardHeader>
         <CardTitle className="flex items-center justify-between gap-4">
           <div className="text-sm md:text-lg">
@@ -68,9 +79,18 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="text-sm text-muted-foreground self-end">
-        {banners.length === 1 ? "This banner lasts" : "These banners last"}{" "}
-        for&nbsp;<strong>{durationDays} days</strong>.
+      <CardFooter className="flex-col md:flex-row text-sm text-muted-foreground justify-between">
+        {isCurrent && (
+          <div className="text-yellow-400 font-bold">
+            Current Banner{banners.length === 1 ? "" : "s"}
+          </div>
+        )}
+        {!isCurrent && <div />}
+
+        <div>
+          {banners.length === 1 ? "This banner lasts" : "These banners last"}{" "}
+          for&nbsp;<strong>{durationDays} days</strong>.
+        </div>
       </CardFooter>
     </Card>
   );
