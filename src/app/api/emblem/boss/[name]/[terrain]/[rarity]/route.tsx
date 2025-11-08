@@ -3,7 +3,11 @@ import {
   BOSS_EMBLEM_RARITIES,
   VALID_BOSS_EMBLEM_COMBINATIONS,
 } from "@/lib/emblems";
-import { makeEmblem } from "@/lib/emblems.server";
+import {
+  DEFAULT_SIZES,
+  makeEmblem,
+  processTrailingPart,
+} from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {
@@ -28,6 +32,14 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
         terrain: combo.terrain,
         rarity: `${rarity.id}.png`,
       });
+
+      for (const size of DEFAULT_SIZES) {
+        combinations.push({
+          name: combo.name,
+          terrain: combo.terrain,
+          rarity: `${rarity.id}.png@w${size}`,
+        });
+      }
     }
   }
 
@@ -62,12 +74,10 @@ export async function GET(
     );
   }
 
-  const rawRarityWithoutPng = rawRarity.endsWith(".png")
-    ? rawRarity.slice(0, -4)
-    : rawRarity;
+  const { content: rarity, isPng: png, width } = processTrailingPart(rawRarity);
 
   const rarityData = BOSS_EMBLEM_RARITIES.find(
-    (r) => r.id.toLowerCase() === rawRarityWithoutPng.toLowerCase(),
+    (r) => r.id.toLowerCase() === rarity.toLowerCase(),
   );
 
   if (!rarityData) {
@@ -83,13 +93,11 @@ export async function GET(
 
   const name = bossData.name;
   const terrain = bossData.terrain;
-  const rarity = rarityData.id;
-
-  const png = rawRarity.endsWith(".png");
 
   const output = await makeEmblem(
-    <BossEmblem name={name} terrain={terrain} rarity={rarity} />,
+    <BossEmblem name={name} terrain={terrain} rarity={rarityData.id} />,
     png,
+    width,
   );
 
   return new Response(

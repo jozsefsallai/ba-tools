@@ -6,7 +6,11 @@ import {
   type FavorEmblemExtra,
   type FavorEmblemRank,
 } from "@/lib/emblems";
-import { makeEmblem } from "@/lib/emblems.server";
+import {
+  DEFAULT_SIZES,
+  makeEmblem,
+  processTrailingPart,
+} from "@/lib/emblems.server";
 import type { Student } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -35,12 +39,34 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
         student: student.schaleDbId.toString(),
         rank: `${rank}.png`,
       });
+
+      for (const size of DEFAULT_SIZES) {
+        combinations.push({
+          student: student.devName,
+          rank: `${rank}.png@w${size}`,
+        });
+        combinations.push({
+          student: student.id,
+          rank: `${rank}.png@w${size}`,
+        });
+        combinations.push({
+          student: student.schaleDbId.toString(),
+          rank: `${rank}.png@w${size}`,
+        });
+      }
     }
   }
 
   for (const rank of ranks) {
     combinations.push({ student: "hoshino_battle", rank: rank.toString() });
     combinations.push({ student: "hoshino_battle", rank: `${rank}.png` });
+
+    for (const size of DEFAULT_SIZES) {
+      combinations.push({
+        student: "hoshino_battle",
+        rank: `${rank}.png@w${size}`,
+      });
+    }
   }
 
   for (const extraStudent of [
@@ -50,6 +76,13 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
     for (const rank of ranks) {
       combinations.push({ student: extraStudent.id, rank: rank.toString() });
       combinations.push({ student: extraStudent.id, rank: `${rank}.png` });
+
+      for (const size of DEFAULT_SIZES) {
+        combinations.push({
+          student: extraStudent.id,
+          rank: `${rank}.png@w${size}`,
+        });
+      }
     }
   }
 
@@ -114,11 +147,11 @@ export async function GET(
     );
   }
 
-  const png = rawRank.endsWith(".png");
-
-  const rawRankWithoutPng = rawRank.endsWith(".png")
-    ? rawRank.slice(0, -4)
-    : rawRank;
+  const {
+    content: rawRankWithoutPng,
+    isPng: png,
+    width,
+  } = processTrailingPart(rawRank);
 
   const rank = Number.parseInt(rawRankWithoutPng, 10) as FavorEmblemRank;
 
@@ -136,6 +169,7 @@ export async function GET(
   const output = await makeEmblem(
     <FavorEmblem rank={rank} student={student} nameOverride={nameOverride} />,
     png,
+    width,
   );
 
   return new Response(

@@ -37,6 +37,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 8, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.titleGenerator,
+        description: "Added ability to change the width of generated titles.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
+  {
     date: "November 7, 2025",
     features: [],
     fixes: [

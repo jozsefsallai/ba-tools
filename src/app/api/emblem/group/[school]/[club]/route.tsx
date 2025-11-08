@@ -4,7 +4,11 @@ import {
   GROUP_EMBLEM_SCHOOLS,
   GROUP_EMBLEM_VALID_COMBINATIONS,
 } from "@/lib/emblems";
-import { makeEmblem } from "@/lib/emblems.server";
+import {
+  DEFAULT_SIZES,
+  makeEmblem,
+  processTrailingPart,
+} from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {
@@ -13,17 +17,32 @@ type RouteParams = {
 };
 
 export async function generateStaticParams(): Promise<RouteParams[]> {
-  return [
-    ...GROUP_EMBLEM_VALID_COMBINATIONS,
-    ...GROUP_EMBLEM_VALID_COMBINATIONS.map((combo) => ({
+  const combinations: RouteParams[] = [];
+
+  for (const combo of GROUP_EMBLEM_VALID_COMBINATIONS) {
+    combinations.push({
+      school: combo.school,
+      club: combo.club,
+    });
+
+    combinations.push({
       school: combo.school,
       club: `${combo.club}.png`,
-    })),
-  ];
+    });
+
+    for (const size of DEFAULT_SIZES) {
+      combinations.push({
+        school: combo.school,
+        club: `${combo.club}.png@w${size}`,
+      });
+    }
+  }
+
+  return combinations;
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   {
     params,
   }: {
@@ -45,11 +64,11 @@ export async function GET(
     );
   }
 
-  const png = rawClub.endsWith(".png");
-
-  const clubWithoutPng = rawClub.endsWith(".png")
-    ? rawClub.slice(0, -4)
-    : rawClub;
+  const {
+    content: clubWithoutPng,
+    isPng: png,
+    width,
+  } = processTrailingPart(rawClub);
 
   const club = GROUP_EMBLEM_CLUBS.find((c) => c.id === clubWithoutPng);
 
@@ -60,6 +79,7 @@ export async function GET(
       nameOverride={club ? undefined : clubWithoutPng}
     />,
     png,
+    width,
   );
 
   return new Response(

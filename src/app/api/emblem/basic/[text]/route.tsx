@@ -1,6 +1,10 @@
 import { BasicEmblem } from "@/app/api/emblem/_components/basic-emblem";
 import { DEFAULT_BASIC_EMBLEM_TEXTS } from "@/lib/emblems";
-import { makeEmblem } from "@/lib/emblems.server";
+import {
+  DEFAULT_SIZES,
+  makeEmblem,
+  processTrailingPart,
+} from "@/lib/emblems.server";
 import { NextResponse } from "next/server";
 
 type RouteParams = {
@@ -8,10 +12,18 @@ type RouteParams = {
 };
 
 export async function generateStaticParams(): Promise<RouteParams[]> {
-  return [
-    ...DEFAULT_BASIC_EMBLEM_TEXTS.map((text) => ({ text })),
-    ...DEFAULT_BASIC_EMBLEM_TEXTS.map((text) => ({ text: `${text}.png` })),
-  ];
+  const combinations: RouteParams[] = [];
+
+  for (const text of DEFAULT_BASIC_EMBLEM_TEXTS) {
+    combinations.push({ text });
+    combinations.push({ text: `${text}.png` });
+
+    for (const size of DEFAULT_SIZES) {
+      combinations.push({ text: `${text}.png@w${size}` });
+    }
+  }
+
+  return combinations;
 }
 
 export async function GET(
@@ -20,7 +32,7 @@ export async function GET(
 ) {
   const { text } = await params;
 
-  const finalText = text.endsWith(".png") ? text.slice(0, -4) : text;
+  const { content: finalText, isPng: png, width } = processTrailingPart(text);
 
   if (!finalText || finalText.length > 40) {
     return NextResponse.json(
@@ -33,9 +45,7 @@ export async function GET(
     );
   }
 
-  const png = text.endsWith(".png");
-
-  const output = await makeEmblem(<BasicEmblem text={finalText} />, png);
+  const output = await makeEmblem(<BasicEmblem text={finalText} />, png, width);
 
   return new Response(
     typeof output === "string" ? output : (output.buffer as ArrayBuffer),
