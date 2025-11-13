@@ -72,6 +72,7 @@ enum Club {
   FreightLogisticsDepartment
   OccultClub
   FreeTradeCartel
+  NicomediasTroop
   EmptyClub
 }
 
