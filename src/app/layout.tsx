@@ -13,6 +13,7 @@ import { UserPreferencesProvider } from "@/components/providers/user-preferences
 import { db } from "@/lib/db";
 import { StudentsProvider } from "@/components/providers/students-provider";
 import { NavigationGuardProvider } from "next-navigation-guard";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,6 +92,8 @@ export default async function RootLayout({
             </ConvexClientProvider>
           </ThemedClerkProvider>
         </ThemeProvider>
+
+        <SpeedInsights />
       </body>
     </html>
   );

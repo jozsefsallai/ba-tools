@@ -52,6 +52,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@resvg/resvg-wasm": "^2.6.2",
     "@types/mdx": "^2.0.13",
+    "@vercel/speed-insights": "^1.2.0",
     "ai": "^5.0.15",
     "chromadb": "^3.0.12",
     "class-variance-authority": "^0.7.1",
