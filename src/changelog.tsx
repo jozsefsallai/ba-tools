@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 export const CHANGELOG_SCOPES = {
   website: "Website",
+  backend: "Backend",
   homePage: "Home Page",
   userCorner: "User Corner",
   authentication: "Authentication",
@@ -56,6 +57,10 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.inventoryManagement,
         description: "Updated name of the swimsuit Hyakkaryouran event preset.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.backend,
+        description: "Changed database provider and connection strategy.",
       },
     ],
   },
