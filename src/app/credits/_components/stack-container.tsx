@@ -3,6 +3,7 @@ import ConvexLogo from "@/app/credits/_components/stack/convex";
 import GoLogo from "@/app/credits/_components/stack/go";
 import NextJSLogo from "@/app/credits/_components/stack/next";
 import PixiJSLogo from "@/app/credits/_components/stack/pixi";
+import PlanetScaleLogo from "@/app/credits/_components/stack/planetscale";
 import PostgreSQLLogo from "@/app/credits/_components/stack/postgres";
 import PrismaLogo from "@/app/credits/_components/stack/prisma";
 import ShadcnUILogo from "@/app/credits/_components/stack/shadcn";
@@ -42,6 +43,12 @@ const STACK_ITEMS: StackItem[] = [
     name: "Vercel",
     component: VercelLogo,
     url: "https://vercel.com/",
+  },
+  {
+    role: "Database Provider (game data)",
+    name: "PlanetScale",
+    component: PlanetScaleLogo,
+    url: "https://planetscale.com/",
   },
   {
     role: "Database (game data)",
