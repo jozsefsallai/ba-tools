@@ -45,7 +45,13 @@ export const CHANGELOG: ChangelogItemData[] = [
         description: "Added Raid Score Calculator tool.",
       },
     ],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed headpat, gift, and lesson EXP breakdown not taking into account already selected gifts.",
+      },
+    ],
     changes: [
       {
         scope: CHANGELOG_SCOPES.inventoryManagement,

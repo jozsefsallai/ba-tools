@@ -31,7 +31,11 @@ import giftNormalImage from "@/assets/images/gift_normal.png";
 
 import Image from "next/image";
 import { BondProgress } from "@/app/bond/_components/bond-progress";
-import { favorTable, favorTableMap } from "@/lib/favor-table";
+import {
+  favorTable,
+  type FavorTableEntry,
+  favorTableMap,
+} from "@/lib/favor-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -758,6 +762,45 @@ export function BondView({ students, gifts }: BondViewProps) {
       setCurrentBondExpStr("0");
     }
   }
+
+  const startingLevel = useMemo(() => {
+    let result: FavorTableEntry | undefined;
+
+    for (const entry of favorTable) {
+      if (entry.totalExp > currentBondExp) {
+        break;
+      }
+
+      result = entry;
+    }
+
+    if (result?.level === 101) {
+      return favorTable[99];
+    }
+
+    return result ?? favorTable[0];
+  }, [currentBondExp]);
+
+  const nextLevel = useMemo(() => {
+    let result: FavorTableEntry | undefined;
+
+    for (const entry of favorTable) {
+      result = entry;
+
+      if (entry.totalExp > totalExp) {
+        break;
+      }
+    }
+
+    return result ?? favorTable[0];
+  }, [totalExp]);
+
+  const currentLevel = useMemo(() => {
+    return (
+      favorTable.find((entry) => entry.level === nextLevel.level - 1) ??
+      favorTable[0]
+    );
+  }, [nextLevel]);
 
   async function handleCreateInventory(name?: string) {
     if (busy) {
@@ -1531,7 +1574,8 @@ export function BondView({ students, gifts }: BondViewProps) {
             )}
 
             <BondProgress
-              startingExp={currentBondExp}
+              startingLevel={startingLevel}
+              currentLevel={currentLevel}
               exp={totalExp}
               targetBond={targetBondStr}
             />
@@ -1549,7 +1593,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
             {remainingExpBreakdown && targetBondExp && (
               <RemainingExpBreakdownCard
-                currentBond={currentBondStr}
+                currentBond={currentLevel.level.toString()}
                 targetBond={targetBondStr}
                 expNeeded={targetBondExp - totalExp}
                 breakdown={remainingExpBreakdown}
