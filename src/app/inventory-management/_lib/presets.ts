@@ -439,7 +439,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
-    name: "The Flower That Blooms: Waterborne Contest! (Swimsuit Hyakkaryouran Event)",
+    name: "Hyakkaryouran: Fair and Square Aquatic Showdown",
     rounds: [
       [
         withCounts(ITEMS.watergun, 2),

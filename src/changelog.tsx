@@ -46,7 +46,12 @@ export const CHANGELOG: ChangelogItemData[] = [
       },
     ],
     fixes: [],
-    changes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "Updated name of the swimsuit Hyakkaryouran event preset.",
+      },
+    ],
   },
   {
     date: "November 8, 2025",
