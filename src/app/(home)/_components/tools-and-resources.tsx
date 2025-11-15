@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import {
   BookOpenTextIcon,
+  CalculatorIcon,
   DicesIcon,
   GemIcon,
   Grid2X2Icon,
@@ -36,7 +37,6 @@ const RESOURCES: Resource[] = [
     icon: <ListOrderedIcon className="size-10 text-yellow-500 shrink-0" />,
     description:
       "Visualize your EX skill rotation timelines in an intuitive graphical format. Create timelines for yourself, to use in videos, or to share with other players.",
-    isHot: true,
   },
   {
     name: "Inventory Management",
@@ -44,6 +44,7 @@ const RESOURCES: Resource[] = [
     icon: <Grid2X2Icon className="size-10 text-purple-400 shrink-0" />,
     description:
       "Find the most likely placements of items in the Battleship-style minigame. Helps you minimize the number of currency you need to unlock certain items.",
+    isHot: true,
   },
   {
     name: "Railroad Puzzle Solver",
@@ -51,6 +52,14 @@ const RESOURCES: Resource[] = [
     icon: <TrainTrackIcon className="size-10 text-green-500 shrink-0" />,
     description:
       "Find and visualize the optimal paths in the Highlander event's Railroad Puzzle minigame. Specify a custom configuration or find the most minimal ones.",
+  },
+  {
+    name: "Raid Score Calculator",
+    path: "/raid-score-calculator",
+    icon: <CalculatorIcon className="size-10 text-blue-500 shrink-0" />,
+    description:
+      "Convert between clear time and raid score for various bosses and difficulties. Supports multiple teams and remaining time input (for single teams).",
+    isNew: true,
   },
   {
     name: "Formation Display",

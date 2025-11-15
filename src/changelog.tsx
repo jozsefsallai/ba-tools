@@ -15,6 +15,7 @@ export const CHANGELOG_SCOPES = {
   scenarioImageGenerator: "Scenario Image Generator",
   globalBanners: "Global Banners",
   titleGenerator: "Title Generator",
+  raidSoreCalc: "Raid Score Calculator",
   pvp: "PVP Tracker",
   games: "Games",
   content: "Content",
@@ -36,6 +37,17 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "November 14, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.raidSoreCalc,
+        description: "Added Raid Score Calculator tool.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
   {
     date: "November 8, 2025",
     features: [

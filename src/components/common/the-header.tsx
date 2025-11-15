@@ -62,6 +62,10 @@ const GAMEPLAY_TOOLS: NavLink[] = [
     href: "/railroad-puzzle-solver",
     text: "Railroad Puzzle Solver",
   },
+  {
+    href: "/raid-score-calculator",
+    text: "Raid Score Calculator",
+  },
 ];
 
 const MISC_TOOLS: NavLink[] = [
