@@ -3,7 +3,6 @@
 import {
   type InventoryManagementPreset,
   inventoryManagementPresets,
-  type InventoryManagementPresetItem,
 } from "@/app/inventory-management/_lib/presets";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,17 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Fragment, type PropsWithChildren, useRef, useState } from "react";
+import {
+  Fragment,
+  type PropsWithChildren,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export type LoadInventoryManagementPresetDialogProps = PropsWithChildren<{
-  onFinish: (
-    name: string,
-    items: {
-      first: InventoryManagementPresetItem;
-      second: InventoryManagementPresetItem;
-      third: InventoryManagementPresetItem;
-    },
-  ) => void;
+  onFinish: (id: string, roundIndex: number) => void;
 }>;
 
 export function LoadInventoryPresetDialog({
@@ -44,6 +42,8 @@ export function LoadInventoryPresetDialog({
   const [selectedPreset, setSelectedPreset] =
     useState<InventoryManagementPreset | null>(null);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
+
+  const [copiedPermalink, setCopiedPermalink] = useState(false);
 
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -97,13 +97,7 @@ export function LoadInventoryPresetDialog({
       return;
     }
 
-    const items = selectedPreset.rounds[selectedRound];
-
-    onFinish(`${selectedPreset.name}, Round ${selectedRound + 1}`, {
-      first: items[0],
-      second: items[1],
-      third: items[2],
-    });
+    onFinish(selectedPreset.id, selectedRound);
 
     closeRef.current?.click();
   }
@@ -113,6 +107,31 @@ export function LoadInventoryPresetDialog({
       setSelectedPreset(null);
       setSelectedRound(null);
     }
+  }
+
+  const permalink = useMemo(() => {
+    if (!selectedPreset) {
+      return null;
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("preset", selectedPreset.id);
+
+    if (selectedRound !== null) {
+      url.searchParams.set("round", String(selectedRound + 1));
+    }
+
+    return url.toString();
+  }, [selectedPreset, selectedRound]);
+
+  async function handleCopyPermalink() {
+    if (!permalink || copiedPermalink) {
+      return;
+    }
+
+    setCopiedPermalink(true);
+    await navigator.clipboard.writeText(permalink);
+    setTimeout(() => setCopiedPermalink(false), 2000);
   }
 
   return (
@@ -181,6 +200,14 @@ export function LoadInventoryPresetDialog({
         </div>
 
         <DialogFooter>
+          <Button
+            variant="outline"
+            disabled={!permalink || copiedPermalink}
+            onClick={handleCopyPermalink}
+          >
+            {copiedPermalink ? "Copied!" : "Copy Permalink"}
+          </Button>
+
           <Button
             type="submit"
             onClick={onPresetItemConfirmed}

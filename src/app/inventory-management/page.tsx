@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Schale Inventory Management Simulator - Joe's Blue Archive Tools",
@@ -41,7 +42,9 @@ export default async function InventoryManagementPage() {
         </p>
       </div>
 
-      <InventoryManagementSimulatorView />
+      <Suspense>
+        <InventoryManagementSimulatorView />
+      </Suspense>
 
       <Separator />
 

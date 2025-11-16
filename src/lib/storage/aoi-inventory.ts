@@ -13,6 +13,9 @@ export type OldAoiInventoryData = {
 export type AoiInventoryDataSlot = {
   savedAt: number;
 
+  presetId?: string;
+  roundIndex?: number;
+
   first: InventoryManagementItem;
   second: InventoryManagementItem;
   third: InventoryManagementItem;

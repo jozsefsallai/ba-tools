@@ -7,8 +7,8 @@ import {
   type SelectRegion,
 } from "@/app/inventory-management/_components/grid";
 import {
+  type InventoryManagementPreset,
   inventoryManagementPresets,
-  type InventoryManagementPresetItem,
 } from "@/app/inventory-management/_lib/presets";
 import { LoadInventoryPresetDialog } from "@/components/dialogs/load-inventory-management-preset-dialog";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,8 @@ import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { MessageBox } from "@/components/common/message-box";
+import { useSearchParams } from "next/navigation";
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 
 function ItemSetup({
   title,
@@ -152,11 +154,20 @@ export function InventoryManagementSimulatorView() {
   const [initError, setInitError] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
 
+  const searchParams = useSearchParams();
+
+  const presetParam = searchParams.get("preset");
+  const roundParam = searchParams.get("round");
+  const slotParam = searchParams.get("slot");
+
   const [requestInProgress, setRequestInProgress] = useState(false);
 
   const [displayedItem, setDisplayedItem] = useState<
     DisplayedItem | undefined
   >();
+
+  const [preset, setPreset] = useState<InventoryManagementPreset | null>(null);
+  const [presetRoundIndex, setPresetRoundIndex] = useState<number>(0);
 
   const LAST_PRESET =
     inventoryManagementPresets[inventoryManagementPresets.length - 1];
@@ -315,12 +326,21 @@ export function InventoryManagementSimulatorView() {
       return;
     }
 
-    const { first, second, third, blockedCells } = data[slot];
+    const { presetId, roundIndex, first, second, third, blockedCells } =
+      data[slot];
 
     setFirstItem(first);
     setSecondItem(second);
     setThirdItem(third);
     setBlockedCells(blockedCells);
+
+    if (presetId) {
+      const preset = inventoryManagementPresets.find((p) => p.id === presetId);
+      if (preset) {
+        setPreset(preset);
+        setPresetRoundIndex(roundIndex ?? 0);
+      }
+    }
 
     toast.success("Data loaded successfully.");
   }
@@ -332,6 +352,8 @@ export function InventoryManagementSimulatorView() {
       ...oldStorage,
       [slot]: {
         savedAt: Date.now(),
+        presetId: preset?.id,
+        roundIndex: presetRoundIndex,
         first: firstItem,
         second: secondItem,
         third: thirdItem,
@@ -343,6 +365,8 @@ export function InventoryManagementSimulatorView() {
       ...oldData,
       [slot]: {
         savedAt: Date.now(),
+        presetId: preset?.id,
+        roundIndex: presetRoundIndex,
         first: firstItem,
         second: secondItem,
         third: thirdItem,
@@ -353,18 +377,24 @@ export function InventoryManagementSimulatorView() {
     toast.success("Data saved successfully.");
   }
 
-  function handlePresetLoaded(
-    name: string,
-    {
-      first,
-      second,
-      third,
-    }: {
-      first: InventoryManagementPresetItem;
-      second: InventoryManagementPresetItem;
-      third: InventoryManagementPresetItem;
-    },
-  ) {
+  function handlePresetLoaded(id: string, roundIndex: number) {
+    const preset = inventoryManagementPresets.find((p) => p.id === id);
+    if (!preset) {
+      toast.error("Preset not found.");
+      return;
+    }
+
+    if (roundIndex < 0) {
+      toast.error("Invalid round index for the selected preset.");
+      return;
+    }
+
+    const round = preset.rounds[Math.min(roundIndex, preset.rounds.length - 1)];
+    const [first, second, third] = round;
+
+    setPreset(preset);
+    setPresetRoundIndex(roundIndex);
+
     setFirstItem({
       width: first.width,
       height: first.height,
@@ -386,7 +416,9 @@ export function InventoryManagementSimulatorView() {
     setBlockedCells([]);
     setResults(undefined);
 
-    toast.success(`Preset "${name}" loaded successfully.`);
+    toast.success(
+      `Preset "${preset.name}, round ${roundIndex + 1}" loaded successfully.`,
+    );
   }
 
   function onPlacingToggled(item: InventoryManagementItem, rotated: boolean) {
@@ -401,6 +433,14 @@ export function InventoryManagementSimulatorView() {
 
     setPlacingItem(item);
     setSelectRegion({ width, height });
+  }
+
+  function handleNextRound() {
+    if (!preset) {
+      return;
+    }
+
+    handlePresetLoaded(preset.id, presetRoundIndex + 1);
   }
 
   useEffect(() => {
@@ -438,6 +478,42 @@ export function InventoryManagementSimulatorView() {
     };
   }, []);
 
+  useEffect(() => {
+    const parsedSlotParam = slotParam
+      ? Number.parseInt(slotParam, 10)
+      : undefined;
+
+    if (
+      parsedSlotParam &&
+      !Number.isNaN(parsedSlotParam) &&
+      parsedSlotParam >= 1 &&
+      parsedSlotParam <= 3
+    ) {
+      const slot = `slot${parsedSlotParam}` as AoiInventorySlot;
+      handleLoad(slot);
+      return;
+    }
+
+    let preset: InventoryManagementPreset | undefined;
+    let roundIndex = 0;
+
+    if (presetParam) {
+      preset = inventoryManagementPresets.find((p) => p.id === presetParam);
+    }
+
+    if (preset && roundParam) {
+      const parsedRoundParam = Number.parseInt(roundParam, 10);
+
+      if (!Number.isNaN(parsedRoundParam) && parsedRoundParam >= 1) {
+        roundIndex = parsedRoundParam - 1;
+      }
+    }
+
+    if (preset) {
+      handlePresetLoaded(preset.id, roundIndex);
+    }
+  }, [presetParam, roundParam, slotParam]);
+
   if (initError) {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
@@ -452,6 +528,29 @@ export function InventoryManagementSimulatorView() {
 
   return (
     <div className="flex flex-col gap-8 items-center justify-center">
+      {preset && (
+        <Card className="md:w-2/3 mx-auto py-2">
+          <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
+            <div className="text-sm text-muted-foreground text-center">
+              Preset: <strong>{preset.name}</strong>, round{" "}
+              <strong>{presetRoundIndex + 1}</strong>
+            </div>
+
+            <ConfirmDialog
+              title="Proceed to Next Round?"
+              description="Are you sure you want to load the next round? This will reset the current setup."
+              confirmText="Yes"
+              cancelText="Nevermind"
+              onConfirm={handleNextRound}
+            >
+              <Button variant="outline" size="sm">
+                Next Round
+              </Button>
+            </ConfirmDialog>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex flex-col gap-4 justify-center items-center">
         <div className="text-muted-foreground text-sm">
           <strong>Remaining Slots:</strong> {45 - blockedCells.length} / 45

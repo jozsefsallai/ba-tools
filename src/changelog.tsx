@@ -39,6 +39,31 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 16, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "Added button to quickly load the next round in a preset.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "Added permalinks to inventory management presets.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "Added permalinks to inventory management save slots.",
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description:
+          "The save slot data now will also include the selected preset and round.",
+      },
+    ],
+  },
+  {
     date: "November 14, 2025",
     features: [
       {

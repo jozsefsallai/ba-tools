@@ -7,6 +7,7 @@ export type InventoryManagementPresetItem = {
 };
 
 export type InventoryManagementPreset = {
+  id: string;
   name: string;
   rounds: [
     InventoryManagementPresetItem,
@@ -204,6 +205,7 @@ export const ITEMS = {
 
 export const inventoryManagementPresets: InventoryManagementPreset[] = [
   {
+    id: "aoi7",
     name: "Balancing Schale's Books with the General Student Council (S7)",
     rounds: [
       [
@@ -251,6 +253,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
+    id: "aoi8",
     name: "Balancing Schale's Books with the General Student Council (S8)",
     rounds: [
       [
@@ -298,6 +301,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
+    id: "kisaki",
     name: "The Senses Descend (Kisaki & Reijo Event)",
     rounds: [
       [
@@ -345,6 +349,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
+    id: "pajama",
     name: "Secret Midnight Party: The Chimes of Tag (PJ Seminar Event)",
     rounds: [
       [
@@ -392,6 +397,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
+    id: "aoi12",
     name: "Balancing Schale's Books with the General Student Council (S12)",
     rounds: [
       [
@@ -439,6 +445,7 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
   },
 
   {
+    id: "shyakka",
     name: "Hyakkaryouran: Fair and Square Aquatic Showdown",
     rounds: [
       [
