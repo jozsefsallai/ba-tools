@@ -158,7 +158,7 @@ export const ITEMS = {
 
   // Swimsuit Hyakkaryouran Event
   watergun: {
-    name: "Water Gun",
+    name: "Water Rifle",
     width: 3,
     height: 2,
   },
@@ -188,7 +188,7 @@ export const ITEMS = {
   },
 
   floaty: {
-    name: "Floaty",
+    name: "Swim Floaty",
     width: 3,
     height: 3,
   },

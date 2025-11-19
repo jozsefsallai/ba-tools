@@ -73,11 +73,6 @@ export default async function RootLayout({
               <NavigationGuardProvider>
                 <StudentsProvider loadedStudents={students}>
                   <UserPreferencesProvider>
-                    <div className="bg-yellow-500 text-black p-2 text-center text-sm font-medium">
-                      Degraded performance due to third-party provider issues.
-                      Some features may not work as expected.
-                    </div>
-
                     <main className="flex flex-col gap-10 h-full">
                       <TheHeader />
                       <section className="relative container px-4 md:px-0 flex-1">
