@@ -528,29 +528,6 @@ export function InventoryManagementSimulatorView() {
 
   return (
     <div className="flex flex-col gap-8 items-center justify-center">
-      {preset && (
-        <Card className="md:w-2/3 mx-auto py-2">
-          <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
-            <div className="text-sm text-muted-foreground text-center">
-              Preset: <strong>{preset.name}</strong>, round{" "}
-              <strong>{presetRoundIndex + 1}</strong>
-            </div>
-
-            <ConfirmDialog
-              title="Proceed to Next Round?"
-              description="Are you sure you want to load the next round? This will reset the current setup."
-              confirmText="Yes"
-              cancelText="Nevermind"
-              onConfirm={handleNextRound}
-            >
-              <Button variant="outline" size="sm">
-                Next Round
-              </Button>
-            </ConfirmDialog>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="flex flex-col gap-4 justify-center items-center">
         <div className="text-muted-foreground text-sm">
           <strong>Remaining Slots:</strong> {45 - blockedCells.length} / 45
@@ -662,6 +639,29 @@ export function InventoryManagementSimulatorView() {
             Reset
           </Button>
         </div>
+
+        {preset && (
+          <Card className="md:w-2/3 mx-auto py-2">
+            <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
+              <div className="text-sm text-muted-foreground text-center">
+                Preset: <strong>{preset.name}</strong>, round{" "}
+                <strong>{presetRoundIndex + 1}</strong>
+              </div>
+
+              <ConfirmDialog
+                title="Proceed to Next Round?"
+                description="Are you sure you want to load the next round? This will reset the current setup."
+                confirmText="Yes"
+                cancelText="Nevermind"
+                onConfirm={handleNextRound}
+              >
+                <Button variant="outline" size="sm">
+                  Next Round
+                </Button>
+              </ConfirmDialog>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
