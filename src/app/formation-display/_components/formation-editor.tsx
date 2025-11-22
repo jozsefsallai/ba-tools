@@ -18,7 +18,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChevronsUpDownIcon, PlusIcon } from "lucide-react";
+import { ChevronsUpDownIcon, ImportIcon, PlusIcon } from "lucide-react";
 
 import { sleep } from "@/lib/sleep";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -43,6 +43,8 @@ import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "next-navigation-guard";
 import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { SaveStatus } from "@/components/common/save-status";
+import { ParseEchelonDataDialog } from "@/components/dialogs/parse-echelon-data-dialog";
+import type { EchelonData } from "@/lib/echelon-parser";
 
 type CombatClass = "striker" | "special";
 
@@ -322,6 +324,60 @@ export function FormationEditor() {
     setRequestInProgress(false);
   }
 
+  function handleEchelonDataParsed(data: EchelonData) {
+    const newStrikers: StudentItem[] = [];
+    const newSpecials: StudentItem[] = [];
+
+    const studentIds = new Set<string>();
+
+    for (const item of data.strikers) {
+      if (!item) {
+        newStrikers.push({
+          id: uuid(),
+        });
+      } else {
+        if (!studentIds.has(item.student.id)) {
+          studentIds.add(item.student.id);
+
+          newStrikers.push({
+            id: uuid(),
+            student: item.student,
+            level: item.level,
+            starLevel: item.starLevel,
+            ueLevel: item.ueLevel,
+            starter: item.starter,
+            borrowed: item.borrowed,
+          });
+        }
+      }
+    }
+
+    for (const item of data.specials) {
+      if (!item) {
+        newSpecials.push({
+          id: uuid(),
+        });
+      } else {
+        if (!studentIds.has(item.student.id)) {
+          studentIds.add(item.student.id);
+
+          newSpecials.push({
+            id: uuid(),
+            student: item.student,
+            level: item.level,
+            starLevel: item.starLevel,
+            ueLevel: item.ueLevel,
+            starter: item.starter,
+            borrowed: item.borrowed,
+          });
+        }
+      }
+    }
+
+    setStrikers(newStrikers);
+    setSpecials(newSpecials);
+  }
+
   useEffect(() => {
     if (!formationId) {
       // reset
@@ -490,6 +546,13 @@ export function FormationEditor() {
                     <PlusIcon />
                     Empty Special
                   </Button>
+
+                  <ParseEchelonDataDialog onParse={handleEchelonDataParsed}>
+                    <Button variant="outline">
+                      <ImportIcon />
+                      Bulk Import
+                    </Button>
+                  </ParseEchelonDataDialog>
                 </div>
               </div>
             </TabsContent>

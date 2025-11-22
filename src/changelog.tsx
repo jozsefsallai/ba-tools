@@ -39,6 +39,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 22, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description: "Added ability to parse raw echelon data.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
+  {
     date: "November 16, 2025",
     features: [
       {
