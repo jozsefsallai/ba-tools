@@ -45,6 +45,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.formationDisplay,
         description: "Added ability to parse raw echelon data.",
       },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to embed echelon data anywhere in the description.",
+      },
     ],
     fixes: [],
     changes: [],
