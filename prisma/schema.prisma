@@ -73,6 +73,7 @@ enum Club {
   OccultClub
   FreeTradeCartel
   NicomediasTroop
+  PublishingDepartment
   EmptyClub
 }
 
