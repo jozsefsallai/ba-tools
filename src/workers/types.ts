@@ -30,13 +30,19 @@ export type NativeModulesType = {
   ) => InventoryManagementResult;
 };
 
+export type InitPayload = {
+  baseUrl: string;
+};
+
 export type EventType = "init" | "simulate_inventory_management";
 
 export type BaseEvent<T extends EventType> = {
   type: T;
 };
 
-export type InitEvent = BaseEvent<"init">;
+export type InitEvent = BaseEvent<"init"> & {
+  payload: InitPayload;
+};
 
 export type SimulateInventoryManagementEvent =
   BaseEvent<"simulate_inventory_management"> & {

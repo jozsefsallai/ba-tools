@@ -467,7 +467,14 @@ export function InventoryManagementSimulatorView() {
       },
     );
 
-    worker.postMessage({ type: "init" } satisfies InitEvent);
+    const baseUrl = window.location.origin;
+
+    worker.postMessage({
+      type: "init",
+      payload: {
+        baseUrl,
+      },
+    } satisfies InitEvent);
 
     const saveData = aoiInventoryStorage.get();
     setSaveData(saveData);

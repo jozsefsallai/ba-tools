@@ -25,20 +25,7 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  serverExternalPackages: ["@resvg/resvg-js"],
-
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback.fs = false;
-    }
-
-    config.module.rules.push({
-      test: /\.node$/,
-      use: "node-loader",
-    });
-
-    return config;
-  },
+  serverExternalPackages: ["@resvg/resvg-js", "chromadb"],
 
   async rewrites() {
     return [

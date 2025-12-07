@@ -11,7 +11,7 @@ let nativeModulesInitialized = false;
 let nativeModules: NativeModulesType | null = null;
 let error: Error | null = null;
 
-async function loadNativeModules() {
+async function loadNativeModules(baseUrl: string) {
   try {
     // @ts-ignore
     const go = new Go();
@@ -19,11 +19,11 @@ async function loadNativeModules() {
 
     if ("instantiateStreaming" in WebAssembly) {
       obj = await WebAssembly.instantiateStreaming(
-        fetch("/wasm/main.wasm"),
+        fetch(`${baseUrl}/wasm/main.wasm`),
         go.importObject,
       );
     } else {
-      const res = await fetch("/wasm/main.wasm");
+      const res = await fetch(`${baseUrl}/wasm/main.wasm`);
       const buffer = await res.arrayBuffer();
       obj = await WebAssembly.instantiate(buffer, go.importObject);
     }
@@ -42,7 +42,7 @@ self.addEventListener("message", async (event: MessageEvent<WorkerEvent>) => {
   switch (event.data.type) {
     case "init": {
       if (!nativeModulesInitialized) {
-        await loadNativeModules();
+        await loadNativeModules(event.data.payload.baseUrl);
       }
 
       self.postMessage({
@@ -55,10 +55,6 @@ self.addEventListener("message", async (event: MessageEvent<WorkerEvent>) => {
     }
 
     case "simulate_inventory_management": {
-      if (!nativeModulesInitialized) {
-        await loadNativeModules();
-      }
-
       if (!nativeModules) {
         self.postMessage({
           type: "simulate_inventory_management",
