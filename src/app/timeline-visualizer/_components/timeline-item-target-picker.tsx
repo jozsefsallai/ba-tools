@@ -2,7 +2,7 @@
 
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useMemo } from "react";
 
 export type TimelineItemTargetPickerProps = {
@@ -12,11 +12,7 @@ export type TimelineItemTargetPickerProps = {
   onToggle: (student: Student) => void;
 };
 
-function StudentItem({
-  student,
-}: {
-  student: Student;
-}) {
+function StudentItem({ student }: { student: Student }) {
   const image = useMemo(() => {
     return buildStudentIconUrl(student);
   }, [student]);

@@ -1,4 +1,4 @@
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { createContext, useContext } from "react";
 
 export type StudentsContext = {

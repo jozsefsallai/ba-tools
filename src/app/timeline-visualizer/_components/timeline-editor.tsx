@@ -28,7 +28,7 @@ import { trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { sleep } from "@/lib/sleep";
 import { timelineStorage } from "@/lib/storage/timeline";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { Authenticated, useMutation } from "convex/react";
 import html2canvas from "html2canvas-pro";
 import {

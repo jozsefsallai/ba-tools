@@ -1,4 +1,4 @@
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 
 export const STAR_LEVELS = [1, 2, 3, 4, 5] as const;
 export const UE_LEVELS = [1, 2, 3, 4] as const;

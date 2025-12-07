@@ -1,4 +1,4 @@
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import type { Doc } from "~convex/dataModel";
 
 export type RosterStudentData = Doc<"roster">["students"][number] & {

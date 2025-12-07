@@ -1,7 +1,7 @@
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import Link from "next/link";
 import { useMemo } from "react";
 import type { Doc } from "~convex/dataModel";

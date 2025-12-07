@@ -21,7 +21,7 @@ import {
   type UELevel,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import { type FormEvent, useCallback, useState } from "react";
 

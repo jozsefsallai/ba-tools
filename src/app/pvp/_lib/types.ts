@@ -1,5 +1,5 @@
 import type { StarLevel, UELevel } from "@/lib/types";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 
 export type PVPFormationStudentItem = {
   student?: Student;

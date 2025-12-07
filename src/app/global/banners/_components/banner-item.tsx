@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { GameBanner, Student } from "@prisma/client";
+import type { GameBanner, Student } from "~prisma";
 import { InfoIcon } from "lucide-react";
 import { Fragment } from "react";
 

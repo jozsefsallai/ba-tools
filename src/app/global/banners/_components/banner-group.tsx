@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { GameBanner, Student } from "@prisma/client";
+import type { GameBanner, Student } from "~prisma";
 import { format } from "date-fns";
 import { useMemo } from "react";
 

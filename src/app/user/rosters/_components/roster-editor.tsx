@@ -27,7 +27,7 @@ import {
   type StarLevel,
   type GameServer,
 } from "@/lib/types";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, SaveIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";

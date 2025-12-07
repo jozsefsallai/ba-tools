@@ -19,7 +19,7 @@ import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import {
   ChevronDownIcon,
   ChevronsUpDownIcon,

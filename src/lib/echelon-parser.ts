@@ -1,6 +1,6 @@
 import { commandScore } from "@/lib/text-score";
 import type { StarLevel, UELevel } from "@/lib/types";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 
 export type EchelonStudentItem = {
   student: Student;

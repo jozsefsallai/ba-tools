@@ -16,7 +16,7 @@ import {
   importJustinPlannerData,
   type JustinPlannerExportData,
 } from "@/lib/justin";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useRef, useState, type PropsWithChildren } from "react";
 import { toast } from "sonner";
 

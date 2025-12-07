@@ -15,7 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";

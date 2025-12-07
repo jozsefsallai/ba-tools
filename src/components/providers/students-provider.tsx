@@ -1,7 +1,7 @@
 "use client";
 
 import { studentsContext } from "@/hooks/use-students";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { type PropsWithChildren, useMemo, useState } from "react";
 
 export function StudentsProvider({

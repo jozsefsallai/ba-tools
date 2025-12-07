@@ -6,7 +6,7 @@ import {
 } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useMemo, useRef, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";

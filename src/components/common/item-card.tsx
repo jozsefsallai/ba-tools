@@ -1,6 +1,6 @@
 import { buildItemIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { ItemRarity } from "@prisma/client";
+import type { ItemRarity } from "~prisma";
 
 export type ItemCardProps = {
   name: string;

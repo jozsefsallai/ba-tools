@@ -2,7 +2,7 @@
 
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useCallback, useMemo } from "react";
 
 export type TimelineQuickAddProps = {

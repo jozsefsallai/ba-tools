@@ -21,7 +21,7 @@ import {
 } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import React, { useCallback, useMemo } from "react";
 
 export type RosterItem = {

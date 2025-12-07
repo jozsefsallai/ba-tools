@@ -1,4 +1,4 @@
-import type { GameBanner, Student } from "@prisma/client";
+import type { GameBanner, Student } from "~prisma";
 
 export type BannerGroups = Map<
   string,

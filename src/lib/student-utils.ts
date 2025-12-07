@@ -1,4 +1,4 @@
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 
 export const VARIANT_RE = /\(.+\)/g;
 

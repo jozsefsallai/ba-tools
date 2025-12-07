@@ -11,7 +11,7 @@ import {
   makeEmblem,
   processTrailingPart,
 } from "@/lib/emblems.server";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { NextResponse } from "next/server";
 
 type RouteParams = {

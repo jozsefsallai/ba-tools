@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useStudents } from "@/hooks/use-students";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import {
   ChevronDownIcon,

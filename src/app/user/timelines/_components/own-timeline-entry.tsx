@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { GlobeIcon, GripVerticalIcon, LockIcon } from "lucide-react";

@@ -28,6 +28,9 @@
       ],
       "~convex/*": [
         "./convex/_generated/*"
+      ],
+      "~prisma": [
+        "./src/lib/db/client.ts"
       ]
     }
   },

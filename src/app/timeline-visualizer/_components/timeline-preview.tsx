@@ -1,7 +1,7 @@
 "use client";
 
 import { StudentCard } from "@/components/common/student-card";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import { useCallback, type RefObject } from "react";
 
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";

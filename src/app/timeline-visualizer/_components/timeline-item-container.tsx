@@ -17,7 +17,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import {
   type RefObject,
   useCallback,

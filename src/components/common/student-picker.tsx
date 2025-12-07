@@ -17,7 +17,7 @@ import { useStudents } from "@/hooks/use-students";
 import { commandScore } from "@/lib/text-score";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "@prisma/client";
+import type { Student } from "~prisma";
 import React, {
   type PropsWithChildren,
   useCallback,

@@ -1,5 +1,5 @@
 import { buildCDNAbsoluteUrl } from "@/lib/url";
-import type { Club, School, Student } from "@prisma/client";
+import type { Club, School, Student } from "~prisma";
 
 export const EMBLEM_WIDTH = 558;
 export const EMBLEM_HEIGHT = 106;

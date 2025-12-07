@@ -13,7 +13,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Gift, Student } from "@prisma/client";
+import type { Gift, Student } from "~prisma";
 import {
   AlertCircleIcon,
   ChevronsUpDownIcon,
@@ -113,11 +113,7 @@ function isGiftLikedByStudent(
   return student.giftsLiked.some((g) => g.id === gift.id);
 }
 
-function GiftInfo({
-  gift,
-}: {
-  gift: GiftWithStudents;
-}) {
+function GiftInfo({ gift }: { gift: GiftWithStudents }) {
   return (
     <div
       className={cn("flex flex-col gap-4 p-4", {

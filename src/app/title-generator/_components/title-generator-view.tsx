@@ -29,7 +29,7 @@ import {
   VALID_BOSS_EMBLEM_COMBINATIONS,
 } from "@/lib/emblems";
 import { cn } from "@/lib/utils";
-import type { Club, School, Student } from "@prisma/client";
+import type { Club, School, Student } from "~prisma";
 import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
