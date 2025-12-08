@@ -39,6 +39,25 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "December 8, 2025",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.backend,
+        description: "Upgraded backend to use Next.js 16.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.backend,
+        description: "Upgraded Prisma ORM to version 7.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.globalBanners,
+        description: "Highlighted fest banners.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "November 22, 2025",
     features: [
       {

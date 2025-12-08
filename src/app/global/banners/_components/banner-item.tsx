@@ -20,11 +20,26 @@ export type BannerItemProps = {
 };
 
 export function BannerItem({ banner }: BannerItemProps) {
+  const hasFestStudent = banner.pickupStudents.some(
+    (student) => student.isFestGlobal,
+  );
+
   return (
-    <div className="border rounded-md p-4 shadow-lg flex flex-col gap-4 bg-card">
+    <div
+      className={cn(
+        "border rounded-md p-4 shadow-lg flex flex-col gap-4 bg-card relative overflow-hidden",
+        {
+          "border-primary/75": hasFestStudent,
+        },
+      )}
+    >
+      {hasFestStudent && (
+        <div className="bg-gradient-to-r from-transparent via-primary/15 dark:via-primary/35 to-transparent w-4/5 absolute left-2/5 -skew-x-[45deg] top-0 bottom-0" />
+      )}
+
       {banner.pickupStudents.map((student, idx) => (
         <Fragment key={student.id}>
-          <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
+          <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between relative">
             <TooltipProvider>
               <div className="flex items-center gap-4 md:gap-6">
                 <div className="relative">

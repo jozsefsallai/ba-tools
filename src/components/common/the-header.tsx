@@ -137,7 +137,14 @@ export function TheHeader() {
       <div className="container flex justify-between items-center gap-2">
         <Link href="/">
           <div className="flex items-center gap-4">
-            <Image src={plana} alt="Plana" width={48} height={48} />
+            <div className="relative">
+              <Image src={plana} alt="Plana" width={48} height={48} />
+              <img
+                src="/assets/xmas-hat.png"
+                alt=""
+                className="absolute top-[-4px] left-[-8px] size-12"
+              />
+            </div>
 
             <h1 className="hidden lg:block text-2xl font-bold">
               Joe's Blue Archive Tools
