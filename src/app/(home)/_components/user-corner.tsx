@@ -28,7 +28,7 @@ export function UserCorner() {
       </Unauthenticated>
 
       <Authenticated>
-        <nav className="flex gap-4">
+        <nav className="flex flex-col gap-4">
           <Button variant="outline" asChild>
             <Link href="/user/formations">My Formations</Link>
           </Button>

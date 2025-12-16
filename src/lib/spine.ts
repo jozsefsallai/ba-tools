@@ -218,4 +218,20 @@ export class SpineRenderer {
 
     this.pixi.stage.addChild(graphics);
   }
+
+  drawDebugText(text: string, x: number, y: number, color: number) {
+    const style = new PIXI.TextStyle({
+      fill: color,
+      fontSize: 12,
+      fontFamily: "courier-new, monospace",
+    });
+
+    const debugText = new PIXI.Text(text, style);
+    debugText.x = x;
+    debugText.y = y;
+
+    this.pixi.stage.addChild(debugText);
+
+    return debugText;
+  }
 }

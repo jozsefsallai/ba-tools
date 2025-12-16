@@ -34,12 +34,12 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="fixed top-0 left-0 right-0 bottom-0 z-50 bg-white text-[#ff1000] pt-12 pl-14 md:pt-24 md:pl-28">
-      <div className="font-geist-mono text-sm md:text-xl whitespace-pre-wrap">
+      <div className="font-sono text-sm md:text-xl whitespace-pre-wrap">
         {CONTENT}
       </div>
 
       <div className="absolute bottom-12 left-14 md:bottom-24 md:left-28 tracking-widest text-sm md:text-2xl">
-        CONTENT #XX
+        EXCERPT #XX
       </div>
 
       <div className="absolute bottom-12 right-14 md:bottom-24 md:right-28 tracking-widest text-sm md:text-2xl">

@@ -9,12 +9,6 @@
   margin-inline: auto;
 }
 
-@theme {
-  --font-sans: var(--font-geist-sans);
-  --font-geist-mono: var(--font-geist-mono);
-  --font-nexon-football-gothic: var(--font-nexon-football-gothic);
-}
-
 :root {
   --background: oklch(0.994 0 0);
   --foreground: oklch(0 0 0);
@@ -116,6 +110,10 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-outfit);
+  --font-sono: var(--font-sono);
+  --font-nexon-football-gothic: var(--font-nexon-football-gothic);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -187,4 +185,24 @@
 .no-arrows {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+@keyframes embarrassed-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25%,
+  75% {
+    transform: translateX(-5px);
+  }
+
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+.embarrassed-shake {
+  animation: embarrassed-shake 200ms ease-in-out;
 }

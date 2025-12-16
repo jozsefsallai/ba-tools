@@ -5,6 +5,7 @@ export const CHANGELOG_SCOPES = {
   website: "Website",
   backend: "Backend",
   homePage: "Home Page",
+  plana: "Plana",
   userCorner: "User Corner",
   authentication: "Authentication",
   bondCalculator: "Bond Calculator",
@@ -38,6 +39,56 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "December 15, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.plana,
+        description: "Adjusted certain interactions with Plana.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed premium bouquets not being marked as gifts every student loves.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Updated primary font.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.homePage,
+        description: "Minor layout changes.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.homePage,
+        description: (
+          <>
+            Removed{" "}
+            <span className="text-yellow-400 font-nexon-football-gothic uppercase text-xs italic px-1 rounded-full">
+              Hot
+            </span>{" "}
+            badge from Inventory Management tool.
+          </>
+        ),
+      },
+      {
+        scope: CHANGELOG_SCOPES.homePage,
+        description: (
+          <>
+            Removed{" "}
+            <span className="text-red-400 font-nexon-football-gothic uppercase text-xs italic px-1 rounded-full">
+              New
+            </span>{" "}
+            badge from Inventory Management tool.
+          </>
+        ),
+      },
+    ],
+  },
   {
     date: "December 8, 2025",
     features: [],

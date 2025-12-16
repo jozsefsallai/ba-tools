@@ -9,9 +9,9 @@ export function DonationBox() {
       <p>
         The tools on this site are completely free to use and that will never
         change. I do this as a hobby and for my love of the game and I want to
-        help the community with my creations. While most of the time there are
-        practically no operation costs involved in running the site, I am more
-        than willing to pay for the occasional costs out of my own pocket.
+        help the community with my creations. The operation costs of the site
+        are minimal and I am more than willing to pay for the occasional costs
+        out of my own pocket.
       </p>
 
       <p>
@@ -26,18 +26,16 @@ export function DonationBox() {
         below. Your support is greatly appreciated!
       </p>
 
-      <div>
-        <Button variant="outline" asChild>
-          <a
-            href="https://buymeacoffee.com/joexyz"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            <CoffeeIcon />
-            Buy me a coffee
-          </a>
-        </Button>
-      </div>
+      <Button variant="outline" asChild>
+        <a
+          href="https://buymeacoffee.com/joexyz"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          <CoffeeIcon />
+          Buy me a coffee
+        </a>
+      </Button>
     </section>
   );
 }

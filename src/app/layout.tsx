@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Noto_Sans } from "next/font/google";
+import { Outfit, Sono, Noto_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -14,13 +14,14 @@ import { db } from "@/lib/db";
 import { StudentsProvider } from "@/components/providers/students-provider";
 import { NavigationGuardProvider } from "next-navigation-guard";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sono = Sono({
+  variable: "--font-sono",
   subsets: ["latin"],
 });
 
@@ -57,9 +58,13 @@ export default async function RootLayout({
   });
 
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${outfit.variable} h-full`}
+      suppressHydrationWarning
+    >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${nexonFootballGothic.variable} ${notoSans.variable} antialiased h-full`}
+        className={`${sono.variable} ${nexonFootballGothic.variable} ${notoSans.variable} antialiased h-full`}
       >
         <ThemeProvider
           attribute="class"

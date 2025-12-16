@@ -44,7 +44,6 @@ const RESOURCES: Resource[] = [
     icon: <Grid2X2Icon className="size-10 text-purple-400 shrink-0" />,
     description:
       "Find the most likely placements of items in the Battleship-style minigame. Helps you minimize the number of currency you need to unlock certain items.",
-    isHot: true,
   },
   {
     name: "Railroad Puzzle Solver",
@@ -74,7 +73,6 @@ const RESOURCES: Resource[] = [
     icon: <RectangleEllipsisIcon className="size-10 text-[#8fc9ff] shrink-0" />,
     description:
       "Generate fully rendered user titles for boss completions, relationship rank, talent levels, school clubs, as well as generic titles with custom text.",
-    isNew: true,
   },
   {
     name: "Gacha Rate Stats",

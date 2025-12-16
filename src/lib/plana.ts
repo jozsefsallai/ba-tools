@@ -1,5 +1,6 @@
 import { SpineRenderer } from "@/lib/spine";
 import type { Bone } from "@esotericsoftware/spine-pixi-v7";
+import type * as PIXI from "pixi.js-v7";
 
 import { z } from "zod";
 
@@ -56,6 +57,7 @@ export class Plana {
 
   private blinkIntervalId: NodeJS.Timeout | number | null = null;
   private heartHaloTimeoutId: NodeJS.Timeout | number | null = null;
+  private embarrassedFaceTimeoutId: NodeJS.Timeout | number | null = null;
 
   static CANVAS_WIDTH = 500;
   static CANVAS_HEIGHT = 850;
@@ -67,14 +69,16 @@ export class Plana {
     dy: 220,
   };
 
-  // Set this to true to draw the headpat hitbox for debugging
-  private debugHeadpats = false;
+  // Set this to true to draw debug info and hitboxes
+  private debug = false;
 
   static HEADPAT_INCREMENT = 2;
   static HEADPAT_CLAMP = 30;
   static BLINK_INTERVAL = 10000;
   static HEART_HALO_TIMEOUT = 6000;
+  static EMBARRASSED_FACE_TIMEOUT = 10000;
 
+  private initialExpression: PlanaExpression = "idle";
   private expression: PlanaExpression = "idle";
 
   static EXPRESSION_ANIM_MAP: Record<PlanaExpression, string> = {
@@ -109,6 +113,7 @@ export class Plana {
 
     if (opts.expression) {
       this.expression = opts.expression;
+      this.initialExpression = opts.expression;
     }
 
     this.renderer = new SpineRenderer({
@@ -159,7 +164,7 @@ export class Plana {
 
     this.refreshExpression();
 
-    this.drawHeadpatHitboxForDebugging();
+    this.debugDraw();
   }
 
   deinit() {
@@ -211,14 +216,14 @@ export class Plana {
     }
   }
 
-  async setExpression(expression: PlanaExpression) {
+  async setExpression(expression: PlanaExpression, shouldUnpat = true) {
     if (this.expression === expression) {
       return;
     }
 
     this.expression = expression;
 
-    if (this.isPatting) {
+    if (this.isPatting && shouldUnpat) {
       this.unpat();
     }
 
@@ -336,6 +341,17 @@ export class Plana {
     this.heartHaloTimeoutId = setTimeout(() => {
       this.renderer.playAnimation(4, "Dev_Halo_love", true);
     }, Plana.HEART_HALO_TIMEOUT);
+
+    this.embarrassedFaceTimeoutId = setTimeout(() => {
+      this.setExpression("embarrassed", false);
+      this.renderer.stopAnimation(3);
+
+      this.canvas.classList.add("embarrassed-shake");
+
+      setTimeout(() => {
+        this.canvas.classList.remove("embarrassed-shake");
+      }, 300);
+    }, Plana.EMBARRASSED_FACE_TIMEOUT);
   }
 
   private rub(x: number, _y: number, dx: number, _dy: number) {
@@ -380,6 +396,12 @@ export class Plana {
       this.renderer.stopAnimation(4);
     }
 
+    if (this.embarrassedFaceTimeoutId) {
+      clearTimeout(this.embarrassedFaceTimeoutId);
+      this.setExpression(this.initialExpression);
+      this.canvas.classList.remove("embarrassed-shake");
+    }
+
     // slowly reset head position
     const interval = setInterval(() => {
       if (!this.touchPoint) {
@@ -422,18 +444,38 @@ export class Plana {
     this.renderer.playAnimation(2, "Eye_Close_01", false);
   }
 
-  private drawHeadpatHitboxForDebugging() {
-    if (!this.debugHeadpats) {
+  private renderDebugInfo(debugText: PIXI.Text) {
+    if (!this.debug) {
       return;
     }
 
-    const hitbox = this.getHeadpatHitbox();
+    const debugInfo = [
+      `Touch Point Y: ${this.touchPoint?.y.toFixed(2) ?? "N/A"}`,
+      `Expression: ${this.expression}`,
+      `Spine Anim: ${this.expressionAnim}`,
+      `Is Patting: ${this.isPatting}`,
+      `Scale Modifier: ${this.scaleModifier}`,
+    ];
+
+    debugText.text = debugInfo.join("\n");
+    requestAnimationFrame(() => this.renderDebugInfo(debugText));
+  }
+
+  private debugDraw() {
+    if (!this.debug) {
+      return;
+    }
+
+    const headpatHitbox = this.getHeadpatHitbox();
     this.renderer.drawDebugRect(
-      hitbox.x,
-      hitbox.y,
-      hitbox.dx - hitbox.x,
-      hitbox.dy - hitbox.y,
+      headpatHitbox.x,
+      headpatHitbox.y,
+      headpatHitbox.dx - headpatHitbox.x,
+      headpatHitbox.dy - headpatHitbox.y,
       0xff0000,
     );
+
+    const debugText = this.renderer.drawDebugText("init", 30, 80, 0xff0000);
+    this.renderDebugInfo(debugText);
   }
 }
