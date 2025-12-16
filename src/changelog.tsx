@@ -83,7 +83,7 @@ export const CHANGELOG: ChangelogItemData[] = [
             <span className="text-red-400 font-nexon-football-gothic uppercase text-xs italic px-1 rounded-full">
               New
             </span>{" "}
-            badge from Inventory Management tool.
+            badge from Title Generator tool.
           </>
         ),
       },
