@@ -49,7 +49,7 @@ export function TimelineItemTargetPicker({
   }, [student, uniqueStudents]);
 
   return (
-    <div className="px-1 flex gap-1">
+    <div className="px-1 flex flex-wrap gap-1">
       {filteredStudents.map((student) => (
         <button
           key={student.id}

@@ -63,15 +63,18 @@ export function TimelineQuickAdd({
 
   return (
     <section
-      className={cn("flex flex-col gap-4 rounded-md py-4 px-8 self-center", {
-        "p-0": small,
-      })}
+      className={cn(
+        "flex flex-col max-w-full gap-4 rounded-md py-4 px-8 self-center",
+        {
+          "p-0": small,
+        },
+      )}
     >
       {!small && (
         <h2 className="text-lg font-semibold text-center">Quick Add Student</h2>
       )}
 
-      <div className="flex gap-2 items-center justify-center">
+      <div className="flex flex-wrap gap-2 items-center justify-center">
         {students.map((student) => (
           <button
             key={student.id}
