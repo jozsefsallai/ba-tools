@@ -109,6 +109,7 @@ export const VALID_BOSS_EMBLEM_COMBINATIONS: {
   { name: "Kaitenger", terrain: "Street" },
   { name: "Perorozilla", terrain: "Outdoor" },
   { name: "Shirokuro", terrain: "Indoor" },
+  { name: "Shirokuro", terrain: "Street" },
 ];
 
 export const FAVOR_EMBLEM_RANKS: EmblemConfigItem<FavorEmblemRank>[] = [
