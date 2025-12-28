@@ -40,6 +40,28 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "December 28, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.titleGenerator,
+        description: "Added Final Restriction Release titles.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Fixed a bug where the student picker and the target student picker would overflow when there were too many different students.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.titleGenerator,
+        description: "Added Urban Shiro & Kuro boss titles.",
+      },
+    ],
+  },
+  {
     date: "December 15, 2025",
     features: [
       {

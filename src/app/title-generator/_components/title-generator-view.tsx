@@ -26,6 +26,9 @@ import {
   GROUP_EMBLEM_SCHOOLS,
   GROUP_EMBLEM_VALID_COMBINATIONS,
   type PotentialEmblemRank,
+  TOWER_EMBLEM_BOSSES,
+  TOWER_EMBLEM_DEFENSE_TYPES,
+  type TowerEmblemDefenseType,
   VALID_BOSS_EMBLEM_COMBINATIONS,
 } from "@/lib/emblems";
 import { cn } from "@/lib/utils";
@@ -33,7 +36,13 @@ import type { Club, School, Student } from "~prisma";
 import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-type TitleGeneratorMode = "basic" | "favor" | "potential" | "boss" | "group";
+type TitleGeneratorMode =
+  | "basic"
+  | "favor"
+  | "potential"
+  | "boss"
+  | "group"
+  | "tower";
 
 export function TitleGeneratorView() {
   const { students } = useStudents();
@@ -72,6 +81,14 @@ export function TitleGeneratorView() {
     (typeof VALID_BOSS_EMBLEM_COMBINATIONS)[number]
   >(VALID_BOSS_EMBLEM_COMBINATIONS[0]);
   const [bossRarity, setBossRarity] = useState<BossEmblemRarity>("N");
+
+  // tower
+  const [towerBossItem, setTowerBossItem] = useState<
+    (typeof TOWER_EMBLEM_BOSSES)[number]
+  >(TOWER_EMBLEM_BOSSES[0]);
+  const [towerDefenseType, setTowerDefenseType] =
+    useState<TowerEmblemDefenseType>("Light");
+  const [towerFloor, setTowerFloor] = useState<50 | 100>(50);
 
   // group
   const [groupSchool, setGroupSchool] = useState<School>("Abydos");
@@ -121,6 +138,10 @@ export function TitleGeneratorView() {
     return `${bossItem.name}_${bossItem.terrain}`;
   }, [bossItem]);
 
+  const towerBossItemValue = useMemo(() => {
+    return towerBossItem.name;
+  }, [towerBossItem]);
+
   const url = useMemo(() => {
     if (typeof window === "undefined") {
       return null;
@@ -152,6 +173,9 @@ export function TitleGeneratorView() {
       case "boss": {
         return `/api/emblem/boss/${bossItem.name}/${bossItem.terrain}/${bossRarity}.png`;
       }
+      case "tower": {
+        return `/api/emblem/tower/${towerBossItem.name}/${towerDefenseType}/${towerFloor}.png`;
+      }
       case "group": {
         return groupNameOverride.trim().length > 0
           ? `/api/emblem/group/${groupSchool}/${encodeURIComponent(groupNameOverride.trim())}.png`
@@ -169,6 +193,9 @@ export function TitleGeneratorView() {
     potentialNameOverride,
     bossItem,
     bossRarity,
+    towerBossItem,
+    towerDefenseType,
+    towerFloor,
     groupSchool,
     groupClub,
     groupNameOverride,
@@ -207,6 +234,14 @@ export function TitleGeneratorView() {
 
     if (foundItem) {
       setBossItem(foundItem);
+    }
+  }
+
+  function handleSetTowerBossItem(item: string) {
+    const foundItem = TOWER_EMBLEM_BOSSES.find((i) => i.name === item);
+
+    if (foundItem) {
+      setTowerBossItem(foundItem);
     }
   }
 
@@ -276,6 +311,18 @@ export function TitleGeneratorView() {
           newDefaults.push(
             `/api/emblem/boss/${combo.name}/${combo.terrain}/${rarity}.png`,
           );
+        }
+      }
+    }
+
+    if (mode === "tower") {
+      for (const boss of TOWER_EMBLEM_BOSSES) {
+        for (const defenseType of TOWER_EMBLEM_DEFENSE_TYPES) {
+          for (const floorOption of [50, 100] as (50 | 100)[]) {
+            newDefaults.push(
+              `/api/emblem/tower/${boss.name}/${defenseType}/${floorOption}.png`,
+            );
+          }
         }
       }
     }
@@ -372,6 +419,7 @@ export function TitleGeneratorView() {
             <SelectItem value="favor">Relationship Rank</SelectItem>
             <SelectItem value="potential">Talent Level</SelectItem>
             <SelectItem value="boss">Boss Completion</SelectItem>
+            <SelectItem value="tower">Final Restriction Release</SelectItem>
             <SelectItem value="group">Club Advisor</SelectItem>
           </SelectContent>
         </Select>
@@ -553,6 +601,73 @@ export function TitleGeneratorView() {
                 <SelectItem value="R">Hardcore+</SelectItem>
                 <SelectItem value="SR">Extreme+</SelectItem>
                 <SelectItem value="SSR">Insane+</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
+
+      {mode === "tower" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <Label>Boss:</Label>
+
+            <Select
+              value={towerBossItemValue}
+              onValueChange={handleSetTowerBossItem}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                {TOWER_EMBLEM_BOSSES.map((boss) => (
+                  <SelectItem key={boss.id} value={boss.name}>
+                    {boss.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label>Defense Type:</Label>
+
+            <Select
+              value={towerDefenseType}
+              onValueChange={(v) =>
+                setTowerDefenseType(v as TowerEmblemDefenseType)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="Light">Light Defense</SelectItem>
+                <SelectItem value="Heavy">Heavy Defense</SelectItem>
+                <SelectItem value="Unarmed">Special Defense</SelectItem>
+                <SelectItem value="Elastic">Elastic Defense</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label>Floor:</Label>
+
+            <Select
+              value={String(towerFloor)}
+              onValueChange={(v) =>
+                setTowerFloor(Number.parseInt(v, 10) as 50 | 100)
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
               </SelectContent>
             </Select>
           </div>

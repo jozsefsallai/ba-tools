@@ -309,6 +309,40 @@ export const FAVOR_EMBLEM_EXTRA_PLANA: FavorEmblemExtra = {
   devName: "Plana",
 };
 
+export type TowerEmblemBossIdentifier = "set" | "chokmah" | "tiphareth";
+
+export const TOWER_EMBLEM_DEFENSE_TYPES = [
+  "Elastic",
+  "Heavy",
+  "Light",
+  "Unarmed",
+] as const;
+
+export type TowerEmblemDefenseType =
+  (typeof TOWER_EMBLEM_DEFENSE_TYPES)[number];
+
+export const TOWER_EMBLEM_BOSSES: {
+  name: TowerEmblemBossIdentifier;
+  id: string;
+  label: string;
+}[] = [
+  {
+    name: "set",
+    id: "EN0008",
+    label: "Celestial Pantheon: The Fury of Set",
+  },
+  {
+    name: "chokmah",
+    id: "EN0009",
+    label: "Decagrammaton: Chokmah",
+  },
+  {
+    name: "tiphareth",
+    id: "EN0011",
+    label: "Decagrammaton: Tiphareth",
+  },
+];
+
 export type BossEmblemParams = {
   name: BossEmblemName;
   rarity: BossEmblemRarity;
@@ -331,6 +365,12 @@ export type GroupEmblemParams = {
   school: School;
   club?: Club;
   nameOverride?: string;
+};
+
+export type TowerEmblemParams = {
+  boss: (typeof TOWER_EMBLEM_BOSSES)[number];
+  defenseType: TowerEmblemDefenseType;
+  floor: number;
 };
 
 export type BasicEmblemParams = {
@@ -393,6 +433,18 @@ export function buildGroupEmblemIconUrl(school: School) {
 
   return buildCDNAbsoluteUrl(
     `v2/images/emblems/group/Emblem_Icon_Group_${finalSchool}.png`,
+  );
+}
+
+export function buildTowerEmblemBackgroundUrl(id: string) {
+  return buildCDNAbsoluteUrl(
+    `v2/images/emblems/bg/Emblem_BG_MultiFloorRaid_${id}.png`,
+  );
+}
+
+export function buildTowerIconUrl(defenseType: TowerEmblemDefenseType) {
+  return buildCDNAbsoluteUrl(
+    `v2/images/emblems/tower/Emblem_Icon_MultiFloorRaid_${defenseType}.png`,
   );
 }
 
