@@ -124,5 +124,166 @@
 
     "loading": "タイムラインを読み込み中...",
     "empty": "タイムラインにアイテムがないよ。"
+  },
+
+  "bond": {
+    "title": "絆ランク計算機",
+    "description": "生徒に贈るギフトの内容から、絆ランクがどれくらい上がるか計算できるよ。あらかじめ計画を立てたり、貯まったギフトでどこまでランクを上げられるか確認するのに使ってみてね。",
+
+    "inventory": {
+      "select": {
+        "label": "ギフト所持数 (BETA)",
+        "none": "(データなし)",
+        "unnamed": "名前なしの所持データ",
+        "new": "新しい所持データ",
+        "rename": "名前を変更",
+        "save": "データを保存",
+        "delete": "データを削除"
+      },
+
+      "target": {
+        "label": "絆ランクの目標",
+        "none": "(目標なし)",
+        "unknown": "不明な生徒: {studentId}",
+        "new": "新規目標 ({studentName})",
+        "delete": "目標を削除 ({studentName})"
+      }
+    },
+
+    "sort": {
+      "label": "並び替え：",
+      "default": "デフォルト",
+      "relevance": {
+        "student": "{studentName}の好み",
+        "noStudent": "生徒の好み"
+      }
+    },
+
+    "item": {
+      "adored": "大好き",
+      "loved": "好き",
+      "liked": "普通",
+      "normal": "通常",
+
+      "universal": "このギフトは全員が{expValue, plural, 60 {大好き} other {好き}}で、絆経験値を <strong>{exp}</strong> 獲得できるよ！",
+      "adoredBy": "大好きな生徒 ({exp} EXP)：",
+      "lovedBy": "好きな生徒 ({exp} EXP)：",
+      "likedBy": "普通の生徒 ({exp} EXP)：",
+
+      "everyoneElse": "他の生徒に贈ると <strong>{exp}</strong> EXP獲得できるよ。"
+    },
+
+    "choiceBox": {
+      "name": "贈り物選択ボックス",
+      "description": "お好みの贈り物が選べる贈り物ボックス"
+    },
+
+    "student": {
+      "select": "生徒を選択",
+      "notice": "まずは上のドロップダウンから生徒を選んでね。",
+
+      "onlyFavorite": "好みのギフトのみ表示",
+      "currentRank": "現在のランク",
+      "targetRank": "目標のランク",
+      "currentExp": "現在のEXP",
+      "targetExp": "目標のEXP",
+
+      "irrelevantGifts": {
+        "title": "お知らせ",
+        "description": "選択したギフトの一部は、現在選んでいる生徒に関係がないため表示されていないよ。「好みのギフトのみ表示」のチェックを外すと変更できるようになるよ。"
+      },
+
+      "breakdown": "ギフトの内訳を表示"
+    },
+
+    "progress": {
+      "goal": "(目標: {targetBond})",
+      "total": "<strong>合計EXP:</strong> {exp}"
+    },
+
+    "breakdown": {
+      "title": "ギフトの内訳",
+      "description": "各ギフトと獲得EXPの詳細だよ。",
+
+      "table": {
+        "gift": "ギフト",
+        "unitExp": "単体EXP",
+        "count": "個数",
+        "totalExp": "合計EXP"
+      },
+
+      "total": "合計",
+      "close": "閉じる"
+    },
+
+    "inventoryTip": "<strong>ヒント：</strong> <signIn></signIn> すると、ギフトの所持数や目標データを保存できるよ (BETA)。",
+
+    "remaining": {
+      "title": "ランク {targetBond} 到着に必要なEXP: {expNeeded}",
+      "description": "<strong>ランク {currentBond}</strong> から <strong>ランク {targetBond}</strong> に上げるには、以下のいずれかが必要だよ：",
+
+      "headpats": "なでなで",
+      "likedSSR": "普通なSSRギフト",
+      "lovedSSR": "好きなSSRギフト",
+      "adoredSSR": "大好きなSSRギフト",
+      "normalSR": "通常なSRギフト",
+      "likedSR": "普通なSRギフト",
+      "lovedSR": "好きなSRギフト",
+      "adoredSR": "大好きなSRギフト",
+
+      "optimal": "ギフトとなでなでの最適内訳",
+      "excludeSSR": "SSRギフトを除外",
+      "optimalNote": "* 注: 最適な内訳は、計 {paddedExp} EXPを基準に計算されているよ。",
+      "wasted": "超過分： {wasted} EXP"
+    },
+
+    "lessons": {
+      "title": "スケジュールの内訳",
+      "description": "<strong>{exp} EXP</strong> をスケジュールだけで稼ぐ場合、ランクやレベルに応じて必要な回数は以下の通りだよ。",
+
+      "table": {
+        "rank": "ランク",
+        "level": "レベル",
+        "exp": "EXP",
+        "bonus": "ボーナスEXP",
+        "count": "回数"
+      },
+
+      "total": "(合計 {exp})",
+      "bonusChance": "発生確率 <strong>{chance}</strong>%",
+
+      "counts": {
+        "withBonus": "ボーナスあり: <strong>{countWithBonus}</strong> 回",
+        "expected": "期待値: <strong>{expectedCount}</strong> 回"
+      }
+    },
+
+    "toasts": {
+      "inventoryCreateFail": "所持データの作成に失敗したよ。",
+      "inventoryUpdateFail": "所持データの更新に失敗したよ。",
+      "targetCreateFail": "目標の作成に失敗したよ。",
+      "targetUpdateFail": "目標の更新に失敗したよ。",
+      "inventoryDeleteFail": "所持データの削除に失敗したよ。",
+      "inventoryDeleteSuccess": "所持データを削除したよ。",
+      "targetDeleteFail": "目標の削除に失敗したよ。",
+      "targetDeleteSuccess": "目標を削除したよ。"
+    },
+
+    "dialogs": {
+      "deleteInventory": {
+        "title": "所持データを削除する？",
+        "description": "この所持データを削除しても大丈夫？ギフトの数や関連する目標データもすべて完全に削除されるよ。"
+      },
+
+      "deleteTarget": {
+        "title": "目標を削除する？",
+        "description": "この目標を削除しても大丈夫？絆データや選択したギフトの情報は完全に消えるけど、ギフトの所持数データには影響しないよ。"
+      },
+
+      "save": {
+        "title": "目標データを保存する？",
+        "description": "変更内容が保存されていないよ。ページを離れる前にクラウドに保存しておく？"
+      }
+    }
   }
 }

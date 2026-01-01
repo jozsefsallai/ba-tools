@@ -72,7 +72,7 @@ import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "next-navigation-guard";
 import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { SaveStatus } from "@/components/common/save-status";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
@@ -114,7 +114,41 @@ function isGiftLikedByStudent(
   return student.giftsLiked.some((g) => g.id === gift.id);
 }
 
+function GiftItemCard({ gift }: { gift: GiftWithStudents }) {
+  const t = useTranslations();
+  const locale = useLocale();
+
+  const giftName = useMemo(() => {
+    switch (locale) {
+      case "en":
+        return gift.name;
+      case "jp":
+        return gift.nameJP || gift.name;
+    }
+  }, [gift, locale]);
+
+  const giftDescription = useMemo(() => {
+    switch (locale) {
+      case "en":
+        return gift.description;
+      case "jp":
+        return gift.descriptionJP || gift.description;
+    }
+  }, [gift, locale]);
+
+  return (
+    <ItemCard
+      name={giftName}
+      iconName={gift.iconName}
+      description={giftDescription}
+      rarity={gift.rarity}
+      className="cursor-pointer"
+    />
+  );
+}
+
 function GiftInfo({ gift }: { gift: GiftWithStudents }) {
+  const t = useTranslations();
   const locale = useLocale();
 
   const giftName = useMemo(() => {
@@ -152,20 +186,30 @@ function GiftInfo({ gift }: { gift: GiftWithStudents }) {
         <div className="flex gap-2 items-center justify-center">
           <Image
             src={gift.expValue === 60 ? giftAdoredImage : giftLovedImage}
-            alt={gift.expValue === 60 ? "Adored" : "Loved"}
+            alt={
+              gift.expValue === 60
+                ? t("tools.bond.item.adored")
+                : t("tools.bond.item.loved")
+            }
             className="size-6"
           />
-          This gift is {gift.expValue === 60 ? "adored" : "loved"} by everyone
-          and gives{" "}
-          <strong>{(gift.expValue === 60 ? 4 : 3) * gift.expValue} EXP!</strong>
+          {t.rich("tools.bond.item.universal", {
+            strong: (children) => <strong>{children}</strong>,
+            expValue: gift.expValue,
+            exp: (gift.expValue === 60 ? 4 : 3) * gift.expValue,
+          })}
         </div>
       )}
 
       {gift.adoredBy.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="font-semibold flex gap-2 items-center">
-            <Image src={giftAdoredImage} alt="Adored" className="size-6" />
-            Adored by ({4 * gift.expValue} EXP):
+            <Image
+              src={giftAdoredImage}
+              alt={t("tools.bond.item.adored")}
+              className="size-6"
+            />
+            {t("tools.bond.item.adoredBy", { exp: 4 * gift.expValue })}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -181,8 +225,12 @@ function GiftInfo({ gift }: { gift: GiftWithStudents }) {
       {gift.lovedBy.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="font-semibold flex gap-2 items-center">
-            <Image src={giftLovedImage} alt="Loved" className="size-6" />
-            Loved by ({3 * gift.expValue} EXP):
+            <Image
+              src={giftLovedImage}
+              alt={t("tools.bond.item.loved")}
+              className="size-6"
+            />
+            {t("tools.bond.item.lovedBy", { exp: 3 * gift.expValue })}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -198,8 +246,12 @@ function GiftInfo({ gift }: { gift: GiftWithStudents }) {
       {gift.likedBy.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="font-semibold flex gap-2 items-center">
-            <Image src={giftLikedImage} alt="Liked" className="size-6" />
-            Liked by ({2 * gift.expValue} EXP):
+            <Image
+              src={giftLikedImage}
+              alt={t("tools.bond.item.liked")}
+              className="size-6"
+            />
+            {t("tools.bond.item.likedBy", { exp: 2 * gift.expValue })}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -219,11 +271,10 @@ function GiftInfo({ gift }: { gift: GiftWithStudents }) {
             alt={gift.rarity === "SSR" ? "Liked" : "Normal"}
             className="size-6"
           />
-          Gives{" "}
-          <strong>
-            {gift.rarity === "SSR" ? gift.expValue * 2 : gift.expValue}
-          </strong>{" "}
-          EXP to everyone else.
+          {t.rich("tools.bond.item.everyoneElse", {
+            strong: (children) => <strong>{children}</strong>,
+            exp: gift.rarity === "SSR" ? gift.expValue * 2 : gift.expValue,
+          })}
         </div>
       )}
     </div>
@@ -231,6 +282,8 @@ function GiftInfo({ gift }: { gift: GiftWithStudents }) {
 }
 
 export function BondView({ students, gifts }: BondViewProps) {
+  const t = useTranslations();
+
   const { isSignedIn } = useUser();
 
   const { studentMap } = useStudents();
@@ -847,7 +900,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       setSelectedInventoryId(id);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create gift inventory.");
+      toast.error(t("tools.bond.toasts.inventoryCreateFail"));
     } finally {
       setBusy(false);
     }
@@ -880,7 +933,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update gift inventory.");
+      toast.error(t("tools.bond.toasts.inventoryUpdateFail"));
     } finally {
       setBusy(false);
     }
@@ -917,7 +970,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create gift target.");
+      toast.error(t("tools.bond.toasts.targetCreateFail"));
     } finally {
       setBusy(false);
     }
@@ -952,7 +1005,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update gift target.");
+      toast.error(t("tools.bond.toasts.targetUpdateFail"));
     } finally {
       setBusy(false);
     }
@@ -980,7 +1033,7 @@ export function BondView({ students, gifts }: BondViewProps) {
         id: selectedInvenetoryId,
       });
 
-      toast.success("Gift inventory deleted.");
+      toast.success(t("tools.bond.toasts.inventoryDeleteSuccess"));
 
       setSelectedInventoryId(null);
       setSelectedTargetId(null);
@@ -997,7 +1050,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete gift inventory.");
+      toast.error(t("tools.bond.toasts.inventoryDeleteFail"));
     } finally {
       setBusy(false);
     }
@@ -1015,7 +1068,7 @@ export function BondView({ students, gifts }: BondViewProps) {
         id: selectedTargetId,
       });
 
-      toast.success("Gift target deleted.");
+      toast.success(t("tools.bond.toasts.targetDeleteSuccess"));
 
       setSelectedTargetId(null);
       updateCurrentBondExp("0");
@@ -1030,7 +1083,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete gift target.");
+      toast.error(t("tools.bond.toasts.targetDeleteFail"));
     } finally {
       setBusy(false);
     }
@@ -1143,10 +1196,6 @@ export function BondView({ students, gifts }: BondViewProps) {
     updateTargetBondExp(target.targetExp?.toString() ?? "", true);
   }, [selectedTargetId]);
 
-  useEffect(() => {
-    console.log("Gift counts changed:", giftCounts);
-  }, [giftCounts]);
-
   return (
     <div className="flex flex-col-reverse md:flex-row gap-6">
       <div className="md:basis-2/3">
@@ -1155,7 +1204,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             <div className="flex flex-col gap-4 mb-6">
               <div className="flex flex-col gap-2">
                 <Label className="text-xs" htmlFor="gift-inventory">
-                  Gift Inventory (BETA)
+                  {t("tools.bond.inventory.select.label")}
                 </Label>
 
                 <div className="flex flex-col md:flex-row gap-2 items-center">
@@ -1168,11 +1217,14 @@ export function BondView({ students, gifts }: BondViewProps) {
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value="_">(no inventory)</SelectItem>
+                      <SelectItem value="_">
+                        {t("tools.bond.inventory.select.none")}
+                      </SelectItem>
 
                       {inventoriesQuery.data?.map((inventory) => (
                         <SelectItem key={inventory._id} value={inventory._id}>
-                          {inventory.name ?? "Unnamed Gift Inventory"}
+                          {inventory.name ??
+                            t("tools.bond.inventory.select.unnamed")}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1191,7 +1243,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                       </CreateGiftInventoryDialog>
 
                       <TooltipContent className="text-center">
-                        New Inventory
+                        {t("tools.bond.inventory.select.new")}
                       </TooltipContent>
                     </Tooltip>
 
@@ -1211,7 +1263,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                       </RenameGiftInventoryDialog>
 
                       <TooltipContent className="text-center">
-                        Rename Inventory
+                        {t("tools.bond.inventory.select.rename")}
                       </TooltipContent>
                     </Tooltip>
 
@@ -1226,14 +1278,16 @@ export function BondView({ students, gifts }: BondViewProps) {
                       </TooltipTrigger>
 
                       <TooltipContent className="text-center">
-                        Save Inventory
+                        {t("tools.bond.inventory.select.save")}
                       </TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
                       <ConfirmDialog
-                        title="Delete Gift Inventory?"
-                        description="Are you sure you want to delete this gift inventory? The gift counts, as well as all the associated targets will be permanently removed."
+                        title={t("tools.bond.dialogs.deleteInventory.title")}
+                        description={t(
+                          "tools.bond.dialogs.deleteInventory.description",
+                        )}
                         confirmVariant="destructive"
                         onConfirm={handleDeleteInventory}
                       >
@@ -1248,7 +1302,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                       </ConfirmDialog>
 
                       <TooltipContent className="text-center">
-                        Delete Inventory
+                        {t("tools.bond.inventory.select.delete")}
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -1257,7 +1311,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
               <div className="flex flex-col gap-2">
                 <Label className="text-xs" htmlFor="gift-target">
-                  Gift Target
+                  {t("tools.bond.inventory.target.label")}
                 </Label>
 
                 <div className="flex gap-2 items-center">
@@ -1271,12 +1325,16 @@ export function BondView({ students, gifts }: BondViewProps) {
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value="_">(no target)</SelectItem>
+                      <SelectItem value="_">
+                        {t("tools.bond.inventory.target.none")}
+                      </SelectItem>
 
                       {inventoryQuery.data?.targets.map((target) => (
                         <SelectItem key={target._id} value={target._id}>
                           {studentMap[target.studentId]?.name ??
-                            `Unknown Student: ${target.studentId}`}
+                            t("tools.bond.inventory.target.unknown", {
+                              studentId: target.studentId,
+                            })}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -1299,14 +1357,18 @@ export function BondView({ students, gifts }: BondViewProps) {
                     </TooltipTrigger>
 
                     <TooltipContent className="text-center">
-                      New Target ({selectedStudent?.name})
+                      {t("tools.bond.inventory.target.new", {
+                        studentName: selectedStudent?.name ?? "N/A",
+                      })}
                     </TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
                     <ConfirmDialog
-                      title="Delete Gift Target?"
-                      description="Are you sure you want to delete this gift target? The bond data, as well as the selected gifts will be permanently removed. Your gift inventory will not be affected."
+                      title={t("tools.bond.dialogs.deleteTarget.title")}
+                      description={t(
+                        "tools.bond.dialogs.deleteTarget.description",
+                      )}
                       confirmVariant="destructive"
                       onConfirm={handleDeleteTarget}
                     >
@@ -1321,7 +1383,9 @@ export function BondView({ students, gifts }: BondViewProps) {
                     </ConfirmDialog>
 
                     <TooltipContent className="text-center">
-                      Delete Target ({selectedStudent?.name})
+                      {t("tools.bond.inventory.target.delete", {
+                        studentName: selectedStudent?.name ?? "N/A",
+                      })}
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -1331,7 +1395,7 @@ export function BondView({ students, gifts }: BondViewProps) {
         </Authenticated>
 
         <div className="flex items-center gap-2 mb-6">
-          <Label className="shrink-0">Sort by:</Label>
+          <Label className="shrink-0">{t("tools.bond.sort.label")}</Label>
 
           <Select
             value={sortMethod}
@@ -1342,9 +1406,15 @@ export function BondView({ students, gifts }: BondViewProps) {
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="default">
+                {t("tools.bond.sort.default")}
+              </SelectItem>
               <SelectItem value="by-relevance" disabled={!selectedStudent}>
-                {selectedStudent?.name ?? "Student"}'s Preferences
+                {selectedStudent
+                  ? t("tools.bond.sort.relevance.student", {
+                      studentName: selectedStudent.name,
+                    })
+                  : t("tools.bond.sort.relevance.noStudent")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -1358,13 +1428,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             >
               <Popover>
                 <PopoverTrigger className="flex-1 flex">
-                  <ItemCard
-                    name={gift.name}
-                    iconName={gift.iconName}
-                    description={gift.description}
-                    rarity={gift.rarity}
-                    className="cursor-pointer"
-                  />
+                  <GiftItemCard gift={gift} />
                 </PopoverTrigger>
 
                 <PopoverContent className="w-[90vw] md:w-[450px] ring-4 max-h-[500px] overflow-y-auto shadow-lg ring-black/75 dark:ring-white/75 p-0">
@@ -1400,7 +1464,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                     (gift.isLovedByEveryone && gift.expValue === 60)) && (
                     <Image
                       src={giftAdoredImage}
-                      alt="Adored"
+                      alt={t("tools.bond.item.adored")}
                       className="size-8"
                       title={`${gift.expValue * 4} EXP`}
                     />
@@ -1410,7 +1474,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                     (gift.isLovedByEveryone && gift.expValue !== 60)) && (
                     <Image
                       src={giftLovedImage}
-                      alt="Loved"
+                      alt={t("tools.bond.item.loved")}
                       className="size-8"
                       title={`${gift.expValue * 3} EXP`}
                     />
@@ -1419,7 +1483,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                   {gift.likedBy.some((s) => s.id === selectedStudent.id) && (
                     <Image
                       src={giftLikedImage}
-                      alt="Liked"
+                      alt={t("tools.bond.item.liked")}
                       className="size-8"
                       title={`${gift.expValue * 2} EXP`}
                     />
@@ -1443,9 +1507,9 @@ export function BondView({ students, gifts }: BondViewProps) {
 
           <div className="flex flex-col items-center gap-2 relative">
             <ItemCard
-              name="Gift Choice Box"
+              name={t("tools.bond.choiceBox.name")}
               iconName="item_icon_favor_selection"
-              description="A gift box that lets you choose the gift you want."
+              description={t("tools.bond.choiceBox.description")}
               rarity="SR"
               className="cursor-pointer"
             />
@@ -1494,14 +1558,16 @@ export function BondView({ students, gifts }: BondViewProps) {
           className="w-[90vw] md:w-[450px]"
         >
           <Button variant="outline" className="w-full justify-between">
-            {selectedStudent ? `${selectedStudent.name}` : "Select Student"}
+            {selectedStudent
+              ? `${selectedStudent.name}`
+              : t("tools.bond.student.select")}
             <ChevronsUpDownIcon />
           </Button>
         </StudentPicker>
 
         {!selectedStudent && (
           <div className="text-sm text-muted-foreground border rounded-md w-full p-6 text-center">
-            To get started, select a student from the dropdown above.
+            {t("tools.bond.student.notice")}
           </div>
         )}
 
@@ -1522,13 +1588,15 @@ export function BondView({ students, gifts }: BondViewProps) {
                     onCheckedChange={setOnlyDisplayRelevantGifts}
                   />
                   <Label htmlFor="only-relevant-gifts">
-                    Only Display Favorite Gifts
+                    {t("tools.bond.student.onlyFavorite")}
                   </Label>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col gap-1">
-                    <Label className="text-xs">Current Rank</Label>
+                    <Label className="text-xs">
+                      {t("tools.bond.student.currentRank")}
+                    </Label>
 
                     <Input
                       type="number"
@@ -1540,7 +1608,9 @@ export function BondView({ students, gifts }: BondViewProps) {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <Label className="text-xs">Target Rank</Label>
+                    <Label className="text-xs">
+                      {t("tools.bond.student.targetRank")}
+                    </Label>
 
                     <Input
                       type="number"
@@ -1553,7 +1623,9 @@ export function BondView({ students, gifts }: BondViewProps) {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <Label className="text-xs">Current EXP</Label>
+                    <Label className="text-xs">
+                      {t("tools.bond.student.currentExp")}
+                    </Label>
 
                     <Input
                       type="number"
@@ -1564,7 +1636,9 @@ export function BondView({ students, gifts }: BondViewProps) {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <Label className="text-xs">Target EXP</Label>
+                    <Label className="text-xs">
+                      {t("tools.bond.student.targetExp")}
+                    </Label>
 
                     <Input
                       type="number"
@@ -1581,11 +1655,11 @@ export function BondView({ students, gifts }: BondViewProps) {
             {selectedStudent && hasIrrelevantGifts && (
               <Alert>
                 <AlertCircleIcon />
-                <AlertTitle>Notice</AlertTitle>
+                <AlertTitle>
+                  {t("tools.bond.student.irrelevantGifts.title")}
+                </AlertTitle>
                 <AlertDescription>
-                  Some of the gifts you selected will not be displayed because
-                  they are not relevant to the selected student. In order to
-                  change them, uncheck the "Only Display Favorite Gifts" option.
+                  {t("tools.bond.student.irrelevantGifts.description")}
                 </AlertDescription>
               </Alert>
             )}
@@ -1605,7 +1679,9 @@ export function BondView({ students, gifts }: BondViewProps) {
               selectedStudentId={selectedStudent.id}
               exp={totalExp}
             >
-              <Button variant="outline">View Gift Breakdown</Button>
+              <Button variant="outline">
+                {t("tools.bond.student.breakdown")}
+              </Button>
             </GiftBreakdown>
 
             {remainingExpBreakdown && targetBondExp && (
@@ -1623,8 +1699,8 @@ export function BondView({ students, gifts }: BondViewProps) {
       <Authenticated>
         <SaveDialog
           open={navigationGuard.active}
-          title="Save target data?"
-          description="You have unsaved changes in your bond setup. Would you like to save them in the cloud before leaving the page?"
+          title={t("tools.bond.dialogs.save.title")}
+          description={t("tools.bond.dialogs.save.description")}
           onYes={handleSave}
           onNo={navigationGuard.accept}
           onCancel={navigationGuard.reject}

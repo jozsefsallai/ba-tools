@@ -125,5 +125,166 @@
 
     "loading": "Loading timeline...",
     "empty": "No items in timeline."
+  },
+
+  "bond": {
+    "title": "Relationship Rank Calculator",
+    "description": "Using this tool you can calculate the relationship rank of a student based on what gifts you give to them. This tool can be useful if you want to plan gifts ahead or if you want to check your gift saving progress.",
+
+    "inventory": {
+      "select": {
+        "label": "Gift Inventory (BETA)",
+        "none": "(no inventory)",
+        "unnamed": "Unnamed Gift Inventory",
+        "new": "New Inventory",
+        "rename": "Rename Inventory",
+        "save": "Save Inventory",
+        "delete": "Delete Inventory"
+      },
+
+      "target": {
+        "label": "Gift Target",
+        "none": "(no target)",
+        "unknown": "Unknown Student: {studentId}",
+        "new": "New Target ({studentName})",
+        "delete": "Delete Target ({studentName})"
+      }
+    },
+
+    "sort": {
+      "label": "Sort by:",
+      "default": "Default",
+      "relevance": {
+        "student": "{studentName}'s Preferences",
+        "noStudent": "Student's Preferences"
+      }
+    },
+
+    "item": {
+      "adored": "Adored",
+      "loved": "Loved",
+      "liked": "Liked",
+      "normal": "Normal",
+
+      "universal": "This gift is {expValue, plural, 60 {adored} other {loved}} by everyone and gives <strong>{exp}</strong> EXP!",
+      "adoredBy": "Adored by ({exp} EXP):",
+      "lovedBy": "Loved by ({exp} EXP):",
+      "likedBy": "Liked by ({exp} EXP):",
+
+      "everyoneElse": "Gives <strong>{exp}</strong> EXP to everyone else."
+    },
+
+    "choiceBox": {
+      "name": "Gift Choice Box",
+      "description": "A gift box that lets you choose the gift you want."
+    },
+
+    "student": {
+      "select": "Select Student",
+      "notice": "To get started, select a student from the dropdown above.",
+
+      "onlyFavorite": "Only Display Favorite Gifts",
+      "currentRank": "Current Rank",
+      "targetRank": "Target Rank",
+      "currentExp": "Current EXP",
+      "targetExp": "Target EXP",
+
+      "irrelevantGifts": {
+        "title": "Notice",
+        "description": "Some of the gifts you selected will not be displayed because they are not relevant to the selected student. In order to change them, uncheck the \"Only Display Favorite Gifts\" option."
+      },
+
+      "breakdown": "View Gift Breakdown"
+    },
+
+    "progress": {
+      "goal": "(Goal: {targetBond})",
+      "total": "<strong>Total EXP:</strong> {exp}"
+    },
+
+    "breakdown": {
+      "title": "Gift Breakdown",
+      "description": "Breakdown of gifts and their EXP values.",
+
+      "table": {
+        "gift": "Gift",
+        "unitExp": "Unit EXP",
+        "count": "Count",
+        "totalExp": "Total EXP"
+      },
+
+      "total": "Total",
+      "close": "Close"
+    },
+
+    "inventoryTip": "<strong>Tip:</strong> <signIn></signIn> to save your gift inventory and bond targets (BETA).",
+
+    "remaining": {
+      "title": "EXP Needed to Reach Rank {targetBond}: {expNeeded}",
+      "description": "In order to go from <strong>Rank {currentBond}</strong> to <strong>Rank {targetBond}</strong>, you will need one of the following:",
+
+      "headpats": "Headpats",
+      "likedSSR": "Liked SSR Gifts",
+      "lovedSSR": "Loved SSR Gifts",
+      "adoredSSR": "Adored SSR Gifts",
+      "normalSR": "Normal SR Gifts",
+      "likedSR": "Liked SR Gifts",
+      "lovedSR": "Loved SR Gifts",
+      "adoredSR": "Adored SR Gifts",
+
+      "optimal": "Optimal Gift and Headpat Breakdown",
+      "excludeSSR": "Exclude SSR Gifts",
+      "optimalNote": "* Note: The optimal breakdown is calculated based on a total of {paddedExp} EXP.",
+      "wasted": "Wasted {wasted} EXP"
+    },
+
+    "lessons": {
+      "title": "Lessons Breakdown",
+      "description": "If you wanted to gain <strong>{exp} EXP</strong> through lessons alone, here's how many lessons it would take you at each rank and level.",
+
+      "table": {
+        "rank": "Rank",
+        "level": "Level",
+        "exp": "EXP",
+        "bonus": "Bonus EXP",
+        "count": "Count"
+      },
+
+      "total": "(total {exp})",
+      "bonusChance": "<strong>{chance}</strong>% chance",
+
+      "counts": {
+        "withBonus": "With bonus: <strong>{countWithBonus}</strong>",
+        "expected": "Expected: <strong>{expectedCount}</strong>"
+      }
+    },
+
+    "toasts": {
+      "inventoryCreateFail": "Failed to create gift inventory.",
+      "inventoryUpdateFail": "Failed to update gift inventory.",
+      "targetCreateFail": "Failed to create gift target.",
+      "targetUpdateFail": "Failed to update gift target.",
+      "inventoryDeleteFail": "Failed to delete gift inventory.",
+      "inventoryDeleteSuccess": "Gift inventory deleted.",
+      "targetDeleteFail": "Failed to delete gift target.",
+      "targetDeleteSuccess": "Gift target deleted."
+    },
+
+    "dialogs": {
+      "deleteInventory": {
+        "title": "Delete Gift Inventory?",
+        "description": "Are you sure you want to delete this gift inventory? The gift counts, as well as all the associated targets will be permanently removed."
+      },
+
+      "deleteTarget": {
+        "title": "Delete Gift Target?",
+        "description": "Are you sure you want to delete this gift target? The bond data, as well as the selected gifts will be permanently removed. Your gift inventory will not be affected."
+      },
+
+      "save": {
+        "title": "Save target data?",
+        "description": "You have unsaved changes in your bond setup. Would you like to save them in the cloud before leaving the page?"
+      }
+    }
   }
 }

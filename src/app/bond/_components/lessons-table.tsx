@@ -10,6 +10,7 @@ import {
   lessonsFavorTable,
   type LessonsFavorTableEntry,
 } from "@/lib/favor-table";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 export type LessonsTableProps = {
@@ -24,6 +25,8 @@ export type LessonsEntry = {
 };
 
 export function LessonsTable({ exp }: LessonsTableProps) {
+  const t = useTranslations();
+
   const lessonsNeeded = useMemo<LessonsEntry[]>(() => {
     return lessonsFavorTable.map((lesson) => ({
       lesson,
@@ -39,21 +42,23 @@ export function LessonsTable({ exp }: LessonsTableProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="font-semibold">Lessons Breakdown</div>
+      <div className="font-semibold">{t("tools.bond.lessons.title")}</div>
 
       <div className="text-xs text-muted-foreground">
-        If you wanted to gain <strong>{exp} EXP</strong> through lessons alone,
-        here's how many lessons it would take you at each rank and level.
+        {t.rich("tools.bond.lessons.description", {
+          strong: (children) => <strong>{children}</strong>,
+          exp,
+        })}
       </div>
 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Rank</TableHead>
-            <TableHead>Level</TableHead>
-            <TableHead>EXP</TableHead>
-            <TableHead>Bonus EXP</TableHead>
-            <TableHead>Count</TableHead>
+            <TableHead>{t("tools.bond.lessons.table.rank")}</TableHead>
+            <TableHead>{t("tools.bond.lessons.table.level")}</TableHead>
+            <TableHead>{t("tools.bond.lessons.table.exp")}</TableHead>
+            <TableHead>{t("tools.bond.lessons.table.bonus")}</TableHead>
+            <TableHead>{t("tools.bond.lessons.table.count")}</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -75,22 +80,32 @@ export function LessonsTable({ exp }: LessonsTableProps) {
                   <div>
                     {lesson.bonusExp}{" "}
                     <span className="text-xs text-muted-foreground">
-                      (total {lesson.exp + lesson.bonusExp})
+                      {t("tools.bond.lessons.total", {
+                        exp: lesson.exp + lesson.bonusExp,
+                      })}
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    <strong>{(lesson.bonusChance * 100).toFixed(0)}%</strong>{" "}
-                    chance
+                    {t.rich("tools.bond.lessons.bonusChance", {
+                      strong: (children) => <strong>{children}</strong>,
+                      chance: (lesson.bonusChance * 100).toFixed(0),
+                    })}
                   </div>
                 </TableCell>
 
                 <TableCell className="align-top">
                   <div>{count}</div>
                   <div className="text-xs text-muted-foreground">
-                    With bonus: <strong>{countWithBonus}</strong>
+                    {t.rich("tools.bond.lessons.counts.withBonus", {
+                      strong: (children) => <strong>{children}</strong>,
+                      countWithBonus,
+                    })}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Expected: <strong>{expectedCount}</strong>
+                    {t.rich("tools.bond.lessons.counts.expected", {
+                      strong: (children) => <strong>{children}</strong>,
+                      expectedCount,
+                    })}
                   </div>
                 </TableCell>
               </TableRow>

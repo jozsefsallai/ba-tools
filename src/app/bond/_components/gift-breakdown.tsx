@@ -29,6 +29,7 @@ import giftLovedImage from "@/assets/images/gift_loved.png";
 import giftLikedImage from "@/assets/images/gift_liked.png";
 import giftNormalImage from "@/assets/images/gift_normal.png";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 
 export type GiftBreakdownProps = PropsWithChildren<{
   gifts: GiftWithStudents[];
@@ -44,6 +45,9 @@ function GiftRow({
   count,
   selectedStudentId,
 }: { gift: GiftWithStudents; count: number; selectedStudentId: string }) {
+  const t = useTranslations();
+  const locale = useLocale();
+
   const isAdored =
     gift.adoredBy.some((s) => s.id === selectedStudentId) ||
     (gift.isLovedByEveryone && gift.expValue === 60);
@@ -70,13 +74,31 @@ function GiftRow({
     return gift.rarity === "SSR" ? gift.expValue * 2 : gift.expValue;
   }, [isAdored, isLoved, isLiked, gift]);
 
+  const giftName = useMemo(() => {
+    switch (locale) {
+      case "en":
+        return gift.name;
+      case "jp":
+        return gift.nameJP;
+    }
+  }, [gift, locale]);
+
+  const giftDescription = useMemo(() => {
+    switch (locale) {
+      case "en":
+        return gift.description;
+      case "jp":
+        return gift.descriptionJP;
+    }
+  }, [gift, locale]);
+
   return (
     <TableRow className="table table-fixed w-full">
       <TableCell>
         <ItemCard
-          name={gift.name}
+          name={giftName}
           iconName={gift.iconName}
-          description={gift.description}
+          description={giftDescription}
           rarity={gift.rarity}
           displayName={false}
         />
@@ -85,19 +107,35 @@ function GiftRow({
       <TableCell>
         <div className="flex items-center gap-1">
           {isAdored && (
-            <Image src={giftAdoredImage} alt="Adored" className="size-6" />
+            <Image
+              src={giftAdoredImage}
+              alt={t("tools.bond.item.adored")}
+              className="size-6"
+            />
           )}
 
           {isLoved && (
-            <Image src={giftLovedImage} alt="Loved" className="size-6" />
+            <Image
+              src={giftLovedImage}
+              alt={t("tools.bond.item.loved")}
+              className="size-6"
+            />
           )}
 
           {isLiked && (
-            <Image src={giftLikedImage} alt="Liked" className="size-6" />
+            <Image
+              src={giftLikedImage}
+              alt={t("tools.bond.item.liked")}
+              className="size-6"
+            />
           )}
 
           {!isAdored && !isLoved && !isLiked && (
-            <Image src={giftNormalImage} alt="Normal" className="size-6" />
+            <Image
+              src={giftNormalImage}
+              alt={t("tools.bond.item.normal")}
+              className="size-6"
+            />
           )}
 
           {exp}
@@ -120,6 +158,8 @@ export function GiftBreakdown({
   exp,
   children,
 }: GiftBreakdownProps) {
+  const t = useTranslations();
+
   const giftsWithCounts = useMemo(() => {
     return gifts.filter(
       (gift) => giftCounts[gift.id] > 0 && giftEnabled[gift.id],
@@ -132,23 +172,23 @@ export function GiftBreakdown({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gift Breakdown</DialogTitle>
+          <DialogTitle>{t("tools.bond.breakdown.title")}</DialogTitle>
 
           <DialogDescription>
-            Breakdown of gifts and their EXP values.
+            {t("tools.bond.breakdown.description")}
           </DialogDescription>
         </DialogHeader>
 
         <Table>
           <TableHeader className="block">
             <TableRow className="table table-fixed w-full">
-              <TableHead>Gift</TableHead>
+              <TableHead>{t("tools.bond.breakdown.table.gift")}</TableHead>
 
-              <TableHead>Unit EXP</TableHead>
+              <TableHead>{t("tools.bond.breakdown.table.unitExp")}</TableHead>
 
-              <TableHead>Count</TableHead>
+              <TableHead>{t("tools.bond.breakdown.table.count")}</TableHead>
 
-              <TableHead>Total EXP</TableHead>
+              <TableHead>{t("tools.bond.breakdown.table.totalExp")}</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -166,9 +206,9 @@ export function GiftBreakdown({
               <TableRow className="table table-fixed w-full">
                 <TableCell>
                   <ItemCard
-                    name="Gift Choice Box"
+                    name={t("tools.bond.choiceBox.name")}
                     iconName="item_icon_favor_selection"
-                    description="A gift box that lets you choose the gift you want."
+                    description={t("tools.bond.choiceBox.description")}
                     rarity="SR"
                     displayName={false}
                   />
@@ -195,7 +235,7 @@ export function GiftBreakdown({
           <TableFooter className="block">
             <TableRow className="text-lg table table-fixed w-full">
               <TableCell colSpan={3} className="text-right font-bold">
-                Total
+                {t("tools.bond.breakdown.total")}
               </TableCell>
               <TableCell>{exp}</TableCell>
             </TableRow>
@@ -204,7 +244,7 @@ export function GiftBreakdown({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button>Close</Button>
+            <Button>{t("tools.bond.breakdown.close")}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

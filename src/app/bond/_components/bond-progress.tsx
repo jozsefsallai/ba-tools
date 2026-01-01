@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import bondImage from "@/assets/images/bond.png";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export type BondProgressProps = {
   startingLevel: FavorTableEntry;
@@ -20,6 +21,8 @@ export function BondProgress({
   exp,
   targetBond,
 }: BondProgressProps) {
+  const t = useTranslations();
+
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="text-3xl font-bold flex items-start gap-2">
@@ -31,7 +34,7 @@ export function BondProgress({
 
           {!!targetBond && (
             <small className="text-sm text-muted-foreground">
-              (Goal: {targetBond})
+              ({t("tools.bond.progress.goal", { targetBond })})
             </small>
           )}
         </div>
@@ -62,7 +65,10 @@ export function BondProgress({
       )}
 
       <div className="text-sm text-center text-muted-foreground">
-        <strong>Total EXP:</strong> {exp}
+        {t.rich("tools.bond.progress.total", {
+          strong: (children) => <strong>{children}</strong>,
+          exp,
+        })}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { LessonsTable } from "@/app/bond/_components/lessons-table";
+import { useTranslations } from "next-intl";
 
 export type RemainingExpBreakdown = {
   headpats: number;
@@ -78,6 +79,8 @@ function BreakdownItem({
   count: number;
   wasted: number;
 }) {
+  const t = useTranslations();
+
   return (
     <div
       className={cn("flex flex-col items-center gap-1", {
@@ -89,7 +92,7 @@ function BreakdownItem({
       <span className="text-lg font-bold">{count || "N/A"}</span>
       {wasted > 0 && (
         <span className="text-xs text-muted-foreground">
-          Wasted {wasted} EXP
+          {t("tools.bond.remaining.wasted", { wasted })}
         </span>
       )}
     </div>
@@ -102,6 +105,8 @@ export function RemainingExpBreakdownCard({
   expNeeded,
   breakdown,
 }: RemainingExpBreakdownCardProps) {
+  const t = useTranslations();
+
   const [excludeSSRGifts, setExcludeSSRGifts] = useState(false);
 
   const wastedEXP = useMemo<WastedEXPResult>(() => {
@@ -195,70 +200,75 @@ export function RemainingExpBreakdownCard({
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
-          EXP Needed to Reach Rank {targetBond}: {expNeeded}
+          {t("tools.bond.remaining.title", {
+            targetBond: targetBond ?? "",
+            expNeeded,
+          })}
         </CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6">
         <div className="text-xs text-muted-foreground">
-          In order to go from <strong>Rank {currentBond}</strong> to{" "}
-          <strong>Rank {targetBond}</strong>, you will need one of the
-          following:
+          {t.rich("tools.bond.remaining.description", {
+            strong: (children) => <strong>{children}</strong>,
+            currentBond,
+            targetBond: targetBond ?? "",
+          })}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-4 md:grid-rows-2 gap-4">
           <BreakdownItem
             image={headpatImage}
-            label="Headpats"
+            label={t("tools.bond.remaining.headpats")}
             count={breakdown.headpats}
             wasted={wastedEXP.wastedEXPMap.headpats}
           />
 
           <BreakdownItem
             image={giftLikedImage}
-            label="Liked SSR Gifts"
+            label={t("tools.bond.remaining.likedSSR")}
             count={breakdown.likedSSRGifts}
             wasted={wastedEXP.wastedEXPMap.likedSSRGifts}
           />
 
           <BreakdownItem
             image={giftLovedImage}
-            label="Loved SSR Gifts"
+            label={t("tools.bond.remaining.lovedSSR")}
             count={breakdown.lovedSSRGifts}
             wasted={wastedEXP.wastedEXPMap.lovedSSRGifts}
           />
 
           <BreakdownItem
             image={giftAdoredImage}
-            label="Adored SSR Gifts"
+            label={t("tools.bond.remaining.adoredSSR")}
             count={breakdown.adoredSSRGifts}
             wasted={wastedEXP.wastedEXPMap.adoredSSRGifts}
           />
 
           <BreakdownItem
             image={giftNormalImage}
-            label="Normal SR Gifts"
+            label={t("tools.bond.remaining.normalSR")}
             count={breakdown.normalSRGifts}
             wasted={wastedEXP.wastedEXPMap.normalSRGifts}
           />
 
           <BreakdownItem
             image={giftLikedImage}
-            label="Liked SR Gifts"
+            label={t("tools.bond.remaining.likedSR")}
             count={breakdown.likedSRGifts}
             wasted={wastedEXP.wastedEXPMap.likedSRGifts}
           />
 
           <BreakdownItem
             image={giftLovedImage}
-            label="Loved SR Gifts"
+            label={t("tools.bond.remaining.lovedSR")}
             count={breakdown.lovedSRGifts}
             wasted={wastedEXP.wastedEXPMap.lovedSRGifts}
           />
 
           <BreakdownItem
             image={giftAdoredImage}
-            label="Adored SR Gifts"
+            label={t("tools.bond.remaining.adoredSR")}
             count={breakdown.adoredSRGifts}
             wasted={wastedEXP.wastedEXPMap.adoredSRGifts}
           />
@@ -269,7 +279,7 @@ export function RemainingExpBreakdownCard({
         {wastedEXP.hasWastedEXP && (
           <div className="flex flex-col gap-4">
             <div className="font-semibold">
-              Optimal Gift and Headpat Breakdown
+              {t("tools.bond.remaining.optimal")}
             </div>
 
             <div className="flex items-center gap-2">
@@ -279,62 +289,64 @@ export function RemainingExpBreakdownCard({
                 onCheckedChange={setExcludeSSRGifts}
               />
 
-              <Label htmlFor="exclude-ssr-gifts">Exclude SSR Gifts</Label>
+              <Label htmlFor="exclude-ssr-gifts">
+                {t("tools.bond.remaining.excludeSSR")}
+              </Label>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-4 md:grid-rows-2 gap-4">
               <BreakdownItem
                 image={headpatImage}
-                label="Headpats"
+                label={t("tools.bond.remaining.headpats")}
                 count={optimalBreakdown.headpats}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftLikedImage}
-                label="Liked SSR Gifts"
+                label={t("tools.bond.remaining.likedSSR")}
                 count={optimalBreakdown.likedSSRGifts}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftLovedImage}
-                label="Loved SSR Gifts"
+                label={t("tools.bond.remaining.lovedSSR")}
                 count={optimalBreakdown.lovedSSRGifts}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftAdoredImage}
-                label="Adored SSR Gifts"
+                label={t("tools.bond.remaining.adoredSSR")}
                 count={optimalBreakdown.adoredSSRGifts}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftNormalImage}
-                label="Normal SR Gifts"
+                label={t("tools.bond.remaining.normalSR")}
                 count={optimalBreakdown.normalSRGifts}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftLikedImage}
-                label="Liked SR Gifts"
+                label={t("tools.bond.remaining.likedSR")}
                 count={optimalBreakdown.likedSRGifts}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftLovedImage}
-                label="Loved SR Gifts"
+                label={t("tools.bond.remaining.lovedSR")}
                 count={optimalBreakdown.lovedSRGifts}
                 wasted={0}
               />
 
               <BreakdownItem
                 image={giftAdoredImage}
-                label="Adored SR Gifts"
+                label={t("tools.bond.remaining.adoredSR")}
                 count={optimalBreakdown.adoredSRGifts}
                 wasted={0}
               />
@@ -342,8 +354,7 @@ export function RemainingExpBreakdownCard({
 
             {paddedExp > expNeeded && (
               <div className="text-xs text-muted-foreground">
-                * Note: The optimal breakdown is calculated based on a total of{" "}
-                {paddedExp} EXP.
+                {t("tools.bond.remaining.optimalNote", { paddedExp })}
               </div>
             )}
           </div>
