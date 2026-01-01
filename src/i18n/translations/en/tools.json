@@ -310,7 +310,7 @@
 
         "score": {
           "label": "Raid Score",
-          "placeholder": "e.g. 39,966,640",
+          "placeholder": "e.g. 39,345,039",
           "hint": "The raid score value. Can only be a number. Commas not required, supports decimal values."
         }
       },
