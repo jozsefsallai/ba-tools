@@ -180,6 +180,9 @@ model Student {
   name          String
   lastName      String
   firstName     String
+  nameJP        String  @default("")
+  lastNameJP    String  @default("")
+  firstNameJP   String  @default("")
   school        School
   club          Club
   age           String
@@ -266,7 +269,9 @@ model Skill {
 model Gift {
   id                Int        @id
   name              String
+  nameJP            String     @default("")
   description       String?
+  descriptionJP     String?
   rarity            ItemRarity
   expValue          Int        @default(0)
   iconName          String
