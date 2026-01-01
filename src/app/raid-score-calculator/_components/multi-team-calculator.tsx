@@ -10,6 +10,7 @@ import {
   type RaidDuration,
 } from "@/lib/raids";
 import { PlusIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 
 export type MultiTeamCalculatorProps = {
@@ -21,6 +22,8 @@ export function MultiTeamCalculator({
   duration,
   difficulty,
 }: MultiTeamCalculatorProps) {
+  const t = useTranslations();
+
   const [clearTimes, setClearTimes] = useState<string[]>([""]);
 
   const handleAddClearTime = useCallback(() => {
@@ -90,7 +93,8 @@ export function MultiTeamCalculator({
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
-            <strong>Total Time:</strong> {formattedTotalTime}
+            <strong>{t("tools.raidScore.mode.multi.total")}</strong>{" "}
+            {formattedTotalTime}
           </div>
         </CardContent>
       </Card>
@@ -116,7 +120,7 @@ export function MultiTeamCalculator({
       </div>
 
       <Button onClick={handleAddClearTime}>
-        <PlusIcon /> Add Clear Time
+        <PlusIcon /> {t("tools.raidScore.mode.multi.add")}
       </Button>
     </div>
   );

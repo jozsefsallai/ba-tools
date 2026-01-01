@@ -286,5 +286,40 @@
         "description": "You have unsaved changes in your bond setup. Would you like to save them in the cloud before leaving the page?"
       }
     }
+  },
+
+  "raidScore": {
+    "title": "Raid Score Calculator",
+    "description": "You can use this tool to convert between clear time and raid score for a given boss and difficulty.",
+
+    "mode": {
+      "single": {
+        "title": "Single Team Mode",
+
+        "clearTime": {
+          "label": "Clear Time",
+          "placeholder": "e.g. 2:34.567",
+          "hint": "The total clear time of the raid, sum of times from all teams."
+        },
+
+        "remainingTime": {
+          "label": "Remaining Time",
+          "placeholder": "e.g. 0:25.433",
+          "hint": "The remaining time a team has when reaching 0 HP. This is niche and only useful for 1-team clears."
+        },
+
+        "score": {
+          "label": "Raid Score",
+          "placeholder": "e.g. 39,966,640",
+          "hint": "The raid score value. Can only be a number. Commas not required, supports decimal values."
+        }
+      },
+
+      "multi": {
+        "title": "Multiple Teams Mode",
+        "total": "Total Time:",
+        "add": "Add Clear Time"
+      }
+    }
   }
 }

@@ -64,5 +64,37 @@
       "no": "保存しない",
       "cancel": "キャンセル"
     }
+  },
+
+  "raids": {
+    "binah": "ビナー",
+    "kaiten": "KAITEN FX Mk.0",
+    "chesed": "ケセド",
+    "shirokuro": "シロ&クロ",
+    "hieronymus": "ヒエロニムス",
+    "perorodzilla": "ペロロジラ",
+    "hod": "ホド",
+    "gregorius": "グレゴリオ",
+    "hovercraft": "ホバークラフト",
+    "kurokage": "クロカゲ",
+    "geburah": "ゲブラ",
+    "yesod": "イェソド"
+  },
+
+  "difficulties": {
+    "Normal": "NORMAL",
+    "Hard": "HARD",
+    "VeryHard": "VERY HARD",
+    "Hardcore": "HARDCORE",
+    "Extreme": "EXTREME",
+    "Insane": "INSANE",
+    "Torment": "TORMENT",
+    "Lunatic": "LUNATIC"
+  },
+
+  "duration": {
+    "3min": "3分",
+    "4min": "4分",
+    "4min30sec": "4分30秒"
   }
 }

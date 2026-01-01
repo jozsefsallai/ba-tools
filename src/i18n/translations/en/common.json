@@ -30,6 +30,7 @@
       }
     }
   },
+
   "footer": {
     "copyright": "Made by <a>joexyz</a>. This website is in no way affiliated or endorsed by NEXON Games Co., Ltd. or Yostar, Inc.",
     "nav": {
@@ -39,14 +40,17 @@
       "sourceCode": "Source code"
     }
   },
+
   "studentPicker": {
     "zds": "No such student."
   },
+
   "mdTips": {
     "tip1": "Wrapping links between &lt; and &gt; will create a link (e.g.: <code>'<'https://bluearchive.nexon.com'>'</code>).",
     "tip2": "<strong>YouTube</strong> and <strong>BiliBili</strong> links written using the format above will automatically be embedded",
     "tip3": "See this <a>Markdown Cheat Sheet</a> for more formatting tips. Please note that not all formatting may be supported."
   },
+
   "saveStatus": {
     "saving": "Saving changes...",
     "dirty": "You have unsaved changes.",
@@ -64,5 +68,37 @@
       "no": "Don't Save",
       "cancel": "Cancel"
     }
+  },
+
+  "raids": {
+    "binah": "Binah",
+    "kaiten": "KAITEN FX Mk.0",
+    "chesed": "Chesed",
+    "shirokuro": "Shiro & Kuro",
+    "hieronymus": "Hieronymus",
+    "perorodzilla": "Perorodzilla",
+    "hod": "Hod",
+    "gregorius": "Gregorius",
+    "hovercraft": "Hovercraft",
+    "kurokage": "Kurokage",
+    "geburah": "Geburah",
+    "yesod": "Yesod"
+  },
+
+  "difficulties": {
+    "Normal": "Normal",
+    "Hard": "Hard",
+    "VeryHard": "Very Hard",
+    "Hardcore": "Hardcore",
+    "Extreme": "Extreme",
+    "Insane": "Insane",
+    "Torment": "Torment",
+    "Lunatic": "Lunatic"
+  },
+
+  "duration": {
+    "3min": "3 minutes",
+    "4min": "4 minutes",
+    "4min30sec": "4:30 minutes"
   }
 }

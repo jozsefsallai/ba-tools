@@ -1,34 +1,34 @@
 export type RaidDuration = 180 | 240 | 290;
 
 export const RAID_DURATIONS: {
-  label: string;
+  label: "3min" | "4min" | "4min30sec";
   value: RaidDuration;
   raids: string[];
 }[] = [
   {
-    label: "3 minutes",
+    label: "3min",
     value: 180,
-    raids: ["Binah", "KAITEN FX Mk.0"],
+    raids: ["binah", "kaiten"],
   },
   {
-    label: "4 minutes",
+    label: "4min",
     value: 240,
     raids: [
-      "Chesed",
-      "Shiro & Kuro",
-      "Hieronymus",
-      "Perorodzilla",
-      "Hod",
-      "Gregorius",
-      "Hovercraft",
-      "Kurokage",
-      "Geburah",
+      "chesed",
+      "shirokuro",
+      "hieronymus",
+      "perorodzilla",
+      "hod",
+      "gregorius",
+      "hovercraft",
+      "kurokage",
+      "geburah",
     ],
   },
   {
-    label: "4:30 minutes",
+    label: "4min30sec",
     value: 290,
-    raids: ["Yesod"],
+    raids: ["yesod"],
   },
 ];
 

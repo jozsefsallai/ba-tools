@@ -9,11 +9,15 @@ import {
   type RaidDifficultyData,
   type RaidDuration,
 } from "@/lib/raids";
+import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 
 type CalculatorMode = "single" | "multi";
 
 export function RaidScoreCalculator() {
+  const t = useTranslations();
+  const format = useFormatter();
+
   const [duration, setDuration] = useState<RaidDuration>(180);
   const [difficulty, setDifficulty] = useState<RaidDifficultyData>(
     RAID_DIFFICULTY_DATA[0],
@@ -49,9 +53,18 @@ export function RaidScoreCalculator() {
               className="h-auto whitespace-pre-wrap"
             >
               <div className="flex flex-col gap-0.5">
-                <div className="text-xl">{dur.label}</div>
+                <div className="text-xl">
+                  {t(`common.duration.${dur.label}`)}
+                </div>
 
-                <div className="text-xs">{dur.raids.join(", ")}</div>
+                <div className="text-xs">
+                  {format.list(
+                    dur.raids.map((r) => t(`common.raids.${r}` as any)),
+                    {
+                      style: "narrow",
+                    },
+                  )}
+                </div>
               </div>
             </TabsTrigger>
           ))}
@@ -69,7 +82,7 @@ export function RaidScoreCalculator() {
               value={diff.difficulty}
               className="h-auto"
             >
-              {diff.name}
+              {t(`common.difficulties.${diff.difficulty}`)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -80,8 +93,12 @@ export function RaidScoreCalculator() {
         onValueChange={(value) => setMode(value as CalculatorMode)}
       >
         <TabsList className="w-full">
-          <TabsTrigger value="single">Single Team Mode</TabsTrigger>
-          <TabsTrigger value="multi">Multiple Teams Mode</TabsTrigger>
+          <TabsTrigger value="single">
+            {t("tools.raidScore.mode.single.title")}
+          </TabsTrigger>
+          <TabsTrigger value="multi">
+            {t("tools.raidScore.mode.multi.title")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="single" className="mt-4">
