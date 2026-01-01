@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,6 +10,7 @@ export function TheFooter({
   commitHash: string;
 }) {
   const pathname = usePathname();
+  const t = useTranslations();
 
   if (pathname === "/plana") {
     return;
@@ -18,17 +20,18 @@ export function TheFooter({
     <footer className="border-t px-2 py-8 bg-background text-muted-foreground text-center text-sm relative z-10">
       <div className="container">
         <div className="md:w-2/3 mx-auto">
-          Made by{" "}
-          <a
-            href="https://joexyz.online"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="underline"
-          >
-            joexyz
-          </a>
-          . This website is in no way affiliated or endorsed by NEXON Games Co.,
-          Ltd. or Yostar, Inc.
+          {t.rich("common.footer.copyright", {
+            a: (children) => (
+              <a
+                href="https://joexyz.online"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="underline"
+              >
+                {children}
+              </a>
+            ),
+          })}
           <br />
           <a
             href="https://nimblebun.works/en/terms"
@@ -36,7 +39,7 @@ export function TheFooter({
             rel="noreferrer noopener"
             className="underline"
           >
-            Terms
+            {t("common.footer.nav.terms")}
           </a>{" "}
           &middot;{" "}
           <a
@@ -45,11 +48,11 @@ export function TheFooter({
             rel="noreferrer noopener"
             className="underline"
           >
-            Privacy
+            {t("common.footer.nav.privacy")}
           </a>{" "}
           &middot;{" "}
           <Link href="/credits" className="underline">
-            Credits
+            {t("common.footer.nav.credits")}
           </Link>{" "}
           &middot;{" "}
           <a
@@ -58,7 +61,7 @@ export function TheFooter({
             rel="noreferrer noopener"
             className="underline"
           >
-            Source code
+            {t("common.footer.nav.sourceCode")}
           </a>{" "}
           &middot;{" "}
           {commitHash === "development"

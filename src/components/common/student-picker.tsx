@@ -28,6 +28,7 @@ import React, {
   useState,
 } from "react";
 import { VList } from "virtua";
+import { useTranslations } from "next-intl";
 
 export type StudentPickerHandle = {
   open(): void;
@@ -71,16 +72,20 @@ export const StudentPicker = React.memo(
     onStudentSelected,
     className,
     placeholder,
-    noStudentText = "No such student.",
+    noStudentText,
     children,
     ref,
   }: StudentPickerProps) => {
+    const t = useTranslations();
+
     const { students } = useStudents();
 
     const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
     const [searchInput, setSearchInput] = useState("");
 
     const hackRef = useRef<HTMLDivElement>(null);
+
+    const finalNoStudentText = noStudentText ?? t("common.studentPicker.zds");
 
     const filteredStudents = useMemo(() => {
       if (!searchInput) {
@@ -181,7 +186,7 @@ export const StudentPicker = React.memo(
             <CommandList>
               <div ref={hackRef} />
 
-              <CommandEmpty>{noStudentText}</CommandEmpty>
+              <CommandEmpty>{finalNoStudentText}</CommandEmpty>
               <CommandGroup>
                 <VList style={{ height: 290 }}>
                   {filteredStudents.map((student) => (

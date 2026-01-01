@@ -1,0 +1,129 @@
+{
+  "timeline": {
+    "title": "Timeline Visualizer",
+    "description": "This tool allows you to create a visual rotation timeline (e.g. for a raid). You can select students, adjust the spacing between them, set the cost/timestamp at which the student's skill cost should be used, and more.",
+    "notice": "<strong>Note:</strong> Dark mode extensions and zoom levels may cause rendering issues in the resulting image. If the generated image looks weird, try disabling any dark mode extensions you may have and using 100% zoom.",
+    "mobileNotice": "<strong>Note:</strong> This tool might not work well on mobile devices.",
+
+    "tabs": {
+      "items": {
+        "title": "Items",
+        "addStudent": "Add Student",
+        "addHS": "Add Horizonatal Separator",
+        "addVS": "Add Vertical Separator",
+        "addText": "Add Text"
+      },
+
+      "settings": {
+        "title": "Settings",
+        "name": "Timeline Name",
+        "namePlaceholder": "Untitled Timeline",
+        "visibility": "Visibility",
+        "public": "Public",
+        "private": "Private",
+        "showCreator": "Show Creator Name",
+        "description": "Description <small>(supports Markdown)</small>",
+        "descriptionPlaceholder": "Enter a description for this timeline (optional)"
+      },
+
+      "appearance": {
+        "title": "Appearance",
+
+        "scale": "Scale",
+        "itemSpacing": "Item Spacing",
+        "vsSize": "Vertical Separator Size",
+        "hsSize": "Horizontal Separator Size"
+      },
+
+      "save": {
+        "title": "Save/Export",
+
+        "loadLocal": "Load Local",
+        "saveLocal": "Save Local",
+        "export": "Export",
+        "import": "Import"
+      }
+    },
+
+    "actions": {
+      "share": "Share Timeline",
+      "cloudSave": "Save to Cloud",
+      "download": "Download Image"
+    },
+
+    "confirmExit": {
+      "title": "Save timeline?",
+      "description": {
+        "signedIn": "You have unsaved changes in your timeline. Would you like to save it in the cloud before leaving the page?",
+        "signedOut": "You have unsaved changes in your timeline. Would you like to save it in your browser before leaving the page?"
+      }
+    },
+
+    "copy": {
+      "button": "Copy Text Timeline",
+      "copied": "Copied to Clipboard",
+      "copiedToast": "Copied text TL to clipboard!"
+    },
+
+    "quickadd": {
+      "title": "Quick Add Student"
+    },
+
+    "editor": {
+      "student": {
+        "variant": {
+          "label": "Variant:",
+          "default": "Default"
+        },
+
+        "trigger": {
+          "label": "Trigger:",
+          "placeholder": "Cost, time, etc."
+        },
+
+        "target": {
+          "label": "Target:",
+          "select": "Select Target Student"
+        },
+
+        "copy": {
+          "label": "Copy"
+        },
+
+        "notes": {
+          "toggle": "Notes",
+          "label": "Notes:",
+          "placeholder": "Additional notes"
+        }
+      },
+
+      "separator": {
+        "title": {
+          "horizontal": "Horizontal separator",
+          "vertical": "Vertical separator"
+        },
+
+        "size": {
+          "toggle": "Override Size",
+          "placeholder": "Size in pixels"
+        }
+      },
+
+      "text": {
+        "placeholder": "Enter text"
+      },
+
+      "actions": {
+        "duplicate": "Duplicate",
+        "remove": "Remove",
+        "addHere": "Add Here",
+        "insertHS": "Insert Horizontal Separator",
+        "insertVS": "Insert Vertical Separator",
+        "insertText": "Insert Text Item"
+      }
+    },
+
+    "loading": "Loading timeline...",
+    "empty": "No items in timeline."
+  }
+}

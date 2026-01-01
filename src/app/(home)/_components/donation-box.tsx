@@ -1,30 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { CoffeeIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export function DonationBox() {
+export async function DonationBox() {
+  const t = await getTranslations();
+
   return (
     <section className="flex flex-col gap-4 text-sm">
-      <h2 className="text-2xl">Donation Box</h2>
+      <h2 className="text-2xl">{t("static.home.donation.title")}</h2>
 
-      <p>
-        The tools on this site are completely free to use and that will never
-        change. I do this as a hobby and for my love of the game and I want to
-        help the community with my creations. The operation costs of the site
-        are minimal and I am more than willing to pay for the occasional costs
-        out of my own pocket.
-      </p>
+      <p>{t("static.home.donation.p1")}</p>
 
-      <p>
-        The best way for you to support the site is to report any issues that
-        may arise while using the tools or suggest new features and tools that
-        you would like to see.
-      </p>
+      <p>{t("static.home.donation.p2")}</p>
 
-      <p>
-        I don't expect any monetary compensation for these tools, but if you
-        really want to support what I do, you can buy me a coffee using the link
-        below. Your support is greatly appreciated!
-      </p>
+      <p>{t("static.home.donation.p3")}</p>
 
       <Button variant="outline" asChild>
         <a
@@ -33,7 +22,7 @@ export function DonationBox() {
           rel="noreferrer noopener"
         >
           <CoffeeIcon />
-          Buy me a coffee
+          {t("static.home.donation.cta")}
         </a>
       </Button>
     </section>

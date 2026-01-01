@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { CheckIcon, LoaderCircleIcon, PencilLineIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 export type SaveStatusProps = {
@@ -8,6 +11,9 @@ export type SaveStatusProps = {
 };
 
 export function SaveStatus({ isDirty, isSaving }: SaveStatusProps) {
+  const t = useTranslations();
+  const locale = useLocale();
+
   const Icon = useMemo(() => {
     if (isSaving) {
       return <LoaderCircleIcon className="size-4 animate-spin" />;
@@ -22,15 +28,15 @@ export function SaveStatus({ isDirty, isSaving }: SaveStatusProps) {
 
   const label = useMemo(() => {
     if (isSaving) {
-      return "Saving changes...";
+      return t("common.saveStatus.saving");
     }
 
     if (isDirty) {
-      return "You have unsaved changes.";
+      return t("common.saveStatus.dirty");
     }
 
-    return "No unsaved changes.";
-  }, [isDirty, isSaving]);
+    return t("common.saveStatus.ok");
+  }, [isDirty, isSaving, locale]);
 
   return (
     <div

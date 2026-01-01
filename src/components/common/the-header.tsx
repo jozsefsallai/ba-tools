@@ -33,6 +33,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useTranslations } from "next-intl";
+import { LocaleToggle } from "@/components/locale-toggle";
 
 type NavLink = {
   href: string;
@@ -45,88 +47,90 @@ type NavigationGroup = {
   links: NavLink[];
 };
 
-const GAMEPLAY_TOOLS: NavLink[] = [
-  {
-    href: "/bond",
-    text: "Relationship Rank Calculator",
-  },
-  {
-    href: "/timeline-visualizer",
-    text: "Timeline Visualizer",
-  },
-  {
-    href: "/inventory-management",
-    text: "Inventory Management",
-  },
-  {
-    href: "/railroad-puzzle-solver",
-    text: "Railroad Puzzle Solver",
-  },
-  {
-    href: "/raid-score-calculator",
-    text: "Raid Score Calculator",
-  },
-];
-
-const MISC_TOOLS: NavLink[] = [
-  {
-    href: "/formation-display",
-    text: "Formation Display",
-  },
-  {
-    href: "/title-generator",
-    text: "Title Generator",
-  },
-  {
-    href: "/gacha-rate-stats",
-    text: "Gacha Rate Stats",
-  },
-  {
-    href: "/scenario-image-generator",
-    text: "Scenario Image Generator",
-  },
-];
-
-const RESOURCES: NavLink[] = [
-  {
-    href: "/global/banners",
-    text: "Upcoming Global Banners",
-  },
-];
-
-const GAMES: NavLink[] = [
-  {
-    href: "/games/flappy-peroro",
-    text: "Flappy Peroro",
-  },
-];
-
-const NAVIGATION_GROUPS: NavigationGroup[] = [
-  {
-    id: "gameplay-tools",
-    name: "Gameplay Tools",
-    links: GAMEPLAY_TOOLS,
-  },
-  {
-    id: "misc-tools",
-    name: "Misc Tools",
-    links: MISC_TOOLS,
-  },
-  {
-    id: "resources",
-    name: "Resources",
-    links: RESOURCES,
-  },
-  {
-    id: "games",
-    name: "Games",
-    links: GAMES,
-  },
-];
-
 export function TheHeader() {
+  const t = useTranslations();
+
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  const GAMEPLAY_TOOLS: NavLink[] = [
+    {
+      href: "/bond",
+      text: t("common.header.nav.gameplay.bond"),
+    },
+    {
+      href: "/timeline-visualizer",
+      text: t("common.header.nav.gameplay.timelineVisualizer"),
+    },
+    {
+      href: "/inventory-management",
+      text: t("common.header.nav.gameplay.inventoryManagement"),
+    },
+    {
+      href: "/railroad-puzzle-solver",
+      text: t("common.header.nav.gameplay.railroadPuzzleSolver"),
+    },
+    {
+      href: "/raid-score-calculator",
+      text: t("common.header.nav.gameplay.raidScore"),
+    },
+  ];
+
+  const MISC_TOOLS: NavLink[] = [
+    {
+      href: "/formation-display",
+      text: t("common.header.nav.misc.formationDisplay"),
+    },
+    {
+      href: "/title-generator",
+      text: t("common.header.nav.misc.titleGenerator"),
+    },
+    {
+      href: "/gacha-rate-stats",
+      text: t("common.header.nav.misc.gachaRateStats"),
+    },
+    {
+      href: "/scenario-image-generator",
+      text: t("common.header.nav.misc.scenarioImageGenerator"),
+    },
+  ];
+
+  const RESOURCES: NavLink[] = [
+    {
+      href: "/global/banners",
+      text: t("common.header.nav.resouces.glBanners"),
+    },
+  ];
+
+  const GAMES: NavLink[] = [
+    {
+      href: "/games/flappy-peroro",
+      text: t("common.header.nav.games.flappyPeroro"),
+    },
+  ];
+
+  const NAVIGATION_GROUPS: NavigationGroup[] = [
+    {
+      id: "gameplay-tools",
+      name: t("common.header.nav.gameplay.title"),
+      links: GAMEPLAY_TOOLS,
+    },
+    {
+      id: "misc-tools",
+      name: t("common.header.nav.misc.title"),
+      links: MISC_TOOLS,
+    },
+    {
+      id: "resources",
+      name: t("common.header.nav.resouces.title"),
+      links: RESOURCES,
+    },
+    {
+      id: "games",
+      name: t("common.header.nav.games.title"),
+      links: GAMES,
+    },
+  ];
 
   useEffect(() => {
     setOpen(false);
@@ -147,7 +151,7 @@ export function TheHeader() {
             </div>
 
             <h1 className="hidden lg:block text-2xl font-bold">
-              Joe's Blue Archive Tools
+              {t("common.appName")}
             </h1>
           </div>
         </Link>
@@ -188,6 +192,7 @@ export function TheHeader() {
             </NavigationMenuList>
           </NavigationMenu>
 
+          <LocaleToggle />
           <ThemeToggle />
 
           <Unauthenticated>

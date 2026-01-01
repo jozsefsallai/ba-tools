@@ -60,8 +60,11 @@ import { useNavigationGuard } from "next-navigation-guard";
 import { SaveStatus } from "@/components/common/save-status";
 import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 
 export function TimelineEditor() {
+  const t = useTranslations();
+
   const { students: allStudents } = useStudents();
 
   const { isSignedIn } = useUser();
@@ -672,7 +675,7 @@ export function TimelineEditor() {
   }, [preferences, items]);
 
   if (timelineId && query.status === "pending") {
-    return <MessageBox>Loading timeline...</MessageBox>;
+    return <MessageBox>{t("tools.timeline.loading")}</MessageBox>;
   }
 
   return (
@@ -682,21 +685,16 @@ export function TimelineEditor() {
           hidden: items.length > 0,
         })}
       >
-        <p>
-          This tool allows you to create a visual rotation timeline (e.g. for a
-          raid). You can select students, adjust the spacing between them, set
-          the cost/timestamp at which the student's skill cost should be used,
-          and more.
-        </p>
+        <p>{t("tools.timeline.description")}</p>
         <p className="md:hidden text-muted-foreground">
-          <strong>Note:</strong> This tool might not work well on mobile
-          devices.
+          {t.rich("tools.timeline.mobileNotice", {
+            strong: (children) => <strong>{children}</strong>,
+          })}
         </p>
         <p className="text-muted-foreground">
-          <strong>Note:</strong> Dark mode extensions and zoom levels may cause
-          rendering issues in the resulting image. If the generated image looks
-          weird, try disabling any dark mode extensions you may have and using
-          100% zoom.
+          {t.rich("tools.timeline.notice", {
+            strong: (children) => <strong>{children}</strong>,
+          })}
         </p>
       </div>
 
@@ -714,12 +712,20 @@ export function TimelineEditor() {
         <CardContent>
           <Tabs defaultValue="items" className="gap-4">
             <TabsList className="place-self-center">
-              <TabsTrigger value="items">Items</TabsTrigger>
+              <TabsTrigger value="items">
+                {t("tools.timeline.tabs.items.title")}
+              </TabsTrigger>
               <Authenticated>
-                <TabsTrigger value="settings">Settings</TabsTrigger>
+                <TabsTrigger value="settings">
+                  {t("tools.timeline.tabs.settings.title")}
+                </TabsTrigger>
               </Authenticated>
-              <TabsTrigger value="appearance">Appearance</TabsTrigger>
-              <TabsTrigger value="save">Save/Export</TabsTrigger>
+              <TabsTrigger value="appearance">
+                {t("tools.timeline.tabs.appearance.title")}
+              </TabsTrigger>
+              <TabsTrigger value="save">
+                {t("tools.timeline.tabs.save.title")}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent
@@ -742,7 +748,7 @@ export function TimelineEditor() {
                       variant="outline"
                       className="w-[200px] md:w-[250px] justify-between"
                     >
-                      Add Student
+                      {t("tools.timeline.tabs.items.addStudent")}
                       <ChevronsUpDownIcon />
                     </Button>
                   </StudentPicker>
@@ -752,18 +758,18 @@ export function TimelineEditor() {
                       variant="outline"
                       onClick={() => addSeparator("horizontal")}
                     >
-                      Add Horizontal Separator
+                      {t("tools.timeline.tabs.items.addHS")}
                     </Button>
 
                     <Button
                       variant="outline"
                       onClick={() => addSeparator("vertical")}
                     >
-                      Add Vertical Separator
+                      {t("tools.timeline.tabs.items.addVS")}
                     </Button>
 
                     <Button variant="outline" onClick={addText}>
-                      Add Text
+                      {t("tools.timeline.tabs.items.addText")}
                     </Button>
                   </div>
                 </div>
@@ -774,17 +780,24 @@ export function TimelineEditor() {
               <TabsContent value="settings" className="flex flex-col gap-4">
                 <div className="flex gap-4">
                   <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-                    <Label className="shrink-0">Timeline Name</Label>
+                    <Label className="shrink-0">
+                      {t("tools.timeline.tabs.settings.name")}
+                    </Label>
+
                     <Input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Untitled Timeline"
+                      placeholder={t(
+                        "tools.timeline.tabs.settings.namePlaceholder",
+                      )}
                     />
                   </div>
 
                   <div className="flex gap-2 items-center">
-                    <Label>Visibility</Label>
+                    <Label>
+                      {t("tools.timeline.tabs.settings.visibility")}
+                    </Label>
 
                     <Select
                       value={visibility}
@@ -796,15 +809,21 @@ export function TimelineEditor() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="public">Public</SelectItem>
+                        <SelectItem value="private">
+                          {t("tools.timeline.tabs.settings.private")}
+                        </SelectItem>
+                        <SelectItem value="public">
+                          {t("tools.timeline.tabs.settings.public")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   {visibility === "public" && (
                     <div className="flex gap-2 items-center">
-                      <Label className="shrink-0">Show Creator</Label>
+                      <Label className="shrink-0">
+                        {t("tools.timeline.tabs.settings.showCreator")}
+                      </Label>
 
                       <Select
                         value={showCreator ? "yes" : "no"}
@@ -814,8 +833,8 @@ export function TimelineEditor() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="no">No</SelectItem>
-                          <SelectItem value="yes">Yes</SelectItem>
+                          <SelectItem value="no">{t("common.no")}</SelectItem>
+                          <SelectItem value="yes">{t("common.yes")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -824,17 +843,22 @@ export function TimelineEditor() {
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="description">
-                    Description{" "}
-                    <small className="text-muted-foreground text-xs">
-                      (supports Markdown)
-                    </small>
+                    {t.rich("tools.timeline.tabs.settings.description", {
+                      small: (children) => (
+                        <small className="text-muted-foreground text-xs">
+                          {children}
+                        </small>
+                      ),
+                    })}
                   </Label>
 
                   <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Enter a description for this timeline (optional)"
+                    placeholder={t(
+                      "tools.timeline.tabs.settings.descriptionPlaceholder",
+                    )}
                     className="resize-none min-h-24"
                   />
 
@@ -846,7 +870,7 @@ export function TimelineEditor() {
             <TabsContent value="appearance">
               <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
                 <div className="flex gap-2 items-center">
-                  <Label>Scale</Label>
+                  <Label>{t("tools.timeline.tabs.appearance.scale")}</Label>
 
                   <Select
                     value={scale.toString()}
@@ -867,7 +891,9 @@ export function TimelineEditor() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <Label>Item Spacing</Label>
+                  <Label>
+                    {t("tools.timeline.tabs.appearance.itemSpacing")}
+                  </Label>
 
                   <Input
                     type="number"
@@ -878,7 +904,7 @@ export function TimelineEditor() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <Label>Vertical Separator Size</Label>
+                  <Label>{t("tools.timeline.tabs.appearance.vsSize")}</Label>
 
                   <Input
                     type="number"
@@ -891,7 +917,7 @@ export function TimelineEditor() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <Label>Horizontal Separator Size</Label>
+                  <Label>{t("tools.timeline.tabs.appearance.hsSize")}</Label>
 
                   <Input
                     type="number"
@@ -908,24 +934,28 @@ export function TimelineEditor() {
             <TabsContent value="save">
               <div className="flex gap-4 items-center justify-center">
                 <Button variant="outline" onClick={loadTimelineFromStorage}>
-                  Load Local
+                  {t("tools.timeline.tabs.save.loadLocal")}
                 </Button>
 
                 <Button
                   variant="outline"
                   onClick={() => saveTimelineToLocalStorage()}
                 >
-                  Save Local
+                  {t("tools.timeline.tabs.save.saveLocal")}
                 </Button>
 
                 <ExportTimelineDataDialog
                   onBeforeLoad={() => saveTimelineToLocalStorage(false)}
                 >
-                  <Button variant="outline">Export</Button>
+                  <Button variant="outline">
+                    {t("tools.timeline.tabs.save.export")}
+                  </Button>
                 </ExportTimelineDataDialog>
 
                 <ImportTimelineDataDialog onComplete={loadTimelineFromStorage}>
-                  <Button variant="outline">Import</Button>
+                  <Button variant="outline">
+                    {t("tools.timeline.tabs.save.import")}
+                  </Button>
                 </ImportTimelineDataDialog>
               </div>
             </TabsContent>
@@ -944,7 +974,7 @@ export function TimelineEditor() {
         {query.data?.visibility === "public" && (
           <Button variant="outline" onClick={copyLink}>
             <ShareIcon />
-            Share Timeline
+            {t("tools.timeline.actions.share")}
           </Button>
         )}
 
@@ -955,7 +985,7 @@ export function TimelineEditor() {
             disabled={generationInProgress}
           >
             <SaveIcon />
-            Save to Cloud
+            {t("tools.timeline.actions.cloudSave")}
           </Button>
         </Authenticated>
 
@@ -966,7 +996,7 @@ export function TimelineEditor() {
           disabled={items.length === 0 || generationInProgress}
         >
           <DownloadIcon />
-          Download Image
+          {t("tools.timeline.actions.download")}
         </Button>
       </div>
 
@@ -999,8 +1029,10 @@ export function TimelineEditor() {
 
       <SaveDialog
         open={navigationGuard.active}
-        title="Save timeline?"
-        description={`You have unsaved changes in your timeline. Would you like to save it ${isSignedIn ? "in the cloud" : "in your browser"} before leaving the page?`}
+        title={t("tools.timeline.confirmExit.title")}
+        description={t(
+          `tools.timeline.confirmExit.description.${isSignedIn ? "signedIn" : "signedOut"}`,
+        )}
         onYes={save}
         onNo={navigationGuard.accept}
         onCancel={navigationGuard.reject}

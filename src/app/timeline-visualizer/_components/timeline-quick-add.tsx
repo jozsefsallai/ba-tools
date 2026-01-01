@@ -4,6 +4,7 @@ import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Student } from "~prisma";
 import { useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 export type TimelineQuickAddProps = {
   students: Student[];
@@ -50,9 +51,7 @@ export function TimelineQuickAdd({
   onStudentClick,
   small,
 }: TimelineQuickAddProps) {
-  if (students.length === 0) {
-    return null;
-  }
+  const t = useTranslations();
 
   const handleStudentClick = useCallback(
     (student: Student) => {
@@ -60,6 +59,10 @@ export function TimelineQuickAdd({
     },
     [onStudentClick],
   );
+
+  if (students.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -71,7 +74,9 @@ export function TimelineQuickAdd({
       )}
     >
       {!small && (
-        <h2 className="text-lg font-semibold text-center">Quick Add Student</h2>
+        <h2 className="text-lg font-semibold text-center">
+          {t("tools.timeline.quickadd.title")}
+        </h2>
       )}
 
       <div className="flex flex-wrap gap-2 items-center justify-center">

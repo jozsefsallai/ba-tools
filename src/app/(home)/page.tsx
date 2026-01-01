@@ -12,6 +12,7 @@ import { DonationBox } from "@/app/(home)/_components/donation-box";
 import { ChangelogItem } from "@/components/common/changelog-item";
 import { CHANGELOG } from "@/changelog";
 import { Separator } from "@/components/ui/separator";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -27,44 +28,48 @@ export default async function Home() {
 
   const isMobile = userAgent && checkMobile(userAgent).any;
 
+  const t = await getTranslations();
+
   return (
     <article className="flex flex-col gap-4 md:w-2/3 mx-auto">
-      <h1 className="text-4xl">Welcome!</h1>
+      <h1 className="text-4xl">{t("static.home.welcome")}</h1>
 
       <p>
-        This is a collection of tools and utilities that I've created for
-        players of the mobile game <strong>Blue Archive</strong>.
+        {t.rich("static.home.intro1", {
+          strong: (children) => <strong>{children}</strong>,
+        })}
       </p>
 
       <p>
-        If you have any suggestions or feedback, feel free to reach out to me on
-        Discord:{" "}
-        <strong>
-          <a
-            href="discord://open/users/245890903133257730"
-            className="underline"
-          >
-            joexyz
-          </a>
-        </strong>
-        . The website and all the tools on it are open source and the source
-        code is also available on{" "}
-        <a
-          href="https://github.com/jozsefsallai/ba-tools"
-          target="_blank"
-          rel="noreferrer noopener"
-          className="underline"
-        >
-          GitHub
-        </a>
-        .
+        {t.rich("static.home.intro2", {
+          a1: (children) => (
+            <strong>
+              <a
+                href="discord://open/users/245890903133257730"
+                className="underline"
+              >
+                {children}
+              </a>
+            </strong>
+          ),
+          a2: (children) => (
+            <a
+              href="https://github.com/jozsefsallai/ba-tools"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="underline"
+            >
+              {children}
+            </a>
+          ),
+        })}
       </p>
 
       {!isMobile && <Plana />}
 
       {isMobile && (
         <Button variant="outline" asChild>
-          <Link href="/plana">Ok, I just wanna headpat Plana</Link>
+          <Link href="/plana">{t("static.home.planaPat")}</Link>
         </Button>
       )}
 
@@ -78,12 +83,12 @@ export default async function Home() {
       <Separator />
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-2xl">Last Changelog</h2>
+        <h2 className="text-2xl">{t("static.home.changelog.title")}</h2>
 
         <ChangelogItem data={CHANGELOG[0]} />
 
         <Button variant="outline" asChild>
-          <Link href="/changelog">See Full Changelog</Link>
+          <Link href="/changelog">{t("static.home.changelog.viewAll")}</Link>
         </Button>
       </section>
     </article>

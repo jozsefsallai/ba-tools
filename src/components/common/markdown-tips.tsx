@@ -1,26 +1,35 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export function MarkdownTips() {
+  const t = useTranslations();
+
   return (
     <div className="prose prose-sm dark:prose-invert max-w-none text-xs">
       <ul>
         <li>
-          Wrapping links between &lt; and &gt; will create a link (e.g.:{" "}
-          <code>&lt;https://bluearchive.nexon.com&gt;</code>).
+          {t.rich("common.mdTips.tip1", {
+            code: (children) => <code>{children}</code>,
+          })}
         </li>
         <li>
-          <strong>YouTube</strong> and <strong>BiliBili</strong> links written
-          using the format above will automatically be embedded
+          {t.rich("common.mdTips.tip2", {
+            strong: (children) => <strong>{children}</strong>,
+          })}
         </li>
         <li>
-          See this{" "}
-          <a
-            href="https://www.markdownguide.org/cheat-sheet/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Markdown Cheat Sheet
-          </a>{" "}
-          for more formatting tips. Please note that not all formatting may be
-          supported.
+          {t.rich("common.mdTips.tip3", {
+            a: (children) => (
+              <a
+                href="https://www.markdownguide.org/basic-syntax/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {children}
+              </a>
+            ),
+          })}
         </li>
       </ul>
     </div>

@@ -72,6 +72,7 @@ import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "next-navigation-guard";
 import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { SaveStatus } from "@/components/common/save-status";
+import { useLocale } from "next-intl";
 
 export type StudentWithGifts = Student & {
   giftsAdored: Gift[];
@@ -114,6 +115,26 @@ function isGiftLikedByStudent(
 }
 
 function GiftInfo({ gift }: { gift: GiftWithStudents }) {
+  const locale = useLocale();
+
+  const giftName = useMemo(() => {
+    switch (locale) {
+      case "en":
+        return gift.name;
+      case "jp":
+        return gift.nameJP || gift.name;
+    }
+  }, [gift, locale]);
+
+  const giftDescription = useMemo(() => {
+    switch (locale) {
+      case "en":
+        return gift.description;
+      case "jp":
+        return gift.descriptionJP || gift.description;
+    }
+  }, [gift, locale]);
+
   return (
     <div
       className={cn("flex flex-col gap-4 p-4", {
@@ -121,10 +142,10 @@ function GiftInfo({ gift }: { gift: GiftWithStudents }) {
         "bg-purple-500/10": gift.rarity === "SSR",
       })}
     >
-      <div className="text-lg font-bold">{gift.name}</div>
+      <div className="text-lg font-bold">{giftName}</div>
 
-      {gift.description && (
-        <div className="text-sm text-muted-foreground">{gift.description}</div>
+      {giftDescription && (
+        <div className="text-sm text-muted-foreground">{giftDescription}</div>
       )}
 
       {gift.isLovedByEveryone && (

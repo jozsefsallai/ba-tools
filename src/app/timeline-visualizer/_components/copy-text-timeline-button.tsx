@@ -2,6 +2,7 @@ import type { TimelineItem } from "@/app/timeline-visualizer/_components/timelin
 import { Button } from "@/components/ui/button";
 import { getShorthand } from "@/lib/student-utils";
 import { CopyIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +11,8 @@ export type CopyTextTimelineButtonProps = {
 };
 
 export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
+  const t = useTranslations();
+
   const [copied, setCopied] = useState(false);
 
   async function copyToClipboard() {
@@ -64,7 +67,7 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
 
     await navigator.clipboard.writeText(output.trim());
 
-    toast.success("Copied text TL to clipboard");
+    toast.success(t("tools.timeline.copy.copiedToast"));
 
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -73,7 +76,9 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
   return (
     <Button variant="outline" onClick={copyToClipboard} disabled={copied}>
       <CopyIcon />
-      {copied ? "Copied to Clipboard" : "Copy Text Timeline"}
+      {copied
+        ? t("tools.timeline.copy.copied")
+        : t("tools.timeline.copy.button")}
     </Button>
   );
 }

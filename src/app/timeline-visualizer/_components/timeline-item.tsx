@@ -36,6 +36,7 @@ import {
   useState,
 } from "react";
 import { v4 as uuid } from "uuid";
+import { useTranslations } from "next-intl";
 
 export type TimelineItemProps = {
   item: TimelineItemType;
@@ -64,6 +65,8 @@ export function TimelineItem({
   onTriggerKeyDown,
   autoFocusOnTriggerField = false,
 }: TimelineItemProps) {
+  const t = useTranslations();
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id, animateLayoutChanges: () => false });
 
@@ -259,7 +262,9 @@ export function TimelineItem({
 
                   {skillVariants.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <Label htmlFor={`variant-${item.id}`}>Variant:</Label>
+                      <Label htmlFor={`variant-${item.id}`}>
+                        {t("tools.timeline.editor.student.variant.label")}
+                      </Label>
 
                       <Select
                         value={item.variantId ?? "default"}
@@ -267,7 +272,8 @@ export function TimelineItem({
                       >
                         <SelectTrigger>
                           {skillVariants.find((v) => v.id === item.variantId)
-                            ?.name ?? "Default"}
+                            ?.name ??
+                            t("tools.timeline.editor.student.variant.default")}
                         </SelectTrigger>
 
                         <SelectContent>
@@ -284,12 +290,16 @@ export function TimelineItem({
 
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`trigger-${item.id}`}>Trigger:</Label>
+                    <Label htmlFor={`trigger-${item.id}`}>
+                      {t("tools.timeline.editor.student.trigger.label")}
+                    </Label>
 
                     <Input
                       id={`trigger-${item.id}`}
                       value={item.trigger ?? ""}
-                      placeholder="Cost, time, etc."
+                      placeholder={t(
+                        "tools.timeline.editor.student.trigger.placeholder",
+                      )}
                       onChange={handleTriggerUpdate}
                       onKeyDown={onTriggerKeyDown}
                       className="w-32"
@@ -298,7 +308,9 @@ export function TimelineItem({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`target-${item.id}`}>Target:</Label>
+                    <Label htmlFor={`target-${item.id}`}>
+                      {t("tools.timeline.editor.student.target.label")}
+                    </Label>
 
                     <StudentPicker
                       onStudentSelected={handleTargetUpdate}
@@ -310,7 +322,7 @@ export function TimelineItem({
                       >
                         {item.target
                           ? `${item.target.name}`
-                          : "Select Target Student"}
+                          : t("tools.timeline.editor.student.target.select")}
                         <ChevronsUpDownIcon />
                       </Button>
                     </StudentPicker>
@@ -341,7 +353,9 @@ export function TimelineItem({
                       onCheckedChange={handleCopyUpdate}
                     />
 
-                    <Label htmlFor={`copy-${item.id}`}>Copy</Label>
+                    <Label htmlFor={`copy-${item.id}`}>
+                      {t("tools.timeline.editor.student.copy.label")}
+                    </Label>
                   </div>
 
                   <div>
@@ -351,7 +365,7 @@ export function TimelineItem({
                     >
                       {displayNotesField && <ChevronUpIcon />}
                       {!displayNotesField && <ChevronDownIcon />}
-                      Notes
+                      {t("tools.timeline.editor.student.notes.toggle")}
                     </Button>
                   </div>
                 </div>
@@ -359,13 +373,15 @@ export function TimelineItem({
                 {displayNotesField && (
                   <div className="flex items-start gap-2">
                     <Label htmlFor={`notes-${item.id}`} className="mt-1">
-                      Notes:
+                      {t("tools.timeline.editor.student.notes.label")}
                     </Label>
 
                     <Textarea
                       id={`notes-${item.id}`}
                       value={item.notes ?? ""}
-                      placeholder="Additional notes"
+                      placeholder={t(
+                        "tools.timeline.editor.student.notes.placeholder",
+                      )}
                       onChange={handleNotesUpdate}
                       className="w-full resize-none"
                     />
@@ -378,8 +394,7 @@ export function TimelineItem({
           {item.type === "separator" && (
             <>
               <div className="text-center text-xl text-muted-foreground">
-                {item.orientation === "horizontal" ? "Horizontal" : "Vertical"}{" "}
-                separator
+                {t(`tools.timeline.editor.separator.title.${item.orientation}`)}
               </div>
 
               <div className="flex items-center gap-2">
@@ -389,14 +404,18 @@ export function TimelineItem({
                   onCheckedChange={(checked) => setSeparatorOverride(checked)}
                 />
 
-                <Label htmlFor={`sizeOverride-${item.id}`}>Override Size</Label>
+                <Label htmlFor={`sizeOverride-${item.id}`}>
+                  {t("tools.timeline.editor.separator.size.toggle")}
+                </Label>
               </div>
 
               {separatorOverride && (
                 <Input
                   type="number"
                   value={separatorSizeStr ?? ""}
-                  placeholder="Size in pixels"
+                  placeholder={t(
+                    "tools.timeline.editor.separator.size.placeholder",
+                  )}
                   onChange={(e) => setSeparatorSizeStr(e.target.value)}
                   className="w-32"
                 />
@@ -408,7 +427,7 @@ export function TimelineItem({
             <div className="flex-1">
               <Textarea
                 value={item.text}
-                placeholder="Enter text"
+                placeholder={t("tools.timeline.editor.text.placeholder")}
                 onChange={handleTextUpdate}
                 className="w-full resize-none"
               />
@@ -417,18 +436,22 @@ export function TimelineItem({
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <Button variant="outline" onClick={duplicate} title="Duplicate">
+          <Button
+            variant="outline"
+            onClick={duplicate}
+            title={t("tools.timeline.editor.actions.duplicate")}
+          >
             <CopyIcon />
           </Button>
 
           <Button variant="destructive" onClick={handleRemove}>
-            Remove
+            {t("tools.timeline.editor.actions.remove")}
           </Button>
         </div>
       </div>
 
       <div className="hidden group-hover:flex items-center gap-2 absolute -bottom-6 right-4 border rounded-md shadow-md bg-background py-1 px-3 text-xs z-50">
-        <strong>Add Here</strong>
+        <strong>{t("tools.timeline.editor.actions.addHere")}</strong>
 
         <TimelineQuickAdd
           students={uniqueStudents}
@@ -440,7 +463,7 @@ export function TimelineItem({
           type="button"
           className="skew-x-[-11deg] rounded-[11%] w-[30px] h-[26px] hover:bg-secondary border flex items-center justify-center cursor-pointer"
           onClick={() => insertSeparatorBelow("horizontal")}
-          title="Insert Horizontal Separator"
+          title={t("tools.timeline.editor.actions.insertHS")}
         >
           <div className="skew-x-[11deg] text-xs font-bold">HS</div>
         </button>
@@ -449,7 +472,7 @@ export function TimelineItem({
           type="button"
           className="skew-x-[-11deg] rounded-[11%] w-[30px] h-[26px] hover:bg-secondary border flex items-center justify-center cursor-pointer"
           onClick={() => insertSeparatorBelow("vertical")}
-          title="Insert Vertical Separator"
+          title={t("tools.timeline.editor.actions.insertVS")}
         >
           <div className="skew-x-[11deg] text-xs font-bold">VS</div>
         </button>
@@ -458,7 +481,7 @@ export function TimelineItem({
           type="button"
           className="skew-x-[-11deg] rounded-[11%] w-[30px] h-[26px] hover:bg-secondary border flex items-center justify-center cursor-pointer"
           onClick={insertTextBelow}
-          title="Insert Text Item"
+          title={t("tools.timeline.editor.actions.insertText")}
         >
           <div className="skew-x-[11deg] text-xs font-bold">T</div>
         </button>

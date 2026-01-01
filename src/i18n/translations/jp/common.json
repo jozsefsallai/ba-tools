@@ -1,0 +1,68 @@
+{
+  "appName": "Joeのブルアカツール",
+  "yes": "はい",
+  "no": "いいえ",
+  "loading": "読み込み中...",
+  "header": {
+    "nav": {
+      "gameplay": {
+        "title": "ゲーム攻略ツール",
+        "bond": "絆ランク計算機",
+        "timelineVisualizer": "TL可視化ツール",
+        "inventoryManagement": "在庫管理",
+        "railroadPuzzleSolver": "鉄道パズル解答器",
+        "raidScore": "総力戦スコア計算機"
+      },
+      "misc": {
+        "title": "その他",
+        "formationDisplay": "編成表示",
+        "titleGenerator": "肩書きジェネレーター",
+        "gachaRateStats": "ガチャ確率統計",
+        "scenarioImageGenerator": "シナリオ画像メーカー"
+      },
+      "resouces": {
+        "title": "リソース",
+        "glBanners": "今後のグローバル版ガチャ"
+      },
+      "games": {
+        "title": "ゲーム",
+        "flappyPeroro": "フラップ・ペロロ"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "Made by <a>joexyz</a>. このサイトは、NEXON GamesやYostarとは一切関係のないファンサイトです。",
+    "nav": {
+      "terms": "利用規約",
+      "privacy": "プライバシー",
+      "credits": "クレジット",
+      "sourceCode": "ソースコード"
+    }
+  },
+  "studentPicker": {
+    "zds": "該当する生徒がいません。"
+  },
+  "mdTips": {
+    "tip1": "リンクを &lt; と &gt; で囲むと、リンクが作成されるよ（例：<code>'<'https://bluearchive.jp'>'</code>）。",
+    "tip2": "上記の形式で書かれた <strong>YouTube</strong> と <strong>BiliBili</strong> のリンクは、自動的に動画が埋め込まれるよ。",
+    "tip3": "他の書き方はこの <a>Markdownチートシート</a> を見てみてね。すべての書式に対応しているわけじゃないから注意してね。"
+  },
+  "saveStatus": {
+    "saving": "変更を保存中...",
+    "dirty": "保存されていない変更があるよ。",
+    "ok": "すべての変更が保存済みだよ。"
+  },
+
+  "dialogs": {
+    "confirm": {
+      "confirm": "確定",
+      "cancel": "キャンセル"
+    },
+
+    "save": {
+      "yes": "保存する",
+      "no": "保存しない",
+      "cancel": "キャンセル"
+    }
+  }
+}

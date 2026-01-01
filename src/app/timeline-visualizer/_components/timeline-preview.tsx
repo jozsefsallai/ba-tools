@@ -6,6 +6,7 @@ import { useCallback, type RefObject } from "react";
 
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type BaseItem = {
   type: "student" | "separator" | "text";
@@ -54,6 +55,8 @@ export function TimelinePreview({
   busy = false,
   onItemClicked,
 }: TimelinePreviewProps) {
+  const t = useTranslations();
+
   const handleItemClicked = useCallback(
     (item: TimelineItem) => {
       return () => {
@@ -77,7 +80,7 @@ export function TimelinePreview({
   if (items.length === 0) {
     return (
       <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
-        No items in timeline.
+        {t("tools.timeline.empty")}
       </div>
     );
   }

@@ -1,0 +1,74 @@
+{
+  "home": {
+    "welcome": "Welcome!",
+    "intro1": "This is a collection of tools and utilities that I've created for players of the mobile game <strong>Blue Archive</strong>.",
+    "intro2": "If you have any suggestions or feedback, feel free to reach out to me on Discord: <a1>joexyz</a1>. The website and all the tools on it are open source and the source code is also available on <a2>GitHub</a2>.",
+    "planaPat": "Ok, I just wanna headpat Plana",
+
+    "toollist": {
+      "bond": {
+        "title": "Relationship Rank Calculator",
+        "description": "Calculate the relationship rank you can get from gifts you give to students. Find what gifts each student likes the most."
+      },
+      "timelineVisualizer": {
+        "title": "Timeline Visualizer",
+        "description": "Visualize your EX skill rotation timelines in an intuitive graphical format. Create timelines for yourself, to use in videos, or to share with other players."
+      },
+      "inventoryManagement": {
+        "title": "Inventory Management",
+        "description": "Find the most likely placements of items in the Battleship-style minigame. Helps you minimize the number of currency you need to unlock certain items."
+      },
+      "railroadPuzzleSolver": {
+        "title": "Railroad Puzzle Solver",
+        "description": "Find and visualize the optimal paths in the Highlander event's Railroad Puzzle minigame. Specify a custom configuration or find the most minimal ones."
+      },
+      "raidScore": {
+        "title": "Raid Score Calculator",
+        "description": "Convert between clear time and raid score for various bosses and difficulties. Supports multiple teams and remaining time input (for single teams)."
+      },
+      "formationDisplay": {
+        "title": "Formation Display",
+        "description": "Display a formation of students in a design that's similar to what you'd see in-game. Useful for YouTube thumbnails or spreadsheets."
+      },
+      "titleGenerator": {
+        "title": "Title Generator",
+        "description": "Generate fully rendered user titles for boss completions, relationship rank, talent levels, school clubs, as well as generic titles with custom text."
+      },
+      "gachaRateStats": {
+        "title": "Gacha Rate Stats",
+        "description": "Track the 3* rate of a pulling session in real time. You may use it in gacha videos or streams to display your luck (or lack thereof)."
+      },
+      "scenarioImageGenerator": {
+        "title": "Scenario Image Generator",
+        "description": "Create and generate images that resemble the in-game story UI. Use custom backgrounds, texts, characters, and more."
+      },
+      "glBanners": {
+        "title": "Upcoming Global Banners",
+        "description": "Track the upcoming rate-up banners that are going to be available in the Global version. Data is based on JP banners and may change."
+      }
+    },
+
+    "userCorner": {
+      "title": "User Corner",
+      "description": "Create an account to save your preferences and data to the cloud. With an account, you can save and access various things you create on the site (e.g. timelines and formations) from any device. You can also share your timelines with other people.",
+
+      "nav": {
+        "formations": "My Formations",
+        "timelines": "My Timelines"
+      }
+    },
+
+    "donation": {
+      "title": "Donation Box",
+      "p1": "The tools on this site are completely free to use and that will never change. I do this as a hobby and for my love of the game and I want to help the community with my creations. The operation costs of the site are minimal and I am more than willing to pay for the occasional costs out of my own pocket.",
+      "p2": "The best way for you to support the site is to report any issues that may arise while using the tools or suggest new features and tools that you would like to see.",
+      "p3": "I don't expect any monetary compensation for these tools, but if you really want to support what I do, you can buy me a coffee using the link below. Your support is greatly appreciated!",
+      "cta": "Buy me a coffee"
+    },
+
+    "changelog": {
+      "title": "Last Changelog",
+      "viewAll": "See Full Changelog"
+    }
+  }
+}

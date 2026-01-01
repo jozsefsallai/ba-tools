@@ -1,4 +1,4 @@
-import { Outfit, Sono, Noto_Sans } from "next/font/google";
+import { Outfit, Sono, Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -13,11 +13,20 @@ import { UserPreferencesProvider } from "@/components/providers/user-preferences
 import { db } from "@/lib/db";
 import { StudentsProvider } from "@/components/providers/students-provider";
 import { NavigationGuardProvider } from "next-navigation-guard";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-noto-sans-jp",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 const sono = Sono({
@@ -57,10 +66,12 @@ export default async function RootLayout({
     },
   });
 
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
-      className={`${outfit.variable} h-full`}
+      lang={locale}
+      className={`h-full ${outfit.variable} ${notoSansJP.variable}`}
       suppressHydrationWarning
     >
       <body
@@ -75,23 +86,27 @@ export default async function RootLayout({
           <ThemedClerkProvider>
             <ConvexClientProvider>
               <NavigationGuardProvider>
-                <StudentsProvider loadedStudents={students}>
-                  <UserPreferencesProvider>
-                    <main className="flex flex-col gap-10 h-full">
-                      <TheHeader />
-                      <section className="relative container px-4 md:px-0 flex-1">
-                        {children}
-                      </section>
-                      <TheFooter
-                        commitHash={
-                          process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
-                        }
-                      />
-                    </main>
+                <NextIntlClientProvider>
+                  <StudentsProvider loadedStudents={students}>
+                    <UserPreferencesProvider>
+                      <main className="flex flex-col gap-10 h-full">
+                        <TheHeader />
 
-                    <Toaster />
-                  </UserPreferencesProvider>
-                </StudentsProvider>
+                        <section className="relative container px-4 md:px-0 flex-1">
+                          {children}
+                        </section>
+
+                        <TheFooter
+                          commitHash={
+                            process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
+                          }
+                        />
+                      </main>
+
+                      <Toaster />
+                    </UserPreferencesProvider>
+                  </StudentsProvider>
+                </NextIntlClientProvider>
               </NavigationGuardProvider>
             </ConvexClientProvider>
           </ThemedClerkProvider>

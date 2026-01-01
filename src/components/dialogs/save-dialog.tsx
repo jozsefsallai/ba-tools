@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 export type SaveDialogProps = {
@@ -30,16 +31,22 @@ export function SaveDialog({
   setOpen,
   title,
   description,
-  yesText = "Save",
-  noText = "Don't Save",
-  cancelText = "Cancel",
+  yesText,
+  noText,
+  cancelText,
   onYes,
   onNo,
   onCancel,
 }: SaveDialogProps) {
+  const t = useTranslations();
+
   const [inProgress, setInProgress] = useState(false);
 
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  const finalYesText = yesText ?? t("common.dialogs.save.yes");
+  const finalNoText = noText ?? t("common.dialogs.save.no");
+  const finalCancelText = cancelText ?? t("common.dialogs.save.cancel");
 
   async function handleYes() {
     if (inProgress) {
@@ -97,11 +104,11 @@ export function SaveDialog({
           <DialogClose ref={closeRef} />
 
           <Button onClick={handleYes} disabled={inProgress}>
-            {yesText}
+            {finalYesText}
           </Button>
 
           <Button variant="outline" onClick={handleNo} disabled={inProgress}>
-            {noText}
+            {finalNoText}
           </Button>
 
           <Button
@@ -109,7 +116,7 @@ export function SaveDialog({
             onClick={handleCancel}
             disabled={inProgress}
           >
-            {cancelText}
+            {finalCancelText}
           </Button>
         </DialogFooter>
       </DialogContent>

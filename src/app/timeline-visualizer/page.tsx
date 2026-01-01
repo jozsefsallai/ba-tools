@@ -10,6 +10,7 @@ import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import { auth } from "@clerk/nextjs/server";
 import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
+import { getTranslations } from "next-intl/server";
 
 type PageSearchParams = {
   id?: string;
@@ -64,11 +65,13 @@ export async function generateMetadata({
 }
 
 export default async function TimelineVisualizerPage() {
+  const t = await getTranslations();
+
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center">
-          <h1 className="text-xl font-bold">Timeline Visualizer</h1>
+          <h1 className="text-xl font-bold">{t("tools.timeline.title")}</h1>
           <HelpSheet document="timeline-visualizer">
             <Button variant="ghost">
               <HelpCircleIcon />

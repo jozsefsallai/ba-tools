@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useRef, useState } from "react";
 
 export type ConfirmDialogProps = PropsWithChildren<{
@@ -26,16 +27,21 @@ export type ConfirmDialogProps = PropsWithChildren<{
 export function ConfirmDialog({
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   confirmVariant = "default",
   onConfirm,
   onCancel,
   children,
 }: ConfirmDialogProps) {
+  const t = useTranslations();
+
   const [inProgress, setInProgress] = useState(false);
 
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  const finalConfirmText = confirmText ?? t("common.dialogs.confirm.confirm");
+  const finalCancelText = cancelText ?? t("common.dialogs.confirm.cancel");
 
   async function handleConfirm() {
     if (inProgress) {
@@ -79,7 +85,7 @@ export function ConfirmDialog({
             onClick={handleConfirm}
             disabled={inProgress}
           >
-            {confirmText}
+            {finalConfirmText}
           </Button>
 
           <Button
@@ -87,7 +93,7 @@ export function ConfirmDialog({
             onClick={handleCancel}
             disabled={inProgress}
           >
-            {cancelText}
+            {finalCancelText}
           </Button>
         </DialogFooter>
       </DialogContent>

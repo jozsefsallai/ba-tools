@@ -1,0 +1,68 @@
+{
+  "appName": "Joe's Blue Archive Tools",
+  "yes": "Yes",
+  "no": "No",
+  "loading": "Loading...",
+  "header": {
+    "nav": {
+      "gameplay": {
+        "title": "Gameplay Tools",
+        "bond": "Relationship Rank Calculator",
+        "timelineVisualizer": "Timeline Visualizer",
+        "inventoryManagement": "Inventory Management",
+        "railroadPuzzleSolver": "Railroad Puzzle Solver",
+        "raidScore": "Raid Score Calculator"
+      },
+      "misc": {
+        "title": "Misc Tools",
+        "formationDisplay": "Formation Display",
+        "titleGenerator": "Title Generator",
+        "gachaRateStats": "Gacha Rate Stats",
+        "scenarioImageGenerator": "Scenario Image Generator"
+      },
+      "resouces": {
+        "title": "Resources",
+        "glBanners": "Upcoming Global Banners"
+      },
+      "games": {
+        "title": "Games",
+        "flappyPeroro": "Flappy Peroro"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "Made by <a>joexyz</a>. This website is in no way affiliated or endorsed by NEXON Games Co., Ltd. or Yostar, Inc.",
+    "nav": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "credits": "Credits",
+      "sourceCode": "Source code"
+    }
+  },
+  "studentPicker": {
+    "zds": "No such student."
+  },
+  "mdTips": {
+    "tip1": "Wrapping links between &lt; and &gt; will create a link (e.g.: <code>'<'https://bluearchive.nexon.com'>'</code>).",
+    "tip2": "<strong>YouTube</strong> and <strong>BiliBili</strong> links written using the format above will automatically be embedded",
+    "tip3": "See this <a>Markdown Cheat Sheet</a> for more formatting tips. Please note that not all formatting may be supported."
+  },
+  "saveStatus": {
+    "saving": "Saving changes...",
+    "dirty": "You have unsaved changes.",
+    "ok": "No unsaved changes."
+  },
+
+  "dialogs": {
+    "confirm": {
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+
+    "save": {
+      "yes": "Save",
+      "no": "Don't Save",
+      "cancel": "Cancel"
+    }
+  }
+}

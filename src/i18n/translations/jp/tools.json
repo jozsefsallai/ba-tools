@@ -1,0 +1,128 @@
+{
+  "timeline": {
+    "title": "TL可視化ツール",
+    "description": "スキルの回転（タイムライン）をグラフ形式で作れるツールだよ（総力戦とかに便利）。生徒を選んだり、間隔を調整したり、コストを使うタイミングや時間を細かく設定したりできるよ。",
+    "notice": "<strong>注意：</strong>ダークモードの拡張機能やブラウザのズーム設定によっては、画像が正しく書き出されないことがあるよ。もし表示がおかしくなったら、拡張機能をオフにしたりズームを100%にしたりしてみてね。",
+    "mobileNotice": "<strong>注意：</strong>このツールはモバイル端末だと上手く動かないかもしれないよ。",
+
+    "tabs": {
+      "items": {
+        "title": "アイテム",
+        "addStudent": "生徒を追加",
+        "addHS": "スペース（横）を追加",
+        "addVS": "スペース（縦）を追加",
+        "addText": "テキストを追加"
+      },
+
+      "settings": {
+        "title": "設定",
+        "name": "タイムライン名",
+        "namePlaceholder": "無題のタイムライン",
+        "visibility": "公開設定",
+        "public": "公開",
+        "private": "非公開",
+        "showCreator": "作成者名を表示する",
+        "description": "説明文 <small>(Markdown対応)</small>",
+        "descriptionPlaceholder": "このタイムラインの説明を入力（任意）"
+      },
+
+      "appearance": {
+        "title": "見た目",
+        "scale": "スケール",
+        "itemSpacing": "アイテムの間隔",
+        "vsSize": "スペース（縦）のサイズ",
+        "hsSize": "スペース（横）のサイズ"
+      },
+
+      "save": {
+        "title": "保存・出力",
+
+        "loadLocal": "ブラウザから読み込む",
+        "saveLocal": "ブラウザに保存",
+        "export": "エクスポート",
+        "import": "インポート"
+      }
+    },
+
+    "actions": {
+      "share": "タイムラインを共有",
+      "cloudSave": "クラウドに保存",
+      "download": "画像をダウンロード"
+    },
+
+    "confirmExit": {
+      "title": "タイムラインを保存する？",
+      "description": {
+        "signedIn": "保存されていない変更があるよ。ページを離れる前にクラウドに保存しておく？",
+        "signedOut": "保存されていない変更があるよ。ページを離れる前にブラウザに保存しておく？"
+      }
+    },
+
+    "copy": {
+      "button": "テキスト形式のTLをコピー",
+      "copied": "クリップボードにコピーしたよ",
+      "copiedToast": "テキスト形式のTLをクリップボードにコピーしたよ！"
+    },
+
+    "quickadd": {
+      "title": "生徒をクイック追加"
+    },
+
+    "editor": {
+      "student": {
+        "variant": {
+          "label": "バリアント：",
+          "default": "デフォルト"
+        },
+
+        "trigger": {
+          "label": "発動条件：",
+          "placeholder": "コスト、時間など"
+        },
+
+        "target": {
+          "label": "対象：",
+          "select": "対象の生徒を選択"
+        },
+
+        "copy": {
+          "label": "コピー"
+        },
+
+        "notes": {
+          "toggle": "備考",
+          "label": "備考：",
+          "placeholder": "追加のメモなど"
+        }
+      },
+
+      "separator": {
+        "title": {
+          "horizontal": "横スペース",
+          "vertical": "縦スペース"
+        },
+
+        "size": {
+          "toggle": "サイズを個別に指定",
+          "placeholder": "サイズ (px)"
+        }
+      },
+
+      "text": {
+        "placeholder": "テキストを入力"
+      },
+
+      "actions": {
+        "duplicate": "複製",
+        "remove": "削除",
+        "addHere": "ここに追加する",
+        "insertHS": "横スペースを挿入",
+        "insertVS": "縦スペースを挿入",
+        "insertText": "テキストを挿入"
+      }
+    },
+
+    "loading": "タイムラインを読み込み中...",
+    "empty": "タイムラインにアイテムがないよ。"
+  }
+}
