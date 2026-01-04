@@ -77,16 +77,16 @@ export default async function RootLayout({
       <body
         className={`${sono.variable} ${nexonFootballGothic.variable} ${notoSans.variable} antialiased h-full`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ThemedClerkProvider>
-            <ConvexClientProvider>
-              <NavigationGuardProvider>
-                <NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ThemedClerkProvider>
+              <ConvexClientProvider>
+                <NavigationGuardProvider>
                   <StudentsProvider loadedStudents={students}>
                     <UserPreferencesProvider>
                       <main className="flex flex-col gap-10 h-full">
@@ -106,11 +106,11 @@ export default async function RootLayout({
                       <Toaster />
                     </UserPreferencesProvider>
                   </StudentsProvider>
-                </NextIntlClientProvider>
-              </NavigationGuardProvider>
-            </ConvexClientProvider>
-          </ThemedClerkProvider>
-        </ThemeProvider>
+                </NavigationGuardProvider>
+              </ConvexClientProvider>
+            </ThemedClerkProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
