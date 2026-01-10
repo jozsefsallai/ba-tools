@@ -321,5 +321,21 @@
         "add": "Add Clear Time"
       }
     }
+  },
+
+  "gachaStats": {
+    "title": "Gacha Rate Stats",
+    "description": "A tool you can use to get basic stats about your Blue Archive gacha pulls. Enter how many 3★ students you got on each 10-pull and click on the <strong>Add attempt</strong> button to add it to the stats. You can use the <strong>Remove</strong> button next to each attempt to remove it if you've made a mistake.",
+    "notice": "<strong>Tip:</strong> You can use this tool to display your pull stats in real time if you're recording or streaming your pulls by adding a Browser Source in OBS, cropping it to the stats square, and keying out the background.",
+
+    "question": "How many 3★s did you get on this attempt?",
+    "attempt": "<strong>Attempt #{attempt}</strong>: got <strong>{count}</strong> 3★s",
+    "remove": "Remove",
+
+    "info": {
+      "pulls": "total pulls",
+      "3stars": "total 3★s",
+      "rate": "3★ rate"
+    }
   }
 }

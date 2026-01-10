@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface AttemptProps {
@@ -14,15 +15,20 @@ function Attempt({
   threeStarCount,
   onWantsToRemoveAttempt,
 }: AttemptProps) {
+  const t = useTranslations();
+
   return (
     <div className="flex gap-2 items-center justify-between border mb-2 px-4 py-2">
       <div>
-        <strong>Attempt #{index + 1}</strong>: got{" "}
-        <strong>{threeStarCount}</strong> 3*s{" "}
+        {t.rich("tools.gachaStats.attempt", {
+          strong: (children) => <strong>{children}</strong>,
+          attempt: index + 1,
+          count: threeStarCount,
+        })}
       </div>
 
       <Button variant="outline" onClick={() => onWantsToRemoveAttempt(index)}>
-        Remove
+        {t("tools.gachaStats.remove")}
       </Button>
     </div>
   );
@@ -47,22 +53,38 @@ interface CounterProps {
 }
 
 function ThreeStarRate({ attempts }: CounterProps) {
+  const t = useTranslations();
+
   const total = attempts.length * 10;
   const totalThreeStars = attempts.reduce((acc, curr) => acc + curr, 0);
   const rate = total === 0 ? 0 : (totalThreeStars / total) * 100;
 
-  return <InfoBox main={`${rate.toFixed(2)}%`} description="3* rate" />;
+  return (
+    <InfoBox
+      main={`${rate.toFixed(2)}%`}
+      description={t("tools.gachaStats.info.rate")}
+    />
+  );
 }
 
 function TotalPulls({ attempts }: CounterProps) {
-  return <InfoBox main={`${attempts.length * 10}`} description="total pulls" />;
+  const t = useTranslations();
+
+  return (
+    <InfoBox
+      main={`${attempts.length * 10}`}
+      description={t("tools.gachaStats.info.pulls")}
+    />
+  );
 }
 
 function TotalThreeStars({ attempts }: CounterProps) {
+  const t = useTranslations();
+
   return (
     <InfoBox
       main={`${attempts.reduce((acc, curr) => acc + curr, 0)}`}
-      description="total 3*s"
+      description={t("tools.gachaStats.info.3stars")}
     />
   );
 }
@@ -78,6 +100,8 @@ function Statistics({ attempts }: CounterProps) {
 }
 
 export function GachaRateStatsView() {
+  const t = useTranslations();
+
   const [attempts, setAttempts] = useState<number[]>([]);
 
   function addAttempt(count: number) {
@@ -94,7 +118,7 @@ export function GachaRateStatsView() {
         <Statistics attempts={attempts} />
 
         <div className="flex flex-col items-center">
-          <p className="mb-3">How many 3*s did you get on this attempt?</p>
+          <p className="mb-3">{t("tools.gachaStats.question")}</p>
 
           <div className="flex gap-3">
             {Array.from({ length: 11 }, (_, i) => (
