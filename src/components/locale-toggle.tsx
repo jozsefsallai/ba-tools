@@ -8,8 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { SupportedLocale } from "@/i18n/constants";
-import { GlobeIcon } from "lucide-react";
+import { GlobeIcon, InfoIcon } from "lucide-react";
 import { useLocale } from "next-intl";
 
 export function LocaleToggle() {
@@ -36,9 +42,31 @@ export function LocaleToggle() {
         <DropdownMenuItem onClick={() => toggleLocale("en")}>
           English
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toggleLocale("jp")}>
-          日本語
-        </DropdownMenuItem>
+
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuItem
+                onClick={() => toggleLocale("jp")}
+                className="flex items-center justify-between gap-2"
+              >
+                <div>日本語</div>
+
+                <InfoIcon />
+              </DropdownMenuItem>
+            </TooltipTrigger>
+
+            <TooltipContent side="left">
+              <p>
+                日本語版は現在作成中のため、
+                <br />
+                誤植や不自然な表現が
+                <br />
+                含まれている可能性があります。
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </DropdownMenuContent>
     </DropdownMenu>
   );
