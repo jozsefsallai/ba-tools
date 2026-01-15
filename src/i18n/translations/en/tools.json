@@ -337,5 +337,82 @@
       "3stars": "total 3★s",
       "rate": "3★ rate"
     }
+  },
+
+  "emblem": {
+    "title": "Title Generator",
+    "description": "This tool allows you to generate fully rendered user titles for boss completions, relationship rank, talent levels, school clubs, as well as generic titles with custom text.",
+
+    "error": "Error Generating Title",
+
+    "mode": "Mode:",
+    "options": "Options",
+
+    "update": "Update",
+
+    "modes": {
+      "basic": {
+        "title": "Basic",
+        "fields": {
+          "text": "Text"
+        }
+      },
+
+      "favor": {
+        "title": "Relationship Rank",
+        "fields": {
+          "student": "Student:",
+          "extra": "Extra",
+          "arona": "Arona",
+          "plana": "Plana",
+          "rank": "Relationship Rank:",
+          "nameOverride": "Name Override (optional):"
+        }
+      },
+
+      "potential": {
+        "title": "Talent Level",
+
+        "fields": {
+          "student": "Student:",
+          "level": "Talent Level:",
+          "nameOverride": "Name Override (optional):"
+        }
+      },
+
+      "boss": {
+        "title": "Boss Completion",
+
+        "fields": {
+          "boss": "Boss:",
+          "completion": "Completion:"
+        }
+      },
+
+      "tower": {
+        "title": "Final Restriction Release",
+
+        "fields": {
+          "boss": "Boss:",
+          "floor": "Floor:",
+          "defense": "Defense Type:"
+        }
+      },
+
+      "club": {
+        "title": "Club Advisor",
+
+        "fields": {
+          "school": "School:",
+          "club": "Club:",
+          "nameOverride": "Name Override (optional):"
+        }
+      }
+    },
+
+    "default": {
+      "button": "View Default Titles",
+      "warning": "<strong>Warning:</strong> It may take a while to load all titles depending on the mode you've selected."
+    }
   }
 }

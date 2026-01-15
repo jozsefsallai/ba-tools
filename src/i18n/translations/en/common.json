@@ -70,6 +70,76 @@
     }
   },
 
+  "school": {
+    "Abydos": "Abydos High School",
+    "Arius": "Arius Satellite School",
+    "Gehenna": "Gehenna Academy",
+    "Hyakkiyako": "Allied Hyakkiyako Academy",
+    "Millennium": "Millennium Science School",
+    "RedWinter": "Red Winter Federal Academy",
+    "Shanhaijing": "Shanhaijing Academy",
+    "SRT": "SRT Academy",
+    "Trinity": "Trinity General School",
+    "Valkyrie": "Valkyrie Police School",
+    "Highlander": "Highlander Railroad Academy",
+    "WildHunt": "Wildhunt Art Academy",
+    "ETC": "ETC",
+    "Tokiwadai": "Tokiwadai Middle School",
+    "Sakugawa": "Sakugawa Middle School"
+  },
+
+  "club": {
+    "Kohshinjo68": "Problem Solver 68",
+    "Justice": "Justice Task Force",
+    "CleanNClearing": "Cleaning & Clearing",
+    "BookClub": "Library Committee",
+    "Countermeasure": "Foreclosure Task Force",
+    "Engineer": "Engineering Department",
+    "FoodService": "School Lunch Club",
+    "Fuuki": "Prefect Team",
+    "GourmetClub": "Gourmet Research Society",
+    "HoukagoDessert": "After-School Sweets Club",
+    "KnightsHospitaller": "Remedial Knights",
+    "MatsuriOffice": "Festival Operations Department",
+    "Meihuayuan": "Plum Blossom Garden",
+    "Onmyobu": "Yin-Yang Club",
+    "RemedialClass": "Make-Up Work Club",
+    "SPTF": "Super Phenomenon Task Force",
+    "Shugyobu": "Inner Discipline Club",
+    "Endanbou": "Eastern Alchemy Society",
+    "TheSeminar": "Seminar",
+    "TrainingClub": "Athletics Training Club",
+    "TrinityVigilance": "Trinity's Vigilante Crew",
+    "Veritas": "Veritas",
+    "NinpoKenkyubu": "Ninjutsu Research Club",
+    "GameDev": "Game Development Department",
+    "RedwinterSecretary": "Red Winter Office",
+    "anzenkyoku": "Public Safety Bureau",
+    "SisterHood": "The Sisterhood",
+    "Class227": "Spec Ops No. 227",
+    "Emergentology": "Medical Emergency Club",
+    "RabbitPlatoon": "RABBIT Squad",
+    "PandemoniumSociety": "Pandemonium Society",
+    "AriusSqud": "Arius Squad",
+    "HotSpringsDepartment": "Hot Springs Department",
+    "TeaParty": "Tea Party",
+    "PublicPeaceBureau": "Public Peace Bureau",
+    "BlackTortoisePromenade": "Black Tortoise Promenade",
+    "Genryumon": "Genryumon",
+    "LaborParty": "Labor Party",
+    "KnowledgeLiberationFront": "Knowledge Liberation Front",
+    "Hyakkayouran": "Hyakkaryouran Resolution Council",
+    "ShinySparkleSociety": "Sparkle Club",
+    "AbydosStudentCouncil": "Abydos Student Council",
+    "CentralControlCenter": "Central Control Center",
+    "FreightLogisticsDepartment": "Freight Logistics Department",
+    "OccultClub": "Occult Research Society",
+    "FreeTradeCartel": "Special Trade Department",
+    "NicomediasTroop": "Nicomedia Troop",
+    "PublishingDepartment": "Publishing Department",
+    "EmptyClub": "None"
+  },
+
   "raids": {
     "binah": "Binah",
     "kaiten": "KAITEN FX Mk.0",
@@ -100,5 +170,48 @@
     "3min": "3 minutes",
     "4min": "4 minutes",
     "4min30sec": "4:30 minutes"
+  },
+
+  "terrain": {
+    "Indoor": "Indoor",
+    "Outdoor": "Field",
+    "Street": "Urban"
+  },
+
+  "attackType": {
+    "Explosion": "Explosive",
+    "Pierce": "Piercing",
+    "Mystic": "Mystic",
+    "Sonic": "Sonic",
+    "Normal": "Normal",
+    "Mixed": "Mixed"
+  },
+
+  "defenseType": {
+    "LightArmor": "Light",
+    "HeavyArmor": "Heavy",
+    "Unarmed": "Special",
+    "ElasticArmor": "Elastic",
+    "Normal": "Normal",
+    "Mixed": "Mixed"
+  },
+
+  "combatClass": {
+    "Main": "Striker",
+    "Support": "Special"
+  },
+
+  "combatRole": {
+    "DamageDealer": "Dealer",
+    "Tanker": "Tank",
+    "Healer": "Healer",
+    "Supporter": "Support",
+    "Vehicle": "T.S."
+  },
+
+  "combatPosition": {
+    "Back": "Back",
+    "Front": "Front",
+    "Middle": "Middle"
   }
 }

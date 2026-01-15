@@ -1,5 +1,6 @@
 import { TitleGeneratorView } from "@/app/title-generator/_components/title-generator-view";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Title Generator - Joe's Blue Archive Tools",
@@ -10,17 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default async function EmblemPage() {
+  const t = await getTranslations();
+
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center">
-          <h1 className="text-xl font-bold">Title Generator</h1>
+          <h1 className="text-xl font-bold">{t("tools.emblem.title")}</h1>
         </div>
-        <p>
-          This tool allows you to generate fully rendered user titles for boss
-          completions, relationship rank, talent levels, school clubs, as well
-          as generic titles with custom text.
-        </p>
+
+        <p>{t("tools.emblem.description")}</p>
       </div>
 
       <TitleGeneratorView />

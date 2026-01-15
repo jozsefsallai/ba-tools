@@ -66,6 +66,76 @@
     }
   },
 
+  "school": {
+    "Abydos": "アビドス高等学校",
+    "Arius": "アリウス分校",
+    "Gehenna": "ゲヘナ学園",
+    "Hyakkiyako": "百鬼夜行連合学院",
+    "Millennium": "ミレニアムサイエンススクール",
+    "RedWinter": "レッドウィンター連邦学園",
+    "Shanhaijing": "山海経高級中学校",
+    "SRT": "SRT特殊学園",
+    "Trinity": "トリニティ総合学園",
+    "Valkyrie": "ヴァルキューレ警察学校",
+    "Highlander": "ハイランダー鉄道学園",
+    "WildHunt": "ワイルドハント芸術学院",
+    "ETC": "その他",
+    "Tokiwadai": "常盤台中学",
+    "Sakugawa": "柵川中学"
+  },
+
+  "club": {
+    "Kohshinjo68": "便利屋68",
+    "Justice": "正義実現委員会",
+    "CleanNClearing": "Cleaning&Clearing",
+    "BookClub": "図書委員会",
+    "Countermeasure": "対策委員会",
+    "Engineer": "エンジニア部",
+    "FoodService": "給食部",
+    "Fuuki": "風紀委員会",
+    "GourmetClub": "美食研究会",
+    "HoukagoDessert": "放課後スイーツ部",
+    "KnightsHospitaller": "救護騎士団",
+    "MatsuriOffice": "お祭り運営委員会",
+    "Meihuayuan": "梅花園",
+    "Onmyobu": "陰陽部",
+    "RemedialClass": "補習授業部",
+    "SPTF": "特異現象捜査部",
+    "Shugyobu": "修行部",
+    "Endanbou": "錬丹術研究会",
+    "TheSeminar": "セミナー",
+    "TrainingClub": "トレーニング部",
+    "TrinityVigilance": "トリニティ自警団",
+    "Veritas": "ヴェリタス",
+    "NinpoKenkyubu": "忍術研究部",
+    "GameDev": "ゲーム開発部",
+    "RedwinterSecretary": "レッドウィンター事務局",
+    "anzenkyoku": "生活安全局",
+    "SisterHood": "シスターフッド",
+    "Class227": "227号特別クラス",
+    "Emergentology": "救急医学部",
+    "RabbitPlatoon": "RABBIT小隊",
+    "PandemoniumSociety": "パンデモニウム・ソサエティー",
+    "AriusSqud": "アリウススクワッド",
+    "HotSpringsDepartment": "温泉開発部",
+    "TeaParty": "ティーパーティー",
+    "PublicPeaceBureau": "公安局",
+    "BlackTortoisePromenade": "玄武商会",
+    "Genryumon": "玄龍門",
+    "LaborParty": "工務部",
+    "KnowledgeLiberationFront": "知識解放戦線",
+    "Hyakkayouran": "百花繚乱紛争調停委員会",
+    "ShinySparkleSociety": "キラキラ部",
+    "AbydosStudentCouncil": "アビドス生徒会",
+    "CentralControlCenter": "CCC",
+    "FreightLogisticsDepartment": "貨物輸送管理部",
+    "OccultClub": "オカルト研究会",
+    "FreeTradeCartel": "特殊交易部",
+    "NicomediasTroop": "ニコメディアトゥループ",
+    "PublishingDepartment": "出版部",
+    "EmptyClub": "無し"
+  },
+
   "raids": {
     "binah": "ビナー",
     "kaiten": "KAITEN FX Mk.0",
@@ -96,5 +166,48 @@
     "3min": "3分",
     "4min": "4分",
     "4min30sec": "4分30秒"
+  },
+
+  "terrain": {
+    "Indoor": "屋内",
+    "Outdoor": "屋外",
+    "Street": "市街地"
+  },
+
+  "attackType": {
+    "Explosion": "爆発",
+    "Pierce": "貫通",
+    "Mystic": "神秘",
+    "Sonic": "振動",
+    "Normal": "ノーマル",
+    "Mixed": "混合"
+  },
+
+  "defenseType": {
+    "LightArmor": "軽装備",
+    "HeavyArmor": "重装甲",
+    "Unarmed": "特殊装甲",
+    "ElasticArmor": "弾力装甲",
+    "Normal": "通常装甲",
+    "Mixed": "混合"
+  },
+
+  "combatClass": {
+    "Main": "STRIKER",
+    "Support": "SPECIAL"
+  },
+
+  "combatRole": {
+    "DamageDealer": "アタッカー",
+    "Tanker": "タンク",
+    "Healer": "ヒーラー",
+    "Supporter": "サポーター",
+    "Vehicle": "T.S"
+  },
+
+  "combatPosition": {
+    "Back": "BACK",
+    "Front": "FRONT",
+    "Middle": "MIDDLE"
   }
 }

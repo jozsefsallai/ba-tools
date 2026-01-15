@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import type { Club, School, Student } from "~prisma";
 import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type TitleGeneratorMode =
   | "basic"
@@ -45,6 +46,8 @@ type TitleGeneratorMode =
   | "tower";
 
 export function TitleGeneratorView() {
+  const t = useTranslations();
+
   const { students } = useStudents();
 
   const [clientReady, setClientReady] = useState(false);
