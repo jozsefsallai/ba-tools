@@ -40,6 +40,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "January 21, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Added Chemical attack type and Composite defense type.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
+  {
     date: "December 28, 2025",
     features: [
       {

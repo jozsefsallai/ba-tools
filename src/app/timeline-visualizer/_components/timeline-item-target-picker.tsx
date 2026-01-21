@@ -26,6 +26,7 @@ function StudentItem({ student }: { student: Student }) {
           "bg-type-yellow": student.attackType === "Pierce",
           "bg-type-blue": student.attackType === "Mystic",
           "bg-type-purple": student.attackType === "Sonic",
+          "bg-type-green": student.attackType === "Chemical",
         },
       )}
     >
