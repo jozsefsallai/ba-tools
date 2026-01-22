@@ -96,6 +96,24 @@ export const skillCardVariantMap = {
       image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0294_01"),
     },
   ],
+
+  aris_battle: [
+    {
+      id: "default",
+      name: "Default",
+      image: null,
+    },
+    {
+      id: "stance_1",
+      name: "Stance 1",
+      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0334_01"),
+    },
+    {
+      id: "stance_2",
+      name: "Stance 2",
+      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0334_02"),
+    },
+  ],
 } as const satisfies Record<string, SkillCardVariantData[]>;
 
 export type SkillCardVariant = keyof typeof skillCardVariantMap;
