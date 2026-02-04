@@ -40,6 +40,21 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "February 4, 2025",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.homePage,
+        description: "Added Student of the Day section to home page.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.homePage,
+        description: "Added reset info section to home page.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
+  {
     date: "January 21, 2025",
     features: [
       {
