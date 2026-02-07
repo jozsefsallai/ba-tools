@@ -70,6 +70,14 @@ export function StudentOfTheDay() {
     setView((prev) => (prev === "global" ? "user" : "global"));
   }, []);
 
+  const userName = useMemo(() => {
+    if (!user) {
+      return null;
+    }
+
+    return user.fullName ?? user.username;
+  }, [user]);
+
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-2xl">Student of the Day</h2>
@@ -78,7 +86,7 @@ export function StudentOfTheDay() {
         <FlippableCard
           isFlipped={view === "user"}
           front={
-            <div className="h-full flex flex-col items-center justify-center gap-2 p-6 border rounded-md bg-card">
+            <div className="relative h-full flex flex-col items-center justify-center gap-2 p-6 border rounded-md bg-card">
               <img
                 src={globalSOTDPortrait}
                 alt={globalSOTD.name}
@@ -86,6 +94,10 @@ export function StudentOfTheDay() {
               />
 
               <div className="font-bold text-xl">{globalSOTD.name}</div>
+
+              <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground uppercase">
+                Site-Wide Student
+              </div>
             </div>
           }
           back={
@@ -101,6 +113,10 @@ export function StudentOfTheDay() {
 
                 <div className="relative font-bold text-xl">
                   {userSOTD.name}
+                </div>
+
+                <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground font-medium uppercase">
+                  {userName ? `${userName}'s` : "Your"} Student
                 </div>
               </div>
             ) : null
