@@ -13,6 +13,8 @@ import { ChangelogItem } from "@/components/common/changelog-item";
 import { CHANGELOG } from "@/changelog";
 import { Separator } from "@/components/ui/separator";
 import { getTranslations } from "next-intl/server";
+import { StudentOfTheDay } from "@/app/(home)/_components/student-of-the-day";
+import { ResetInfo } from "@/app/(home)/_components/reset-info";
 
 export const metadata: Metadata = {
   title: "Joe's Blue Archive Tools",
@@ -74,6 +76,15 @@ export default async function Home() {
       )}
 
       <ToolsAndResources />
+
+      <Separator />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <StudentOfTheDay />
+        <ResetInfo />
+      </div>
+
+      <Separator />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <UserCorner />

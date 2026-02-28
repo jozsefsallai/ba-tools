@@ -88,6 +88,7 @@ enum AttackType {
   Mystic
   Normal
   Sonic
+  Chemical
   Mixed
 }
 
@@ -96,6 +97,7 @@ enum DefenseType {
   HeavyArmor
   Unarmed
   ElasticArmor
+  CompositeArmor
   Normal
   Mixed
 }

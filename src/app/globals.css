@@ -165,6 +165,7 @@
   --color-type-yellow: #bf8901;
   --color-type-blue: #226f9c;
   --color-type-purple: #794394;
+  --color-type-green: #11736b;
 }
 
 @layer base {
