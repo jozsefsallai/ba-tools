@@ -3,6 +3,50 @@
   "yes": "はい",
   "no": "いいえ",
   "loading": "読み込み中...",
+  "loadingNativeModules": "ネイティブモジュールを読み込み中...",
+  "private": "非公開",
+  "public": "公開",
+  "visibility": "公開設定",
+  "edit": "編集",
+  "delete": "削除",
+  "selectStudent": "生徒を選択",
+  "saving": "保存中...",
+  "saveChanges": "変更を保存",
+  "downloadImage": "画像をダウンロード",
+  "copyToClipboard": "クリップボードにコピー",
+  "scale": "スケール",
+  "showCreator": "作成者を表示",
+  "createdBy": "作成者：",
+  "unknownUser": "不明なユーザー",
+  "hot": "人気",
+  "new": "新規",
+  "name": "名前",
+  "introduction": "自己紹介",
+  "description": "説明",
+  "gameServer": "ゲームサーバー",
+  "friendCode": "フレンドコード",
+  "accountLevel": "アカウントレベル",
+  "studentRep": "代表生徒",
+  "optional": "(任意)",
+  "supportsMarkdown": "(Markdown対応)",
+  "optionalSupportsMarkdown": "(任意、Markdown対応)",
+  "inGameNickname": "ゲーム内ニックネーム",
+  "width": "幅",
+  "height": "高さ",
+  "count": "個数",
+  "place": "配置",
+  "cancel": "キャンセル",
+  "placeHorizontally": "横に配置",
+  "placeVertically": "縦に配置",
+  "create": "作成",
+  "parse": "解析",
+  "backTo": "{destination} に戻る",
+  "failedToLoad": "{item} の読み込みに失敗したよ。",
+  "untitledFormation": "無題の編成",
+  "untitledTimeline": "無題のタイムライン",
+  "untitledTimelineGroup": "無題のタイムライングループ",
+  "clickAgainToConfirm": "もう一度クリックして確定",
+
   "header": {
     "nav": {
       "gameplay": {
@@ -16,7 +60,7 @@
       "misc": {
         "title": "その他",
         "formationDisplay": "編成表示",
-        "titleGenerator": "肩書きジェネレーター",
+        "titleGenerator": "称号ジェネレーター",
         "gachaRateStats": "ガチャ確率統計",
         "scenarioImageGenerator": "シナリオ画像メーカー"
       },
@@ -43,7 +87,7 @@
     "zds": "該当する生徒がいません。"
   },
   "mdTips": {
-    "tip1": "リンクを &lt; と &gt; で囲むと、リンクが作成されるよ（例：<code>'<'https://bluearchive.jp'>'</code>）。",
+    "tip1": "リンクを &lt; と &gt; で囲むと、リンクが作成されるよ（例：<code>&lt;https://bluearchive.jp&gt;</code>）。",
     "tip2": "上記の形式で書かれた <strong>YouTube</strong> と <strong>BiliBili</strong> のリンクは、自動的に動画が埋め込まれるよ。",
     "tip3": "他の書き方はこの <a>Markdownチートシート</a> を見てみてね。すべての書式に対応しているわけじゃないから注意してね。"
   },
@@ -209,5 +253,19 @@
     "Back": "BACK",
     "Front": "FRONT",
     "Middle": "MIDDLE"
+  },
+
+  "notFound": {
+    "title": "404 - ページが見つからないよ",
+    "description": "お探しのページは存在しないみたい。"
+  },
+
+  "helpSheet": {
+    "formationDisplay": "編成表示",
+    "inventoryManagement": "在庫管理",
+    "bond": "絆ランク計算機",
+    "scenarioImageGenerator": "シナリオ画像メーカー",
+    "timelineVisualizer": "TL可視化ツール",
+    "railroadPuzzleSolver": "鉄道パズル解答器"
   }
 }

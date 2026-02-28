@@ -336,5 +336,500 @@
       "3stars": "★3合計数",
       "rate": "★3確率"
     }
+  },
+
+  "emblem": {
+    "title": "称号ジェネレーター",
+    "description": "ボス討伐、絆ランク、能力、所属部活などの称号を再現できるツールだよ。自由なテキストを入力してオリジナルの称号を作ることもできるよ。",
+
+    "error": "称号の生成に失敗したよ",
+
+    "mode": "モード：",
+    "options": "オプション",
+
+    "update": "更新",
+
+    "modes": {
+      "basic": {
+        "title": "基本",
+        "fields": {
+          "text": "テキスト"
+        }
+      },
+
+      "favor": {
+        "title": "絆ランク",
+        "fields": {
+          "student": "生徒：",
+          "extra": "その他",
+          "arona": "アロナ",
+          "plana": "プラナ",
+          "rank": "絆ランク：",
+          "nameOverride": "名前の上書き (任意)："
+        }
+      },
+
+      "potential": {
+        "title": "能力",
+
+        "fields": {
+          "student": "生徒：",
+          "level": "能力レベル：",
+          "nameOverride": "名前の上書き (任意)："
+        }
+      },
+
+      "boss": {
+        "title": "ボス討伐",
+
+        "fields": {
+          "boss": "ボス：",
+          "completion": "討伐内容："
+        }
+      },
+
+      "tower": {
+        "title": "制約解除決戦",
+
+        "fields": {
+          "boss": "ボス：",
+          "floor": "階層：",
+          "defense": "防御タイプ："
+        }
+      },
+
+      "club": {
+        "title": "部活顧問",
+
+        "fields": {
+          "school": "学校：",
+          "club": "部活：",
+          "nameOverride": "名前の上書き (任意)："
+        }
+      }
+    },
+
+    "default": {
+      "button": "デフォルトの称号を表示",
+      "warning": "<strong>注意：</strong>選択したモードによっては、すべての称号を読み込むのに時間がかかる場合があるよ。"
+    }
+  },
+
+  "formationDisplay": {
+    "title": "編成表示",
+    "description": "生徒の編成画像を生成できるツールだよ。YouTubeのサムネイル作成とかに便利！",
+    "descriptionLong": "このツールでは、生徒の編成画像を生成できるよ。YouTubeのサムネイルを綺麗にデザインしたい時とかに役立つよ。",
+    "mobileNotice": "<strong>注意：</strong>このツールはモバイル端末だと上手く動かないかもしれないよ。",
+    "renderNotice": "<strong>注意：</strong>ダークモードの拡張機能やブラウザのズーム設定によっては、画像が正しく書き出されないことがあるよ。もし表示がおかしくなったら、拡張機能をオフにしたりズームを100%にしたりしてみてね。",
+
+    "tabs": {
+      "items": "アイテム",
+      "appearance": "見た目",
+      "cloud": "クラウド"
+    },
+
+    "selectStudent": "生徒を選択",
+    "emptyStriker": "空のストライカー",
+    "emptySpecial": "空のスペシャル",
+    "bulkImport": "一括インポート",
+
+    "displayOverline": "オーバーラインを表示",
+    "displayRoleIcon": "役割アイコンを表示",
+    "verticalGroups": "垂直グループ化",
+
+    "formationName": "編成名",
+    "updateFormation": "編成を更新",
+    "saveFormation": "編成を保存",
+
+    "strikers": "ストライカー",
+    "specials": "スペシャル",
+    "noStrikers": "編成にストライカーがいません。",
+    "noSpecials": "編成にスペシャルがいません。",
+
+    "loadingFormation": "編成を読み込み中...",
+
+    "saveDialog": {
+      "title": "編成を保存する？",
+      "description": "保存されていない変更があるよ。ページを離れる前にクラウドに保存しておく？"
+    },
+
+    "toasts": {
+      "createSuccess": "編成を作成したよ。",
+      "updateSuccess": "編成を更新したよ。",
+      "createFail": "編成の作成に失敗したよ。",
+      "noStudents": "最低でも1人は生徒を編成に追加してね。"
+    },
+
+    "parseDialog": {
+      "title": "編成データを読み込む (BETA)",
+      "description": "以下に編成データを入力してね。"
+    },
+
+    "myFormations": {
+      "title": "マイ編成",
+      "createNew": "新しく編成を作る",
+      "description": "保存した編成の確認や管理ができるよ。",
+      "noFormations": "保存された編成はないよ。"
+    }
+  },
+
+  "scenarioImageGenerator": {
+    "title": "シナリオ画像メーカー",
+    "description": "ブルアカのストーリー風画像を自由に作成・生成できるツールだよ。",
+    "disclaimer": "<strong>免責事項：</strong>このツールで使用されているアセットの一部は、<a>HansTNO氏のテンプレート</a>から引用しています。",
+
+    "stopAnimation": "アニメーション停止",
+    "startAnimation": "アニメーション再生",
+    "recordingMode": "録画モード",
+
+    "settings": "設定",
+    "characters": "キャラクター",
+
+    "tabs": {
+      "content": "内容",
+      "background": "背景",
+      "font": "フォント",
+      "elements": "表示要素",
+      "behavior": "動作設定"
+    },
+
+    "content": {
+      "characterName": "キャラ名",
+      "characterNamePlaceholder": "キャラクターの名前を入力",
+      "affiliation": "所属 (任意)",
+      "affiliationPlaceholder": "所属組織などを入力",
+      "dialogueContent": "セリフ内容",
+      "dialoguePlaceholder": "セリフを入力してね"
+    },
+
+    "background": {
+      "backgroundImage": "背景画像",
+      "selectBackgroundImage": "背景画像を選択",
+      "backgroundUrl": "背景画像のURLを入力",
+      "backgroundScale": "背景スケール (デフォルト: 1)",
+      "backgroundScalePlaceholder": "スケール値を入力",
+      "backgroundXOffset": "背景 Xオフセット",
+      "backgroundXOffsetPlaceholder": "横方向の位置調整",
+      "backgroundYOffset": "背景 Yオフセット",
+      "backgroundYOffsetPlaceholder": "縦方向の位置調整"
+    },
+
+    "fontSettings": {
+      "font": "フォント",
+      "fontSize": "フォントサイズ (デフォルト: {defaultSize})",
+      "fontSizePlaceholder": "サイズを入力"
+    },
+
+    "elements": {
+      "displayButtons": "ボタンを表示",
+      "autoEnabled": "AUTO有効化",
+      "displayHorizontalLine": "境界線を表示",
+      "displayGradient": "グラデーションを表示",
+      "displayTriangle": "送りマークを表示"
+    },
+
+    "behaviorSettings": {
+      "textScrollSpeed": "テキスト表示速度 (0-1, デフォルト: {defaultSpeed})",
+      "scrollSpeedPlaceholder": "速度を入力",
+      "transparentBackground": "背景を透過する"
+    },
+
+    "character": {
+      "sprite": "立ち絵",
+      "selectSprite": "立ち絵を選択",
+      "enterImageUrl": "画像のURLを入力",
+      "darken": "暗くする",
+      "hologram": "ホログラム",
+      "silhouette": "シルエット",
+      "silhouetteColor": "シルエットの色",
+      "addCharacterFile": "キャラを追加 (ファイル)",
+      "addCharacterUrl": "キャラを追加 (URL)",
+      "deleteCharacter": "キャラクターを削除"
+    },
+
+    "recording": {
+      "title": "録画モード",
+      "description": "録画モードに切り替えるよ。画面録画ソフトの準備をしてね。準備ができたら下のボタンを押して録画を開始しよう。",
+      "escHint": "Escキーを押すと録画モードを終了できるよ（フルスクリーンの場合は2回押してね）。",
+      "start": "録画開始"
+    },
+
+    "toasts": {
+      "copied": "シナリオ画像をクリップボードにコピーしたよ！"
+    }
+  },
+
+  "pvp": {
+    "title": "戦術対抗戦トラッカー",
+    "description": "ブルアカの戦術対抗戦の記録を管理・統計できるツールだよ。",
+    "needAccount": "戦術対抗戦トラッカーを使うにはアカウントが必要だよ。",
+
+    "seasons": {
+      "createNew": "新しいシーズンを作成",
+      "server": "サーバー: {server}",
+      "failedToLoad": "シーズンの読み込みに失敗したよ。"
+    },
+
+    "season": {
+      "title": "シーズン: {name}",
+      "recordNewMatch": "対戦記録を追加",
+      "failedToLoad": "このシーズンの対戦記録の読み込みに失敗したよ。"
+    },
+
+    "match": {
+      "editMatch": "記録を編集",
+      "recordNewMatch": "新しい対戦を記録",
+      "date": "日付",
+      "videoUrl": "動画URL",
+      "matchType": "対戦タイプ",
+      "result": "結果",
+      "attack": "攻撃",
+      "defense": "防衛",
+      "win": "勝ち",
+      "loss": "負け",
+      "you": "自分",
+      "opponent": "相手",
+      "yourRank": "自分の順位",
+      "opponentName": "相手の名前",
+      "opponentRank": "相手の順位",
+      "opponentStudentRep": "相手の代表生徒",
+      "failedToLoad": "対戦データの読み込みに失敗したよ。"
+    },
+
+    "newSeason": {
+      "title": "新しい対抗戦シーズン",
+      "description": "シーズンの名前とゲームサーバーを入力してね。",
+      "seasonName": "シーズン名"
+    },
+
+    "toasts": {
+      "matchUpdated": "対戦記録を更新したよ。",
+      "matchRecorded": "対戦を記録したよ。",
+      "matchSaveFail": "保存に失敗したよ。もう一度試してみてね。",
+      "seasonCreateFail": "シーズンの作成に失敗したよ。"
+    }
+  },
+
+  "railroad": {
+    "title": "鉄道パズル解答器",
+    "description": "ハイランダーイベントのミニゲームで、線路をどう繋げばいいか可視化・解決してくれるツールだよ。イベントアイテムの消費を抑えるために、最も効率的な線路の組み合わせを導き出すこともできるよ。",
+
+    "railTypes": {
+      "straight": "直線",
+      "slightlyCurved": "少しカーブ",
+      "veryCurved": "急カーブ"
+    },
+
+    "railPiecesUsed": "使用した線路：",
+    "map": "マップ",
+    "usedRailPieces": "使用済みの線路",
+    "remainingRailPieces": "残りの線路",
+
+    "solveInstantly": "即座に解決",
+    "solveInstantlyHint": "（動作が重い場合はオフにしてね）",
+    "launchAoba": "アオバを出発させる",
+    "stopAoba": "アオバを止める",
+    "getMinimalConfigs": "最小構成を取得",
+    "solve": "解決！",
+
+    "minimalConfigs": "最小の線路構成（{count}件見つかったよ）",
+
+    "toasts": {
+      "noSolution": "指定された線路の数では解決策が見つからなかったよ。",
+      "aobaDerailed": "アオバが脱線しちゃった！ :(",
+      "noSolutionForAoba": "解決策がある時だけ、この機能を使えるよ。",
+      "startTileNotFound": "スタート地点が見つからないよ。"
+    }
+  },
+
+  "inventoryManagement": {
+    "title": "在庫管理",
+    "description": "アオイのイベントなどの「在庫管理」（海戦ゲーム形式）ミニゲームで、各アイテムの配置確率をシミュレートできるツールだよ。",
+    "notice": "<strong>注意：</strong>このツールは確率を微調整するためにいくつかのチェック機能を持たせているけど、盤面に小さなアイテムが多い場合などは、どうしても誤判定が出る可能性があるよ。結果はあくまで目安として使ってね。",
+
+    "remainingSlots": "残りのマス：",
+    "simulate": "シミュレート",
+    "load": "読み込む",
+    "save": "保存する",
+    "loadPreset": "プリセットを読み込む",
+    "reset": "リセット",
+    "preset": "プリセット：",
+    "round": "ラウンド",
+    "nextRound": "次のラウンドへ",
+
+    "confirmNextRound": {
+      "title": "次のラウンドに進む？",
+      "description": "次のラウンドを読み込んでも大丈夫？今の設定はリセットされるよ。",
+      "confirm": "はい",
+      "cancel": "やめておく"
+    },
+
+    "firstItem": "1つ目のアイテム",
+    "secondItem": "2つ目のアイテム",
+    "thirdItem": "3つ目のアイテム",
+
+    "displayedItems": "表示中のアイテム：",
+    "all": "すべて",
+
+    "slot": "スロット {number}",
+    "slotLastSave": "スロット {number} - 最終保存：{time}",
+    "slotEmpty": "スロット {number} - (空)",
+
+    "presetDialog": {
+      "title": "在庫管理のプリセットを選択",
+      "description": "シミュレーターに読み込むイベントのプリセットを選んでね。",
+      "selectEvent": "イベントを選択",
+      "selectRound": "ラウンドを選択",
+      "copyPermalink": "パーマリンクをコピー",
+      "copied": "コピーしたよ！",
+      "loadPresetData": "プリセットデータを読み込む"
+    },
+
+    "toasts": {
+      "noSavedData": "保存されたデータが見つからないよ。",
+      "dataLoaded": "データを読み込んだよ。",
+      "dataSaved": "データを保存したよ。",
+      "presetLoaded": "プリセット「{name}、ラウンド {round}」を読み込んだよ。",
+      "presetNotFound": "プリセットが見つからないよ。",
+      "invalidRound": "選択したプリセットに該当するラウンドがないよ。",
+      "cannotBlockOutside": "グリッドの外側にあるマスはブロックできないよ。"
+    }
+  },
+
+  "roster": {
+    "title": "名簿・ロスター",
+
+    "myRosters": {
+      "title": "マイロスター",
+      "newRoster": "新しいロスターを作成",
+      "description": "ここでは、公開・共有できるロスター（生徒名簿）の管理ができるよ。",
+      "failedToLoad": "ロスターの読み込みに失敗したよ。"
+    },
+
+    "create": {
+      "title": "ロスター作成",
+      "submit": "ロスターを作成する",
+      "toasts": {
+        "success": "ロスターを作成したよ！",
+        "fail": "ロスターの作成に失敗したよ。"
+      }
+    },
+
+    "editor": {
+      "title": "ロスターを編集",
+      "failedToLoad": "ロスターの読み込みに失敗したよ。",
+      "toasts": {
+        "success": "ロスターを更新したよ！",
+        "fail": "ロスターの更新に失敗したよ。もう一度試してみてね。"
+      }
+    },
+
+    "view": {
+      "loadingRoster": "ロスターを読み込み中...",
+      "failedToLoad": "ロスターの読み込みに失敗したよ。",
+      "lastUpdated": "最終更新：",
+      "filters": "フィルター",
+      "sort": "並び替え",
+      "searchByName": "名前で検索...",
+      "any": "すべて",
+      "minStarLevel": "最小★数：",
+      "minUELevel": "最小固有武器Lv：",
+      "minLevel": "最小Lv：",
+      "maxLevel": "最大Lv：",
+      "minRelationshipRank": "最小絆ランク：",
+      "minAttackTalent": "最小攻撃能力：",
+      "minHPTalent": "最小HP能力：",
+      "minHealingTalent": "最小治癒能力：",
+      "minGear1Tier": "最小装備1 Tier：",
+      "minGear2Tier": "最小装備2 Tier：",
+      "minGear3Tier": "最小装備3 Tier：",
+      "minBondGearTier": "最小愛用品 Tier：",
+
+      "sortOptions": {
+        "default": "デフォルト",
+        "nameAsc": "名前（昇順）",
+        "nameDesc": "名前（降順）",
+        "levelAsc": "レベル（低い順）",
+        "levelDesc": "レベル（高い順）",
+        "relationshipRankAsc": "絆ランク（低い順）",
+        "relationshipRankDesc": "絆ランク（高い順）",
+        "atkTalentAsc": "攻撃能力（低い順）",
+        "atkTalentDesc": "攻撃能力（高い順）",
+        "hpTalentAsc": "HP能力（低い順）",
+        "hpTalentDesc": "HP能力（高い順）",
+        "healTalentAsc": "治癒能力（低い順）",
+        "healTalentDesc": "治癒能力（高い順）"
+      }
+    }
+  },
+
+  "timelineView": {
+    "loadingTimeline": "タイムラインを読み込み中...",
+    "failedToLoad": "タイムラインの読み込みに失敗したよ。",
+    "editTimeline": "タイムラインを編集"
+  },
+
+  "timelineGroupView": {
+    "loadingGroup": "TLグループを読み込み中...",
+    "failedToLoad": "TLグループの読み込みに失敗したよ。",
+    "editGroup": "グループを編集",
+    "timelines": "タイムライン一覧",
+    "noTimelines": "このグループにはタイムラインが入っていないよ。",
+    "defaultDescription": "スキル回転（TL）を可視化した画像のグループだよ。"
+  },
+
+  "myTimelines": {
+    "title": "マイタイムライン",
+    "newGroup": "新しいグループ",
+    "newTimeline": "新しいタイムライン",
+    "description": "ここでは、保存したタイムラインの確認や管理ができるよ。",
+
+    "allTimelines": "すべてのタイムライン",
+    "allTimelinesDescription": "これまでに作成したすべてのタイムラインだよ。",
+    "allTimelinesGroupDescription": "このグループには、あなたのすべてのタイムラインが含まれているよ。",
+    "groupContains": "このグループには {count} 個のタイムラインが含まれているよ。",
+    "failedToLoad": "タイムライングループの読み込みに失敗したよ。",
+
+    "createGroup": {
+      "title": "TLグループを作成",
+      "namePlaceholder": "マイタイムライングループ",
+      "descriptionPlaceholder": "このグループの説明（任意）",
+      "submit": "TLグループを作成する",
+      "toasts": {
+        "success": "TLグループを作成したよ",
+        "fail": "TLグループの作成に失敗したよ"
+      }
+    },
+
+    "editGroup": {
+      "title": "TLグループを編集",
+      "addTimeline": "タイムラインを追加",
+      "selectTimeline": "追加するタイムラインを選択",
+      "searchPlaceholder": "検索...",
+      "noTimelinesFound": "タイムラインが見つからないよ。",
+      "noTimelinesInGroup": "このグループにはまだタイムラインが登録されていないよ。",
+      "shareGroup": "TLグループを共有",
+      "toasts": {
+        "success": "TLグループを更新したよ",
+        "fail": "TLグループの更新に失敗したよ",
+        "linkCopied": "リンクをクリップボードにコピーしたよ。"
+      }
+    }
+  },
+
+  "resetInfo": {
+    "title": "リセット時間情報",
+    "nextReset": "次のリセットまで：",
+    "nextCafeReset": "次のカフェリセットまで：",
+    "headpatCooldown": "なでなで可能になるまで："
+  },
+
+  "studentOfTheDay": {
+    "title": "今日の生徒",
+    "siteWide": "今日の全ユーザー共通の生徒",
+    "yourStudent": "今日のあなたの生徒",
+    "userStudent": "{name}さんの今日の生徒",
+    "viewYours": "「今日のあなたの生徒」を表示",
+    "viewGlobal": "「今日の全ユーザー共通の生徒」を表示"
   }
 }

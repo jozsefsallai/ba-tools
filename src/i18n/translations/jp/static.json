@@ -31,7 +31,7 @@
         "description": "ゲーム内の画面に近いデザインで生徒の編成を表示するよ。YouTubeのサムネイルや、スプレッドシートの管理に便利だよ。"
       },
       "titleGenerator": {
-        "title": "肩書きジェネレーター",
+        "title": "称号ジェネレーター",
         "description": "ボス討伐、絆ランク、能力、所属部活などの称号を再現できるよ。自由なテキストを入力して自分だけのオリジナル称号も作れるよ。"
       },
       "gachaRateStats": {
@@ -69,5 +69,36 @@
       "title": "更新履歴",
       "viewAll": "すべての更新履歴を見る"
     }
+  },
+
+  "credits": {
+    "title": "クレジット",
+    "techStack": "技術スタック",
+    "licenses": "ライセンス",
+    "stack": {
+      "webFramework": "Webフレームワーク",
+      "styling": "スタイリング",
+      "uiLibrary": "UIライブラリ",
+      "hosting": "ホスティング",
+      "databaseProviderGameData": "データベースプロバイダー (ゲームデータ)",
+      "databaseGameData": "データベース (ゲームデータ)",
+      "orm": "ORM",
+      "databaseUserData": "データベース (ユーザーデータ)",
+      "authentication": "認証",
+      "nativeModules": "ネイティブモジュール",
+      "scenarioAndSpineRendering": "シナリオUI & Spineレンダリング",
+      "planaRendering": "プラナ レンダリング"
+    }
+  },
+
+  "banners": {
+    "title": "今後のグローバル版ガチャ",
+    "description": "ここでは、ブルーアーカイブのグローバル版で開催予定のガチャを確認できるよ。スケジュールの予測は日本版に基づいているから、グローバル版では変更される可能性があることを忘れないでね。",
+    "notice": "<strong>重要：</strong>現在、ブルーアーカイブのグローバル版は日本版との差を縮めるためにスケジュールの短縮が行われているよ。その結果、一部のガチャが統合されたり、期間が短くなったり、スキップされたりする場合があるよ。"
+  },
+
+  "flappyPeroro": {
+    "title": "フラップ・ペロロ",
+    "description": "モモフレンズのペロロが登場する「Flappy Bird」風ゲームだよ。"
   }
 }
