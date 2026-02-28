@@ -30,6 +30,7 @@ import {
 import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, SaveIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -40,6 +41,7 @@ export type RosterEditorProps = {
 };
 
 export function RosterEditor({ rosterId }: RosterEditorProps) {
+  const t = useTranslations();
   const { students } = useStudents();
 
   const query = useQueryWithStatus(api.roster.getOwnById, {
@@ -178,23 +180,23 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         students,
       });
 
-      toast.success("Roster updated successfully!");
+      toast.success(t("tools.roster.editor.toasts.success"));
     } catch (err) {
       console.error("Failed to update roster", err);
-      toast.error("Failed to update roster. Please try again.");
+      toast.error(t("tools.roster.editor.toasts.fail"));
     } finally {
       setIsSaving(false);
     }
   }
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error" || !query.data) {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load roster.
+        {t("tools.roster.editor.failedToLoad")}
       </MessageBox>
     );
   }
@@ -202,12 +204,12 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Edit Roster</h2>
+        <h2 className="text-lg font-bold">{t("tools.roster.editor.title")}</h2>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">
-            In-Game Nickname{" "}
-            <small className="text-muted-foreground text-xs">(optional)</small>
+            {t("common.inGameNickname")}{" "}
+            <small className="text-muted-foreground text-xs">{t("common.optional")}</small>
           </Label>
 
           <Input
@@ -220,9 +222,9 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="introduction">
-            Introduction
+            {t("common.introduction")}
             <small className="text-muted-foreground text-xs">
-              (optional, supports Markdown)
+              {t("common.optionalSupportsMarkdown")}
             </small>
           </Label>
 
@@ -238,7 +240,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <Label>Visibility</Label>
+          <Label>{t("common.visibility")}</Label>
 
           <Select
             value={visibility}
@@ -248,14 +250,14 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="private">Private</SelectItem>
-              <SelectItem value="public">Public</SelectItem>
+              <SelectItem value="private">{t("common.private")}</SelectItem>
+              <SelectItem value="public">{t("common.public")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="accountLevel">Account Level</Label>
+          <Label htmlFor="accountLevel">{t("common.accountLevel")}</Label>
 
           <Input
             id="accountLevel"
@@ -269,7 +271,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         </div>
 
         <div className="flex gap-2">
-          <Label htmlFor="studentRep">Student Representative</Label>
+          <Label htmlFor="studentRep">{t("common.studentRep")}</Label>
 
           <div>
             <StudentPicker
@@ -277,7 +279,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
               className="w-[200px] md:w-[350px]"
             >
               <Button variant="outline">
-                {studentRep ? studentRep.name : "Select a student"}
+                {studentRep ? studentRep.name : t("common.selectStudent")}
                 <ChevronDownIcon />
               </Button>
             </StudentPicker>
@@ -291,7 +293,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="gameServer">Game Server</Label>
+          <Label htmlFor="gameServer">{t("common.gameServer")}</Label>
 
           <Select
             value={gameServer}
@@ -311,7 +313,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="friendCode">Friend Code</Label>
+          <Label htmlFor="friendCode">{t("common.friendCode")}</Label>
 
           <Input
             id="friendCode"
@@ -338,7 +340,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent z-50 p-4 pt-8 flex justify-center">
         <Button onClick={handleWantsToUpdate} disabled={isSaving}>
           <SaveIcon />
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? t("common.saving") : t("common.saveChanges")}
         </Button>
       </div>
     </div>

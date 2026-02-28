@@ -27,6 +27,7 @@ import slugify from "slugify";
 import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DownloadIcon, PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import Link from "next/link";
 import { useStudents } from "@/hooks/use-students";
@@ -36,6 +37,7 @@ export type TimelineViewProps = {
 };
 
 export function TimelineView({ id }: TimelineViewProps) {
+  const t = useTranslations();
   const { students: allStudents } = useStudents();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -121,13 +123,13 @@ export function TimelineView({ id }: TimelineViewProps) {
   }
 
   if (query.status === "pending") {
-    return <MessageBox>Loading timeline...</MessageBox>;
+    return <MessageBox>{t("tools.timelineView.loadingTimeline")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load timeline.
+        {t("tools.timelineView.failedToLoad")}
       </MessageBox>
     );
   }
@@ -138,13 +140,13 @@ export function TimelineView({ id }: TimelineViewProps) {
         <div className="flex flex-col gap-2">
           <div className="flex gap-2 justify-between">
             <h1 className="text-3xl font-bold">
-              {query.data.name ?? "Untitled Timeline"}
+              {query.data.name ?? t("common.untitledTimeline")}
             </h1>
 
             {query.data.isOwn && (
               <Button variant="outline" asChild>
                 <Link href={`/timeline-visualizer?id=${id}`}>
-                  <PencilIcon /> Edit Timeline
+                  <PencilIcon /> {t("tools.timelineView.editTimeline")}
                 </Link>
               </Button>
             )}
@@ -152,7 +154,7 @@ export function TimelineView({ id }: TimelineViewProps) {
 
           {"user" in query.data && query.data.showCreator && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <span>Created by</span>
+              <span>{t("common.createdBy")}</span>
 
               <Avatar className="size-6">
                 <AvatarFallback>
@@ -165,7 +167,7 @@ export function TimelineView({ id }: TimelineViewProps) {
               <span className="font-bold">
                 {query.data.user.name ??
                   query.data.user.username ??
-                  "Unknown User"}
+                  t("common.unknownUser")}
               </span>
             </div>
           )}
@@ -189,7 +191,7 @@ export function TimelineView({ id }: TimelineViewProps) {
 
       <div className="flex items-center justify-center gap-4">
         <div className="flex items-center gap-2">
-          <Label>Scale</Label>
+          <Label>{t("common.scale")}</Label>
 
           <Select
             value={scale.toString()}
@@ -217,7 +219,7 @@ export function TimelineView({ id }: TimelineViewProps) {
             disabled={items.length === 0 || generationInProgress}
           >
             <DownloadIcon />
-            Download Image
+            {t("common.downloadImage")}
           </Button>
         </div>
       </div>

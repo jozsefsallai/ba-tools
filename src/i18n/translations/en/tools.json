@@ -414,5 +414,423 @@
       "button": "View Default Titles",
       "warning": "<strong>Warning:</strong> It may take a while to load all titles depending on the mode you've selected."
     }
+  },
+
+  "formationDisplay": {
+    "title": "Formation Display",
+    "description": "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
+    "descriptionLong": "This tool allows you to generate an image of a student formation. This can be useful for cases such as designing clean YouTube thumbnails.",
+    "mobileNotice": "<strong>Note:</strong> This tool might not work well on mobile devices.",
+    "renderNotice": "<strong>Note:</strong> Dark mode extensions and zoom levels may cause rendering issues in the resulting image. If the generated image looks weird, try disabling any dark mode extensions you may have and using 100% zoom.",
+
+    "tabs": {
+      "items": "Items",
+      "appearance": "Appearance",
+      "cloud": "Cloud"
+    },
+
+    "selectStudent": "Select Student",
+    "emptyStriker": "Empty Striker",
+    "emptySpecial": "Empty Special",
+    "bulkImport": "Bulk Import",
+
+    "displayOverline": "Display Overline",
+    "displayRoleIcon": "Display Role Icon",
+    "verticalGroups": "Vertical Groups",
+
+    "formationName": "Formation Name",
+    "updateFormation": "Update Formation",
+    "saveFormation": "Save Formation",
+
+    "strikers": "Strikers",
+    "specials": "Specials",
+    "noStrikers": "No strikers in formation.",
+    "noSpecials": "No specials in formation.",
+
+    "loadingFormation": "Loading formation...",
+
+    "saveDialog": {
+      "title": "Save formation?",
+      "description": "You have unsaved changes in your formation. Would you like to save it in the cloud before leaving the page?"
+    },
+
+    "toasts": {
+      "createSuccess": "Formation created successfully.",
+      "updateSuccess": "Formation updated successfully.",
+      "createFail": "Failed to create formation.",
+      "noStudents": "You must add at least one student to the formation."
+    },
+
+    "parseDialog": {
+      "title": "Read Formation Data (BETA)",
+      "description": "Enter the formation data below."
+    },
+
+    "myFormations": {
+      "title": "My Formations",
+      "createNew": "Create New Formation",
+      "description": "Here you can view and manage your saved formations.",
+      "noFormations": "You have no formations saved."
+    }
+  },
+
+  "scenarioImageGenerator": {
+    "title": "Scenario Image Generator",
+    "description": "Create and generate images that resemble fake Blue Archive scenario/story screenshots.",
+    "disclaimer": "<strong>Disclaimer:</strong> Some of the assets used in this tool were extracted from <a>HansTNO's template</a>.",
+
+    "stopAnimation": "Stop Animation",
+    "startAnimation": "Start Animation",
+    "recordingMode": "Recording Mode",
+
+    "settings": "Settings",
+    "characters": "Characters",
+
+    "tabs": {
+      "content": "Content",
+      "background": "Background",
+      "font": "Font",
+      "elements": "Elements",
+      "behavior": "Behavior"
+    },
+
+    "content": {
+      "characterName": "Character Name",
+      "characterNamePlaceholder": "Enter character name",
+      "affiliation": "Affiliation (optional)",
+      "affiliationPlaceholder": "Enter affiliation",
+      "dialogueContent": "Dialogue Content",
+      "dialoguePlaceholder": "Enter dialogue content"
+    },
+
+    "background": {
+      "backgroundImage": "Background Image",
+      "selectBackgroundImage": "Select Background Image",
+      "backgroundUrl": "Enter background image URL",
+      "backgroundScale": "Background Scale (default: 1)",
+      "backgroundScalePlaceholder": "Enter background scale",
+      "backgroundXOffset": "Background X Offset",
+      "backgroundXOffsetPlaceholder": "Enter background X offset",
+      "backgroundYOffset": "Background Y Offset",
+      "backgroundYOffsetPlaceholder": "Enter background Y offset"
+    },
+
+    "fontSettings": {
+      "font": "Font",
+      "fontSize": "Font Size (default: {defaultSize})",
+      "fontSizePlaceholder": "Enter font size"
+    },
+
+    "elements": {
+      "displayButtons": "Display Buttons",
+      "autoEnabled": "Auto Enabled",
+      "displayHorizontalLine": "Display Horizontal Line",
+      "displayGradient": "Display Gradient",
+      "displayTriangle": "Display Triangle"
+    },
+
+    "behaviorSettings": {
+      "textScrollSpeed": "Text Scroll Speed (0-1, default: {defaultSpeed})",
+      "scrollSpeedPlaceholder": "Enter scroll speed",
+      "transparentBackground": "Transparent Background"
+    },
+
+    "character": {
+      "sprite": "Sprite",
+      "selectSprite": "Select Sprite",
+      "enterImageUrl": "Enter image URL",
+      "darken": "Darken",
+      "hologram": "Hologram",
+      "silhouette": "Silhouette",
+      "silhouetteColor": "Silhouette Color",
+      "addCharacterFile": "Add Character (file)",
+      "addCharacterUrl": "Add Character (URL)",
+      "deleteCharacter": "Delete Character"
+    },
+
+    "recording": {
+      "title": "Recording Mode",
+      "description": "You're about to enter recording mode. Prepare your screen recording software to capture the browser window. Click on the following button when you feel ready to start recording.",
+      "escHint": "You can quit recording mode by pressing the Esc key (twice if you're in full screen).",
+      "start": "Start Recording"
+    },
+
+    "toasts": {
+      "copied": "Scenario image copied to clipboard!"
+    }
+  },
+
+  "pvp": {
+    "title": "PVP Tracker",
+    "description": "This tool allows you to track your PVP battles in Blue Archive.",
+    "needAccount": "You need an account to use the PVP Tracker tool.",
+
+    "seasons": {
+      "createNew": "Create New Season",
+      "server": "Server: {server}",
+      "failedToLoad": "Failed to load PVP seasons."
+    },
+
+    "season": {
+      "title": "Season: {name}",
+      "recordNewMatch": "Record New Match",
+      "failedToLoad": "Failed to load PVP matches for this season."
+    },
+
+    "match": {
+      "editMatch": "Edit Match",
+      "recordNewMatch": "Record New Match",
+      "date": "Date",
+      "videoUrl": "Video URL",
+      "matchType": "Match type",
+      "result": "Result",
+      "attack": "Attack",
+      "defense": "Defense",
+      "win": "Win",
+      "loss": "Loss",
+      "you": "You",
+      "opponent": "Opponent",
+      "yourRank": "Your Rank",
+      "opponentName": "Opponent Name",
+      "opponentRank": "Opponent Rank",
+      "opponentStudentRep": "Opponent Student Rep",
+      "failedToLoad": "Failed to load PVP match."
+    },
+
+    "newSeason": {
+      "title": "New PVP Season",
+      "description": "Enter the name and game server of this PVP season.",
+      "seasonName": "Season Name"
+    },
+
+    "toasts": {
+      "matchUpdated": "Match updated successfully.",
+      "matchRecorded": "Match recorded successfully.",
+      "matchSaveFail": "Failed to save match. Please try again.",
+      "seasonCreateFail": "Failed to create PVP season."
+    }
+  },
+
+  "railroad": {
+    "title": "Railroad Puzzle Solver",
+    "description": "This tool helps you solve/visualize the path to take when placing your railroad tracks in the Highlander event's minigame. You can also generate the most optimal combinations of railroad pieces to use if you want to minimize your event currency use.",
+
+    "railTypes": {
+      "straight": "Straight",
+      "slightlyCurved": "Slightly Curved",
+      "veryCurved": "Very Curved"
+    },
+
+    "railPiecesUsed": "Rail pieces used:",
+    "map": "Map",
+    "usedRailPieces": "Used rail pieces",
+    "remainingRailPieces": "Remaining rail pieces",
+
+    "solveInstantly": "Solve Instantly",
+    "solveInstantlyHint": "(disable this if you experience lag)",
+    "launchAoba": "Launch Aoba",
+    "stopAoba": "Stop Aoba",
+    "getMinimalConfigs": "Get Minimal Rail Configs",
+    "solve": "Solve!",
+
+    "minimalConfigs": "Minimal Rail Configurations ({count} found)",
+
+    "toasts": {
+      "noSolution": "No solution found with the given number of rails.",
+      "aobaDerailed": "Aoba derailed! :(",
+      "noSolutionForAoba": "You can only use this function if there's a solution.",
+      "startTileNotFound": "Start tile not found."
+    }
+  },
+
+  "inventoryManagement": {
+    "title": "Inventory Management",
+    "description": "This tool allows you to simulate the probabilities of each item's placement in the inventory management events (e.g. Aoi's event).",
+    "notice": "<strong>Note:</strong> While the tool does have some biases and multiple checks in place to finetune the probabilities, at the end of the day, it can still result in false positives, especially when the board contains many small items. Use the results as a guideline, not as a guarantee.",
+
+    "remainingSlots": "Remaining Slots:",
+    "simulate": "Simulate",
+    "load": "Load",
+    "save": "Save",
+    "loadPreset": "Load Preset",
+    "reset": "Reset",
+    "preset": "Preset:",
+    "round": "round",
+    "nextRound": "Next Round",
+
+    "confirmNextRound": {
+      "title": "Proceed to Next Round?",
+      "description": "Are you sure you want to load the next round? This will reset the current setup.",
+      "confirm": "Yes",
+      "cancel": "Nevermind"
+    },
+
+    "firstItem": "First Item",
+    "secondItem": "Second Item",
+    "thirdItem": "Third Item",
+
+    "displayedItems": "Displayed Items:",
+    "all": "All",
+
+    "slot": "Slot {number}",
+    "slotLastSave": "Slot {number} - last save: {time}",
+    "slotEmpty": "Slot {number} - (empty)",
+
+    "presetDialog": {
+      "title": "Select Inventory Management Preset",
+      "description": "Select an event preset to load into the inventory management simulator.",
+      "selectEvent": "Select an event",
+      "selectRound": "Select a round",
+      "copyPermalink": "Copy Permalink",
+      "copied": "Copied!",
+      "loadPresetData": "Load Preset Data"
+    },
+
+    "toasts": {
+      "noSavedData": "No saved data found.",
+      "dataLoaded": "Data loaded successfully.",
+      "dataSaved": "Data saved successfully.",
+      "presetLoaded": "Preset \"{name}, round {round}\" loaded successfully.",
+      "presetNotFound": "Preset not found.",
+      "invalidRound": "Invalid round index for the selected preset.",
+      "cannotBlockOutside": "Cannot block cells outside the grid."
+    }
+  },
+
+  "roster": {
+    "title": "Roster",
+
+    "myRosters": {
+      "title": "My Rosters",
+      "newRoster": "New Roster",
+      "description": "Here you can view and manage your rosters which you can share publicly.",
+      "failedToLoad": "Failed to load rosters."
+    },
+
+    "create": {
+      "title": "Create Roster",
+      "submit": "Create Roster",
+      "toasts": {
+        "success": "Roster created successfully!",
+        "fail": "Failed to create roster."
+      }
+    },
+
+    "editor": {
+      "title": "Edit Roster",
+      "failedToLoad": "Failed to load roster.",
+      "toasts": {
+        "success": "Roster updated successfully!",
+        "fail": "Failed to update roster. Please try again."
+      }
+    },
+
+    "view": {
+      "loadingRoster": "Loading roster...",
+      "failedToLoad": "Failed to load roster.",
+      "lastUpdated": "Last updated:",
+      "filters": "Filters",
+      "sort": "Sort",
+      "searchByName": "Search by name...",
+      "any": "Any",
+      "minStarLevel": "Min Star Level:",
+      "minUELevel": "Min UE Level:",
+      "minLevel": "Min Level:",
+      "maxLevel": "Max Level:",
+      "minRelationshipRank": "Min Relationship Rank:",
+      "minAttackTalent": "Min Attack Talent:",
+      "minHPTalent": "Min HP Talent:",
+      "minHealingTalent": "Min Healing Talent:",
+      "minGear1Tier": "Min Gear 1 Tier:",
+      "minGear2Tier": "Min Gear 2 Tier:",
+      "minGear3Tier": "Min Gear 3 Tier:",
+      "minBondGearTier": "Min Bond Gear Tier:",
+
+      "sortOptions": {
+        "default": "Default",
+        "nameAsc": "Name (asc)",
+        "nameDesc": "Name (desc)",
+        "levelAsc": "Level (asc)",
+        "levelDesc": "Level (desc)",
+        "relationshipRankAsc": "Relationship Rank (asc)",
+        "relationshipRankDesc": "Relationship Rank (desc)",
+        "atkTalentAsc": "Attack Talent (asc)",
+        "atkTalentDesc": "Attack Talent (desc)",
+        "hpTalentAsc": "HP Talent (asc)",
+        "hpTalentDesc": "HP Talent (desc)",
+        "healTalentAsc": "Healing Talent (asc)",
+        "healTalentDesc": "Healing Talent (desc)"
+      }
+    }
+  },
+
+  "timelineView": {
+    "loadingTimeline": "Loading timeline...",
+    "failedToLoad": "Failed to load timeline.",
+    "editTimeline": "Edit Timeline"
+  },
+
+  "timelineGroupView": {
+    "loadingGroup": "Loading timeline group...",
+    "failedToLoad": "Failed to load timeline group.",
+    "editGroup": "Edit Group",
+    "timelines": "Timelines",
+    "noTimelines": "This group has no timelines.",
+    "defaultDescription": "A group of visual EX skill rotation timelines."
+  },
+
+  "myTimelines": {
+    "title": "My Timelines",
+    "newGroup": "New Group",
+    "newTimeline": "New Timeline",
+    "description": "Here you can view and manage your saved timelines.",
+
+    "allTimelines": "All Timelines",
+    "allTimelinesDescription": "All timelines you have created.",
+    "allTimelinesGroupDescription": "This group contains all your timelines.",
+    "groupContains": "This group contains {count, plural, one {# timeline} other {# timelines}}.",
+    "failedToLoad": "Failed to load timeline groups.",
+
+    "createGroup": {
+      "title": "Create Timeline Group",
+      "namePlaceholder": "My Timeline Group",
+      "descriptionPlaceholder": "A description of this timeline group (optional)",
+      "submit": "Create Timeline Group",
+      "toasts": {
+        "success": "Timeline group created",
+        "fail": "Failed to create timeline group"
+      }
+    },
+
+    "editGroup": {
+      "title": "Edit Timeline Group",
+      "addTimeline": "Add Timeline",
+      "selectTimeline": "Select Timeline to Add",
+      "searchPlaceholder": "Type to search...",
+      "noTimelinesFound": "No timelines found.",
+      "noTimelinesInGroup": "This group does not have any timelines yet.",
+      "shareGroup": "Share Timeline Group",
+      "toasts": {
+        "success": "Timeline group updated",
+        "fail": "Failed to update timeline group",
+        "linkCopied": "Link copied to clipboard."
+      }
+    }
+  },
+
+  "resetInfo": {
+    "title": "Reset Time Information",
+    "nextReset": "Next reset in:",
+    "nextCafeReset": "Next cafe reset in:",
+    "headpatCooldown": "Headpat cooldown ends in:"
+  },
+
+  "studentOfTheDay": {
+    "title": "Student of the Day",
+    "siteWide": "Site-Wide Student",
+    "yourStudent": "Your Student",
+    "userStudent": "{name}'s Student",
+    "viewYours": "View Your Student of the Day",
+    "viewGlobal": "View Global Student of the Day"
   }
 }

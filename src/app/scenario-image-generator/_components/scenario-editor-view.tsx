@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useScenarioData } from "@/app/scenario-image-generator/_hooks/use-scenario-data";
@@ -32,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function ScenarioEditorView() {
+  const t = useTranslations();
   const {
     applicationRef,
     backgroundMode,
@@ -200,7 +202,7 @@ export function ScenarioEditorView() {
 
       const item = new ClipboardItem({ "image/png": blob });
       navigator.clipboard.write([item]).then(() => {
-        toast.success("Scenario image copied to clipboard!");
+        toast.success(t("tools.scenarioImageGenerator.toasts.copied"));
       });
     });
   }
@@ -296,11 +298,11 @@ export function ScenarioEditorView() {
 
       <div className="flex gap-4">
         <Button onClick={() => setAnimate((prev) => !prev)}>
-          {animate ? "Stop Animation" : "Start Animation"}
+          {animate ? t("tools.scenarioImageGenerator.stopAnimation") : t("tools.scenarioImageGenerator.startAnimation")}
         </Button>
 
         <Button disabled={animate} onClick={() => setRecordingMode(true)}>
-          Recording Mode
+          {t("tools.scenarioImageGenerator.recordingMode")}
         </Button>
       </div>
 
@@ -309,45 +311,45 @@ export function ScenarioEditorView() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
         <Card>
           <CardHeader>
-            <CardTitle>Settings</CardTitle>
+            <CardTitle>{t("tools.scenarioImageGenerator.settings")}</CardTitle>
           </CardHeader>
 
           <CardContent>
             <Tabs defaultValue="content" className="gap-4">
               <TabsList className="place-self-center">
-                <TabsTrigger value="content">Content</TabsTrigger>
-                <TabsTrigger value="background">Background</TabsTrigger>
-                <TabsTrigger value="font">Font</TabsTrigger>
-                <TabsTrigger value="elements">Elements</TabsTrigger>
-                <TabsTrigger value="behavior">Behavior</TabsTrigger>
+                <TabsTrigger value="content">{t("tools.scenarioImageGenerator.tabs.content")}</TabsTrigger>
+                <TabsTrigger value="background">{t("tools.scenarioImageGenerator.tabs.background")}</TabsTrigger>
+                <TabsTrigger value="font">{t("tools.scenarioImageGenerator.tabs.font")}</TabsTrigger>
+                <TabsTrigger value="elements">{t("tools.scenarioImageGenerator.tabs.elements")}</TabsTrigger>
+                <TabsTrigger value="behavior">{t("tools.scenarioImageGenerator.tabs.behavior")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="content">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Label htmlFor="name">Character Name</Label>
+                  <Label htmlFor="name">{t("tools.scenarioImageGenerator.content.characterName")}</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter character name"
+                    placeholder={t("tools.scenarioImageGenerator.content.characterNamePlaceholder")}
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="affiliation">Affiliation (optional)</Label>
+                  <Label htmlFor="affiliation">{t("tools.scenarioImageGenerator.content.affiliation")}</Label>
                   <Input
                     id="affiliation"
                     value={affiliation}
                     onChange={(e) => setAffiliation(e.target.value)}
-                    placeholder="Enter affiliation"
+                    placeholder={t("tools.scenarioImageGenerator.content.affiliationPlaceholder")}
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="content">Dialogue Content</Label>
+                  <Label htmlFor="content">{t("tools.scenarioImageGenerator.content.dialogueContent")}</Label>
                   <Textarea
                     id="content"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="Enter dialogue content"
+                    placeholder={t("tools.scenarioImageGenerator.content.dialoguePlaceholder")}
                     className="h-24 col-span-2"
                   />
                 </div>
@@ -362,7 +364,7 @@ export function ScenarioEditorView() {
                         : "backgroundUrl"
                     }
                   >
-                    Background Image
+                    {t("tools.scenarioImageGenerator.background.backgroundImage")}
                   </Label>
                   <div className="flex gap-2 col-span-2">
                     {backgroundMode === "image" && (
@@ -371,7 +373,7 @@ export function ScenarioEditorView() {
                         onClick={handleBackgroundImageClick}
                         className="flex-1"
                       >
-                        {backgroundName || "Select Background Image"}
+                        {backgroundName || t("tools.scenarioImageGenerator.background.selectBackgroundImage")}
                       </Button>
                     )}
 
@@ -390,7 +392,7 @@ export function ScenarioEditorView() {
                         type="url"
                         value={backgroundUrl ?? ""}
                         onChange={(e) => setBackgroundUrl(e.target.value)}
-                        placeholder="Enter background image URL"
+                        placeholder={t("tools.scenarioImageGenerator.background.backgroundUrl")}
                         className="flex-1"
                       />
                     )}
@@ -418,7 +420,7 @@ export function ScenarioEditorView() {
                   </div>
 
                   <Label htmlFor="backgroundScale">
-                    Background Scale (default: 1)
+                    {t("tools.scenarioImageGenerator.background.backgroundScale")}
                   </Label>
 
                   <Input
@@ -426,27 +428,27 @@ export function ScenarioEditorView() {
                     type="number"
                     value={backgroundScaleStr}
                     onChange={(e) => setBackgroundScaleStr(e.target.value)}
-                    placeholder="Enter background scale"
+                    placeholder={t("tools.scenarioImageGenerator.background.backgroundScalePlaceholder")}
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="backgroundXOffset">Background X Offset</Label>
+                  <Label htmlFor="backgroundXOffset">{t("tools.scenarioImageGenerator.background.backgroundXOffset")}</Label>
                   <Input
                     id="backgroundXOffset"
                     type="number"
                     value={backgroundXOffsetStr}
                     onChange={(e) => setBackgroundXOffsetStr(e.target.value)}
-                    placeholder="Enter background X offset"
+                    placeholder={t("tools.scenarioImageGenerator.background.backgroundXOffsetPlaceholder")}
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="backgroundYOffset">Background Y Offset</Label>
+                  <Label htmlFor="backgroundYOffset">{t("tools.scenarioImageGenerator.background.backgroundYOffset")}</Label>
                   <Input
                     id="backgroundYOffset"
                     type="number"
                     value={backgroundYOffsetStr}
                     onChange={(e) => setBackgroundYOffsetStr(e.target.value)}
-                    placeholder="Enter background Y offset"
+                    placeholder={t("tools.scenarioImageGenerator.background.backgroundYOffsetPlaceholder")}
                     className="col-span-2"
                   />
                 </div>
@@ -454,7 +456,7 @@ export function ScenarioEditorView() {
 
               <TabsContent value="font">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Label>Font</Label>
+                  <Label>{t("tools.scenarioImageGenerator.fontSettings.font")}</Label>
                   <div className="col-span-2">
                     <Select
                       value={font.family}
@@ -480,14 +482,14 @@ export function ScenarioEditorView() {
                   </div>
 
                   <Label htmlFor="fontSize">
-                    Font Size (default: {SCENARIO_TEXT_FONT_SIZE})
+                    {t("tools.scenarioImageGenerator.fontSettings.fontSize", { defaultSize: SCENARIO_TEXT_FONT_SIZE })}
                   </Label>
                   <Input
                     id="fontSize"
                     type="number"
                     value={fontSize}
                     onChange={(e) => setFontSize(Number(e.target.value))}
-                    placeholder="Enter font size"
+                    placeholder={t("tools.scenarioImageGenerator.fontSettings.fontSizePlaceholder")}
                     className="col-span-2"
                   />
                 </div>
@@ -495,7 +497,7 @@ export function ScenarioEditorView() {
 
               <TabsContent value="elements">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Label htmlFor="displayButtons">Display Buttons</Label>
+                  <Label htmlFor="displayButtons">{t("tools.scenarioImageGenerator.elements.displayButtons")}</Label>
                   <Switch
                     id="displayButtons"
                     checked={displayButtons}
@@ -503,7 +505,7 @@ export function ScenarioEditorView() {
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="autoEnabled">Auto Enabled</Label>
+                  <Label htmlFor="autoEnabled">{t("tools.scenarioImageGenerator.elements.autoEnabled")}</Label>
                   <Switch
                     id="autoEnabled"
                     checked={autoEnabled}
@@ -511,7 +513,7 @@ export function ScenarioEditorView() {
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="displayLine">Display Horizontal Line</Label>
+                  <Label htmlFor="displayLine">{t("tools.scenarioImageGenerator.elements.displayHorizontalLine")}</Label>
                   <Switch
                     id="displayLine"
                     checked={displayLine}
@@ -519,7 +521,7 @@ export function ScenarioEditorView() {
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="displayGradient">Display Gradient</Label>
+                  <Label htmlFor="displayGradient">{t("tools.scenarioImageGenerator.elements.displayGradient")}</Label>
                   <Switch
                     id="displayGradient"
                     checked={displayGradient}
@@ -527,7 +529,7 @@ export function ScenarioEditorView() {
                     className="col-span-2"
                   />
 
-                  <Label htmlFor="displayTriangle">Display Triangle</Label>
+                  <Label htmlFor="displayTriangle">{t("tools.scenarioImageGenerator.elements.displayTriangle")}</Label>
                   <Switch
                     id="displayTriangle"
                     checked={displayTriangle}
@@ -540,8 +542,7 @@ export function ScenarioEditorView() {
               <TabsContent value="behavior">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Label htmlFor="scrollSpeed">
-                    Text Scroll Speed (0-1, default:{" "}
-                    {SCENARIO_TEXT_SCROLL_SPEED})
+                    {t("tools.scenarioImageGenerator.behaviorSettings.textScrollSpeed", { defaultSpeed: SCENARIO_TEXT_SCROLL_SPEED })}
                   </Label>
                   <Input
                     id="scrollSpeed"
@@ -551,12 +552,12 @@ export function ScenarioEditorView() {
                     max={1}
                     step={0.01}
                     onChange={(e) => setScrollSpeed(Number(e.target.value))}
-                    placeholder="Enter scroll speed"
+                    placeholder={t("tools.scenarioImageGenerator.behaviorSettings.scrollSpeedPlaceholder")}
                     className="col-span-2"
                   />
 
                   <Label htmlFor="transparentBackground">
-                    Transparent Background
+                    {t("tools.scenarioImageGenerator.behaviorSettings.transparentBackground")}
                   </Label>
                   <Switch
                     id="transparentBackground"
@@ -574,7 +575,7 @@ export function ScenarioEditorView() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Characters</CardTitle>
+            <CardTitle>{t("tools.scenarioImageGenerator.characters")}</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -631,12 +632,12 @@ export function ScenarioEditorView() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button variant="outline" onClick={handleAddCharacter}>
                 <PlusIcon className="mr-2" />
-                Add Character (file)
+                {t("tools.scenarioImageGenerator.character.addCharacterFile")}
               </Button>
 
               <Button variant="outline" onClick={handleAddCharacterUrl}>
                 <PlusIcon className="mr-2" />
-                Add Character (URL)
+                {t("tools.scenarioImageGenerator.character.addCharacterUrl")}
               </Button>
             </div>
 
@@ -654,8 +655,8 @@ export function ScenarioEditorView() {
       <Separator />
 
       <div className="flex gap-4">
-        <Button onClick={handleCopyToClipboard}>Copy to Clipboard</Button>
-        <Button onClick={handleDownloadImage}>Download Image</Button>
+        <Button onClick={handleCopyToClipboard}>{t("common.copyToClipboard")}</Button>
+        <Button onClick={handleDownloadImage}>{t("common.downloadImage")}</Button>
       </div>
 
       {recordingMode && (
@@ -665,24 +666,21 @@ export function ScenarioEditorView() {
       {recordingMode && !animate && (
         <div className="fixed top-0 left-0 right-0 bottom-0 bg-amber-800/60 text-white z-50 flex items-center justify-center">
           <div className="flex flex-col items-center justify-center text-center gap-4 w-lg">
-            <h2 className="text-3xl font-semibold">Recording Mode</h2>
+            <h2 className="text-3xl font-semibold">{t("tools.scenarioImageGenerator.recording.title")}</h2>
 
             <p>
-              You're about to enter recording mode. Prepare your screen
-              recording software to capture the browser window. Click on the
-              following button when you feel ready to start recording.
+              {t("tools.scenarioImageGenerator.recording.description")}
             </p>
 
             <p>
-              You can quit recording mode by pressing the Esc key (twice if
-              you're in full screen).
+              {t("tools.scenarioImageGenerator.recording.escHint")}
             </p>
 
             <Button
               onClick={() => setAnimate(true)}
               className="bg-amber-500 hover:bg-amber-600"
             >
-              Start Recording
+              {t("tools.scenarioImageGenerator.recording.start")}
             </Button>
           </div>
         </div>

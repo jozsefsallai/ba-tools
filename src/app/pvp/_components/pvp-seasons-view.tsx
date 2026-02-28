@@ -5,19 +5,21 @@ import { NewPVPSeasonDialog } from "@/components/dialogs/new-pvp-season-dialog";
 import { useQueryWithStatus } from "@/lib/convex";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 
 export function PVPSeasonsView() {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.pvp.getOwnSeasons);
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load PVP seasons.
+        {t("tools.pvp.seasons.failedToLoad")}
       </MessageBox>
     );
   }
@@ -27,7 +29,7 @@ export function PVPSeasonsView() {
       <NewPVPSeasonDialog>
         <div className="border border-dashed flex flex-col gap-2 items-center justify-center h-full rounded-md p-4 hover:bg-accent cursor-pointer">
           <PlusIcon className="size-8" />
-          <div className="text-xl font-medium">Create New Season</div>
+          <div className="text-xl font-medium">{t("tools.pvp.seasons.createNew")}</div>
         </div>
       </NewPVPSeasonDialog>
 
@@ -40,7 +42,7 @@ export function PVPSeasonsView() {
             <h2 className="text-2xl font-bold">{season.name}</h2>
 
             <p className="text-sm text-muted-foreground">
-              Server: {season.gameServer}
+              {t("tools.pvp.seasons.server", { server: season.gameServer })}
             </p>
           </div>
         </Link>

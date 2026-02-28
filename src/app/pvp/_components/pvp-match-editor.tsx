@@ -28,6 +28,7 @@ import { Separator } from "@/components/ui/separator";
 import { useStudents } from "@/hooks/use-students";
 import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
+import { useTranslations } from "next-intl";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -47,6 +48,7 @@ export type PVPMatchEditor = {
 };
 
 export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
+  const t = useTranslations();
   const { studentMap } = useStudents();
 
   const router = useRouter();
@@ -235,19 +237,19 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           ...matchData,
         });
 
-        toast.success("Match updated successfully.");
+        toast.success(t("tools.pvp.toasts.matchUpdated"));
       } else {
         await recordMatchMutation({
           seasonId,
           ...matchData,
         });
 
-        toast.success("Match recorded successfully.");
+        toast.success(t("tools.pvp.toasts.matchRecorded"));
         router.push(`/pvp/${seasonId}`);
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to save match. Please try again.");
+      toast.error(t("tools.pvp.toasts.matchSaveFail"));
     } finally {
       setIsSaving(false);
     }
@@ -309,7 +311,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           </Button>
 
           <h1 className="text-xl font-bold">
-            {current ? "Edit Match" : "Record New Match"}
+            {current ? t("tools.pvp.match.editMatch") : t("tools.pvp.match.recordNewMatch")}
           </h1>
         </div>
       </div>
@@ -317,7 +319,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="flex flex-col gap-1">
           <Label htmlFor="match-date" className="text-xs">
-            Date
+            {t("tools.pvp.match.date")}
           </Label>
 
           <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
@@ -349,7 +351,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">Video URL</Label>
+          <Label className="text-xs">{t("tools.pvp.match.videoUrl")}</Label>
 
           <Input
             type="url"
@@ -360,7 +362,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">Match type</Label>
+          <Label className="text-xs">{t("tools.pvp.match.matchType")}</Label>
 
           <Select
             value={matchType}
@@ -371,14 +373,14 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="attack">Attack</SelectItem>
-              <SelectItem value="defense">Defense</SelectItem>
+              <SelectItem value="attack">{t("tools.pvp.match.attack")}</SelectItem>
+              <SelectItem value="defense">{t("tools.pvp.match.defense")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">Result</Label>
+          <Label className="text-xs">{t("tools.pvp.match.result")}</Label>
 
           <Select
             value={result}
@@ -389,8 +391,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="win">Win</SelectItem>
-              <SelectItem value="loss">Loss</SelectItem>
+              <SelectItem value="win">{t("tools.pvp.match.win")}</SelectItem>
+              <SelectItem value="loss">{t("tools.pvp.match.loss")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -401,14 +403,14 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>You</CardTitle>
+            <CardTitle>{t("tools.pvp.match.you")}</CardTitle>
           </CardHeader>
 
           <CardContent className="flex flex-col gap-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 flex flex-col gap-1">
                 <Label htmlFor="own-rank" className="text-xs">
-                  Your Rank
+                  {t("tools.pvp.match.yourRank")}
                 </Label>
 
                 <Input
@@ -450,14 +452,14 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Opponent</CardTitle>
+            <CardTitle>{t("tools.pvp.match.opponent")}</CardTitle>
           </CardHeader>
 
           <CardContent className="flex flex-col gap-6">
             <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="opponent-name" className="text-xs">
-                  Opponent Name
+                  {t("tools.pvp.match.opponentName")}
                 </Label>
 
                 <Input
@@ -469,7 +471,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="opponent-rank" className="text-xs">
-                  Opponent Rank
+                  {t("tools.pvp.match.opponentRank")}
                 </Label>
 
                 <Input
@@ -498,7 +500,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
               <div className="flex flex-col gap-1">
                 <Label htmlFor="opponent-student-rep" className="text-xs">
-                  Opponent Student Rep
+                  {t("tools.pvp.match.opponentStudentRep")}
                 </Label>
 
                 <div className="flex gap-1">
@@ -509,7 +511,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                     >
                       {opponentStudentRep
                         ? opponentStudentRep.name
-                        : "Select Student"}
+                        : t("common.selectStudent")}
                       <ChevronDownIcon />
                     </Button>
                   </StudentPicker>
@@ -542,7 +544,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent z-50 p-4 pt-8 flex justify-center">
         <Button onClick={handleWantsToUpdate} disabled={isSaving}>
           <SaveIcon />
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? t("common.saving") : t("common.saveChanges")}
         </Button>
       </div>
     </div>

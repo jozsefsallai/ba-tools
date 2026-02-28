@@ -39,6 +39,7 @@ import { buildStudentPortraitUrl } from "@/lib/url";
 import { format } from "date-fns";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 
@@ -48,6 +49,7 @@ export type RosterViewProps = {
 };
 
 export function RosterView({ gameServer, friendCode }: RosterViewProps) {
+  const t = useTranslations();
   const { students } = useStudents();
 
   const query = useQueryWithStatus(api.roster.getByGameServerAndFriendCode, {
@@ -471,13 +473,13 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
   }, []);
 
   if (query.status === "pending") {
-    return <MessageBox>Loading roster...</MessageBox>;
+    return <MessageBox>{t("tools.roster.view.loadingRoster")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load roster.
+        {t("tools.roster.view.failedToLoad")}
       </MessageBox>
     );
   }
@@ -526,7 +528,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
             <Separator />
 
             <div className="text-xs text-muted-foreground">
-              <strong>Last updated:</strong>{" "}
+              <strong>{t("tools.roster.view.lastUpdated")}</strong>{" "}
               {format(new Date(query.data.lastUpdated), "PPP")}
             </div>
           </div>
@@ -536,13 +538,13 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       <Separator />
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-bold">Roster</h2>
+        <h2 className="text-2xl font-bold">{t("tools.roster.title")}</h2>
 
         <Card className="py-0">
           <CardContent>
             <Accordion type="multiple">
               <AccordionItem value="filters">
-                <AccordionTrigger>Filters</AccordionTrigger>
+                <AccordionTrigger>{t("tools.roster.view.filters")}</AccordionTrigger>
 
                 <AccordionContent className="pt-2 pb-6">
                   <div className="flex flex-col gap-4">
@@ -550,12 +552,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       id="filter-name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Search by name..."
+                      placeholder={t("tools.roster.view.searchByName")}
                     />
 
                     <div className="grid grid-cols-5 gap-2">
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Star Level:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minStarLevel")}</Label>
 
                         <Select
                           value={minStarLevel?.toString() ?? ""}
@@ -568,7 +570,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           }
                         >
                           <SelectTrigger className="w-full">
-                            {minStarLevel ? <SelectValue /> : "Any"}
+                            {minStarLevel ? <SelectValue /> : t("tools.roster.view.any")}
                           </SelectTrigger>
 
                           <SelectContent>
@@ -582,7 +584,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min UE Level:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minUELevel")}</Label>
 
                         <Select
                           value={minUELevel?.toString() ?? ""}
@@ -595,11 +597,11 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           }
                         >
                           <SelectTrigger className="w-full h-auto">
-                            {minUELevel ? <SelectValue /> : "Any"}
+                            {minUELevel ? <SelectValue /> : t("tools.roster.view.any")}
                           </SelectTrigger>
 
                           <SelectContent>
-                            <SelectItem value="_">Any</SelectItem>
+                            <SelectItem value="_">{t("tools.roster.view.any")}</SelectItem>
                             <SelectItem value="1">1</SelectItem>
                             <SelectItem value="2">2</SelectItem>
                             <SelectItem value="3">3</SelectItem>
@@ -609,7 +611,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Level:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minLevel")}</Label>
 
                         <Input
                           type="number"
@@ -619,12 +621,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinLevelFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Max Level:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.maxLevel")}</Label>
 
                         <Input
                           type="number"
@@ -634,13 +636,13 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMaxLevelFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
                         <Label className="text-xs">
-                          Min Relationship Rank:
+                          {t("tools.roster.view.minRelationshipRank")}
                         </Label>
 
                         <Input
@@ -653,14 +655,14 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                               e.target.value,
                             )
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-5 gap-2">
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Attack Talent:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minAttackTalent")}</Label>
 
                         <Input
                           type="number"
@@ -670,12 +672,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinAtkTalentFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min HP Talent:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minHPTalent")}</Label>
 
                         <Input
                           type="number"
@@ -685,12 +687,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinHpTalentFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Healing Talent:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minHealingTalent")}</Label>
 
                         <Input
                           type="number"
@@ -700,14 +702,14 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinHealTalentFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-5 gap-2">
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Gear 1 Tier:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minGear1Tier")}</Label>
 
                         <Input
                           type="number"
@@ -717,12 +719,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinGear1TierFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Gear 2 Tier:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minGear2Tier")}</Label>
 
                         <Input
                           type="number"
@@ -732,12 +734,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinGear2TierFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Gear 3 Tier:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minGear3Tier")}</Label>
 
                         <Input
                           type="number"
@@ -747,12 +749,12 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinGear3TierFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">Min Bond Gear Tier:</Label>
+                        <Label className="text-xs">{t("tools.roster.view.minBondGearTier")}</Label>
 
                         <Input
                           type="number"
@@ -762,7 +764,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           onChange={(e) =>
                             handleMinGear4TierFilterChange(e.target.value)
                           }
-                          placeholder="Any"
+                          placeholder={t("tools.roster.view.any")}
                         />
                       </div>
                     </div>
@@ -771,7 +773,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
               </AccordionItem>
 
               <AccordionItem value="sort">
-                <AccordionTrigger>Sort</AccordionTrigger>
+                <AccordionTrigger>{t("tools.roster.view.sort")}</AccordionTrigger>
 
                 <AccordionContent className="pt-2 pb-6">
                   <Select
@@ -785,34 +787,34 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value="default">Default</SelectItem>
-                      <SelectItem value="nameAsc">Name (asc)</SelectItem>
-                      <SelectItem value="nameDesc">Name (desc)</SelectItem>
-                      <SelectItem value="levelAsc">Level (asc)</SelectItem>
-                      <SelectItem value="levelDesc">Level (desc)</SelectItem>
+                      <SelectItem value="default">{t("tools.roster.view.sortOptions.default")}</SelectItem>
+                      <SelectItem value="nameAsc">{t("tools.roster.view.sortOptions.nameAsc")}</SelectItem>
+                      <SelectItem value="nameDesc">{t("tools.roster.view.sortOptions.nameDesc")}</SelectItem>
+                      <SelectItem value="levelAsc">{t("tools.roster.view.sortOptions.levelAsc")}</SelectItem>
+                      <SelectItem value="levelDesc">{t("tools.roster.view.sortOptions.levelDesc")}</SelectItem>
                       <SelectItem value="relationshipRankAsc">
-                        Relationship Rank (asc)
+                        {t("tools.roster.view.sortOptions.relationshipRankAsc")}
                       </SelectItem>
                       <SelectItem value="relationshipRankDesc">
-                        Relationship Rank (desc)
+                        {t("tools.roster.view.sortOptions.relationshipRankDesc")}
                       </SelectItem>
                       <SelectItem value="atkTalentAsc">
-                        Attack Talent (asc)
+                        {t("tools.roster.view.sortOptions.atkTalentAsc")}
                       </SelectItem>
                       <SelectItem value="atkTalentDesc">
-                        Attack Talent (desc)
+                        {t("tools.roster.view.sortOptions.atkTalentDesc")}
                       </SelectItem>
                       <SelectItem value="hpTalentAsc">
-                        HP Talent (asc)
+                        {t("tools.roster.view.sortOptions.hpTalentAsc")}
                       </SelectItem>
                       <SelectItem value="hpTalentDesc">
-                        HP Talent (desc)
+                        {t("tools.roster.view.sortOptions.hpTalentDesc")}
                       </SelectItem>
                       <SelectItem value="healTalentAsc">
-                        Healing Talent (asc)
+                        {t("tools.roster.view.sortOptions.healTalentAsc")}
                       </SelectItem>
                       <SelectItem value="healTalentDesc">
-                        Healing Talent (desc)
+                        {t("tools.roster.view.sortOptions.healTalentDesc")}
                       </SelectItem>
                     </SelectContent>
                   </Select>

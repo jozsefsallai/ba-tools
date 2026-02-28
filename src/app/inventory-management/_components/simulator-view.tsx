@@ -35,6 +35,7 @@ import type {
   WorkerResponse,
 } from "@/workers/types";
 import { MoveIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -55,6 +56,8 @@ function ItemSetup({
   isPlacing?: boolean;
   onPlacingToggled?: (rotated: boolean) => void;
 }) {
+  const t = useTranslations();
+
   return (
     <Card>
       <CardHeader>
@@ -64,7 +67,7 @@ function ItemSetup({
       <CardContent className="flex flex-col gap-2">
         <div className="flex gap-2">
           <div className="flex flex-col gap-2">
-            <Label>Width</Label>
+            <Label>{t("common.width")}</Label>
             <Input
               type="number"
               min={1}
@@ -79,7 +82,7 @@ function ItemSetup({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Height</Label>
+            <Label>{t("common.height")}</Label>
             <Input
               type="number"
               min={1}
@@ -94,7 +97,7 @@ function ItemSetup({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Count</Label>
+            <Label>{t("common.count")}</Label>
             <Input
               type="number"
               min={0}
@@ -117,7 +120,7 @@ function ItemSetup({
             >
               {isPlacing && <XIcon />}
               {!isPlacing && <MoveIcon />}
-              {isPlacing ? "Cancel" : "Place"}
+              {isPlacing ? t("common.cancel") : t("common.place")}
             </Button>
           )}
 
@@ -129,7 +132,7 @@ function ItemSetup({
               >
                 {isPlacing && <XIcon />}
                 {!isPlacing && <MoveIcon />}
-                {isPlacing ? "Cancel" : "Place Horizontally"}
+                {isPlacing ? t("common.cancel") : t("common.placeHorizontally")}
               </Button>
 
               {!isPlacing && (
@@ -138,7 +141,7 @@ function ItemSetup({
                   onClick={() => onPlacingToggled?.(true)}
                 >
                   {!isPlacing && <MoveIcon />}
-                  {isPlacing ? "Cancel" : "Place Vertically"}
+                  {isPlacing ? t("common.cancel") : t("common.placeVertically")}
                 </Button>
               )}
             </>
@@ -150,6 +153,7 @@ function ItemSetup({
 }
 
 export function InventoryManagementSimulatorView() {
+  const t = useTranslations();
   const [ready, setReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
@@ -212,7 +216,7 @@ export function InventoryManagementSimulatorView() {
     const endY = coords.y + selectRegion.height - 1;
 
     if (endX >= 9 || endY >= 5) {
-      toast.error("Cannot block cells outside the grid.");
+      toast.error(t("tools.inventoryManagement.toasts.cannotBlockOutside"));
       return;
     }
 
@@ -322,7 +326,7 @@ export function InventoryManagementSimulatorView() {
   function handleLoad(slot: AoiInventorySlot) {
     const data = aoiInventoryStorage.get();
     if (!data || !data[slot]) {
-      toast.warning("No saved data found.");
+      toast.warning(t("tools.inventoryManagement.toasts.noSavedData"));
       return;
     }
 
@@ -342,7 +346,7 @@ export function InventoryManagementSimulatorView() {
       }
     }
 
-    toast.success("Data loaded successfully.");
+    toast.success(t("tools.inventoryManagement.toasts.dataLoaded"));
   }
 
   function handleSave(slot: AoiInventorySlot) {
@@ -374,18 +378,18 @@ export function InventoryManagementSimulatorView() {
       },
     }));
 
-    toast.success("Data saved successfully.");
+    toast.success(t("tools.inventoryManagement.toasts.dataSaved"));
   }
 
   function handlePresetLoaded(id: string, roundIndex: number) {
     const preset = inventoryManagementPresets.find((p) => p.id === id);
     if (!preset) {
-      toast.error("Preset not found.");
+      toast.error(t("tools.inventoryManagement.toasts.presetNotFound"));
       return;
     }
 
     if (roundIndex < 0) {
-      toast.error("Invalid round index for the selected preset.");
+      toast.error(t("tools.inventoryManagement.toasts.invalidRound"));
       return;
     }
 
@@ -417,7 +421,7 @@ export function InventoryManagementSimulatorView() {
     setResults(undefined);
 
     toast.success(
-      `Preset "${preset.name}, round ${roundIndex + 1}" loaded successfully.`,
+      t("tools.inventoryManagement.toasts.presetLoaded", { name: preset.name, round: roundIndex + 1 }),
     );
   }
 
@@ -530,14 +534,14 @@ export function InventoryManagementSimulatorView() {
   }
 
   if (!ready) {
-    return <MessageBox>Loading native modules...</MessageBox>;
+    return <MessageBox>{t("common.loadingNativeModules")}</MessageBox>;
   }
 
   return (
     <div className="flex flex-col gap-8 items-center justify-center">
       <div className="flex flex-col gap-4 justify-center items-center">
         <div className="text-muted-foreground text-sm">
-          <strong>Remaining Slots:</strong> {45 - blockedCells.length} / 45
+          <strong>{t("tools.inventoryManagement.remainingSlots")}</strong> {45 - blockedCells.length} / 45
         </div>
 
         <Grid
@@ -551,47 +555,47 @@ export function InventoryManagementSimulatorView() {
 
         <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
           <Button onClick={startSimulation} disabled={requestInProgress}>
-            Simulate
+            {t("tools.inventoryManagement.simulate")}
           </Button>
 
           <Select
             value=""
             onValueChange={(val) => handleLoad(val as AoiInventorySlot)}
           >
-            <SelectTrigger>Load</SelectTrigger>
+            <SelectTrigger>{t("tools.inventoryManagement.load")}</SelectTrigger>
 
             <SelectContent>
               <SelectItem value="slot1" disabled={!saveData?.slot1}>
                 {saveData?.slot1
-                  ? `Slot 1 - last save: ${formatDistanceToNow(
-                      saveData.slot1.savedAt,
-                      {
+                  ? t("tools.inventoryManagement.slotLastSave", {
+                      number: 1,
+                      time: formatDistanceToNow(saveData.slot1.savedAt, {
                         addSuffix: true,
-                      },
-                    )}`
-                  : "Slot 1 - (empty)"}
+                      }),
+                    })
+                  : t("tools.inventoryManagement.slotEmpty", { number: 1 })}
               </SelectItem>
 
               <SelectItem value="slot2" disabled={!saveData?.slot2}>
                 {saveData?.slot2
-                  ? `Slot 2 - last save: ${formatDistanceToNow(
-                      saveData.slot2.savedAt,
-                      {
+                  ? t("tools.inventoryManagement.slotLastSave", {
+                      number: 2,
+                      time: formatDistanceToNow(saveData.slot2.savedAt, {
                         addSuffix: true,
-                      },
-                    )}`
-                  : "Slot 2 - (empty)"}
+                      }),
+                    })
+                  : t("tools.inventoryManagement.slotEmpty", { number: 2 })}
               </SelectItem>
 
               <SelectItem value="slot3" disabled={!saveData?.slot3}>
                 {saveData?.slot3
-                  ? `Slot 3 - last save: ${formatDistanceToNow(
-                      saveData.slot3.savedAt,
-                      {
+                  ? t("tools.inventoryManagement.slotLastSave", {
+                      number: 3,
+                      time: formatDistanceToNow(saveData.slot3.savedAt, {
                         addSuffix: true,
-                      },
-                    )}`
-                  : "Slot 3 - (empty)"}
+                      }),
+                    })
+                  : t("tools.inventoryManagement.slotEmpty", { number: 3 })}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -600,50 +604,50 @@ export function InventoryManagementSimulatorView() {
             value=""
             onValueChange={(val) => handleSave(val as AoiInventorySlot)}
           >
-            <SelectTrigger>Save</SelectTrigger>
+            <SelectTrigger>{t("tools.inventoryManagement.save")}</SelectTrigger>
 
             <SelectContent>
               <SelectItem value="slot1">
                 {saveData?.slot1
-                  ? `Slot 1 - last save: ${formatDistanceToNow(
-                      saveData.slot1.savedAt,
-                      {
+                  ? t("tools.inventoryManagement.slotLastSave", {
+                      number: 1,
+                      time: formatDistanceToNow(saveData.slot1.savedAt, {
                         addSuffix: true,
-                      },
-                    )}`
-                  : "Slot 1 - (empty)"}
+                      }),
+                    })
+                  : t("tools.inventoryManagement.slotEmpty", { number: 1 })}
               </SelectItem>
 
               <SelectItem value="slot2">
                 {saveData?.slot2
-                  ? `Slot 2 - last save: ${formatDistanceToNow(
-                      saveData.slot2.savedAt,
-                      {
+                  ? t("tools.inventoryManagement.slotLastSave", {
+                      number: 2,
+                      time: formatDistanceToNow(saveData.slot2.savedAt, {
                         addSuffix: true,
-                      },
-                    )}`
-                  : "Slot 2 - (empty)"}
+                      }),
+                    })
+                  : t("tools.inventoryManagement.slotEmpty", { number: 2 })}
               </SelectItem>
 
               <SelectItem value="slot3">
                 {saveData?.slot3
-                  ? `Slot 3 - last save: ${formatDistanceToNow(
-                      saveData.slot3.savedAt,
-                      {
+                  ? t("tools.inventoryManagement.slotLastSave", {
+                      number: 3,
+                      time: formatDistanceToNow(saveData.slot3.savedAt, {
                         addSuffix: true,
-                      },
-                    )}`
-                  : "Slot 3 - (empty)"}
+                      }),
+                    })
+                  : t("tools.inventoryManagement.slotEmpty", { number: 3 })}
               </SelectItem>
             </SelectContent>
           </Select>
 
           <LoadInventoryPresetDialog onFinish={handlePresetLoaded}>
-            <Button variant="outline">Load Preset</Button>
+            <Button variant="outline">{t("tools.inventoryManagement.loadPreset")}</Button>
           </LoadInventoryPresetDialog>
 
           <Button variant="destructive" onClick={handleReset}>
-            Reset
+            {t("tools.inventoryManagement.reset")}
           </Button>
         </div>
       </div>
@@ -652,19 +656,19 @@ export function InventoryManagementSimulatorView() {
         <Card className="md:w-2/3 mx-auto py-2">
           <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
             <div className="text-sm text-muted-foreground text-center">
-              Preset: <strong>{preset.name}</strong>, round{" "}
+              {t("tools.inventoryManagement.preset")} <strong>{preset.name}</strong>, {t("tools.inventoryManagement.round")}{" "}
               <strong>{presetRoundIndex + 1}</strong>
             </div>
 
             <ConfirmDialog
-              title="Proceed to Next Round?"
-              description="Are you sure you want to load the next round? This will reset the current setup."
-              confirmText="Yes"
-              cancelText="Nevermind"
+              title={t("tools.inventoryManagement.confirmNextRound.title")}
+              description={t("tools.inventoryManagement.confirmNextRound.description")}
+              confirmText={t("tools.inventoryManagement.confirmNextRound.confirm")}
+              cancelText={t("tools.inventoryManagement.confirmNextRound.cancel")}
               onConfirm={handleNextRound}
             >
               <Button variant="outline" size="sm">
-                Next Round
+                {t("tools.inventoryManagement.nextRound")}
               </Button>
             </ConfirmDialog>
           </CardContent>
@@ -673,7 +677,7 @@ export function InventoryManagementSimulatorView() {
 
       <div className="flex flex-col md:flex-row gap-4">
         <ItemSetup
-          title="First Item"
+          title={t("tools.inventoryManagement.firstItem")}
           item={firstItem}
           onChange={(newItem) => handleItemChange(setFirstItem, newItem)}
           isPlacing={placingItem === firstItem}
@@ -681,7 +685,7 @@ export function InventoryManagementSimulatorView() {
         />
 
         <ItemSetup
-          title="Second Item"
+          title={t("tools.inventoryManagement.secondItem")}
           item={secondItem}
           onChange={(newItem) => handleItemChange(setSecondItem, newItem)}
           isPlacing={placingItem === secondItem}
@@ -689,7 +693,7 @@ export function InventoryManagementSimulatorView() {
         />
 
         <ItemSetup
-          title="Third Item"
+          title={t("tools.inventoryManagement.thirdItem")}
           item={thirdItem}
           onChange={(newItem) => handleItemChange(setThirdItem, newItem)}
           isPlacing={placingItem === thirdItem}
@@ -698,7 +702,7 @@ export function InventoryManagementSimulatorView() {
       </div>
 
       <div className="flex flex-col md:flex-row items-center gap-4">
-        <Label>Displayed Items:</Label>
+        <Label>{t("tools.inventoryManagement.displayedItems")}</Label>
 
         <ToggleGroup
           type="single"
@@ -707,7 +711,7 @@ export function InventoryManagementSimulatorView() {
           onValueChange={changeDisplayedItem}
         >
           <ToggleGroupItem className="px-4" value="all">
-            All
+            {t("tools.inventoryManagement.all")}
           </ToggleGroupItem>
 
           <ToggleGroupItem className="px-4" value="1">

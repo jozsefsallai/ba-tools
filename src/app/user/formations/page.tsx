@@ -3,26 +3,36 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "My Formations - Joe's Blue Archive Tools",
-  description: "View and manage your formations saved in the cloud.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return {
+    title: `${t("tools.formationDisplay.myFormations.title")} - ${t("common.appName")}`,
+    description: t("tools.formationDisplay.myFormations.description"),
+    twitter: {
+      card: "summary",
+    },
+  };
+}
 
 export default async function MyFormationsPage() {
+  const t = await getTranslations();
+
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center justify-between">
-          <h1 className="text-xl font-bold">My Formations</h1>
+          <h1 className="text-xl font-bold">
+            {t("tools.formationDisplay.myFormations.title")}
+          </h1>
           <Button asChild>
-            <Link href="/formation-display">Create New Formation</Link>
+            <Link href="/formation-display">
+              {t("tools.formationDisplay.myFormations.createNew")}
+            </Link>
           </Button>
         </div>
-        <p>Here you can view and manage your saved formations.</p>
+        <p>{t("tools.formationDisplay.myFormations.description")}</p>
       </div>
 
       <Separator />

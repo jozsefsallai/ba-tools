@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQueryWithStatus } from "@/lib/convex";
 import { useMutation } from "convex/react";
 import { SaveIcon, ShareIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -44,6 +45,7 @@ export type TimelineGroupViewProps = {
 };
 
 export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.timelineGroup.getOwnById, {
     id: groupId,
   });
@@ -97,10 +99,10 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
         timelines: items.map((i) => i._id),
       });
 
-      toast.success("Timeline group updated");
+      toast.success(t("tools.myTimelines.editGroup.toasts.success"));
     } catch (err) {
       console.error("Failed to update timeline group", err);
-      toast.error("Failed to update timeline group");
+      toast.error(t("tools.myTimelines.editGroup.toasts.fail"));
     }
   }
 
@@ -109,17 +111,17 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
 
     await navigator.clipboard.writeText(url.toString());
 
-    toast.success("Link copied to clipboard.");
+    toast.success(t("tools.myTimelines.editGroup.toasts.linkCopied"));
   }
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error" || !query.data) {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load timeline group.
+        {t("tools.timelineGroupView.failedToLoad")}
       </MessageBox>
     );
   }
@@ -127,10 +129,10 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Edit Timeline Group</h2>
+        <h2 className="text-lg font-bold">{t("tools.myTimelines.editGroup.title")}</h2>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">{t("common.name")}</Label>
           <Input
             id="name"
             value={name}
@@ -141,9 +143,9 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="description">
-            Description
+            {t("common.description")}
             <small className="text-muted-foreground text-xs">
-              (supports Markdown)
+              {t("common.supportsMarkdown")}
             </small>
           </Label>
 
@@ -159,7 +161,7 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <Label>Visibility</Label>
+          <Label>{t("common.visibility")}</Label>
 
           <Select
             value={visibility}
@@ -169,15 +171,15 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="private">Private</SelectItem>
-              <SelectItem value="public">Public</SelectItem>
+              <SelectItem value="private">{t("common.private")}</SelectItem>
+              <SelectItem value="public">{t("common.public")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {visibility === "public" && (
           <div className="flex gap-2 items-center">
-            <Label className="shrink-0">Show Creator</Label>
+            <Label className="shrink-0">{t("common.showCreator")}</Label>
 
             <Select
               value={showCreator ? "yes" : "no"}
@@ -187,8 +189,8 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="no">No</SelectItem>
-                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">{t("common.no")}</SelectItem>
+                <SelectItem value="yes">{t("common.yes")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -197,33 +199,33 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
         <Separator />
 
         <div className="flex gap-2 items-center">
-          <Label>Add Timeline</Label>
+          <Label>{t("tools.myTimelines.editGroup.addTimeline")}</Label>
 
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline">Select Timeline to Add</Button>
+              <Button variant="outline">{t("tools.myTimelines.editGroup.selectTimeline")}</Button>
             </PopoverTrigger>
 
             <PopoverContent className="w-full p-0">
               <Command>
-                <CommandInput placeholder="Type to search..." className="h-9" />
+                <CommandInput placeholder={t("tools.myTimelines.editGroup.searchPlaceholder")} className="h-9" />
 
                 <CommandList>
-                  <CommandEmpty>No timelines found.</CommandEmpty>
+                  <CommandEmpty>{t("tools.myTimelines.editGroup.noTimelinesFound")}</CommandEmpty>
 
                   <CommandGroup>
                     {(allTimelinesQuery.data ?? []).map((timeline) => (
                       <CommandItem
                         key={timeline._id}
                         value={
-                          timeline.name ?? `Untitled Timeline ${timeline._id}`
+                          timeline.name ?? `${t("common.untitledTimeline")} ${timeline._id}`
                         }
                         onSelect={() => {
                           onWantsToAdd(timeline);
                           setPopoverOpen(false);
                         }}
                       >
-                        {timeline.name ?? `Untitled Timeline ${timeline._id}`}
+                        {timeline.name ?? `${t("common.untitledTimeline")} ${timeline._id}`}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -237,7 +239,7 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
       <Separator />
 
       {items.length === 0 && (
-        <MessageBox>This group does not have any timelines yet.</MessageBox>
+        <MessageBox>{t("tools.myTimelines.editGroup.noTimelinesInGroup")}</MessageBox>
       )}
 
       <TimelineGroupItemsContainer
@@ -250,13 +252,13 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
         {visibility === "public" && (
           <Button variant="outline" onClick={copyLink}>
             <ShareIcon />
-            Share Timeline Group
+            {t("tools.myTimelines.editGroup.shareGroup")}
           </Button>
         )}
 
         <Button onClick={saveChanges}>
           <SaveIcon />
-          Save Changes
+          {t("common.saveChanges")}
         </Button>
       </div>
     </div>

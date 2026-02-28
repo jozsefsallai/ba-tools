@@ -12,6 +12,7 @@ import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import { v4 as uuid } from "uuid";
 import { useStudents } from "@/hooks/use-students";
+import { useTranslations } from "next-intl";
 
 export type FormationEntryProps = {
   entry: FunctionReturnType<typeof api.formation.getOwn>[number];
@@ -19,6 +20,7 @@ export type FormationEntryProps = {
 
 export function FormationEntry({ entry }: FormationEntryProps) {
   const { students: allStudents } = useStudents();
+  const t = useTranslations();
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
@@ -100,7 +102,7 @@ export function FormationEntry({ entry }: FormationEntryProps) {
 
           {!entry.name && (
             <div className="text-xl font-semibold text-muted-foreground italic">
-              (Untitled Formation)
+              {t("common.untitledFormation")}
             </div>
           )}
         </div>
@@ -118,7 +120,7 @@ export function FormationEntry({ entry }: FormationEntryProps) {
 
       <div className="flex items-center gap-4">
         <Button variant="outline" asChild>
-          <Link href={`/formation-display?id=${entry._id}`}>Edit</Link>
+          <Link href={`/formation-display?id=${entry._id}`}>{t("common.edit")}</Link>
         </Button>
 
         <Button
@@ -126,7 +128,7 @@ export function FormationEntry({ entry }: FormationEntryProps) {
           onClick={handleDelete}
           className="flex items-center gap-2"
         >
-          {deleteConfirm ? "Click again to confirm" : "Delete"}
+          {deleteConfirm ? t("common.clickAgainToConfirm") : t("common.delete")}
         </Button>
       </div>
     </article>

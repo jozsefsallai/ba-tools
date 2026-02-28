@@ -3,6 +3,49 @@
   "yes": "Yes",
   "no": "No",
   "loading": "Loading...",
+  "loadingNativeModules": "Loading native modules...",
+  "private": "Private",
+  "public": "Public",
+  "visibility": "Visibility",
+  "edit": "Edit",
+  "delete": "Delete",
+  "selectStudent": "Select a student",
+  "saving": "Saving...",
+  "saveChanges": "Save Changes",
+  "downloadImage": "Download Image",
+  "copyToClipboard": "Copy to Clipboard",
+  "scale": "Scale",
+  "showCreator": "Show Creator",
+  "createdBy": "Created by",
+  "unknownUser": "Unknown User",
+  "hot": "Hot",
+  "new": "New",
+  "name": "Name",
+  "introduction": "Introduction",
+  "description": "Description",
+  "gameServer": "Game Server",
+  "friendCode": "Friend Code",
+  "accountLevel": "Account Level",
+  "studentRep": "Student Representative",
+  "optional": "(optional)",
+  "supportsMarkdown": "(supports Markdown)",
+  "optionalSupportsMarkdown": "(optional, supports Markdown)",
+  "inGameNickname": "In-Game Nickname",
+  "width": "Width",
+  "height": "Height",
+  "count": "Count",
+  "place": "Place",
+  "cancel": "Cancel",
+  "placeHorizontally": "Place Horizontally",
+  "placeVertically": "Place Vertically",
+  "create": "Create",
+  "parse": "Parse",
+  "backTo": "Back to {destination}",
+  "failedToLoad": "Failed to load {item}.",
+  "untitledFormation": "Untitled Formation",
+  "untitledTimeline": "Untitled Timeline",
+  "untitledTimelineGroup": "Untitled Timeline Group",
+  "clickAgainToConfirm": "Click again to confirm",
   "header": {
     "nav": {
       "gameplay": {
@@ -213,5 +256,19 @@
     "Back": "Back",
     "Front": "Front",
     "Middle": "Middle"
+  },
+
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "description": "The page you are looking for does not exist."
+  },
+
+  "helpSheet": {
+    "formationDisplay": "Formation Display",
+    "inventoryManagement": "Inventory Management",
+    "bond": "Relationship Rank Calculator",
+    "scenarioImageGenerator": "Scenario Image Generator",
+    "timelineVisualizer": "Timeline Visualizer",
+    "railroadPuzzleSolver": "Railroad Puzzle Solver"
   }
 }

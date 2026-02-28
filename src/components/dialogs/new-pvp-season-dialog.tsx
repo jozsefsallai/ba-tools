@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
 import { useMutation } from "convex/react";
+import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -35,6 +36,7 @@ export function NewPVPSeasonDialog({
   onCreate,
   children,
 }: NewPVPSeasonDialogProps) {
+  const t = useTranslations();
   const [name, setName] = useState("");
   const [gameServer, setGameServer] = useState<GameServer>("JP");
 
@@ -57,7 +59,7 @@ export function NewPVPSeasonDialog({
       closeRef.current?.click();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create PVP season.");
+      toast.error(t("tools.pvp.toasts.seasonCreateFail"));
     } finally {
       setRequestInProgress(false);
     }
@@ -69,16 +71,16 @@ export function NewPVPSeasonDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New PVP Season</DialogTitle>
+          <DialogTitle>{t("tools.pvp.newSeason.title")}</DialogTitle>
           <DialogDescription>
-            Enter the name and game server of this PVP season.
+            {t("tools.pvp.newSeason.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <Label htmlFor="pvp-season-name" className="w-32">
-              Season Name
+              {t("tools.pvp.newSeason.seasonName")}
             </Label>
             <Input
               id="pvp-season-name"
@@ -88,7 +90,7 @@ export function NewPVPSeasonDialog({
           </div>
 
           <div className="flex items-center gap-2">
-            <Label className="w-32">Game Server</Label>
+            <Label className="w-32">{t("common.gameServer")}</Label>
 
             <Select
               value={gameServer}
@@ -117,7 +119,7 @@ export function NewPVPSeasonDialog({
             onClick={handleCreate}
             disabled={requestInProgress}
           >
-            Create
+            {t("common.create")}
           </Button>
         </DialogFooter>
       </DialogContent>

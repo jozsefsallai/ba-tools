@@ -13,6 +13,7 @@ import { currentTimeJST, resetTimeForDateJST } from "@/lib/date";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { useUser } from "@clerk/nextjs";
 import { RefreshCwIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import seedrandom from "seedrandom";
 
@@ -21,6 +22,7 @@ type SOTDView = "global" | "user";
 export function StudentOfTheDay() {
   const { students } = useStudents();
   const { user } = useUser();
+  const t = useTranslations();
 
   const [view, setView] = useState<SOTDView>("global");
 
@@ -80,7 +82,7 @@ export function StudentOfTheDay() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-2xl">Student of the Day</h2>
+      <h2 className="text-2xl">{t("tools.studentOfTheDay.title")}</h2>
 
       <div className="flex-1 relative">
         <FlippableCard
@@ -96,7 +98,7 @@ export function StudentOfTheDay() {
               <div className="font-bold text-xl">{globalSOTD.name}</div>
 
               <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground uppercase">
-                Site-Wide Student
+                {t("tools.studentOfTheDay.siteWide")}
               </div>
             </div>
           }
@@ -116,7 +118,7 @@ export function StudentOfTheDay() {
                 </div>
 
                 <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground font-medium uppercase">
-                  {userName ? `${userName}'s` : "Your"} Student
+                  {userName ? t("tools.studentOfTheDay.userStudent", { name: userName }) : t("tools.studentOfTheDay.yourStudent")}
                 </div>
               </div>
             ) : null
@@ -140,8 +142,8 @@ export function StudentOfTheDay() {
 
               <TooltipContent>
                 {view === "global"
-                  ? "View Your Student of the Day"
-                  : "View Global Student of the Day"}
+                  ? t("tools.studentOfTheDay.viewYours")
+                  : t("tools.studentOfTheDay.viewGlobal")}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

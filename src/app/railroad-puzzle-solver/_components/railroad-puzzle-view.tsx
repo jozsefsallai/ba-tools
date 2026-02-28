@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, type CSSProperties, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { puzzles, type RailroadPuzzlePreset } from "../_lib/presets";
 
 import { Hexagon } from "./hexagon";
@@ -42,17 +43,22 @@ import { getNeighbor } from "@/app/railroad-puzzle-solver/_lib/utils";
 import { useInterval } from "usehooks-ts";
 import { Howl } from "howler";
 
-const RAIL_TYPE_LABELS: Record<RailType, string> = {
-  STRAIGHT: "Straight",
-  SLIGHTLY_CURVED: "Slightly Curved",
-  VERY_CURVED: "Very Curved",
-};
-
 type HexagonMapStyles = CSSProperties & {
   "--railroad-cell-height": string;
 };
 
 export function RailroadPuzzleView() {
+  const t = useTranslations();
+
+  const railTypeLabels: Record<RailType, string> = useMemo(
+    () => ({
+      STRAIGHT: t("tools.railroad.railTypes.straight"),
+      SLIGHTLY_CURVED: t("tools.railroad.railTypes.slightlyCurved"),
+      VERY_CURVED: t("tools.railroad.railTypes.veryCurved"),
+    }),
+    [t],
+  );
+
   const [selectedPreset, setSelectedPreset] = useState<RailroadPuzzlePreset>(
     puzzles[0],
   );
@@ -126,7 +132,7 @@ export function RailroadPuzzleView() {
   function handleSolveClick() {
     const solved = solve();
     if (!solved) {
-      toast.error("No solution found with the given number of rails.");
+      toast.error(t("tools.railroad.toasts.noSolution"));
       return;
     }
   }
@@ -224,7 +230,7 @@ export function RailroadPuzzleView() {
       if (!nextTile) {
         setAobaRail(null);
         setRailingAoba(false);
-        toast.error("Aoba derailed! :(");
+        toast.error(t("tools.railroad.toasts.aobaDerailed"));
         return;
       }
 
@@ -235,7 +241,7 @@ export function RailroadPuzzleView() {
 
   function startAoba() {
     if (resultMap.size === 0) {
-      toast.error("You can only use this function if there's a solution.");
+      toast.error(t("tools.railroad.toasts.noSolutionForAoba"));
       return;
     }
 
@@ -245,7 +251,7 @@ export function RailroadPuzzleView() {
       setAobaRail(startTile);
     } else {
       setRailingAoba(false);
-      toast.error("Start tile not found.");
+      toast.error(t("tools.railroad.toasts.startTileNotFound"));
       return;
     }
 
@@ -346,7 +352,7 @@ export function RailroadPuzzleView() {
 
       <div className="flex gap-4 items-center justify-between text-sm text-muted-foreground w-full md:w-2/3 mx-auto">
         <div>
-          <strong>Rail pieces used:</strong>{" "}
+          <strong>{t("tools.railroad.railPiecesUsed")}</strong>{" "}
           {railsUsed !== null ? railsUsed : "..."}
         </div>
         <div>
@@ -378,7 +384,7 @@ export function RailroadPuzzleView() {
         <CardContent>
           <div className="flex flex-col gap-8 md:gap-4">
             <div className="flex gap-2 items-center">
-              <Label>Map</Label>
+              <Label>{t("tools.railroad.map")}</Label>
               <Select
                 value={selectedPreset.name}
                 onValueChange={(value) => {
@@ -402,7 +408,7 @@ export function RailroadPuzzleView() {
             </div>
 
             <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
-              <strong className="text-sm md:w-[150px]">Used rail pieces</strong>
+              <strong className="text-sm md:w-[150px]">{t("tools.railroad.usedRailPieces")}</strong>
 
               {Object.keys(railInventory).map((key) => {
                 const railType = key as RailType;
@@ -410,7 +416,7 @@ export function RailroadPuzzleView() {
 
                 return (
                   <div className="flex gap-2 items-center" key={railType}>
-                    <Label>{RAIL_TYPE_LABELS[railType]}</Label>
+                    <Label>{railTypeLabels[railType]}</Label>
                     <div className="flex gap-1 items-center">
                       <Input
                         type="number"
@@ -441,7 +447,7 @@ export function RailroadPuzzleView() {
 
             <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
               <strong className="text-sm md:w-[150px]">
-                Remaining rail pieces
+                {t("tools.railroad.remainingRailPieces")}
               </strong>
 
               {Object.keys(railInventory).map((key) => {
@@ -450,7 +456,7 @@ export function RailroadPuzzleView() {
 
                 return (
                   <div className="flex gap-2 items-center" key={railType}>
-                    <Label>{RAIL_TYPE_LABELS[railType]}</Label>
+                    <Label>{railTypeLabels[railType]}</Label>
                     <div className="flex gap-1 items-center">
                       <Input
                         type="number"
@@ -489,10 +495,10 @@ export function RailroadPuzzleView() {
                 onCheckedChange={setSolveInstantly}
               />
 
-              <Label htmlFor="solve-instantly">Solve Instantly</Label>
+              <Label htmlFor="solve-instantly">{t("tools.railroad.solveInstantly")}</Label>
 
               <div className="text-xs text-muted-foreground">
-                (disable this if you experience lag)
+                {t("tools.railroad.solveInstantlyHint")}
               </div>
             </div>
 
@@ -503,13 +509,13 @@ export function RailroadPuzzleView() {
                   onClick={startAoba}
                   disabled={resultMap.size === 0}
                 >
-                  Launch Aoba
+                  {t("tools.railroad.launchAoba")}
                 </Button>
               )}
 
               {aobaRail !== null && (
                 <Button variant="outline" onClick={stopAoba}>
-                  Stop Aoba
+                  {t("tools.railroad.stopAoba")}
                 </Button>
               )}
 
@@ -518,11 +524,11 @@ export function RailroadPuzzleView() {
                 onClick={handleGetMinimalConfigsClick}
                 disabled={aobaRail !== null}
               >
-                Get Minimal Rail Configs
+                {t("tools.railroad.getMinimalConfigs")}
               </Button>
 
               <Button onClick={handleSolveClick} disabled={aobaRail !== null}>
-                Solve!
+                {t("tools.railroad.solve")}
               </Button>
             </div>
           </div>
@@ -534,7 +540,7 @@ export function RailroadPuzzleView() {
           <CardContent>
             <div className="flex flex-col gap-4">
               <div className="text-lg font-semibold">
-                Minimal Rail Configurations ({minRailConfigs.length} found)
+                {t("tools.railroad.minimalConfigs", { count: minRailConfigs.length })}
               </div>
 
               <div className="flex flex-col md:flex-row flex-wrap gap-4">
@@ -555,7 +561,7 @@ export function RailroadPuzzleView() {
                             key={railType}
                           >
                             <span className="font-medium">
-                              {RAIL_TYPE_LABELS[railType]}:
+                              {railTypeLabels[railType]}:
                             </span>
 
                             <span>{config[railType]}</span>

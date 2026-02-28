@@ -117,7 +117,7 @@ export async function ToolsAndResources() {
                   },
                 )}
               >
-                {item.isHot ? "Hot" : "New"}
+                {item.isHot ? t("common.hot") : t("common.new")}
               </span>
             )}
           </div>

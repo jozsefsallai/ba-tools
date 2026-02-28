@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { type EchelonData, parseEchelon } from "@/lib/echelon-parser";
 import { type PropsWithChildren, useCallback, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const EXAMPLE = `Hikari: lv.90 UE40
 Seia [S]: lv.90 4*
@@ -32,6 +33,7 @@ export function ParseEchelonDataDialog({
   children,
   onParse,
 }: ParseEchelonDataDialogProps) {
+  const t = useTranslations();
   const { students } = useStudents();
 
   const [raw, setRaw] = useState("");
@@ -50,8 +52,8 @@ export function ParseEchelonDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Read Formation Data (BETA)</DialogTitle>
-          <DialogDescription>Enter the formation data below.</DialogDescription>
+          <DialogTitle>{t("tools.formationDisplay.parseDialog.title")}</DialogTitle>
+          <DialogDescription>{t("tools.formationDisplay.parseDialog.description")}</DialogDescription>
         </DialogHeader>
 
         <Textarea
@@ -64,7 +66,7 @@ export function ParseEchelonDataDialog({
 
         <DialogFooter>
           <Button type="submit" onClick={onWantsToParseEchelonData}>
-            Parse
+            {t("common.parse")}
           </Button>
         </DialogFooter>
 

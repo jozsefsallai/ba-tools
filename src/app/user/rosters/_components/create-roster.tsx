@@ -18,12 +18,14 @@ import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
 import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 
 export function CreateRoster() {
+  const t = useTranslations();
   const { students } = useStudents();
 
   const [name, setName] = useState("");
@@ -50,22 +52,22 @@ export function CreateRoster() {
         friendCode,
       });
 
-      toast.success("Roster created successfully!");
+      toast.success(t("tools.roster.create.toasts.success"));
       router.push(`/user/rosters/${id}`);
     } catch (err) {
       console.error("Failed to create roster", err);
-      toast.error("Failed to create roster.");
+      toast.error(t("tools.roster.create.toasts.fail"));
     }
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold">Create Roster</h2>
+      <h2 className="text-lg font-bold">{t("tools.roster.create.title")}</h2>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">
-          In-Game Nickname{" "}
-          <small className="text-muted-foreground text-xs">(optional)</small>
+          {t("common.inGameNickname")}{" "}
+          <small className="text-muted-foreground text-xs">{t("common.optional")}</small>
         </Label>
 
         <Input
@@ -78,9 +80,9 @@ export function CreateRoster() {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="introduction">
-          Introduction
+          {t("common.introduction")}
           <small className="text-muted-foreground text-xs">
-            (optional, supports Markdown)
+            {t("common.optionalSupportsMarkdown")}
           </small>
         </Label>
 
@@ -96,7 +98,7 @@ export function CreateRoster() {
       </div>
 
       <div className="flex gap-2 items-center">
-        <Label>Visibility</Label>
+        <Label>{t("common.visibility")}</Label>
 
         <Select
           value={visibility}
@@ -106,14 +108,14 @@ export function CreateRoster() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="private">Private</SelectItem>
-            <SelectItem value="public">Public</SelectItem>
+            <SelectItem value="private">{t("common.private")}</SelectItem>
+            <SelectItem value="public">{t("common.public")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="accountLevel">Account Level</Label>
+        <Label htmlFor="accountLevel">{t("common.accountLevel")}</Label>
 
         <Input
           id="accountLevel"
@@ -127,7 +129,7 @@ export function CreateRoster() {
       </div>
 
       <div className="flex gap-2">
-        <Label htmlFor="studentRep">Student Representative</Label>
+        <Label htmlFor="studentRep">{t("common.studentRep")}</Label>
 
         <div>
           <StudentPicker
@@ -135,7 +137,7 @@ export function CreateRoster() {
             className="w-[200px] md:w-[350px]"
           >
             <Button variant="outline">
-              {studentRep ? studentRep.name : "Select a student"}
+              {studentRep ? studentRep.name : t("common.selectStudent")}
               <ChevronDownIcon />
             </Button>
           </StudentPicker>
@@ -149,7 +151,7 @@ export function CreateRoster() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="gameServer">Game Server</Label>
+        <Label htmlFor="gameServer">{t("common.gameServer")}</Label>
 
         <Select
           value={gameServer}
@@ -169,7 +171,7 @@ export function CreateRoster() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="friendCode">Friend Code</Label>
+        <Label htmlFor="friendCode">{t("common.friendCode")}</Label>
 
         <Input
           id="friendCode"
@@ -181,7 +183,7 @@ export function CreateRoster() {
 
       <div>
         <Button onClick={handleCreate} disabled={name.length === 0}>
-          Create Roster
+          {t("tools.roster.create.submit")}
         </Button>
       </div>
     </div>

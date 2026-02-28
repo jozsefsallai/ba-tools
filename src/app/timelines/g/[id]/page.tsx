@@ -1,6 +1,7 @@
 import { TimelineGroupView } from "@/app/timelines/g/_components/timeline-group-view";
 import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -17,6 +18,7 @@ export async function generateMetadata({
   params: Promise<PageParams>;
 }): Promise<Metadata> {
   try {
+    const t = await getTranslations();
     const { id } = await params;
 
     const timelineGroup = await fetchQuery(api.timelineGroup.getById, {
@@ -32,10 +34,10 @@ export async function generateMetadata({
             .join(" "),
           160,
         )
-      : "A group of visual EX skill rotation timelines.";
+      : t("tools.timelineGroupView.defaultDescription");
 
     return {
-      title: `${timelineGroup.name ?? "Untitled Timeline Group"} - Joe's Blue Archive Tools`,
+      title: `${timelineGroup.name ?? t("common.untitledTimelineGroup")} - ${t("common.appName")}`,
       description,
       twitter: {
         card: "summary",

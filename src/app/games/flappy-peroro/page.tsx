@@ -1,13 +1,17 @@
 import FlappyPeroroGameContainer from "@/app/games/flappy-peroro/_components/game-container";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Flappy Peroro - Joe's Blue Archive Tools",
-  description: "Flappy Bird game featuring Peroro from Momo Friends.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return {
+    title: `${t("static.flappyPeroro.title")} - ${t("common.appName")}`,
+    description: t("static.flappyPeroro.description"),
+    twitter: {
+      card: "summary",
+    },
+  };
+}
 
 export default async function FlappyPeroroPage() {
   return <FlappyPeroroGameContainer />;

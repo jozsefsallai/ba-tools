@@ -4,19 +4,21 @@ import { OwnRostersBrowserItem } from "@/app/user/rosters/_components/own-roster
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 
 export function OwnRostersBrowser() {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.roster.getOwn);
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load rosters.
+        {t("tools.roster.myRosters.failedToLoad")}
       </MessageBox>
     );
   }

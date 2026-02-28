@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslations } from "next-intl";
 import {
   Fragment,
   type PropsWithChildren,
@@ -39,6 +40,7 @@ export function LoadInventoryPresetDialog({
   children,
   onFinish,
 }: LoadInventoryManagementPresetDialogProps) {
+  const t = useTranslations();
   const [selectedPreset, setSelectedPreset] =
     useState<InventoryManagementPreset | null>(null);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
@@ -140,11 +142,10 @@ export function LoadInventoryPresetDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Select Inventory Management Preset</DialogTitle>
+          <DialogTitle>{t("tools.inventoryManagement.presetDialog.title")}</DialogTitle>
 
           <DialogDescription>
-            Select an event preset to load into the inventory management
-            simulator.
+            {t("tools.inventoryManagement.presetDialog.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -155,7 +156,7 @@ export function LoadInventoryPresetDialog({
           >
             <SelectTrigger>
               <SelectValue
-                placeholder="Select an event"
+                placeholder={t("tools.inventoryManagement.presetDialog.selectEvent")}
                 className="text-ellipsis"
               />
             </SelectTrigger>
@@ -178,7 +179,7 @@ export function LoadInventoryPresetDialog({
             onValueChange={handleRoundSelected}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a round" />
+              <SelectValue placeholder={t("tools.inventoryManagement.presetDialog.selectRound")} />
             </SelectTrigger>
 
             <SelectContent>
@@ -205,7 +206,7 @@ export function LoadInventoryPresetDialog({
             disabled={!permalink || copiedPermalink}
             onClick={handleCopyPermalink}
           >
-            {copiedPermalink ? "Copied!" : "Copy Permalink"}
+            {copiedPermalink ? t("tools.inventoryManagement.presetDialog.copied") : t("tools.inventoryManagement.presetDialog.copyPermalink")}
           </Button>
 
           <Button
@@ -213,7 +214,7 @@ export function LoadInventoryPresetDialog({
             onClick={onPresetItemConfirmed}
             disabled={selectedRound === null}
           >
-            Load Preset Data
+            {t("tools.inventoryManagement.presetDialog.loadPresetData")}
           </Button>
         </DialogFooter>
 

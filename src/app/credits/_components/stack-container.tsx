@@ -10,6 +10,7 @@ import ShadcnUILogo from "@/app/credits/_components/stack/shadcn";
 import SpineLogo from "@/app/credits/_components/stack/spine";
 import TailwindCSSLogo from "@/app/credits/_components/stack/tailwind";
 import VercelLogo from "@/app/credits/_components/stack/vercel";
+import { getTranslations } from "next-intl/server";
 import type { ReactNode, SVGProps } from "react";
 
 type StackItem = {
@@ -19,82 +20,84 @@ type StackItem = {
   url: string;
 };
 
-const STACK_ITEMS: StackItem[] = [
-  {
-    role: "Web Framework",
-    name: "Next.js",
-    component: NextJSLogo,
-    url: "https://nextjs.org/",
-  },
-  {
-    role: "Styling",
-    name: "TailwindCSS",
-    component: TailwindCSSLogo,
-    url: "https://tailwindcss.com/",
-  },
-  {
-    role: "UI Library",
-    name: "shadcn/ui",
-    component: ShadcnUILogo,
-    url: "https://ui.shadcn.com/",
-  },
-  {
-    role: "Hosting",
-    name: "Vercel",
-    component: VercelLogo,
-    url: "https://vercel.com/",
-  },
-  {
-    role: "Database Provider (game data)",
-    name: "PlanetScale",
-    component: PlanetScaleLogo,
-    url: "https://planetscale.com/",
-  },
-  {
-    role: "Database (game data)",
-    name: "PostgreSQL",
-    component: PostgreSQLLogo,
-    url: "https://www.postgresql.org/",
-  },
-  {
-    role: "ORM",
-    name: "Prisma",
-    component: PrismaLogo,
-    url: "https://www.prisma.io/",
-  },
-  {
-    role: "Database (user data)",
-    name: "Convex",
-    component: ConvexLogo,
-    url: "https://convex.dev/referral/JOZSEF7939",
-  },
-  {
-    role: "Authentication",
-    name: "Clerk",
-    component: ClerkLogo,
-    url: "https://clerk.com/",
-  },
-  {
-    role: "Native Modules",
-    name: "Go",
-    component: GoLogo,
-    url: "https://go.dev/",
-  },
-  {
-    role: "Scenario UI & Spine Rendering",
-    name: "PixiJS",
-    component: PixiJSLogo,
-    url: "https://pixijs.com/",
-  },
-  {
-    role: "Plana Rendering",
-    name: "Spine",
-    component: SpineLogo,
-    url: "https://esotericsoftware.com/",
-  },
-];
+export async function StackContainer() {
+  const t = await getTranslations();
 
-export function StackContainer() {
+  const STACK_ITEMS: StackItem[] = [
+    {
+      role: t("static.credits.stack.webFramework"),
+      name: "Next.js",
+      component: NextJSLogo,
+      url: "https://nextjs.org/",
+    },
+    {
+      role: t("static.credits.stack.styling"),
+      name: "TailwindCSS",
+      component: TailwindCSSLogo,
+      url: "https://tailwindcss.com/",
+    },
+    {
+      role: t("static.credits.stack.uiLibrary"),
+      name: "shadcn/ui",
+      component: ShadcnUILogo,
+      url: "https://ui.shadcn.com/",
+    },
+    {
+      role: t("static.credits.stack.hosting"),
+      name: "Vercel",
+      component: VercelLogo,
+      url: "https://vercel.com/",
+    },
+    {
+      role: t("static.credits.stack.databaseProviderGameData"),
+      name: "PlanetScale",
+      component: PlanetScaleLogo,
+      url: "https://planetscale.com/",
+    },
+    {
+      role: t("static.credits.stack.databaseGameData"),
+      name: "PostgreSQL",
+      component: PostgreSQLLogo,
+      url: "https://www.postgresql.org/",
+    },
+    {
+      role: t("static.credits.stack.orm"),
+      name: "Prisma",
+      component: PrismaLogo,
+      url: "https://www.prisma.io/",
+    },
+    {
+      role: t("static.credits.stack.databaseUserData"),
+      name: "Convex",
+      component: ConvexLogo,
+      url: "https://convex.dev/referral/JOZSEF7939",
+    },
+    {
+      role: t("static.credits.stack.authentication"),
+      name: "Clerk",
+      component: ClerkLogo,
+      url: "https://clerk.com/",
+    },
+    {
+      role: t("static.credits.stack.nativeModules"),
+      name: "Go",
+      component: GoLogo,
+      url: "https://go.dev/",
+    },
+    {
+      role: t("static.credits.stack.scenarioAndSpineRendering"),
+      name: "PixiJS",
+      component: PixiJSLogo,
+      url: "https://pixijs.com/",
+    },
+    {
+      role: t("static.credits.stack.planaRendering"),
+      name: "Spine",
+      component: SpineLogo,
+      url: "https://esotericsoftware.com/",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {STACK_ITEMS.map((item) => (

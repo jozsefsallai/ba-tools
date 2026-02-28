@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useQueryWithStatus } from "@/lib/convex";
 import { PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -16,16 +17,17 @@ export type TimelineGroupViewProps = {
 };
 
 export function TimelineGroupView({ id }: TimelineGroupViewProps) {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.timelineGroup.getById, { id });
 
   if (query.status === "pending") {
-    return <MessageBox>Loading timeline group...</MessageBox>;
+    return <MessageBox>{t("tools.timelineGroupView.loadingGroup")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load timeline group.
+        {t("tools.timelineGroupView.failedToLoad")}
       </MessageBox>
     );
   }
@@ -40,7 +42,7 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
             {query.data.isOwn && (
               <Button variant="outline" asChild>
                 <Link href={`/user/timelines/${id}`}>
-                  <PencilIcon /> Edit Group
+                  <PencilIcon /> {t("tools.timelineGroupView.editGroup")}
                 </Link>
               </Button>
             )}
@@ -48,7 +50,7 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
 
           {"user" in query.data && query.data.showCreator && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <span>Created by</span>
+              <span>{t("common.createdBy")}</span>
 
               <Avatar className="size-6">
                 <AvatarFallback>
@@ -61,7 +63,7 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
               <span className="font-bold">
                 {query.data.user.name ??
                   query.data.user.username ??
-                  "Unknown User"}
+                  t("common.unknownUser")}
               </span>
             </div>
           )}
@@ -75,10 +77,10 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
       </div>
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-bold">Timelines</h2>
+        <h2 className="text-2xl font-bold">{t("tools.timelineGroupView.timelines")}</h2>
 
         {query.data.timelines.length === 0 ? (
-          <MessageBox>This group has no timelines.</MessageBox>
+          <MessageBox>{t("tools.timelineGroupView.noTimelines")}</MessageBox>
         ) : (
           <div className="flex flex-col gap-4">
             {query.data.timelines.map((timeline) => (

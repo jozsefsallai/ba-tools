@@ -7,6 +7,7 @@ import {
   currentTimeJST,
   resetTimeForDateJST,
 } from "@/lib/date";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 function getResetDate(): Date {
@@ -31,6 +32,7 @@ function getNextHeadpatResetDate(): Date {
 }
 
 export function ResetInfo() {
+  const t = useTranslations();
   const [resetDate, setResetDate] = useState<Date | null>(null);
   const [cafeResetDate, setCafeResetDate] = useState<Date | null>(null);
   const [headpatResetDate, setHeadpatResetDate] = useState<Date | null>(null);
@@ -63,12 +65,12 @@ export function ResetInfo() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-2xl">Reset Time Information</h2>
+      <h2 className="text-2xl">{t("tools.resetInfo.title")}</h2>
 
       <div className="flex flex-col items-center gap-4 px-6 py-4 border rounded-md bg-card">
         {resetDate && (
           <div className="flex flex-col items-center">
-            <div className="text-sm text-muted-foreground">Next reset in:</div>
+            <div className="text-sm text-muted-foreground">{t("tools.resetInfo.nextReset")}</div>
 
             <CountdownTimer
               targetTime={resetDate}
@@ -81,7 +83,7 @@ export function ResetInfo() {
         {cafeResetDate && (
           <div className="flex flex-col items-center">
             <div className="text-sm text-muted-foreground">
-              Next cafe reset in:
+              {t("tools.resetInfo.nextCafeReset")}
             </div>
 
             <CountdownTimer
@@ -95,7 +97,7 @@ export function ResetInfo() {
         {headpatResetDate && (
           <div className="flex flex-col items-center">
             <div className="text-sm text-muted-foreground">
-              Headpat cooldown ends in:
+              {t("tools.resetInfo.headpatCooldown")}
             </div>
 
             <CountdownTimer

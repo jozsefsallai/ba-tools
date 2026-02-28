@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQueryWithStatus } from "@/lib/convex";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -14,16 +15,17 @@ export type PVPSeasonViewProps = {
 };
 
 export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.pvp.getMatchesForSeason, { seasonId });
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load PVP matches for this season.
+        {t("tools.pvp.season.failedToLoad")}
       </MessageBox>
     );
   }
@@ -33,13 +35,13 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center justify-between">
           <h1 className="text-xl font-bold">
-            Season: {query.data.season.name}
+            {t("tools.pvp.season.title", { name: query.data.season.name })}
           </h1>
 
           <Button asChild>
             <Link href={`/pvp/${seasonId}/match/new`}>
               <PlusIcon />
-              Record New Match
+              {t("tools.pvp.season.recordNewMatch")}
             </Link>
           </Button>
         </div>

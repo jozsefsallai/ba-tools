@@ -1,16 +1,19 @@
 "use client";
 
 import { Plana } from "@/components/plana";
+import { useTranslations } from "next-intl";
 
 export default function NotFound() {
+  const t = useTranslations();
+
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center">
-          <h1 className="text-xl font-bold">404 - Page Not Found</h1>
+          <h1 className="text-xl font-bold">{t("common.notFound.title")}</h1>
         </div>
 
-        <p>The page you are looking for does not exist.</p>
+        <p>{t("common.notFound.description")}</p>
       </div>
 
       <div className="fixed md:absolute z-20 md:z-0 -bottom-30 md:-bottom-10 left-1/2 -translate-x-1/2">

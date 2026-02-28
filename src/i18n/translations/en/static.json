@@ -70,5 +70,36 @@
       "title": "Last Changelog",
       "viewAll": "See Full Changelog"
     }
+  },
+
+  "credits": {
+    "title": "Credits",
+    "techStack": "Tech Stack",
+    "licenses": "Licenses",
+    "stack": {
+      "webFramework": "Web Framework",
+      "styling": "Styling",
+      "uiLibrary": "UI Library",
+      "hosting": "Hosting",
+      "databaseProviderGameData": "Database Provider (game data)",
+      "databaseGameData": "Database (game data)",
+      "orm": "ORM",
+      "databaseUserData": "Database (user data)",
+      "authentication": "Authentication",
+      "nativeModules": "Native Modules",
+      "scenarioAndSpineRendering": "Scenario UI & Spine Rendering",
+      "planaRendering": "Plana Rendering"
+    }
+  },
+
+  "banners": {
+    "title": "Upcoming Global Banners",
+    "description": "On this page you may view the upcoming global banners in Blue Archive. Please keep in mind that the schedule predictions are based on the JP server's banner release schedule and are subject to change on global.",
+    "notice": "<strong>Important:</strong> Blue Archive global is currently on an accelerated schedule in order to reduce the gap between the JP and the global servers. As a result, some of these banners could be merged, shortened, or skipped entirely."
+  },
+
+  "flappyPeroro": {
+    "title": "Flappy Peroro",
+    "description": "Flappy Bird game featuring Peroro from Momo Friends."
   }
 }

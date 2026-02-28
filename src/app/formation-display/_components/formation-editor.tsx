@@ -6,6 +6,7 @@ import {
 } from "@/app/formation-display/_components/formation-preview";
 import type { Student } from "@/lib/types";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import html2canvas from "html2canvas-pro";
 import { Label } from "@/components/ui/label";
 import {
@@ -49,6 +50,7 @@ import type { EchelonData } from "@/lib/echelon-parser";
 type CombatClass = "striker" | "special";
 
 export function FormationEditor() {
+  const t = useTranslations();
   const { students: allStudents } = useStudents();
 
   const { hasUnsavedChanges, useSaveableState, markAsSaved } =
@@ -255,7 +257,7 @@ export function FormationEditor() {
 
   async function createOrUpdateCloudFormation() {
     if (strikers.length === 0 && specials.length === 0) {
-      toast.error("You must add at least one student to the formation.");
+      toast.error(t("tools.formationDisplay.toasts.noStudents"));
       return;
     }
 
@@ -302,14 +304,14 @@ export function FormationEditor() {
 
       await clearCache(`/formation-display?id=${formationId}`);
 
-      toast.success("Formation updated successfully.");
+      toast.success(t("tools.formationDisplay.toasts.updateSuccess"));
     } else {
       const newFormation = await createMutation(data);
 
       if (newFormation) {
         markAsSaved();
 
-        toast.success("Formation created successfully.");
+        toast.success(t("tools.formationDisplay.toasts.createSuccess"));
 
         if (!navigationGuard.active) {
           router.push(`/formation-display?id=${newFormation._id}`);
@@ -317,7 +319,7 @@ export function FormationEditor() {
           navigationGuard.accept();
         }
       } else {
-        toast.error("Failed to create formation.");
+        toast.error(t("tools.formationDisplay.toasts.createFail"));
       }
     }
 
@@ -468,7 +470,7 @@ export function FormationEditor() {
   }, [preferences]);
 
   if (formationId && query.status === "pending") {
-    return <MessageBox>Loading formation...</MessageBox>;
+    return <MessageBox>{t("tools.formationDisplay.loadingFormation")}</MessageBox>;
   }
 
   return (
@@ -479,18 +481,13 @@ export function FormationEditor() {
         })}
       >
         <p>
-          This tool allows you to generate an image of a student formation. This
-          can be useful for cases such as designing clean YouTube thumbnails.
+          {t("tools.formationDisplay.descriptionLong")}
         </p>
         <p className="md:hidden text-muted-foreground">
-          <strong>Note:</strong> This tool might not work well on mobile
-          devices.
+          {t.rich("tools.formationDisplay.mobileNotice", { strong: (children) => <strong>{children}</strong> })}
         </p>
         <p className="text-muted-foreground">
-          <strong>Note:</strong> Dark mode extensions and zoom levels may cause
-          rendering issues in the resulting image. If the generated image looks
-          weird, try disabling any dark mode extensions you may have and using
-          100% zoom.
+          {t.rich("tools.formationDisplay.renderNotice", { strong: (children) => <strong>{children}</strong> })}
         </p>
       </div>
 
@@ -508,10 +505,10 @@ export function FormationEditor() {
         <CardContent>
           <Tabs defaultValue="items" className="gap-4">
             <TabsList className="place-self-center">
-              <TabsTrigger value="items">Items</TabsTrigger>
-              <TabsTrigger value="appearance">Appearance</TabsTrigger>
+              <TabsTrigger value="items">{t("tools.formationDisplay.tabs.items")}</TabsTrigger>
+              <TabsTrigger value="appearance">{t("tools.formationDisplay.tabs.appearance")}</TabsTrigger>
               <Authenticated>
-                <TabsTrigger value="cloud">Cloud</TabsTrigger>
+                <TabsTrigger value="cloud">{t("tools.formationDisplay.tabs.cloud")}</TabsTrigger>
               </Authenticated>
             </TabsList>
 
@@ -526,7 +523,7 @@ export function FormationEditor() {
                       variant="outline"
                       className="w-[200px] md:w-[250px] justify-between"
                     >
-                      Select Student
+                      {t("tools.formationDisplay.selectStudent")}
                       <ChevronsUpDownIcon />
                     </Button>
                   </StudentPicker>
@@ -536,7 +533,7 @@ export function FormationEditor() {
                     onClick={() => addEmptyCard("striker")}
                   >
                     <PlusIcon />
-                    Empty Striker
+                    {t("tools.formationDisplay.emptyStriker")}
                   </Button>
 
                   <Button
@@ -544,13 +541,13 @@ export function FormationEditor() {
                     onClick={() => addEmptyCard("special")}
                   >
                     <PlusIcon />
-                    Empty Special
+                    {t("tools.formationDisplay.emptySpecial")}
                   </Button>
 
                   <ParseEchelonDataDialog onParse={handleEchelonDataParsed}>
                     <Button variant="outline">
                       <ImportIcon />
-                      Bulk Import
+                      {t("tools.formationDisplay.bulkImport")}
                     </Button>
                   </ParseEchelonDataDialog>
                 </div>
@@ -560,7 +557,7 @@ export function FormationEditor() {
             <TabsContent value="appearance">
               <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
                 <div className="flex gap-2 items-center">
-                  <Label>Scale</Label>
+                  <Label>{t("common.scale")}</Label>
 
                   <Select
                     value={scale.toString()}
@@ -586,7 +583,7 @@ export function FormationEditor() {
                     checked={displayOverline}
                     onCheckedChange={setDisplayOverline}
                   />
-                  <Label htmlFor="display-overline">Display Overline</Label>
+                  <Label htmlFor="display-overline">{t("tools.formationDisplay.displayOverline")}</Label>
                 </div>
 
                 <div className="flex gap-2 items-center">
@@ -595,7 +592,7 @@ export function FormationEditor() {
                     checked={displayRoleIcon}
                     onCheckedChange={setDisplayRoleIcon}
                   />
-                  <Label htmlFor="display-role-icon">Display Role Icon</Label>
+                  <Label htmlFor="display-role-icon">{t("tools.formationDisplay.displayRoleIcon")}</Label>
                 </div>
 
                 <div className="flex gap-2 items-center">
@@ -604,7 +601,7 @@ export function FormationEditor() {
                     checked={groupsVertical}
                     onCheckedChange={setGroupsVertical}
                   />
-                  <Label htmlFor="groups-vertical">Vertical Groups</Label>
+                  <Label htmlFor="groups-vertical">{t("tools.formationDisplay.verticalGroups")}</Label>
                 </div>
               </div>
             </TabsContent>
@@ -613,11 +610,11 @@ export function FormationEditor() {
               <TabsContent value="cloud">
                 <div className="flex gap-6 items-center justify-center">
                   <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-                    <Label className="shrink-0">Formation Name</Label>
+                    <Label className="shrink-0">{t("tools.formationDisplay.formationName")}</Label>
                     <Input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Untitled Formation"
+                      placeholder={t("common.untitledFormation")}
                     />
                   </div>
 
@@ -625,7 +622,7 @@ export function FormationEditor() {
                     onClick={createOrUpdateCloudFormation}
                     disabled={generationInProgress}
                   >
-                    {formationId ? "Update Formation" : "Save Formation"}
+                    {formationId ? t("tools.formationDisplay.updateFormation") : t("tools.formationDisplay.saveFormation")}
                   </Button>
                 </div>
               </TabsContent>
@@ -651,17 +648,17 @@ export function FormationEditor() {
             generationInProgress
           }
         >
-          Download Image
+          {t("common.downloadImage")}
         </Button>
       </div>
 
       <Separator />
 
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Strikers</h2>
+        <h2 className="text-lg font-bold">{t("tools.formationDisplay.strikers")}</h2>
 
         {strikers.length === 0 && (
-          <p className="text-muted-foreground">No strikers in formation.</p>
+          <p className="text-muted-foreground">{t("tools.formationDisplay.noStrikers")}</p>
         )}
 
         {strikers.length > 0 && (
@@ -679,10 +676,10 @@ export function FormationEditor() {
       <Separator />
 
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Specials</h2>
+        <h2 className="text-lg font-bold">{t("tools.formationDisplay.specials")}</h2>
 
         {specials.length === 0 && (
-          <p className="text-muted-foreground">No specials in formation.</p>
+          <p className="text-muted-foreground">{t("tools.formationDisplay.noSpecials")}</p>
         )}
 
         {specials.length > 0 && (
@@ -700,8 +697,8 @@ export function FormationEditor() {
       <Authenticated>
         <SaveDialog
           open={navigationGuard.active}
-          title="Save formation?"
-          description="You have unsaved changes in your formation. Would you like to save it in the cloud before leaving the page?"
+          title={t("tools.formationDisplay.saveDialog.title")}
+          description={t("tools.formationDisplay.saveDialog.description")}
           onYes={createOrUpdateCloudFormation}
           onNo={navigationGuard.accept}
           onCancel={navigationGuard.reject}

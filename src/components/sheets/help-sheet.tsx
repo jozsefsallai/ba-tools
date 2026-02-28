@@ -16,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useTranslations } from "next-intl";
 
 export type HelpSheetProps = PropsWithChildren<{
   document:
@@ -27,31 +28,24 @@ export type HelpSheetProps = PropsWithChildren<{
     | "railroad-puzzle-solver";
 }>;
 
-function getTitle(document: HelpSheetProps["document"]) {
-  switch (document) {
-    case "formation-display":
-      return "Formation Display";
-    case "inventory-management":
-      return "Inventory Management";
-    case "bond":
-      return "Relationship Rank Calculator";
-    case "scenario-image-generator":
-      return "Scenario Image Generator";
-    case "timeline-visualizer":
-      return "Timeline Visualizer";
-    case "railroad-puzzle-solver":
-      return "Railroad Puzzle Solver";
-  }
-}
+const TITLE_KEYS = {
+  "formation-display": "common.helpSheet.formationDisplay",
+  "inventory-management": "common.helpSheet.inventoryManagement",
+  bond: "common.helpSheet.bond",
+  "scenario-image-generator": "common.helpSheet.scenarioImageGenerator",
+  "timeline-visualizer": "common.helpSheet.timelineVisualizer",
+  "railroad-puzzle-solver": "common.helpSheet.railroadPuzzleSolver",
+} as const;
 
 export function HelpSheet({ document, children }: HelpSheetProps) {
+  const t = useTranslations();
   return (
     <Sheet>
       <SheetTrigger asChild>{children}</SheetTrigger>
 
       <SheetContent className="!max-w-full w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle>{getTitle(document)}</SheetTitle>
+          <SheetTitle>{t(TITLE_KEYS[document])}</SheetTitle>
         </SheetHeader>
 
         <article className="prose dark:prose-invert p-4 pt-0 overflow-y-auto">

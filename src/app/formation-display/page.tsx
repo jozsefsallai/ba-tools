@@ -7,6 +7,7 @@ import { fetchQuery } from "convex/nextjs";
 import { HelpCircleIcon } from "lucide-react";
 
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -20,10 +21,11 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<PageSearchParams>;
 }): Promise<Metadata> {
+  const t = await getTranslations();
+
   const fallback: Metadata = {
-    title: "Formation Display - Joe's Blue Archive Tools",
-    description:
-      "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
+    title: `${t("tools.formationDisplay.title")} - ${t("common.appName")}`,
+    description: t("tools.formationDisplay.description"),
     twitter: {
       card: "summary",
     },
@@ -53,9 +55,8 @@ export async function generateMetadata({
     );
 
     return {
-      title: `${formation.name ?? "Untitled Formation"} - Joe's Blue Archive Tools`,
-      description:
-        "Generate an image of a student formation. Useful for things like YouTube thumbnails.",
+      title: `${formation.name ?? t("common.untitledFormation")} - ${t("common.appName")}`,
+      description: t("tools.formationDisplay.description"),
       twitter: {
         card: "summary",
       },
@@ -66,11 +67,15 @@ export async function generateMetadata({
 }
 
 export default async function FormationDisplayPage() {
+  const t = await getTranslations();
+
   return (
     <div className="flex flex-col gap-10">
       <div className="md:w-2/3 mx-auto flex flex-col gap-4">
         <div className="flex gap-2 items-center">
-          <h1 className="text-xl font-bold">Formation Display</h1>
+          <h1 className="text-xl font-bold">
+            {t("tools.formationDisplay.title")}
+          </h1>
           <HelpSheet document="formation-display">
             <Button variant="ghost">
               <HelpCircleIcon />

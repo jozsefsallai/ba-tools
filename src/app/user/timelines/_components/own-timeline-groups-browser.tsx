@@ -3,18 +3,20 @@
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 
 export function OwnTimelineGroupsBrowser() {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.timelineGroup.getOwn);
 
   const timelineGroups = useMemo<Doc<"timelineGroup">[]>(() => {
     const ungrouped: Doc<"timelineGroup"> = {
       _id: "ungrouped" as any,
-      name: "All Timelines",
-      description: "All timelines you have created.",
+      name: t("tools.myTimelines.allTimelines"),
+      description: t("tools.myTimelines.allTimelinesDescription"),
       visibility: "private" as const,
       showCreator: false,
       userId: "system" as any,
@@ -27,16 +29,16 @@ export function OwnTimelineGroupsBrowser() {
     }
 
     return [ungrouped];
-  }, [query]);
+  }, [query, t]);
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load timeline groups.
+        {t("tools.myTimelines.failedToLoad")}
       </MessageBox>
     );
   }
@@ -53,15 +55,13 @@ export function OwnTimelineGroupsBrowser() {
 
             <p className="text-sm text-muted-foreground">
               {group._id === "ungrouped"
-                ? "This group contains all your timelines."
-                : `This group contains ${group.timelines.length} timeline${
-                    group.timelines.length !== 1 ? "s" : ""
-                  }.`}
+                ? t("tools.myTimelines.allTimelinesGroupDescription")
+                : t("tools.myTimelines.groupContains", { count: group.timelines.length })}
             </p>
 
             <p className="text-xs text-muted-foreground">
-              <strong>Visibility:</strong>{" "}
-              {group.visibility === "private" ? "Private" : "Public"}
+              <strong>{`${t("common.visibility")}:`}</strong>{" "}
+              {group.visibility === "private" ? t("common.private") : t("common.public")}
             </p>
           </div>
         </Link>
