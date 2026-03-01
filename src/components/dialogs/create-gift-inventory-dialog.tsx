@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useRef, useState } from "react";
 
 export type CreateGiftInventoryDialogProps = PropsWithChildren<{
@@ -22,6 +23,7 @@ export function CreateGiftInventoryDialog({
   onCreate,
   children,
 }: CreateGiftInventoryDialogProps) {
+  const t = useTranslations();
   const [name, setName] = useState("");
 
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -37,14 +39,14 @@ export function CreateGiftInventoryDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create gift inventory</DialogTitle>
+          <DialogTitle>{t("common.dialogs.createGiftInventory.title")}</DialogTitle>
           <DialogDescription>
-            Enter the name of the new gift inventory.
+            {t("common.dialogs.createGiftInventory.description")}
           </DialogDescription>
         </DialogHeader>
 
         <Input
-          placeholder="Gift Inventory Name"
+          placeholder={t("common.dialogs.createGiftInventory.placeholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -53,7 +55,7 @@ export function CreateGiftInventoryDialog({
           <DialogClose ref={closeRef} />
 
           <Button type="submit" onClick={handleCreate}>
-            Create
+            {t("common.create")}
           </Button>
         </DialogFooter>
       </DialogContent>

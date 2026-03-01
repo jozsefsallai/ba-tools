@@ -16,6 +16,7 @@ import {
   studentStorage,
   type StudentStorageItem,
 } from "@/lib/storage/students";
+import { useTranslations } from "next-intl";
 import { useRef, useState, type PropsWithChildren } from "react";
 import { toast } from "sonner";
 
@@ -24,6 +25,7 @@ export type ImportStudentDataDialogProps = PropsWithChildren;
 export function ImportStudentDataDialog({
   children,
 }: ImportStudentDataDialogProps) {
+  const t = useTranslations();
   const [jsonImport, setJsonImport] = useState("");
 
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -39,10 +41,10 @@ export function ImportStudentDataDialog({
       studentStorage.set(data);
       closeRef.current?.click();
 
-      toast.success("Student data imported successfully");
+      toast.success(t("common.dialogs.importStudentData.toasts.success"));
     } catch (err) {
       console.error(err);
-      toast.error("Invalid student data provided.");
+      toast.error(t("common.dialogs.importStudentData.toasts.invalidData"));
     }
   }
 
@@ -52,9 +54,9 @@ export function ImportStudentDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import cached student data</DialogTitle>
+          <DialogTitle>{t("common.dialogs.importStudentData.title")}</DialogTitle>
           <DialogDescription>
-            Enter the JSON you've copied earlier.
+            {t("common.dialogs.importStudentData.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -67,7 +69,7 @@ export function ImportStudentDataDialog({
 
         <DialogFooter>
           <Button type="submit" onClick={onWantsToImportStudentData}>
-            Import
+            {t("common.import")}
           </Button>
         </DialogFooter>
 

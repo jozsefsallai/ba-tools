@@ -681,6 +681,8 @@
       "description": "Select an event preset to load into the inventory management simulator.",
       "selectEvent": "Select an event",
       "selectRound": "Select a round",
+      "none": "None",
+      "roundLabel": "Round",
       "copyPermalink": "Copy Permalink",
       "copied": "Copied!",
       "loadPresetData": "Load Preset Data"

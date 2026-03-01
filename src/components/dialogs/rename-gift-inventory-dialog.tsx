@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useEffect, useRef, useState } from "react";
 
 export type RenameGiftInventoryDialogProps = PropsWithChildren<{
@@ -24,6 +25,7 @@ export function RenameGiftInventoryDialog({
   onRename,
   children,
 }: RenameGiftInventoryDialogProps) {
+  const t = useTranslations();
   const [name, setName] = useState(current);
 
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -43,14 +45,14 @@ export function RenameGiftInventoryDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Rename gift inventory</DialogTitle>
+          <DialogTitle>{t("common.dialogs.renameGiftInventory.title")}</DialogTitle>
           <DialogDescription>
-            Enter the new name of the new gift inventory.
+            {t("common.dialogs.renameGiftInventory.description")}
           </DialogDescription>
         </DialogHeader>
 
         <Input
-          placeholder="Gift Inventory Name"
+          placeholder={t("common.dialogs.renameGiftInventory.placeholder")}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -59,7 +61,7 @@ export function RenameGiftInventoryDialog({
           <DialogClose ref={closeRef} />
 
           <Button type="submit" onClick={handleRename}>
-            Save
+            {t("common.dialogs.renameGiftInventory.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

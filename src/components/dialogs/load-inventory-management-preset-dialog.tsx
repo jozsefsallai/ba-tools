@@ -163,7 +163,7 @@ export function LoadInventoryPresetDialog({
 
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="_null">None</SelectItem>
+                <SelectItem value="_null">{t("tools.inventoryManagement.presetDialog.none")}</SelectItem>
 
                 {inventoryManagementPresets.map((preset, idx) => (
                   <SelectItem value={preset.name} key={idx}>
@@ -184,11 +184,11 @@ export function LoadInventoryPresetDialog({
 
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="_null">None</SelectItem>
+                <SelectItem value="_null">{t("tools.inventoryManagement.presetDialog.none")}</SelectItem>
 
                 {selectedPreset?.rounds.map((round, idx) => (
                   <SelectItem value={String(idx)} key={idx}>
-                    Round{" "}
+                    {t("tools.inventoryManagement.presetDialog.roundLabel")}{" "}
                     {idx < selectedPreset.rounds.length - 1
                       ? idx + 1
                       : `${idx + 1}+`}

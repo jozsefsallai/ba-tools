@@ -16,6 +16,7 @@ import {
   timelineStorage,
   type TimelineStorageData,
 } from "@/lib/storage/timeline";
+import { useTranslations } from "next-intl";
 import { useRef, useState, type PropsWithChildren } from "react";
 import { toast } from "sonner";
 
@@ -27,6 +28,7 @@ export function ImportTimelineDataDialog({
   children,
   onComplete,
 }: ImportTimelineDataDialogProps) {
+  const t = useTranslations();
   const [jsonImport, setJsonImport] = useState("");
 
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -36,11 +38,11 @@ export function ImportTimelineDataDialog({
       const data = JSON.parse(jsonImport) as TimelineStorageData;
       timelineStorage.set(data);
       closeRef.current?.click();
-      toast.success("Timeline data imported successfully");
+      toast.success(t("common.dialogs.importTimelineData.toasts.success"));
       onComplete?.();
     } catch (err) {
       console.error(err);
-      toast.error("Invalid timeline data provided.");
+      toast.error(t("common.dialogs.importTimelineData.toasts.invalidData"));
     }
   }
 
@@ -50,9 +52,9 @@ export function ImportTimelineDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import timeline data</DialogTitle>
+          <DialogTitle>{t("common.dialogs.importTimelineData.title")}</DialogTitle>
           <DialogDescription>
-            Enter the JSON you've copied earlier.
+            {t("common.dialogs.importTimelineData.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -65,7 +67,7 @@ export function ImportTimelineDataDialog({
 
         <DialogFooter>
           <Button type="submit" onClick={onWantsToImportTimelineData}>
-            Import
+            {t("common.import")}
           </Button>
         </DialogFooter>
 

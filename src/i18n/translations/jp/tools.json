@@ -680,6 +680,8 @@
       "description": "シミュレーターに読み込むイベントのプリセットを選んでね。",
       "selectEvent": "イベントを選択",
       "selectRound": "ラウンドを選択",
+      "none": "なし",
+      "roundLabel": "ラウンド",
       "copyPermalink": "パーマリンクをコピー",
       "copied": "コピーしたよ！",
       "loadPresetData": "プリセットデータを読み込む"

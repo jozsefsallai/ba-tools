@@ -14,10 +14,12 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import type { UserPreferences as UserPreferencesType } from "@/lib/user-preferences";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export function UserPreferences() {
+  const t = useTranslations();
   const { preferences, savePreferences } = useUserPreferences();
 
   const [newPreferences, setNewPreferences] = useState<UserPreferencesType>({
@@ -52,10 +54,10 @@ export function UserPreferences() {
         timelineVisualizer: newPreferences.timelineVisualizer,
         formationDisplay: newPreferences.formationDisplay,
       });
-      toast.success("Preferences saved!");
+      toast.success(t("common.userPreferences.toasts.saved"));
     } catch (err) {
       console.error(err);
-      toast.error("Failed to save preferences.");
+      toast.error(t("common.userPreferences.toasts.saveFailed"));
     } finally {
       setPreferencesSaving(false);
     }
@@ -63,16 +65,16 @@ export function UserPreferences() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-lg font-semibold">User Preferences</h1>
+      <h1 className="text-lg font-semibold">{t("common.userPreferences.title")}</h1>
 
       <Separator />
 
       <div className="flex flex-col gap-4 text-sm">
-        <h2 className="text-base font-semibold">Timeline Visualizer</h2>
+        <h2 className="text-base font-semibold">{t("common.userPreferences.timelineVisualizer.title")}</h2>
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label className="shrink-0">Default scale</Label>
+            <Label className="shrink-0">{t("common.userPreferences.timelineVisualizer.defaultScale")}</Label>
 
             <div>
               <Select
@@ -104,7 +106,7 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="tl-default-item-spacing">
-              Default item spacing
+              {t("common.userPreferences.timelineVisualizer.defaultItemSpacing")}
             </Label>
 
             <div>
@@ -131,7 +133,7 @@ export function UserPreferences() {
               className="shrink-0"
               htmlFor="tl-default-vertical-separator-size"
             >
-              Default vertical separator size
+              {t("common.userPreferences.timelineVisualizer.defaultVerticalSeparatorSize")}
             </Label>
 
             <div>
@@ -158,7 +160,7 @@ export function UserPreferences() {
               className="shrink-0"
               htmlFor="tl-default-horizontal-separator-size"
             >
-              Default horizontal separator size
+              {t("common.userPreferences.timelineVisualizer.defaultHorizontalSeparatorSize")}
             </Label>
 
             <div>
@@ -182,7 +184,7 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="tl-trigger-autofocus">
-              Auto-focus on Trigger
+              {t("common.userPreferences.timelineVisualizer.triggerAutoFocus")}
             </Label>
 
             <Switch
@@ -195,9 +197,7 @@ export function UserPreferences() {
           </div>
 
           <div className="text-xs text-muted-foreground">
-            When enabled, the editor will automatically focus on the trigger
-            field when selecting a student. You can then press Enter while in
-            the trigger field to select a new student.
+            {t("common.userPreferences.timelineVisualizer.triggerAutoFocusHint")}
           </div>
         </div>
       </div>
@@ -205,11 +205,11 @@ export function UserPreferences() {
       <Separator />
 
       <div className="flex flex-col gap-4 text-sm">
-        <h2 className="text-base font-semibold">Formation Display</h2>
+        <h2 className="text-base font-semibold">{t("common.userPreferences.formationDisplay.title")}</h2>
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label className="shrink-0">Default scale</Label>
+            <Label className="shrink-0">{t("common.userPreferences.formationDisplay.defaultScale")}</Label>
 
             <div>
               <Select
@@ -241,7 +241,7 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="echelontool-display-overline">
-              Default display overline
+              {t("common.userPreferences.formationDisplay.defaultDisplayOverline")}
             </Label>
 
             <Switch
@@ -261,7 +261,7 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="echelontool-display-role">
-              Default display role icons
+              {t("common.userPreferences.formationDisplay.defaultDisplayRoleIcons")}
             </Label>
 
             <Switch
@@ -281,7 +281,7 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="echelontool-vertical-groups">
-              Default vertical groups
+              {t("common.userPreferences.formationDisplay.defaultVerticalGroups")}
             </Label>
 
             <Switch
@@ -306,7 +306,7 @@ export function UserPreferences() {
         onClick={handleSaveClick}
         disabled={preferencesSaving}
       >
-        Save Preferences
+        {t("common.userPreferences.savePreferences")}
       </Button>
     </div>
   );

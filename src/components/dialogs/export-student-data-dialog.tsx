@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { studentStorage } from "@/lib/storage/students";
+import { useTranslations } from "next-intl";
 import type { PropsWithChildren } from "react";
 
 export type ExportStudentDataDialogProps = PropsWithChildren;
@@ -17,17 +18,17 @@ export type ExportStudentDataDialogProps = PropsWithChildren;
 export function ExportStudentDataDialog({
   children,
 }: ExportStudentDataDialogProps) {
+  const t = useTranslations();
+
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Export cached student data</DialogTitle>
+          <DialogTitle>{t("common.dialogs.exportStudentData.title")}</DialogTitle>
           <DialogDescription>
-            Copy the following JSON string to import your saved student stat
-            info into a different device/browser or after clearing your local
-            storage.
+            {t("common.dialogs.exportStudentData.description")}
           </DialogDescription>
         </DialogHeader>
 

@@ -110,6 +110,57 @@
       "yes": "Save",
       "no": "Don't Save",
       "cancel": "Cancel"
+    },
+
+    "createGiftInventory": {
+      "title": "Create gift inventory",
+      "description": "Enter the name of the new gift inventory.",
+      "placeholder": "Gift Inventory Name"
+    },
+
+    "renameGiftInventory": {
+      "title": "Rename gift inventory",
+      "description": "Enter the new name of the gift inventory.",
+      "placeholder": "Gift Inventory Name",
+      "save": "Save"
+    },
+
+    "exportStudentData": {
+      "title": "Export cached student data",
+      "description": "Copy the following JSON string to import your saved student stat info into a different device/browser or after clearing your local storage."
+    },
+
+    "exportTimelineData": {
+      "title": "Export timeline data",
+      "description": "Copy the following JSON string to import your saved timeline info into a different device/browser or after clearing your local storage."
+    },
+
+    "importJustinPlannerData": {
+      "title": "Import Justin planner student data",
+      "description": "Enter the JSON you've copied from Justin planner.",
+      "toasts": {
+        "success": "Student data imported successfully",
+        "invalidData": "Invalid student data provided.",
+        "invalidJustinData": "Invalid Justin planner data."
+      }
+    },
+
+    "importStudentData": {
+      "title": "Import cached student data",
+      "description": "Enter the JSON you've copied earlier.",
+      "toasts": {
+        "success": "Student data imported successfully",
+        "invalidData": "Invalid student data provided."
+      }
+    },
+
+    "importTimelineData": {
+      "title": "Import timeline data",
+      "description": "Enter the JSON you've copied earlier.",
+      "toasts": {
+        "success": "Timeline data imported successfully",
+        "invalidData": "Invalid timeline data provided."
+      }
     }
   },
 
@@ -270,5 +321,39 @@
     "scenarioImageGenerator": "Scenario Image Generator",
     "timelineVisualizer": "Timeline Visualizer",
     "railroadPuzzleSolver": "Railroad Puzzle Solver"
-  }
+  },
+
+  "userPreferences": {
+    "title": "User Preferences",
+    "savePreferences": "Save Preferences",
+    "toasts": {
+      "saved": "Preferences saved!",
+      "saveFailed": "Failed to save preferences."
+    },
+    "timelineVisualizer": {
+      "title": "Timeline Visualizer",
+      "defaultScale": "Default scale",
+      "defaultItemSpacing": "Default item spacing",
+      "defaultVerticalSeparatorSize": "Default vertical separator size",
+      "defaultHorizontalSeparatorSize": "Default horizontal separator size",
+      "triggerAutoFocus": "Auto-focus on Trigger",
+      "triggerAutoFocusHint": "When enabled, the editor will automatically focus on the trigger field when selecting a student. You can then press Enter while in the trigger field to select a new student."
+    },
+    "formationDisplay": {
+      "title": "Formation Display",
+      "defaultScale": "Default scale",
+      "defaultDisplayOverline": "Default display overline",
+      "defaultDisplayRoleIcons": "Default display role icons",
+      "defaultVerticalGroups": "Default vertical groups"
+    }
+  },
+
+  "themeToggle": {
+    "srOnly": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+
+  "import": "Import"
 }

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { timelineStorage } from "@/lib/storage/timeline";
+import { useTranslations } from "next-intl";
 import { useState, type PropsWithChildren } from "react";
 
 export type ExportTimelineDataDialogProps = PropsWithChildren & {
@@ -20,6 +21,7 @@ export function ExportTimelineDataDialog({
   onBeforeLoad,
   children,
 }: ExportTimelineDataDialogProps) {
+  const t = useTranslations();
   const [json, setJson] = useState("");
 
   function handleOpenChange(open: boolean) {
@@ -36,11 +38,9 @@ export function ExportTimelineDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Export timeline data</DialogTitle>
+          <DialogTitle>{t("common.dialogs.exportTimelineData.title")}</DialogTitle>
           <DialogDescription>
-            Copy the following JSON string to import your saved timeline info
-            into a different device/browser or after clearing your local
-            storage.
+            {t("common.dialogs.exportTimelineData.description")}
           </DialogDescription>
         </DialogHeader>
 

@@ -16,6 +16,7 @@ import {
   importJustinPlannerData,
   type JustinPlannerExportData,
 } from "@/lib/justin";
+import { useTranslations } from "next-intl";
 import type { Student } from "~prisma";
 import { useRef, useState, type PropsWithChildren } from "react";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export function ImportJustinPlannerDataDialog({
   students,
   children,
 }: ImportJustinPlannerDataDialogProps) {
+  const t = useTranslations();
   const [jsonImport, setJsonImport] = useState("");
 
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -37,16 +39,16 @@ export function ImportJustinPlannerDataDialog({
       const data = JSON.parse(jsonImport) as JustinPlannerExportData;
 
       if (data.exportVersion !== 2) {
-        toast.error("Invalid Justin planner data.");
+        toast.error(t("common.dialogs.importJustinPlannerData.toasts.invalidJustinData"));
       }
 
       importJustinPlannerData(students, data);
       closeRef.current?.click();
 
-      toast.success("Student data imported successfully");
+      toast.success(t("common.dialogs.importJustinPlannerData.toasts.success"));
     } catch (err) {
       console.error(err);
-      toast.error("Invalid student data provided.");
+      toast.error(t("common.dialogs.importJustinPlannerData.toasts.invalidData"));
     }
   }
 
@@ -56,9 +58,9 @@ export function ImportJustinPlannerDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Import Justin planner student data</DialogTitle>
+          <DialogTitle>{t("common.dialogs.importJustinPlannerData.title")}</DialogTitle>
           <DialogDescription>
-            Enter the JSON you've copied from Justin planner.
+            {t("common.dialogs.importJustinPlannerData.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -71,7 +73,7 @@ export function ImportJustinPlannerDataDialog({
 
         <DialogFooter>
           <Button type="submit" onClick={onWantsToImportStudentData}>
-            Import
+            {t("common.import")}
           </Button>
         </DialogFooter>
 

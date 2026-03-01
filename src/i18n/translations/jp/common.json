@@ -110,6 +110,57 @@
     }
   },
 
+  "createGiftInventory": {
+    "title": "所持データを作成",
+    "description": "新しいギフト所持データの名前を入力してね。",
+    "placeholder": "ギフト所持データ名"
+  },
+
+  "renameGiftInventory": {
+    "title": "所持データの名前を変更",
+    "description": "所持データの新しい名前を入力してね。",
+    "placeholder": "ギフト所持データ名",
+    "save": "保存"
+  },
+
+  "exportStudentData": {
+    "title": "生徒データの書き出し（エクスポート）",
+    "description": "保存されている生徒のステータス情報を別の端末やブラウザに移行したり、ブラウザのキャッシュを削除する前に、以下のJSONテキストをコピーしてね。"
+  },
+
+  "exportTimelineData": {
+    "title": "タイムラインデータの書き出し（エクスポート）",
+    "description": "保存されているタイムライン情報を別の端末やブラウザに移行したり、ブラウザのキャッシュを削除する前に、以下のJSONテキストをコピーしてね。"
+  },
+
+  "importJustinPlannerData": {
+    "title": "Justin plannerから生徒データを読み込む",
+    "description": "Justin plannerからコピーしたJSONテキストを入力してね。",
+    "toasts": {
+      "success": "生徒データの読み込みに成功したよ",
+      "invalidData": "生徒データが正しくないみたい。",
+      "invalidJustinData": "Justin plannerのデータが正しくないみたい。"
+    }
+  },
+
+  "importStudentData": {
+    "title": "生徒データの読み込み（インポート）",
+    "description": "コピーしておいたJSONテキストを入力してね。",
+    "toasts": {
+      "success": "生徒データの読み込みに成功したよ",
+      "invalidData": "生徒データが正しくないみたい。"
+    }
+  },
+
+  "importTimelineData": {
+    "title": "タイムラインデータの読み込み（インポート）",
+    "description": "コピーしておいたJSONテキストを入力してね。",
+    "toasts": {
+      "success": "タイムラインデータの読み込みに成功したよ",
+      "invalidData": "タイムラインデータが正しくないみたい。"
+    }
+  },
+
   "school": {
     "Abydos": "アビドス高等学校",
     "Arius": "アリウス分校",
@@ -267,5 +318,39 @@
     "scenarioImageGenerator": "シナリオ画像メーカー",
     "timelineVisualizer": "TL可視化ツール",
     "railroadPuzzleSolver": "鉄道パズル解答器"
-  }
+  },
+
+  "userPreferences": {
+    "title": "ユーザー設定",
+    "savePreferences": "設定を保存",
+    "toasts": {
+      "saved": "設定を保存したよ！",
+      "saveFailed": "設定の保存に失敗したよ。"
+    },
+    "timelineVisualizer": {
+      "title": "TL可視化ツール",
+      "defaultScale": "デフォルトのスケール",
+      "defaultItemSpacing": "デフォルトのアイテム間隔",
+      "defaultVerticalSeparatorSize": "デフォルトの縦スペースサイズ",
+      "defaultHorizontalSeparatorSize": "デフォルトの横スペースサイズ",
+      "triggerAutoFocus": "発動条件にオートフォーカス",
+      "triggerAutoFocusHint": "有効にすると、生徒を選択した時にエディタの発動条件入力欄へ自動でフォーカスするよ。その状態でEnterキーを押すと、新しい生徒の選択に素早く戻れるよ。"
+    },
+    "formationDisplay": {
+      "title": "編成表示",
+      "defaultScale": "デフォルトのスケール",
+      "defaultDisplayOverline": "デフォルトでオーバーラインを表示",
+      "defaultDisplayRoleIcons": "デフォルトで役割アイコンを表示",
+      "defaultVerticalGroups": "デフォルトで垂直グループ化"
+    }
+  },
+
+  "themeToggle": {
+    "srOnly": "テーマを切り替える",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+
+  "import": "インポート"
 }
