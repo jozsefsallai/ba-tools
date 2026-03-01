@@ -470,7 +470,9 @@ export function FormationEditor() {
   }, [preferences]);
 
   if (formationId && query.status === "pending") {
-    return <MessageBox>{t("tools.formationDisplay.loadingFormation")}</MessageBox>;
+    return (
+      <MessageBox>{t("tools.formationDisplay.loadingFormation")}</MessageBox>
+    );
   }
 
   return (
@@ -480,14 +482,16 @@ export function FormationEditor() {
           hidden: strikers.length + specials.length > 0,
         })}
       >
-        <p>
-          {t("tools.formationDisplay.descriptionLong")}
-        </p>
+        <p>{t("tools.formationDisplay.descriptionLong")}</p>
         <p className="md:hidden text-muted-foreground">
-          {t.rich("tools.formationDisplay.mobileNotice", { strong: (children) => <strong>{children}</strong> })}
+          {t.rich("tools.formationDisplay.mobileNotice", {
+            strong: (children) => <strong>{children}</strong>,
+          })}
         </p>
         <p className="text-muted-foreground">
-          {t.rich("tools.formationDisplay.renderNotice", { strong: (children) => <strong>{children}</strong> })}
+          {t.rich("tools.formationDisplay.renderNotice", {
+            strong: (children) => <strong>{children}</strong>,
+          })}
         </p>
       </div>
 
@@ -505,10 +509,16 @@ export function FormationEditor() {
         <CardContent>
           <Tabs defaultValue="items" className="gap-4">
             <TabsList className="place-self-center">
-              <TabsTrigger value="items">{t("tools.formationDisplay.tabs.items")}</TabsTrigger>
-              <TabsTrigger value="appearance">{t("tools.formationDisplay.tabs.appearance")}</TabsTrigger>
+              <TabsTrigger value="items">
+                {t("tools.formationDisplay.tabs.items")}
+              </TabsTrigger>
+              <TabsTrigger value="appearance">
+                {t("tools.formationDisplay.tabs.appearance")}
+              </TabsTrigger>
               <Authenticated>
-                <TabsTrigger value="cloud">{t("tools.formationDisplay.tabs.cloud")}</TabsTrigger>
+                <TabsTrigger value="cloud">
+                  {t("tools.formationDisplay.tabs.cloud")}
+                </TabsTrigger>
               </Authenticated>
             </TabsList>
 
@@ -557,7 +567,7 @@ export function FormationEditor() {
             <TabsContent value="appearance">
               <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
                 <div className="flex gap-2 items-center">
-                  <Label>{t("common.scale")}</Label>
+                  <Label className="shrink-0">{t("common.scale")}</Label>
 
                   <Select
                     value={scale.toString()}
@@ -583,7 +593,9 @@ export function FormationEditor() {
                     checked={displayOverline}
                     onCheckedChange={setDisplayOverline}
                   />
-                  <Label htmlFor="display-overline">{t("tools.formationDisplay.displayOverline")}</Label>
+                  <Label htmlFor="display-overline">
+                    {t("tools.formationDisplay.displayOverline")}
+                  </Label>
                 </div>
 
                 <div className="flex gap-2 items-center">
@@ -592,7 +604,9 @@ export function FormationEditor() {
                     checked={displayRoleIcon}
                     onCheckedChange={setDisplayRoleIcon}
                   />
-                  <Label htmlFor="display-role-icon">{t("tools.formationDisplay.displayRoleIcon")}</Label>
+                  <Label htmlFor="display-role-icon">
+                    {t("tools.formationDisplay.displayRoleIcon")}
+                  </Label>
                 </div>
 
                 <div className="flex gap-2 items-center">
@@ -601,7 +615,9 @@ export function FormationEditor() {
                     checked={groupsVertical}
                     onCheckedChange={setGroupsVertical}
                   />
-                  <Label htmlFor="groups-vertical">{t("tools.formationDisplay.verticalGroups")}</Label>
+                  <Label htmlFor="groups-vertical">
+                    {t("tools.formationDisplay.verticalGroups")}
+                  </Label>
                 </div>
               </div>
             </TabsContent>
@@ -610,7 +626,9 @@ export function FormationEditor() {
               <TabsContent value="cloud">
                 <div className="flex gap-6 items-center justify-center">
                   <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-                    <Label className="shrink-0">{t("tools.formationDisplay.formationName")}</Label>
+                    <Label className="shrink-0">
+                      {t("tools.formationDisplay.formationName")}
+                    </Label>
                     <Input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -622,7 +640,9 @@ export function FormationEditor() {
                     onClick={createOrUpdateCloudFormation}
                     disabled={generationInProgress}
                   >
-                    {formationId ? t("tools.formationDisplay.updateFormation") : t("tools.formationDisplay.saveFormation")}
+                    {formationId
+                      ? t("tools.formationDisplay.updateFormation")
+                      : t("tools.formationDisplay.saveFormation")}
                   </Button>
                 </div>
               </TabsContent>
@@ -655,10 +675,14 @@ export function FormationEditor() {
       <Separator />
 
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">{t("tools.formationDisplay.strikers")}</h2>
+        <h2 className="text-lg font-bold">
+          {t("tools.formationDisplay.strikers")}
+        </h2>
 
         {strikers.length === 0 && (
-          <p className="text-muted-foreground">{t("tools.formationDisplay.noStrikers")}</p>
+          <p className="text-muted-foreground">
+            {t("tools.formationDisplay.noStrikers")}
+          </p>
         )}
 
         {strikers.length > 0 && (
@@ -676,10 +700,14 @@ export function FormationEditor() {
       <Separator />
 
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">{t("tools.formationDisplay.specials")}</h2>
+        <h2 className="text-lg font-bold">
+          {t("tools.formationDisplay.specials")}
+        </h2>
 
         {specials.length === 0 && (
-          <p className="text-muted-foreground">{t("tools.formationDisplay.noSpecials")}</p>
+          <p className="text-muted-foreground">
+            {t("tools.formationDisplay.noSpecials")}
+          </p>
         )}
 
         {specials.length > 0 && (

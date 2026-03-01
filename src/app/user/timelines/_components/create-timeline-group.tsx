@@ -49,7 +49,9 @@ export function CreateTimelineGroup() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold">{t("tools.myTimelines.createGroup.title")}</h2>
+      <h2 className="text-lg font-bold">
+        {t("tools.myTimelines.createGroup.title")}
+      </h2>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">{t("common.name")}</Label>
@@ -81,7 +83,7 @@ export function CreateTimelineGroup() {
       </div>
 
       <div className="flex gap-2 items-center">
-        <Label>{t("common.visibility")}</Label>
+        <Label className="shrink-0">{t("common.visibility")}</Label>
 
         <Select
           value={visibility}

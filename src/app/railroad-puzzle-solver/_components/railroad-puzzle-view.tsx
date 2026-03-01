@@ -384,7 +384,7 @@ export function RailroadPuzzleView() {
         <CardContent>
           <div className="flex flex-col gap-8 md:gap-4">
             <div className="flex gap-2 items-center">
-              <Label>{t("tools.railroad.map")}</Label>
+              <Label className="shrink-0">{t("tools.railroad.map")}</Label>
               <Select
                 value={selectedPreset.name}
                 onValueChange={(value) => {
@@ -408,7 +408,9 @@ export function RailroadPuzzleView() {
             </div>
 
             <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
-              <strong className="text-sm md:w-[150px]">{t("tools.railroad.usedRailPieces")}</strong>
+              <strong className="text-sm md:w-[150px]">
+                {t("tools.railroad.usedRailPieces")}
+              </strong>
 
               {Object.keys(railInventory).map((key) => {
                 const railType = key as RailType;
@@ -495,7 +497,9 @@ export function RailroadPuzzleView() {
                 onCheckedChange={setSolveInstantly}
               />
 
-              <Label htmlFor="solve-instantly">{t("tools.railroad.solveInstantly")}</Label>
+              <Label htmlFor="solve-instantly">
+                {t("tools.railroad.solveInstantly")}
+              </Label>
 
               <div className="text-xs text-muted-foreground">
                 {t("tools.railroad.solveInstantlyHint")}
@@ -540,7 +544,9 @@ export function RailroadPuzzleView() {
           <CardContent>
             <div className="flex flex-col gap-4">
               <div className="text-lg font-semibold">
-                {t("tools.railroad.minimalConfigs", { count: minRailConfigs.length })}
+                {t("tools.railroad.minimalConfigs", {
+                  count: minRailConfigs.length,
+                })}
               </div>
 
               <div className="flex flex-col md:flex-row flex-wrap gap-4">

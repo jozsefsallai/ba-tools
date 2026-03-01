@@ -79,7 +79,7 @@ export function NewPVPSeasonDialog({
 
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
-            <Label htmlFor="pvp-season-name" className="w-32">
+            <Label htmlFor="pvp-season-name" className="w-32 shrink-0">
               {t("tools.pvp.newSeason.seasonName")}
             </Label>
             <Input
@@ -90,7 +90,7 @@ export function NewPVPSeasonDialog({
           </div>
 
           <div className="flex items-center gap-2">
-            <Label className="w-32">{t("common.gameServer")}</Label>
+            <Label className="shrink-0 w-32">{t("common.gameServer")}</Label>
 
             <Select
               value={gameServer}

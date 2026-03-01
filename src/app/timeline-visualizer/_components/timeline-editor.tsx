@@ -795,7 +795,7 @@ export function TimelineEditor() {
                   </div>
 
                   <div className="flex gap-2 items-center">
-                    <Label>
+                    <Label className="shrink-0">
                       {t("tools.timeline.tabs.settings.visibility")}
                     </Label>
 
@@ -870,7 +870,9 @@ export function TimelineEditor() {
             <TabsContent value="appearance">
               <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
                 <div className="flex gap-2 items-center">
-                  <Label>{t("tools.timeline.tabs.appearance.scale")}</Label>
+                  <Label className="shrink-0">
+                    {t("tools.timeline.tabs.appearance.scale")}
+                  </Label>
 
                   <Select
                     value={scale.toString()}
@@ -891,7 +893,7 @@ export function TimelineEditor() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <Label>
+                  <Label className="shrink-0">
                     {t("tools.timeline.tabs.appearance.itemSpacing")}
                   </Label>
 
@@ -904,7 +906,9 @@ export function TimelineEditor() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <Label>{t("tools.timeline.tabs.appearance.vsSize")}</Label>
+                  <Label className="shrink-0">
+                    {t("tools.timeline.tabs.appearance.vsSize")}
+                  </Label>
 
                   <Input
                     type="number"
@@ -917,7 +921,9 @@ export function TimelineEditor() {
                 </div>
 
                 <div className="flex gap-2 items-center">
-                  <Label>{t("tools.timeline.tabs.appearance.hsSize")}</Label>
+                  <Label className="shrink-0">
+                    {t("tools.timeline.tabs.appearance.hsSize")}
+                  </Label>
 
                   <Input
                     type="number"

@@ -209,7 +209,9 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">
             {t("common.inGameNickname")}{" "}
-            <small className="text-muted-foreground text-xs">{t("common.optional")}</small>
+            <small className="text-muted-foreground text-xs">
+              {t("common.optional")}
+            </small>
           </Label>
 
           <Input
@@ -240,7 +242,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <Label>{t("common.visibility")}</Label>
+          <Label className="shrink-0">{t("common.visibility")}</Label>
 
           <Select
             value={visibility}
@@ -271,7 +273,9 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         </div>
 
         <div className="flex gap-2">
-          <Label htmlFor="studentRep">{t("common.studentRep")}</Label>
+          <Label className="shrink-0" htmlFor="studentRep">
+            {t("common.studentRep")}
+          </Label>
 
           <div>
             <StudentPicker

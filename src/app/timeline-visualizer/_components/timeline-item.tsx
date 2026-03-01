@@ -262,7 +262,10 @@ export function TimelineItem({
 
                   {skillVariants.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <Label htmlFor={`variant-${item.id}`}>
+                      <Label
+                        className="shrink-0"
+                        htmlFor={`variant-${item.id}`}
+                      >
                         {t("tools.timeline.editor.student.variant.label")}
                       </Label>
 
@@ -290,7 +293,7 @@ export function TimelineItem({
 
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`trigger-${item.id}`}>
+                    <Label className="shrink-0" htmlFor={`trigger-${item.id}`}>
                       {t("tools.timeline.editor.student.trigger.label")}
                     </Label>
 
@@ -308,7 +311,7 @@ export function TimelineItem({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`target-${item.id}`}>
+                    <Label className="shrink-0" htmlFor={`target-${item.id}`}>
                       {t("tools.timeline.editor.student.target.label")}
                     </Label>
 
@@ -353,7 +356,7 @@ export function TimelineItem({
                       onCheckedChange={handleCopyUpdate}
                     />
 
-                    <Label htmlFor={`copy-${item.id}`}>
+                    <Label className="shrink-0" htmlFor={`copy-${item.id}`}>
                       {t("tools.timeline.editor.student.copy.label")}
                     </Label>
                   </div>
@@ -372,7 +375,10 @@ export function TimelineItem({
 
                 {displayNotesField && (
                   <div className="flex items-start gap-2">
-                    <Label htmlFor={`notes-${item.id}`} className="mt-1">
+                    <Label
+                      htmlFor={`notes-${item.id}`}
+                      className="mt-1 shrink-0"
+                    >
                       {t("tools.timeline.editor.student.notes.label")}
                     </Label>
 
@@ -404,7 +410,7 @@ export function TimelineItem({
                   onCheckedChange={(checked) => setSeparatorOverride(checked)}
                 />
 
-                <Label htmlFor={`sizeOverride-${item.id}`}>
+                <Label className="shrink-0" htmlFor={`sizeOverride-${item.id}`}>
                   {t("tools.timeline.editor.separator.size.toggle")}
                 </Label>
               </div>

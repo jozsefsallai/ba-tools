@@ -98,7 +98,9 @@ export function FormationItem({
 
               <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="level">Level:</Label>
+                  <Label className="shrink-0" htmlFor="level">
+                    Level:
+                  </Label>
 
                   <Input
                     id="level"
@@ -111,7 +113,7 @@ export function FormationItem({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Label>Stars:</Label>
+                  <Label className="shrink-0">Stars:</Label>
 
                   <Select
                     value={item.starLevel?.toString() ?? ""}
@@ -136,7 +138,7 @@ export function FormationItem({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Label>UE:</Label>
+                  <Label className="shrink-0">UE:</Label>
 
                   <Select
                     value={item.ueLevel?.toString() ?? ""}

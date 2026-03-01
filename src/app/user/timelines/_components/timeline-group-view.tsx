@@ -129,7 +129,9 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">{t("tools.myTimelines.editGroup.title")}</h2>
+        <h2 className="text-lg font-bold">
+          {t("tools.myTimelines.editGroup.title")}
+        </h2>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">{t("common.name")}</Label>
@@ -161,7 +163,7 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <Label>{t("common.visibility")}</Label>
+          <Label className="shrink-0">{t("common.visibility")}</Label>
 
           <Select
             value={visibility}
@@ -199,33 +201,46 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
         <Separator />
 
         <div className="flex gap-2 items-center">
-          <Label>{t("tools.myTimelines.editGroup.addTimeline")}</Label>
+          <Label className="shrink-0">
+            {t("tools.myTimelines.editGroup.addTimeline")}
+          </Label>
 
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline">{t("tools.myTimelines.editGroup.selectTimeline")}</Button>
+              <Button variant="outline">
+                {t("tools.myTimelines.editGroup.selectTimeline")}
+              </Button>
             </PopoverTrigger>
 
             <PopoverContent className="w-full p-0">
               <Command>
-                <CommandInput placeholder={t("tools.myTimelines.editGroup.searchPlaceholder")} className="h-9" />
+                <CommandInput
+                  placeholder={t(
+                    "tools.myTimelines.editGroup.searchPlaceholder",
+                  )}
+                  className="h-9"
+                />
 
                 <CommandList>
-                  <CommandEmpty>{t("tools.myTimelines.editGroup.noTimelinesFound")}</CommandEmpty>
+                  <CommandEmpty>
+                    {t("tools.myTimelines.editGroup.noTimelinesFound")}
+                  </CommandEmpty>
 
                   <CommandGroup>
                     {(allTimelinesQuery.data ?? []).map((timeline) => (
                       <CommandItem
                         key={timeline._id}
                         value={
-                          timeline.name ?? `${t("common.untitledTimeline")} ${timeline._id}`
+                          timeline.name ??
+                          `${t("common.untitledTimeline")} ${timeline._id}`
                         }
                         onSelect={() => {
                           onWantsToAdd(timeline);
                           setPopoverOpen(false);
                         }}
                       >
-                        {timeline.name ?? `${t("common.untitledTimeline")} ${timeline._id}`}
+                        {timeline.name ??
+                          `${t("common.untitledTimeline")} ${timeline._id}`}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -239,7 +254,9 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
       <Separator />
 
       {items.length === 0 && (
-        <MessageBox>{t("tools.myTimelines.editGroup.noTimelinesInGroup")}</MessageBox>
+        <MessageBox>
+          {t("tools.myTimelines.editGroup.noTimelinesInGroup")}
+        </MessageBox>
       )}
 
       <TimelineGroupItemsContainer

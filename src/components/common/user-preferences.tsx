@@ -72,7 +72,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label>Default scale</Label>
+            <Label className="shrink-0">Default scale</Label>
 
             <div>
               <Select
@@ -103,7 +103,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="tl-default-item-spacing">
+            <Label className="shrink-0" htmlFor="tl-default-item-spacing">
               Default item spacing
             </Label>
 
@@ -127,7 +127,10 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="tl-default-vertical-separator-size">
+            <Label
+              className="shrink-0"
+              htmlFor="tl-default-vertical-separator-size"
+            >
               Default vertical separator size
             </Label>
 
@@ -151,7 +154,10 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="tl-default-horizontal-separator-size">
+            <Label
+              className="shrink-0"
+              htmlFor="tl-default-horizontal-separator-size"
+            >
               Default horizontal separator size
             </Label>
 
@@ -175,7 +181,9 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="tl-trigger-autofocus">Auto-focus on Trigger</Label>
+            <Label className="shrink-0" htmlFor="tl-trigger-autofocus">
+              Auto-focus on Trigger
+            </Label>
 
             <Switch
               id="tl-trigger-autofocus"
@@ -201,7 +209,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label>Default scale</Label>
+            <Label className="shrink-0">Default scale</Label>
 
             <div>
               <Select
@@ -232,7 +240,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="echelontool-display-overline">
+            <Label className="shrink-0" htmlFor="echelontool-display-overline">
               Default display overline
             </Label>
 
@@ -252,7 +260,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="echelontool-display-role">
+            <Label className="shrink-0" htmlFor="echelontool-display-role">
               Default display role icons
             </Label>
 
@@ -272,7 +280,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label htmlFor="echelontool-vertical-groups">
+            <Label className="shrink-0" htmlFor="echelontool-vertical-groups">
               Default vertical groups
             </Label>
 

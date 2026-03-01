@@ -191,7 +191,7 @@ export function TimelineView({ id }: TimelineViewProps) {
 
       <div className="flex items-center justify-center gap-4">
         <div className="flex items-center gap-2">
-          <Label>{t("common.scale")}</Label>
+          <Label className="shrink-0">{t("common.scale")}</Label>
 
           <Select
             value={scale.toString()}
