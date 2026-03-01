@@ -12,12 +12,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 export type RosterItemProps = {
   item: RosterStudentData;
 };
 
 export function RosterItem({ item }: RosterItemProps) {
+  const t = useTranslations();
+
   return (
     <TooltipProvider>
       <div className="flex items-start gap-4 md:gap-6 bg-card border rounded-md p-4">
@@ -38,14 +41,16 @@ export function RosterItem({ item }: RosterItemProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs font-semibold">Skills:</div>
+            <div className="text-xs font-semibold">
+              {t("tools.roster.view.skills")}
+            </div>
 
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge variant="secondary">{item.ex}</Badge>
               </TooltipTrigger>
 
-              <TooltipContent>EX Skill</TooltipContent>
+              <TooltipContent>{t("tools.roster.view.exSkill")}</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -53,7 +58,9 @@ export function RosterItem({ item }: RosterItemProps) {
                 <Badge variant="secondary">{item.basic}</Badge>
               </TooltipTrigger>
 
-              <TooltipContent>Basic Skill</TooltipContent>
+              <TooltipContent>
+                {t("tools.roster.view.basicSkill")}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -61,7 +68,9 @@ export function RosterItem({ item }: RosterItemProps) {
                 <Badge variant="secondary">{item.enhanced}</Badge>
               </TooltipTrigger>
 
-              <TooltipContent>Enhanced Skill</TooltipContent>
+              <TooltipContent>
+                {t("tools.roster.view.enhancedSkill")}
+              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -69,12 +78,14 @@ export function RosterItem({ item }: RosterItemProps) {
                 <Badge variant="secondary">{item.sub}</Badge>
               </TooltipTrigger>
 
-              <TooltipContent>Subskill</TooltipContent>
+              <TooltipContent>{t("tools.roster.view.subskill")}</TooltipContent>
             </Tooltip>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs font-semibold">Equipment:</div>
+            <div className="text-xs font-semibold">
+              {t("tools.roster.view.equipment")}
+            </div>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -84,7 +95,8 @@ export function RosterItem({ item }: RosterItemProps) {
               </TooltipTrigger>
 
               <TooltipContent>
-                {item.student.equipment[0] ?? "Equipment Slot 1"}
+                {item.student.equipment[0] ??
+                  t("tools.roster.view.equipmentSlot1")}
               </TooltipContent>
             </Tooltip>
 
@@ -96,7 +108,8 @@ export function RosterItem({ item }: RosterItemProps) {
               </TooltipTrigger>
 
               <TooltipContent>
-                {item.student.equipment[1] ?? "Equipment Slot 2"}
+                {item.student.equipment[1] ??
+                  t("tools.roster.view.equipmentSlot2")}
               </TooltipContent>
             </Tooltip>
 
@@ -108,7 +121,8 @@ export function RosterItem({ item }: RosterItemProps) {
               </TooltipTrigger>
 
               <TooltipContent>
-                {item.student.equipment[2] ?? "Equipment Slot 3"}
+                {item.student.equipment[2] ??
+                  t("tools.roster.view.equipmentSlot3")}
               </TooltipContent>
             </Tooltip>
 
@@ -118,14 +132,18 @@ export function RosterItem({ item }: RosterItemProps) {
                   <Badge variant="secondary">T{item.equipmentSlot4}</Badge>
                 </TooltipTrigger>
 
-                <TooltipContent>Bond Item</TooltipContent>
+                <TooltipContent>
+                  {t("tools.roster.view.bondItem")}
+                </TooltipContent>
               </Tooltip>
             )}
           </div>
 
           {!!(item.attackLevel || item.hpLevel || item.healLevel) && (
             <div className="flex items-center gap-2">
-              <div className="text-xs font-semibold">Talents:</div>
+              <div className="text-xs font-semibold">
+                {t("tools.roster.view.talents")}
+              </div>
 
               {!!item.attackLevel && (
                 <Tooltip>
@@ -133,7 +151,9 @@ export function RosterItem({ item }: RosterItemProps) {
                     <Badge variant="secondary">ATK{item.attackLevel}</Badge>
                   </TooltipTrigger>
 
-                  <TooltipContent>Attack Talent Level</TooltipContent>
+                  <TooltipContent>
+                    {t("tools.roster.view.attackTalentLevel")}
+                  </TooltipContent>
                 </Tooltip>
               )}
 
@@ -143,7 +163,9 @@ export function RosterItem({ item }: RosterItemProps) {
                     <Badge variant="secondary">HP{item.hpLevel}</Badge>
                   </TooltipTrigger>
 
-                  <TooltipContent>HP Talent Level</TooltipContent>
+                  <TooltipContent>
+                    {t("tools.roster.view.hpTalentLevel")}
+                  </TooltipContent>
                 </Tooltip>
               )}
 
@@ -153,7 +175,9 @@ export function RosterItem({ item }: RosterItemProps) {
                     <Badge variant="secondary">HEAL{item.healLevel}</Badge>
                   </TooltipTrigger>
 
-                  <TooltipContent>Heal Talent Level</TooltipContent>
+                  <TooltipContent>
+                    {t("tools.roster.view.healTalentLevel")}
+                  </TooltipContent>
                 </Tooltip>
               )}
             </div>

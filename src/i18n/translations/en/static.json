@@ -95,7 +95,31 @@
   "banners": {
     "title": "Upcoming Global Banners",
     "description": "On this page you may view the upcoming global banners in Blue Archive. Please keep in mind that the schedule predictions are based on the JP server's banner release schedule and are subject to change on global.",
-    "notice": "<strong>Important:</strong> Blue Archive global is currently on an accelerated schedule in order to reduce the gap between the JP and the global servers. As a result, some of these banners could be merged, shortened, or skipped entirely."
+    "notice": "<strong>Important:</strong> Blue Archive global is currently on an accelerated schedule in order to reduce the gap between the JP and the global servers. As a result, some of these banners could be merged, shortened, or skipped entirely.",
+
+    "group": {
+      "inDays": "in {count} days",
+      "tomorrow": "tomorrow",
+      "today": "today",
+      "yesterday": "yesterday",
+      "daysAgo": "{count} days ago",
+      "currentBanner": "Current Banner",
+      "currentBanners": "Current Banners",
+      "bannerLasts": "This banner lasts",
+      "bannersLast": "These banners last",
+      "forDays": "for <strong>{count}</strong> days."
+    },
+
+    "item": {
+      "fest": "FEST",
+      "festTooltip": "This student is a <strong>FEST</strong> unit.<br />The rate of obtaining a 3* student on this banner is <strong>doubled (6%)</strong><br />and there is a small chance of obtaining other FEST students on this banner.",
+      "limited": "Limited",
+      "limitedTooltip": "This student is a <strong>LIMITED unit</strong> and cannot be obtained outside of their banner.",
+      "freePulls": "{count} Free Pulls",
+      "freePullsTooltip": "During the duration of this banner, you will receive <strong>daily free pulls</strong> for a total of <strong>{count}</strong>.<br />The free pulls can be used on this banner and <strong>will not carry over to future banners</strong>.",
+      "viewOnSchaleDB": "View on SchaleDB",
+      "viewStudentOnSchaleDB": "View <strong>{name}</strong> on SchaleDB"
+    }
   },
 
   "flappyPeroro": {

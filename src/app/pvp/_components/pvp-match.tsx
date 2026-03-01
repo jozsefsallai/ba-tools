@@ -12,6 +12,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -23,6 +24,7 @@ export type PVPMatchProps = {
 };
 
 export function PVPMatch({ seasonId, match }: PVPMatchProps) {
+  const t = useTranslations();
   const { studentMap } = useStudents();
 
   const [displayDamageChart, setDisplayDamageChart] = useState(false);
@@ -62,12 +64,12 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
   const handleDeleteMatch = useCallback(async () => {
     try {
       await deleteMatchMutation({ matchId: match._id });
-      toast.success("PVP match record deleted.");
+      toast.success(t("tools.pvp.match.deleteSuccess"));
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete PVP match record.");
+      toast.error(t("tools.pvp.match.deleteFail"));
     }
-  }, [deleteMatchMutation, match._id]);
+  }, [deleteMatchMutation, match._id, t]);
 
   return (
     <article className="flex flex-col gap-4 border rounded-md p-6">
@@ -75,7 +77,7 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
         <div className="flex-1 flex flex-col gap-4">
           <div className="flex items-start gap-6">
             <PVPFormation
-              name="You"
+              name={t("tools.pvp.match.you")}
               kind={match.matchType}
               rank={match.ownRank}
               result={match.result}
@@ -85,11 +87,11 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
             />
 
             <div className="text-3xl font-nexon-football-gothic font-bold italic mt-14">
-              VS
+              {t("tools.pvp.match.vs")}
             </div>
 
             <PVPFormation
-              name={match.opponentName ?? "Opponent"}
+              name={match.opponentName ?? t("tools.pvp.match.opponent")}
               kind={match.matchType === "attack" ? "defense" : "attack"}
               rank={match.opponentRank}
               result={match.result === "win" ? "loss" : "win"}
@@ -106,7 +108,9 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
             <Button variant="outline" onClick={handleToggleDamageChart}>
               {displayDamageChart && <ChevronDownIcon />}
               {!displayDamageChart && <ChevronRightIcon />}
-              {displayDamageChart ? "Hide" : "Show"} Damage Chart
+              {displayDamageChart
+                ? t("tools.pvp.match.hideDamageChart")
+                : t("tools.pvp.match.showDamageChart")}
             </Button>
           )}
 
@@ -117,8 +121,8 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
           </Button>
 
           <ConfirmDialog
-            title="Delete PVP record?"
-            description="Are you sure you want to delete this PVP match record? This action cannot be undone."
+            title={t("tools.pvp.match.deleteTitle")}
+            description={t("tools.pvp.match.deleteDescription")}
             confirmVariant="destructive"
             onConfirm={handleDeleteMatch}
           >

@@ -94,7 +94,31 @@
   "banners": {
     "title": "今後のグローバル版ガチャ",
     "description": "ここでは、ブルーアーカイブのグローバル版で開催予定のガチャを確認できるよ。スケジュールの予測は日本版に基づいているから、グローバル版では変更される可能性があることを忘れないでね。",
-    "notice": "<strong>重要：</strong>現在、ブルーアーカイブのグローバル版は日本版との差を縮めるためにスケジュールの短縮が行われているよ。その結果、一部のガチャが統合されたり、期間が短くなったり、スキップされたりする場合があるよ。"
+    "notice": "<strong>重要：</strong>現在、ブルーアーカイブのグローバル版は日本版との差を縮めるためにスケジュールの短縮が行われているよ。その結果、一部のガチャが統合されたり、期間が短くなったり、スキップされたりする場合があるよ。",
+
+    "group": {
+      "inDays": "{count}日後",
+      "tomorrow": "明日",
+      "today": "今日",
+      "yesterday": "昨日",
+      "daysAgo": "{count}日前",
+      "currentBanner": "開催中のガチャ",
+      "currentBanners": "開催中のガチャ",
+      "bannerLasts": "このガチャの期間は",
+      "bannersLast": "これらのガチャの期間は",
+      "forDays": "<strong>{count}</strong>日間だよ。"
+    },
+
+    "item": {
+      "fest": "フェス",
+      "festTooltip": "この生徒は<strong>フェス限定</strong>ユニットだよ。<br />このガチャでは★3生徒の排出率が<strong>2倍（6%）</strong>になって、<br />他のフェス限定生徒も低確率で排出されるよ。",
+      "limited": "限定",
+      "limitedTooltip": "この生徒は<strong>期間限定ユニット</strong>だよ。ピックアップ期間外は入手できないから注意してね。",
+      "freePulls": "無料{count}連",
+      "freePullsTooltip": "このガチャの期間中、<strong>毎日無料ガチャ</strong>が引けて、合計で<strong>{count}連分</strong>になるよ。<br />無料分はこのガチャでのみ有効で、<strong>次のガチャへ持ち越すことはできないよ</strong>。",
+      "viewOnSchaleDB": "SchaleDBで表示",
+      "viewStudentOnSchaleDB": "SchaleDBで <strong>{name}</strong> を表示"
+    }
   },
 
   "flappyPeroro": {

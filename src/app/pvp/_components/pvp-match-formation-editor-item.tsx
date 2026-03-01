@@ -23,6 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Student } from "~prisma";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { type FormEvent, useCallback, useState } from "react";
 
 export type PVPMatchFormationEditorItemProps = {
@@ -42,6 +43,7 @@ export function PVPMatchFormationEditorItem({
   onMoveUp,
   onMoveDown,
 }: PVPMatchFormationEditorItemProps) {
+  const t = useTranslations();
   const [levelStr, setLevelStr] = useState(item.level?.toString() ?? "");
   const [damageStr, setDamageStr] = useState(item.damage?.toString() ?? "");
 
@@ -159,7 +161,9 @@ export function PVPMatchFormationEditorItem({
         <div className="flex items-center gap-1">
           <StudentPicker onStudentSelected={handleStudentUpdate}>
             <Button variant="outline" className="flex-1 justify-between">
-              {item.student ? item.student.name : "Select Student"}
+              {item.student
+                ? item.student.name
+                : t("tools.pvp.formationEditorItem.selectStudent")}
               <ChevronDownIcon />
             </Button>
           </StudentPicker>
@@ -185,7 +189,9 @@ export function PVPMatchFormationEditorItem({
 
         <div className="grid grid-cols-4 gap-4">
           <div className="flex flex-col gap-1">
-            <Label className="text-xs">Level</Label>
+            <Label className="text-xs">
+              {t("tools.pvp.formationEditorItem.level")}
+            </Label>
             <Input
               type="number"
               min={1}
@@ -196,7 +202,9 @@ export function PVPMatchFormationEditorItem({
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label className="text-xs">Star Level</Label>
+            <Label className="text-xs">
+              {t("tools.pvp.formationEditorItem.starLevel")}
+            </Label>
             <Select
               value={item.starLevel?.toString() ?? "_"}
               onValueChange={handleStarLevelUpdate}
@@ -206,7 +214,9 @@ export function PVPMatchFormationEditorItem({
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="_">None</SelectItem>
+                <SelectItem value="_">
+                  {t("tools.pvp.formationEditorItem.none")}
+                </SelectItem>
 
                 {STAR_LEVELS.map((level) => (
                   <SelectItem key={level} value={level.toString()}>
@@ -218,7 +228,9 @@ export function PVPMatchFormationEditorItem({
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label className="text-xs">UE Level</Label>
+            <Label className="text-xs">
+              {t("tools.pvp.formationEditorItem.ueLevel")}
+            </Label>
             <Select
               value={item.ueLevel?.toString() ?? "_"}
               onValueChange={handleUELevelUpdate}
@@ -228,7 +240,9 @@ export function PVPMatchFormationEditorItem({
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="_">None</SelectItem>
+                <SelectItem value="_">
+                  {t("tools.pvp.formationEditorItem.none")}
+                </SelectItem>
 
                 {UE_LEVELS.map((level) => (
                   <SelectItem key={level} value={level.toString()}>
@@ -240,7 +254,9 @@ export function PVPMatchFormationEditorItem({
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label className="text-xs">Damage</Label>
+            <Label className="text-xs">
+              {t("tools.pvp.formationEditorItem.damage")}
+            </Label>
             <Input
               type="number"
               min={0}

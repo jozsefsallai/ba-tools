@@ -9,47 +9,46 @@ import {
 import { cn } from "@/lib/utils";
 import type { GameBanner, Student } from "~prisma";
 import { format } from "date-fns";
-import { useMemo } from "react";
+import { getTranslations } from "next-intl/server";
 
 export type BannerGroupProps = {
   dates: [number, number];
   banners: Array<GameBanner & { pickupStudents: Student[] }>;
 };
 
-function distanceFromNow(date: number) {
-  const distanceDays = Math.ceil((date - Date.now()) / (1000 * 60 * 60 * 24));
+export async function BannerGroup({ dates, banners }: BannerGroupProps) {
+  const t = await getTranslations();
 
-  if (distanceDays > 1) {
-    return `in ${distanceDays} days`;
-  }
-
-  if (distanceDays === 1) {
-    return "tomorrow";
-  }
-
-  if (distanceDays === 0) {
-    return "today";
-  }
-
-  if (distanceDays === -1) {
-    return "yesterday";
-  }
-
-  return `${Math.abs(distanceDays)} days ago`;
-}
-
-export function BannerGroup({ dates, banners }: BannerGroupProps) {
   const formattedStartDate = format(new Date(dates[0]), "MMM d, yyyy");
   const formattedEndDate = format(new Date(dates[1]), "MMM d, yyyy");
 
-  const distanceDays = distanceFromNow(dates[0]);
+  const distanceDaysVal = Math.ceil(
+    (dates[0] - Date.now()) / (1000 * 60 * 60 * 24),
+  );
+  let distanceDays: string;
+  if (distanceDaysVal > 1) {
+    distanceDays = t("static.banners.group.inDays", { count: distanceDaysVal });
+  } else if (distanceDaysVal === 1) {
+    distanceDays = t("static.banners.group.tomorrow");
+  } else if (distanceDaysVal === 0) {
+    distanceDays = t("static.banners.group.today");
+  } else if (distanceDaysVal === -1) {
+    distanceDays = t("static.banners.group.yesterday");
+  } else {
+    distanceDays = t("static.banners.group.daysAgo", {
+      count: Math.abs(distanceDaysVal),
+    });
+  }
 
   const durationDays = Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24));
 
-  const isCurrent = useMemo(() => {
-    const now = Date.now();
-    return dates[0] <= now && now <= dates[1];
-  }, [dates]);
+  const now = Date.now();
+  const isCurrent = dates[0] <= now && now <= dates[1];
+
+  const forDaysRich = t.rich("static.banners.group.forDays", {
+    strong: (chunks) => <strong>{chunks}</strong>,
+    count: durationDays,
+  });
 
   return (
     <Card
@@ -82,14 +81,18 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
       <CardFooter className="flex-col md:flex-row text-sm text-muted-foreground justify-between">
         {isCurrent && (
           <div className="text-yellow-400 font-bold">
-            Current Banner{banners.length === 1 ? "" : "s"}
+            {banners.length === 1
+              ? t("static.banners.group.currentBanner")
+              : t("static.banners.group.currentBanners")}
           </div>
         )}
         {!isCurrent && <div />}
 
         <div>
-          {banners.length === 1 ? "This banner lasts" : "These banners last"}{" "}
-          for&nbsp;<strong>{durationDays} days</strong>.
+          {banners.length === 1
+            ? t("static.banners.group.bannerLasts")
+            : t("static.banners.group.bannersLast")}{" "}
+          {forDaysRich}
         </div>
       </CardFooter>
     </Card>

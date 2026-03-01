@@ -409,6 +409,25 @@
       }
     },
 
+    "bossCompletion": {
+      "belowHardcore": "HARDCORE未満",
+      "hardcorePlus": "HARDCORE以上",
+      "extremePlus": "EXTREME以上",
+      "insanePlus": "INSANE以上"
+    },
+
+    "towerDefense": {
+      "light": "軽装備",
+      "heavy": "重装甲",
+      "unarmed": "特殊装甲",
+      "elastic": "弾力装甲"
+    },
+
+    "bossTerrainSuffix": "戦",
+
+    "generatedTitleAlt": "生成された称号",
+    "defaultTitleAlt": "デフォルト称号 {index}",
+
     "default": {
       "button": "デフォルトの称号を表示",
       "warning": "<strong>注意：</strong>選択したモードによっては、すべての称号を読み込むのに時間がかかる場合があるよ。"
@@ -445,6 +464,7 @@
     "specials": "スペシャル",
     "noStrikers": "編成にストライカーがいません。",
     "noSpecials": "編成にスペシャルがいません。",
+    "noStudentsInFormation": "編成に生徒がいません。",
 
     "loadingFormation": "編成を読み込み中...",
 
@@ -593,13 +613,37 @@
       "opponentName": "相手の名前",
       "opponentRank": "相手の順位",
       "opponentStudentRep": "相手の代表生徒",
-      "failedToLoad": "対戦データの読み込みに失敗したよ。"
+      "failedToLoad": "対戦データの読み込みに失敗したよ。",
+      "vs": "VS",
+      "showDamageChart": "ダメージ統計を表示",
+      "hideDamageChart": "ダメージ統計を非表示",
+      "deleteTitle": "対戦記録を削除する？",
+      "deleteDescription": "この対戦記録を削除しても大丈夫？この操作は取り消せないよ。",
+      "deleteSuccess": "対戦記録を削除したよ。",
+      "deleteFail": "対戦記録の削除に失敗したよ。"
     },
 
     "newSeason": {
       "title": "新しい対抗戦シーズン",
       "description": "シーズンの名前とゲームサーバーを入力してね。",
       "seasonName": "シーズン名"
+    },
+
+    "formationEditorItem": {
+      "selectStudent": "生徒を選択",
+      "level": "Lv",
+      "starLevel": "★数",
+      "ueLevel": "固有武器Lv",
+      "damage": "ダメージ",
+      "none": "無し"
+    },
+
+    "matchGroup": {
+      "attacks": "攻撃：",
+      "defenses": "防衛：",
+      "won": "勝ち",
+      "lost": "負け",
+      "total": "合計"
     },
 
     "toasts": {
@@ -633,6 +677,28 @@
     "solve": "解決！",
 
     "minimalConfigs": "最小の線路構成（{count}件見つかったよ）",
+
+    "hexagon": {
+      "directions": {
+        "W": "西",
+        "NE": "北東",
+        "SE": "南東",
+        "E": "東",
+        "SW": "南西",
+        "NW": "北西"
+      },
+      "startTile": "スタート地点",
+      "startTileDesc": "ここからアオバが出発するよ。",
+      "exitDirection": "進行方向：",
+      "goalTile": "ゴール地点",
+      "goalTileDesc": "ここがアオバの到着地点だよ。",
+      "entranceDirection": "進入方向：",
+      "stationTile": "駅タイル",
+      "stationTileDesc": "このマスは <strong>{railType}</strong> の線路を使って通過する必要があるよ。",
+      "stationTileWithDirections": "このマスは <strong>{railType}</strong> の線路を使って、<br /><strong>{entrance}</strong> から <strong>{exit}</strong> へ通過する必要があるよ。",
+      "railPiece": "線路パーツ",
+      "railPieceDesc": "<strong>{railType}</strong> の線路を使って、<br /><strong>{entrance}</strong> から <strong>{exit}</strong> へ接続するよ。"
+    },
 
     "toasts": {
       "noSolution": "指定された線路の数では解決策が見つからなかったよ。",
@@ -705,6 +771,7 @@
       "title": "マイロスター",
       "newRoster": "新しいロスターを作成",
       "description": "ここでは、公開・共有できるロスター（生徒名簿）の管理ができるよ。",
+      "pageDescription": "ブルアカの生徒名簿を管理・共有できるツールだよ。",
       "failedToLoad": "ロスターの読み込みに失敗したよ。"
     },
 
@@ -747,6 +814,21 @@
       "minGear3Tier": "最小装備3 Tier：",
       "minBondGearTier": "最小愛用品 Tier：",
 
+      "skills": "スキル：",
+      "exSkill": "EXスキル",
+      "basicSkill": "ノーマルスキル",
+      "enhancedSkill": "パッシブスキル",
+      "subskill": "サブスキル",
+      "equipment": "装備：",
+      "equipmentSlot1": "装備スロット1",
+      "equipmentSlot2": "装備スロット2",
+      "equipmentSlot3": "装備スロット3",
+      "bondItem": "愛用品",
+      "talents": "能力解放：",
+      "attackTalentLevel": "攻撃力 強化レベル",
+      "hpTalentLevel": "最大HP 強化レベル",
+      "healTalentLevel": "治癒力 強化レベル",
+
       "sortOptions": {
         "default": "デフォルト",
         "nameAsc": "名前（昇順）",
@@ -762,6 +844,38 @@
         "healTalentAsc": "治癒能力（低い順）",
         "healTalentDesc": "治癒能力（高い順）"
       }
+    },
+
+    "rosterItemEditor": {
+      "max": "MAX",
+      "level": "Lv:",
+      "star": "★:",
+      "ue": "固有:",
+      "bond": "絆:",
+      "skills": "スキル:",
+      "ex": "EX",
+      "basic": "NS",
+      "enhanced": "PS",
+      "sub": "SS",
+      "equipment": "装備:",
+      "talent": "能力:",
+      "attack": "攻撃",
+      "hp": "HP",
+      "healing": "治癒",
+      "featuredBorrowSlot": "助っ人設定:",
+      "none": "(無し)",
+      "notFeatured": "未設定",
+      "slot1": "枠1",
+      "slot2": "枠2",
+      "slot3": "枠3",
+      "bondItem": "愛用品",
+      "s1": "スロ1",
+      "s2": "スロ2",
+      "s3": "スロ3",
+      "bg": "愛用",
+      "enh": "パッシブ",
+      "atk": "攻撃",
+      "heal": "治癒"
     }
   },
 
@@ -810,12 +924,22 @@
       "searchPlaceholder": "検索...",
       "noTimelinesFound": "タイムラインが見つからないよ。",
       "noTimelinesInGroup": "このグループにはまだタイムラインが登録されていないよ。",
+      "untitledTimeline": "(無題のタイムライン)",
+      "clickAgainToConfirm": "もう一度クリックして確定",
       "shareGroup": "TLグループを共有",
+      "viewPublicTimeline": "公開ページを表示",
+      "removeFromGroup": "グループから外す",
+      "deleteTimeline": "タイムラインを削除",
       "toasts": {
         "success": "TLグループを更新したよ",
         "fail": "TLグループの更新に失敗したよ",
         "linkCopied": "リンクをクリップボードにコピーしたよ。"
       }
+    },
+
+    "ownTimelineBrowser": {
+      "failedToLoad": "タイムラインの読み込みに失敗したよ。",
+      "noTimelines": "保存されたタイムラインはないよ。"
     }
   },
 

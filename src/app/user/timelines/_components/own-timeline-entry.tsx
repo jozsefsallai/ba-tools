@@ -10,6 +10,7 @@ import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { GlobeIcon, GripVerticalIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -25,6 +26,7 @@ export function OwnTimelineEntry({
   isGroupItem,
   onWantsToDeleteFromGroup,
 }: OwnTimelineEntryProps) {
+  const t = useTranslations();
   const { students: allStudents } = useStudents();
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -94,7 +96,7 @@ export function OwnTimelineEntry({
 
             {!entry.name && (
               <div className="text-lg font-semibold text-muted-foreground italic">
-                (Untitled Timeline)
+                {t("tools.myTimelines.editGroup.untitledTimeline")}
               </div>
             )}
 
@@ -119,17 +121,21 @@ export function OwnTimelineEntry({
       <div className="flex items-center gap-4">
         {entry.visibility === "public" && (
           <Button variant="outline" asChild>
-            <Link href={`/timelines/${entry._id}`}>View Public Timeline</Link>
+            <Link href={`/timelines/${entry._id}`}>
+              {t("tools.myTimelines.editGroup.viewPublicTimeline")}
+            </Link>
           </Button>
         )}
 
         <Button variant="outline" asChild>
-          <Link href={`/timeline-visualizer?id=${entry._id}`}>Edit</Link>
+          <Link href={`/timeline-visualizer?id=${entry._id}`}>
+            {t("common.edit")}
+          </Link>
         </Button>
 
         {isGroupItem && (
           <Button variant="outline" onClick={handleDeleteFromGroup}>
-            Remove from Group
+            {t("tools.myTimelines.editGroup.removeFromGroup")}
           </Button>
         )}
 
@@ -138,7 +144,9 @@ export function OwnTimelineEntry({
           onClick={handleDelete}
           className="flex items-center gap-2"
         >
-          {deleteConfirm ? "Click again to confirm" : "Delete Timeline"}
+          {deleteConfirm
+            ? t("tools.myTimelines.editGroup.clickAgainToConfirm")
+            : t("tools.myTimelines.editGroup.deleteTimeline")}
         </Button>
       </div>
     </article>

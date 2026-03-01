@@ -1,5 +1,6 @@
 import { PVPMatch } from "@/app/pvp/_components/pvp-match";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -14,6 +15,8 @@ export type PVPMatchGroupProps = {
 };
 
 export function PVPMatchGroup({ seasonId, group }: PVPMatchGroupProps) {
+  const t = useTranslations();
+
   const formattedDate = useMemo(() => {
     return format(new Date(group.dayTimestamp), "MMMM d, yyyy");
   }, [group.dayTimestamp]);
@@ -48,10 +51,14 @@ export function PVPMatchGroup({ seasonId, group }: PVPMatchGroupProps) {
         <h2 className="text-lg font-semibold">{formattedDate}</h2>
 
         <div className="text-sm text-muted-foreground">
-          <strong>Attacks:</strong> {attackWins} won, {attackLoses} lost (
-          {attackWins + attackLoses} total) &middot; <strong>Defenses:</strong>{" "}
-          {defenseWins} won, {defenseLoses} lost ({defenseWins + defenseLoses}{" "}
-          total)
+          <strong>{t("tools.pvp.matchGroup.attacks")}</strong> {attackWins}{" "}
+          {t("tools.pvp.matchGroup.won")}, {attackLoses}{" "}
+          {t("tools.pvp.matchGroup.lost")} ({attackWins + attackLoses}{" "}
+          {t("tools.pvp.matchGroup.total")}) &middot;{" "}
+          <strong>{t("tools.pvp.matchGroup.defenses")}</strong> {defenseWins}{" "}
+          {t("tools.pvp.matchGroup.won")}, {defenseLoses}{" "}
+          {t("tools.pvp.matchGroup.lost")} ({defenseWins + defenseLoses}{" "}
+          {t("tools.pvp.matchGroup.total")})
         </div>
       </div>
 

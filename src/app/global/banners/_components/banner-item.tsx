@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { GameBanner, Student } from "~prisma";
 import { InfoIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Fragment } from "react";
 
 export type BannerItemProps = {
@@ -20,6 +21,7 @@ export type BannerItemProps = {
 };
 
 export function BannerItem({ banner }: BannerItemProps) {
+  const t = useTranslations();
   const hasFestStudent = banner.pickupStudents.some(
     (student) => student.isFestGlobal,
   );
@@ -68,17 +70,14 @@ export function BannerItem({ banner }: BannerItemProps) {
                     {student.isFestGlobal && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge>FEST</Badge>
+                          <Badge>{t("static.banners.item.fest")}</Badge>
                         </TooltipTrigger>
 
                         <TooltipContent className="text-center">
-                          This student is a <strong>FEST</strong> unit.
-                          <br />
-                          The rate of obtaining a 3* student on this banner is{" "}
-                          <strong>doubled (6%)</strong>
-                          <br />
-                          and there is a small chance of obtaining other FEST
-                          students on this banner.
+                          {t.rich("static.banners.item.festTooltip", {
+                            strong: (chunks) => <strong>{chunks}</strong>,
+                            br: () => <br />,
+                          })}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -86,12 +85,13 @@ export function BannerItem({ banner }: BannerItemProps) {
                     {student.isLimitedGlobal && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge>Limited</Badge>
+                          <Badge>{t("static.banners.item.limited")}</Badge>
                         </TooltipTrigger>
 
                         <TooltipContent>
-                          This student is a <strong>LIMITED unit</strong> and
-                          cannot be obtained outside of their banner.
+                          {t.rich("static.banners.item.limitedTooltip", {
+                            strong: (chunks) => <strong>{chunks}</strong>,
+                          })}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -100,19 +100,21 @@ export function BannerItem({ banner }: BannerItemProps) {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge variant="outline">
-                            {banner.freePulls} Free Pulls
+                            {t("static.banners.item.freePulls", {
+                              count: banner.freePulls,
+                            })}
                           </Badge>
                         </TooltipTrigger>
 
                         <TooltipContent className="text-center">
-                          During the duration of this banner, you will receive{" "}
-                          <strong>daily free pulls</strong> for a total of{" "}
-                          <strong>{banner.freePulls}</strong>.<br />
-                          The free pulls can be used on this banner and{" "}
-                          <strong>
-                            will will not carry over to future banners
-                          </strong>
-                          .
+                          {t.rich(
+                            "static.banners.item.freePullsTooltip",
+                            {
+                              strong: (chunks) => <strong>{chunks}</strong>,
+                              br: () => <br />,
+                              count: banner.freePulls,
+                            },
+                          )}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -129,13 +131,18 @@ export function BannerItem({ banner }: BannerItemProps) {
                       rel="noreferrer"
                     >
                       <InfoIcon />
-                      <span className="md:hidden">View on SchaleDB</span>
+                      <span className="md:hidden">
+                        {t("static.banners.item.viewOnSchaleDB")}
+                      </span>
                     </a>
                   </Button>
                 </TooltipTrigger>
 
                 <TooltipContent>
-                  View <strong>{student.name}</strong> on SchaleDB
+                  {t.rich("static.banners.item.viewStudentOnSchaleDB", {
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                    name: student.name,
+                  })}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

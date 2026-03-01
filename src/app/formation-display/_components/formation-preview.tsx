@@ -4,6 +4,7 @@ import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import type { RefObject } from "react";
 
 export type StudentItem = {
@@ -52,10 +53,12 @@ export function FormationPreview({
   groupsVertical = false,
   busy,
 }: FormationPreviewProps) {
+  const t = useTranslations();
+
   if (strikers.length === 0 && specials.length === 0) {
     return (
       <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
-        No students in formation.
+        {t("tools.formationDisplay.noStudentsInFormation")}
       </div>
     );
   }

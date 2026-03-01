@@ -410,6 +410,25 @@
       }
     },
 
+    "bossCompletion": {
+      "belowHardcore": "< Hardcore",
+      "hardcorePlus": "Hardcore+",
+      "extremePlus": "Extreme+",
+      "insanePlus": "Insane+"
+    },
+
+    "towerDefense": {
+      "light": "Light Defense",
+      "heavy": "Heavy Defense",
+      "unarmed": "Special Defense",
+      "elastic": "Elastic Defense"
+    },
+
+    "bossTerrainSuffix": " Warfare",
+
+    "generatedTitleAlt": "Generated Title",
+    "defaultTitleAlt": "Default Title {index}",
+
     "default": {
       "button": "View Default Titles",
       "warning": "<strong>Warning:</strong> It may take a while to load all titles depending on the mode you've selected."
@@ -446,6 +465,7 @@
     "specials": "Specials",
     "noStrikers": "No strikers in formation.",
     "noSpecials": "No specials in formation.",
+    "noStudentsInFormation": "No students in formation.",
 
     "loadingFormation": "Loading formation...",
 
@@ -594,13 +614,37 @@
       "opponentName": "Opponent Name",
       "opponentRank": "Opponent Rank",
       "opponentStudentRep": "Opponent Student Rep",
-      "failedToLoad": "Failed to load PVP match."
+      "failedToLoad": "Failed to load PVP match.",
+      "vs": "VS",
+      "showDamageChart": "Show Damage Chart",
+      "hideDamageChart": "Hide Damage Chart",
+      "deleteTitle": "Delete PVP record?",
+      "deleteDescription": "Are you sure you want to delete this PVP match record? This action cannot be undone.",
+      "deleteSuccess": "PVP match record deleted.",
+      "deleteFail": "Failed to delete PVP match record."
     },
 
     "newSeason": {
       "title": "New PVP Season",
       "description": "Enter the name and game server of this PVP season.",
       "seasonName": "Season Name"
+    },
+
+    "formationEditorItem": {
+      "selectStudent": "Select Student",
+      "level": "Level",
+      "starLevel": "Star Level",
+      "ueLevel": "UE Level",
+      "damage": "Damage",
+      "none": "None"
+    },
+
+    "matchGroup": {
+      "attacks": "Attacks:",
+      "defenses": "Defenses:",
+      "won": "won",
+      "lost": "lost",
+      "total": "total"
     },
 
     "toasts": {
@@ -634,6 +678,28 @@
     "solve": "Solve!",
 
     "minimalConfigs": "Minimal Rail Configurations ({count} found)",
+
+    "hexagon": {
+      "directions": {
+        "W": "West",
+        "NE": "Northeast",
+        "SE": "Southeast",
+        "E": "East",
+        "SW": "Southwest",
+        "NW": "Northwest"
+      },
+      "startTile": "Start Tile",
+      "startTileDesc": "This is where the train will depart from.",
+      "exitDirection": "Exit direction:",
+      "goalTile": "Goal Tile",
+      "goalTileDesc": "This is where the train needs to arrive.",
+      "entranceDirection": "Entrance direction:",
+      "stationTile": "Station Tile",
+      "stationTileDesc": "The train must pass through this tile using a <strong>{railType}</strong> piece.",
+      "stationTileWithDirections": "The train must pass through this tile<br />from <strong>{entrance}</strong> to <strong>{exit}</strong><br />using a <strong>{railType}</strong> piece.",
+      "railPiece": "Rail Piece",
+      "railPieceDesc": "Connects a tile from <strong>{entrance}</strong> to <strong>{exit}</strong><br />using a <strong>{railType}</strong> piece."
+    },
 
     "toasts": {
       "noSolution": "No solution found with the given number of rails.",
@@ -706,6 +772,7 @@
       "title": "My Rosters",
       "newRoster": "New Roster",
       "description": "Here you can view and manage your rosters which you can share publicly.",
+      "pageDescription": "View and manage your Blue Archive rosters.",
       "failedToLoad": "Failed to load rosters."
     },
 
@@ -748,6 +815,21 @@
       "minGear3Tier": "Min Gear 3 Tier:",
       "minBondGearTier": "Min Bond Gear Tier:",
 
+      "skills": "Skills:",
+      "exSkill": "EX Skill",
+      "basicSkill": "Basic Skill",
+      "enhancedSkill": "Enhanced Skill",
+      "subskill": "Subskill",
+      "equipment": "Equipment:",
+      "equipmentSlot1": "Equipment Slot 1",
+      "equipmentSlot2": "Equipment Slot 2",
+      "equipmentSlot3": "Equipment Slot 3",
+      "bondItem": "Bond Item",
+      "talents": "Talents:",
+      "attackTalentLevel": "Attack Talent Level",
+      "hpTalentLevel": "HP Talent Level",
+      "healTalentLevel": "Heal Talent Level",
+
       "sortOptions": {
         "default": "Default",
         "nameAsc": "Name (asc)",
@@ -763,6 +845,38 @@
         "healTalentAsc": "Healing Talent (asc)",
         "healTalentDesc": "Healing Talent (desc)"
       }
+    },
+
+    "rosterItemEditor": {
+      "max": "MAX",
+      "level": "Level:",
+      "star": "Star:",
+      "ue": "UE:",
+      "bond": "Bond:",
+      "skills": "Skills:",
+      "ex": "EX",
+      "basic": "Basic",
+      "enhanced": "Enhanced",
+      "sub": "Sub",
+      "equipment": "Equipment:",
+      "talent": "Talent:",
+      "attack": "Attack",
+      "hp": "HP",
+      "healing": "Healing",
+      "featuredBorrowSlot": "Featured Borrow Slot:",
+      "none": "(None)",
+      "notFeatured": "Not Featured",
+      "slot1": "Slot 1",
+      "slot2": "Slot 2",
+      "slot3": "Slot 3",
+      "bondItem": "Bond Item",
+      "s1": "S1",
+      "s2": "S2",
+      "s3": "S3",
+      "bg": "BG",
+      "enh": "Enh.",
+      "atk": "ATK",
+      "heal": "HEAL"
     }
   },
 
@@ -811,12 +925,22 @@
       "searchPlaceholder": "Type to search...",
       "noTimelinesFound": "No timelines found.",
       "noTimelinesInGroup": "This group does not have any timelines yet.",
+      "untitledTimeline": "(Untitled Timeline)",
+      "clickAgainToConfirm": "Click again to confirm",
       "shareGroup": "Share Timeline Group",
+      "viewPublicTimeline": "View Public Timeline",
+      "removeFromGroup": "Remove from Group",
+      "deleteTimeline": "Delete Timeline",
       "toasts": {
         "success": "Timeline group updated",
         "fail": "Failed to update timeline group",
         "linkCopied": "Link copied to clipboard."
       }
+    },
+
+    "ownTimelineBrowser": {
+      "failedToLoad": "Failed to load timelines.",
+      "noTimelines": "You have no timelines saved."
     }
   },
 

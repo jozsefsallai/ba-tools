@@ -368,7 +368,7 @@ export function TitleGeneratorView() {
           <div className="relative">
             <img
               src={url}
-              alt="Generated Title"
+              alt={t("tools.emblem.generatedTitleAlt")}
               onLoad={handleImageLoaded}
               onError={handleImageErrored}
               className={cn({
@@ -379,8 +379,8 @@ export function TitleGeneratorView() {
 
             {errored && (
               <img
-                src="/api/emblem/basic/Error Generating Title.png"
-                alt="Error"
+                src={`/api/emblem/basic/${t("tools.emblem.error")}.png`}
+                alt={t("tools.emblem.error")}
                 className={cn({
                   "opacity-50": loading,
                 })}
@@ -407,7 +407,7 @@ export function TitleGeneratorView() {
       <Separator />
 
       <div className="flex flex-col gap-1">
-        <Label>Mode:</Label>
+        <Label>{t("tools.emblem.mode")}</Label>
 
         <Select
           value={mode}
@@ -418,22 +418,34 @@ export function TitleGeneratorView() {
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="basic">Basic</SelectItem>
-            <SelectItem value="favor">Relationship Rank</SelectItem>
-            <SelectItem value="potential">Talent Level</SelectItem>
-            <SelectItem value="boss">Boss Completion</SelectItem>
-            <SelectItem value="tower">Final Restriction Release</SelectItem>
-            <SelectItem value="group">Club Advisor</SelectItem>
+            <SelectItem value="basic">
+              {t("tools.emblem.modes.basic.title")}
+            </SelectItem>
+            <SelectItem value="favor">
+              {t("tools.emblem.modes.favor.title")}
+            </SelectItem>
+            <SelectItem value="potential">
+              {t("tools.emblem.modes.potential.title")}
+            </SelectItem>
+            <SelectItem value="boss">
+              {t("tools.emblem.modes.boss.title")}
+            </SelectItem>
+            <SelectItem value="tower">
+              {t("tools.emblem.modes.tower.title")}
+            </SelectItem>
+            <SelectItem value="group">
+              {t("tools.emblem.modes.club.title")}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="text-xl font-medium">Options</div>
+      <div className="text-xl font-medium">{t("tools.emblem.options")}</div>
 
       {mode === "basic" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label>Text:</Label>
+            <Label>{t("tools.emblem.modes.basic.fields.text")}</Label>
 
             <div className="flex items-center gap-2">
               <Input
@@ -442,7 +454,9 @@ export function TitleGeneratorView() {
                 onChange={(e) => setBasicTextStr(e.target.value)}
               />
 
-              <Button onClick={handleBasicTextUpdate}>Update</Button>
+              <Button onClick={handleBasicTextUpdate}>
+                {t("tools.emblem.update")}
+              </Button>
             </div>
           </div>
         </div>
@@ -451,7 +465,7 @@ export function TitleGeneratorView() {
       {mode === "favor" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label>Student:</Label>
+            <Label>{t("tools.emblem.modes.favor.fields.student")}</Label>
             <StudentPicker onStudentSelected={setFavorStudent}>
               <Button variant="outline" className="w-full justify-between">
                 <span>{favorStudent.name}</span>
@@ -460,20 +474,20 @@ export function TitleGeneratorView() {
             </StudentPicker>
 
             <div className="flex gap-2">
-              <Label>Extra:</Label>
+              <Label>{t("tools.emblem.modes.favor.fields.extra")}</Label>
 
               <Button variant="outline" size="sm" onClick={handleSetArona}>
-                Arona
+                {t("tools.emblem.modes.favor.fields.arona")}
               </Button>
 
               <Button variant="outline" size="sm" onClick={handleSetPlana}>
-                Plana
+                {t("tools.emblem.modes.favor.fields.plana")}
               </Button>
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Relationship Rank:</Label>
+            <Label>{t("tools.emblem.modes.favor.fields.rank")}</Label>
 
             <Select
               value={String(favorRank)}
@@ -494,7 +508,9 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Name Override (optional):</Label>
+            <Label>
+              {t("tools.emblem.modes.favor.fields.nameOverride")}
+            </Label>
 
             <div className="flex items-center gap-2">
               <Input
@@ -506,7 +522,7 @@ export function TitleGeneratorView() {
               <Button
                 onClick={() => setFavorNameOverride(favorNameOverrideStr)}
               >
-                Update
+                {t("tools.emblem.update")}
               </Button>
             </div>
           </div>
@@ -516,7 +532,7 @@ export function TitleGeneratorView() {
       {mode === "potential" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label>Student:</Label>
+            <Label>{t("tools.emblem.modes.potential.fields.student")}</Label>
             <StudentPicker onStudentSelected={setPotentialStudent}>
               <Button variant="outline" className="w-full justify-between">
                 <span>{potentialStudent.name}</span>
@@ -526,7 +542,7 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Talent Level:</Label>
+            <Label>{t("tools.emblem.modes.potential.fields.level")}</Label>
 
             <Select
               value={String(potentialRank)}
@@ -546,7 +562,9 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Name Override (optional):</Label>
+            <Label>
+              {t("tools.emblem.modes.potential.fields.nameOverride")}
+            </Label>
 
             <div className="flex items-center gap-2">
               <Input
@@ -560,7 +578,7 @@ export function TitleGeneratorView() {
                   setPotentialNameOverride(potentialNameOverrideStr)
                 }
               >
-                Update
+                {t("tools.emblem.update")}
               </Button>
             </div>
           </div>
@@ -570,7 +588,7 @@ export function TitleGeneratorView() {
       {mode === "boss" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label>Boss:</Label>
+            <Label>{t("tools.emblem.modes.boss.fields.boss")}</Label>
 
             <Select value={bossItemValue} onValueChange={handleSetBossItem}>
               <SelectTrigger>
@@ -580,8 +598,8 @@ export function TitleGeneratorView() {
               <SelectContent>
                 {VALID_BOSS_EMBLEM_COMBINATIONS.map((item, idx) => (
                   <SelectItem key={idx} value={`${item.name}_${item.terrain}`}>
-                    {bossNames[item.name]} - {terrainNames[item.terrain]}{" "}
-                    Warfare
+                    {bossNames[item.name]} - {terrainNames[item.terrain]}
+                    {t("tools.emblem.bossTerrainSuffix")}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -589,7 +607,7 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Completion:</Label>
+            <Label>{t("tools.emblem.modes.boss.fields.completion")}</Label>
 
             <Select
               value={bossRarity}
@@ -600,10 +618,18 @@ export function TitleGeneratorView() {
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="N">&lt; Hardcore</SelectItem>
-                <SelectItem value="R">Hardcore+</SelectItem>
-                <SelectItem value="SR">Extreme+</SelectItem>
-                <SelectItem value="SSR">Insane+</SelectItem>
+                <SelectItem value="N">
+                  {t("tools.emblem.bossCompletion.belowHardcore")}
+                </SelectItem>
+                <SelectItem value="R">
+                  {t("tools.emblem.bossCompletion.hardcorePlus")}
+                </SelectItem>
+                <SelectItem value="SR">
+                  {t("tools.emblem.bossCompletion.extremePlus")}
+                </SelectItem>
+                <SelectItem value="SSR">
+                  {t("tools.emblem.bossCompletion.insanePlus")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -613,7 +639,7 @@ export function TitleGeneratorView() {
       {mode === "tower" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label>Boss:</Label>
+            <Label>{t("tools.emblem.modes.tower.fields.boss")}</Label>
 
             <Select
               value={towerBossItemValue}
@@ -634,7 +660,7 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Defense Type:</Label>
+            <Label>{t("tools.emblem.modes.tower.fields.defense")}</Label>
 
             <Select
               value={towerDefenseType}
@@ -647,16 +673,24 @@ export function TitleGeneratorView() {
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value="Light">Light Defense</SelectItem>
-                <SelectItem value="Heavy">Heavy Defense</SelectItem>
-                <SelectItem value="Unarmed">Special Defense</SelectItem>
-                <SelectItem value="Elastic">Elastic Defense</SelectItem>
+                <SelectItem value="Light">
+                  {t("tools.emblem.towerDefense.light")}
+                </SelectItem>
+                <SelectItem value="Heavy">
+                  {t("tools.emblem.towerDefense.heavy")}
+                </SelectItem>
+                <SelectItem value="Unarmed">
+                  {t("tools.emblem.towerDefense.unarmed")}
+                </SelectItem>
+                <SelectItem value="Elastic">
+                  {t("tools.emblem.towerDefense.elastic")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Floor:</Label>
+            <Label>{t("tools.emblem.modes.tower.fields.floor")}</Label>
 
             <Select
               value={String(towerFloor)}
@@ -680,7 +714,7 @@ export function TitleGeneratorView() {
       {mode === "group" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label>School:</Label>
+            <Label>{t("tools.emblem.modes.club.fields.school")}</Label>
 
             <Select
               value={groupSchool}
@@ -701,7 +735,7 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Club:</Label>
+            <Label>{t("tools.emblem.modes.club.fields.club")}</Label>
 
             <Select
               value={groupClub}
@@ -722,7 +756,7 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>Name Override (optional):</Label>
+            <Label>{t("tools.emblem.modes.club.fields.nameOverride")}</Label>
 
             <div className="flex items-center gap-2">
               <Input
@@ -734,7 +768,7 @@ export function TitleGeneratorView() {
               <Button
                 onClick={() => setGroupNameOverride(groupNameOverrideStr)}
               >
-                Update
+                {t("tools.emblem.update")}
               </Button>
             </div>
           </div>
@@ -745,12 +779,13 @@ export function TitleGeneratorView() {
 
       <div className="flex flex-col items-center justify-center gap-2 text-center">
         <Button variant="outline" onClick={handleViewDefaultsClick}>
-          View Default Titles
+          {t("tools.emblem.default.button")}
         </Button>
 
         <div className="text-sm text-muted-foreground">
-          <strong>Warning:</strong> It may take a while to load all titles
-          depending on the mode you've selected.
+          {t.rich("tools.emblem.default.warning", {
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </div>
       </div>
 
@@ -760,7 +795,7 @@ export function TitleGeneratorView() {
             <div key={idx} className="flex flex-col items-center gap-2">
               <img
                 src={defaultUrl}
-                alt={`Default Title ${idx + 1}`}
+                alt={t("tools.emblem.defaultTitleAlt", { index: idx + 1 })}
                 className="max-w-full"
               />
 

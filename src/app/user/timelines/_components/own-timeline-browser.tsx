@@ -3,19 +3,21 @@
 import { OwnTimelineEntry } from "@/app/user/timelines/_components/own-timeline-entry";
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
+import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 
 export function OwnTimelineBrowser() {
+  const t = useTranslations();
   const query = useQueryWithStatus(api.timeline.getOwn);
 
   if (query.status === "pending") {
-    return <MessageBox>Loading...</MessageBox>;
+    return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
   if (query.status === "error") {
     return (
       <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        Failed to load timelines.
+        {t("tools.myTimelines.ownTimelineBrowser.failedToLoad")}
       </MessageBox>
     );
   }
@@ -23,7 +25,7 @@ export function OwnTimelineBrowser() {
   if (query.status === "success" && query.data.length === 0) {
     return (
       <MessageBox>
-        <p>You have no timelines saved.</p>
+        <p>{t("tools.myTimelines.ownTimelineBrowser.noTimelines")}</p>
       </MessageBox>
     );
   }

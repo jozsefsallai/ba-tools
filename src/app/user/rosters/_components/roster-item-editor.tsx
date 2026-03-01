@@ -23,6 +23,7 @@ import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import type { Student } from "~prisma";
 import React, { useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 export type RosterItem = {
   enabled: boolean;
@@ -56,6 +57,7 @@ export type RosterItemEditorProps = {
 
 export const RosterItemEditor = React.memo(
   ({ gameServer, rosterItem, updateRosterItem }: RosterItemEditorProps) => {
+    const t = useTranslations();
     const handleEnabledChange = useCallback(
       (newValue: boolean) => {
         updateRosterItem(rosterItem.student.id, { enabled: newValue });
@@ -260,7 +262,7 @@ export const RosterItemEditor = React.memo(
             size="sm"
             className="w-12 text-xs"
           >
-            MAX
+            {t("tools.roster.rosterItemEditor.max")}
           </Button>
         </div>
 
@@ -281,7 +283,7 @@ export const RosterItemEditor = React.memo(
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-4 items-center gap-1">
               <div className="flex flex-col">
-                <Label className="text-[10px]">Level:</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.level")}</Label>
 
                 <Input
                   type="number"
@@ -295,7 +297,7 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Star:</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.star")}</Label>
 
                 <Select
                   value={rosterItem?.starLevel?.toString() ?? ""}
@@ -321,7 +323,7 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">UE:</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.ue")}</Label>
 
                 <Select
                   value={rosterItem?.ueLevel?.toString() ?? ""}
@@ -350,7 +352,7 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Bond:</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.bond")}</Label>
 
                 <Input
                   type="number"
@@ -367,13 +369,13 @@ export const RosterItemEditor = React.memo(
             </div>
 
             <div className="grid grid-cols-5 items-center gap-1">
-              <Label className="text-xs pt-[15px]">Skills:</Label>
+              <Label className="text-xs pt-[15px]">{t("tools.roster.rosterItemEditor.skills")}</Label>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">EX</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.ex")}</Label>
 
                 <Input
-                  placeholder="EX"
+                  placeholder={t("tools.roster.rosterItemEditor.ex")}
                   type="number"
                   min={1}
                   max={5}
@@ -385,10 +387,10 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Basic</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.basic")}</Label>
 
                 <Input
-                  placeholder="Basic"
+                  placeholder={t("tools.roster.rosterItemEditor.basic")}
                   type="number"
                   min={1}
                   max={10}
@@ -402,10 +404,10 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Enhanced</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.enhanced")}</Label>
 
                 <Input
-                  placeholder="Enh."
+                  placeholder={t("tools.roster.rosterItemEditor.enh")}
                   type="number"
                   min={1}
                   max={10}
@@ -419,10 +421,10 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Sub</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.sub")}</Label>
 
                 <Input
-                  placeholder="Sub"
+                  placeholder={t("tools.roster.rosterItemEditor.sub")}
                   type="number"
                   min={1}
                   max={10}
@@ -435,15 +437,15 @@ export const RosterItemEditor = React.memo(
             </div>
 
             <div className="grid grid-cols-5 items-center gap-1">
-              <Label className="text-xs pt-[15px]">Equipment:</Label>
+              <Label className="text-xs pt-[15px]">{t("tools.roster.rosterItemEditor.equipment")}</Label>
 
               <div className="flex flex-col">
                 <Label className="text-[10px]">
-                  {rosterItem.student.equipment[0] ?? "Slot 1"}
+                  {rosterItem.student.equipment[0] ?? t("tools.roster.rosterItemEditor.slot1")}
                 </Label>
 
                 <Input
-                  placeholder={rosterItem.student.equipment[0] ?? "S1"}
+                  placeholder={rosterItem.student.equipment[0] ?? t("tools.roster.rosterItemEditor.s1")}
                   type="number"
                   min={0}
                   max={10}
@@ -458,11 +460,11 @@ export const RosterItemEditor = React.memo(
 
               <div className="flex flex-col">
                 <Label className="text-[10px]">
-                  {rosterItem.student.equipment[1] ?? "Slot 2"}
+                  {rosterItem.student.equipment[1] ?? t("tools.roster.rosterItemEditor.slot2")}
                 </Label>
 
                 <Input
-                  placeholder={rosterItem.student.equipment[1] ?? "S2"}
+                  placeholder={rosterItem.student.equipment[1] ?? t("tools.roster.rosterItemEditor.s2")}
                   type="number"
                   min={0}
                   max={10}
@@ -477,11 +479,11 @@ export const RosterItemEditor = React.memo(
 
               <div className="flex flex-col">
                 <Label className="text-[10px]">
-                  {rosterItem.student.equipment[2] ?? "Slot 3"}
+                  {rosterItem.student.equipment[2] ?? t("tools.roster.rosterItemEditor.slot3")}
                 </Label>
 
                 <Input
-                  placeholder={rosterItem.student.equipment[2] ?? "S3"}
+                  placeholder={rosterItem.student.equipment[2] ?? t("tools.roster.rosterItemEditor.s3")}
                   type="number"
                   min={0}
                   max={10}
@@ -497,15 +499,15 @@ export const RosterItemEditor = React.memo(
               {hasBondItem && (
                 <div className="flex flex-col">
                   <Label className="text-[10px]">
-                    {rosterItem.student.equipment[3] ?? "Bond Item"}
+                    {rosterItem.student.equipment[3] ?? t("tools.roster.rosterItemEditor.bondItem")}
                   </Label>
 
                   <Input
-                    placeholder="BG"
+                    placeholder={t("tools.roster.rosterItemEditor.bg")}
                     type="number"
                     min={0}
                     max={2}
-                    value={rosterItem?.equipmentSlot4 ?? "BG"}
+                    value={rosterItem?.equipmentSlot4 ?? ""}
                     onChange={(e) =>
                       handleEquipmentSlotTierChange(4, Number(e.target.value))
                     }
@@ -517,13 +519,13 @@ export const RosterItemEditor = React.memo(
             </div>
 
             <div className="grid grid-cols-5 items-center gap-1">
-              <Label className="text-xs pt-[15px]">Talent:</Label>
+              <Label className="text-xs pt-[15px]">{t("tools.roster.rosterItemEditor.talent")}</Label>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Attack</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.attack")}</Label>
 
                 <Input
-                  placeholder="ATK"
+                  placeholder={t("tools.roster.rosterItemEditor.atk")}
                   type="number"
                   min={0}
                   max={25}
@@ -537,10 +539,10 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">HP</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.hp")}</Label>
 
                 <Input
-                  placeholder="HP"
+                  placeholder={t("tools.roster.rosterItemEditor.hp")}
                   type="number"
                   min={0}
                   max={25}
@@ -552,10 +554,10 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">Healing</Label>
+                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.healing")}</Label>
 
                 <Input
-                  placeholder="HEAL"
+                  placeholder={t("tools.roster.rosterItemEditor.heal")}
                   type="number"
                   min={0}
                   max={25}
@@ -570,7 +572,7 @@ export const RosterItemEditor = React.memo(
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs">Featured Borrow Slot:</Label>
+              <Label className="text-xs">{t("tools.roster.rosterItemEditor.featuredBorrowSlot")}</Label>
 
               <Select
                 value={rosterItem?.featuredBorrowSlot ?? ""}
@@ -582,11 +584,11 @@ export const RosterItemEditor = React.memo(
                 disabled={!rosterItem.enabled}
               >
                 <SelectTrigger className="w-full py-1 px-2 h-auto">
-                  {rosterItem?.featuredBorrowSlot ? <SelectValue /> : "(None)"}
+                  {rosterItem?.featuredBorrowSlot ? <SelectValue /> : t("tools.roster.rosterItemEditor.none")}
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="_">Not Featured</SelectItem>
+                  <SelectItem value="_">{t("tools.roster.rosterItemEditor.notFeatured")}</SelectItem>
 
                   {BORROW_SLOT_GAMEMODES.map((mode) => (
                     <SelectItem key={mode} value={mode}>

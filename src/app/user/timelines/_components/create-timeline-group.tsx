@@ -59,7 +59,7 @@ export function CreateTimelineGroup() {
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="My Timeline Group"
+          placeholder={t("tools.myTimelines.createGroup.namePlaceholder")}
         />
       </div>
 
@@ -75,7 +75,7 @@ export function CreateTimelineGroup() {
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="A description of this timeline group (optional)"
+          placeholder={t("tools.myTimelines.createGroup.descriptionPlaceholder")}
           className="resize-none min-h-24"
         />
 
