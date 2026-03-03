@@ -491,4 +491,40 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
       ],
     ],
   },
+
+  {
+    id: "aoi15",
+    name: "Balancing Schale's Books with the General Student Council (S15)",
+    rounds: [
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 3),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+      ],
+
+      [
+        withCounts(ITEMS.luxuryFountainPen, 7),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.umbrella, 2),
+      ],
+
+      [
+        withCounts(ITEMS.pollackRoeFlavoredSnack, 3),
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+      ],
+
+      [
+        withCounts(ITEMS.luxuryFountainPen, 7),
+        withCounts(ITEMS.receipt, 3),
+        withCounts(ITEMS.umbrella, 2),
+      ],
+
+      [
+        withCounts(ITEMS.shoppingBag, 2),
+        withCounts(ITEMS.toyBox, 1),
+        withCounts(ITEMS.gamingMagazine, 1),
+      ],
+    ],
+  },
 ];
