@@ -322,12 +322,14 @@ model GameBanner {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  id String @id @default(cuid())
+  id   String  @id @default(cuid())
+  name String?
 
   startDate DateTime
   endDate   DateTime
 
-  freePulls Int @default(0)
+  freePulls          Int     @default(0)
+  isSelectablePickup Boolean @default(false)
 
   pickupStudents Student[] @relation("GameBannerPickup")
 }
