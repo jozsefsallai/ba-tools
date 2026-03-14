@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils";
 import type { Club, School, Student } from "~prisma";
 import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type TitleGeneratorMode =
   | "basic"
@@ -47,6 +47,7 @@ type TitleGeneratorMode =
 
 export function TitleGeneratorView() {
   const t = useTranslations();
+  const locale = useLocale();
 
   const { students } = useStudents();
 
@@ -363,6 +364,14 @@ export function TitleGeneratorView() {
 
   return (
     <div className="md:w-2/3 mx-auto flex flex-col gap-6">
+      {locale === "jp" && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-md">
+          <div className="text-sm text-yellow-500/80">
+            今のところ、このツールは日本語に対応してないよ。
+          </div>
+        </div>
+      )}
+
       {clientReady && url && absoluteUrl && (
         <div className="flex flex-col self-center items-center gap-2">
           <div className="relative">
@@ -508,9 +517,7 @@ export function TitleGeneratorView() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <Label>
-              {t("tools.emblem.modes.favor.fields.nameOverride")}
-            </Label>
+            <Label>{t("tools.emblem.modes.favor.fields.nameOverride")}</Label>
 
             <div className="flex items-center gap-2">
               <Input

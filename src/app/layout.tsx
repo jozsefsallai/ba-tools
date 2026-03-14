@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { TheHeader } from "@/components/common/the-header";
 import { TheFooter } from "@/components/common/the-footer";
+import { JapaneseTranslationNotice } from "@/components/common/japanese-translation-notice";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -94,6 +95,8 @@ export default async function RootLayout({
 
                         <section className="relative container px-4 md:px-0 flex-1">
                           {children}
+
+                          {locale === "jp" && <JapaneseTranslationNotice />}
                         </section>
 
                         <TheFooter
