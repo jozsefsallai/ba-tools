@@ -112,13 +112,15 @@
 
     "item": {
       "fest": "FEST",
-      "festTooltip": "This student is a <strong>FEST</strong> unit.<br />The rate of obtaining a 3* student on this banner is <strong>doubled (6%)</strong><br />and there is a small chance of obtaining other FEST students on this banner.",
+      "festTooltip": "This student is a <strong>FEST</strong> unit.<br></br>The rate of obtaining a 3* student on this banner is <strong>doubled (6%)</strong><br></br>and there is a small chance of obtaining other FEST students on this banner.",
+      "festTooltip2": "This student is a <strong>FEST</strong> unit.",
       "limited": "Limited",
       "limitedTooltip": "This student is a <strong>LIMITED unit</strong> and cannot be obtained outside of their banner.",
       "freePulls": "{count} Free Pulls",
-      "freePullsTooltip": "During the duration of this banner, you will receive <strong>daily free pulls</strong> for a total of <strong>{count}</strong>.<br />The free pulls can be used on this banner and <strong>will not carry over to future banners</strong>.",
+      "freePullsTooltip": "During the duration of this banner, you will receive <strong>daily free pulls</strong> for a total of <strong>{count}</strong>.<br></br>The free pulls can be used on this banner and <strong>will not carry over to future banners</strong>.",
       "viewOnSchaleDB": "View on SchaleDB",
-      "viewStudentOnSchaleDB": "View <strong>{name}</strong> on SchaleDB"
+      "viewStudentOnSchaleDB": "View <strong>{name}</strong> on SchaleDB",
+      "selectablePickup": "On this banner, you can select any of the following characters as a pickup student:"
     }
   },
 

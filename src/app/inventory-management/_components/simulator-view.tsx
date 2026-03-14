@@ -101,7 +101,7 @@ function ItemSetup({
             <Input
               type="number"
               min={0}
-              max={6}
+              max={7}
               value={item.count}
               onChange={(e) =>
                 onChange({

@@ -111,13 +111,15 @@
 
     "item": {
       "fest": "フェス",
-      "festTooltip": "この生徒は<strong>フェス限定</strong>ユニットだよ。<br />このガチャでは★3生徒の排出率が<strong>2倍（6%）</strong>になって、<br />他のフェス限定生徒も低確率で排出されるよ。",
+      "festTooltip": "この生徒は<strong>フェス限定</strong>ユニットだよ。<br></br>このガチャでは★3生徒の排出率が<strong>2倍（6%）</strong>になって、<br></br>他のフェス限定生徒も低確率で排出されるよ。",
+      "festTooltip2": "この生徒は<strong>フェス限定</strong>ユニットだよ。",
       "limited": "限定",
       "limitedTooltip": "この生徒は<strong>期間限定ユニット</strong>だよ。ピックアップ期間外は入手できないから注意してね。",
       "freePulls": "無料{count}連",
-      "freePullsTooltip": "このガチャの期間中、<strong>毎日無料ガチャ</strong>が引けて、合計で<strong>{count}連分</strong>になるよ。<br />無料分はこのガチャでのみ有効で、<strong>次のガチャへ持ち越すことはできないよ</strong>。",
+      "freePullsTooltip": "このガチャの期間中、<strong>毎日無料ガチャ</strong>が引けて、合計で<strong>{count}連分</strong>になるよ。<br></br>無料分はこのガチャでのみ有効で、<strong>次のガチャへ持ち越すことはできないよ</strong>。",
       "viewOnSchaleDB": "SchaleDBで表示",
-      "viewStudentOnSchaleDB": "SchaleDBで <strong>{name}</strong> を表示"
+      "viewStudentOnSchaleDB": "SchaleDBで <strong>{name}</strong> を表示",
+      "selectablePickup": "このガチャでは、以下のキャラクターからピックアップ生徒を1人選べるよ："
     }
   },
 
