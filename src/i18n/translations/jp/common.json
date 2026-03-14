@@ -9,9 +9,9 @@
   "visibility": "公開設定",
   "edit": "編集",
   "delete": "削除",
-  "selectStudent": "生徒を選択",
+  "selectStudent": "生徒を選択してください",
   "saving": "保存中...",
-  "saveChanges": "変更を保存",
+  "saveChanges": "変更を保存する",
   "downloadImage": "画像をダウンロード",
   "copyToClipboard": "クリップボードにコピー",
   "scale": "スケール",
@@ -45,7 +45,7 @@
   "untitledFormation": "無題の編成",
   "untitledTimeline": "無題のタイムライン",
   "untitledTimelineGroup": "無題のタイムライングループ",
-  "clickAgainToConfirm": "もう一度クリックして確定",
+  "clickAgainToConfirm": "もう一度クリックして確定します",
 
   "header": {
     "nav": {
@@ -70,7 +70,7 @@
       },
       "games": {
         "title": "ゲーム",
-        "flappyPeroro": "フラップ・ペロロ"
+        "flappyPeroro": "フラッピー・ペロロ"
       }
     }
   },
@@ -84,17 +84,17 @@
     }
   },
   "studentPicker": {
-    "zds": "該当する生徒がいません。"
+    "zds": "該当する生徒が存在していません。"
   },
   "mdTips": {
-    "tip1": "リンクを &lt; と &gt; で囲むと、リンクが作成されるよ（例：<code>&lt;https://bluearchive.jp&gt;</code>）。",
-    "tip2": "上記の形式で書かれた <strong>YouTube</strong> と <strong>BiliBili</strong> のリンクは、自動的に動画が埋め込まれるよ。",
-    "tip3": "他の書き方はこの <a>Markdownチートシート</a> を見てみてね。すべての書式に対応しているわけじゃないから注意してね。"
+    "tip1": "リンクを &lt; と &gt; で囲むと、リンクが作成されます（例：<code>&lt;https://bluearchive.jp&gt;</code>）。",
+    "tip2": "上記の形式で書かれた <strong>YouTube</strong> と <strong>BiliBili</strong> のリンクは自動的に動画が埋め込まれるよ。",
+    "tip3": "他の書き方はこの <a>Markdownチートシート</a> を参考してください。すべての書式に対応しているわけじゃないから改めてご注意ください。"
   },
   "saveStatus": {
     "saving": "変更を保存中...",
-    "dirty": "保存されていない変更があるよ。",
-    "ok": "すべての変更が保存済みだよ。"
+    "dirty": "保存されていない変更があります。",
+    "ok": "すべての変更が保存済み。"
   },
 
   "dialogs": {
@@ -112,52 +112,52 @@
 
   "createGiftInventory": {
     "title": "所持データを作成",
-    "description": "新しいギフト所持データの名前を入力してね。",
+    "description": "新しいギフト所持データの名前を入力してください。",
     "placeholder": "ギフト所持データ名"
   },
 
   "renameGiftInventory": {
     "title": "所持データの名前を変更",
-    "description": "所持データの新しい名前を入力してね。",
+    "description": "所持データの新しい名前を入力してください。",
     "placeholder": "ギフト所持データ名",
     "save": "保存"
   },
 
   "exportStudentData": {
     "title": "生徒データの書き出し（エクスポート）",
-    "description": "保存されている生徒のステータス情報を別の端末やブラウザに移行したり、ブラウザのキャッシュを削除する前に、以下のJSONテキストをコピーしてね。"
+    "description": "保存されている生徒のステータス情報を別の端末やブラウザに移行する。ブラウザのキャッシュを削除する前に、以下のJSONストリングをコピーしてください。"
   },
 
   "exportTimelineData": {
     "title": "タイムラインデータの書き出し（エクスポート）",
-    "description": "保存されているタイムライン情報を別の端末やブラウザに移行したり、ブラウザのキャッシュを削除する前に、以下のJSONテキストをコピーしてね。"
+    "description": "保存されているタイムライン情報を別の端末やブラウザに移行する。ブラウザのキャッシュを削除する前に、以下のJSONストリングをコピーしてください。"
   },
 
   "importJustinPlannerData": {
     "title": "Justin plannerから生徒データを読み込む",
-    "description": "Justin plannerからコピーしたJSONテキストを入力してね。",
+    "description": "Justin plannerからコピーしたJSONストリングを入力してください。",
     "toasts": {
-      "success": "生徒データの読み込みに成功したよ",
-      "invalidData": "生徒データが正しくないみたい。",
-      "invalidJustinData": "Justin plannerのデータが正しくないみたい。"
+      "success": "生徒データの読み込みを成功しました",
+      "invalidData": "不適正な生徒データが入力されました。。",
+      "invalidJustinData": "不適正なJustin plannerのデータが入力されました。"
     }
   },
 
   "importStudentData": {
     "title": "生徒データの読み込み（インポート）",
-    "description": "コピーしておいたJSONテキストを入力してね。",
+    "description": "コピーしておいたJSONストリングを入力してください。",
     "toasts": {
-      "success": "生徒データの読み込みに成功したよ",
-      "invalidData": "生徒データが正しくないみたい。"
+      "success": "生徒データの読み込みを成功しました",
+      "invalidData": "不適正な生徒データが入力されました。"
     }
   },
 
   "importTimelineData": {
     "title": "タイムラインデータの読み込み（インポート）",
-    "description": "コピーしておいたJSONテキストを入力してね。",
+    "description": "コピーしておいたJSONストリングを入力してください。",
     "toasts": {
-      "success": "タイムラインデータの読み込みに成功したよ",
-      "invalidData": "タイムラインデータが正しくないみたい。"
+      "success": "タイムラインデータの読み込みを成功しました",
+      "invalidData": "不適正なタイムラインデータが入力されました。"
     }
   },
 
@@ -307,8 +307,8 @@
   },
 
   "notFound": {
-    "title": "404 - ページが見つからないよ",
-    "description": "お探しのページは存在しないみたい。"
+    "title": "404 - ページが見つかりませんでした",
+    "description": "お探しのページは存在いたしません。"
   },
 
   "helpSheet": {
@@ -324,8 +324,8 @@
     "title": "ユーザー設定",
     "savePreferences": "設定を保存",
     "toasts": {
-      "saved": "設定を保存したよ！",
-      "saveFailed": "設定の保存に失敗したよ。"
+      "saved": "設定を保存しました",
+      "saveFailed": "設定の保存に失敗しました。"
     },
     "timelineVisualizer": {
       "title": "TL可視化ツール",
