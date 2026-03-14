@@ -4,7 +4,6 @@
     "description": "スキルの回転（タイムライン）をグラフ形式で作れるツールだよ（総力戦とかに便利）。生徒を選んだり、間隔を調整したり、コストを使うタイミングや時間を細かく設定したりできるよ。",
     "notice": "<strong>注意：</strong>ダークモードの拡張機能やブラウザのズーム設定によっては、画像が正しく書き出されないことがあるよ。もし表示がおかしくなったら、拡張機能をオフにしたりズームを100%にしたりしてみてね。",
     "mobileNotice": "<strong>注意：</strong>このツールはモバイル端末だと上手く動かないかもしれないよ。",
-
     "tabs": {
       "items": {
         "title": "アイテム",
@@ -13,7 +12,6 @@
         "addVS": "スペース（縦）を追加",
         "addText": "テキストを追加"
       },
-
       "settings": {
         "title": "設定",
         "name": "タイムライン名",
@@ -25,7 +23,6 @@
         "description": "説明文 <small>(Markdown対応)</small>",
         "descriptionPlaceholder": "このタイムラインの説明を入力（任意）"
       },
-
       "appearance": {
         "title": "見た目",
         "scale": "スケール",
@@ -33,23 +30,19 @@
         "vsSize": "スペース（縦）のサイズ",
         "hsSize": "スペース（横）のサイズ"
       },
-
       "save": {
         "title": "保存・出力",
-
         "loadLocal": "ブラウザから読み込む",
         "saveLocal": "ブラウザに保存",
         "export": "エクスポート",
         "import": "インポート"
       }
     },
-
     "actions": {
       "share": "タイムラインを共有",
       "cloudSave": "クラウドに保存",
       "download": "画像をダウンロード"
     },
-
     "confirmExit": {
       "title": "タイムラインを保存する？",
       "description": {
@@ -57,61 +50,50 @@
         "signedOut": "保存されていない変更があるよ。ページを離れる前にブラウザに保存しておく？"
       }
     },
-
     "copy": {
       "button": "テキスト形式のTLをコピー",
       "copied": "クリップボードにコピーしたよ",
       "copiedToast": "テキスト形式のTLをクリップボードにコピーしたよ！"
     },
-
     "quickadd": {
       "title": "生徒をクイック追加"
     },
-
     "editor": {
       "student": {
         "variant": {
           "label": "バリアント：",
           "default": "デフォルト"
         },
-
         "trigger": {
           "label": "発動条件：",
           "placeholder": "コスト、時間など"
         },
-
         "target": {
           "label": "対象：",
           "select": "対象の生徒を選択"
         },
-
         "copy": {
           "label": "コピー"
         },
-
         "notes": {
           "toggle": "備考",
           "label": "備考：",
           "placeholder": "追加のメモなど"
         }
       },
-
       "separator": {
         "title": {
           "horizontal": "横スペース",
           "vertical": "縦スペース"
         },
-
         "size": {
           "toggle": "サイズを個別に指定",
           "placeholder": "サイズ (px)"
         }
       },
-
       "text": {
         "placeholder": "テキストを入力"
       },
-
       "actions": {
         "duplicate": "複製",
         "remove": "削除",
@@ -121,15 +103,12 @@
         "insertText": "テキストを挿入"
       }
     },
-
     "loading": "タイムラインを読み込み中...",
     "empty": "タイムラインにアイテムがないよ。"
   },
-
   "bond": {
     "title": "絆ランク計算機",
     "description": "生徒に贈るギフトの内容から、絆ランクがどれくらい上がるか計算できるよ。あらかじめ計画を立てたり、貯まったギフトでどこまでランクを上げられるか確認するのに使ってみてね。",
-
     "inventory": {
       "select": {
         "label": "ギフト所持数 (BETA)",
@@ -140,7 +119,6 @@
         "save": "データを保存",
         "delete": "データを削除"
       },
-
       "target": {
         "label": "絆ランクの目標",
         "none": "(目標なし)",
@@ -149,7 +127,6 @@
         "delete": "目標を削除 ({studentName})"
       }
     },
-
     "sort": {
       "label": "並び替え：",
       "default": "デフォルト",
@@ -158,70 +135,55 @@
         "noStudent": "生徒の好み"
       }
     },
-
     "item": {
       "adored": "大好き",
       "loved": "好き",
       "liked": "普通",
       "normal": "通常",
-
       "universal": "このギフトは全員が{expValue, plural, 60 {大好き} other {好き}}で、絆経験値を <strong>{exp}</strong> 獲得できるよ！",
       "adoredBy": "大好きな生徒 ({exp} EXP)：",
       "lovedBy": "好きな生徒 ({exp} EXP)：",
       "likedBy": "普通の生徒 ({exp} EXP)：",
-
       "everyoneElse": "他の生徒に贈ると <strong>{exp}</strong> EXP獲得できるよ。"
     },
-
     "choiceBox": {
       "name": "贈り物選択ボックス",
       "description": "お好みの贈り物が選べる贈り物ボックス"
     },
-
     "student": {
       "select": "生徒を選択",
       "notice": "まずは上のドロップダウンから生徒を選んでね。",
-
       "onlyFavorite": "好みのギフトのみ表示",
       "currentRank": "現在のランク",
       "targetRank": "目標のランク",
       "currentExp": "現在のEXP",
       "targetExp": "目標のEXP",
-
       "irrelevantGifts": {
         "title": "お知らせ",
         "description": "選択したギフトの一部は、現在選んでいる生徒に関係がないため表示されていないよ。「好みのギフトのみ表示」のチェックを外すと変更できるようになるよ。"
       },
-
       "breakdown": "ギフトの内訳を表示"
     },
-
     "progress": {
       "goal": "(目標: {targetBond})",
       "total": "<strong>合計EXP:</strong> {exp}"
     },
-
     "breakdown": {
       "title": "ギフトの内訳",
       "description": "各ギフトと獲得EXPの詳細だよ。",
-
       "table": {
         "gift": "ギフト",
         "unitExp": "単体EXP",
         "count": "個数",
         "totalExp": "合計EXP"
       },
-
       "total": "合計",
       "close": "閉じる"
     },
-
     "inventoryTip": "<strong>ヒント：</strong> <signIn></signIn> すると、ギフトの所持数や目標データを保存できるよ (BETA)。",
-
     "remaining": {
       "title": "ランク {targetBond} 到着に必要なEXP: {expNeeded}",
       "description": "<strong>ランク {currentBond}</strong> から <strong>ランク {targetBond}</strong> に上げるには、以下のいずれかが必要だよ：",
-
       "headpats": "なでなで",
       "likedSSR": "普通なSSRギフト",
       "lovedSSR": "好きなSSRギフト",
@@ -230,17 +192,14 @@
       "likedSR": "普通なSRギフト",
       "lovedSR": "好きなSRギフト",
       "adoredSR": "大好きなSRギフト",
-
       "optimal": "ギフトとなでなでの最適内訳",
       "excludeSSR": "SSRギフトを除外",
       "optimalNote": "* 注: 最適な内訳は、計 {paddedExp} EXPを基準に計算されているよ。",
       "wasted": "超過分： {wasted} EXP"
     },
-
     "lessons": {
       "title": "スケジュールの内訳",
       "description": "<strong>{exp} EXP</strong> をスケジュールだけで稼ぐ場合、ランクやレベルに応じて必要な回数は以下の通りだよ。",
-
       "table": {
         "rank": "ランク",
         "level": "レベル",
@@ -248,16 +207,13 @@
         "bonus": "ボーナスEXP",
         "count": "回数"
       },
-
       "total": "(合計 {exp})",
       "bonusChance": "発生確率 <strong>{chance}</strong>%",
-
       "counts": {
         "withBonus": "ボーナスあり: <strong>{countWithBonus}</strong> 回",
         "expected": "期待値: <strong>{expectedCount}</strong> 回"
       }
     },
-
     "toasts": {
       "inventoryCreateFail": "所持データの作成に失敗したよ。",
       "inventoryUpdateFail": "所持データの更新に失敗したよ。",
@@ -268,52 +224,43 @@
       "targetDeleteFail": "目標の削除に失敗したよ。",
       "targetDeleteSuccess": "目標を削除したよ。"
     },
-
     "dialogs": {
       "deleteInventory": {
         "title": "所持データを削除する？",
         "description": "この所持データを削除しても大丈夫？ギフトの数や関連する目標データもすべて完全に削除されるよ。"
       },
-
       "deleteTarget": {
         "title": "目標を削除する？",
         "description": "この目標を削除しても大丈夫？絆データや選択したギフトの情報は完全に消えるけど、ギフトの所持数データには影響しないよ。"
       },
-
       "save": {
         "title": "目標データを保存する？",
         "description": "変更内容が保存されていないよ。ページを離れる前にクラウドに保存しておく？"
       }
     }
   },
-
   "raidScore": {
     "title": "総力戦スコア計算機",
     "description": "ボスと難易度を選んで、クリアタイムから総力戦スコアを計算したり、その逆の計算ができるツールだよ。",
-
     "mode": {
       "single": {
         "title": "1部隊モード",
-
         "clearTime": {
           "label": "クリアタイム",
           "placeholder": "例：2:34.567",
           "hint": "レイド全体の合計クリアタイム（全部隊の合計時間）だよ。"
         },
-
         "remainingTime": {
           "label": "残り時間",
           "placeholder": "例：0:25.433",
           "hint": "ボスのHPを0にした時の残り時間だよ。主に1部隊クリア時の計算に使うよ。"
         },
-
         "score": {
           "label": "総力戦スコア",
           "placeholder": "例：39,345,039",
           "hint": "総力戦スコアの数値だよ。数字のみ入力してね。カンマは不要で、小数点の入力にも対応しているよ。"
         }
       },
-
       "multi": {
         "title": "複数部隊モード",
         "total": "合計タイム：",
@@ -321,34 +268,26 @@
       }
     }
   },
-
   "gachaStats": {
     "title": "ガチャ確率統計",
     "description": "ブルアカのガチャ結果の統計を出すためのツールだよ。10連ごとに引けた★3生徒の数を入力して、「結果を追加」ボタンを押してね。もし入力を間違えたら、各履歴の横にある「削除」ボタンで消せるよ。",
     "notice": "<strong>ヒント：</strong>OBSのブラウザソースとして読み込んで、統計部分をクロップして背景を透過すれば、ガチャ動画や配信でリアルタイムの確率を表示することができるよ。",
-
     "question": "この10連で★3は何人出た？",
     "attempt": "<strong>{attempt}回目</strong>：★3を <strong>{count}</strong> 人獲得",
     "remove": "削除",
-
     "info": {
       "pulls": "合計引数",
       "3stars": "★3合計数",
       "rate": "★3確率"
     }
   },
-
   "emblem": {
     "title": "称号ジェネレーター",
     "description": "ボス討伐、絆ランク、能力、所属部活などの称号を再現できるツールだよ。自由なテキストを入力してオリジナルの称号を作ることもできるよ。",
-
     "error": "称号の生成に失敗したよ",
-
     "mode": "モード：",
     "options": "オプション",
-
     "update": "更新",
-
     "modes": {
       "basic": {
         "title": "基本",
@@ -356,7 +295,6 @@
           "text": "テキスト"
         }
       },
-
       "favor": {
         "title": "絆ランク",
         "fields": {
@@ -368,39 +306,31 @@
           "nameOverride": "名前の上書き (任意)："
         }
       },
-
       "potential": {
         "title": "能力",
-
         "fields": {
           "student": "生徒：",
           "level": "能力レベル：",
           "nameOverride": "名前の上書き (任意)："
         }
       },
-
       "boss": {
         "title": "ボス討伐",
-
         "fields": {
           "boss": "ボス：",
           "completion": "討伐内容："
         }
       },
-
       "tower": {
         "title": "制約解除決戦",
-
         "fields": {
           "boss": "ボス：",
           "floor": "階層：",
           "defense": "防御タイプ："
         }
       },
-
       "club": {
         "title": "部活顧問",
-
         "fields": {
           "school": "学校：",
           "club": "部活：",
@@ -408,83 +338,67 @@
         }
       }
     },
-
     "bossCompletion": {
       "belowHardcore": "HARDCORE未満",
       "hardcorePlus": "HARDCORE以上",
       "extremePlus": "EXTREME以上",
       "insanePlus": "INSANE以上"
     },
-
     "towerDefense": {
       "light": "軽装備",
       "heavy": "重装甲",
       "unarmed": "特殊装甲",
       "elastic": "弾力装甲"
     },
-
     "bossTerrainSuffix": "戦",
-
     "generatedTitleAlt": "生成された称号",
     "defaultTitleAlt": "デフォルト称号 {index}",
-
     "default": {
       "button": "デフォルトの称号を表示",
       "warning": "<strong>注意：</strong>選択したモードによっては、すべての称号を読み込むのに時間がかかる場合があるよ。"
     }
   },
-
   "formationDisplay": {
     "title": "編成表示",
     "description": "生徒の編成画像を生成できるツールだよ。YouTubeのサムネイル作成とかに便利！",
     "descriptionLong": "このツールでは、生徒の編成画像を生成できるよ。YouTubeのサムネイルを綺麗にデザインしたい時とかに役立つよ。",
     "mobileNotice": "<strong>注意：</strong>このツールはモバイル端末だと上手く動かないかもしれないよ。",
     "renderNotice": "<strong>注意：</strong>ダークモードの拡張機能やブラウザのズーム設定によっては、画像が正しく書き出されないことがあるよ。もし表示がおかしくなったら、拡張機能をオフにしたりズームを100%にしたりしてみてね。",
-
     "tabs": {
       "items": "アイテム",
       "appearance": "見た目",
       "cloud": "クラウド"
     },
-
     "selectStudent": "生徒を選択",
     "emptyStriker": "空のストライカー",
     "emptySpecial": "空のスペシャル",
     "bulkImport": "一括インポート",
-
     "displayOverline": "オーバーラインを表示",
     "displayRoleIcon": "役割アイコンを表示",
     "verticalGroups": "垂直グループ化",
-
     "formationName": "編成名",
     "updateFormation": "編成を更新",
     "saveFormation": "編成を保存",
-
     "strikers": "ストライカー",
     "specials": "スペシャル",
     "noStrikers": "編成にストライカーがいません。",
     "noSpecials": "編成にスペシャルがいません。",
     "noStudentsInFormation": "編成に生徒がいません。",
-
     "loadingFormation": "編成を読み込み中...",
-
     "saveDialog": {
       "title": "編成を保存する？",
       "description": "保存されていない変更があるよ。ページを離れる前にクラウドに保存しておく？"
     },
-
     "toasts": {
       "createSuccess": "編成を作成したよ。",
       "updateSuccess": "編成を更新したよ。",
       "createFail": "編成の作成に失敗したよ。",
       "noStudents": "最低でも1人は生徒を編成に追加してね。"
     },
-
     "parseDialog": {
       "title": "編成データを読み込む (BETA)",
       "description": "以下に編成データを入力してね。"
     },
-
     "myFormations": {
       "title": "マイ編成",
       "createNew": "新しく編成を作る",
@@ -492,19 +406,15 @@
       "noFormations": "保存された編成はないよ。"
     }
   },
-
   "scenarioImageGenerator": {
     "title": "シナリオ画像メーカー",
     "description": "ブルアカのストーリー風画像を自由に作成・生成できるツールだよ。",
     "disclaimer": "<strong>免責事項：</strong>このツールで使用されているアセットの一部は、<a>HansTNO氏のテンプレート</a>から引用しています。",
-
     "stopAnimation": "アニメーション停止",
     "startAnimation": "アニメーション再生",
     "recordingMode": "録画モード",
-
     "settings": "設定",
     "characters": "キャラクター",
-
     "tabs": {
       "content": "内容",
       "background": "背景",
@@ -512,7 +422,6 @@
       "elements": "表示要素",
       "behavior": "動作設定"
     },
-
     "content": {
       "characterName": "キャラ名",
       "characterNamePlaceholder": "キャラクターの名前を入力",
@@ -521,7 +430,6 @@
       "dialogueContent": "セリフ内容",
       "dialoguePlaceholder": "セリフを入力してね"
     },
-
     "background": {
       "backgroundImage": "背景画像",
       "selectBackgroundImage": "背景画像を選択",
@@ -533,13 +441,11 @@
       "backgroundYOffset": "背景 Yオフセット",
       "backgroundYOffsetPlaceholder": "縦方向の位置調整"
     },
-
     "fontSettings": {
       "font": "フォント",
       "fontSize": "フォントサイズ (デフォルト: {defaultSize})",
       "fontSizePlaceholder": "サイズを入力"
     },
-
     "elements": {
       "displayButtons": "ボタンを表示",
       "autoEnabled": "AUTO有効化",
@@ -547,13 +453,11 @@
       "displayGradient": "グラデーションを表示",
       "displayTriangle": "送りマークを表示"
     },
-
     "behaviorSettings": {
       "textScrollSpeed": "テキスト表示速度 (0-1, デフォルト: {defaultSpeed})",
       "scrollSpeedPlaceholder": "速度を入力",
       "transparentBackground": "背景を透過する"
     },
-
     "character": {
       "sprite": "立ち絵",
       "selectSprite": "立ち絵を選択",
@@ -566,36 +470,30 @@
       "addCharacterUrl": "キャラを追加 (URL)",
       "deleteCharacter": "キャラクターを削除"
     },
-
     "recording": {
       "title": "録画モード",
       "description": "録画モードに切り替えるよ。画面録画ソフトの準備をしてね。準備ができたら下のボタンを押して録画を開始しよう。",
       "escHint": "Escキーを押すと録画モードを終了できるよ（フルスクリーンの場合は2回押してね）。",
       "start": "録画開始"
     },
-
     "toasts": {
       "copied": "シナリオ画像をクリップボードにコピーしたよ！"
     }
   },
-
   "pvp": {
     "title": "戦術対抗戦トラッカー",
     "description": "ブルアカの戦術対抗戦の記録を管理・統計できるツールだよ。",
     "needAccount": "戦術対抗戦トラッカーを使うにはアカウントが必要だよ。",
-
     "seasons": {
       "createNew": "新しいシーズンを作成",
       "server": "サーバー: {server}",
       "failedToLoad": "シーズンの読み込みに失敗したよ。"
     },
-
     "season": {
       "title": "シーズン: {name}",
       "recordNewMatch": "対戦記録を追加",
       "failedToLoad": "このシーズンの対戦記録の読み込みに失敗したよ。"
     },
-
     "match": {
       "editMatch": "記録を編集",
       "recordNewMatch": "新しい対戦を記録",
@@ -622,13 +520,11 @@
       "deleteSuccess": "対戦記録を削除したよ。",
       "deleteFail": "対戦記録の削除に失敗したよ。"
     },
-
     "newSeason": {
       "title": "新しい対抗戦シーズン",
       "description": "シーズンの名前とゲームサーバーを入力してね。",
       "seasonName": "シーズン名"
     },
-
     "formationEditorItem": {
       "selectStudent": "生徒を選択",
       "level": "Lv",
@@ -637,7 +533,6 @@
       "damage": "ダメージ",
       "none": "無し"
     },
-
     "matchGroup": {
       "attacks": "攻撃：",
       "defenses": "防衛：",
@@ -645,7 +540,6 @@
       "lost": "負け",
       "total": "合計"
     },
-
     "toasts": {
       "matchUpdated": "対戦記録を更新したよ。",
       "matchRecorded": "対戦を記録したよ。",
@@ -653,31 +547,25 @@
       "seasonCreateFail": "シーズンの作成に失敗したよ。"
     }
   },
-
   "railroad": {
     "title": "鉄道パズル解答器",
     "description": "ハイランダーイベントのミニゲームで、線路をどう繋げばいいか可視化・解決してくれるツールだよ。イベントアイテムの消費を抑えるために、最も効率的な線路の組み合わせを導き出すこともできるよ。",
-
     "railTypes": {
       "straight": "直線",
       "slightlyCurved": "少しカーブ",
       "veryCurved": "急カーブ"
     },
-
     "railPiecesUsed": "使用した線路：",
     "map": "マップ",
     "usedRailPieces": "使用済みの線路",
     "remainingRailPieces": "残りの線路",
-
     "solveInstantly": "即座に解決",
     "solveInstantlyHint": "（動作が重い場合はオフにしてね）",
     "launchAoba": "アオバを出発させる",
     "stopAoba": "アオバを止める",
     "getMinimalConfigs": "最小構成を取得",
     "solve": "解決！",
-
     "minimalConfigs": "最小の線路構成（{count}件見つかったよ）",
-
     "hexagon": {
       "directions": {
         "W": "西",
@@ -699,7 +587,6 @@
       "railPiece": "線路パーツ",
       "railPieceDesc": "<strong>{railType}</strong> の線路を使って、<br /><strong>{entrance}</strong> から <strong>{exit}</strong> へ接続するよ。"
     },
-
     "toasts": {
       "noSolution": "指定された線路の数では解決策が見つからなかったよ。",
       "aobaDerailed": "アオバが脱線しちゃった！ :(",
@@ -707,12 +594,10 @@
       "startTileNotFound": "スタート地点が見つからないよ。"
     }
   },
-
   "inventoryManagement": {
     "title": "在庫管理",
     "description": "アオイのイベントなどの「在庫管理」（海戦ゲーム形式）ミニゲームで、各アイテムの配置確率をシミュレートできるツールだよ。",
     "notice": "<strong>注意：</strong>このツールは確率を微調整するためにいくつかのチェック機能を持たせているけど、盤面に小さなアイテムが多い場合などは、どうしても誤判定が出る可能性があるよ。結果はあくまで目安として使ってね。",
-
     "remainingSlots": "残りのマス：",
     "simulate": "シミュレート",
     "load": "読み込む",
@@ -722,25 +607,20 @@
     "preset": "プリセット：",
     "round": "ラウンド",
     "nextRound": "次のラウンドへ",
-
     "confirmNextRound": {
       "title": "次のラウンドに進む？",
       "description": "次のラウンドを読み込んでも大丈夫？今の設定はリセットされるよ。",
       "confirm": "はい",
       "cancel": "やめておく"
     },
-
     "firstItem": "1つ目のアイテム",
     "secondItem": "2つ目のアイテム",
     "thirdItem": "3つ目のアイテム",
-
     "displayedItems": "表示中のアイテム：",
     "all": "すべて",
-
     "slot": "スロット {number}",
     "slotLastSave": "スロット {number} - 最終保存：{time}",
     "slotEmpty": "スロット {number} - (空)",
-
     "presetDialog": {
       "title": "在庫管理のプリセットを選択",
       "description": "シミュレーターに読み込むイベントのプリセットを選んでね。",
@@ -752,7 +632,6 @@
       "copied": "コピーしたよ！",
       "loadPresetData": "プリセットデータを読み込む"
     },
-
     "toasts": {
       "noSavedData": "保存されたデータが見つからないよ。",
       "dataLoaded": "データを読み込んだよ。",
@@ -763,10 +642,8 @@
       "cannotBlockOutside": "グリッドの外側にあるマスはブロックできないよ。"
     }
   },
-
   "roster": {
     "title": "名簿・ロスター",
-
     "myRosters": {
       "title": "マイロスター",
       "newRoster": "新しいロスターを作成",
@@ -774,7 +651,6 @@
       "pageDescription": "ブルアカの生徒名簿を管理・共有できるツールだよ。",
       "failedToLoad": "ロスターの読み込みに失敗したよ。"
     },
-
     "create": {
       "title": "ロスター作成",
       "submit": "ロスターを作成する",
@@ -783,7 +659,6 @@
         "fail": "ロスターの作成に失敗したよ。"
       }
     },
-
     "editor": {
       "title": "ロスターを編集",
       "failedToLoad": "ロスターの読み込みに失敗したよ。",
@@ -792,7 +667,6 @@
         "fail": "ロスターの更新に失敗したよ。もう一度試してみてね。"
       }
     },
-
     "view": {
       "loadingRoster": "ロスターを読み込み中...",
       "failedToLoad": "ロスターの読み込みに失敗したよ。",
@@ -813,7 +687,6 @@
       "minGear2Tier": "最小装備2 Tier：",
       "minGear3Tier": "最小装備3 Tier：",
       "minBondGearTier": "最小愛用品 Tier：",
-
       "skills": "スキル：",
       "exSkill": "EXスキル",
       "basicSkill": "ノーマルスキル",
@@ -828,7 +701,6 @@
       "attackTalentLevel": "攻撃力 強化レベル",
       "hpTalentLevel": "最大HP 強化レベル",
       "healTalentLevel": "治癒力 強化レベル",
-
       "sortOptions": {
         "default": "デフォルト",
         "nameAsc": "名前（昇順）",
@@ -845,7 +717,6 @@
         "healTalentDesc": "治癒能力（高い順）"
       }
     },
-
     "rosterItemEditor": {
       "max": "MAX",
       "level": "Lv:",
@@ -878,13 +749,11 @@
       "heal": "治癒"
     }
   },
-
   "timelineView": {
     "loadingTimeline": "タイムラインを読み込み中...",
     "failedToLoad": "タイムラインの読み込みに失敗したよ。",
     "editTimeline": "タイムラインを編集"
   },
-
   "timelineGroupView": {
     "loadingGroup": "TLグループを読み込み中...",
     "failedToLoad": "TLグループの読み込みに失敗したよ。",
@@ -893,19 +762,16 @@
     "noTimelines": "このグループにはタイムラインが入っていないよ。",
     "defaultDescription": "スキル回転（TL）を可視化した画像のグループだよ。"
   },
-
   "myTimelines": {
     "title": "マイタイムライン",
     "newGroup": "新しいグループ",
     "newTimeline": "新しいタイムライン",
     "description": "ここでは、保存したタイムラインの確認や管理ができるよ。",
-
     "allTimelines": "すべてのタイムライン",
     "allTimelinesDescription": "これまでに作成したすべてのタイムラインだよ。",
     "allTimelinesGroupDescription": "このグループには、あなたのすべてのタイムラインが含まれているよ。",
-    "groupContains": "このグループには {count} 個のタイムラインが含まれているよ。",
+    "groupContains": "このグループには {count} 個のタイムラインが入っているよ。",
     "failedToLoad": "タイムライングループの読み込みに失敗したよ。",
-
     "createGroup": {
       "title": "TLグループを作成",
       "namePlaceholder": "マイタイムライングループ",
@@ -916,7 +782,6 @@
         "fail": "TLグループの作成に失敗したよ"
       }
     },
-
     "editGroup": {
       "title": "TLグループを編集",
       "addTimeline": "タイムラインを追加",
@@ -936,20 +801,17 @@
         "linkCopied": "リンクをクリップボードにコピーしたよ。"
       }
     },
-
     "ownTimelineBrowser": {
       "failedToLoad": "タイムラインの読み込みに失敗したよ。",
       "noTimelines": "保存されたタイムラインはないよ。"
     }
   },
-
   "resetInfo": {
     "title": "リセット時間情報",
     "nextReset": "次のリセットまで：",
     "nextCafeReset": "次のカフェリセットまで：",
     "headpatCooldown": "なでなで可能になるまで："
   },
-
   "studentOfTheDay": {
     "title": "今日の生徒",
     "siteWide": "今日の全ユーザー共通の生徒",

@@ -46,7 +46,6 @@
   "untitledTimeline": "無題のタイムライン",
   "untitledTimelineGroup": "無題のタイムライングループ",
   "clickAgainToConfirm": "もう一度クリックして確定します",
-
   "header": {
     "nav": {
       "gameplay": {
@@ -96,71 +95,61 @@
     "dirty": "保存されていない変更があります。",
     "ok": "すべての変更が保存済み。"
   },
-
   "dialogs": {
     "confirm": {
       "confirm": "確定",
       "cancel": "キャンセル"
     },
-
     "save": {
       "yes": "保存する",
       "no": "保存しない",
       "cancel": "キャンセル"
+    },
+    "createGiftInventory": {
+      "title": "所持データを作成",
+      "description": "新しいギフト所持データの名前を入力してください。",
+      "placeholder": "ギフト所持データ名"
+    },
+    "renameGiftInventory": {
+      "title": "所持データの名前を変更",
+      "description": "所持データの新しい名前を入力してください。",
+      "placeholder": "ギフト所持データ名",
+      "save": "保存"
+    },
+    "exportStudentData": {
+      "title": "生徒データの書き出し（エクスポート）",
+      "description": "保存されている生徒のステータス情報を別の端末やブラウザに移行する。ブラウザのキャッシュを削除する前に、以下のJSONストリングをコピーしてください。"
+    },
+    "exportTimelineData": {
+      "title": "タイムラインデータの書き出し（エクスポート）",
+      "description": "保存されているタイムライン情報を別の端末やブラウザに移行する。ブラウザのキャッシュを削除する前に、以下のJSONストリングをコピーしてください。"
+    },
+    "importJustinPlannerData": {
+      "title": "Justin plannerから生徒データを読み込む",
+      "description": "Justin plannerからコピーしたJSONストリングを入力してください。",
+      "toasts": {
+        "success": "生徒データの読み込みを成功しました",
+        "invalidData": "不適正な生徒データが入力されました。。",
+        "invalidJustinData": "不適正なJustin plannerのデータが入力されました。"
+      }
+    },
+    "importStudentData": {
+      "title": "生徒データの読み込み（インポート）",
+      "description": "コピーしておいたJSONストリングを入力してください。",
+      "toasts": {
+        "success": "生徒データの読み込みを成功しました",
+        "invalidData": "不適正な生徒データが入力されました。"
+      }
+    },
+    "importTimelineData": {
+      "title": "タイムラインデータの読み込み（インポート）",
+      "description": "コピーしておいたJSONストリングを入力してください。",
+      "toasts": {
+        "success": "タイムラインデータの読み込みを成功しました",
+        "invalidData": "不適正なタイムラインデータが入力されました。"
+      }
     }
   },
-
-  "createGiftInventory": {
-    "title": "所持データを作成",
-    "description": "新しいギフト所持データの名前を入力してください。",
-    "placeholder": "ギフト所持データ名"
-  },
-
-  "renameGiftInventory": {
-    "title": "所持データの名前を変更",
-    "description": "所持データの新しい名前を入力してください。",
-    "placeholder": "ギフト所持データ名",
-    "save": "保存"
-  },
-
-  "exportStudentData": {
-    "title": "生徒データの書き出し（エクスポート）",
-    "description": "保存されている生徒のステータス情報を別の端末やブラウザに移行する。ブラウザのキャッシュを削除する前に、以下のJSONストリングをコピーしてください。"
-  },
-
-  "exportTimelineData": {
-    "title": "タイムラインデータの書き出し（エクスポート）",
-    "description": "保存されているタイムライン情報を別の端末やブラウザに移行する。ブラウザのキャッシュを削除する前に、以下のJSONストリングをコピーしてください。"
-  },
-
-  "importJustinPlannerData": {
-    "title": "Justin plannerから生徒データを読み込む",
-    "description": "Justin plannerからコピーしたJSONストリングを入力してください。",
-    "toasts": {
-      "success": "生徒データの読み込みを成功しました",
-      "invalidData": "不適正な生徒データが入力されました。。",
-      "invalidJustinData": "不適正なJustin plannerのデータが入力されました。"
-    }
-  },
-
-  "importStudentData": {
-    "title": "生徒データの読み込み（インポート）",
-    "description": "コピーしておいたJSONストリングを入力してください。",
-    "toasts": {
-      "success": "生徒データの読み込みを成功しました",
-      "invalidData": "不適正な生徒データが入力されました。"
-    }
-  },
-
-  "importTimelineData": {
-    "title": "タイムラインデータの読み込み（インポート）",
-    "description": "コピーしておいたJSONストリングを入力してください。",
-    "toasts": {
-      "success": "タイムラインデータの読み込みを成功しました",
-      "invalidData": "不適正なタイムラインデータが入力されました。"
-    }
-  },
-
   "school": {
     "Abydos": "アビドス高等学校",
     "Arius": "アリウス分校",
@@ -178,7 +167,6 @@
     "Tokiwadai": "常盤台中学",
     "Sakugawa": "柵川中学"
   },
-
   "club": {
     "Kohshinjo68": "便利屋68",
     "Justice": "正義実現委員会",
@@ -230,7 +218,6 @@
     "PublishingDepartment": "出版部",
     "EmptyClub": "無し"
   },
-
   "raids": {
     "binah": "ビナー",
     "kaiten": "KAITEN FX Mk.0",
@@ -245,7 +232,6 @@
     "geburah": "ゲブラ",
     "yesod": "イェソド"
   },
-
   "difficulties": {
     "Normal": "NORMAL",
     "Hard": "HARD",
@@ -256,19 +242,16 @@
     "Torment": "TORMENT",
     "Lunatic": "LUNATIC"
   },
-
   "duration": {
     "3min": "3分",
     "4min": "4分",
     "4min30sec": "4分30秒"
   },
-
   "terrain": {
     "Indoor": "屋内",
     "Outdoor": "屋外",
     "Street": "市街地"
   },
-
   "attackType": {
     "Explosion": "爆発",
     "Pierce": "貫通",
@@ -277,7 +260,6 @@
     "Normal": "ノーマル",
     "Mixed": "混合"
   },
-
   "defenseType": {
     "LightArmor": "軽装備",
     "HeavyArmor": "重装甲",
@@ -286,12 +268,10 @@
     "Normal": "通常装甲",
     "Mixed": "混合"
   },
-
   "combatClass": {
     "Main": "STRIKER",
     "Support": "SPECIAL"
   },
-
   "combatRole": {
     "DamageDealer": "アタッカー",
     "Tanker": "タンク",
@@ -299,18 +279,15 @@
     "Supporter": "サポーター",
     "Vehicle": "T.S"
   },
-
   "combatPosition": {
     "Back": "BACK",
     "Front": "FRONT",
     "Middle": "MIDDLE"
   },
-
   "notFound": {
     "title": "404 - ページが見つかりませんでした",
     "description": "お探しのページは存在いたしません。"
   },
-
   "helpSheet": {
     "formationDisplay": "編成表示",
     "inventoryManagement": "在庫管理",
@@ -319,7 +296,6 @@
     "timelineVisualizer": "TL可視化ツール",
     "railroadPuzzleSolver": "鉄道パズル解答器"
   },
-
   "userPreferences": {
     "title": "ユーザー設定",
     "savePreferences": "設定を保存",
@@ -344,13 +320,11 @@
       "defaultVerticalGroups": "デフォルトで垂直グループ化"
     }
   },
-
   "themeToggle": {
     "srOnly": "テーマを切り替える",
     "light": "ライト",
     "dark": "ダーク",
     "system": "システム"
   },
-
   "import": "インポート"
 }
