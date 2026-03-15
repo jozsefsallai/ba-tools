@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Outfit, Sono, Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -55,6 +56,17 @@ const nexonFootballGothic = localFont({
   ],
   variable: "--font-nexon-football-gothic",
 });
+
+export const metadata: Metadata = {
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "BA Tools",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+};
 
 export default async function RootLayout({
   children,

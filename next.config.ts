@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
 import createMDX from "@next/mdx";
 import createNextIntlPlugin from "next-intl/plugin";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -78,4 +85,4 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({});
 
-export default withNextIntl(withMDX(nextConfig));
+export default withSerwist(withNextIntl(withMDX(nextConfig)));

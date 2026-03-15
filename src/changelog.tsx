@@ -46,6 +46,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.website,
         description: "Added Japanese locale option.",
       },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Added ability to install the site as a PWA.",
+      },
     ],
     fixes: [
       {
