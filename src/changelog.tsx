@@ -40,6 +40,27 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "March 15, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Added Japanese locale option.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Fixed font rendering and text alignment issues.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Fixed a bug where whitespace-only trigger, notes, or text will break the image generation on Firefox.",
+      },
+    ],
+    changes: [],
+  },
+  {
     date: "February 4, 2025",
     features: [
       {

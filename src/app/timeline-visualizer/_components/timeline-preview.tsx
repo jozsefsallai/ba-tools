@@ -132,7 +132,7 @@ export function TimelinePreview({
                         />
                       )}
 
-                      {item.trigger && (
+                      {item.trigger && item.trigger.trim().length > 0 && (
                         <TimelinePreviewTrigger
                           trigger={item.trigger}
                           busy={busy}
@@ -140,7 +140,7 @@ export function TimelinePreview({
                       )}
                     </div>
 
-                    {item.notes && (
+                    {item.notes && item.notes.trim().length > 0 && (
                       <div
                         className={cn(
                           "font-nexon-football-gothic font-bold text-sm text-white px-3 cursor-pointer -ml-6 whitespace-pre-wrap text-center",
@@ -184,7 +184,7 @@ export function TimelinePreview({
                 );
               }
 
-              if (item.type === "text") {
+              if (item.type === "text" && item.text.trim().length > 0) {
                 return (
                   <div
                     key={item.id}
