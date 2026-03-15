@@ -502,7 +502,6 @@ export function FormationEditor() {
         displayOverline={displayOverline}
         noDisplayRole={!displayRoleIcon}
         groupsVertical={groupsVertical}
-        busy={generationInProgress}
       />
 
       <Card className="md:w-2/3 mx-auto">

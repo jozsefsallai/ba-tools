@@ -7,6 +7,7 @@ import { useCallback, type RefObject } from "react";
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import { TimelinePreviewTrigger } from "@/app/timeline-visualizer/_components/timeline-preview-trigger";
 
 type BaseItem = {
   type: "student" | "separator" | "text";
@@ -111,7 +112,6 @@ export function TimelinePreview({
                           <StudentCard
                             isSkillCard
                             noDisplayRole
-                            busy={busy}
                             student={item.target}
                           />
                         </div>
@@ -120,7 +120,6 @@ export function TimelinePreview({
                       <StudentCard
                         isSkillCard
                         noDisplayRole
-                        busy={busy}
                         student={item.student}
                         variantId={item.variantId}
                       />
@@ -134,15 +133,10 @@ export function TimelinePreview({
                       )}
 
                       {item.trigger && (
-                        <div
-                          className="absolute border-2 border-black dark:border-white top-0 left-[6px] skew-x-[-11deg] font-nexon-football-gothic font-bold text-lg px-1.5 bg-[#4b8fff] rounded-[2px] rounded-br-md z-10 text-white text-nowrap"
-                          style={{
-                            textShadow:
-                              "-1px -1px 0 rgba(0, 0, 0, 0.5), 1px -1px 0 rgba(0, 0, 0, 0.5), -1px 1px 0 rgba(0, 0, 0, 0.5), 1px 1px 0 rgba(0, 0, 0, 0.5)",
-                          }}
-                        >
-                          <div className="skew-x-[11deg]">{item.trigger}</div>
-                        </div>
+                        <TimelinePreviewTrigger
+                          trigger={item.trigger}
+                          busy={busy}
+                        />
                       )}
                     </div>
 

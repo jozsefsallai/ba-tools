@@ -24,7 +24,6 @@ export type FormationPreviewProps = {
   displayOverline?: boolean;
   noDisplayRole?: boolean;
   groupsVertical?: boolean;
-  busy?: boolean;
 };
 
 function Overline({
@@ -51,7 +50,6 @@ export function FormationPreview({
   displayOverline,
   noDisplayRole,
   groupsVertical = false,
-  busy,
 }: FormationPreviewProps) {
   const t = useTranslations();
 
@@ -85,7 +83,6 @@ export function FormationPreview({
                 <StudentCard
                   key={entry.id}
                   noDisplayRole={noDisplayRole}
-                  busy={busy}
                   student={entry.student}
                   {...entry}
                 />
@@ -110,7 +107,6 @@ export function FormationPreview({
                 <StudentCard
                   key={entry.id}
                   noDisplayRole={noDisplayRole}
-                  busy={busy}
                   student={entry.student}
                   {...entry}
                 />

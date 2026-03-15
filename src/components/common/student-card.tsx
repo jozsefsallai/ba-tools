@@ -18,7 +18,6 @@ export type StudentCardProps = {
   ueLevel?: UELevel;
   borrowed?: boolean;
   starter?: boolean;
-  busy?: boolean;
   variantId?: string;
   style?: React.CSSProperties;
   isSkillCard?: boolean;
@@ -32,15 +31,10 @@ export function StudentCard({
   ueLevel,
   borrowed,
   starter,
-  busy,
   variantId,
   style,
   isSkillCard,
 }: StudentCardProps) {
-  const isFirefox =
-    typeof window !== "undefined" &&
-    /firefox/i.test(window.navigator.userAgent);
-
   const iconUrl = useMemo(() => {
     const fallback = isSkillCard
       ? buildSkillPortraitUrl(student)
@@ -121,10 +115,7 @@ export function StudentCard({
               starLevel={starLevel}
               ueLevel={ueLevel}
               containerClassName="w-[24px] h-[24px] absolute bottom-[2px] left-[2px] skew-x-[11deg]"
-              textClassName={cn({
-                "mt-[2px]": !isFirefox || !busy,
-                "mt-[3px]": !isFirefox && busy,
-              })}
+              textClassName="leading-none mt-[1px]"
             />
           )}
 

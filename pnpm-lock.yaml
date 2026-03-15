@@ -156,8 +156,8 @@ importers:
         specifier: ^2.2.4
         version: 2.2.4
       html2canvas-pro:
-        specifier: ^1.5.8
-        version: 1.5.8
+        specifier: ^2.0.2
+        version: 2.0.2
       ismobilejs:
         specifier: ^1.1.1
         version: 1.1.1
@@ -3818,8 +3818,8 @@ packages:
   html-url-attributes@3.0.1:
     resolution: {integrity: sha512-ol6UPyBWqsrO6EJySPz2O7ZSr856WDrEzM5zMqp+FJJLGMW35cLYmmZnl0vztAZxRUoNZJFTCohfjuIJ8I4QBQ==}
 
-  html2canvas-pro@1.5.8:
-    resolution: {integrity: sha512-bVGAU7IvhBwBlRAmX6QhekX8lsaxmYoF6zIwf/HNlHscjx+KN8jw/U4PQRYqeEVm9+m13hcS1l5ChJB9/e29Lw==}
+  html2canvas-pro@2.0.2:
+    resolution: {integrity: sha512-9G/t0XgCZWonLwL0JwI7su6NdbOPUY7Ur4Ihpp8+XMaW9ibA2nDXF181Jr6tm94k8lX6sthpaXB3XqEnsMd5Cw==}
     engines: {node: '>=16.0.0'}
 
   http-status-codes@2.3.0:
@@ -8805,7 +8805,7 @@ snapshots:
 
   html-url-attributes@3.0.1: {}
 
-  html2canvas-pro@1.5.8:
+  html2canvas-pro@2.0.2:
     dependencies:
       css-line-break: 2.1.0
       text-segmentation: 1.0.3

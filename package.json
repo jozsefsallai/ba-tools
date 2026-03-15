@@ -66,7 +66,7 @@
     "deepmerge": "^4.3.1",
     "dotenv": "^17.2.3",
     "howler": "^2.2.4",
-    "html2canvas-pro": "^1.5.8",
+    "html2canvas-pro": "^2.0.2",
     "ismobilejs": "^1.1.1",
     "lucide-react": "^0.477.0",
     "motion": "^12.31.0",
