@@ -13,11 +13,11 @@ export function addStudentMediaUrlFieldsForMcp(
   }
 
   const iconUrl = buildCDNAbsoluteUrl(
-    buildStudentIconUrlFromId(id).replace("/cdn/", "/"),
+    buildStudentIconUrlFromId(id).replace("/cdn/", ""),
   );
 
   const portraitUrl = buildCDNAbsoluteUrl(
-    buildStudentPortraitUrlFromId(id).replace("/cdn/", "/"),
+    buildStudentPortraitUrlFromId(id).replace("/cdn/", ""),
   );
 
   return { ...row, iconUrl, portraitUrl };

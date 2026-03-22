@@ -50,7 +50,7 @@ export function registerSearchGiftsTool(server: McpServer) {
       const giftsForMcp = gifts.map((g) => ({
         ...g,
         iconUrl: buildCDNAbsoluteUrl(
-          buildItemIconUrl(g.iconName).replace("/cdn/", "/"),
+          buildItemIconUrl(g.iconName).replace("/cdn/", ""),
         ),
         adoredBy: g.adoredBy.map((s) =>
           addStudentMediaUrlFieldsForMcp({ ...s } as Record<string, unknown>),
