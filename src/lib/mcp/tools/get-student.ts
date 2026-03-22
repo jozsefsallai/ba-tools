@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
 import { mapStudentDeepEnumsToEn } from "@/lib/mcp/student-enum-labels-en";
 import { findStudentIdsMatchingSearchTags } from "@/lib/mcp/student-ids-by-search-tags";
+import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
@@ -54,22 +55,38 @@ export function registerGetStudentTool(server: McpServer) {
         });
       } else if (nameQuery?.trim()) {
         const q = nameQuery.trim();
-        const tagIds = await findStudentIdsMatchingSearchTags(q);
-        student = await db.student.findFirst({
-          where: {
-            OR: [
-              { name: { equals: q, mode: "insensitive" as const } },
-              { devName: { equals: q, mode: "insensitive" as const } },
-              { name: { contains: q, mode: "insensitive" as const } },
-              { devName: { contains: q, mode: "insensitive" as const } },
-              { firstName: { contains: q, mode: "insensitive" as const } },
-              { lastName: { contains: q, mode: "insensitive" as const } },
-              ...(tagIds.length > 0 ? [{ id: { in: tagIds } }] : []),
-            ],
-          },
+
+        const fuzzyCandidates = await db.student.findMany({
           orderBy: { defaultOrder: "asc" },
-          include,
+          select: { id: true, name: true, searchTags: true },
         });
+
+        const { ordered } = orderStudentsByFuzzyNameQuery(fuzzyCandidates, q);
+        const bestId = ordered[0]?.id;
+
+        if (bestId) {
+          student = await db.student.findUnique({
+            where: { id: bestId },
+            include,
+          });
+        } else {
+          const tagIds = await findStudentIdsMatchingSearchTags(q);
+          student = await db.student.findFirst({
+            where: {
+              OR: [
+                { name: { equals: q, mode: "insensitive" as const } },
+                { devName: { equals: q, mode: "insensitive" as const } },
+                { name: { contains: q, mode: "insensitive" as const } },
+                { devName: { contains: q, mode: "insensitive" as const } },
+                { firstName: { contains: q, mode: "insensitive" as const } },
+                { lastName: { contains: q, mode: "insensitive" as const } },
+                ...(tagIds.length > 0 ? [{ id: { in: tagIds } }] : []),
+              ],
+            },
+            orderBy: { defaultOrder: "asc" },
+            include,
+          });
+        }
       }
 
       if (!student) {

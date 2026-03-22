@@ -14,10 +14,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useStudents } from "@/hooks/use-students";
-import { commandScore } from "@/lib/text-score";
+import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "~prisma";
+import { useTranslations } from "next-intl";
 import React, {
   type PropsWithChildren,
   useCallback,
@@ -28,7 +28,7 @@ import React, {
   useState,
 } from "react";
 import { VList } from "virtua";
-import { useTranslations } from "next-intl";
+import type { Student } from "~prisma";
 
 export type StudentPickerHandle = {
   open(): void;
@@ -92,33 +92,8 @@ export const StudentPicker = React.memo(
         return students;
       }
 
-      const scores = new Map<string, number>();
-
-      return students
-        .filter((student) => {
-          const score = commandScore(
-            student.name,
-            searchInput,
-            student.searchTags,
-          );
-
-          if (score > 0.15) {
-            scores.set(student.id, score);
-            return true;
-          }
-
-          return false;
-        })
-        .sort((a, b) => {
-          const scoreA = scores.get(a.id) ?? 0;
-          const scoreB = scores.get(b.id) ?? 0;
-
-          if (scoreA === scoreB) {
-            return a.name.localeCompare(b.name);
-          }
-
-          return scoreB - scoreA;
-        });
+      return orderStudentsByFuzzyNameQuery(students, searchInput.trim())
+        .ordered;
     }, [students, searchInput]);
 
     const handleInputChange = useCallback((value: string) => {

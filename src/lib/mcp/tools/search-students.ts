@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
 import { mapStudentScalarEnumsToEn } from "@/lib/mcp/student-enum-labels-en";
-import { findStudentIdsMatchingSearchTags } from "@/lib/mcp/student-ids-by-search-tags";
+import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
@@ -20,14 +20,12 @@ export function registerSearchStudentsTool(server: McpServer) {
     {
       title: "Search students",
       description:
-        "Search Blue Archive students in the ba-tools database by text and optional combat filters. Returns a compact summary per student. The text query matches display/dev/first/last name and also `searchTags` (short lowercase tags, e.g. imari for Idol Mari).",
+        "Search Blue Archive students with optional combat filters. When `query` is set: all students matching the non-text filters are loaded, then ranked with a fuzzy scoring algorithm. Results are best match first and include `matchScore`. When `query` is omitted, returns up to `limit` rows in default roster order.",
       inputSchema: {
         query: z
           .string()
           .optional()
-          .describe(
-            "Substring match against display name, dev name, first/last name (case-insensitive), and searchTags (normalized: lowercase, alphanumeric only)",
-          ),
+          .describe("Fuzzy search against display name and searchTags"),
         school: z.enum(School).optional(),
         club: z.enum(Club).optional(),
         attackType: z.enum(AttackType).optional(),
@@ -59,48 +57,74 @@ export function registerSearchStudentsTool(server: McpServer) {
         limit,
       } = args;
 
-      const filters: object[] = [];
+      const structuralFilters: object[] = [];
+      if (school) structuralFilters.push({ school });
+      if (club) structuralFilters.push({ club });
+      if (attackType) structuralFilters.push({ attackType });
+      if (defenseType) structuralFilters.push({ defenseType });
+      if (combatClass) structuralFilters.push({ combatClass });
+      if (combatRole) structuralFilters.push({ combatRole });
+      if (weaponType) structuralFilters.push({ weaponType });
+      if (rarity !== undefined) structuralFilters.push({ rarity });
+
+      const select = {
+        id: true,
+        name: true,
+        devName: true,
+        school: true,
+        club: true,
+        combatClass: true,
+        combatRole: true,
+        combatPosition: true,
+        attackType: true,
+        defenseType: true,
+        weaponType: true,
+        rarity: true,
+        searchTags: true,
+      } as const;
+
+      const where =
+        structuralFilters.length > 0 ? { AND: structuralFilters } : undefined;
+
       if (query?.trim()) {
-        const q = query.trim();
-        const tagIds = await findStudentIdsMatchingSearchTags(q);
-        filters.push({
-          OR: [
-            { name: { contains: q, mode: "insensitive" as const } },
-            { devName: { contains: q, mode: "insensitive" as const } },
-            { firstName: { contains: q, mode: "insensitive" as const } },
-            { lastName: { contains: q, mode: "insensitive" as const } },
-            ...(tagIds.length > 0 ? [{ id: { in: tagIds } }] : []),
-          ],
+        const searchInput = query.trim();
+        const candidates = await db.student.findMany({
+          where,
+          orderBy: { defaultOrder: "asc" },
+          select,
         });
+
+        const { ordered, primaryScores, secondaryScores } =
+          orderStudentsByFuzzyNameQuery(candidates, searchInput);
+
+        const students = ordered.slice(0, limit);
+
+        const forMcp = students.map((s) =>
+          mapStudentScalarEnumsToEn({
+            ...s,
+            matchScore:
+              primaryScores.get(s.id) ?? secondaryScores.get(s.id) ?? 0,
+          } as Record<string, unknown>),
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text:
+                students.length === 0
+                  ? "No students matched the query and filters (fuzzy score threshold 0.15)."
+                  : jsonText(forMcp),
+            },
+          ],
+        };
       }
-      if (school) filters.push({ school });
-      if (club) filters.push({ club });
-      if (attackType) filters.push({ attackType });
-      if (defenseType) filters.push({ defenseType });
-      if (combatClass) filters.push({ combatClass });
-      if (combatRole) filters.push({ combatRole });
-      if (weaponType) filters.push({ weaponType });
-      if (rarity !== undefined) filters.push({ rarity });
 
       const students = await db.student.findMany({
-        where: filters.length ? { AND: filters } : undefined,
+        where,
         orderBy: { defaultOrder: "asc" },
         take: limit,
-        select: {
-          id: true,
-          name: true,
-          devName: true,
-          school: true,
-          club: true,
-          combatClass: true,
-          combatRole: true,
-          combatPosition: true,
-          attackType: true,
-          defenseType: true,
-          weaponType: true,
-          rarity: true,
-          searchTags: true,
-        },
+        select,
       });
 
       const forMcp = students.map((s) =>
