@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
 import { mapStudentScalarEnumsToEn } from "@/lib/mcp/student-enum-labels-en";
 import { findStudentIdsMatchingSearchTags } from "@/lib/mcp/student-ids-by-search-tags";
+import { addStudentMediaUrlFieldsForMcp } from "@/lib/mcp/student-media-urls";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { Prisma } from "~prisma";
@@ -20,7 +21,7 @@ export function registerListBannersTool(server: McpServer) {
     {
       title: "List / query game banners",
       description:
-        "Query scheduled gacha banners for the Global server (upcoming / roadmap data). Supports: time windows (overlap), finding reruns by pickup student name or id, and untilNextFest to list banners before the next Global fest pickup. Combine filters as needed.",
+        "Query scheduled gacha banners for the Global server (upcoming / roadmap data). Supports: time windows (overlap), finding reruns by pickup student name or id, and untilNextFest to list banners before the next Global fest pickup. Each pickup student includes `iconUrl` and `portraitUrl` (CDN paths). Combine filters as needed.",
       inputSchema: {
         limit: z.number().int().min(1).max(150).optional().default(50),
         includePast: z
@@ -248,7 +249,9 @@ export function registerListBannersTool(server: McpServer) {
       const bannersForMcp = banners.map((b) => ({
         ...b,
         pickupStudents: b.pickupStudents.map((s) =>
-          mapStudentScalarEnumsToEn({ ...s } as Record<string, unknown>),
+          addStudentMediaUrlFieldsForMcp(
+            mapStudentScalarEnumsToEn({ ...s } as Record<string, unknown>),
+          ),
         ),
       }));
 

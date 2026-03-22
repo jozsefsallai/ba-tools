@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
 import { mapStudentScalarEnumsToEn } from "@/lib/mcp/student-enum-labels-en";
+import { addStudentMediaUrlFieldsForMcp } from "@/lib/mcp/student-media-urls";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -20,7 +21,7 @@ export function registerSearchStudentsTool(server: McpServer) {
     {
       title: "Search students",
       description:
-        "Search Blue Archive students with optional combat filters. When `query` is set: all students matching the non-text filters are loaded, then ranked with a fuzzy scoring algorithm. Results are best match first and include `matchScore`. When `query` is omitted, returns up to `limit` rows in default roster order.",
+        "Search Blue Archive students with optional combat filters. When `query` is set: all students matching the non-text filters are loaded, then ranked with a fuzzy scoring algorithm. Results are best match first and include `matchScore`. Each student includes `iconUrl` and `portraitUrl` (CDN paths). When `query` is omitted, returns up to `limit` rows in default roster order.",
       inputSchema: {
         query: z
           .string()
@@ -100,11 +101,13 @@ export function registerSearchStudentsTool(server: McpServer) {
         const students = ordered.slice(0, limit);
 
         const forMcp = students.map((s) =>
-          mapStudentScalarEnumsToEn({
-            ...s,
-            matchScore:
-              primaryScores.get(s.id) ?? secondaryScores.get(s.id) ?? 0,
-          } as Record<string, unknown>),
+          addStudentMediaUrlFieldsForMcp(
+            mapStudentScalarEnumsToEn({
+              ...s,
+              matchScore:
+                primaryScores.get(s.id) ?? secondaryScores.get(s.id) ?? 0,
+            } as Record<string, unknown>),
+          ),
         );
 
         return {
@@ -128,7 +131,9 @@ export function registerSearchStudentsTool(server: McpServer) {
       });
 
       const forMcp = students.map((s) =>
-        mapStudentScalarEnumsToEn({ ...s } as Record<string, unknown>),
+        addStudentMediaUrlFieldsForMcp(
+          mapStudentScalarEnumsToEn({ ...s } as Record<string, unknown>),
+        ),
       );
 
       return {

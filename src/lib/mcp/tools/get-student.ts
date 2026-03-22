@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
 import { mapStudentDeepEnumsToEn } from "@/lib/mcp/student-enum-labels-en";
 import { findStudentIdsMatchingSearchTags } from "@/lib/mcp/student-ids-by-search-tags";
+import { addStudentMediaUrlsDeepForMcp } from "@/lib/mcp/student-media-urls";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -12,7 +13,7 @@ export function registerGetStudentTool(server: McpServer) {
     {
       title: "Get student details",
       description:
-        "Load one student by exact id or by nameQuery (display/dev/first/last name contains, case-insensitive, plus searchTags substring match after normalizing to lowercase alphanumerics), including skills and gift preferences.",
+        "Load one student by exact id or by nameQuery (display/dev/first/last name contains, case-insensitive, plus searchTags substring match after normalizing to lowercase alphanumerics), including skills and gift preferences. The student record includes `iconUrl` and `portraitUrl` (CDN paths); nested variants/baseVariant get the same when present.",
       inputSchema: {
         id: z
           .string()
@@ -106,10 +107,12 @@ export function registerGetStudentTool(server: McpServer) {
           {
             type: "text",
             text: jsonText(
-              mapStudentDeepEnumsToEn({ ...student } as Record<
-                string,
-                unknown
-              >),
+              addStudentMediaUrlsDeepForMcp(
+                mapStudentDeepEnumsToEn({ ...student } as Record<
+                  string,
+                  unknown
+                >),
+              ),
             ),
           },
         ],

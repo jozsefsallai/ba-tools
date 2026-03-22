@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
+import { addStudentMediaUrlFieldsForMcp } from "@/lib/mcp/student-media-urls";
+import { buildItemIconUrl } from "@/lib/url";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
@@ -9,7 +11,7 @@ export function registerSearchGiftsTool(server: McpServer) {
     {
       title: "Search gifts",
       description:
-        "Search gifts by name (EN or JP substring). Returns adored / loved / liked student lists per gift.",
+        "Search gifts by name (EN or JP substring). Each gift includes `iconUrl` (CDN path). Adored / loved / liked student lists include `iconUrl` and `portraitUrl` per student.",
       inputSchema: {
         query: z
           .string()
@@ -37,12 +39,27 @@ export function registerSearchGiftsTool(server: McpServer) {
           nameJP: true,
           rarity: true,
           expValue: true,
+          iconName: true,
           isLovedByEveryone: true,
           adoredBy: { select: { id: true, name: true } },
           lovedBy: { select: { id: true, name: true } },
           likedBy: { select: { id: true, name: true } },
         },
       });
+
+      const giftsForMcp = gifts.map((g) => ({
+        ...g,
+        iconUrl: buildItemIconUrl(g.iconName),
+        adoredBy: g.adoredBy.map((s) =>
+          addStudentMediaUrlFieldsForMcp({ ...s } as Record<string, unknown>),
+        ),
+        lovedBy: g.lovedBy.map((s) =>
+          addStudentMediaUrlFieldsForMcp({ ...s } as Record<string, unknown>),
+        ),
+        likedBy: g.likedBy.map((s) =>
+          addStudentMediaUrlFieldsForMcp({ ...s } as Record<string, unknown>),
+        ),
+      }));
 
       return {
         content: [
@@ -51,7 +68,7 @@ export function registerSearchGiftsTool(server: McpServer) {
             text:
               gifts.length === 0
                 ? "No gifts matched the query."
-                : jsonText(gifts),
+                : jsonText(giftsForMcp),
           },
         ],
       };
