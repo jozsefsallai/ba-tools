@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { jsonText } from "@/lib/mcp/json-text";
 import { addStudentMediaUrlFieldsForMcp } from "@/lib/mcp/student-media-urls";
-import { buildItemIconUrl } from "@/lib/url";
+import { buildCDNAbsoluteUrl, buildItemIconUrl } from "@/lib/url";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
@@ -49,7 +49,9 @@ export function registerSearchGiftsTool(server: McpServer) {
 
       const giftsForMcp = gifts.map((g) => ({
         ...g,
-        iconUrl: buildItemIconUrl(g.iconName),
+        iconUrl: buildCDNAbsoluteUrl(
+          buildItemIconUrl(g.iconName).replace("/cdn/", "/"),
+        ),
         adoredBy: g.adoredBy.map((s) =>
           addStudentMediaUrlFieldsForMcp({ ...s } as Record<string, unknown>),
         ),
