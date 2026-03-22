@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "works.nimblebun/ba-tools-mcp",
+  "description": "MCP server for Joe's Blue Archive tools. Search students, gifts, and banners.",
+  "version": "0.1.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://ba.joexyz.online/mcp"
+    }
+  ]
+}

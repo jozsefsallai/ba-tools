@@ -277,6 +277,7 @@
     "Pierce": "Piercing",
     "Mystic": "Mystic",
     "Sonic": "Sonic",
+    "Chemical": "Corrosive",
     "Normal": "Normal",
     "Mixed": "Mixed"
   },
@@ -286,6 +287,7 @@
     "HeavyArmor": "Heavy",
     "Unarmed": "Special",
     "ElasticArmor": "Elastic",
+    "CompositeArmor": "Composite",
     "Normal": "Normal",
     "Mixed": "Mixed"
   },

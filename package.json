@@ -28,6 +28,7 @@
     "@esotericsoftware/spine-pixi-v7": "^4.2.75",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
+    "@modelcontextprotocol/sdk": "1.25.3",
     "@napi-rs/image": "^1.11.2",
     "@neondatabase/serverless": "^1.0.2",
     "@next/mdx": "^16.0.7",
@@ -55,7 +56,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@resvg/resvg-wasm": "^2.6.2",
     "@serwist/next": "^9.5.7",
-    "ai": "^5.0.15",
+    "ai": "^6.0.134",
     "bufferutil": "^4.0.9",
     "chromadb": "^3.0.12",
     "class-variance-authority": "^0.7.1",
@@ -70,6 +71,7 @@
     "html2canvas-pro": "^2.0.2",
     "ismobilejs": "^1.1.1",
     "lucide-react": "^0.477.0",
+    "mcp-handler": "^1.0.7",
     "motion": "^12.31.0",
     "next": "16.0.10",
     "next-intl": "^4.6.1",
@@ -102,7 +104,7 @@
     "uuid": "^11.1.0",
     "virtua": "^0.45.3",
     "ws": "^8.18.3",
-    "zod": "3.25.42"
+    "zod": "4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

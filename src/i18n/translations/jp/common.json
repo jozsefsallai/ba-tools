@@ -257,6 +257,7 @@
     "Pierce": "貫通",
     "Mystic": "神秘",
     "Sonic": "振動",
+    "Chemical": "分解",
     "Normal": "ノーマル",
     "Mixed": "混合"
   },
@@ -265,6 +266,7 @@
     "HeavyArmor": "重装甲",
     "Unarmed": "特殊装甲",
     "ElasticArmor": "弾力装甲",
+    "CompositeArmor": "複合装甲",
     "Normal": "通常装甲",
     "Mixed": "混合"
   },
