@@ -136,7 +136,7 @@ export async function ToolsAndResources() {
                 <h3 className="text-lg font-bold font-heading text-[#000080] dark:text-[#00ff00]">
                   {item.name}
                 </h3>
-                <p className="text-sm comic-sans text-white">
+                <p className="text-sm comic-sans text-black dark:text-white">
                   {item.description}
                 </p>
               </div>
