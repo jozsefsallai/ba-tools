@@ -24,6 +24,29 @@ type Resource = {
   isNew?: boolean;
 };
 
+const CARD_GEOSITIES = [
+  {
+    border: "border-[#ff00ff]",
+    bg: "bg-[#ffccff]",
+    darkBg: "dark:bg-[#330033]",
+  },
+  {
+    border: "border-[#00ff00]",
+    bg: "bg-[#ccffcc]",
+    darkBg: "dark:bg-[#003300]",
+  },
+  {
+    border: "border-[#00ffff]",
+    bg: "bg-[#ccffff]",
+    darkBg: "dark:bg-[#003333]",
+  },
+  {
+    border: "border-[#ffff00]",
+    bg: "bg-[#ffffcc]",
+    darkBg: "dark:bg-[#333300]",
+  },
+] as const;
+
 export async function ToolsAndResources() {
   const t = await getTranslations();
 
@@ -95,34 +118,44 @@ export async function ToolsAndResources() {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      {RESOURCES.map((item) => (
-        <Link key={item.path} href={item.path}>
-          <div className="h-full flex items-start space-x-4 border rounded-md p-4 hover:bg-accent relative">
-            {item.icon}
+      {RESOURCES.map((item, index) => {
+        const geo = CARD_GEOSITIES[index % CARD_GEOSITIES.length];
+        return (
+          <Link key={item.path} href={item.path}>
+            <div
+              className={cn(
+                "h-full flex items-start space-x-4 border-4 rounded-none p-4 shadow-md relative hover:brightness-110 transition",
+                geo.border,
+                geo.bg,
+                geo.darkBg,
+              )}
+            >
+              {item.icon}
 
-            <div>
-              <h3 className="text-lg font-semibold">{item.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {item.description}
-              </p>
+              <div>
+                <h3 className="text-lg font-bold font-heading text-[#000080] dark:text-[#00ff00]">
+                  {item.name}
+                </h3>
+                <p className="text-sm comic-sans text-white">
+                  {item.description}
+                </p>
+              </div>
+
+              {(item.isHot || item.isNew) && (
+                <span
+                  className={cn(
+                    "absolute top-2 right-2 comic-sans uppercase text-xs font-bold px-2 py-1 border-2 border-black bg-[#ffff00] text-[#ff0000] blink",
+                  )}
+                >
+                  {item.isHot
+                    ? `${t("common.hot")}!!!`
+                    : `${t("common.new")}!!!`}
+                </span>
+              )}
             </div>
-
-            {(item.isHot || item.isNew) && (
-              <span
-                className={cn(
-                  "absolute top-5 right-4 font-nexon-football-gothic uppercase text-xs italic px-2 py-1 rounded-full text-white",
-                  {
-                    "text-yellow-400": item.isHot,
-                    "text-red-400": item.isNew,
-                  },
-                )}
-              >
-                {item.isHot ? t("common.hot") : t("common.new")}
-              </span>
-            )}
-          </div>
-        </Link>
-      ))}
+          </Link>
+        );
+      })}
     </div>
   );
 }

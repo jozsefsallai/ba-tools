@@ -69,6 +69,26 @@
     "changelog": {
       "title": "Last Changelog",
       "viewAll": "See Full Changelog"
+    },
+
+    "visitorCounter": "You are visitor No. {count}! Thanks 4 visiting my site!!!",
+
+    "guestbook": {
+      "title": "Guestbook",
+      "nameLabel": "Your name",
+      "namePlaceholder": "cat0808",
+      "messageLabel": "Your message",
+      "messagePlaceholder": "this site SUCKS!!!!",
+      "submit": "Sign the guestbook!",
+      "submitting": "Signing…",
+      "loading": "Loading messages…",
+      "empty": "Be the first to sign!",
+      "success": "Thanks for signing!",
+      "error": "Something went wrong. Try again.",
+      "validation": "Enter a name and a message.",
+      "tooLong": "Message is too long (max 180 characters).",
+      "alreadySigned": "You already signed the guestbook from this browser.",
+      "alreadySignedBlurb": "You already signed as {name}! Thanks!!!"
     }
   },
 

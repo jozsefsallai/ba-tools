@@ -17,16 +17,30 @@ export function TheFooter({
   }
 
   return (
-    <footer className="border-t px-2 py-8 bg-background text-muted-foreground text-center text-sm relative z-10">
+    <footer className="border-t-4 border-[#ffff00] px-2 py-8 text-center text-sm relative z-10 bg-gradient-to-r from-[#ff00ff] via-[#00ffff] to-[#ffff00] dark:from-[#330033] dark:via-[#003366] dark:to-[#003300] text-[#000080] dark:text-[#00ff00]">
       <div className="container">
-        <div className="md:w-2/3 mx-auto">
+        <div className="md:w-2/3 mx-auto comic-sans space-y-2">
+          <p className="blink text-[#ff0000] dark:text-[#ffff00] font-bold text-base">
+            [NEW!] We got a footer now!!! [NEW!]
+          </p>
+          <p>
+            Webmaster:{" "}
+            <a
+              href="mailto:hi@joexyz.online"
+              className="underline text-[#0000ff] dark:text-[#ff99ff]"
+            >
+              email me!!!
+            </a>{" "}
+            ~ no spam plz ~
+          </p>
           {t.rich("common.footer.copyright", {
             a: (children) => (
               <a
                 href="https://joexyz.online"
                 target="_blank"
                 rel="noreferrer noopener"
-                className="underline"
+                className="underline font-bold"
+                style={{ color: "#660099" }}
               >
                 {children}
               </a>

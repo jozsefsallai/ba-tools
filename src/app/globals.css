@@ -9,104 +9,96 @@
   margin-inline: auto;
 }
 
+/* Geocities-era neon palette */
 :root {
-  --background: oklch(0.994 0 0);
-  --foreground: oklch(0 0 0);
-  --card: oklch(0.994 0 0);
-  --card-foreground: oklch(0 0 0);
-  --popover: oklch(0.9911 0 0);
-  --popover-foreground: oklch(0 0 0);
-  --primary: oklch(0.4384 0.1511 312.7376);
-  --primary-foreground: oklch(1.0 0 0);
-  --secondary: oklch(0.954 0.0063 255.4755);
-  --secondary-foreground: oklch(0.1344 0 0);
-  --muted: oklch(0.9702 0 0);
-  --muted-foreground: oklch(0.4386 0 0);
-  --accent: oklch(0.9393 0.0288 266.368);
-  --accent-foreground: oklch(0.1344 0 0);
-  --destructive: oklch(0.629 0.1902 23.0704);
-  --destructive-foreground: oklch(1.0 0 0);
-  --border: oklch(0.93 0.0094 286.2156);
-  --input: oklch(0.9401 0 0);
-  --ring: oklch(0 0 0);
-  --chart-1: oklch(0.7459 0.1483 156.4499);
-  --chart-2: oklch(0.5393 0.2713 286.7462);
-  --chart-3: oklch(0.7336 0.1758 50.5517);
-  --chart-4: oklch(0.5828 0.1809 259.7276);
-  --chart-5: oklch(0.559 0 0);
-  --sidebar: oklch(0.9777 0.0051 247.8763);
-  --sidebar-foreground: oklch(0 0 0);
-  --sidebar-primary: oklch(0 0 0);
-  --sidebar-primary-foreground: oklch(1.0 0 0);
-  --sidebar-accent: oklch(0.9401 0 0);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(0.9401 0 0);
-  --sidebar-ring: oklch(0 0 0);
-  --radius: 0.625rem;
-  --shadow-2xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
-  --shadow-xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
-  --shadow-sm: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-md: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 2px 4px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-lg: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 4px 6px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 8px 10px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
-  --tracking-normal: 0em;
+  --font-heading: "Times New Roman", Times, Georgia, serif;
+  --background: #00ffff;
+  --foreground: #330033;
+  --card: #ffff99;
+  --card-foreground: #000080;
+  --popover: #ffccff;
+  --popover-foreground: #000000;
+  --primary: #ff00ff;
+  --primary-foreground: #ffff00;
+  --secondary: #ccff00;
+  --secondary-foreground: #660066;
+  --muted: #99ffcc;
+  --muted-foreground: #990099;
+  --accent: #ff6600;
+  --accent-foreground: #ffffff;
+  --destructive: #ff0000;
+  --destructive-foreground: #ffff00;
+  --border: #ffff00;
+  --input: #ff99ff;
+  --ring: #00ff00;
+  --chart-1: #ff00ff;
+  --chart-2: #00ff00;
+  --chart-3: #ffff00;
+  --chart-4: #00ffff;
+  --chart-5: #ff6600;
+  --sidebar: #ffccff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #ff00ff;
+  --sidebar-primary-foreground: #ffff00;
+  --sidebar-accent: #ccff00;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #ffff00;
+  --sidebar-ring: #00ff00;
+  --radius: 0.125rem;
+  --shadow-2xs: 4px 4px 0 #ff00ff;
+  --shadow-xs: 4px 4px 0 #00ff00;
+  --shadow-sm: 6px 6px 0 #ffff00;
+  --shadow: 6px 6px 0 #ff6600;
+  --shadow-md: 8px 8px 0 #00ffff;
+  --shadow-lg: 10px 10px 0 #ff00ff;
+  --shadow-xl: 12px 12px 0 #00ff00;
+  --shadow-2xl: 16px 16px 0 #ffff00;
+  --tracking-normal: 0.02em;
   --spacing: 0.25rem;
 }
 
 .dark {
-  --background: oklch(0.2223 0.006 271.1393);
-  --foreground: oklch(0.9551 0 0);
-  --card: oklch(0.2568 0.0076 274.6528);
-  --card-foreground: oklch(0.9551 0 0);
-  --popover: oklch(0.2568 0.0076 274.6528);
-  --popover-foreground: oklch(0.9551 0 0);
-  --primary: oklch(0.4384 0.1511 312.7376);
-  --primary-foreground: oklch(1.0 0 0);
-  --secondary: oklch(0.294 0.013 272.9312);
-  --secondary-foreground: oklch(0.9551 0 0);
-  --muted: oklch(0.294 0.013 272.9312);
-  --muted-foreground: oklch(0.7058 0 0);
-  --accent: oklch(0.2795 0.0368 260.031);
-  --accent-foreground: oklch(0.9551 0 0);
-  --destructive: oklch(0.444 0.177 26.899);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.3289 0.0092 268.3843);
-  --input: oklch(0.3289 0.0092 268.3843);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.8003 0.1821 151.711);
-  --chart-2: oklch(0.6132 0.2294 291.7437);
-  --chart-3: oklch(0.8077 0.1035 19.5706);
-  --chart-4: oklch(0.6691 0.1569 260.1063);
-  --chart-5: oklch(0.7058 0 0);
-  --sidebar: oklch(0.2011 0.0039 286.0396);
-  --sidebar-foreground: oklch(0.9551 0 0);
-  --sidebar-primary: oklch(0.4384 0.1511 312.7376);
-  --sidebar-primary-foreground: oklch(1.0 0 0);
-  --sidebar-accent: oklch(0.294 0.013 272.9312);
-  --sidebar-accent-foreground: oklch(1.0 0 0);
-  --sidebar-border: oklch(0.3289 0.0092 268.3843);
-  --sidebar-ring: oklch(0.4384 0.1511 312.7376);
-  --radius: 0.625rem;
-  --shadow-2xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
-  --shadow-xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
-  --shadow-sm: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 1px 2px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-md: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 2px 4px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-lg: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 4px 6px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.16), 0px 8px 10px -1px
-    hsl(0 0% 0% / 0.16);
-  --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
+  --background: #000000;
+  --foreground: #00ff00;
+  --card: #1a0033;
+  --card-foreground: #00ffff;
+  --popover: #330066;
+  --popover-foreground: #ff00ff;
+  --primary: #ff00ff;
+  --primary-foreground: #ffff00;
+  --secondary: #003300;
+  --secondary-foreground: #00ff00;
+  --muted: #330033;
+  --muted-foreground: #ff99ff;
+  --accent: #0000ff;
+  --accent-foreground: #ffff00;
+  --destructive: #ff0000;
+  --destructive-foreground: #ffffff;
+  --border: #00ffff;
+  --input: #6600ff;
+  --ring: #ff00ff;
+  --chart-1: #00ff00;
+  --chart-2: #ff00ff;
+  --chart-3: #ffff00;
+  --chart-4: #00ffff;
+  --chart-5: #ff6600;
+  --sidebar: #1a0033;
+  --sidebar-foreground: #00ff00;
+  --sidebar-primary: #ff00ff;
+  --sidebar-primary-foreground: #ffff00;
+  --sidebar-accent: #003366;
+  --sidebar-accent-foreground: #00ffff;
+  --sidebar-border: #00ff00;
+  --sidebar-ring: #ff00ff;
+  --radius: 0.125rem;
+  --shadow-2xs: 4px 4px 0 #00ff00;
+  --shadow-xs: 4px 4px 0 #ff00ff;
+  --shadow-sm: 6px 6px 0 #ffff00;
+  --shadow: 6px 6px 0 #00ffff;
+  --shadow-md: 8px 8px 0 #ff00ff;
+  --shadow-lg: 10px 10px 0 #00ff00;
+  --shadow-xl: 12px 12px 0 #ffff00;
+  --shadow-2xl: 16px 16px 0 #ff00ff;
 }
 
 @theme inline {
@@ -147,9 +139,9 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
 
   --shadow-2xs: var(--shadow-2xs);
@@ -174,15 +166,170 @@
   }
   body {
     @apply bg-background text-foreground;
+    cursor: crosshair;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: bold;
   }
 }
 
+/* Comic Sans everywhere (Geocities default) */
+html {
+  --font-sans: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive, Papyrus,
+    fantasy;
+}
+
 html[lang="en"] {
-  --font-sans: var(--font-outfit);
+  --font-sans: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive, Papyrus,
+    fantasy;
 }
 
 html[lang="jp"] {
-  --font-sans: var(--font-noto-sans-jp);
+  --font-sans: "Comic Sans MS", "Comic Sans", var(--font-noto-sans-jp), cursive;
+}
+
+/* Tiled star/sparkle background */
+.geocities-bg {
+  background-color: var(--background);
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      #ffff00 0,
+      transparent 8px
+    ), radial-gradient(circle at 80% 70%, #ff00ff 0, transparent 6px),
+    radial-gradient(circle at 40% 80%, #00ffff 0, transparent 7px),
+    radial-gradient(circle at 90% 20%, #00ff00 0, transparent 5px),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 24px,
+      rgba(255, 0, 255, 0.08) 24px,
+      rgba(255, 0, 255, 0.08) 25px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 24px,
+      rgba(0, 255, 255, 0.06) 24px,
+      rgba(0, 255, 255, 0.06) 25px
+    );
+}
+
+.dark .geocities-bg {
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      #ffff00 0,
+      transparent 8px
+    ), radial-gradient(circle at 80% 70%, #ff00ff 0, transparent 6px),
+    radial-gradient(circle at 40% 80%, #00ffff 0, transparent 7px),
+    radial-gradient(circle at 90% 20%, #00ff00 0, transparent 5px),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 32px,
+      rgba(0, 255, 0, 0.05) 32px,
+      rgba(0, 255, 0, 0.05) 33px
+    );
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes rainbow {
+  0% {
+    color: #ff0000;
+  }
+  16% {
+    color: #ff9900;
+  }
+  33% {
+    color: #ffff00;
+  }
+  50% {
+    color: #00ff00;
+  }
+  66% {
+    color: #0099ff;
+  }
+  83% {
+    color: #9900ff;
+  }
+  100% {
+    color: #ff0000;
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px #ffff00) brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 12px #ff00ff) brightness(1.2);
+    transform: scale(1.02);
+  }
+}
+
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+.marquee-scroll {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee-scroll 12s linear infinite;
+}
+
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.rainbow-text {
+  animation: rainbow 3s linear infinite;
+}
+
+.neon-glow {
+  text-shadow: 0 0 4px #ff00ff, 0 0 8px #00ffff, 0 0 12px #ffff00;
+}
+
+.comic-sans {
+  font-family: "Comic Sans MS", "Comic Sans", cursive, Papyrus, fantasy !important;
+}
+
+.times-new-roman {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+.sparkle-pulse {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
 }
 
 .no-arrows::-webkit-outer-spin-button,
