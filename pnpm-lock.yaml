@@ -176,9 +176,6 @@ importers:
       motion:
         specifier: ^12.31.0
         version: 12.31.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      neko-ts:
-        specifier: ^0.0.6
-        version: 0.0.6
       next:
         specifier: 16.0.10
         version: 16.0.10(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -4561,9 +4558,6 @@ packages:
   negotiator@1.0.0:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
-
-  neko-ts@0.0.6:
-    resolution: {integrity: sha512-PqKIgmqD1LwRM7fb1gqC3ITbojxB47hZmm6eUYjLUAM5w1+KnQ9TZxMDMJHl7pK0XE37ekMPSD7Vzfn0Pa6wow==}
 
   neo-async@2.6.2:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
@@ -10042,8 +10036,6 @@ snapshots:
   nanoid@3.3.9: {}
 
   negotiator@1.0.0: {}
-
-  neko-ts@0.0.6: {}
 
   neo-async@2.6.2: {}
 

@@ -64,26 +64,6 @@
     "changelog": {
       "title": "更新履歴",
       "viewAll": "すべての更新履歴を見る"
-    },
-
-    "visitorCounter": "あなたは {count} 番目の訪問者だよ！来てくれてありがとう!!!",
-
-    "guestbook": {
-      "title": "ゲストブック",
-      "nameLabel": "お名前",
-      "namePlaceholder": "cat0808",
-      "messageLabel": "メッセージ",
-      "messagePlaceholder": "このサイトは糞だ!!!1",
-      "submit": "書き込む！",
-      "submitting": "送信中…",
-      "loading": "読み込み中…",
-      "empty": "最初の書き込みをどうぞ！",
-      "success": "書き込みありがとう！",
-      "error": "エラーが起きたよ。もう一度試してね。",
-      "validation": "名前とメッセージを入力してね。",
-      "tooLong": "メッセージが長すぎるよ（最大180文字）。",
-      "alreadySigned": "このブラウザからはもう書き込み済みだよ。",
-      "alreadySignedBlurb": "もう「{name}」として書き込んだよ！ありがとう!!!"
     }
   },
   "credits": {

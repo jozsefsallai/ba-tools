@@ -15,7 +15,7 @@ import { useUser } from "@clerk/nextjs";
 import { RefreshCwIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
-// import seedrandom from "seedrandom";
+import seedrandom from "seedrandom";
 
 type SOTDView = "global" | "user";
 
@@ -33,14 +33,13 @@ export function StudentOfTheDay() {
   }, []);
 
   const globalSOTD = useMemo(() => {
-    // const globalSeed = Buffer.from(dateTimestamp.toString(), "utf-8")
-    //   .toString("base64")
-    //   .replace(/=/g, "");
+    const globalSeed = Buffer.from(dateTimestamp.toString(), "utf-8")
+      .toString("base64")
+      .replace(/=/g, "");
 
-    // const rng = seedrandom(globalSeed);
+    const rng = seedrandom(globalSeed);
 
-    // return students[Math.floor(rng() * students.length)];
-    return students.find((student) => student.id === "koyuki") ?? students[0];
+    return students[Math.floor(rng() * students.length)];
   }, [dateTimestamp, students]);
 
   const globalSOTDPortrait = useMemo(() => {
@@ -52,14 +51,13 @@ export function StudentOfTheDay() {
       return null;
     }
 
-    // const userSeed = Buffer.from(`${user.id}-${dateTimestamp}`, "utf-8")
-    //   .toString("base64")
-    //   .replace(/=/g, "");
+    const userSeed = Buffer.from(`${user.id}-${dateTimestamp}`, "utf-8")
+      .toString("base64")
+      .replace(/=/g, "");
 
-    // const rng = seedrandom(userSeed);
+    const rng = seedrandom(userSeed);
 
-    // return students[Math.floor(rng() * students.length)];
-    return students.find((student) => student.id === "koyuki") ?? students[0];
+    return students[Math.floor(rng() * students.length)];
   }, [dateTimestamp, user, students]);
 
   const userSOTDPortrait = useMemo(() => {
@@ -84,49 +82,43 @@ export function StudentOfTheDay() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-2xl font-heading neon-glow text-[#ff6600] dark:text-[#ffff00]">
-        {t("tools.studentOfTheDay.title")}
-      </h2>
+      <h2 className="text-2xl">{t("tools.studentOfTheDay.title")}</h2>
 
       <div className="flex-1 relative">
         <FlippableCard
           isFlipped={view === "user"}
           front={
-            <div className="relative h-full flex flex-col items-center justify-center gap-2 p-6 border-4 border-[#ff00ff] rounded-none bg-card shadow-[8px_8px_0_#00ffff] sparkle-pulse">
+            <div className="relative h-full flex flex-col items-center justify-center gap-2 p-6 border rounded-md bg-card">
               <img
                 src={globalSOTDPortrait}
                 alt={globalSOTD.name}
-                className="rounded-full object-cover w-36 h-36 border-4 border-[#ffff00] shadow-[4px_4px_0_#ff00ff]"
+                className="rounded-full object-cover w-36 h-36 border-4 border-white shadow-md"
               />
 
-              <div className="font-bold text-xl font-heading rainbow-text">
-                {globalSOTD.name}
-              </div>
+              <div className="font-bold text-xl">{globalSOTD.name}</div>
 
-              <div className="absolute top-2 left-2 border-2 border-[#00ff00] bg-[#ffff00] rounded-none px-2 py-0.5 text-xs text-[#000080] uppercase comic-sans">
+              <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground uppercase">
                 {t("tools.studentOfTheDay.siteWide")}
               </div>
             </div>
           }
           back={
             userSOTD && userSOTDPortrait ? (
-              <div className="relative h-full flex flex-col items-center justify-center gap-2 p-6 border-4 border-[#00ff00] rounded-none bg-card overflow-hidden shadow-[8px_8px_0_#ff00ff]">
-                <div className="bg-gradient-to-r from-transparent via-[#00ffff]/30 dark:via-[#ff00ff]/40 to-transparent w-4/5 absolute left-1/5 -skew-x-[45deg] top-0 bottom-0" />
+              <div className="relative h-full flex flex-col items-center justify-center gap-2 p-6 border rounded-md bg-card overflow-hidden">
+                <div className="bg-gradient-to-r from-transparent via-blue-400/15 dark:via-blue-400/35 to-transparent w-4/5 absolute left-1/5 -skew-x-[45deg] top-0 bottom-0" />
 
                 <img
                   src={userSOTDPortrait}
                   alt={userSOTD.name}
-                  className="relative rounded-full object-cover w-36 h-36 border-4 border-[#ff00ff] shadow-[4px_4px_0_#00ff00]"
+                  className="relative rounded-full object-cover w-36 h-36 border-4 border-white shadow-md"
                 />
 
-                <div className="relative font-bold text-xl font-heading rainbow-text">
+                <div className="relative font-bold text-xl">
                   {userSOTD.name}
                 </div>
 
-                <div className="absolute top-2 left-2 border-2 border-[#ffff00] bg-[#000080] rounded-none px-2 py-0.5 text-xs text-[#00ff00] font-medium uppercase comic-sans">
-                  {userName
-                    ? t("tools.studentOfTheDay.userStudent", { name: userName })
-                    : t("tools.studentOfTheDay.yourStudent")}
+                <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground font-medium uppercase">
+                  {userName ? t("tools.studentOfTheDay.userStudent", { name: userName }) : t("tools.studentOfTheDay.yourStudent")}
                 </div>
               </div>
             ) : null

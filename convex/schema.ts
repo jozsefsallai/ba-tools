@@ -205,12 +205,6 @@ export default defineSchema({
     gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
   }).index("by_userId", ["userId"]),
 
-  guestbookEntries: defineTable({
-    name: v.string(),
-    message: v.string(),
-    submitterToken: v.optional(v.string()),
-  }).index("by_submitterToken", ["submitterToken"]),
-
   pvpMatchRecord: defineTable({
     userId: v.id("users"),
     seasonId: v.id("pvpSeason"),

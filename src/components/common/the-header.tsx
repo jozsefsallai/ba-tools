@@ -2,15 +2,7 @@
 
 import plana from "@/app/opengraph-image.png";
 
-import { UserPreferences } from "@/components/common/user-preferences";
-import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -22,19 +14,27 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { SignInButton, UserButton } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated } from "convex/react";
+import { SignInButton, UserButton } from "@clerk/nextjs";
 import {
   ChartNoAxesGanttIcon,
   CogIcon,
   MenuIcon,
   UsersIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { UserPreferences } from "@/components/common/user-preferences";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { useTranslations } from "next-intl";
+import { LocaleToggle } from "@/components/locale-toggle";
 
 type NavLink = {
   href: string;
@@ -132,36 +132,20 @@ export function TheHeader() {
     },
   ];
 
-  const NAV_TRIGGER_COLORS = [
-    "text-[#ff00ff] data-[state=open]:text-[#ff00ff]",
-    "text-[#00cc00] data-[state=open]:text-[#00cc00]",
-    "text-[#0099ff] data-[state=open]:text-[#0099ff]",
-    "text-[#ff6600] data-[state=open]:text-[#ff6600]",
-  ] as const;
-
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
   return (
-    <header className="border-b-4 border-[#ff00ff] bg-[#ffffcc] dark:bg-[#1a0033] p-0">
-      <div className="marquee-container bg-[#000080] text-[#ffff00] py-1.5 text-xs md:text-sm overflow-hidden border-b-2 border-[#00ff00]">
-        <div className="overflow-hidden whitespace-nowrap">
-          <span className="inline-block marquee-scroll comic-sans font-bold px-2">
-            ★ WELCOME 2 {t("common.appName").toUpperCase()} ★ HOT LINKS BELOW ★{" "}
-            <span className="blink">NEW CONTENT EVERY DAY (NOT)</span>
-          </span>
-        </div>
-      </div>
-
-      <div className="container flex justify-between items-center gap-2 p-2 py-3">
+    <header className="border-b p-2 py-3">
+      <div className="container flex justify-between items-center gap-2">
         <Link href="/">
           <div className="flex items-center gap-4">
-            <div className="relative sparkle-pulse">
+            <div className="relative">
               <Image src={plana} alt="Plana" width={48} height={48} />
             </div>
 
-            <h1 className="hidden lg:block text-2xl font-bold font-heading neon-glow text-[#ff00ff] dark:text-[#00ff00]">
+            <h1 className="hidden lg:block text-2xl font-bold">
               {t("common.appName")}
             </h1>
           </div>
@@ -175,14 +159,9 @@ export function TheHeader() {
             className="hidden md:block z-10"
           >
             <NavigationMenuList>
-              {NAVIGATION_GROUPS.map((group, index) => (
+              {NAVIGATION_GROUPS.map((group) => (
                 <NavigationMenuItem key={group.id}>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      "cursor-pointer comic-sans font-bold",
-                      NAV_TRIGGER_COLORS[index % NAV_TRIGGER_COLORS.length],
-                    )}
-                  >
+                  <NavigationMenuTrigger className="cursor-pointer">
                     {group.name}
                   </NavigationMenuTrigger>
 

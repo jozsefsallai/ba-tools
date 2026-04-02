@@ -15,7 +15,6 @@ import type {
 } from "convex/server";
 import type * as formation from "../formation.js";
 import type * as gifts from "../gifts.js";
-import type * as guestbook from "../guestbook.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as pvp from "../pvp.js";
@@ -36,7 +35,6 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   formation: typeof formation;
   gifts: typeof gifts;
-  guestbook: typeof guestbook;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   pvp: typeof pvp;

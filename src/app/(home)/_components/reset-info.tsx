@@ -65,20 +65,16 @@ export function ResetInfo() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-2xl font-heading text-[#ff00ff] dark:text-[#00ffff] border-b-4 border-dashed border-[#00ff00] pb-1">
-        {t("tools.resetInfo.title")}
-      </h2>
+      <h2 className="text-2xl">{t("tools.resetInfo.title")}</h2>
 
-      <div className="flex flex-col items-center gap-4 px-6 py-4 border-4 border-[#ff0000] rounded-none bg-[#ffeeee] dark:bg-[#330000]">
+      <div className="flex flex-col items-center gap-4 px-6 py-4 border rounded-md bg-card">
         {resetDate && (
           <div className="flex flex-col items-center">
-            <div className="text-sm times-new-roman font-bold text-[#000080] dark:text-[#00ff00]">
-              {t("tools.resetInfo.nextReset")}
-            </div>
+            <div className="text-sm text-muted-foreground">{t("tools.resetInfo.nextReset")}</div>
 
             <CountdownTimer
               targetTime={resetDate}
-              className="text-3xl times-new-roman font-bold blink text-[#ff0000]"
+              className="text-3xl"
               onComplete={onResetComplete}
             />
           </div>
@@ -86,13 +82,13 @@ export function ResetInfo() {
 
         {cafeResetDate && (
           <div className="flex flex-col items-center">
-            <div className="text-sm times-new-roman font-bold text-[#660099] dark:text-[#ff99ff]">
+            <div className="text-sm text-muted-foreground">
               {t("tools.resetInfo.nextCafeReset")}
             </div>
 
             <CountdownTimer
               targetTime={cafeResetDate}
-              className="text-3xl times-new-roman font-bold blink text-[#ff0000]"
+              className="text-3xl"
               onComplete={onCafeResetComplete}
             />
           </div>
@@ -100,13 +96,13 @@ export function ResetInfo() {
 
         {headpatResetDate && (
           <div className="flex flex-col items-center">
-            <div className="text-sm times-new-roman font-bold text-[#006600] dark:text-[#00ff00]">
+            <div className="text-sm text-muted-foreground">
               {t("tools.resetInfo.headpatCooldown")}
             </div>
 
             <CountdownTimer
               targetTime={headpatResetDate}
-              className="text-3xl times-new-roman font-bold blink text-[#ff0000]"
+              className="text-3xl"
               onComplete={onHeadpatResetComplete}
             />
           </div>
