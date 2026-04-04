@@ -11,7 +11,7 @@ export default async function MyRostersHomeLayout({
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center justify-between">
           <h1 className="text-xl font-bold">
             {t("tools.roster.myRosters.title")}

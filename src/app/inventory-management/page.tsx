@@ -24,7 +24,7 @@ export default async function InventoryManagementPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <h1 className="text-xl font-bold">
             {t("tools.inventoryManagement.title")}
@@ -50,7 +50,7 @@ export default async function InventoryManagementPage() {
 
       <Separator />
 
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <h2 className="text-lg font-bold">How To Use</h2>
 
         <div className="prose dark:prose-invert max-w-full">

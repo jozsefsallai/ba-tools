@@ -34,7 +34,7 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <div className="flex gap-2 justify-between">
             <h1 className="text-3xl font-bold">{query.data.name}</h1>

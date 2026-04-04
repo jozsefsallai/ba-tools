@@ -363,7 +363,7 @@ export function TitleGeneratorView() {
   }, []);
 
   return (
-    <div className="md:w-2/3 mx-auto flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       {locale === "jp" && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-md">
           <div className="text-sm text-yellow-500/80">

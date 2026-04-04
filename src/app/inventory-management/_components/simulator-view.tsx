@@ -653,7 +653,7 @@ export function InventoryManagementSimulatorView() {
       </div>
 
       {preset && (
-        <Card className="md:w-2/3 mx-auto py-2">
+        <Card className="py-2">
           <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
             <div className="text-sm text-muted-foreground text-center">
               {t("tools.inventoryManagement.preset")} <strong>{preset.name}</strong>, {t("tools.inventoryManagement.round")}{" "}

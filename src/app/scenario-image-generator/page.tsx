@@ -22,7 +22,7 @@ export default async function ScenarioImageGeneratorPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <h1 className="text-xl font-bold">
             {t("tools.scenarioImageGenerator.title")}
@@ -42,7 +42,7 @@ export default async function ScenarioImageGeneratorPage() {
         <ScenarioEditorView />
       </ScenarioDataProvider>
 
-      <div className="md:w-2/3 mx-auto">
+      <div>
         <p className="text-sm text-muted-foreground text-center">
           {t.rich("tools.scenarioImageGenerator.disclaimer", {
             strong: (children) => <strong>{children}</strong>,

@@ -681,7 +681,7 @@ export function TimelineEditor() {
   return (
     <div className="flex flex-col gap-10">
       <div
-        className={cn("md:w-2/3 mx-auto -mt-6 flex flex-col gap-4", {
+        className={cn("-mt-6 flex flex-col gap-4", {
           hidden: items.length > 0,
         })}
       >
@@ -708,7 +708,7 @@ export function TimelineEditor() {
         onItemClicked={handlePreviewItemClicked}
       />
 
-      <Card className="md:w-2/3 mx-auto">
+      <Card>
         <CardContent>
           <Tabs defaultValue="items" className="gap-4">
             <TabsList className="place-self-center">

@@ -1,270 +1,218 @@
 "use client";
 
-import plana from "@/app/opengraph-image.png";
-
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { cn } from "@/lib/utils";
-import { Authenticated, Unauthenticated } from "convex/react";
-import { SignInButton, UserButton } from "@clerk/nextjs";
-import {
-  ChartNoAxesGanttIcon,
-  CogIcon,
-  MenuIcon,
-  UsersIcon,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { UserPreferences } from "@/components/common/user-preferences";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LocaleToggle } from "@/components/locale-toggle";
+import { useMemo } from "react";
+import { useQuery } from "convex/react";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
 
-type NavLink = {
+type BreadcrumbInfo = {
+  label: string;
+  group?: string;
   href: string;
-  text: string;
 };
 
-type NavigationGroup = {
-  id: string;
-  name: string;
-  links: NavLink[];
-};
-
-export function TheHeader() {
+function usePageBreadcrumbs(): BreadcrumbInfo | null {
   const t = useTranslations();
-
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  const GAMEPLAY_TOOLS: NavLink[] = [
-    {
-      href: "/bond",
-      text: t("common.header.nav.gameplay.bond"),
-    },
-    {
-      href: "/timeline-visualizer",
-      text: t("common.header.nav.gameplay.timelineVisualizer"),
-    },
-    {
-      href: "/inventory-management",
-      text: t("common.header.nav.gameplay.inventoryManagement"),
-    },
-    {
-      href: "/railroad-puzzle-solver",
-      text: t("common.header.nav.gameplay.railroadPuzzleSolver"),
-    },
-    {
-      href: "/raid-score-calculator",
-      text: t("common.header.nav.gameplay.raidScore"),
-    },
-  ];
+  return useMemo(() => {
+    const PATH_LABELS: Record<
+      string,
+      { label: string; group?: string; href?: string }
+    > = {
+      "/bond": {
+        label: t("common.header.nav.gameplay.bond"),
+        group: t("common.header.nav.gameplay.title"),
+      },
+      "/timeline-visualizer": {
+        label: t("common.header.nav.gameplay.timelineVisualizer"),
+        group: t("common.header.nav.gameplay.title"),
+      },
+      "/inventory-management": {
+        label: t("common.header.nav.gameplay.inventoryManagement"),
+        group: t("common.header.nav.gameplay.title"),
+      },
+      "/railroad-puzzle-solver": {
+        label: t("common.header.nav.gameplay.railroadPuzzleSolver"),
+        group: t("common.header.nav.gameplay.title"),
+      },
+      "/raid-score-calculator": {
+        label: t("common.header.nav.gameplay.raidScore"),
+        group: t("common.header.nav.gameplay.title"),
+      },
+      "/formation-display": {
+        label: t("common.header.nav.misc.formationDisplay"),
+        group: t("common.header.nav.misc.title"),
+      },
+      "/title-generator": {
+        label: t("common.header.nav.misc.titleGenerator"),
+        group: t("common.header.nav.misc.title"),
+      },
+      "/gacha-rate-stats": {
+        label: t("common.header.nav.misc.gachaRateStats"),
+        group: t("common.header.nav.misc.title"),
+      },
+      "/scenario-image-generator": {
+        label: t("common.header.nav.misc.scenarioImageGenerator"),
+        group: t("common.header.nav.misc.title"),
+      },
+      "/global/banners": {
+        label: t("common.header.nav.resouces.glBanners"),
+        group: t("common.header.nav.resouces.title"),
+      },
+      "/games/flappy-peroro": {
+        label: t("common.header.nav.games.flappyPeroro"),
+        group: t("common.header.nav.games.title"),
+      },
+      "/timelines/g/": {
+        label: t("common.header.nav.gameplay.timelineVisualizer"),
+        group: t("common.header.nav.gameplay.title"),
+        href: "/timeline-visualizer",
+      },
+      "/timelines/": {
+        label: t("common.header.nav.gameplay.timelineVisualizer"),
+        group: t("common.header.nav.gameplay.title"),
+        href: "/timeline-visualizer",
+      },
+      "/user/formations": { label: "My Formations" },
+      "/user/timelines": { label: "My Timelines" },
+      "/user/rosters": { label: "My Rosters" },
+      "/pvp": { label: "PvP" },
+      "/credits": { label: "Credits" },
+      "/changelog": { label: "Changelog" },
+    };
 
-  const MISC_TOOLS: NavLink[] = [
-    {
-      href: "/formation-display",
-      text: t("common.header.nav.misc.formationDisplay"),
-    },
-    {
-      href: "/title-generator",
-      text: t("common.header.nav.misc.titleGenerator"),
-    },
-    {
-      href: "/gacha-rate-stats",
-      text: t("common.header.nav.misc.gachaRateStats"),
-    },
-    {
-      href: "/scenario-image-generator",
-      text: t("common.header.nav.misc.scenarioImageGenerator"),
-    },
-  ];
+    const match = Object.entries(PATH_LABELS).find(([path]) =>
+      pathname.startsWith(path),
+    );
 
-  const RESOURCES: NavLink[] = [
-    {
-      href: "/global/banners",
-      text: t("common.header.nav.resouces.glBanners"),
-    },
-  ];
+    if (!match) return null;
 
-  const GAMES: NavLink[] = [
-    {
-      href: "/games/flappy-peroro",
-      text: t("common.header.nav.games.flappyPeroro"),
-    },
-  ];
+    const [path, { label, group, href }] = match;
+    return { label, group, href: href ?? path };
+  }, [pathname, t]);
+}
 
-  const NAVIGATION_GROUPS: NavigationGroup[] = [
-    {
-      id: "gameplay-tools",
-      name: t("common.header.nav.gameplay.title"),
-      links: GAMEPLAY_TOOLS,
-    },
-    {
-      id: "misc-tools",
-      name: t("common.header.nav.misc.title"),
-      links: MISC_TOOLS,
-    },
-    {
-      id: "resources",
-      name: t("common.header.nav.resouces.title"),
-      links: RESOURCES,
-    },
-    {
-      id: "games",
-      name: t("common.header.nav.games.title"),
-      links: GAMES,
-    },
-  ];
+function extractTimelineIdFromPath(pathname: string): string | null {
+  const singleMatch = pathname.match(/^\/timelines\/([^/]+)$/);
+  if (singleMatch) return singleMatch[1];
+  return null;
+}
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+function extractTimelineGroupIdFromPath(pathname: string): string | null {
+  const groupMatch = pathname.match(/^\/timelines\/g\/([^/]+)$/);
+  if (groupMatch) return groupMatch[1];
+  return null;
+}
+
+function useEditingItemName(): string | null {
+  const t = useTranslations();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchId = searchParams.get("id");
+
+  const isEditingTimeline = pathname === "/timeline-visualizer" && !!searchId;
+  const isEditingFormation = pathname === "/formation-display" && !!searchId;
+
+  const viewingTimelineId = extractTimelineIdFromPath(pathname);
+  const viewingGroupId = extractTimelineGroupIdFromPath(pathname);
+
+  const editingTimeline = useQuery(
+    api.timeline.getOwnById,
+    isEditingTimeline ? { id: searchId as Id<"timeline"> } : "skip",
+  );
+
+  const editingFormation = useQuery(
+    api.formation.getById,
+    isEditingFormation ? { id: searchId as Id<"formation"> } : "skip",
+  );
+
+  const viewingTimeline = useQuery(
+    api.timeline.getById,
+    viewingTimelineId ? { id: viewingTimelineId as Id<"timeline"> } : "skip",
+  );
+
+  const viewingGroup = useQuery(
+    api.timelineGroup.getById,
+    viewingGroupId ? { id: viewingGroupId as Id<"timelineGroup"> } : "skip",
+  );
+
+  if (isEditingTimeline && editingTimeline) {
+    return editingTimeline.name || t("common.untitledTimeline");
+  }
+
+  if (isEditingFormation && editingFormation) {
+    return editingFormation.name || t("common.untitledFormation");
+  }
+
+  if (viewingTimelineId && viewingTimeline) {
+    return viewingTimeline.name || t("common.untitledTimeline");
+  }
+
+  if (viewingGroupId && viewingGroup) {
+    return viewingGroup.name || t("common.untitledTimelineGroup");
+  }
+
+  return null;
+}
+
+export function InsetHeader() {
+  const breadcrumbs = usePageBreadcrumbs();
+  const itemName = useEditingItemName();
 
   return (
-    <header className="border-b p-2 py-3">
-      <div className="container flex justify-between items-center gap-2">
-        <Link href="/">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Image src={plana} alt="Plana" width={48} height={48} />
-            </div>
-
-            <h1 className="hidden lg:block text-2xl font-bold">
-              {t("common.appName")}
-            </h1>
-          </div>
-        </Link>
-
-        <div className="flex gap-6 items-center">
-          <NavigationMenu
-            viewport={false}
-            delayDuration={0}
-            skipDelayDuration={0}
-            className="hidden md:block z-10"
-          >
-            <NavigationMenuList>
-              {NAVIGATION_GROUPS.map((group) => (
-                <NavigationMenuItem key={group.id}>
-                  <NavigationMenuTrigger className="cursor-pointer">
-                    {group.name}
-                  </NavigationMenuTrigger>
-
-                  <NavigationMenuContent>
-                    <ul className="w-[300px] flex flex-col gap-2">
-                      {group.links.map((link) => (
-                        <li key={link.href}>
-                          <NavigationMenuLink
-                            asChild
-                            className={cn(
-                              navigationMenuTriggerStyle(),
-                              "block w-full",
-                            )}
-                          >
-                            <Link href={link.href}>{link.text}</Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          <LocaleToggle />
-          <ThemeToggle />
-
-          <Unauthenticated>
-            <Button asChild>
-              <SignInButton mode="modal" oauthFlow="popup" />
-            </Button>
-          </Unauthenticated>
-
-          <Authenticated>
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  href="/user/formations"
-                  label="My formations"
-                  labelIcon={<UsersIcon className="size-4" />}
-                />
-
-                <UserButton.Link
-                  href="/user/timelines"
-                  label="My timelines"
-                  labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
-                />
-              </UserButton.MenuItems>
-
-              <UserButton.UserProfilePage
-                label="Preferences"
-                url="preferences"
-                labelIcon={<CogIcon className="size-4" />}
-              >
-                <UserPreferences />
-              </UserButton.UserProfilePage>
-            </UserButton>
-          </Authenticated>
-
-          <Button
-            variant="outline"
-            onClick={() => setOpen((prev) => !prev)}
-            className="md:hidden"
-          >
-            <MenuIcon />
-          </Button>
-
-          <nav
-            className={cn(
-              "absolute border shadow-lg top-18 left-0 w-full bg-secondary z-50",
-              {
-                hidden: !open,
-              },
-            )}
-          >
-            <Accordion type="multiple">
-              {NAVIGATION_GROUPS.map((group) => (
-                <AccordionItem key={group.id} value={group.id}>
-                  <AccordionTrigger className="px-4">
-                    {group.name}
-                  </AccordionTrigger>
-
-                  <AccordionContent className="flex flex-col gap-2 px-4">
-                    {group.links.map((link) => (
-                      <Button
-                        key={link.href}
-                        variant="outline"
-                        className="justify-start bg-background/30 border-border"
-                        asChild
-                      >
-                        <Link key={link.href} href={link.href}>
-                          {link.text}
-                        </Link>
-                      </Button>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </nav>
-        </div>
-      </div>
+    <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+      <SidebarTrigger className="-ml-1" />
+      <Separator orientation="vertical" className="mr-2 !h-4" />
+      <Breadcrumb>
+        <BreadcrumbList>
+          {breadcrumbs?.group && (
+            <>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="/">{breadcrumbs.group}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+            </>
+          )}
+          {breadcrumbs ? (
+            itemName ? (
+              <>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href={breadcrumbs.href}>
+                    {breadcrumbs.label}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="max-w-48 truncate">
+                    {itemName}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            ) : (
+              <BreadcrumbItem>
+                <BreadcrumbPage>{breadcrumbs.label}</BreadcrumbPage>
+              </BreadcrumbItem>
+            )
+          ) : (
+            <BreadcrumbItem>
+              <BreadcrumbPage>Home</BreadcrumbPage>
+            </BreadcrumbItem>
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
     </header>
   );
 }

@@ -302,7 +302,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-4 items-center">
           <Button variant="outline" size="sm" asChild>
             <Link href={`/pvp/${seasonId}`}>

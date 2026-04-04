@@ -486,7 +486,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex items-start gap-4">
           {studentRep && (
             <img

@@ -82,6 +82,7 @@
     "pixi.js": "^8.9.2",
     "pixi.js-v7": "npm:pixi.js@7",
     "prisma": "^7.1.0",
+    "radix-ui": "^1.4.3",
     "react": "^19.2.1",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.2.1",

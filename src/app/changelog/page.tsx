@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function ChangelogPage() {
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-8">
+      <div className="max-w-4xl mx-auto flex flex-col gap-8">
         <h1 className="text-3xl font-bold">Changelog</h1>
 
         <div className="flex flex-col gap-12">

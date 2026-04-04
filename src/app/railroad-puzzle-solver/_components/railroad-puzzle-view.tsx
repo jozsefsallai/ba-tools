@@ -350,7 +350,7 @@ export function RailroadPuzzleView() {
         </TooltipProvider>
       </div>
 
-      <div className="flex gap-4 items-center justify-between text-sm text-muted-foreground w-full md:w-2/3 mx-auto">
+      <div className="flex gap-4 items-center justify-between text-sm text-muted-foreground w-full">
         <div>
           <strong>{t("tools.railroad.railPiecesUsed")}</strong>{" "}
           {railsUsed !== null ? railsUsed : "..."}
@@ -380,7 +380,7 @@ export function RailroadPuzzleView() {
         </div>
       </div>
 
-      <Card className="w-full md:w-2/3 mx-auto">
+      <Card className="w-full">
         <CardContent>
           <div className="flex flex-col gap-8 md:gap-4">
             <div className="flex gap-2 items-center">
@@ -540,7 +540,7 @@ export function RailroadPuzzleView() {
       </Card>
 
       {minRailConfigs.length > 0 && (
-        <Card className="md:w-2/3 mx-auto">
+        <Card>
           <CardContent>
             <div className="flex flex-col gap-4">
               <div className="text-lg font-semibold">

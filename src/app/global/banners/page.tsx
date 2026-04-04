@@ -57,7 +57,7 @@ export default async function BannersPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <h1 className="text-xl font-bold">{t("static.banners.title")}</h1>
         </div>

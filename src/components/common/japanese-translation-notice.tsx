@@ -37,7 +37,7 @@ export function JapaneseTranslationNotice() {
   return (
     <section
       aria-label="Japanese translation notice"
-      className="md:w-2/3 mx-auto bg-yellow-500/10 text-yellow-500/80 border border-yellow-500/20 rounded-md mt-12"
+      className="bg-yellow-500/10 text-yellow-500/80 border border-yellow-500/20 rounded-md mt-12"
     >
       <div className="container px-4 py-3 flex items-start gap-3">
         <div className="flex-1 min-w-0 text-sm space-y-1">

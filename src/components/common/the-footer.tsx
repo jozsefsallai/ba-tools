@@ -17,9 +17,8 @@ export function TheFooter({
   }
 
   return (
-    <footer className="border-t px-2 py-8 bg-background text-muted-foreground text-center text-sm relative z-10">
-      <div className="container">
-        <div className="md:w-2/3 mx-auto">
+    <footer className="border-t px-4 py-8 text-muted-foreground text-center text-sm">
+      <div>
           {t.rich("common.footer.copyright", {
             a: (children) => (
               <a
@@ -67,7 +66,6 @@ export function TheFooter({
           {commitHash === "development"
             ? "development"
             : commitHash.slice(0, 7)}
-        </div>
       </div>
     </footer>
   );

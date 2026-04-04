@@ -8,7 +8,7 @@ export default function NotFound() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <div className="flex gap-2 items-center">
           <h1 className="text-xl font-bold">{t("common.notFound.title")}</h1>
         </div>

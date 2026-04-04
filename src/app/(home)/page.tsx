@@ -33,7 +33,7 @@ export default async function Home() {
   const t = await getTranslations();
 
   return (
-    <article className="flex flex-col gap-4 md:w-2/3 mx-auto">
+    <article className="flex flex-col gap-4 max-w-4xl mx-auto">
       <h1 className="text-4xl">{t("static.home.welcome")}</h1>
 
       <p>

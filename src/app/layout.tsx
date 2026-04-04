@@ -3,8 +3,9 @@ import { Outfit, Sono, Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import { TheHeader } from "@/components/common/the-header";
 import { TheFooter } from "@/components/common/the-footer";
+import { InsetHeader } from "@/components/common/the-header";
+import { AppSidebar } from "@/components/common/app-sidebar";
 import { JapaneseTranslationNotice } from "@/components/common/japanese-translation-notice";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -12,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provider";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { UserPreferencesProvider } from "@/components/providers/user-preferences-provider";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { db } from "@/lib/db";
 import { StudentsProvider } from "@/components/providers/students-provider";
 import { NavigationGuardProvider } from "next-navigation-guard";
@@ -102,21 +104,24 @@ export default async function RootLayout({
                 <NavigationGuardProvider>
                   <StudentsProvider loadedStudents={students}>
                     <UserPreferencesProvider>
-                      <main className="flex flex-col gap-10 h-full">
-                        <TheHeader />
+                      <SidebarProvider>
+                        <AppSidebar />
+                        <SidebarInset>
+                          <InsetHeader />
 
-                        <section className="relative container px-4 md:px-0 flex-1">
-                          {children}
+                          <main className="flex flex-col gap-6 flex-1 p-4">
+                            {children}
 
-                          {locale === "jp" && <JapaneseTranslationNotice />}
-                        </section>
+                            {locale === "jp" && <JapaneseTranslationNotice />}
+                          </main>
 
-                        <TheFooter
-                          commitHash={
-                            process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
-                          }
-                        />
-                      </main>
+                          <TheFooter
+                            commitHash={
+                              process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
+                            }
+                          />
+                        </SidebarInset>
+                      </SidebarProvider>
 
                       <Toaster />
                     </UserPreferencesProvider>

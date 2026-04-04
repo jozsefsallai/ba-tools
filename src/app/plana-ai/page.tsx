@@ -19,7 +19,7 @@ export default async function PlanaAIPage() {
 
   return (
     <div className="flex flex-col gap-10 h-full">
-      <div className="md:w-2/3 mx-auto flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <h1 className="text-xl font-bold">Plana AI</h1>
       </div>
 
