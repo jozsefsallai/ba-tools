@@ -22,6 +22,7 @@ export const CHANGELOG_SCOPES = {
   games: "Games",
   content: "Content",
   docs: "Documentation",
+  mcp: "MCP Server",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -39,6 +40,39 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "April 4, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added pagination and search functionality to own timelines and groups.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Added pagination and search functionality to own formations.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Changed website layout.",
+      },
+    ],
+    fixes: [],
+  },
+  {
+    date: "March 22, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description: "Added MCP server.",
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
   {
     date: "March 15, 2026",
     features: [
