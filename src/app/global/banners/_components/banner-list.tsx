@@ -7,7 +7,7 @@ export type BannerListProps = {
 
 export function BannerList({ bannerGroups }: BannerListProps) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
       {Array.from(bannerGroups.entries()).map(([key, banners]) => {
         const dates = key.split(",").map((t) => Number.parseInt(t, 10)) as [
           number,
