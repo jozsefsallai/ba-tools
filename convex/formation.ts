@@ -1,3 +1,4 @@
+import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { formationStudentItem } from "./schema";
@@ -9,6 +10,32 @@ export const getOwn = authenticatedQuery({
       .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
       .order("desc")
       .collect();
+  },
+});
+
+export const getOwnPaginated = authenticatedQuery({
+  args: { paginationOpts: paginationOptsValidator },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("formation")
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
+      .order("desc")
+      .paginate(args.paginationOpts);
+  },
+});
+
+export const searchOwn = authenticatedQuery({
+  args: { search: v.string() },
+  handler: async (ctx, args) => {
+    const all = await ctx.db
+      .query("formation")
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
+      .order("desc")
+      .collect();
+    const term = args.search.toLowerCase();
+    return all.filter((item) =>
+      (item.name ?? "").toLowerCase().includes(term),
+    );
   },
 });
 

@@ -328,5 +328,10 @@
     "dark": "ダーク",
     "system": "システム"
   },
-  "import": "インポート"
+  "import": "インポート",
+
+  "searchPlaceholder": "検索...",
+  "loadMore": "もっと見る",
+  "loadingMore": "読み込み中...",
+  "noResults": "結果が見つかりませんでした。"
 }

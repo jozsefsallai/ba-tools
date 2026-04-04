@@ -1,28 +1,45 @@
 "use client";
 
 import { OwnTimelineEntry } from "@/app/user/timelines/_components/own-timeline-entry";
+import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
 import { MessageBox } from "@/components/common/message-box";
-import { useQueryWithStatus } from "@/lib/convex";
+import { useDebounce } from "@/hooks/use-debounce";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { api } from "~convex/api";
 
 export function OwnTimelineBrowser() {
   const t = useTranslations();
-  const query = useQueryWithStatus(api.timeline.getOwn);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 200);
+  const isSearching = debouncedSearch.trim().length > 0;
 
-  if (query.status === "pending") {
+  const {
+    results: paginatedResults,
+    status,
+    loadMore,
+  } = usePaginatedQuery(
+    api.timeline.getOwnPaginated,
+    isSearching ? "skip" : {},
+    { initialNumItems: 20 },
+  );
+
+  const searchResults = useQuery(
+    api.timeline.searchOwn,
+    isSearching ? { search: debouncedSearch.trim() } : "skip",
+  );
+
+  const items = isSearching ? (searchResults ?? []) : paginatedResults;
+  const isInitialLoad =
+    !isSearching && status === "LoadingFirstPage";
+  const isSearchLoading = isSearching && searchResults === undefined;
+
+  if (isInitialLoad) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
-  if (query.status === "error") {
-    return (
-      <MessageBox className="border-destructive bg-destructive/10 text-xl text-foreground">
-        {t("tools.myTimelines.ownTimelineBrowser.failedToLoad")}
-      </MessageBox>
-    );
-  }
-
-  if (query.status === "success" && query.data.length === 0) {
+  if (paginatedResults.length === 0 && !search) {
     return (
       <MessageBox>
         <p>{t("tools.myTimelines.ownTimelineBrowser.noTimelines")}</p>
@@ -32,9 +49,23 @@ export function OwnTimelineBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
-      {query.data.map((entry) => (
+      <SearchBar value={search} onChange={setSearch} />
+
+      {isSearchLoading && <MessageBox>{t("common.loading")}</MessageBox>}
+
+      {!isSearchLoading && items.length === 0 && (
+        <MessageBox>
+          <p>{t("common.noResults")}</p>
+        </MessageBox>
+      )}
+
+      {items.map((entry) => (
         <OwnTimelineEntry key={entry._id} entry={entry} />
       ))}
+
+      {!isSearching && (
+        <LoadMoreButton status={status} loadMore={loadMore} />
+      )}
     </div>
   );
 }

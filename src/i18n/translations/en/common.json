@@ -357,5 +357,10 @@
     "system": "System"
   },
 
-  "import": "Import"
+  "import": "Import",
+
+  "searchPlaceholder": "Search...",
+  "loadMore": "Load More",
+  "loadingMore": "Loading...",
+  "noResults": "No results found."
 }
