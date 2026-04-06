@@ -41,6 +41,24 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "April 6, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to import timelines from a generated image. Note: this feature will only work with timelines that have been exported after the update.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Completely changed the overall flow and UX of the timeline visualizer tool.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "April 4, 2026",
     features: [
       {

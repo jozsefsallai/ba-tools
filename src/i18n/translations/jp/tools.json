@@ -36,7 +36,8 @@
         "loadLocal": "ブラウザから読み込む",
         "saveLocal": "ブラウザに保存",
         "export": "エクスポート",
-        "import": "インポート"
+        "import": "インポート",
+        "importFromImage": "画像から読み込む"
       }
     },
     "actions": {

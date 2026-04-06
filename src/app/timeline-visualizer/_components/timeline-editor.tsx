@@ -23,9 +23,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trimTransparentPixels } from "@/lib/canvas";
+import { decodePngItxt, encodePngWithItxt } from "@/lib/png-metadata";
 import { useQueryWithStatus } from "@/lib/convex";
 import { sleep } from "@/lib/sleep";
-import { timelineStorage } from "@/lib/storage/timeline";
+import {
+  timelineStorage,
+  type TimelineStorageData,
+} from "@/lib/storage/timeline";
 import type { Student } from "~prisma";
 import { Authenticated, useMutation } from "convex/react";
 import html2canvas from "html2canvas-pro";
@@ -33,6 +37,7 @@ import {
   ChevronsUpDownIcon,
   ChevronUpIcon,
   DownloadIcon,
+  ImageUpIcon,
   SaveIcon,
   ShareIcon,
 } from "lucide-react";
@@ -77,6 +82,7 @@ export function TimelineEditor() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const studentPickerRef = useRef<StudentPickerHandle>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const { preferences } = useUserPreferences();
 
@@ -316,6 +322,35 @@ export function TimelineEditor() {
     ],
   );
 
+  function buildTimelineData() {
+    return {
+      items: items.map((item) => {
+        if (item.type === "student") {
+          return {
+            ...item,
+            id: undefined,
+            student: undefined,
+            target: undefined,
+            studentId: item.student.id,
+            targetId: item.target?.id,
+            notes: item.notes,
+          };
+        }
+
+        return {
+          ...item,
+          id: undefined,
+        };
+      }),
+      scale,
+      itemSpacing,
+      verticalSeparatorSize,
+      horizontalSeparatorSize,
+      name: name.length > 0 ? name : undefined,
+      description: description.length > 0 ? description : undefined,
+    };
+  }
+
   async function getTimelineImage() {
     if (!containerRef.current || generationInProgress) {
       return;
@@ -342,11 +377,18 @@ export function TimelineEditor() {
           })
         : "timeline";
 
-    const src = trimmedCanvas.toDataURL("image/png");
+    const blob = await encodePngWithItxt(
+      trimmedCanvas,
+      "ba-tools:timeline",
+      JSON.stringify(buildTimelineData()),
+    );
+
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = src;
+    link.href = url;
     link.download = `${filename}.png`;
     link.click();
+    URL.revokeObjectURL(url);
 
     setGenerationInProgress(false);
   }
@@ -484,6 +526,28 @@ export function TimelineEditor() {
     );
   }
 
+  async function importFromImage(file: File) {
+    try {
+      const buffer = await file.arrayBuffer();
+      const text = decodePngItxt(buffer, "ba-tools:timeline");
+
+      if (!text) {
+        toast.error(
+          t("common.dialogs.importTimelineData.toasts.noDataInImage"),
+        );
+        return;
+      }
+
+      const data = JSON.parse(text) as TimelineStorageData;
+      timelineStorage.set(data);
+      loadTimelineFromStorage();
+      toast.success(t("common.dialogs.importTimelineData.toasts.success"));
+    } catch (err) {
+      console.error(err);
+      toast.error(t("common.dialogs.importTimelineData.toasts.invalidData"));
+    }
+  }
+
   function saveTimelineToLocalStorage(showToast = true) {
     if (requestInProgress) {
       return;
@@ -491,34 +555,7 @@ export function TimelineEditor() {
 
     setRequestInProgress(true);
 
-    const data = {
-      items: items.map((item) => {
-        if (item.type === "student") {
-          return {
-            ...item,
-            id: undefined,
-            student: undefined,
-            target: undefined,
-            studentId: item.student.id,
-            targetId: item.target?.id,
-            notes: item.notes,
-          };
-        }
-
-        return {
-          ...item,
-          id: undefined,
-        };
-      }),
-      scale,
-      itemSpacing,
-      verticalSeparatorSize,
-      horizontalSeparatorSize,
-      name: name.length > 0 ? name : undefined,
-      description: description.length > 0 ? description : undefined,
-    };
-
-    timelineStorage.set(data);
+    timelineStorage.set(buildTimelineData());
 
     if (showToast) {
       toast.success("Timeline saved successfully.");
@@ -967,6 +1004,26 @@ export function TimelineEditor() {
                     {t("tools.timeline.tabs.save.import")}
                   </Button>
                 </ImportTimelineDataDialog>
+
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/png"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) importFromImage(file);
+                    e.target.value = "";
+                  }}
+                />
+
+                <Button
+                  variant="outline"
+                  onClick={() => imageInputRef.current?.click()}
+                >
+                  <ImageUpIcon />
+                  {t("tools.timeline.tabs.save.importFromImage")}
+                </Button>
               </div>
             </TabsContent>
           </Tabs>

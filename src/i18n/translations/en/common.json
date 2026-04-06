@@ -159,7 +159,8 @@
       "description": "Enter the JSON you've copied earlier.",
       "toasts": {
         "success": "Timeline data imported successfully",
-        "invalidData": "Invalid timeline data provided."
+        "invalidData": "Invalid timeline data provided.",
+        "noDataInImage": "No timeline data found in this image."
       }
     }
   },

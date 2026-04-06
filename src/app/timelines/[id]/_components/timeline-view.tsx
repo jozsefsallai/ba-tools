@@ -13,6 +13,7 @@ import type { Id } from "~convex/dataModel";
 import { v4 as uuid } from "uuid";
 import html2canvas from "html2canvas-pro";
 import { trimTransparentPixels } from "@/lib/canvas";
+import { encodePngWithItxt } from "@/lib/png-metadata";
 import { sleep } from "@/lib/sleep";
 import { Label } from "@/components/ui/label";
 import {
@@ -90,7 +91,7 @@ export function TimelineView({ id }: TimelineViewProps) {
   }, [query.data]);
 
   async function getTimelineImage() {
-    if (!containerRef.current || generationInProgress) {
+    if (!containerRef.current || generationInProgress || !query.data) {
       return;
     }
 
@@ -105,7 +106,7 @@ export function TimelineView({ id }: TimelineViewProps) {
 
     const trimmedCanvas = trimTransparentPixels(canvas);
 
-    const trimmedName = (query.data?.name ?? "").trim();
+    const trimmedName = (query.data.name ?? "").trim();
     const filename =
       trimmedName.length > 0
         ? slugify(trimmedName, {
@@ -113,11 +114,28 @@ export function TimelineView({ id }: TimelineViewProps) {
           })
         : "timeline";
 
-    const src = trimmedCanvas.toDataURL("image/png");
+    const timelineData = {
+      items: query.data.items,
+      scale,
+      itemSpacing: query.data.itemSpacing,
+      verticalSeparatorSize: query.data.verticalSeparatorSize,
+      horizontalSeparatorSize: query.data.horizontalSeparatorSize,
+      name: query.data.name ?? undefined,
+      description: query.data.description ?? undefined,
+    };
+
+    const blob = await encodePngWithItxt(
+      trimmedCanvas,
+      "ba-tools:timeline",
+      JSON.stringify(timelineData),
+    );
+
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = src;
+    link.href = url;
     link.download = `${filename}.png`;
     link.click();
+    URL.revokeObjectURL(url);
 
     setGenerationInProgress(false);
   }

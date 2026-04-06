@@ -42,7 +42,8 @@
         "loadLocal": "Load Local",
         "saveLocal": "Save Local",
         "export": "Export",
-        "import": "Import"
+        "import": "Import",
+        "importFromImage": "Import from Image"
       }
     },
 
