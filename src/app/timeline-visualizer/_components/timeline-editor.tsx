@@ -1,6 +1,5 @@
 "use client";
 
-import { TimelineItemContainer } from "@/app/timeline-visualizer/_components/timeline-item-container";
 import {
   type TimelineItem,
   TimelinePreview,
@@ -23,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { sleep } from "@/lib/sleep";
@@ -54,7 +52,6 @@ import { useUserPreferences } from "@/hooks/use-preferences";
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { useStudents } from "@/hooks/use-students";
-import type { WindowVirtualizerHandle } from "virtua";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "next-navigation-guard";
 import { SaveStatus } from "@/components/common/save-status";
@@ -153,7 +150,6 @@ export function TimelineEditor() {
       return true;
     }, []),
   );
-  const virtualListHandlerRef = useRef<WindowVirtualizerHandle>(null);
 
   const [scale, setScale, setScaleUnchecked] = useSaveableState(
     preferences.timelineVisualizer.defaultScale,
@@ -187,9 +183,10 @@ export function TimelineEditor() {
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
-  const [highlightedId, setHighlightedId] = useState<string | null>(null);
-
-  const [autofocusTrigger, setAutofocusTrigger] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [focusTriggerFieldItemId, setFocusTriggerFieldItemId] = useState<
+    string | null
+  >(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -220,25 +217,27 @@ export function TimelineEditor() {
     return Array.from(studentsSet);
   }, [items]);
 
+  const clearFocusTriggerFieldRequest = useCallback(() => {
+    setFocusTriggerFieldItemId(null);
+  }, []);
+
   const addStudent = useCallback(
     (student: Student) => {
+      const id = uuid();
       setItems((prev) => [
         ...prev,
         {
           type: "student",
-          id: uuid(),
+          id,
           student,
         },
       ]);
-
       if (preferences.timelineVisualizer.triggerAutoFocus) {
-        setAutofocusTrigger(true);
-        setTimeout(() => {
-          setAutofocusTrigger(false);
-        }, 100);
+        setSelectedItemId(id);
+        setFocusTriggerFieldItemId(id);
       }
     },
-    [preferences.timelineVisualizer.triggerAutoFocus],
+    [preferences.timelineVisualizer.triggerAutoFocus, setItems],
   );
 
   const addSeparator = useCallback((orientation: "horizontal" | "vertical") => {
@@ -264,6 +263,8 @@ export function TimelineEditor() {
   }, []);
 
   const removeItem = useCallback((itemId: string) => {
+    setSelectedItemId((prev) => (prev === itemId ? null : prev));
+    setFocusTriggerFieldItemId((prev) => (prev === itemId ? null : prev));
     setItems((prev) => prev.filter((i) => i.id !== itemId));
   }, []);
 
@@ -279,18 +280,41 @@ export function TimelineEditor() {
     [],
   );
 
-  const addItemBelow = useCallback((belowId: string, item: TimelineItem) => {
-    setItems((prev) => {
-      const index = prev.findIndex((i) => i.id === belowId);
-      if (index === -1) {
-        return prev;
-      }
+  const handleTriggerKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== "Enter") return;
+      if (!preferences.timelineVisualizer.triggerAutoFocus) return;
+      e.preventDefault();
+      setSelectedItemId(null);
+      setFocusTriggerFieldItemId(null);
+      studentPickerRef.current?.open();
+    },
+    [preferences.timelineVisualizer.triggerAutoFocus],
+  );
 
-      const newItems = [...prev];
-      newItems.splice(index, 0, item);
-      return newItems;
-    });
-  }, []);
+  const editableConfig = useMemo(
+    () => ({
+      selectedItemId,
+      onItemSelected: setSelectedItemId,
+      setItems,
+      onWantsToRemove: removeItem,
+      onWantsToUpdate: updateItem,
+      uniqueStudents,
+      onTriggerKeyDown: handleTriggerKeyDown,
+      focusTriggerFieldItemId,
+      onFocusTriggerFieldConsumed: clearFocusTriggerFieldRequest,
+    }),
+    [
+      selectedItemId,
+      setItems,
+      removeItem,
+      updateItem,
+      uniqueStudents,
+      handleTriggerKeyDown,
+      focusTriggerFieldItemId,
+      clearFocusTriggerFieldRequest,
+    ],
+  );
 
   async function getTimelineImage() {
     if (!containerRef.current || generationInProgress) {
@@ -298,6 +322,8 @@ export function TimelineEditor() {
     }
 
     setGenerationInProgress(true);
+    setSelectedItemId(null);
+    setFocusTriggerFieldItemId(null);
 
     await sleep(50);
 
@@ -507,22 +533,6 @@ export function TimelineEditor() {
     setRequestInProgress(false);
   }
 
-  function handlePreviewItemClicked(item: TimelineItem) {
-    setHighlightedId(item.id);
-
-    const idx = items.findIndex((i) => i.id === item.id);
-    if (idx === -1) {
-      return;
-    }
-
-    const virtualIndex = items.length - 1 - idx;
-
-    virtualListHandlerRef.current?.scrollToIndex(virtualIndex, {
-      align: "start",
-      smooth: true,
-    });
-  }
-
   function goToTop() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -531,19 +541,6 @@ export function TimelineEditor() {
     const url = new URL(`/timelines/${timelineId}`, window.location.origin);
     await navigator.clipboard.writeText(url.toString());
     toast.success("Link copied to clipboard.");
-  }
-
-  function handleTriggerKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key !== "Enter") {
-      return;
-    }
-
-    if (!preferences.timelineVisualizer.triggerAutoFocus) {
-      return;
-    }
-
-    e.preventDefault();
-    studentPickerRef.current?.open();
   }
 
   async function save() {
@@ -575,7 +572,6 @@ export function TimelineEditor() {
 
   useEffect(() => {
     if (!timelineId) {
-      // reset
       setNameUnchecked("");
       setDescriptionUnchecked("");
       setVisibilityUnchecked("private");
@@ -698,15 +694,23 @@ export function TimelineEditor() {
         </p>
       </div>
 
-      <TimelinePreview
-        containerRef={containerRef}
-        items={items}
-        itemSpacing={itemSpacing}
-        verticalSeparatorSize={verticalSeparatorSize}
-        horizontalSeparatorSize={horizontalSeparatorSize}
-        busy={generationInProgress}
-        onItemClicked={handlePreviewItemClicked}
-      />
+      <div className={cn("flex flex-col", { "gap-2": items.length > 0 })}>
+        {items.length > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {t("tools.timeline.clickToEditPreview")}
+          </p>
+        )}
+
+        <TimelinePreview
+          containerRef={containerRef}
+          items={items}
+          itemSpacing={itemSpacing}
+          verticalSeparatorSize={verticalSeparatorSize}
+          horizontalSeparatorSize={horizontalSeparatorSize}
+          busy={generationInProgress}
+          editableConfig={editableConfig}
+        />
+      </div>
 
       <Card>
         <CardContent>
@@ -1005,25 +1009,6 @@ export function TimelineEditor() {
           {t("tools.timeline.actions.download")}
         </Button>
       </div>
-
-      {items.length > 0 && <Separator />}
-
-      {items.length > 0 && (
-        <div className="flex flex-col gap-4">
-          <TimelineItemContainer
-            virtualListHandlerRef={virtualListHandlerRef}
-            items={items}
-            setItems={setItems}
-            onWantsToRemove={removeItem}
-            onWantsToUpdate={updateItem}
-            addItemBelow={addItemBelow}
-            uniqueStudents={uniqueStudents}
-            highlightedId={highlightedId}
-            onTriggerKeyDown={handleTriggerKeyDown}
-            autoFocusOnTriggerField={autofocusTrigger}
-          />
-        </div>
-      )}
 
       <Button
         size="sm"

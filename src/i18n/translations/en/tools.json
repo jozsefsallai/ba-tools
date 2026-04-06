@@ -4,6 +4,7 @@
     "description": "This tool allows you to create a visual rotation timeline (e.g. for a raid). You can select students, adjust the spacing between them, set the cost/timestamp at which the student's skill cost should be used, and more.",
     "notice": "<strong>Note:</strong> Dark mode extensions and zoom levels may cause rendering issues in the resulting image. If the generated image looks weird, try disabling any dark mode extensions you may have and using 100% zoom.",
     "mobileNotice": "<strong>Note:</strong> This tool might not work well on mobile devices.",
+    "clickToEditPreview": "Click any item in the preview below to edit its details. You can also drag the items around to reorder them.",
 
     "tabs": {
       "items": {
