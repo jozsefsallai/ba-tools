@@ -41,6 +41,23 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "April 8, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description: "Added ability to have multiple formation rows.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Completely changed the overall flow and UX of the formation display tool.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "April 6, 2026",
     features: [
       {
