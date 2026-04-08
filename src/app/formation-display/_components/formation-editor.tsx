@@ -5,7 +5,14 @@ import {
   type StudentItem,
 } from "@/app/formation-display/_components/formation-preview";
 import type { Student } from "@/lib/types";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
+} from "react";
 import { useTranslations } from "next-intl";
 import html2canvas from "html2canvas-pro";
 import { Label } from "@/components/ui/label";
@@ -45,6 +52,73 @@ import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { SaveStatus } from "@/components/common/save-status";
 import { ParseEchelonDataDialog } from "@/components/dialogs/parse-echelon-data-dialog";
 import type { EchelonData } from "@/lib/echelon-parser";
+import {
+  persistedSlotsToStudentItems,
+  studentItemsToPersistedSlots,
+} from "@/lib/formation-display-utils";
+
+type FormationEditorRow = {
+  id: string;
+  strikers: StudentItem[];
+  specials: StudentItem[];
+};
+
+function compareStudentItems(a: StudentItem[], b: StudentItem[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; ++i) {
+    const itemA = a[i];
+    const itemB = b[i];
+
+    if (itemA.student?.id !== itemB.student?.id) {
+      return false;
+    }
+
+    if (itemA.starter !== itemB.starter) {
+      return false;
+    }
+
+    if (itemA.starLevel !== itemB.starLevel) {
+      return false;
+    }
+
+    if (itemA.ueLevel !== itemB.ueLevel) {
+      return false;
+    }
+
+    if (itemA.borrowed !== itemB.borrowed) {
+      return false;
+    }
+
+    if (itemA.level !== itemB.level) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function compareFormationRows(
+  a: FormationEditorRow[],
+  b: FormationEditorRow[],
+): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; ++i) {
+    if (
+      !compareStudentItems(a[i].strikers, b[i].strikers) ||
+      !compareStudentItems(a[i].specials, b[i].specials)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 export function FormationEditor() {
   const t = useTranslations();
@@ -65,54 +139,18 @@ export function FormationEditor() {
 
   const [name, setName, setNameUnchecked] = useSaveableState("");
 
-  const [strikers, setStrikers, setStrikersUnchecked] = useSaveableState<
-    StudentItem[]
+  const [rows, setRows, setRowsUnchecked] = useSaveableState<
+    FormationEditorRow[]
   >(
-    [],
-    useCallback((a: StudentItem[], b: StudentItem[]) => {
-      if (a.length !== b.length) {
-        return false;
-      }
-
-      for (let i = 0; i < a.length; ++i) {
-        const itemA = a[i];
-        const itemB = b[i];
-
-        if (itemA.id !== itemB.id) {
-          return false;
-        }
-
-        if (itemA.student?.id !== itemB.student?.id) {
-          return false;
-        }
-
-        if (itemA.starter !== itemB.starter) {
-          return false;
-        }
-
-        if (itemA.starLevel !== itemB.starLevel) {
-          return false;
-        }
-
-        if (itemA.ueLevel !== itemB.ueLevel) {
-          return false;
-        }
-
-        if (itemA.borrowed !== itemB.borrowed) {
-          return false;
-        }
-
-        if (itemA.level !== itemB.level) {
-          return false;
-        }
-      }
-
-      return true;
-    }, []),
+    () => [{ id: uuid(), strikers: [], specials: [] }],
+    compareFormationRows,
   );
-  const [specials, setSpecials, setSpecialsUnchecked] = useSaveableState<
-    StudentItem[]
-  >([]);
+
+  const [rowGap, setRowGap, setRowGapUnchecked] = useSaveableState(
+    preferences.formationDisplay.defaultRowGap ?? 8,
+  );
+
+  const [activeRowIndex, setActiveRowIndex] = useState(0);
 
   const [scale, setScale, setScaleUnchecked] = useSaveableState(
     preferences.formationDisplay.defaultScale,
@@ -151,42 +189,69 @@ export function FormationEditor() {
       student,
     };
 
-    if (student.combatClass === "Main") {
-      if (strikers.find((item) => item.student?.id === student.id)) {
-        return;
+    setRows((prev) => {
+      const row = prev[activeRowIndex];
+      if (!row) {
+        return prev;
       }
 
-      setStrikers((prev) => [...prev, item]);
-    }
+      if (student.combatClass === "Main") {
+        if (row.strikers.find((i) => i.student?.id === student.id)) {
+          return prev;
+        }
 
-    if (student.combatClass === "Support") {
-      if (specials.find((item) => item.student?.id === student.id)) {
-        return;
+        return prev.map((r, i) =>
+          i === activeRowIndex
+            ? { ...r, strikers: [...r.strikers, item] }
+            : r,
+        );
       }
 
-      setSpecials((prev) => [...prev, item]);
-    }
+      if (student.combatClass === "Support") {
+        if (row.specials.find((i) => i.student?.id === student.id)) {
+          return prev;
+        }
+
+        return prev.map((r, i) =>
+          i === activeRowIndex
+            ? { ...r, specials: [...r.specials, item] }
+            : r,
+        );
+      }
+
+      return prev;
+    });
   }
 
   const removeItem = useCallback(
     (itemId: string) => {
       setSelectedItemId((prev) => (prev === itemId ? null : prev));
-      setStrikers((prev) => prev.filter((item) => item.id !== itemId));
-      setSpecials((prev) => prev.filter((item) => item.id !== itemId));
+      setRows((prev) =>
+        prev.map((row) => ({
+          ...row,
+          strikers: row.strikers.filter((item) => item.id !== itemId),
+          specials: row.specials.filter((item) => item.id !== itemId),
+        })),
+      );
     },
-    [setStrikers, setSpecials],
+    [setRows],
   );
 
   const updateItem = useCallback(
     (itemId: string, newData: Partial<Omit<StudentItem, "student" | "id">>) => {
-      const updater = (items: StudentItem[]) =>
-        items.map((item) =>
-          item.id === itemId ? { ...item, ...newData } : item,
-        );
-      setStrikers(updater);
-      setSpecials(updater);
+      setRows((prev) =>
+        prev.map((row) => ({
+          ...row,
+          strikers: row.strikers.map((item) =>
+            item.id === itemId ? { ...item, ...newData } : item,
+          ),
+          specials: row.specials.map((item) =>
+            item.id === itemId ? { ...item, ...newData } : item,
+          ),
+        })),
+      );
     },
-    [setStrikers, setSpecials],
+    [setRows],
   );
 
   function addEmptyCard(combatClass: "striker" | "special") {
@@ -194,13 +259,36 @@ export function FormationEditor() {
       id: uuid(),
     };
 
-    if (combatClass === "striker") {
-      setStrikers((prev) => [...prev, item]);
+    setRows((prev) =>
+      prev.map((row, i) => {
+        if (i !== activeRowIndex) {
+          return row;
+        }
+
+        if (combatClass === "striker") {
+          return { ...row, strikers: [...row.strikers, item] };
+        }
+
+        return { ...row, specials: [...row.specials, item] };
+      }),
+    );
+  }
+
+  function addFormationRow() {
+    const newIndex = rows.length;
+    setRows((prev) => [...prev, { id: uuid(), strikers: [], specials: [] }]);
+    setActiveRowIndex(newIndex);
+  }
+
+  function removeFormationRow() {
+    if (rows.length <= 1) {
+      return;
     }
 
-    if (combatClass === "special") {
-      setSpecials((prev) => [...prev, item]);
-    }
+    const idx = activeRowIndex;
+    const next = rows.filter((_, i) => i !== idx);
+    setRows(next);
+    setActiveRowIndex(Math.min(idx, next.length - 1));
   }
 
   async function getFormationImage() {
@@ -227,7 +315,11 @@ export function FormationEditor() {
   }
 
   async function createOrUpdateCloudFormation() {
-    if (strikers.length === 0 && specials.length === 0) {
+    const hasAnyStudent = rows.some(
+      (row) => row.strikers.length > 0 || row.specials.length > 0,
+    );
+
+    if (!hasAnyStudent) {
       toast.error(t("tools.formationDisplay.toasts.noStudents"));
       return;
     }
@@ -238,24 +330,19 @@ export function FormationEditor() {
 
     setRequestInProgress(true);
 
+    const rowsPayload = rows.map((row) => ({
+      strikers: studentItemsToPersistedSlots(row.strikers),
+      specials: studentItemsToPersistedSlots(row.specials),
+    }));
+
+    const firstRow = rowsPayload[0] ?? { strikers: [], specials: [] };
+
     const data = {
       name: name.length > 0 ? name : undefined,
-      strikers: strikers.map((item) => ({
-        studentId: item.student?.id,
-        starter: item.starter,
-        starLevel: item.starLevel,
-        ueLevel: item.ueLevel,
-        borrowed: item.borrowed,
-        level: item.level,
-      })),
-      specials: specials.map((item) => ({
-        studentId: item.student?.id,
-        starter: item.starter,
-        starLevel: item.starLevel,
-        ueLevel: item.ueLevel,
-        borrowed: item.borrowed,
-        level: item.level,
-      })),
+      strikers: firstRow.strikers,
+      specials: firstRow.specials,
+      rows: rowsPayload,
+      rowGap,
       displayOverline,
       noDisplayRole: !displayRoleIcon,
       groupsVertical,
@@ -347,16 +434,22 @@ export function FormationEditor() {
       }
     }
 
-    setStrikers(newStrikers);
-    setSpecials(newSpecials);
+    setRows((prev) =>
+      prev.map((row, i) =>
+        i === activeRowIndex
+          ? { ...row, strikers: newStrikers, specials: newSpecials }
+          : row,
+      ),
+    );
   }
 
   useEffect(() => {
     if (!formationId) {
       // reset
       setNameUnchecked("");
-      setStrikersUnchecked([]);
-      setSpecialsUnchecked([]);
+      setRowsUnchecked([{ id: uuid(), strikers: [], specials: [] }]);
+      setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
+      setActiveRowIndex(0);
       setScaleUnchecked(1);
       setDisplayOverlineUnchecked(false);
       setDisplayRoleIconUnchecked(true);
@@ -365,52 +458,26 @@ export function FormationEditor() {
     }
 
     if (query.status === "success") {
-      const newStrikers: StudentItem[] = [];
-      const newSpecials: StudentItem[] = [];
+      const sourceRows =
+        query.data.rows && query.data.rows.length > 0
+          ? query.data.rows
+          : [
+              {
+                strikers: query.data.strikers,
+                specials: query.data.specials,
+              },
+            ];
 
-      for (const item of query.data.strikers) {
-        const student = allStudents.find((s) => s.id === item.studentId);
-
-        if (student) {
-          newStrikers.push({
-            id: uuid(),
-            student,
-            starter: item.starter,
-            starLevel: item.starLevel,
-            ueLevel: item.ueLevel,
-            borrowed: item.borrowed,
-            level: item.level,
-          });
-        } else {
-          newStrikers.push({
-            id: uuid(),
-          });
-        }
-      }
-
-      for (const item of query.data.specials) {
-        const student = allStudents.find((s) => s.id === item.studentId);
-
-        if (student) {
-          newSpecials.push({
-            id: uuid(),
-            student,
-            starter: item.starter,
-            starLevel: item.starLevel,
-            ueLevel: item.ueLevel,
-            borrowed: item.borrowed,
-            level: item.level,
-          });
-        } else {
-          newSpecials.push({
-            id: uuid(),
-          });
-        }
-      }
+      const loadedRows: FormationEditorRow[] = sourceRows.map((row) => ({
+        id: uuid(),
+        strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
+        specials: persistedSlotsToStudentItems(row.specials, allStudents),
+      }));
 
       setNameUnchecked(query.data.name || "");
-      setStrikersUnchecked(newStrikers);
-      setSpecialsUnchecked(newSpecials);
+      setRowsUnchecked(loadedRows);
+      setRowGapUnchecked(query.data.rowGap ?? 8);
+      setActiveRowIndex(0);
       setScaleUnchecked(1);
       setDisplayOverlineUnchecked(query.data.displayOverline || false);
       setDisplayRoleIconUnchecked(!query.data.noDisplayRole);
@@ -424,7 +491,11 @@ export function FormationEditor() {
   }, [formationId, query.status]);
 
   useEffect(() => {
-    if (strikers.length > 0 || specials.length > 0) {
+    const rosterEmpty = rows.every(
+      (row) => row.strikers.length === 0 && row.specials.length === 0,
+    );
+
+    if (!rosterEmpty) {
       return;
     }
 
@@ -438,19 +509,62 @@ export function FormationEditor() {
     setGroupsVerticalUnchecked(
       preferences.formationDisplay.defaultGroupsVertical,
     );
-  }, [preferences]);
+    setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
+  }, [preferences, rows]);
 
-  const editableConfig: EditableConfig = useMemo(
-    () => ({
+  const editableConfigByRow = useMemo((): EditableConfig[] => {
+    return rows.map((_, rowIndex) => ({
       selectedItemId,
       onItemSelected: setSelectedItemId,
-      setStrikers,
-      setSpecials,
+      setStrikers: (action: SetStateAction<StudentItem[]>) => {
+        setRows((prev) => {
+          const row = prev[rowIndex];
+          if (!row) {
+            return prev;
+          }
+
+          const nextStrikers =
+            typeof action === "function"
+              ? action(row.strikers)
+              : action;
+
+          return prev.map((r, i) =>
+            i === rowIndex ? { ...r, strikers: nextStrikers } : r,
+          );
+        });
+      },
+      setSpecials: (action: SetStateAction<StudentItem[]>) => {
+        setRows((prev) => {
+          const row = prev[rowIndex];
+          if (!row) {
+            return prev;
+          }
+
+          const nextSpecials =
+            typeof action === "function"
+              ? action(row.specials)
+              : action;
+
+          return prev.map((r, i) =>
+            i === rowIndex ? { ...r, specials: nextSpecials } : r,
+          );
+        });
+      },
       onWantsToRemove: removeItem,
       onWantsToUpdate: updateItem,
-    }),
-    [selectedItemId, setStrikers, setSpecials, removeItem, updateItem],
+    }));
+  }, [rows, selectedItemId, removeItem, updateItem, setRows]);
+
+  const totalSlotCount = useMemo(
+    () =>
+      rows.reduce(
+        (acc, row) => acc + row.strikers.length + row.specials.length,
+        0,
+      ),
+    [rows],
   );
+
+  const hasAnyCard = totalSlotCount > 0;
 
   if (formationId && query.status === "pending") {
     return (
@@ -462,7 +576,7 @@ export function FormationEditor() {
     <div className="flex flex-col gap-10">
       <div
         className={cn(" -mt-6 flex flex-col gap-4", {
-          hidden: strikers.length + specials.length > 0,
+          hidden: hasAnyCard,
         })}
       >
         <p>{t("tools.formationDisplay.descriptionLong")}</p>
@@ -478,21 +592,37 @@ export function FormationEditor() {
         </p>
       </div>
 
-      {strikers.length + specials.length > 0 && (
-        <p className="text-sm text-muted-foreground">
+      {hasAnyCard && (
+        <p className="text-center text-sm text-muted-foreground">
           {t("tools.timeline.clickToEditPreview")}
         </p>
       )}
 
-      <FormationPreview
-        containerRef={containerRef}
-        strikers={strikers}
-        specials={specials}
-        displayOverline={displayOverline}
-        noDisplayRole={!displayRoleIcon}
-        groupsVertical={groupsVertical}
-        editableConfig={editableConfig}
-      />
+      {!hasAnyCard ? (
+        <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
+          {t("tools.formationDisplay.noStudentsInFormation")}
+        </div>
+      ) : (
+        <div className="flex w-full justify-center">
+          <div
+            ref={containerRef}
+            className="inline-flex w-fit max-w-full flex-col items-center"
+            style={{ gap: rowGap ?? 8 }}
+          >
+            {rows.map((row, rowIndex) => (
+              <FormationPreview
+                key={row.id}
+                strikers={row.strikers}
+                specials={row.specials}
+                displayOverline={displayOverline}
+                noDisplayRole={!displayRoleIcon}
+                groupsVertical={groupsVertical}
+                editableConfig={editableConfigByRow[rowIndex]}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <Card>
         <CardContent>
@@ -513,6 +643,51 @@ export function FormationEditor() {
 
             <TabsContent value="items">
               <div className="flex flex-col gap-4">
+                <div className="flex flex-wrap gap-4 items-center justify-center">
+                  <div className="flex flex-wrap gap-2 items-center justify-center">
+                    <Label className="shrink-0">
+                      {t("tools.formationDisplay.activeRow")}
+                    </Label>
+                    <Select
+                      value={activeRowIndex.toString()}
+                      onValueChange={(val) =>
+                        setActiveRowIndex(Number.parseInt(val, 10))
+                      }
+                    >
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {rows.map((row, i) => (
+                          <SelectItem key={row.id} value={i.toString()}>
+                            {t("tools.formationDisplay.rowNumber", {
+                              number: i + 1,
+                            })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addFormationRow}
+                    >
+                      <PlusIcon className="size-4" />
+                      {t("tools.formationDisplay.addRow")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={removeFormationRow}
+                      disabled={rows.length <= 1}
+                    >
+                      {t("tools.formationDisplay.removeRow")}
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="flex gap-4 items-center justify-center">
                   <StudentPicker
                     onStudentSelected={addStudent}
@@ -554,7 +729,27 @@ export function FormationEditor() {
             </TabsContent>
 
             <TabsContent value="appearance">
-              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center flex-wrap">
+                <div className="flex gap-2 items-center">
+                  <Label className="shrink-0" htmlFor="formation-row-gap">
+                    {t("tools.formationDisplay.rowSpacing")}
+                  </Label>
+                  <Input
+                    id="formation-row-gap"
+                    type="number"
+                    className="w-20"
+                    min={0}
+                    max={200}
+                    value={(rowGap ?? 8).toString()}
+                    onChange={(e) => {
+                      const n = Number.parseInt(e.target.value, 10);
+                      if (!Number.isNaN(n)) {
+                        setRowGap(Math.min(200, Math.max(0, n)));
+                      }
+                    }}
+                  />
+                </div>
+
                 <div className="flex gap-2 items-center">
                   <Label className="shrink-0">{t("common.scale")}</Label>
 
@@ -652,10 +847,7 @@ export function FormationEditor() {
       <div className="flex gap-4 items-center justify-center">
         <Button
           onClick={getFormationImage}
-          disabled={
-            (strikers.length === 0 && specials.length === 0) ||
-            generationInProgress
-          }
+          disabled={!hasAnyCard || generationInProgress}
         >
           {t("common.downloadImage")}
         </Button>

@@ -1,16 +1,13 @@
 "use client";
 
-import {
-  FormationPreview,
-  type StudentItem,
-} from "@/app/formation-display/_components/formation-preview";
+import { FormationPreview } from "@/app/formation-display/_components/formation-preview";
 import { Button } from "@/components/ui/button";
+import { persistedSlotsToStudentItems } from "@/lib/formation-display-utils";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
-import { v4 as uuid } from "uuid";
 import { useStudents } from "@/hooks/use-students";
 import { useTranslations } from "next-intl";
 
@@ -26,55 +23,19 @@ export function FormationEntry({ entry }: FormationEntryProps) {
 
   const destroyMutation = useMutation(api.formation.destroy);
 
-  const strikers = useMemo<StudentItem[]>(() => {
-    const output: StudentItem[] = [];
+  const previewRows = useMemo(() => {
+    const sources =
+      entry.rows && entry.rows.length > 0
+        ? entry.rows
+        : [{ strikers: entry.strikers, specials: entry.specials }];
 
-    for (const item of entry.strikers) {
-      const student = allStudents.find((s) => s.id === item.studentId);
-      if (student) {
-        output.push({
-          id: uuid(),
-          student,
-          starter: item.starter,
-          starLevel: item.starLevel,
-          ueLevel: item.ueLevel,
-          borrowed: item.borrowed,
-          level: item.level,
-        });
-      } else {
-        output.push({
-          id: uuid(),
-        });
-      }
-    }
+    return sources.map((row) => ({
+      strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
+      specials: persistedSlotsToStudentItems(row.specials, allStudents),
+    }));
+  }, [entry.rows, entry.strikers, entry.specials, allStudents]);
 
-    return output;
-  }, [entry.strikers, allStudents]);
-
-  const specials = useMemo<StudentItem[]>(() => {
-    const output: StudentItem[] = [];
-
-    for (const item of entry.specials) {
-      const student = allStudents.find((s) => s.id === item.studentId);
-      if (student) {
-        output.push({
-          id: uuid(),
-          student,
-          starter: item.starter,
-          starLevel: item.starLevel,
-          ueLevel: item.ueLevel,
-          borrowed: item.borrowed,
-          level: item.level,
-        });
-      } else {
-        output.push({
-          id: uuid(),
-        });
-      }
-    }
-
-    return output;
-  }, [entry.specials, allStudents]);
+  const rowGapPx = entry.rowGap ?? 8;
 
   async function handleDelete() {
     if (!deleteConfirm) {
@@ -107,14 +68,20 @@ export function FormationEntry({ entry }: FormationEntryProps) {
           )}
         </div>
 
-        <div style={{ zoom: 0.8 }}>
-          <FormationPreview
-            strikers={strikers}
-            specials={specials}
-            displayOverline={entry.displayOverline}
-            noDisplayRole={entry.noDisplayRole}
-            groupsVertical={entry.groupsVertical}
-          />
+        <div
+          className="flex w-fit max-w-full flex-col items-center"
+          style={{ zoom: 0.8, gap: rowGapPx }}
+        >
+          {previewRows.map((row, rowIndex) => (
+            <FormationPreview
+              key={`${entry._id}-row-${rowIndex}`}
+              strikers={row.strikers}
+              specials={row.specials}
+              displayOverline={entry.displayOverline}
+              noDisplayRole={entry.noDisplayRole}
+              groupsVertical={entry.groupsVertical}
+            />
+          ))}
         </div>
       </div>
 

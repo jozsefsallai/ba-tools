@@ -321,7 +321,8 @@
       "defaultScale": "デフォルトのスケール",
       "defaultDisplayOverline": "デフォルトでオーバーラインを表示",
       "defaultDisplayRoleIcons": "デフォルトで役割アイコンを表示",
-      "defaultVerticalGroups": "デフォルトで垂直グループ化"
+      "defaultVerticalGroups": "デフォルトで垂直グループ化",
+      "defaultRowGap": "デフォルトの行間隔（px）"
     }
   },
   "themeToggle": {

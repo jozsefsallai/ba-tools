@@ -459,6 +459,12 @@
     "displayRoleIcon": "Display Role Icon",
     "verticalGroups": "Vertical Groups",
 
+    "activeRow": "Active row",
+    "rowNumber": "Row {number}",
+    "addRow": "Add row",
+    "removeRow": "Remove row",
+    "rowSpacing": "Row spacing (px)",
+
     "formationName": "Formation Name",
     "updateFormation": "Update Formation",
     "saveFormation": "Save Formation",

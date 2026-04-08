@@ -24,9 +24,19 @@ export function UserPreferencesProvider({ children }: PropsWithChildren) {
     await savePreferencesMutation(newPreferences);
   }
 
-  const preferences = useMemo(() => {
+  const preferences = useMemo((): UserPreferences => {
     if (getPreferencesQuery.status === "success") {
-      return getPreferencesQuery.data;
+      const data = getPreferencesQuery.data;
+      return {
+        timelineVisualizer: {
+          ...defaultUserPreferences.timelineVisualizer,
+          ...data.timelineVisualizer,
+        },
+        formationDisplay: {
+          ...defaultUserPreferences.formationDisplay,
+          ...data.formationDisplay,
+        },
+      };
     }
 
     return defaultUserPreferences;

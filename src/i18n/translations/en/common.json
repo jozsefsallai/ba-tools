@@ -347,7 +347,8 @@
       "defaultScale": "Default scale",
       "defaultDisplayOverline": "Default display overline",
       "defaultDisplayRoleIcons": "Default display role icons",
-      "defaultVerticalGroups": "Default vertical groups"
+      "defaultVerticalGroups": "Default vertical groups",
+      "defaultRowGap": "Default row spacing (px)"
     }
   },
 

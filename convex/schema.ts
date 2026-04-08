@@ -18,6 +18,11 @@ export const formationStudentItem = v.object({
   level: v.optional(v.number()),
 });
 
+export const formationRow = v.object({
+  strikers: v.array(formationStudentItem),
+  specials: v.array(formationStudentItem),
+});
+
 export const timelineStudentItem = v.object({
   type: v.literal("student"),
   studentId: v.string(),
@@ -109,6 +114,7 @@ export default defineSchema({
       defaultDisplayOverline: v.boolean(),
       defaultNoDisplayRole: v.boolean(),
       defaultGroupsVertical: v.boolean(),
+      defaultRowGap: v.optional(v.number()),
     }),
   }).index("by_userId", ["userId"]),
 
@@ -117,6 +123,8 @@ export default defineSchema({
     name: v.optional(v.string()),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
+    rows: v.optional(v.array(formationRow)),
+    rowGap: v.optional(v.number()),
     displayOverline: v.optional(v.boolean()),
     noDisplayRole: v.optional(v.boolean()),
     groupsVertical: v.optional(v.boolean()),

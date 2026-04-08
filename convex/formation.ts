@@ -1,7 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
-import { formationStudentItem } from "./schema";
+import { formationRow, formationStudentItem } from "./schema";
 
 export const getOwn = authenticatedQuery({
   handler: async (ctx) => {
@@ -44,6 +44,8 @@ export const create = authenticatedMutation({
     name: v.optional(v.string()),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
+    rows: v.optional(v.array(formationRow)),
+    rowGap: v.optional(v.number()),
     displayOverline: v.optional(v.boolean()),
     noDisplayRole: v.optional(v.boolean()),
     groupsVertical: v.optional(v.boolean()),
@@ -58,6 +60,8 @@ export const create = authenticatedMutation({
       name: args.name,
       strikers: args.strikers,
       specials: args.specials,
+      ...(args.rows !== undefined ? { rows: args.rows } : {}),
+      ...(args.rowGap !== undefined ? { rowGap: args.rowGap } : {}),
       displayOverline: args.displayOverline ?? false,
       noDisplayRole: args.noDisplayRole ?? false,
       groupsVertical: args.groupsVertical ?? false,
@@ -74,6 +78,8 @@ export const update = authenticatedMutation({
     name: v.optional(v.string()),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
+    rows: v.optional(v.array(formationRow)),
+    rowGap: v.optional(v.number()),
     displayOverline: v.optional(v.boolean()),
     noDisplayRole: v.optional(v.boolean()),
     groupsVertical: v.optional(v.boolean()),
@@ -90,6 +96,8 @@ export const update = authenticatedMutation({
       displayOverline: args.displayOverline ?? false,
       noDisplayRole: args.noDisplayRole ?? false,
       groupsVertical: args.groupsVertical ?? false,
+      ...(args.rows !== undefined ? { rows: args.rows } : {}),
+      ...(args.rowGap !== undefined ? { rowGap: args.rowGap } : {}),
     };
 
     const current = await ctx.db.get(args.id);

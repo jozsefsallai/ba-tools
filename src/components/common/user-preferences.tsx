@@ -297,6 +297,38 @@ export function UserPreferences() {
             />
           </div>
         </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 justify-between">
+            <Label
+              className="shrink-0"
+              htmlFor="echelontool-default-row-gap"
+            >
+              {t("common.userPreferences.formationDisplay.defaultRowGap")}
+            </Label>
+
+            <Input
+              id="echelontool-default-row-gap"
+              type="number"
+              className="w-20"
+              min={0}
+              max={200}
+              value={(
+                newPreferences.formationDisplay.defaultRowGap ?? 8
+              ).toString()}
+              onChange={(e) => {
+                const n = Number.parseInt(e.target.value, 10);
+                if (!Number.isNaN(n)) {
+                  setPreference(
+                    "formationDisplay",
+                    "defaultRowGap",
+                    Math.min(200, Math.max(0, n)),
+                  );
+                }
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <Separator />

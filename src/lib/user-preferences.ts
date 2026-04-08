@@ -16,6 +16,7 @@ export const defaultUserPreferences: Pick<
     defaultDisplayOverline: false,
     defaultNoDisplayRole: false,
     defaultGroupsVertical: false,
+    defaultRowGap: 8,
   },
 };
 

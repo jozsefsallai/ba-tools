@@ -6,8 +6,7 @@ import { FormationItemPopover } from "@/app/formation-display/_components/format
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import { useCallback, useState, type RefObject, type SetStateAction } from "react";
+import { useCallback, useState, type SetStateAction } from "react";
 import {
   DndContext,
   type DragEndEvent,
@@ -49,7 +48,6 @@ export type EditableConfig = {
 };
 
 export type FormationPreviewProps = {
-  containerRef?: RefObject<HTMLDivElement | null>;
   strikers: StudentItem[];
   specials: StudentItem[];
   displayOverline?: boolean;
@@ -239,7 +237,6 @@ function SortableGroup({
 }
 
 export function FormationPreview({
-  containerRef,
   strikers,
   specials,
   displayOverline,
@@ -247,14 +244,8 @@ export function FormationPreview({
   groupsVertical = false,
   editableConfig,
 }: FormationPreviewProps) {
-  const t = useTranslations();
-
-  if (strikers.length === 0 && specials.length === 0) {
-    return (
-      <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
-        {t("tools.formationDisplay.noStudentsInFormation")}
-      </div>
-    );
+  if (strikers.length === 0 && specials.length === 0 && !editableConfig) {
+    return null;
   }
 
   const strikersContent = (
@@ -328,12 +319,11 @@ export function FormationPreview({
   );
 
   return (
-    <div className="flex flex-col gap-4 items-center justify-center">
+    <div className="mx-auto flex w-fit max-w-full flex-col items-center gap-4">
       <div
-        className={cn("flex items-center gap-3 p-4", {
+        className={cn("flex w-fit max-w-full items-center gap-3 p-4", {
           "flex-col": groupsVertical,
         })}
-        ref={containerRef}
       >
         {strikersContent}
         {specialsContent}

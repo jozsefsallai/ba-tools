@@ -34,6 +34,7 @@ export const update = authenticatedMutation({
         defaultDisplayOverline: v.optional(v.boolean()),
         defaultNoDisplayRole: v.optional(v.boolean()),
         defaultGroupsVertical: v.optional(v.boolean()),
+        defaultRowGap: v.optional(v.number()),
       }),
     ),
   },
