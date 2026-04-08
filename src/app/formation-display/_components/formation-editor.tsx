@@ -5,7 +5,7 @@ import {
   type StudentItem,
 } from "@/app/formation-display/_components/formation-preview";
 import type { Student } from "@/lib/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import html2canvas from "html2canvas-pro";
 import { Label } from "@/components/ui/label";
@@ -18,13 +18,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { ChevronsUpDownIcon, ImportIcon, PlusIcon } from "lucide-react";
 
 import { sleep } from "@/lib/sleep";
 import { StudentPicker } from "@/components/common/student-picker";
 
-import { FormationItemContainer } from "@/app/formation-display/_components/formation-item-container";
+import type { EditableConfig } from "@/app/formation-display/_components/formation-preview";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryWithStatus } from "@/lib/convex";
 import { api } from "~convex/api";
@@ -46,8 +45,6 @@ import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { SaveStatus } from "@/components/common/save-status";
 import { ParseEchelonDataDialog } from "@/components/dialogs/parse-echelon-data-dialog";
 import type { EchelonData } from "@/lib/echelon-parser";
-
-type CombatClass = "striker" | "special";
 
 export function FormationEditor() {
   const t = useTranslations();
@@ -127,6 +124,8 @@ export function FormationEditor() {
   const [groupsVertical, setGroupsVertical, setGroupsVerticalUnchecked] =
     useSaveableState(preferences.formationDisplay.defaultGroupsVertical);
 
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
   const router = useRouter();
@@ -169,56 +168,28 @@ export function FormationEditor() {
     }
   }
 
-  function removeStudentItem(
-    combatClass: CombatClass,
-    studentItem: StudentItem,
-  ) {
-    if (combatClass === "striker") {
-      setStrikers((prev) => prev.filter((item) => item.id !== studentItem.id));
-    }
+  const removeItem = useCallback(
+    (itemId: string) => {
+      setSelectedItemId((prev) => (prev === itemId ? null : prev));
+      setStrikers((prev) => prev.filter((item) => item.id !== itemId));
+      setSpecials((prev) => prev.filter((item) => item.id !== itemId));
+    },
+    [setStrikers, setSpecials],
+  );
 
-    if (combatClass === "special") {
-      setSpecials((prev) => prev.filter((item) => item.id !== studentItem.id));
-    }
-  }
+  const updateItem = useCallback(
+    (itemId: string, newData: Partial<Omit<StudentItem, "student" | "id">>) => {
+      const updater = (items: StudentItem[]) =>
+        items.map((item) =>
+          item.id === itemId ? { ...item, ...newData } : item,
+        );
+      setStrikers(updater);
+      setSpecials(updater);
+    },
+    [setStrikers, setSpecials],
+  );
 
-  function updateStudentItem(
-    combatClass: CombatClass,
-    studentItem: StudentItem,
-    newData: Omit<StudentItem, "student" | "id">,
-  ) {
-    if (combatClass === "striker") {
-      setStrikers((prev) =>
-        prev.map((item) => {
-          if (item.id === studentItem.id) {
-            return {
-              ...item,
-              ...newData,
-            };
-          }
-
-          return item;
-        }),
-      );
-    }
-
-    if (combatClass === "special") {
-      setSpecials((prev) =>
-        prev.map((item) => {
-          if (item.id === studentItem.id) {
-            return {
-              ...item,
-              ...newData,
-            };
-          }
-
-          return item;
-        }),
-      );
-    }
-  }
-
-  function addEmptyCard(combatClass: CombatClass) {
+  function addEmptyCard(combatClass: "striker" | "special") {
     const item: StudentItem = {
       id: uuid(),
     };
@@ -469,6 +440,18 @@ export function FormationEditor() {
     );
   }, [preferences]);
 
+  const editableConfig: EditableConfig = useMemo(
+    () => ({
+      selectedItemId,
+      onItemSelected: setSelectedItemId,
+      setStrikers,
+      setSpecials,
+      onWantsToRemove: removeItem,
+      onWantsToUpdate: updateItem,
+    }),
+    [selectedItemId, setStrikers, setSpecials, removeItem, updateItem],
+  );
+
   if (formationId && query.status === "pending") {
     return (
       <MessageBox>{t("tools.formationDisplay.loadingFormation")}</MessageBox>
@@ -495,6 +478,12 @@ export function FormationEditor() {
         </p>
       </div>
 
+      {strikers.length + specials.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          {t("tools.timeline.clickToEditPreview")}
+        </p>
+      )}
+
       <FormationPreview
         containerRef={containerRef}
         strikers={strikers}
@@ -502,6 +491,7 @@ export function FormationEditor() {
         displayOverline={displayOverline}
         noDisplayRole={!displayRoleIcon}
         groupsVertical={groupsVertical}
+        editableConfig={editableConfig}
       />
 
       <Card>
@@ -669,56 +659,6 @@ export function FormationEditor() {
         >
           {t("common.downloadImage")}
         </Button>
-      </div>
-
-      <Separator />
-
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">
-          {t("tools.formationDisplay.strikers")}
-        </h2>
-
-        {strikers.length === 0 && (
-          <p className="text-muted-foreground">
-            {t("tools.formationDisplay.noStrikers")}
-          </p>
-        )}
-
-        {strikers.length > 0 && (
-          <FormationItemContainer
-            items={strikers}
-            setItems={setStrikers}
-            onWantsToRemove={(item) => removeStudentItem("striker", item)}
-            onWantsToUpdate={(item, newData) =>
-              updateStudentItem("striker", item, newData)
-            }
-          />
-        )}
-      </div>
-
-      <Separator />
-
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">
-          {t("tools.formationDisplay.specials")}
-        </h2>
-
-        {specials.length === 0 && (
-          <p className="text-muted-foreground">
-            {t("tools.formationDisplay.noSpecials")}
-          </p>
-        )}
-
-        {specials.length > 0 && (
-          <FormationItemContainer
-            items={specials}
-            setItems={setSpecials}
-            onWantsToRemove={(item) => removeStudentItem("special", item)}
-            onWantsToUpdate={(item, newData) =>
-              updateStudentItem("special", item, newData)
-            }
-          />
-        )}
       </div>
 
       <Authenticated>
