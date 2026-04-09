@@ -204,9 +204,7 @@ function SortableGroup({
               id={entry.id}
               isSelected={selectedItemId === entry.id}
               onSelect={() =>
-                onItemSelected(
-                  selectedItemId === entry.id ? null : entry.id,
-                )
+                onItemSelected(selectedItemId === entry.id ? null : entry.id)
               }
               onOpenChange={(open) => {
                 if (!open) onItemSelected(null);
@@ -321,7 +319,7 @@ export function FormationPreview({
   return (
     <div className="mx-auto flex w-fit max-w-full flex-col items-center gap-4">
       <div
-        className={cn("flex w-fit max-w-full items-center gap-3 p-4", {
+        className={cn("flex w-fit max-w-full items-center gap-3 px-4", {
           "flex-col": groupsVertical,
         })}
       >
