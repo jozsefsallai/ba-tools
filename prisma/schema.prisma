@@ -74,6 +74,7 @@ enum Club {
   FreeTradeCartel
   NicomediasTroop
   PublishingDepartment
+  FoxSquad
   EmptyClub
 }
 
