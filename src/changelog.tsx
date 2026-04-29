@@ -23,6 +23,7 @@ export const CHANGELOG_SCOPES = {
   content: "Content",
   docs: "Documentation",
   mcp: "MCP Server",
+  birthdays: "Student Birthdays",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -40,6 +41,22 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "April 29, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.birthdays,
+        description: "Added Student Birthdays page.",
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Added top loader for page transitions.",
+      },
+    ],
+  },
   {
     date: "April 8, 2026",
     features: [
