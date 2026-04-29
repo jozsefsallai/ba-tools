@@ -819,6 +819,52 @@
     "nextCafeReset": "次のカフェリセットまで：",
     "headpatCooldown": "なでなで可能になるまで："
   },
+  "birthdays": {
+    "title": "生徒の誕生日",
+    "description": "ゲーム内の全生徒の誕生日を確認できます。特定の生徒を検索したり、今日や今後の誕生日をチェックしたりすることが可能です。",
+    "calendarTitle": "誕生日カレンダー",
+    "today": {
+      "title": "今日の誕生日",
+      "celebrating": "誕生日おめでとう！"
+    },
+    "upcoming": {
+      "title": "今後の誕生日",
+      "today": "今日",
+      "tomorrow": "明日",
+      "inDays": "{count}日後"
+    },
+    "search": {
+      "title": "検索結果",
+      "matches": "{count}件一致",
+      "noMatches": "検索条件に一致する生徒は見つかりませんでした。"
+    },
+    "filters": {
+      "searchPlaceholder": "生徒名で検索...",
+      "school": "学校",
+      "any": "すべての学校",
+      "myBirthday": "自分の誕生日",
+      "myBirthdayValue": "自分の誕生日: {value}",
+      "clearMyBirthday": "誕生日をクリア"
+    },
+    "cell": {
+      "ariaLabel": "{month}月{day}日の誕生日: {count}人",
+      "popoverHeader": "{month}月{day}日の誕生日"
+    },
+    "months": {
+      "january": "1月",
+      "february": "2月",
+      "march": "3月",
+      "april": "4月",
+      "may": "5月",
+      "june": "6月",
+      "july": "7月",
+      "august": "8月",
+      "september": "9月",
+      "october": "10月",
+      "november": "11月",
+      "december": "12月"
+    }
+  },
   "studentOfTheDay": {
     "title": "今日の生徒",
     "siteWide": "今日の全ユーザー共通の生徒",

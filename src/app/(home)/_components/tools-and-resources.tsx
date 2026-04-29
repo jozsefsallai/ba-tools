@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import {
   BookOpenTextIcon,
+  CakeIcon,
   CalculatorIcon,
   DicesIcon,
   GemIcon,
@@ -90,6 +91,13 @@ export async function ToolsAndResources() {
       path: "/global/banners",
       icon: <GemIcon className="size-10 text-blue-300 shrink-0" />,
       description: t("static.home.toollist.glBanners.description"),
+    },
+    {
+      name: t("static.home.toollist.birthdays.title"),
+      path: "/birthdays",
+      icon: <CakeIcon className="size-10 text-pink-400 shrink-0" />,
+      description: t("static.home.toollist.birthdays.description"),
+      isNew: true,
     },
   ];
 

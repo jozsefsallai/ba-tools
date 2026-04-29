@@ -22,18 +22,20 @@ import { Button } from "@/components/ui/button";
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import {
+  BookOpenTextIcon,
+  CakeIcon,
   CalculatorIcon,
-  CalendarIcon,
   ChartNoAxesGanttIcon,
   CogIcon,
   DicesIcon,
   EllipsisIcon,
   GamepadIcon,
+  GemIcon,
+  Grid2x2Icon,
   HeartIcon,
-  ImageIcon,
-  PackageIcon,
-  TrainFrontIcon,
-  TypeIcon,
+  ListOrderedIcon,
+  RectangleEllipsisIcon,
+  TrainTrackIcon,
   UsersIcon,
 } from "lucide-react";
 import Image from "next/image";
@@ -73,7 +75,11 @@ function RecentTimelines() {
         <SidebarMenuSubItem key={tl._id}>
           <SidebarMenuSubButton asChild size="sm">
             <Link href={`/timeline-visualizer?id=${tl._id}`}>
-              <span className={tl.name ? "truncate" : "truncate italic text-muted-foreground"}>
+              <span
+                className={
+                  tl.name ? "truncate" : "truncate italic text-muted-foreground"
+                }
+              >
                 {tl.name || t("common.untitledTimeline")}
               </span>
             </Link>
@@ -82,10 +88,7 @@ function RecentTimelines() {
       ))}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton asChild size="sm">
-          <Link
-            href="/user/timelines"
-            className="text-muted-foreground"
-          >
+          <Link href="/user/timelines" className="text-muted-foreground">
             <EllipsisIcon className="size-3" />
             <span>{t("common.viewAll")}</span>
           </Link>
@@ -108,7 +111,11 @@ function RecentFormations() {
         <SidebarMenuSubItem key={f._id}>
           <SidebarMenuSubButton asChild size="sm">
             <Link href={`/formation-display?id=${f._id}`}>
-              <span className={f.name ? "truncate" : "truncate italic text-muted-foreground"}>
+              <span
+                className={
+                  f.name ? "truncate" : "truncate italic text-muted-foreground"
+                }
+              >
                 {f.name || t("common.untitledFormation")}
               </span>
             </Link>
@@ -117,10 +124,7 @@ function RecentFormations() {
       ))}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton asChild size="sm">
-          <Link
-            href="/user/formations"
-            className="text-muted-foreground"
-          >
+          <Link href="/user/formations" className="text-muted-foreground">
             <EllipsisIcon className="size-3" />
             <span>{t("common.viewAll")}</span>
           </Link>
@@ -149,11 +153,7 @@ function NavItem({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        isActive={isActive}
-        tooltip={link.text}
-      >
+      <SidebarMenuButton asChild isActive={isActive} tooltip={link.text}>
         <Link href={link.href}>
           <link.icon />
           <span>{link.text}</span>
@@ -183,7 +183,7 @@ export function AppSidebar() {
     {
       href: "/timeline-visualizer",
       text: t("common.header.nav.gameplay.timelineVisualizer"),
-      icon: ChartNoAxesGanttIcon,
+      icon: ListOrderedIcon,
       recentItems: {
         type: "timeline",
         viewAllHref: "/user/timelines",
@@ -192,12 +192,12 @@ export function AppSidebar() {
     {
       href: "/inventory-management",
       text: t("common.header.nav.gameplay.inventoryManagement"),
-      icon: PackageIcon,
+      icon: Grid2x2Icon,
     },
     {
       href: "/railroad-puzzle-solver",
       text: t("common.header.nav.gameplay.railroadPuzzleSolver"),
-      icon: TrainFrontIcon,
+      icon: TrainTrackIcon,
     },
     {
       href: "/raid-score-calculator",
@@ -219,7 +219,7 @@ export function AppSidebar() {
     {
       href: "/title-generator",
       text: t("common.header.nav.misc.titleGenerator"),
-      icon: TypeIcon,
+      icon: RectangleEllipsisIcon,
     },
     {
       href: "/gacha-rate-stats",
@@ -229,7 +229,7 @@ export function AppSidebar() {
     {
       href: "/scenario-image-generator",
       text: t("common.header.nav.misc.scenarioImageGenerator"),
-      icon: ImageIcon,
+      icon: BookOpenTextIcon,
     },
   ];
 
@@ -237,7 +237,12 @@ export function AppSidebar() {
     {
       href: "/global/banners",
       text: t("common.header.nav.resouces.glBanners"),
-      icon: CalendarIcon,
+      icon: GemIcon,
+    },
+    {
+      href: "/birthdays",
+      text: t("common.header.nav.resouces.birthdays"),
+      icon: CakeIcon,
     },
   ];
 

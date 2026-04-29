@@ -958,6 +958,52 @@
     "nextCafeReset": "Next cafe reset in:",
     "headpatCooldown": "Headpat cooldown ends in:"
   },
+  "birthdays": {
+    "title": "Student Birthdays",
+    "description": "View the birthdays of all students in the game. Search for specific students and view current and upcoming birthdays.",
+    "calendarTitle": "Birthday Calendar",
+    "today": {
+      "title": "Today's Birthdays",
+      "celebrating": "Happy Birthday!"
+    },
+    "upcoming": {
+      "title": "Upcoming Birthdays",
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "inDays": "in {count} days"
+    },
+    "search": {
+      "title": "Search Results",
+      "matches": "{count, plural, =0 {0 matches} one {# match} other {# matches}}",
+      "noMatches": "No students found for that search."
+    },
+    "filters": {
+      "searchPlaceholder": "Search by student name...",
+      "school": "School",
+      "any": "Any school",
+      "myBirthday": "My Birthday",
+      "myBirthdayValue": "My Birthday: {value}",
+      "clearMyBirthday": "Clear my birthday"
+    },
+    "cell": {
+      "ariaLabel": "{count, plural, one {# birthday} other {# birthdays}} on {month}/{day}",
+      "popoverHeader": "{month}/{day} Celebrations"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    }
+  },
 
   "studentOfTheDay": {
     "title": "Student of the Day",

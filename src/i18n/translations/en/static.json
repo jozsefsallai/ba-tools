@@ -38,6 +38,10 @@
         "title": "Gacha Rate Stats",
         "description": "Track the 3* rate of a pulling session in real time. You may use it in gacha videos or streams to display your luck (or lack thereof)."
       },
+      "birthdays": {
+        "title": "Student Birthdays",
+        "description": "View the birthdays of all students in the game. Search for specific students and view current and upcoming birthdays."
+      },
       "scenarioImageGenerator": {
         "title": "Scenario Image Generator",
         "description": "Create and generate images that resemble the in-game story UI. Use custom backgrounds, texts, characters, and more."
