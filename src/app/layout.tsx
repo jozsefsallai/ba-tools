@@ -19,6 +19,7 @@ import { StudentsProvider } from "@/components/providers/students-provider";
 import { NavigationGuardProvider } from "next-navigation-guard";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import NextTopLoader from "nextjs-toploader";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -92,6 +93,8 @@ export default async function RootLayout({
       <body
         className={`${sono.variable} ${nexonFootballGothic.variable} ${notoSans.variable} antialiased h-full`}
       >
+        <NextTopLoader />
+
         <NextIntlClientProvider>
           <ThemeProvider
             attribute="class"
