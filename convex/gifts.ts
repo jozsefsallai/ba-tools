@@ -89,7 +89,7 @@ export const createTarget = authenticatedMutation({
       .withIndex("by_studentId", (q) => q.eq("studentId", studentId))
       .first();
 
-    if (existing) {
+    if (existing && existing.giftInventoryId === giftInventoryId) {
       throw new Error("Gift Target for this student already exists");
     }
 

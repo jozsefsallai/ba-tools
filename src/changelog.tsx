@@ -47,6 +47,11 @@ export const CHANGELOG: ChangelogItemData[] = [
     changes: [],
     fixes: [
       {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed a logic error when checking if a gift target already exists.",
+      },
+      {
         scope: CHANGELOG_SCOPES.raidSoreCalc,
         description: "Added HP score for 3 minute Lunatic raids.",
       },
