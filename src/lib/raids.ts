@@ -133,7 +133,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     name: "Lunatic",
     difficultyScore: 17710000,
     hpScore: {
-      180: 0,
+      180: 25525000,
       240: 26315000,
       290: 26954000,
     },

@@ -42,6 +42,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "May 4, 2026",
+    features: [],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.raidSoreCalc,
+        description: "Added HP score for 3 minute Lunatic raids.",
+      },
+    ],
+  },
+  {
     date: "April 29, 2026",
     features: [
       {
