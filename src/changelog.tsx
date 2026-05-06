@@ -42,6 +42,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "May 6, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Star/UE level can now be selected using a dedicated input instead of dropdowns.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "May 4, 2026",
     features: [],
     changes: [],

@@ -1,20 +1,16 @@
 "use client";
 
 import type { StudentItem } from "@/app/formation-display/_components/formation-preview";
+import {
+  StarLevelInput,
+  type StarLevelInputValue,
+} from "@/components/common/star-level-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PopoverContent } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import type { StarLevel, UELevel } from "@/lib/types";
 import { Trash2Icon } from "lucide-react";
 import { useCallback } from "react";
 
@@ -57,27 +53,11 @@ export function FormationItemPopover({
     [onWantsToUpdate, item.id],
   );
 
-  const handleStarLevelUpdate = useCallback(
-    (value: string) => {
-      if (value === "-") {
-        onWantsToUpdate(item.id, { starLevel: undefined });
-        return;
-      }
+  const handleStarsUpdate = useCallback(
+    (value: StarLevelInputValue) => {
       onWantsToUpdate(item.id, {
-        starLevel: Number.parseInt(value, 10) as StarLevel,
-      });
-    },
-    [onWantsToUpdate, item.id],
-  );
-
-  const handleUELevelUpdate = useCallback(
-    (value: string) => {
-      if (value === "-") {
-        onWantsToUpdate(item.id, { ueLevel: undefined });
-        return;
-      }
-      onWantsToUpdate(item.id, {
-        ueLevel: Number.parseInt(value, 10) as UELevel,
+        starLevel: value.starLevel,
+        ueLevel: value.ueLevel,
       });
     },
     [onWantsToUpdate, item.id],
@@ -128,47 +108,14 @@ export function FormationItemPopover({
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <Label className="shrink-0" htmlFor={`pop-stars-${item.id}`}>
-              Stars
-            </Label>
-            <Select
-              value={item.starLevel?.toString() ?? "-"}
-              onValueChange={handleStarLevelUpdate}
-            >
-              <SelectTrigger className="flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="-">None</SelectItem>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="flex flex-col gap-2">
+            <Label className="shrink-0">Stars</Label>
 
-          <div className="flex items-center gap-2">
-            <Label className="shrink-0" htmlFor={`pop-ue-${item.id}`}>
-              UE
-            </Label>
-            <Select
-              value={item.ueLevel?.toString() ?? "-"}
-              onValueChange={handleUELevelUpdate}
-            >
-              <SelectTrigger className="flex-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="-">None</SelectItem>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-              </SelectContent>
-            </Select>
+            <StarLevelInput
+              className="flex-1 items-center"
+              value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
+              onValueChanged={handleStarsUpdate}
+            />
           </div>
 
           <div className="flex items-center gap-2">
