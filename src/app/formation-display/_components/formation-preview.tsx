@@ -4,6 +4,11 @@ import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
 import { FormationItemPopover } from "@/app/formation-display/_components/formation-item-popover";
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
+import {
+  type FormationType,
+  resolveStarterOrders,
+  starterThresholdFor,
+} from "@/lib/formation-type";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useCallback, useState, type SetStateAction } from "react";
@@ -29,6 +34,7 @@ export type StudentItem = {
   id: string;
   student?: Student;
   starter?: boolean;
+  starterOrder?: number;
   starLevel?: StarLevel;
   ueLevel?: UELevel;
   borrowed?: boolean;
@@ -53,6 +59,7 @@ export type FormationPreviewProps = {
   displayOverline?: boolean;
   noDisplayRole?: boolean;
   groupsVertical?: boolean;
+  formationType?: FormationType;
   editableConfig?: EditableConfig;
 };
 
@@ -141,6 +148,8 @@ type SortableGroupProps = {
   items: StudentItem[];
   setItems: React.Dispatch<SetStateAction<StudentItem[]>>;
   noDisplayRole?: boolean;
+  resolvedStarterOrders: Map<string, number>;
+  starterThreshold: number;
   editableConfig: EditableConfig;
 };
 
@@ -148,6 +157,8 @@ function SortableGroup({
   items,
   setItems,
   noDisplayRole,
+  resolvedStarterOrders,
+  starterThreshold,
   editableConfig,
 }: SortableGroupProps) {
   const [, setActiveDragId] = useState<string | null>(null);
@@ -221,6 +232,10 @@ function SortableGroup({
                 <StudentCard
                   noDisplayRole={noDisplayRole}
                   student={entry.student}
+                  starterOrder={resolvedStarterOrders.get(entry.id)}
+                  starterPastThreshold={
+                    (resolvedStarterOrders.get(entry.id) ?? 0) > starterThreshold
+                  }
                   {...entry}
                 />
               ) : (
@@ -240,11 +255,15 @@ export function FormationPreview({
   displayOverline,
   noDisplayRole,
   groupsVertical = false,
+  formationType = "normal",
   editableConfig,
 }: FormationPreviewProps) {
   if (strikers.length === 0 && specials.length === 0 && !editableConfig) {
     return null;
   }
+
+  const resolvedStarterOrders = resolveStarterOrders([...strikers, ...specials]);
+  const starterThreshold = starterThresholdFor(formationType);
 
   const strikersContent = (
     <div className="flex flex-col gap-1">
@@ -260,6 +279,8 @@ export function FormationPreview({
           items={strikers}
           setItems={editableConfig.setStrikers}
           noDisplayRole={noDisplayRole}
+          resolvedStarterOrders={resolvedStarterOrders}
+          starterThreshold={starterThreshold}
           editableConfig={editableConfig}
         />
       ) : (
@@ -270,6 +291,10 @@ export function FormationPreview({
                 key={entry.id}
                 noDisplayRole={noDisplayRole}
                 student={entry.student}
+                starterOrder={resolvedStarterOrders.get(entry.id)}
+                starterPastThreshold={
+                  (resolvedStarterOrders.get(entry.id) ?? 0) > starterThreshold
+                }
                 {...entry}
               />
             ) : (
@@ -295,6 +320,8 @@ export function FormationPreview({
           items={specials}
           setItems={editableConfig.setSpecials}
           noDisplayRole={noDisplayRole}
+          resolvedStarterOrders={resolvedStarterOrders}
+          starterThreshold={starterThreshold}
           editableConfig={editableConfig}
         />
       ) : (
@@ -305,6 +332,10 @@ export function FormationPreview({
                 key={entry.id}
                 noDisplayRole={noDisplayRole}
                 student={entry.student}
+                starterOrder={resolvedStarterOrders.get(entry.id)}
+                starterPastThreshold={
+                  (resolvedStarterOrders.get(entry.id) ?? 0) > starterThreshold
+                }
                 {...entry}
               />
             ) : (

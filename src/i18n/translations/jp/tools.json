@@ -405,6 +405,16 @@
     "emptyStriker": "空のストライカー",
     "emptySpecial": "空のスペシャル",
     "bulkImport": "一括インポート",
+    "starter": "スタートスキル",
+    "formationType": "編成タイプ",
+    "formationTypeAuto": "自動 ({detected})",
+    "formationType_normal": "通常",
+    "formationType_finalRestrictionRelease": "制約解除決戦",
+    "starterOrder": {
+      "title": "スタートスキル順",
+      "count": "{count} / {max}",
+      "empty": "この行にはスタートスキルがありません。"
+    },
     "displayOverline": "オーバーラインを表示",
     "displayRoleIcon": "役割アイコンを表示",
     "verticalGroups": "垂直グループ化",

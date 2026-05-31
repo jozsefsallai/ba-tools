@@ -42,6 +42,9 @@ export const searchOwn = authenticatedQuery({
 export const create = authenticatedMutation({
   args: {
     name: v.optional(v.string()),
+    type: v.optional(
+      v.union(v.literal("normal"), v.literal("finalRestrictionRelease")),
+    ),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
     rows: v.optional(v.array(formationRow)),
@@ -58,6 +61,7 @@ export const create = authenticatedMutation({
     const formation = {
       userId: ctx.user._id,
       name: args.name,
+      ...(args.type !== undefined ? { type: args.type } : {}),
       strikers: args.strikers,
       specials: args.specials,
       ...(args.rows !== undefined ? { rows: args.rows } : {}),
@@ -76,6 +80,9 @@ export const update = authenticatedMutation({
   args: {
     id: v.id("formation"),
     name: v.optional(v.string()),
+    type: v.optional(
+      v.union(v.literal("normal"), v.literal("finalRestrictionRelease")),
+    ),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
     rows: v.optional(v.array(formationRow)),
@@ -91,6 +98,7 @@ export const update = authenticatedMutation({
 
     const formation = {
       name: args.name,
+      ...(args.type !== undefined ? { type: args.type } : {}),
       strikers: args.strikers,
       specials: args.specials,
       displayOverline: args.displayOverline ?? false,

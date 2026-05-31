@@ -52,10 +52,12 @@ import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { SaveStatus } from "@/components/common/save-status";
 import { ParseEchelonDataDialog } from "@/components/dialogs/parse-echelon-data-dialog";
 import type { EchelonData } from "@/lib/echelon-parser";
+import { type FormationType, inferFormationType } from "@/lib/formation-type";
 import {
   persistedSlotsToStudentItems,
   studentItemsToPersistedSlots,
 } from "@/lib/formation-display-utils";
+import { StarterOrderPanel } from "@/app/formation-display/_components/starter-order-panel";
 
 type FormationEditorRow = {
   id: string;
@@ -77,6 +79,10 @@ function compareStudentItems(a: StudentItem[], b: StudentItem[]): boolean {
     }
 
     if (itemA.starter !== itemB.starter) {
+      return false;
+    }
+
+    if (itemA.starterOrder !== itemB.starterOrder) {
       return false;
     }
 
@@ -141,14 +147,13 @@ export function FormationEditor() {
 
   const [rows, setRows, setRowsUnchecked] = useSaveableState<
     FormationEditorRow[]
-  >(
-    () => [{ id: uuid(), strikers: [], specials: [] }],
-    compareFormationRows,
-  );
+  >(() => [{ id: uuid(), strikers: [], specials: [] }], compareFormationRows);
 
   const [rowGap, setRowGap, setRowGapUnchecked] = useSaveableState(
     preferences.formationDisplay.defaultRowGap ?? 8,
   );
+  const [formationType, setFormationType, setFormationTypeUnchecked] =
+    useSaveableState<FormationType | undefined>(undefined);
 
   const [activeRowIndex, setActiveRowIndex] = useState(0);
 
@@ -201,9 +206,7 @@ export function FormationEditor() {
         }
 
         return prev.map((r, i) =>
-          i === activeRowIndex
-            ? { ...r, strikers: [...r.strikers, item] }
-            : r,
+          i === activeRowIndex ? { ...r, strikers: [...r.strikers, item] } : r,
         );
       }
 
@@ -213,9 +216,7 @@ export function FormationEditor() {
         }
 
         return prev.map((r, i) =>
-          i === activeRowIndex
-            ? { ...r, specials: [...r.specials, item] }
-            : r,
+          i === activeRowIndex ? { ...r, specials: [...r.specials, item] } : r,
         );
       }
 
@@ -339,6 +340,7 @@ export function FormationEditor() {
 
     const data = {
       name: name.length > 0 ? name : undefined,
+      ...(formationType !== undefined ? { type: formationType } : {}),
       strikers: firstRow.strikers,
       specials: firstRow.specials,
       rows: rowsPayload,
@@ -406,6 +408,7 @@ export function FormationEditor() {
             starLevel: item.starLevel,
             ueLevel: item.ueLevel,
             starter: item.starter,
+            starterOrder: item.starterOrder,
             borrowed: item.borrowed,
           });
         }
@@ -428,6 +431,7 @@ export function FormationEditor() {
             starLevel: item.starLevel,
             ueLevel: item.ueLevel,
             starter: item.starter,
+            starterOrder: item.starterOrder,
             borrowed: item.borrowed,
           });
         }
@@ -449,6 +453,7 @@ export function FormationEditor() {
       setNameUnchecked("");
       setRowsUnchecked([{ id: uuid(), strikers: [], specials: [] }]);
       setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
+      setFormationTypeUnchecked(undefined);
       setActiveRowIndex(0);
       setScaleUnchecked(1);
       setDisplayOverlineUnchecked(false);
@@ -477,6 +482,7 @@ export function FormationEditor() {
       setNameUnchecked(query.data.name || "");
       setRowsUnchecked(loadedRows);
       setRowGapUnchecked(query.data.rowGap ?? 8);
+      setFormationTypeUnchecked(query.data.type);
       setActiveRowIndex(0);
       setScaleUnchecked(1);
       setDisplayOverlineUnchecked(query.data.displayOverline || false);
@@ -524,9 +530,7 @@ export function FormationEditor() {
           }
 
           const nextStrikers =
-            typeof action === "function"
-              ? action(row.strikers)
-              : action;
+            typeof action === "function" ? action(row.strikers) : action;
 
           return prev.map((r, i) =>
             i === rowIndex ? { ...r, strikers: nextStrikers } : r,
@@ -541,9 +545,7 @@ export function FormationEditor() {
           }
 
           const nextSpecials =
-            typeof action === "function"
-              ? action(row.specials)
-              : action;
+            typeof action === "function" ? action(row.specials) : action;
 
           return prev.map((r, i) =>
             i === rowIndex ? { ...r, specials: nextSpecials } : r,
@@ -565,6 +567,10 @@ export function FormationEditor() {
   );
 
   const hasAnyCard = totalSlotCount > 0;
+  const effectiveType = useMemo(
+    () => formationType ?? inferFormationType(rows),
+    [formationType, rows],
+  );
 
   if (formationId && query.status === "pending") {
     return (
@@ -598,6 +604,39 @@ export function FormationEditor() {
         </p>
       )}
 
+      <div className="flex items-center justify-center gap-2">
+        <Label>{t("tools.formationDisplay.formationType")}</Label>
+        <Select
+          value={formationType ?? "auto"}
+          onValueChange={(val) =>
+            setFormationType(
+              val === "auto" ? undefined : (val as FormationType),
+            )
+          }
+        >
+          <SelectTrigger className="w-[280px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="auto">
+              {t("tools.formationDisplay.formationTypeAuto", {
+                detected: t(
+                  `tools.formationDisplay.formationType_${effectiveType}`,
+                ),
+              })}
+            </SelectItem>
+            <SelectItem value="normal">
+              {t("tools.formationDisplay.formationType_normal")}
+            </SelectItem>
+            <SelectItem value="finalRestrictionRelease">
+              {t(
+                "tools.formationDisplay.formationType_finalRestrictionRelease",
+              )}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {!hasAnyCard ? (
         <div className="border rounded-md px-4 py-10 text-center text-xl text-muted-foreground">
           {t("tools.formationDisplay.noStudentsInFormation")}
@@ -606,7 +645,7 @@ export function FormationEditor() {
         <div className="flex w-full justify-center">
           <div
             ref={containerRef}
-            className="inline-flex w-fit max-w-full flex-col items-center"
+            className="inline-flex w-fit max-w-full flex-col items-center py-2"
             style={{ gap: rowGap ?? 8 }}
           >
             {rows.map((row, rowIndex) => (
@@ -617,6 +656,7 @@ export function FormationEditor() {
                 displayOverline={displayOverline}
                 noDisplayRole={!displayRoleIcon}
                 groupsVertical={groupsVertical}
+                formationType={effectiveType}
                 editableConfig={editableConfigByRow[rowIndex]}
               />
             ))}
@@ -725,6 +765,12 @@ export function FormationEditor() {
                     </Button>
                   </ParseEchelonDataDialog>
                 </div>
+
+                <StarterOrderPanel
+                  row={rows[activeRowIndex]}
+                  formationType={effectiveType}
+                  onUpdateItem={updateItem}
+                />
               </div>
             </TabsContent>
 

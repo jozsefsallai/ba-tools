@@ -3,6 +3,7 @@
 import { FormationPreview } from "@/app/formation-display/_components/formation-preview";
 import { Button } from "@/components/ui/button";
 import { persistedSlotsToStudentItems } from "@/lib/formation-display-utils";
+import { inferFormationType } from "@/lib/formation-type";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import Link from "next/link";
@@ -36,6 +37,17 @@ export function FormationEntry({ entry }: FormationEntryProps) {
   }, [entry.rows, entry.strikers, entry.specials, allStudents]);
 
   const rowGapPx = entry.rowGap ?? 8;
+  const effectiveType = useMemo(
+    () =>
+      entry.type ??
+      inferFormationType(
+        previewRows.map((row) => ({
+          strikers: row.strikers,
+          specials: row.specials,
+        })),
+      ),
+    [entry.type, previewRows],
+  );
 
   async function handleDelete() {
     if (!deleteConfirm) {
@@ -80,6 +92,7 @@ export function FormationEntry({ entry }: FormationEntryProps) {
               displayOverline={entry.displayOverline}
               noDisplayRole={entry.noDisplayRole}
               groupsVertical={entry.groupsVertical}
+              formationType={effectiveType}
             />
           ))}
         </div>

@@ -10,6 +10,7 @@ import { v } from "convex/values";
 export const formationStudentItem = v.object({
   studentId: v.optional(v.string()),
   starter: v.optional(v.boolean()),
+  starterOrder: v.optional(v.number()),
   starLevel: v.optional(
     v.union(...STAR_LEVELS.map((level) => v.literal(level))),
   ),
@@ -121,6 +122,9 @@ export default defineSchema({
   formation: defineTable({
     userId: v.id("users"),
     name: v.optional(v.string()),
+    type: v.optional(
+      v.union(v.literal("normal"), v.literal("finalRestrictionRelease")),
+    ),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
     rows: v.optional(v.array(formationRow)),

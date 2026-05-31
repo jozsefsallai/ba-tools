@@ -8,6 +8,7 @@ export type EchelonStudentItem = {
   starLevel?: StarLevel;
   ueLevel?: UELevel;
   starter?: boolean;
+  starterOrder?: number;
   borrowed?: boolean;
 };
 
@@ -74,14 +75,22 @@ export function parseEchelon(students: Student[], raw: string): EchelonData {
     // Flags
     let borrowed: boolean | undefined;
     let starter: boolean | undefined;
+    let starterOrder: number | undefined;
 
-    const flagMatch = nameAndFlags.match(/\[([AS]+)\]/i);
+    const flagMatch = nameAndFlags.match(/\[([AS\d]+)\]/i);
     let namePart = nameAndFlags;
 
     if (flagMatch) {
       const flags = flagMatch[1];
-      starter = flags.includes("S");
-      borrowed = flags.includes("A");
+      starter = /S/i.test(flags);
+      borrowed = /A/i.test(flags);
+      const orderMatch = flags.match(/\d+/);
+      if (orderMatch) {
+        const parsedOrder = Number.parseInt(orderMatch[0], 10);
+        if (!Number.isNaN(parsedOrder)) {
+          starterOrder = Math.max(1, parsedOrder);
+        }
+      }
 
       namePart = nameAndFlags.replace(flagMatch[0], "").trim();
     }
@@ -95,6 +104,7 @@ export function parseEchelon(students: Student[], raw: string): EchelonData {
     const studentItem: EchelonStudentItem = {
       student,
       starter,
+      starterOrder,
       borrowed,
     };
 

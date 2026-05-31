@@ -42,6 +42,33 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "May 31, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Added ability to import text timelines.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Added formation type support (Normal / Final Restriction Release) with automatic fallback for older saved formations.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Added starter skill ordering with draggable controls and numeric badges on student cards.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Starter highlighting now turns blue when the starter order goes past the starter skill threshold for the active formation type.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "May 6, 2026",
     features: [],
     changes: [

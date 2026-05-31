@@ -1,5 +1,7 @@
 import charBg from "@/assets/images/char-bg.png";
 import iconAssist from "@/assets/images/icon_assist.png";
+import iconMulliganYellow from "@/assets/images/icon_mulligan_yellow.png";
+import iconMulliganBlue from "@/assets/images/icon_mulligan_blue.png";
 
 import { StudentRoleIcon } from "@/components/common/student-role-icon";
 import { StudentStar } from "@/components/common/student-star";
@@ -18,6 +20,8 @@ export type StudentCardProps = {
   ueLevel?: UELevel;
   borrowed?: boolean;
   starter?: boolean;
+  starterOrder?: number;
+  starterPastThreshold?: boolean;
   variantId?: string;
   style?: React.CSSProperties;
   isSkillCard?: boolean;
@@ -31,6 +35,8 @@ export function StudentCard({
   ueLevel,
   borrowed,
   starter,
+  starterOrder,
+  starterPastThreshold,
   variantId,
   style,
   isSkillCard,
@@ -58,7 +64,10 @@ export function StudentCard({
         className={cn("skew-x-[-11deg] p-[2px]", {
           "rounded-[11%]": !isSkillCard,
           "rounded-[2px] p-[2px] bg-black dark:bg-white": isSkillCard,
-          "p-[2px] bg-[#ffff4d]": starter && !isSkillCard,
+          "p-[2px] bg-[#fff159]":
+            starter && !isSkillCard && !starterPastThreshold,
+          "p-[2px] bg-[#5ac7f8]":
+            starter && !isSkillCard && !!starterPastThreshold,
           "p-[1px] bg-white": !starter && !isSkillCard,
         })}
       >
@@ -137,8 +146,36 @@ export function StudentCard({
         <img
           alt="A"
           src={iconAssist.src}
-          className="absolute top-[-3px] right-0 h-[26px]"
+          className={cn("absolute top-[-3px] right-0 h-[26px]", {
+            "right-3": starterOrder !== undefined,
+          })}
         />
+      )}
+
+      {starterOrder !== undefined && (
+        <div
+          className={cn(
+            "absolute top-[-6px] right-[-12px] font-bold text-[18px]",
+            {
+              "text-[#7a4801]": starter && !starterPastThreshold,
+              "text-[#093d5a]": starter && starterPastThreshold,
+            },
+          )}
+        >
+          <img
+            alt={starterOrder.toString()}
+            src={
+              starter && !starterPastThreshold
+                ? iconMulliganYellow.src
+                : iconMulliganBlue.src
+            }
+            className="h-[31px]"
+          />
+
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            {starterOrder}
+          </div>
+        </div>
       )}
     </div>
   );

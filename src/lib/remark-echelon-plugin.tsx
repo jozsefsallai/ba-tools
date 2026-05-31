@@ -1,7 +1,7 @@
-import { EmptyCard } from "@/components/common/empty-card";
-import { StudentCard } from "@/components/common/student-card";
+import { FormationPreview } from "@/app/formation-display/_components/formation-preview";
 import { useStudents } from "@/hooks/use-students";
 import { parseEchelon } from "@/lib/echelon-parser";
+import { inferFormationType } from "@/lib/formation-type";
 import type { Root } from "mdast";
 import { createElement, useMemo } from "react";
 import { visit } from "unist-util-visit";
@@ -17,46 +17,65 @@ function EchelonComponent({ data }: EchelonComponentProps) {
     return parseEchelon(students, data);
   }, [data]);
 
+  const strikers = useMemo(
+    () =>
+      parsedData.strikers.map((item, idx) =>
+        item
+          ? {
+              id: `striker-${idx}`,
+              student: item.student,
+              level: item.level,
+              starLevel: item.starLevel,
+              ueLevel: item.ueLevel,
+              starter: item.starter,
+              starterOrder: item.starterOrder,
+              borrowed: item.borrowed,
+            }
+          : { id: `striker-empty-${idx}` },
+      ),
+    [parsedData],
+  );
+
+  const specials = useMemo(
+    () =>
+      parsedData.specials.map((item, idx) =>
+        item
+          ? {
+              id: `special-${idx}`,
+              student: item.student,
+              level: item.level,
+              starLevel: item.starLevel,
+              ueLevel: item.ueLevel,
+              starter: item.starter,
+              starterOrder: item.starterOrder,
+              borrowed: item.borrowed,
+            }
+          : { id: `special-empty-${idx}` },
+      ),
+    [parsedData],
+  );
+
+  const formationType = useMemo(
+    () =>
+      inferFormationType([
+        {
+          strikers,
+          specials,
+        },
+      ]),
+    [strikers, specials],
+  );
+
   return (
     <div
       className="flex items-center gap-3 prose-img:my-0"
       style={{ zoom: 0.8 }}
     >
-      <div className="flex items-center gap-[2px]">
-        {parsedData.strikers.map((item, idx) =>
-          item ? (
-            <StudentCard
-              key={idx}
-              student={item.student}
-              level={item.level}
-              starLevel={item.starLevel}
-              ueLevel={item.ueLevel}
-              starter={item.starter}
-              borrowed={item.borrowed}
-            />
-          ) : (
-            <EmptyCard key={idx} />
-          ),
-        )}
-      </div>
-
-      <div className="flex items-center gap-[2px]">
-        {parsedData.specials.map((item, idx) =>
-          item ? (
-            <StudentCard
-              key={idx}
-              student={item.student}
-              level={item.level}
-              starLevel={item.starLevel}
-              ueLevel={item.ueLevel}
-              starter={item.starter}
-              borrowed={item.borrowed}
-            />
-          ) : (
-            <EmptyCard key={idx} />
-          ),
-        )}
-      </div>
+      <FormationPreview
+        strikers={strikers}
+        specials={specials}
+        formationType={formationType}
+      />
     </div>
   );
 }

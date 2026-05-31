@@ -484,6 +484,16 @@
     "emptyStriker": "Empty Striker",
     "emptySpecial": "Empty Special",
     "bulkImport": "Bulk Import",
+    "starter": "Starter",
+    "formationType": "Formation type",
+    "formationTypeAuto": "Auto ({detected})",
+    "formationType_normal": "Normal",
+    "formationType_finalRestrictionRelease": "Final Restriction Release",
+    "starterOrder": {
+      "title": "Starter skill order",
+      "count": "{count} / {max}",
+      "empty": "No starter skills selected in this row."
+    },
 
     "displayOverline": "Display Overline",
     "displayRoleIcon": "Display Role Icon",

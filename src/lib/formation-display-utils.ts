@@ -6,6 +6,7 @@ import { v4 as uuid } from "uuid";
 export type PersistedFormationStudentSlot = {
   studentId?: string;
   starter?: boolean;
+  starterOrder?: number;
   starLevel?: StarLevel;
   ueLevel?: UELevel;
   borrowed?: boolean;
@@ -26,6 +27,7 @@ export function persistedSlotsToStudentItems(
         id: uuid(),
         student,
         starter: item.starter,
+        starterOrder: item.starterOrder,
         starLevel: item.starLevel,
         ueLevel: item.ueLevel,
         borrowed: item.borrowed,
@@ -45,6 +47,7 @@ export function studentItemsToPersistedSlots(items: StudentItem[]) {
   return items.map((item) => ({
     studentId: item.student?.id,
     starter: item.starter,
+    starterOrder: item.starterOrder,
     starLevel: item.starLevel,
     ueLevel: item.ueLevel,
     borrowed: item.borrowed,

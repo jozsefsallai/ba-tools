@@ -19,6 +19,25 @@ Once you've added all the students you want, you can change their attributes:
   indicating that the student is a borrowed assistant in this formation.
 - **Starter**: If set to true, the card of the student will get a golden border
   to indicate that she is one of the starter units in this formation.
+- **Starter Order**: Starter units are numbered in the top right. You can
+  reorder starters in the **Starter skill order** panel under the **Items**
+  tab.
+
+## Formation Type and Starter Threshold
+
+The tool supports two formation types:
+
+- **Normal**: Starter slots 1-3 are highlighted in yellow, while slots 4-5 are
+  highlighted in blue.
+- **Final Restriction Release**: Starter slots 1-5 are highlighted in yellow,
+  while slots 6-9 are highlighted in blue.
+
+You can set the type manually from the **Formation type** selector above the
+preview, or leave it on **Auto**. In auto mode, the tool infers:
+
+- **Normal** when every row has 4 or fewer striker students and 2 or fewer
+  special students.
+- **Final Restriction Release** if any row exceeds those counts.
 
 You also have the option to move the student up and down in the formation using
 the button on the left side of the student configuration area. On the right side

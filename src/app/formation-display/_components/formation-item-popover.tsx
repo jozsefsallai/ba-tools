@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Trash2Icon } from "lucide-react";
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 function isFormationPreviewAnchorTarget(target: EventTarget | null) {
   return (
@@ -35,6 +36,8 @@ export function FormationItemPopover({
   onWantsToRemove,
   onWantsToUpdate,
 }: FormationItemPopoverProps) {
+  const t = useTranslations();
+
   const handleRemove = useCallback(() => {
     onWantsToRemove(item.id);
   }, [onWantsToRemove, item.id]);
@@ -72,7 +75,10 @@ export function FormationItemPopover({
 
   const handleStarterUpdate = useCallback(
     (checked: boolean) => {
-      onWantsToUpdate(item.id, { starter: checked });
+      onWantsToUpdate(item.id, {
+        starter: checked,
+        ...(checked ? {} : { starterOrder: undefined }),
+      });
     },
     [onWantsToUpdate, item.id],
   );
@@ -133,7 +139,9 @@ export function FormationItemPopover({
               checked={!!item.starter}
               onCheckedChange={handleStarterUpdate}
             />
-            <Label htmlFor={`pop-starter-${item.id}`}>Starter</Label>
+            <Label htmlFor={`pop-starter-${item.id}`}>
+              {t("tools.formationDisplay.starter")}
+            </Label>
           </div>
         </>
       )}
