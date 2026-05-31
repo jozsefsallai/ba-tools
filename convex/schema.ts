@@ -233,4 +233,17 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_seasonId", ["seasonId"]),
+
+  donation: defineTable({
+    supporterName: v.optional(v.string()),
+    amount: v.number(),
+    currency: v.string(),
+    numberOfCoffees: v.optional(v.number()),
+    supportNote: v.optional(v.string()),
+    supportCreatedOn: v.number(),
+    bmcSupportId: v.optional(v.string()),
+    rawEvent: v.string(),
+  })
+    .index("by_supportCreatedOn", ["supportCreatedOn"])
+    .index("by_bmcSupportId", ["bmcSupportId"]),
 });

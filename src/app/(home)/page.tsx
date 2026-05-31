@@ -6,7 +6,6 @@ import { Plana } from "@/components/plana";
 import checkMobile from "ismobilejs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { UserCorner } from "@/app/(home)/_components/user-corner";
 import { ToolsAndResources } from "@/app/(home)/_components/tools-and-resources";
 import { DonationBox } from "@/app/(home)/_components/donation-box";
 import { ChangelogItem } from "@/components/common/changelog-item";
@@ -86,10 +85,7 @@ export default async function Home() {
 
       <Separator />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <UserCorner />
-        <DonationBox />
-      </div>
+      <DonationBox />
 
       <Separator />
 

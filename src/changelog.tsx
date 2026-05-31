@@ -58,6 +58,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Added starter skill ordering with draggable controls and numeric badges on student cards.",
       },
+      {
+        scope: CHANGELOG_SCOPES.homePage,
+        description:
+          "Donation box now shows recent Buy Me a Coffee supporters and donation amounts.",
+      },
     ],
     changes: [
       {
