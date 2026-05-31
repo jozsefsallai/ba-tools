@@ -63,6 +63,7 @@ import { SaveStatus } from "@/components/common/save-status";
 import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
+import { ImportTextTimelineButton } from "@/app/timeline-visualizer/_components/import-text-timeline-button";
 
 export function TimelineEditor() {
   const t = useTranslations();
@@ -1055,6 +1056,10 @@ export function TimelineEditor() {
             {t("tools.timeline.actions.cloudSave")}
           </Button>
         </Authenticated>
+
+        <ImportTextTimelineButton
+          onImport={(parsedItems) => setItems(parsedItems)}
+        />
 
         <CopyTextTimelineButton items={items} />
 

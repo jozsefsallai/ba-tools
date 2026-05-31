@@ -66,6 +66,36 @@
       "copied": "Copied to Clipboard",
       "copiedToast": "Copied text TL to clipboard!"
     },
+    "import": {
+      "button": "Import Text Timeline",
+      "dialog": {
+        "title": "Import Text Timeline",
+        "description": "Paste a text timeline in the same format as \"Copy Text Timeline\". Horizontal separators and EX skill variants cannot be recovered from text.",
+        "submit": "Import",
+        "placeholder": "Paste your text timeline here..."
+      },
+      "help": {
+        "button": "Format Help",
+        "title": "How to format text timelines",
+        "description": "While I continue to research ways to make the text timeline importer work with any format, there are some strict rules to follow.",
+        "exampleLabel": "Example",
+        "example": "6 Kei\n3:35.000 (S.Nagisa → A.Aris)\n5 A.Aris [self] A.Aris [self]\n10 A.Aris (S.Seia → A.Aris) (D.Aru → A.Aris)\n8 Kei\n6 (S.Seia → A.Aris)\n6 A.Aris (D.Aru → A.Aris) '{Groggy here}'\n\n2:03.000 (S.Nagisa → A.Aris) Kei\n5 A.Aris [self] A.Aris [self] (Rio → Kei)\n8 A.Aris Kei (C) D.Aru S.Seia A.Aris",
+        "rules": {
+          "trigger": "Trigger before a student: 3, 3c, 2:45.900. If a trigger contains a space, wrap it in square brackets: [Cost Down].",
+          "target": "Target format: (Source -> Target), example: (Kisaki -> Mika).",
+          "notes": "Notes should be written after a student, using square brackets: S.Shiroko [delay if needed]",
+          "copy": "Copied skill card marker: (C) after the student name/identifier.",
+          "text": "Standalone text items should use curly brackets: '{Phase transition}'.",
+          "newline": "Each empty line creates a vertical separator. Vertical separators may also be added automatically.",
+          "studentNaming": "Use student shorthands to identify students (e.g. S.Nagisa). You may shorten them (e.g. S.Nagi) as long as the parser can identify them. The identification uses the same logic as the search from the student dropdown."
+        }
+      },
+      "toasts": {
+        "success": "Imported {count} item(s)",
+        "warningSkipped": "Skipped unresolved: {names}",
+        "empty": "Nothing to import"
+      }
+    },
 
     "quickadd": {
       "title": "Quick Add Student"

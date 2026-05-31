@@ -57,6 +57,36 @@
       "copied": "クリップボードにコピーしたよ",
       "copiedToast": "テキスト形式のTLをクリップボードにコピーしたよ！"
     },
+    "import": {
+      "button": "テキスト形式のTLを読み込み",
+      "dialog": {
+        "title": "テキスト形式のTLを読み込み",
+        "description": "「テキスト形式のTLをコピー」と同じ形式のテキストを貼り付けてね。横スペースとEXスキルのバリアントは復元できないよ。",
+        "submit": "読み込み",
+        "placeholder": "ここにテキスト形式のTLを貼り付け"
+      },
+      "help": {
+        "button": "形式ガイド",
+        "title": "テキストTLの書き方",
+        "description": "どんな形式でも読み込めるよう引き続き改善中だけど、現状は次のルールに従ってね。",
+        "exampleLabel": "例",
+        "example": "6 Kei\n3:35.000 (S.Nagisa → A.Aris)\n5 A.Aris [self] A.Aris [self]\n10 A.Aris (S.Seia → A.Aris) (D.Aru → A.Aris)\n8 Kei\n6 (S.Seia → A.Aris)\n6 A.Aris (D.Aru → A.Aris) '{Groggy here}'\n\n2:03.000 (S.Nagisa → A.Aris) Kei\n5 A.Aris [self] A.Aris [self] (Rio → Kei)\n8 A.Aris Kei (C) D.Aru S.Seia A.Aris",
+        "rules": {
+          "trigger": "トリガーは生徒の前に書いてね: 3, 3c, 2:45.900。トリガーにスペースがある場合は [Cost Down] のように角括弧で囲む。",
+          "target": "対象指定: (Source -> Target)、例: (Kisaki -> Mika)。",
+          "notes": "メモは生徒の後ろに角括弧で書く: S.Shiroko [delay if needed]",
+          "copy": "コピー済みスキルカードの印は (C)。生徒名/識別子の後ろに置く。",
+          "text": "単独テキスト項目は波括弧を使う: '{Phase transition}'。",
+          "newline": "空行ごとに縦スペースが1つ追加されるよ。縦スペースは自動で追加される場合もあるよ。",
+          "studentNaming": "生徒の識別には省略名を使ってね (例: S.Nagisa)。S.Nagi のような短縮も、パーサーが識別できればOK。識別ロジックは生徒ドロップダウンの検索と同じだよ。"
+        }
+      },
+      "toasts": {
+        "success": "{count}件の項目を読み込んだよ",
+        "warningSkipped": "解決できなかった項目をスキップしたよ: {names}",
+        "empty": "読み込める内容がないよ"
+      }
+    },
     "quickadd": {
       "title": "生徒をクイック追加"
     },
