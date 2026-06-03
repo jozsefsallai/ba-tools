@@ -42,6 +42,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "June 4, 2026",
+    features: [],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.raidSoreCalc,
+        description: "Added Drumbarka to the list of 4:30 minute raids.",
+      },
+    ],
+  },
+  {
     date: "May 31, 2026",
     features: [
       {

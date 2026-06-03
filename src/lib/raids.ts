@@ -28,7 +28,7 @@ export const RAID_DURATIONS: {
   {
     label: "4min30sec",
     value: 290,
-    raids: ["yesod"],
+    raids: ["yesod", "drumbarka"],
   },
 ];
 
