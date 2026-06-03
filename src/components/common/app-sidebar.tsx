@@ -20,7 +20,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { SignInButton, UserButton } from "@clerk/nextjs";
+import { canAccessPlanaAi } from "@/lib/ai/plana-access";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import {
   BookOpenTextIcon,
@@ -174,6 +175,8 @@ function NavItem({
 export function AppSidebar() {
   const t = useTranslations();
   const pathname = usePathname();
+  const { user } = useUser();
+  const canShowPlanaAi = canAccessPlanaAi(user);
 
   const GAMEPLAY_TOOLS: NavLink[] = [
     {
@@ -232,7 +235,7 @@ export function AppSidebar() {
       text: t("common.header.nav.misc.scenarioImageGenerator"),
       icon: BookOpenTextIcon,
     },
-    ...(process.env.NEXT_PUBLIC_PLANA_AI_ENABLED === "true"
+    ...(canShowPlanaAi
       ? [
           {
             href: "/plana-ai",

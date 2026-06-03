@@ -1,4 +1,6 @@
 import { PlanaChat } from "@/app/plana-ai/_components/plana-chat";
+import { canAccessPlanaAi } from "@/lib/ai/plana-access";
+import { currentUser } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -11,9 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PlanaAIPage() {
-  const isEnabled = process.env.NEXT_PUBLIC_PLANA_AI_ENABLED === "true";
+  const user = await currentUser();
 
-  if (!isEnabled) {
+  if (!canAccessPlanaAi(user)) {
     return redirect("/");
   }
 
