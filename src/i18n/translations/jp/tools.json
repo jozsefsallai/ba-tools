@@ -905,6 +905,68 @@
       "december": "12月"
     }
   },
+  "plana": {
+    "title": "Plana AI",
+    "subtitle": "プラナとチャット",
+    "emptyState": {
+      "heading": "こんにちは、先生。",
+      "body": "いつでもお手伝いできます。何について話しましょうか？",
+      "suggestions": {
+        "greetingMorning": "おはよう、プラナ",
+        "greetingAfternoon": "こんにちは、プラナ",
+        "greetingEvening": "こんばんは、プラナ",
+        "greetingNight": "まだ起きてる、プラナ？",
+        "lore": "キヴォトスについて教えて",
+        "teaParty": "ティーパーティーのメンバーは誰？",
+        "affection": "*なでなで*"
+      }
+    },
+    "input": {
+      "placeholder": "プラナにメッセージ...",
+      "send": "送信",
+      "stop": "停止",
+      "regenerate": "再生成",
+      "newChat": "新しいチャット"
+    },
+    "settings": {
+      "title": "プラナ設定",
+      "subtitle": "使用するLLMプロバイダーとAPIキーを設定します。",
+      "provider": "プロバイダー",
+      "providers": {
+        "openrouter": "OpenRouter",
+        "gateway": "Vercel AI Gateway"
+      },
+      "providerHelp": {
+        "openrouter": "OpenRouter APIキーを取得",
+        "gateway": "Vercel AI Gatewayキーについて"
+      },
+      "apiKey": "APIキー",
+      "apiKeyPlaceholderSaved": "キーは保存済みです — 新しいキーを入力すると置き換えます",
+      "apiKeyPlaceholderEmpty": "APIキーを貼り付け",
+      "toggleApiKeyVisibility": "APIキーの表示を切り替え",
+      "chatModel": "チャットモデル（任意）",
+      "save": "保存",
+      "clear": "クリア",
+      "openSettings": "設定",
+      "toasts": {
+        "saved": "プラナ設定を保存しました。",
+        "cleared": "プラナ設定をクリアしました。",
+        "failed": "プラナ設定の保存に失敗しました。"
+      }
+    },
+    "branches": {
+      "previous": "前の応答",
+      "next": "次の応答",
+      "indicator": "{current} / {total}"
+    },
+    "message": {
+      "rewind": "ここまで巻き戻す"
+    },
+    "errors": {
+      "generic": "プラナが応答できませんでした。もう一度試してください。",
+      "notConfigured": "Plana AIにはAPIキーが必要です。設定から追加してください。"
+    }
+  },
   "studentOfTheDay": {
     "title": "今日の生徒",
     "siteWide": "今日の全ユーザー共通の生徒",

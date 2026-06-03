@@ -1,4 +1,4 @@
-import { PlanaView } from "@/app/plana-ai/_components/plana-view";
+import { PlanaChat } from "@/app/plana-ai/_components/plana-chat";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -11,19 +11,15 @@ export const metadata: Metadata = {
 };
 
 export default async function PlanaAIPage() {
-  const isEnabled = process.env.PLANA_AI_ENABLED === "true";
+  const isEnabled = process.env.NEXT_PUBLIC_PLANA_AI_ENABLED === "true";
 
   if (!isEnabled) {
     return redirect("/");
   }
 
   return (
-    <div className="flex flex-col gap-10 h-full">
-      <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-bold">Plana AI</h1>
-      </div>
-
-      <PlanaView />
+    <div className="h-full">
+      <PlanaChat />
     </div>
   );
 }

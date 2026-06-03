@@ -1,8 +1,10 @@
 "use client";
 
 import plana from "@/app/opengraph-image.png";
+import { UserPreferences } from "@/components/common/user-preferences";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -18,9 +20,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/nextjs";
+import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import {
   BookOpenTextIcon,
   CakeIcon,
@@ -34,16 +35,16 @@ import {
   Grid2x2Icon,
   HeartIcon,
   ListOrderedIcon,
+  MessageCircleHeartIcon,
   RectangleEllipsisIcon,
   TrainTrackIcon,
   UsersIcon,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { UserPreferences } from "@/components/common/user-preferences";
-import type { LucideIcon } from "lucide-react";
 import { api } from "~convex/api";
 
 type NavLink = {
@@ -231,6 +232,15 @@ export function AppSidebar() {
       text: t("common.header.nav.misc.scenarioImageGenerator"),
       icon: BookOpenTextIcon,
     },
+    ...(process.env.NEXT_PUBLIC_PLANA_AI_ENABLED === "true"
+      ? [
+          {
+            href: "/plana-ai",
+            text: t("common.header.nav.misc.planaAi"),
+            icon: MessageCircleHeartIcon,
+          },
+        ]
+      : []),
   ];
 
   const RESOURCES: NavLink[] = [

@@ -62,7 +62,8 @@
         "formationDisplay": "編成表示",
         "titleGenerator": "称号ジェネレーター",
         "gachaRateStats": "ガチャ確率統計",
-        "scenarioImageGenerator": "シナリオ画像メーカー"
+        "scenarioImageGenerator": "シナリオ画像メーカー",
+        "planaAi": "Plana AI"
       },
       "resouces": {
         "title": "リソース",

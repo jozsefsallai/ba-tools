@@ -1045,6 +1045,69 @@
     }
   },
 
+  "plana": {
+    "title": "Plana AI",
+    "subtitle": "Chat with Plana",
+    "emptyState": {
+      "heading": "Hello, Sensei.",
+      "body": "I am ready to assist you. What would you like to discuss?",
+      "suggestions": {
+        "greetingMorning": "Good morning, Plana",
+        "greetingAfternoon": "Good afternoon, Plana",
+        "greetingEvening": "Good evening, Plana",
+        "greetingNight": "Still awake, Plana?",
+        "lore": "Tell me about Kivotos",
+        "teaParty": "Who are the members of the Tea Party?",
+        "affection": "*headpat*"
+      }
+    },
+    "input": {
+      "placeholder": "Message Plana...",
+      "send": "Send",
+      "stop": "Stop",
+      "regenerate": "Regenerate",
+      "newChat": "New chat"
+    },
+    "settings": {
+      "title": "Plana settings",
+      "subtitle": "Bring your own LLM provider and API key.",
+      "provider": "Provider",
+      "providers": {
+        "openrouter": "OpenRouter",
+        "gateway": "Vercel AI Gateway"
+      },
+      "providerHelp": {
+        "openrouter": "Get an OpenRouter API key",
+        "gateway": "Learn about Vercel AI Gateway keys"
+      },
+      "apiKey": "API key",
+      "apiKeyPlaceholderSaved": "Key saved — enter a new one to replace",
+      "apiKeyPlaceholderEmpty": "Paste your API key",
+      "toggleApiKeyVisibility": "Toggle API key visibility",
+      "chatModel": "Chat model (optional)",
+      "save": "Save",
+      "clear": "Clear",
+      "openSettings": "Settings",
+      "toasts": {
+        "saved": "Plana settings saved.",
+        "cleared": "Plana settings cleared.",
+        "failed": "Failed to save Plana settings."
+      }
+    },
+    "branches": {
+      "previous": "Previous response",
+      "next": "Next response",
+      "indicator": "{current} / {total}"
+    },
+    "message": {
+      "rewind": "Rewind to here"
+    },
+    "errors": {
+      "generic": "Plana couldn't respond. Try again.",
+      "notConfigured": "Plana AI needs an API key. Open settings to add one."
+    }
+  },
+
   "studentOfTheDay": {
     "title": "Student of the Day",
     "siteWide": "Site-Wide Student",

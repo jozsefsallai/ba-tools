@@ -17,6 +17,8 @@
     "db:generate": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^3.0.123",
+    "@ai-sdk/react": "^3.0.196",
     "@chroma-core/default-embed": "^0.1.8",
     "@chroma-core/openai": "^0.1.7",
     "@clerk/localizations": "^3.32.1",

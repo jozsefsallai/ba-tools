@@ -1,16 +1,18 @@
 import { PLANA_CHARACTER_BIBLE } from "./plana";
 
-import { generateObject } from "ai";
+import {
+  Output,
+  type UIMessage,
+  convertToModelMessages,
+  generateText,
+  streamText,
+} from "ai";
+import { z } from "zod";
 import { dialogueCollection, summaryCollection } from "./chroma";
 import { LORE_CLASSIFIER_PROMPT } from "./lore-classifier";
-import { z } from "zod";
 
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { type PlanaExpression, planaExpressions } from "@/lib/plana";
-
-const openrouter = createOpenRouter({
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+import { getPlanaProvider } from "@/lib/ai/providers";
+import type { LanguageModel } from "ai";
 
 async function queryVectorStores(query: string) {
   const summaryContext = await summaryCollection.query({
@@ -25,26 +27,6 @@ async function queryVectorStores(query: string) {
     summaryContext: summaryContext.documents.join("\n"),
     dialogueContext: dialogueContext.documents.join("\n"),
   };
-}
-
-async function generateLlmResponse(
-  system: string,
-  prompt: string,
-): Promise<{
-  message: string;
-  expression: PlanaExpression;
-}> {
-  const { object } = await generateObject({
-    model: openrouter("deepseek/deepseek-chat-v3-0324"),
-    system,
-    prompt,
-    schema: z.object({
-      message: z.string(),
-      expression: planaExpressions,
-    }),
-  });
-
-  return object;
 }
 
 function formatContextForPrompt(context: {
@@ -69,46 +51,149 @@ function formatContextForPrompt(context: {
 export async function getLoreClassifierResult(userMessage: string): Promise<{
   needsLoreContext: boolean;
   question?: string | null;
+}>;
+export async function getLoreClassifierResult(
+  userMessage: string,
+  classifierModel: LanguageModel,
+): Promise<{
+  needsLoreContext: boolean;
+  question?: string | null;
+}>;
+export async function getLoreClassifierResult(
+  userMessage: string,
+  classifierModel?: LanguageModel,
+): Promise<{
+  needsLoreContext: boolean;
+  question?: string | null;
 }> {
-  const { object } = await generateObject({
-    model: openrouter("deepseek/deepseek-chat-v3-0324"),
+  const model = classifierModel ?? (await getPlanaProvider()).classifierModel;
+  const { output } = await generateText({
+    model,
     system: LORE_CLASSIFIER_PROMPT,
     prompt: userMessage,
-    schema: z.object({
-      needsLoreContext: z.boolean(),
-      question: z.string().nullish(),
+    output: Output.object({
+      schema: z.object({
+        needsLoreContext: z.boolean(),
+        question: z.string().nullish(),
+      }),
     }),
   });
 
-  return object;
+  return output;
 }
 
-export async function getPlanaResponse(
-  userMessage: string,
-  conversationHistory = "",
+function getTextFromMessage(message: UIMessage) {
+  return message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("");
+}
+
+function getLatestUserMessage(messages: UIMessage[]) {
+  return [...messages].reverse().find((message) => message.role === "user");
+}
+
+function toTextOnlyMessages(messages: UIMessage[]) {
+  return messages.map((message) => ({
+    role: message.role,
+    parts: message.parts.filter((part) => part.type === "text"),
+  }));
+}
+
+function formatSenseiIdentityPrompt(name: string | undefined) {
+  if (!name) {
+    return "";
+  }
+
+  return `### SENSEI IDENTITY ###
+The user's display name is ${JSON.stringify(name)}.
+Address them as "${name} Sensei" instead of only "Sensei" when speaking to them.`;
+}
+
+function getSafeTimeZone(timeZone: string | undefined) {
+  if (!timeZone) {
+    return "UTC";
+  }
+
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format();
+    return timeZone;
+  } catch {
+    return "UTC";
+  }
+}
+
+function formatCurrentDateTimePrompt({
+  date = new Date(),
+  timeZone,
+}: {
+  date?: Date;
+  timeZone?: string;
+} = {}) {
+  const safeTimeZone = getSafeTimeZone(timeZone);
+
+  return `### CURRENT DATE & TIME ###
+Current date: ${new Intl.DateTimeFormat("en-US", {
+    dateStyle: "full",
+    timeZone: safeTimeZone,
+  }).format(date)}
+Current time: ${new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: safeTimeZone,
+    timeZoneName: "short",
+  }).format(date)}
+Day of week: ${new Intl.DateTimeFormat("en-US", {
+    timeZone: safeTimeZone,
+    weekday: "long",
+  }).format(date)}
+User time zone: ${safeTimeZone}
+Use this when Sensei asks about the date, time, schedule, greetings, or time-sensitive context.`;
+}
+
+export async function streamPlanaResponse(
+  messages: UIMessage[],
+  options: {
+    senseiName?: string;
+    timeZone?: string;
+  } = {},
 ) {
+  const provider = await getPlanaProvider();
+  const latestUserMessage = getLatestUserMessage(messages);
+  const userMessage = latestUserMessage
+    ? getTextFromMessage(latestUserMessage)
+    : "";
+
+  if (!userMessage.trim()) {
+    throw new Error("No user message provided");
+  }
+
   const { needsLoreContext, question } = await getLoreClassifierResult(
     `Query addressed to Plana: ${userMessage}`,
+    provider.classifierModel,
   );
 
   const context =
     needsLoreContext && !!question ? await queryVectorStores(question) : null;
-  const formattedContext = context ? formatContextForPrompt(context) : null;
+  const formattedContext = context ? formatContextForPrompt(context) : "";
 
-  const basePrompt = `### CONVERSATION HISTORY ###
-${conversationHistory}
-Sensei: ${userMessage}
-Plana:
-`;
+  const modelMessages = await convertToModelMessages(
+    toTextOnlyMessages(messages),
+  );
 
-  if (!formattedContext) {
-    return await generateLlmResponse(PLANA_CHARACTER_BIBLE, basePrompt);
-  }
+  const system = [
+    PLANA_CHARACTER_BIBLE,
+    formatSenseiIdentityPrompt(options.senseiName),
+    formatCurrentDateTimePrompt({ timeZone: options.timeZone }),
+    formattedContext,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
-  const finalPrompt = `
-${formattedContext}
-
-${basePrompt}`;
-
-  return await generateLlmResponse(PLANA_CHARACTER_BIBLE, finalPrompt);
+  return streamText({
+    model: provider.chatModel,
+    system,
+    messages: modelMessages,
+  });
 }
