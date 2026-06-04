@@ -6,7 +6,6 @@ import type { Student } from "~prisma";
 import { useMemo } from "react";
 
 export type TimelineItemTargetPickerProps = {
-  student: Student;
   uniqueStudents: Student[];
   currentTarget?: Student;
   onToggle: (student: Student) => void;
@@ -40,18 +39,13 @@ function StudentItem({ student }: { student: Student }) {
 }
 
 export function TimelineItemTargetPicker({
-  student,
   uniqueStudents,
   currentTarget,
   onToggle,
 }: TimelineItemTargetPickerProps) {
-  const filteredStudents = useMemo(() => {
-    return uniqueStudents.filter((s) => s.id !== student.id);
-  }, [student, uniqueStudents]);
-
   return (
     <div className="px-1 flex flex-wrap gap-1">
-      {filteredStudents.map((student) => (
+      {uniqueStudents.map((student) => (
         <button
           key={student.id}
           type="button"

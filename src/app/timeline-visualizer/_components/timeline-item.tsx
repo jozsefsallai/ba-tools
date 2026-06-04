@@ -332,7 +332,6 @@ export function TimelineItem({
 
                     {uniqueStudents.length > 0 && (
                       <TimelineItemTargetPicker
-                        student={item.student}
                         uniqueStudents={uniqueStudents}
                         currentTarget={item.target}
                         onToggle={handleTargetUpdate}

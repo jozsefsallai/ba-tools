@@ -6,9 +6,7 @@ import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  PopoverContent,
-} from "@/components/ui/popover";
+import { PopoverContent } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -20,12 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import type { Student } from "~prisma";
-import {
-  ChevronsUpDownIcon,
-  CopyIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react";
+import { ChevronsUpDownIcon, CopyIcon, Trash2Icon, XIcon } from "lucide-react";
 import {
   type SetStateAction,
   useCallback,
@@ -38,7 +31,10 @@ import { v4 as uuid } from "uuid";
 import { useTranslations } from "next-intl";
 
 function isTimelinePreviewAnchorTarget(target: EventTarget | null) {
-  return target instanceof Element && target.closest("[data-timeline-preview-anchor]");
+  return (
+    target instanceof Element &&
+    target.closest("[data-timeline-preview-anchor]")
+  );
 }
 
 export type TimelineItemPopoverProps = {
@@ -264,10 +260,7 @@ export function TimelineItemPopover({
                 onStudentSelected={handleTargetUpdate}
                 className="w-full z-[60]"
               >
-                <Button
-                  variant="outline"
-                  className="flex-1 justify-between"
-                >
+                <Button variant="outline" className="flex-1 justify-between">
                   {item.target
                     ? item.target.name
                     : t("tools.timeline.editor.student.target.select")}
@@ -287,7 +280,6 @@ export function TimelineItemPopover({
             </div>
             {uniqueStudents.length > 0 && (
               <TimelineItemTargetPicker
-                student={item.student}
                 uniqueStudents={uniqueStudents}
                 currentTarget={item.target}
                 onToggle={handleTargetUpdate}
@@ -313,9 +305,7 @@ export function TimelineItemPopover({
             <Textarea
               id={`pop-notes-${item.id}`}
               value={item.notes ?? ""}
-              placeholder={t(
-                "tools.timeline.editor.student.notes.placeholder",
-              )}
+              placeholder={t("tools.timeline.editor.student.notes.placeholder")}
               onChange={handleNotesUpdate}
               className="resize-none min-h-16"
             />
@@ -326,9 +316,7 @@ export function TimelineItemPopover({
       {item.type === "separator" && (
         <>
           <div className="font-semibold text-base">
-            {t(
-              `tools.timeline.editor.separator.title.${item.orientation}`,
-            )}
+            {t(`tools.timeline.editor.separator.title.${item.orientation}`)}
           </div>
 
           <div className="flex items-center gap-2">
@@ -337,10 +325,7 @@ export function TimelineItemPopover({
               checked={separatorOverride}
               onCheckedChange={(checked) => setSeparatorOverride(checked)}
             />
-            <Label
-              className="shrink-0"
-              htmlFor={`pop-sizeOverride-${item.id}`}
-            >
+            <Label className="shrink-0" htmlFor={`pop-sizeOverride-${item.id}`}>
               {t("tools.timeline.editor.separator.size.toggle")}
             </Label>
           </div>
