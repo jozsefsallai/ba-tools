@@ -65,17 +65,13 @@ export function PlanaChatLayout({ chatId: initialChatId }: PlanaChatLayoutProps)
 
   return (
     <ActivePlanaChatContext.Provider value={contextValue}>
-      <div
-        className={cn(
-          "grid min-h-0 flex-1 gap-3 overflow-hidden md:gap-4",
-          sidebarCollapsed
-            ? "md:grid-cols-[3rem_minmax(0,1fr)]"
-            : "md:grid-cols-[minmax(220px,260px)_minmax(0,1fr)]",
-        )}
-      >
+      <div className="flex min-h-0 flex-1 gap-3 overflow-hidden md:gap-4">
         <PlanaChatSidebar
           activeChatId={activeChatId}
-          className="hidden min-w-0 md:flex"
+          className={cn(
+            "hidden min-h-0 shrink-0 md:flex",
+            sidebarCollapsed ? "w-12" : "w-[min(100%,260px)]",
+          )}
           collapsed={sidebarCollapsed}
           onExpand={() => setSidebarCollapsed(false)}
           onCollapse={() => setSidebarCollapsed(true)}

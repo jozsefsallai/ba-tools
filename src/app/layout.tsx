@@ -3,17 +3,13 @@ import { Outfit, Sono, Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-import { AppMain } from "@/components/common/app-main";
-import { TheFooter } from "@/components/common/the-footer";
-import { InsetHeader } from "@/components/common/the-header";
-import { AppSidebar } from "@/components/common/app-sidebar";
+import { AppShell } from "@/components/common/app-shell";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provider";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { UserPreferencesProvider } from "@/components/providers/user-preferences-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { db } from "@/lib/db";
 import { StudentsProvider } from "@/components/providers/students-provider";
 import { NavigationGuardProvider } from "next-navigation-guard";
@@ -107,20 +103,13 @@ export default async function RootLayout({
                 <NavigationGuardProvider>
                   <StudentsProvider loadedStudents={students}>
                     <UserPreferencesProvider>
-                      <SidebarProvider>
-                        <AppSidebar />
-                        <SidebarInset className="min-h-0">
-                          <InsetHeader />
-
-                          <AppMain>{children}</AppMain>
-
-                          <TheFooter
-                            commitHash={
-                              process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
-                            }
-                          />
-                        </SidebarInset>
-                      </SidebarProvider>
+                      <AppShell
+                        commitHash={
+                          process.env.VERCEL_GIT_COMMIT_SHA ?? "development"
+                        }
+                      >
+                        {children}
+                      </AppShell>
 
                       <Toaster />
                     </UserPreferencesProvider>

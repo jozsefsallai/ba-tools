@@ -14,8 +14,8 @@ export function AppMain({ children }: PropsWithChildren) {
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col p-4",
-        isPlanaAi ? "overflow-hidden" : "gap-6",
+        "flex flex-1 flex-col p-4",
+        isPlanaAi ? "min-h-0 overflow-hidden" : "gap-6",
       )}
     >
       {children}

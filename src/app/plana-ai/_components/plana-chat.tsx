@@ -295,6 +295,18 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
       return;
     }
 
+    const viewport = scrollContainerRef.current?.closest(
+      '[data-slot="scroll-area-viewport"]',
+    );
+
+    if (viewport instanceof HTMLElement) {
+      viewport.scrollTo({
+        top: viewport.scrollHeight,
+        behavior: "smooth",
+      });
+      return;
+    }
+
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [
     messages,
@@ -302,6 +314,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     shouldShowTypingPlaceholder,
     hasError,
     shouldStickToBottomRef,
+    scrollContainerRef,
   ]);
 
   useEffect(() => {
@@ -560,7 +573,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
   return (
     <div
       className={cn(
-        "grid h-full min-h-0 gap-4 overflow-hidden md:grid-cols-[minmax(360px,1fr)_minmax(0,1.25fr)] xl:grid-cols-[minmax(480px,1.05fr)_minmax(0,1.15fr)]",
+        "grid h-full min-h-0 flex-1 grid-rows-1 gap-4 overflow-hidden md:grid-cols-[minmax(360px,1fr)_minmax(0,1.25fr)] xl:grid-cols-[minmax(480px,1.05fr)_minmax(0,1.15fr)]",
         className,
       )}
     >
@@ -582,7 +595,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
       </aside>
 
       <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm">
-        <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b px-4 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <PlanaMobileChatSidebar>
               <Button
@@ -629,7 +642,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
           </div>
         </header>
 
-        <ScrollArea className="min-h-0 flex-1">
+        <ScrollArea className="min-h-0 flex-1 overflow-hidden">
           <div
             className={cn("flex min-h-full flex-col gap-5 p-4 md:p-6", {
               "justify-center": showEmptyState,
@@ -716,7 +729,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
           </div>
         </ScrollArea>
 
-        <div className="border-t bg-background/90 p-3 backdrop-blur md:p-4">
+        <div className="shrink-0 border-t bg-background/90 p-3 backdrop-blur md:p-4">
           <ChatInput
             onSend={sendText}
             onStop={stop}
