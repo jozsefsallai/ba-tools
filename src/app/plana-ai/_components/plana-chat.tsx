@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatEmptyState } from "@/app/plana-ai/_components/chat-empty-state";
+import { ChatErrorMessage } from "@/app/plana-ai/_components/chat-error-message";
 import { ChatInput } from "@/app/plana-ai/_components/chat-input";
 import { ChatMessage } from "@/app/plana-ai/_components/chat-message";
 import { PlanaSettingsDialog } from "@/app/plana-ai/_components/plana-settings-dialog";
@@ -14,7 +15,6 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { PlusIcon, SettingsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { getExpressionFromText } from "./message-utils";
 
 type PlanaChatMessage = UIMessage<unknown, Record<string, never>>;
@@ -128,6 +128,12 @@ export function PlanaChat() {
   const latestAssistantMessageId = [...messages]
     .reverse()
     .find((message) => message.role === "assistant")?.id;
+  const hasError = status === "error" && !!error;
+  const errorMessage = hasError
+    ? error.message === "Plana AI is not configured"
+      ? t("tools.plana.errors.notConfigured")
+      : t("tools.plana.errors.generic")
+    : "";
   const shouldShowTypingPlaceholder =
     isBusy && messages.at(-1)?.role === "user";
   const typingPlaceholderMessage: PlanaChatMessage = {
@@ -178,19 +184,7 @@ export function PlanaChat() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-  }, [messages, status, shouldShowTypingPlaceholder]);
-
-  useEffect(() => {
-    if (!error) {
-      return;
-    }
-
-    toast.error(
-      error.message === "Plana AI is not configured"
-        ? t("tools.plana.errors.notConfigured")
-        : t("tools.plana.errors.generic"),
-    );
-  }, [error, t]);
+  }, [messages, status, shouldShowTypingPlaceholder, hasError]);
 
   useEffect(() => {
     if (wasBusyRef.current && !isBusy) {
@@ -274,6 +268,18 @@ export function PlanaChat() {
     setInputDraft("");
     setOptimisticExpression(null);
     setMessages([]);
+  }
+
+  function handleRetry() {
+    clearError();
+    setOptimisticExpression("thinking");
+
+    if (latestAssistantMessageId) {
+      void regenerate({ messageId: latestAssistantMessageId });
+      return;
+    }
+
+    void regenerate();
   }
 
   function handleRegenerate(assistantMessage: PlanaChatMessage) {
@@ -498,6 +504,12 @@ export function PlanaChat() {
                 ))}
                 {shouldShowTypingPlaceholder && (
                   <ChatMessage isStreaming message={typingPlaceholderMessage} />
+                )}
+                {hasError && (
+                  <ChatErrorMessage
+                    message={errorMessage}
+                    onRetry={handleRetry}
+                  />
                 )}
               </>
             )}

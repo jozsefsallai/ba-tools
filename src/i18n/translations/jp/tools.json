@@ -963,8 +963,9 @@
       "rewind": "ここまで巻き戻す"
     },
     "errors": {
-      "generic": "プラナが応答できませんでした。もう一度試してください。",
-      "notConfigured": "Plana AIにはAPIキーが必要です。設定から追加してください。"
+      "generic": "プラナが応答できませんでした。",
+      "notConfigured": "Plana AIにはAPIキーが必要です。設定から追加してください。",
+      "retry": "もう一度試す"
     }
   },
   "studentOfTheDay": {

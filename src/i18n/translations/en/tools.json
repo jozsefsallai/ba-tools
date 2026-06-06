@@ -1103,8 +1103,9 @@
       "rewind": "Rewind to here"
     },
     "errors": {
-      "generic": "Plana couldn't respond. Try again.",
-      "notConfigured": "Plana AI needs an API key. Open settings to add one."
+      "generic": "Plana couldn't respond.",
+      "notConfigured": "Plana AI needs an API key. Open settings to add one.",
+      "retry": "Try again"
     }
   },
 
