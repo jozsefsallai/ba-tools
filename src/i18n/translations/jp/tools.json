@@ -941,6 +941,7 @@
     },
     "emptyState": {
       "heading": "こんにちは、先生。",
+      "headingNamed": "こんにちは、{name}先生。",
       "body": "いつでもお手伝いできます。何について話しましょうか？",
       "suggestions": {
         "greetingMorning": "おはよう、プラナ",

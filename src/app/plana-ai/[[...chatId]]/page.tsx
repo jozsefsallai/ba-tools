@@ -32,7 +32,7 @@ export default async function PlanaAIPage({
   const chatId = chatIdSegments?.[0] as Id<"planaChat"> | undefined;
 
   return (
-    <div className="h-full">
+    <div className="flex min-h-0 flex-1 flex-col">
       <PlanaAiView chatId={chatId} />
     </div>
   );

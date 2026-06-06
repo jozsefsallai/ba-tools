@@ -1,12 +1,10 @@
 "use client";
 
-import planaIcon from "@/assets/plana-icon.png";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PlanaChatAvatar } from "@/app/plana-ai/_components/plana-chat-avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RefreshCwIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 export function ChatErrorMessage({
   message,
@@ -19,15 +17,7 @@ export function ChatErrorMessage({
 
   return (
     <div className="flex w-full gap-3">
-      <Avatar className="mt-1 size-8 border bg-background">
-        <Image
-          alt="Plana"
-          className="size-full object-cover"
-          placeholder="blur"
-          src={planaIcon}
-        />
-        <AvatarFallback className="text-xs">P</AvatarFallback>
-      </Avatar>
+      <PlanaChatAvatar className="mt-1" />
 
       <div
         className={cn(

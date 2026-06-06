@@ -1,7 +1,6 @@
 "use client";
 
-import planaIcon from "@/assets/plana-icon.png";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PlanaChatAvatar } from "@/app/plana-ai/_components/plana-chat-avatar";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -17,7 +16,6 @@ import {
   RewindIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { stripPlanaMetadata } from "./message-utils";
 
@@ -66,17 +64,7 @@ export function ChatMessage({
         "justify-end": isUser,
       })}
     >
-      {!isUser && (
-        <Avatar className="mt-1 size-8 border bg-background">
-          <Image
-            alt="Plana"
-            className="size-full object-cover"
-            placeholder="blur"
-            src={planaIcon}
-          />
-          <AvatarFallback className="text-xs">P</AvatarFallback>
-        </Avatar>
-      )}
+      {!isUser && <PlanaChatAvatar className="mt-1" />}
 
       <div
         className={cn(

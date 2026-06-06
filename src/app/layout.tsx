@@ -3,10 +3,10 @@ import { Outfit, Sono, Noto_Sans, Noto_Sans_JP } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
+import { AppMain } from "@/components/common/app-main";
 import { TheFooter } from "@/components/common/the-footer";
 import { InsetHeader } from "@/components/common/the-header";
 import { AppSidebar } from "@/components/common/app-sidebar";
-import { JapaneseTranslationNotice } from "@/components/common/japanese-translation-notice";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -109,14 +109,10 @@ export default async function RootLayout({
                     <UserPreferencesProvider>
                       <SidebarProvider>
                         <AppSidebar />
-                        <SidebarInset>
+                        <SidebarInset className="min-h-0">
                           <InsetHeader />
 
-                          <main className="flex flex-col gap-6 flex-1 p-4">
-                            {children}
-
-                            {locale === "jp" && <JapaneseTranslationNotice />}
-                          </main>
+                          <AppMain>{children}</AppMain>
 
                           <TheFooter
                             commitHash={

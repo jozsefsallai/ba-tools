@@ -1,6 +1,7 @@
 import { streamPlanaResponse } from "@/lib/ai/chat";
 import { canAccessPlanaAi } from "@/lib/ai/plana-access";
 import { PlanaNotConfiguredError } from "@/lib/ai/providers";
+import { getSenseiDisplayName } from "@/app/plana-ai/_lib/sensei-name";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import type { UIMessage } from "ai";
 import { fetchQuery } from "convex/nextjs";
@@ -67,8 +68,7 @@ export async function POST(req: NextRequest) {
       return new Response("Invalid messages", { status: 400 });
     }
 
-    const senseiName =
-      user?.firstName?.trim() || user?.username?.trim() || undefined;
+    const senseiName = getSenseiDisplayName(user);
     const result = await streamPlanaResponse(resolvedMessages, {
       senseiName,
       timeZone,

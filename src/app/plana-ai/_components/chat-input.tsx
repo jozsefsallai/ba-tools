@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { ChatStatus } from "ai";
-import { SendIcon, SquareIcon, Trash2Icon } from "lucide-react";
+import { SendIcon, SquareIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   forwardRef,
@@ -15,7 +15,6 @@ import {
 } from "react";
 
 type ChatInputProps = {
-  onClear: () => void;
   onSend: (message: string) => void;
   onStop: () => void;
   onValueChange?: (value: string) => void;
@@ -24,10 +23,7 @@ type ChatInputProps = {
 };
 
 export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
-  function ChatInput(
-    { onClear, onSend, onStop, onValueChange, status, value },
-    ref,
-  ) {
+  function ChatInput({ onSend, onStop, onValueChange, status, value }, ref) {
     const t = useTranslations();
     const [internalInput, setInternalInput] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -99,20 +95,7 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
           rows={1}
           value={input}
         />
-        <div className="flex items-center justify-between gap-2 px-1 pb-1">
-          <div className="flex items-center gap-1">
-            <Button
-              aria-label={t("tools.plana.input.newChat")}
-              disabled={isBusy}
-              onClick={onClear}
-              size="icon-sm"
-              type="button"
-              variant="ghost"
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
-
+        <div className="flex items-center justify-end gap-2 px-1 pb-1">
           {isBusy ? (
             <Button
               onClick={onStop}

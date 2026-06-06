@@ -3,17 +3,7 @@
 import { PlanaChat } from "@/app/plana-ai/_components/plana-chat";
 import { PlanaChatSidebar } from "@/app/plana-ai/_components/plana-chat-sidebar";
 import { usePlanaChatUrl } from "@/app/plana-ai/_hooks/use-plana-chat-url";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { PanelLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { Id } from "~convex/dataModel";
 
@@ -41,7 +31,6 @@ export function useActivePlanaChat() {
 }
 
 export function PlanaChatLayout({ chatId: initialChatId }: PlanaChatLayoutProps) {
-  const t = useTranslations();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activityTimestamps, setActivityTimestamps] = useState<
     Record<string, number>
@@ -78,7 +67,7 @@ export function PlanaChatLayout({ chatId: initialChatId }: PlanaChatLayoutProps)
     <ActivePlanaChatContext.Provider value={contextValue}>
       <div
         className={cn(
-          "grid h-[calc(100dvh-8rem)] min-h-0 gap-3 overflow-hidden md:gap-4",
+          "grid min-h-0 flex-1 gap-3 overflow-hidden md:gap-4",
           sidebarCollapsed
             ? "md:grid-cols-[3rem_minmax(0,1fr)]"
             : "md:grid-cols-[minmax(220px,260px)_minmax(0,1fr)]",
@@ -92,33 +81,8 @@ export function PlanaChatLayout({ chatId: initialChatId }: PlanaChatLayoutProps)
           onCollapse={() => setSidebarCollapsed(true)}
         />
 
-        <div className="flex min-h-0 min-w-0 flex-col gap-3">
-          <div className="flex items-center gap-2 md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button size="icon-sm" type="button" variant="outline">
-                  <PanelLeftIcon />
-                  <span className="sr-only">
-                    {t("tools.plana.sidebar.open")}
-                  </span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                className="w-[min(100vw-2rem,320px)] p-0"
-                side="left"
-              >
-                <SheetHeader className="border-b p-4">
-                  <SheetTitle>{t("tools.plana.sidebar.title")}</SheetTitle>
-                </SheetHeader>
-                <PlanaChatSidebar
-                  activeChatId={activeChatId}
-                  className="h-full rounded-none border-0 shadow-none"
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          <PlanaChat chatId={activeChatId} />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <PlanaChat chatId={activeChatId} className="min-h-0 flex-1" />
         </div>
       </div>
     </ActivePlanaChatContext.Provider>

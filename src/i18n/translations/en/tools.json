@@ -1081,6 +1081,7 @@
     },
     "emptyState": {
       "heading": "Hello, Sensei.",
+      "headingNamed": "Hello, {name} Sensei.",
       "body": "I am ready to assist you. What would you like to discuss?",
       "suggestions": {
         "greetingMorning": "Good morning, Plana",

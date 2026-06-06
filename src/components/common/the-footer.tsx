@@ -12,8 +12,8 @@ export function TheFooter({
   const pathname = usePathname();
   const t = useTranslations();
 
-  if (pathname === "/plana") {
-    return;
+  if (pathname === "/plana" || pathname.startsWith("/plana-ai")) {
+    return null;
   }
 
   return (

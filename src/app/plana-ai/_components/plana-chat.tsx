@@ -6,6 +6,7 @@ import { ChatInput } from "@/app/plana-ai/_components/chat-input";
 import { ChatMessage } from "@/app/plana-ai/_components/chat-message";
 import { ChatMessagesSkeleton } from "@/app/plana-ai/_components/chat-messages-skeleton";
 import { useActivePlanaChat } from "@/app/plana-ai/_components/plana-chat-layout";
+import { PlanaMobileChatSidebar } from "@/app/plana-ai/_components/plana-mobile-chat-sidebar";
 import { PlanaSettingsDialog } from "@/app/plana-ai/_components/plana-settings-dialog";
 import { usePlanaChatPersistence } from "@/app/plana-ai/_hooks/use-plana-chat-persistence";
 import {
@@ -20,7 +21,7 @@ import type { PlanaExpression } from "@/lib/plana";
 import { cn } from "@/lib/utils";
 import { Chat, useChat } from "@ai-sdk/react";
 import { type ChatInit, DefaultChatTransport } from "ai";
-import { LoaderCircleIcon, PlusIcon, SettingsIcon } from "lucide-react";
+import { LoaderCircleIcon, PanelLeftIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Id } from "~convex/dataModel";
@@ -55,9 +56,10 @@ function getLatestAssistantExpression(messages: PlanaChatMessage[]) {
 
 type PlanaChatProps = {
   chatId?: Id<"planaChat">;
+  className?: string;
 };
 
-export function PlanaChat({ chatId }: PlanaChatProps) {
+export function PlanaChat({ chatId, className }: PlanaChatProps) {
   const t = useTranslations();
   const { replaceChatUrl, notifyChatActivity } = useActivePlanaChat();
   const avatarPanelRef = useRef<HTMLElement>(null);
@@ -88,29 +90,29 @@ export function PlanaChat({ chatId }: PlanaChatProps) {
       new Chat<PlanaChatMessage>({
         transport: new DefaultChatTransport({
           api: "/api/plana-ai/chat",
-        prepareSendMessagesRequest: async ({
-          body,
-          id,
-          messageId,
-          messages,
-          trigger,
-        }) => {
-          if (pendingSendContextRef.current) {
-            await pendingSendContextRef.current;
-          }
+          prepareSendMessagesRequest: async ({
+            body,
+            id,
+            messageId,
+            messages,
+            trigger,
+          }) => {
+            if (pendingSendContextRef.current) {
+              await pendingSendContextRef.current;
+            }
 
-          return {
-            body: {
-              ...body,
-              chatId: chatIdRef.current,
-              id,
-              messageId,
-              messages,
-              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              trigger,
-            },
-          };
-        },
+            return {
+              body: {
+                ...body,
+                chatId: chatIdRef.current,
+                id,
+                messageId,
+                messages,
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                trigger,
+              },
+            };
+          },
         }),
         onFinish: (payload) => responseFinishRef.current(payload),
       }),
@@ -556,7 +558,12 @@ export function PlanaChat({ chatId }: PlanaChatProps) {
     !isLoadingHistory && messages.length === 0 && !hasError;
 
   return (
-    <div className="grid h-full min-h-0 gap-4 overflow-hidden rounded-3xl border bg-muted/20 p-2 md:grid-cols-[minmax(360px,1fr)_minmax(0,1.25fr)] xl:grid-cols-[minmax(480px,1.05fr)_minmax(0,1.15fr)] md:p-4">
+    <div
+      className={cn(
+        "grid h-full min-h-0 gap-4 overflow-hidden md:grid-cols-[minmax(360px,1fr)_minmax(0,1.25fr)] xl:grid-cols-[minmax(480px,1.05fr)_minmax(0,1.15fr)]",
+        className,
+      )}
+    >
       <aside
         className="relative hidden min-h-0 overflow-hidden rounded-3xl border bg-gradient-to-b from-background via-background to-muted/60 md:block"
         ref={avatarPanelRef}
@@ -576,15 +583,29 @@ export function PlanaChat({ chatId }: PlanaChatProps) {
 
       <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm">
         <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
-          <div>
-            <h1 className="font-semibold tracking-tight">
-              {t("tools.plana.title")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("tools.plana.subtitle")}
-            </p>
+          <div className="flex min-w-0 items-center gap-2">
+            <PlanaMobileChatSidebar>
+              <Button
+                aria-label={t("tools.plana.sidebar.open")}
+                className="shrink-0 md:hidden"
+                size="icon-sm"
+                type="button"
+                variant="outline"
+              >
+                <PanelLeftIcon />
+              </Button>
+            </PlanaMobileChatSidebar>
+
+            <div className="min-w-0">
+              <h1 className="truncate font-semibold tracking-tight">
+                {t("tools.plana.title")}
+              </h1>
+              <p className="truncate text-sm text-muted-foreground">
+                {t("tools.plana.subtitle")}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <PlanaSettingsDialog>
               <Button
                 aria-label={t("tools.plana.settings.openSettings")}
@@ -596,6 +617,7 @@ export function PlanaChat({ chatId }: PlanaChatProps) {
               </Button>
             </PlanaSettingsDialog>
             <Button
+              className="hidden md:inline-flex"
               onClick={startNewChat}
               size="sm"
               type="button"
@@ -696,7 +718,6 @@ export function PlanaChat({ chatId }: PlanaChatProps) {
 
         <div className="border-t bg-background/90 p-3 backdrop-blur md:p-4">
           <ChatInput
-            onClear={startNewChat}
             onSend={sendText}
             onStop={stop}
             onValueChange={setInputDraft}

@@ -32,5 +32,9 @@ export function PlanaAiView({ chatId }: PlanaAiViewProps) {
     );
   }
 
-  return <PlanaChatLayout chatId={chatId} />;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <PlanaChatLayout chatId={chatId} />
+    </div>
+  );
 }
