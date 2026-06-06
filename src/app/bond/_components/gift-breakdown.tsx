@@ -1,6 +1,14 @@
 "use client";
 
-import type { GiftWithStudents } from "@/app/bond/_components/bond-view";
+import type {
+  GiftWithStudents,
+  StudentWithGifts,
+} from "@/app/bond/_lib/types";
+import { getGiftAffinity, getGiftExpValue } from "@/app/bond/_lib/gift-utils";
+import giftAdoredImage from "@/assets/images/gift_adored.png";
+import giftLikedImage from "@/assets/images/gift_liked.png";
+import giftLovedImage from "@/assets/images/gift_loved.png";
+import giftNormalImage from "@/assets/images/gift_normal.png";
 import { ItemCard } from "@/components/common/item-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,57 +30,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { type PropsWithChildren, useMemo } from "react";
-
-import giftAdoredImage from "@/assets/images/gift_adored.png";
-import giftLovedImage from "@/assets/images/gift_loved.png";
-import giftLikedImage from "@/assets/images/gift_liked.png";
-import giftNormalImage from "@/assets/images/gift_normal.png";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
+import { type PropsWithChildren, useMemo } from "react";
 
 export type GiftBreakdownProps = PropsWithChildren<{
   gifts: GiftWithStudents[];
-  giftCounts: Record<number, number>;
-  giftEnabled: Record<number, boolean>;
-  giftBoxesUsed: number;
-  selectedStudentId: string;
+  allocatedCounts: Record<number, number>;
+  allocatedBoxCount: number;
+  selectedStudent: StudentWithGifts;
   exp: number;
 }>;
 
 function GiftRow({
   gift,
   count,
-  selectedStudentId,
-}: { gift: GiftWithStudents; count: number; selectedStudentId: string }) {
+  selectedStudent,
+}: {
+  gift: GiftWithStudents;
+  count: number;
+  selectedStudent: StudentWithGifts;
+}) {
   const t = useTranslations();
   const locale = useLocale();
 
-  const isAdored =
-    gift.adoredBy.some((s) => s.id === selectedStudentId) ||
-    (gift.isLovedByEveryone && gift.expValue === 60);
-
-  const isLoved =
-    gift.lovedBy.some((s) => s.id === selectedStudentId) ||
-    (gift.isLovedByEveryone && gift.expValue !== 60);
-
-  const isLiked = gift.likedBy.some((s) => s.id === selectedStudentId);
-
-  const exp = useMemo(() => {
-    if (isAdored) {
-      return gift.expValue * 4;
-    }
-
-    if (isLoved) {
-      return gift.expValue * 3;
-    }
-
-    if (isLiked) {
-      return gift.expValue * 2;
-    }
-
-    return gift.rarity === "SSR" ? gift.expValue * 2 : gift.expValue;
-  }, [isAdored, isLoved, isLiked, gift]);
+  const affinity = getGiftAffinity(gift, selectedStudent);
+  const exp = getGiftExpValue(gift, selectedStudent);
 
   const giftName = useMemo(() => {
     switch (locale) {
@@ -106,7 +89,7 @@ function GiftRow({
 
       <TableCell>
         <div className="flex items-center gap-1">
-          {isAdored && (
+          {affinity === "adored" && (
             <Image
               src={giftAdoredImage}
               alt={t("tools.bond.item.adored")}
@@ -114,7 +97,7 @@ function GiftRow({
             />
           )}
 
-          {isLoved && (
+          {affinity === "loved" && (
             <Image
               src={giftLovedImage}
               alt={t("tools.bond.item.loved")}
@@ -122,7 +105,7 @@ function GiftRow({
             />
           )}
 
-          {isLiked && (
+          {affinity === "liked" && (
             <Image
               src={giftLikedImage}
               alt={t("tools.bond.item.liked")}
@@ -130,7 +113,7 @@ function GiftRow({
             />
           )}
 
-          {!isAdored && !isLoved && !isLiked && (
+          {affinity === "normal" && (
             <Image
               src={giftNormalImage}
               alt={t("tools.bond.item.normal")}
@@ -151,20 +134,17 @@ function GiftRow({
 
 export function GiftBreakdown({
   gifts,
-  giftCounts,
-  giftEnabled,
-  giftBoxesUsed,
-  selectedStudentId,
+  allocatedCounts,
+  allocatedBoxCount,
+  selectedStudent,
   exp,
   children,
 }: GiftBreakdownProps) {
   const t = useTranslations();
 
   const giftsWithCounts = useMemo(() => {
-    return gifts.filter(
-      (gift) => giftCounts[gift.id] > 0 && giftEnabled[gift.id],
-    );
-  }, [gifts, giftCounts, giftEnabled]);
+    return gifts.filter((gift) => (allocatedCounts[gift.id] ?? 0) > 0);
+  }, [gifts, allocatedCounts]);
 
   return (
     <Dialog>
@@ -197,12 +177,12 @@ export function GiftBreakdown({
               <GiftRow
                 key={gift.id}
                 gift={gift}
-                count={giftCounts[gift.id]}
-                selectedStudentId={selectedStudentId}
+                count={allocatedCounts[gift.id] ?? 0}
+                selectedStudent={selectedStudent}
               />
             ))}
 
-            {giftBoxesUsed > 0 && (
+            {allocatedBoxCount > 0 && (
               <TableRow className="table table-fixed w-full">
                 <TableCell>
                   <ItemCard
@@ -225,9 +205,9 @@ export function GiftBreakdown({
                   </div>
                 </TableCell>
 
-                <TableCell>{giftBoxesUsed}</TableCell>
+                <TableCell>{allocatedBoxCount}</TableCell>
 
-                <TableCell>{giftBoxesUsed * 60}</TableCell>
+                <TableCell>{allocatedBoxCount * 60}</TableCell>
               </TableRow>
             )}
           </TableBody>

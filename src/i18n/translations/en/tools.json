@@ -192,6 +192,18 @@
       }
     },
 
+    "filter": {
+      "label": "Show:",
+      "allGifts": "All gifts",
+      "filtered": "Filtered gifts",
+      "preferredByGroup": "preferred by"
+    },
+
+    "giftCard": {
+      "total": "Total",
+      "projectedRank": "Projected rank {rank}"
+    },
+
     "item": {
       "adored": "Adored",
       "loved": "Loved",
@@ -223,7 +235,8 @@
 
       "irrelevantGifts": {
         "title": "Notice",
-        "description": "Some of the gifts you selected will not be displayed because they are not relevant to the selected student. In order to change them, uncheck the \"Only Display Favorite Gifts\" option."
+        "description": "Some allocated gifts are hidden by the current gift filter. Adjust the filter on the left panel to view and edit them.",
+        "onlyFavoriteDescription": "Some of the gifts you selected will not be displayed because they are not relevant to the selected student. In order to change them, uncheck the \"Only Display Favorite Gifts\" option."
       },
 
       "breakdown": "View Gift Breakdown"

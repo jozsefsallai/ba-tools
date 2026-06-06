@@ -1,19 +1,64 @@
 "use client";
 
-import { ItemCard } from "@/components/common/item-card";
-import { StudentCard } from "@/components/common/student-card";
+import { BondProgress } from "@/app/bond/_components/bond-progress";
+import { GiftAllocationCard } from "@/app/bond/_components/gift-allocation-card";
+import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
+import { GiftChoiceBoxCard } from "@/app/bond/_components/gift-choice-box-card";
+import { GiftPreferenceFilter } from "@/app/bond/_components/gift-preference-filter";
+import {
+  EXP_VALUES,
+  type RemainingExpBreakdown,
+  RemainingExpBreakdownCard,
+} from "@/app/bond/_components/remaining-exp-breakdown-card";
+import {
+  boxAllocationsEqual,
+  buildTargetAllocationsFromDoc,
+  computeTargetProjectedExp,
+  getGiftExpValue,
+  isGiftPreferredByStudent,
+  normalizeTargetGiftBoxCount,
+  serializeTargetAllocations,
+  sortGiftsByStudentPreference,
+  targetAllocationsEqual,
+} from "@/app/bond/_lib/gift-utils";
+import type { BondViewProps, StudentWithGifts } from "@/app/bond/_lib/types";
+import { SaveStatus } from "@/components/common/save-status";
+import { StudentPicker } from "@/components/common/student-picker";
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
+import { CreateGiftInventoryDialog } from "@/components/dialogs/create-gift-inventory-dialog";
+import { RenameGiftInventoryDialog } from "@/components/dialogs/rename-gift-inventory-dialog";
+import { SaveDialog } from "@/components/dialogs/save-dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useStudents } from "@/hooks/use-students";
+import { useQueryWithStatus } from "@/lib/convex";
+import {
+  type FavorTableEntry,
+  favorTable,
+  favorTableMap,
+  getBondLevelFromTotalExp,
+} from "@/lib/favor-table";
+import { studentStorage } from "@/lib/storage/students";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
-import type { Gift, Student } from "~prisma";
+import { useUser } from "@clerk/nextjs";
+import { Authenticated, useMutation } from "convex/react";
 import {
   AlertCircleIcon,
   ChevronsUpDownIcon,
@@ -22,280 +67,45 @@ import {
   SaveIcon,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-
-import giftAdoredImage from "@/assets/images/gift_adored.png";
-import giftLovedImage from "@/assets/images/gift_loved.png";
-import giftLikedImage from "@/assets/images/gift_liked.png";
-import giftNormalImage from "@/assets/images/gift_normal.png";
-
-import Image from "next/image";
-import { BondProgress } from "@/app/bond/_components/bond-progress";
-import {
-  favorTable,
-  type FavorTableEntry,
-  favorTableMap,
-} from "@/lib/favor-table";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { GiftBreakdown } from "@/app/bond/_components/gift-breakdown";
-import { StudentPicker } from "@/components/common/student-picker";
-import { studentStorage } from "@/lib/storage/students";
-import {
-  EXP_VALUES,
-  type RemainingExpBreakdown,
-  RemainingExpBreakdownCard,
-} from "@/app/bond/_components/remaining-exp-breakdown-card";
-import { useUser } from "@clerk/nextjs";
-import type { Id } from "~convex/dataModel";
-import { useQueryWithStatus } from "@/lib/convex";
-import { api } from "~convex/api";
-import { Authenticated, useMutation } from "convex/react";
-import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useStudents } from "@/hooks/use-students";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { CreateGiftInventoryDialog } from "@/components/dialogs/create-gift-inventory-dialog";
-import { RenameGiftInventoryDialog } from "@/components/dialogs/rename-gift-inventory-dialog";
-import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
-import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { SaveDialog } from "@/components/dialogs/save-dialog";
-import { SaveStatus } from "@/components/common/save-status";
-import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
+import type { Student } from "~prisma";
 
-export type StudentWithGifts = Student & {
-  giftsAdored: Gift[];
-  giftsLoved: Gift[];
-  giftsLiked: Gift[];
-};
+export type {
+  BondViewProps,
+  GiftWithStudents,
+  StudentWithGifts,
+} from "@/app/bond/_lib/types";
 
-export type GiftWithStudents = Gift & {
-  adoredBy: Student[];
-  lovedBy: Student[];
-  likedBy: Student[];
-};
-
-export type BondViewProps = {
-  students: StudentWithGifts[];
-  gifts: GiftWithStudents[];
-};
-
-type GiftSortMethod = "default" | "studentPreference";
-
-function isGiftAdoredByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
-  return student.giftsAdored.some((g) => g.id === gift.id);
-}
-
-function isGiftLovedByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
-  return student.giftsLoved.some((g) => g.id === gift.id);
-}
-
-function isGiftLikedByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
-  return student.giftsLiked.some((g) => g.id === gift.id);
-}
-
-function GiftItemCard({ gift }: { gift: GiftWithStudents }) {
-  const t = useTranslations();
-  const locale = useLocale();
-
-  const giftName = useMemo(() => {
-    switch (locale) {
-      case "en":
-        return gift.name;
-      case "jp":
-        return gift.nameJP || gift.name;
-    }
-  }, [gift, locale]);
-
-  const giftDescription = useMemo(() => {
-    switch (locale) {
-      case "en":
-        return gift.description;
-      case "jp":
-        return gift.descriptionJP || gift.description;
-    }
-  }, [gift, locale]);
-
-  return (
-    <ItemCard
-      name={giftName}
-      iconName={gift.iconName}
-      description={giftDescription}
-      rarity={gift.rarity}
-      className="cursor-pointer"
-    />
-  );
-}
-
-function GiftInfo({ gift }: { gift: GiftWithStudents }) {
-  const t = useTranslations();
-  const locale = useLocale();
-
-  const giftName = useMemo(() => {
-    switch (locale) {
-      case "en":
-        return gift.name;
-      case "jp":
-        return gift.nameJP || gift.name;
-    }
-  }, [gift, locale]);
-
-  const giftDescription = useMemo(() => {
-    switch (locale) {
-      case "en":
-        return gift.description;
-      case "jp":
-        return gift.descriptionJP || gift.description;
-    }
-  }, [gift, locale]);
-
-  return (
-    <div
-      className={cn("flex flex-col gap-4 p-4", {
-        "bg-yellow-500/10": gift.rarity === "SR",
-        "bg-purple-500/10": gift.rarity === "SSR",
-      })}
-    >
-      <div className="text-lg font-bold">{giftName}</div>
-
-      {giftDescription && (
-        <div className="text-sm text-muted-foreground">{giftDescription}</div>
-      )}
-
-      {gift.isLovedByEveryone && (
-        <div className="flex gap-2 items-center justify-center">
-          <Image
-            src={gift.expValue === 60 ? giftAdoredImage : giftLovedImage}
-            alt={
-              gift.expValue === 60
-                ? t("tools.bond.item.adored")
-                : t("tools.bond.item.loved")
-            }
-            className="size-6"
-          />
-          {t.rich("tools.bond.item.universal", {
-            strong: (children) => <strong>{children}</strong>,
-            expValue: gift.expValue,
-            exp: (gift.expValue === 60 ? 4 : 3) * gift.expValue,
-          })}
-        </div>
-      )}
-
-      {gift.adoredBy.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <div className="font-semibold flex gap-2 items-center">
-            <Image
-              src={giftAdoredImage}
-              alt={t("tools.bond.item.adored")}
-              className="size-6"
-            />
-            {t("tools.bond.item.adoredBy", { exp: 4 * gift.expValue })}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {gift.adoredBy.map((student) => (
-              <div key={student.id} style={{ zoom: 0.6 }} title={student.name}>
-                <StudentCard key={student.id} student={student} noDisplayRole />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {gift.lovedBy.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <div className="font-semibold flex gap-2 items-center">
-            <Image
-              src={giftLovedImage}
-              alt={t("tools.bond.item.loved")}
-              className="size-6"
-            />
-            {t("tools.bond.item.lovedBy", { exp: 3 * gift.expValue })}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {gift.lovedBy.map((student) => (
-              <div key={student.id} style={{ zoom: 0.6 }} title={student.name}>
-                <StudentCard key={student.id} student={student} noDisplayRole />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {gift.likedBy.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <div className="font-semibold flex gap-2 items-center">
-            <Image
-              src={giftLikedImage}
-              alt={t("tools.bond.item.liked")}
-              className="size-6"
-            />
-            {t("tools.bond.item.likedBy", { exp: 2 * gift.expValue })}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {gift.likedBy.map((student) => (
-              <div key={student.id} style={{ zoom: 0.6 }} title={student.name}>
-                <StudentCard key={student.id} student={student} noDisplayRole />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!gift.isLovedByEveryone && (
-        <div className="flex gap-2 items-center justify-center">
-          <Image
-            src={gift.rarity === "SSR" ? giftLikedImage : giftNormalImage}
-            alt={gift.rarity === "SSR" ? "Liked" : "Normal"}
-            className="size-6"
-          />
-          {t.rich("tools.bond.item.everyoneElse", {
-            strong: (children) => <strong>{children}</strong>,
-            exp: gift.rarity === "SSR" ? gift.expValue * 2 : gift.expValue,
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
+type TargetAllocations = Record<Id<"giftTarget">, Record<number, number>>;
+type TargetBoxAllocations = Record<Id<"giftTarget">, number>;
 
 export function BondView({ students, gifts }: BondViewProps) {
   const t = useTranslations();
-
   const { isSignedIn } = useUser();
-
   const { studentMap } = useStudents();
 
+  const giftIds = useMemo(() => gifts.map((gift) => gift.id), [gifts]);
+
+  const studentWithGiftsMap = useMemo(
+    () => new Map(students.map((student) => [student.id, student])),
+    [students],
+  );
+
+  const [showAllGifts, setShowAllGifts] = useState(true);
+  const [filterStudentIds, setFilterStudentIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [onlyDisplayRelevantGifts, setOnlyDisplayRelevantGifts] =
     useState(false);
-
-  const [sortMethod, setSortMethod] = useState<GiftSortMethod>("default");
+  const [sortMethod, setSortMethod] = useState<string>("default");
 
   const [selectedInvenetoryId, setSelectedInventoryId] =
     useState<Id<"giftInventory"> | null>(null);
-
   const [selectedTargetId, setSelectedTargetId] =
     useState<Id<"giftTarget"> | null>(null);
 
@@ -322,45 +132,60 @@ export function BondView({ students, gifts }: BondViewProps) {
             return false;
           }
         }
-
         return true;
       },
       [gifts],
     ),
+    "giftCounts",
   );
 
-  const [giftEnabled, setGiftEnabled, setGiftEnabledUnchecked] =
-    useSaveableState<Record<number, boolean>>(
-      Object.fromEntries(gifts.map((gift) => [gift.id, true])),
-      useCallback(
-        (a: Record<number, boolean>, b: Record<number, boolean>) => {
-          for (const gift of gifts) {
-            if ((a[gift.id] || false) !== (b[gift.id] || false)) {
-              return false;
-            }
-          }
+  const emptyTargetAllocations = useCallback((): TargetAllocations => ({}), []);
 
-          return true;
-        },
-        [gifts],
-      ),
-    );
+  const [
+    targetAllocations,
+    setTargetAllocations,
+    setTargetAllocationsUnchecked,
+  ] = useSaveableState<TargetAllocations>(
+    emptyTargetAllocations(),
+    useCallback(
+      (a: TargetAllocations, b: TargetAllocations) => {
+        const targetIds = [
+          ...new Set([...Object.keys(a), ...Object.keys(b)]),
+        ] as Id<"giftTarget">[];
+        return targetAllocationsEqual(a, b, targetIds, giftIds);
+      },
+      [giftIds],
+    ),
+    "targetAllocations",
+  );
+
+  const [
+    targetBoxAllocations,
+    setTargetBoxAllocations,
+    setTargetBoxAllocationsUnchecked,
+  ] = useSaveableState<TargetBoxAllocations>(
+    {},
+    useCallback((a: TargetBoxAllocations, b: TargetBoxAllocations) => {
+      const targetIds = [
+        ...new Set([...Object.keys(a), ...Object.keys(b)]),
+      ] as Id<"giftTarget">[];
+      return boxAllocationsEqual(a, b, targetIds);
+    }, []),
+    "targetBoxAllocations",
+  );
 
   const [currentBondExp, setCurrentBondExp, setCurrentBondExpUnchecked] =
-    useSaveableState<number>(0);
+    useSaveableState<number>(0, undefined, "currentBondExp");
   const [targetBondExp, setTargetBondExp, setTargetBondExpUnchecked] =
-    useSaveableState<number | null>(null);
+    useSaveableState<number | null>(null, undefined, "targetBondExp");
 
   const [currentBondStr, setCurrentBondStr] = useState("1");
   const [targetBondStr, setTargetBondStr] = useState("");
-
   const [currentBondExpStr, setCurrentBondExpStr] = useState("0");
   const [targetBondExpStr, setTargetBondExpStr] = useState("");
 
   const [giftBoxesUsed, setGiftBoxesUsed, setGiftBoxesUsedUnchecked] =
-    useSaveableState(0);
-  const [giftBoxesEnabled, setGiftBoxesEnabled, setGiftBoxesEnabledUnchecked] =
-    useSaveableState(true);
+    useSaveableState(0, undefined, "giftBoxesUsed");
 
   const [busy, setBusy] = useState(false);
 
@@ -371,74 +196,113 @@ export function BondView({ students, gifts }: BondViewProps) {
 
   const inventoryQuery = useQueryWithStatus(
     api.gifts.getOwnById,
-    selectedInvenetoryId
-      ? {
-          id: selectedInvenetoryId,
-        }
-      : "skip",
+    selectedInvenetoryId ? { id: selectedInvenetoryId } : "skip",
   );
 
-  const createInventoryMutation = useMutation(api.gifts.createInventory);
-  const createTargetMutation = useMutation(api.gifts.createTarget);
+  const inventoryTargets = useMemo(
+    () => inventoryQuery.data?.targets ?? [],
+    [inventoryQuery.data?.targets],
+  );
 
-  const updateInventoryMutation = useMutation(api.gifts.updateInventory);
-  const updateTargetMutation = useMutation(api.gifts.updateTarget);
+  const filterTargetOptions = useMemo(
+    () =>
+      inventoryTargets.map((target) => ({
+        studentId: target.studentId,
+        studentName:
+          studentWithGiftsMap.get(target.studentId)?.name ??
+          studentMap[target.studentId]?.name ??
+          t("tools.bond.inventory.target.unknown", {
+            studentId: target.studentId,
+          }),
+      })),
+    [inventoryTargets, studentWithGiftsMap, studentMap, t],
+  );
 
-  const destroyInventoryMutation = useMutation(api.gifts.destroyInventory);
-  const destroyTargetMutation = useMutation(api.gifts.destroyTarget);
+  const showTargetRows = isSignedIn && !!selectedInvenetoryId;
+
+  const activeTargetId = useMemo(() => {
+    if (selectedTargetId) {
+      return selectedTargetId;
+    }
+    if (!selectedStudent) {
+      return null;
+    }
+    return (
+      inventoryTargets.find((target) => target.studentId === selectedStudent.id)
+        ?._id ?? null
+    );
+  }, [selectedTargetId, selectedStudent, inventoryTargets]);
+
+  const allocatedGiftCounts = useMemo(() => {
+    if (!showTargetRows) {
+      return giftCounts;
+    }
+    if (!activeTargetId) {
+      return Object.fromEntries(gifts.map((gift) => [gift.id, 0]));
+    }
+    return targetAllocations[activeTargetId] ?? {};
+  }, [showTargetRows, giftCounts, activeTargetId, targetAllocations, gifts]);
+
+  const allocatedBoxCount = useMemo(() => {
+    if (!showTargetRows) {
+      return giftBoxesUsed;
+    }
+    if (!activeTargetId) {
+      return 0;
+    }
+    return targetBoxAllocations[activeTargetId] ?? 0;
+  }, [showTargetRows, giftBoxesUsed, activeTargetId, targetBoxAllocations]);
 
   const displayedGifts = useMemo(() => {
-    if (!onlyDisplayRelevantGifts || !selectedStudent) {
+    if (!showTargetRows) {
+      if (!onlyDisplayRelevantGifts || !selectedStudent) {
+        return gifts;
+      }
+
+      return gifts.filter((gift) =>
+        isGiftPreferredByStudent(gift, selectedStudent),
+      );
+    }
+
+    if (showAllGifts) {
       return gifts;
     }
 
-    return gifts.filter((gift) => {
-      return (
-        gift.isLovedByEveryone ||
-        isGiftAdoredByStudent(gift, selectedStudent) ||
-        isGiftLovedByStudent(gift, selectedStudent) ||
-        isGiftLikedByStudent(gift, selectedStudent)
-      );
-    });
-  }, [onlyDisplayRelevantGifts, selectedStudent]);
+    const filterStudents = inventoryTargets
+      .filter((target) => filterStudentIds.has(target.studentId))
+      .map((target) => studentWithGiftsMap.get(target.studentId))
+      .filter((student): student is StudentWithGifts => !!student);
+
+    if (filterStudents.length === 0) {
+      return [];
+    }
+
+    return gifts.filter((gift) =>
+      filterStudents.some((student) => isGiftPreferredByStudent(gift, student)),
+    );
+  }, [
+    showTargetRows,
+    onlyDisplayRelevantGifts,
+    selectedStudent,
+    showAllGifts,
+    gifts,
+    inventoryTargets,
+    filterStudentIds,
+    studentWithGiftsMap,
+  ]);
 
   const sortedGifts = useMemo(() => {
-    if (sortMethod === "default" || !selectedStudent) {
+    if (sortMethod === "default") {
       return displayedGifts;
     }
 
-    const adored = displayedGifts
-      .filter(
-        (gift) =>
-          isGiftAdoredByStudent(gift, selectedStudent) ||
-          (gift.isLovedByEveryone && gift.expValue === 60),
-      )
-      .sort((a, b) => b.expValue - a.expValue);
+    const student = studentWithGiftsMap.get(sortMethod);
+    if (!student) {
+      return displayedGifts;
+    }
 
-    const loved = displayedGifts
-      .filter(
-        (gift) =>
-          isGiftLovedByStudent(gift, selectedStudent) ||
-          (gift.isLovedByEveryone && gift.expValue === 20),
-      )
-      .sort((a, b) => b.expValue - a.expValue);
-
-    const liked = displayedGifts
-      .filter((gift) => isGiftLikedByStudent(gift, selectedStudent))
-      .sort((a, b) => b.expValue - a.expValue);
-
-    const ids = new Set([
-      ...adored.map((g) => g.id),
-      ...loved.map((g) => g.id),
-      ...liked.map((g) => g.id),
-    ]);
-
-    const normal = displayedGifts
-      .filter((gift) => !ids.has(gift.id))
-      .sort((a, b) => b.expValue - a.expValue);
-
-    return [...adored, ...loved, ...liked, ...normal];
-  }, [displayedGifts, sortMethod, selectedStudent]);
+    return sortGiftsByStudentPreference(displayedGifts, student);
+  }, [displayedGifts, sortMethod, studentWithGiftsMap]);
 
   const studentGiftKinds = useMemo(() => {
     if (!selectedStudent) {
@@ -453,31 +317,16 @@ export function BondView({ students, gifts }: BondViewProps) {
       };
     }
 
-    const hasAdoredSSR = true; // Everyone adores red and purple bouquets
-    const hasLovedSSR = true; // Everyone loves the normal bouquets
-    const hasLikedSSR = true; // Everyone likes SSR gifts
-
-    const hasAdoredSR = selectedStudent.giftsAdored.some(
-      (g) => g.rarity === "SR",
-    );
-    const hasLovedSR = selectedStudent.giftsLoved.some(
-      (g) => g.rarity === "SR",
-    );
-    const hasLikedSR = selectedStudent.giftsLiked.some(
-      (g) => g.rarity === "SR",
-    );
-    const hasNormalSR = true; // Everyone is content with a gift of any kind
-
     return {
-      hasAdoredSSR,
-      hasLovedSSR,
-      hasLikedSSR,
-      hasAdoredSR,
-      hasLovedSR,
-      hasLikedSR,
-      hasNormalSR,
+      hasAdoredSSR: true,
+      hasLovedSSR: true,
+      hasLikedSSR: true,
+      hasAdoredSR: selectedStudent.giftsAdored.some((g) => g.rarity === "SR"),
+      hasLovedSR: selectedStudent.giftsLoved.some((g) => g.rarity === "SR"),
+      hasLikedSR: selectedStudent.giftsLiked.some((g) => g.rarity === "SR"),
+      hasNormalSR: true,
     };
-  }, [gifts, selectedStudent]);
+  }, [selectedStudent]);
 
   const totalExp = useMemo(() => {
     if (!selectedStudent) {
@@ -487,93 +336,115 @@ export function BondView({ students, gifts }: BondViewProps) {
     let total = currentBondExp;
 
     for (const gift of gifts) {
-      if (!giftEnabled[gift.id]) {
+      const count = allocatedGiftCounts[gift.id] ?? 0;
+      if (count === 0) {
         continue;
       }
 
-      const isAdored = gift.adoredBy.some((s) => s.id === selectedStudent.id);
-      if (isAdored) {
-        total += giftCounts[gift.id] * gift.expValue * 4;
-        continue;
-      }
+      total += count * getGiftExpValue(gift, selectedStudent);
+    }
 
-      const isLoved = gift.lovedBy.some((s) => s.id === selectedStudent.id);
-      if (isLoved) {
-        total += giftCounts[gift.id] * gift.expValue * 3;
-        continue;
-      }
-
-      const isLiked = gift.likedBy.some((s) => s.id === selectedStudent.id);
-      if (isLiked) {
-        total += giftCounts[gift.id] * gift.expValue * 2;
-        continue;
-      }
-
-      if (gift.isLovedByEveryone) {
-        if (gift.expValue === 60) {
-          total += giftCounts[gift.id] * gift.expValue * 4;
-        } else {
-          total += giftCounts[gift.id] * gift.expValue * 3;
-        }
-
-        continue;
-      }
-
-      if (gift.rarity === "SSR") {
-        total += giftCounts[gift.id] * gift.expValue * 2;
+    const boxCount = allocatedBoxCount;
+    if (boxCount > 0) {
+      if (studentGiftKinds.hasAdoredSR) {
+        total += boxCount * 80;
+      } else if (studentGiftKinds.hasLovedSR) {
+        total += boxCount * 60;
       } else {
-        total += giftCounts[gift.id] * gift.expValue;
+        total += boxCount * 40;
       }
     }
 
-    if (!giftBoxesEnabled) {
-      return total;
-    }
-
-    if (studentGiftKinds.hasAdoredSR) {
-      total += giftBoxesUsed * 80;
-      return total;
-    }
-
-    if (studentGiftKinds.hasLovedSR) {
-      total += giftBoxesUsed * 60;
-      return total;
-    }
-
-    total += giftBoxesUsed * 40;
     return total;
   }, [
-    giftCounts,
-    giftEnabled,
+    allocatedGiftCounts,
+    allocatedBoxCount,
     selectedStudent,
     currentBondExp,
-    giftBoxesUsed,
-    giftBoxesEnabled,
+    gifts,
+    studentGiftKinds,
+  ]);
+
+  const targetProjectedRanks = useMemo(() => {
+    const ranks: Record<Id<"giftTarget">, number> = {};
+
+    if (!showTargetRows) {
+      return ranks;
+    }
+
+    for (const target of inventoryTargets) {
+      const student = studentWithGiftsMap.get(target.studentId);
+      if (!student) {
+        continue;
+      }
+
+      const currentExp =
+        target._id === selectedTargetId ? currentBondExp : target.currentExp;
+      const projectedExp = computeTargetProjectedExp(
+        target._id,
+        student,
+        gifts,
+        targetAllocations,
+        targetBoxAllocations,
+        currentExp,
+      );
+      ranks[target._id] = getBondLevelFromTotalExp(projectedExp);
+    }
+
+    return ranks;
+  }, [
+    showTargetRows,
+    inventoryTargets,
+    studentWithGiftsMap,
+    selectedTargetId,
+    currentBondExp,
+    gifts,
+    targetAllocations,
+    targetBoxAllocations,
   ]);
 
   const hasIrrelevantGifts = useMemo(() => {
-    if (!selectedStudent || !onlyDisplayRelevantGifts) {
+    if (!selectedStudent) {
       return false;
     }
 
-    return gifts.some((gift) => {
-      if (giftCounts[gift.id] === 0 || !giftEnabled[gift.id]) {
+    if (!showTargetRows) {
+      if (!onlyDisplayRelevantGifts) {
         return false;
       }
 
-      return (
-        !gift.isLovedByEveryone &&
-        !isGiftAdoredByStudent(gift, selectedStudent) &&
-        !isGiftLovedByStudent(gift, selectedStudent) &&
-        !isGiftLikedByStudent(gift, selectedStudent)
-      );
+      return gifts.some((gift) => {
+        if ((giftCounts[gift.id] ?? 0) === 0) {
+          return false;
+        }
+
+        return !isGiftPreferredByStudent(gift, selectedStudent);
+      });
+    }
+
+    if (showAllGifts || !activeTargetId) {
+      return false;
+    }
+
+    const allocations = targetAllocations[activeTargetId] ?? {};
+    const displayedIds = new Set(displayedGifts.map((gift) => gift.id));
+
+    return gifts.some((gift) => {
+      if ((allocations[gift.id] ?? 0) === 0) {
+        return false;
+      }
+      return !displayedIds.has(gift.id);
     });
   }, [
+    showTargetRows,
     onlyDisplayRelevantGifts,
     selectedStudent,
     giftCounts,
-    giftEnabled,
-    studentGiftKinds,
+    showAllGifts,
+    activeTargetId,
+    targetAllocations,
+    displayedGifts,
+    gifts,
   ]);
 
   const remainingExpBreakdown = useMemo<RemainingExpBreakdown | null>(() => {
@@ -600,27 +471,21 @@ export function BondView({ students, gifts }: BondViewProps) {
     if (studentGiftKinds.hasNormalSR) {
       result.normalSRGifts = Math.ceil(difference / EXP_VALUES.normalSRGifts);
     }
-
     if (studentGiftKinds.hasLikedSR) {
       result.likedSRGifts = Math.ceil(difference / EXP_VALUES.likedSRGifts);
     }
-
     if (studentGiftKinds.hasLovedSR) {
       result.lovedSRGifts = Math.ceil(difference / EXP_VALUES.lovedSRGifts);
     }
-
     if (studentGiftKinds.hasAdoredSR) {
       result.adoredSRGifts = Math.ceil(difference / EXP_VALUES.adoredSRGifts);
     }
-
     if (studentGiftKinds.hasLikedSSR) {
       result.likedSSRGifts = Math.ceil(difference / EXP_VALUES.likedSSRGifts);
     }
-
     if (studentGiftKinds.hasLovedSSR) {
       result.lovedSSRGifts = Math.ceil(difference / EXP_VALUES.lovedSSRGifts);
     }
-
     if (studentGiftKinds.hasAdoredSSR) {
       result.adoredSSRGifts = Math.ceil(difference / EXP_VALUES.adoredSSRGifts);
     }
@@ -629,24 +494,61 @@ export function BondView({ students, gifts }: BondViewProps) {
   }, [targetBondExp, totalExp, studentGiftKinds]);
 
   const targetAlreadyExists = useMemo(() => {
-    if (!selectedStudent) {
+    if (!selectedStudent || !inventoryQuery.data) {
       return false;
     }
-
-    if (!inventoryQuery.data) {
-      return false;
-    }
-
     return inventoryQuery.data.targets.some(
-      (t) => t.studentId === selectedStudent.id,
+      (target) => target.studentId === selectedStudent.id,
     );
-  }, [selectedStudent]);
+  }, [selectedStudent, inventoryQuery.data]);
 
   function updateCount(giftId: number, count: number) {
     setGiftCounts((prev) => ({
       ...prev,
       [giftId]: count,
     }));
+  }
+
+  function updateAllocation(
+    targetId: Id<"giftTarget">,
+    giftId: number,
+    value: number,
+  ) {
+    setTargetAllocations((prev) => ({
+      ...prev,
+      [targetId]: {
+        ...(prev[targetId] ?? {}),
+        [giftId]: value,
+      },
+    }));
+  }
+
+  function updateBoxAllocation(targetId: Id<"giftTarget">, value: number) {
+    setTargetBoxAllocations((prev) => ({
+      ...prev,
+      [targetId]: value,
+    }));
+  }
+
+  function handleShowAllGiftsChange(checked: boolean) {
+    setShowAllGifts(checked);
+    if (checked) {
+      setFilterStudentIds(
+        new Set(inventoryTargets.map((target) => target.studentId)),
+      );
+    }
+  }
+
+  function handleFilterStudentToggle(studentId: string, checked: boolean) {
+    setFilterStudentIds((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(studentId);
+      } else {
+        next.delete(studentId);
+      }
+      return next;
+    });
   }
 
   const updateCurrentBond = useCallback(
@@ -663,9 +565,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
 
       const clampedValue = Math.max(1, Math.min(value, 100));
-
       const entry = favorTableMap[clampedValue];
-
       if (!entry) {
         return;
       }
@@ -688,7 +588,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       setCurrentBondExpStr(entry.totalExp.toString());
       setCurrentBondStr(clampedValue.toString());
     },
-    [selectedStudent],
+    [selectedStudent, setCurrentBondExp, setCurrentBondExpUnchecked],
   );
 
   const updateCurrentBondExp = useCallback(
@@ -712,7 +612,6 @@ export function BondView({ students, gifts }: BondViewProps) {
         favorTable.find((entry) => entry.totalExp > clampedValue) ??
         favorTable[favorTable.length - 2];
       const entry = favorTableMap[nextEntry.level - 1];
-
       if (!entry) {
         return;
       }
@@ -735,61 +634,66 @@ export function BondView({ students, gifts }: BondViewProps) {
         bondExp: clampedValue,
       });
     },
-    [selectedStudent],
+    [selectedStudent, setCurrentBondExp, setCurrentBondExpUnchecked],
   );
 
-  const updateTargetBond = useCallback((raw: string, unchecked = false) => {
-    setTargetBondStr(raw);
+  const updateTargetBond = useCallback(
+    (raw: string, unchecked = false) => {
+      setTargetBondStr(raw);
 
-    const setter = unchecked ? setTargetBondExpUnchecked : setTargetBondExp;
+      const setter = unchecked ? setTargetBondExpUnchecked : setTargetBondExp;
+      const value = Number.parseInt(raw, 10);
 
-    const value = Number.parseInt(raw, 10);
-    if (Number.isNaN(value)) {
-      setter(null);
-      return;
-    }
+      if (Number.isNaN(value)) {
+        setter(null);
+        return;
+      }
 
-    const clampedValue = Math.max(1, Math.min(value, 100));
+      const clampedValue = Math.max(1, Math.min(value, 100));
+      const entry = favorTableMap[clampedValue];
 
-    const entry = favorTableMap[clampedValue];
+      if (!entry) {
+        setter(null);
+        return;
+      }
 
-    if (!entry) {
-      setter(null);
-      return;
-    }
+      setter(entry.totalExp);
+      setTargetBondExpStr(entry.totalExp.toString());
+      setTargetBondStr(clampedValue.toString());
+    },
+    [setTargetBondExp, setTargetBondExpUnchecked],
+  );
 
-    setter(entry.totalExp);
-    setTargetBondExpStr(entry.totalExp.toString());
-    setTargetBondStr(clampedValue.toString());
-  }, []);
+  const updateTargetBondExp = useCallback(
+    (raw: string, unchecked = false) => {
+      setTargetBondExpStr(raw);
 
-  const updateTargetBondExp = useCallback((raw: string, unchecked = false) => {
-    setTargetBondExpStr(raw);
+      const setter = unchecked ? setTargetBondExpUnchecked : setTargetBondExp;
+      const value = Number.parseInt(raw, 10);
 
-    const setter = unchecked ? setTargetBondExpUnchecked : setTargetBondExp;
+      if (Number.isNaN(value)) {
+        setter(null);
+        return;
+      }
 
-    const value = Number.parseInt(raw, 10);
-    if (Number.isNaN(value)) {
-      setter(null);
-      return;
-    }
+      let clampedValue = Math.max(
+        0,
+        Math.min(value, favorTable[favorTable.length - 2].totalExp),
+      );
+      if (clampedValue > favorTable[favorTable.length - 2].totalExp) {
+        clampedValue = favorTable[favorTable.length - 2].totalExp;
+      }
 
-    let clampedValue = Math.max(
-      0,
-      Math.min(value, favorTable[favorTable.length - 2].totalExp),
-    );
-    if (clampedValue > favorTable[favorTable.length - 2].totalExp) {
-      clampedValue = favorTable[favorTable.length - 2].totalExp;
-    }
-
-    setter(clampedValue);
-    setTargetBondStr(
-      (
-        favorTable.find((entry) => entry.totalExp >= clampedValue)?.level ?? 1
-      ).toString(),
-    );
-    setTargetBondExpStr(clampedValue.toString());
-  }, []);
+      setter(clampedValue);
+      setTargetBondStr(
+        (
+          favorTable.find((entry) => entry.totalExp >= clampedValue)?.level ?? 1
+        ).toString(),
+      );
+      setTargetBondExpStr(clampedValue.toString());
+    },
+    [setTargetBondExp, setTargetBondExpUnchecked],
+  );
 
   function updateStudent(baseStudent: Student) {
     const student = students.find((s) => s.id === baseStudent.id);
@@ -800,7 +704,6 @@ export function BondView({ students, gifts }: BondViewProps) {
     setSelectedStudent(student);
 
     const storedStudent = studentStorage.getStudent(student.id);
-
     let bondUpdated = false;
 
     if (typeof storedStudent?.bondExp !== "undefined") {
@@ -840,7 +743,6 @@ export function BondView({ students, gifts }: BondViewProps) {
       if (entry.totalExp > currentBondExp) {
         break;
       }
-
       result = entry;
     }
 
@@ -856,7 +758,6 @@ export function BondView({ students, gifts }: BondViewProps) {
 
     for (const entry of favorTable) {
       result = entry;
-
       if (entry.totalExp > totalExp) {
         break;
       }
@@ -911,32 +812,15 @@ export function BondView({ students, gifts }: BondViewProps) {
       return;
     }
 
-    setBusy(true);
-
-    try {
-      await updateInventoryMutation({
-        id: selectedInvenetoryId,
-        name,
-        gifts: Array.from(Object.entries(giftCounts)).map(
-          ([giftId, count]) => ({
-            id: Number(giftId),
-            count,
-          }),
-        ),
-        giftBoxes: giftBoxesUsed,
-      });
-
-      markAsSaved();
-
-      if (navigationGuard.active) {
-        navigationGuard.accept();
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(t("tools.bond.toasts.inventoryUpdateFail"));
-    } finally {
-      setBusy(false);
-    }
+    await updateInventoryMutation({
+      id: selectedInvenetoryId,
+      name,
+      gifts: Array.from(Object.entries(giftCounts)).map(([giftId, count]) => ({
+        id: Number(giftId),
+        count,
+      })),
+      giftBoxes: giftBoxesUsed,
+    });
   }
 
   async function handleCreateTarget() {
@@ -952,16 +836,20 @@ export function BondView({ students, gifts }: BondViewProps) {
         studentId: selectedStudent.id,
         currentExp: currentBondExp,
         targetExp: targetBondExp ?? undefined,
-        gifts: Array.from(Object.entries(giftEnabled)).map(
-          ([giftId, enabled]) => ({
-            id: Number(giftId),
-            enabled,
-          }),
-        ),
-        useGiftBoxes: giftBoxesEnabled,
+        gifts: gifts.map((gift) => ({ id: gift.id, count: 0 })),
+        giftBoxCount: 0,
       });
 
       setSelectedTargetId(id);
+      setTargetAllocations((prev) => ({
+        ...prev,
+        [id]: Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
+      }));
+      setTargetBoxAllocations((prev) => ({
+        ...prev,
+        [id]: 0,
+      }));
+      setFilterStudentIds((prev) => new Set([...prev, selectedStudent.id]));
 
       markAsSaved();
 
@@ -976,27 +864,34 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
   }
 
-  async function handleUpdateTarget() {
-    if (busy || !selectedTargetId) {
+  async function handleSave() {
+    if (busy) {
       return;
     }
 
     setBusy(true);
 
     try {
-      await updateTargetMutation({
-        id: selectedTargetId,
-        studentId: selectedStudent?.id,
-        currentExp: currentBondExp,
-        targetExp: targetBondExp ?? undefined,
-        gifts: Array.from(Object.entries(giftEnabled)).map(
-          ([giftId, enabled]) => ({
-            id: Number(giftId),
-            enabled,
-          }),
-        ),
-        useGiftBoxes: giftBoxesEnabled,
-      });
+      if (selectedInvenetoryId) {
+        await handleUpdateInventory();
+      }
+
+      if (inventoryQuery.data) {
+        for (const target of inventoryQuery.data.targets) {
+          await updateTargetMutation({
+            id: target._id,
+            gifts: serializeTargetAllocations(
+              targetAllocations[target._id] ?? {},
+            ),
+            giftBoxCount: targetBoxAllocations[target._id] ?? 0,
+            ...(target._id === selectedTargetId && {
+              studentId: selectedStudent?.id,
+              currentExp: currentBondExp,
+              targetExp: targetBondExp ?? undefined,
+            }),
+          });
+        }
+      }
 
       markAsSaved();
 
@@ -1005,19 +900,9 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("tools.bond.toasts.targetUpdateFail"));
+      toast.error(t("tools.bond.toasts.inventoryUpdateFail"));
     } finally {
       setBusy(false);
-    }
-  }
-
-  async function handleSave() {
-    if (selectedInvenetoryId) {
-      await handleUpdateInventory();
-    }
-
-    if (selectedTargetId) {
-      await handleUpdateTarget();
     }
   }
 
@@ -1029,19 +914,20 @@ export function BondView({ students, gifts }: BondViewProps) {
     setBusy(true);
 
     try {
-      await destroyInventoryMutation({
-        id: selectedInvenetoryId,
-      });
+      await destroyInventoryMutation({ id: selectedInvenetoryId });
 
       toast.success(t("tools.bond.toasts.inventoryDeleteSuccess"));
 
       setSelectedInventoryId(null);
       setSelectedTargetId(null);
-      updateCurrentBondExp("0");
-      updateTargetBondExp("");
+      updateCurrentBondExp("0", true);
+      updateTargetBondExp("", true);
       setSelectedStudent(null);
       setGiftCounts(Object.fromEntries(gifts.map((gift) => [gift.id, 0])));
-      setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
+      setTargetAllocations({});
+      setTargetBoxAllocations({});
+      setFilterStudentIds(new Set());
+      setShowAllGifts(true);
 
       markAsSaved();
 
@@ -1064,17 +950,25 @@ export function BondView({ students, gifts }: BondViewProps) {
     setBusy(true);
 
     try {
-      await destroyTargetMutation({
-        id: selectedTargetId,
-      });
+      await destroyTargetMutation({ id: selectedTargetId });
 
       toast.success(t("tools.bond.toasts.targetDeleteSuccess"));
 
+      setTargetAllocations((prev) => {
+        const next = { ...prev };
+        delete next[selectedTargetId];
+        return next;
+      });
+      setTargetBoxAllocations((prev) => {
+        const next = { ...prev };
+        delete next[selectedTargetId];
+        return next;
+      });
+
       setSelectedTargetId(null);
-      updateCurrentBondExp("0");
-      updateTargetBondExp("");
+      updateCurrentBondExp("0", true);
+      updateTargetBondExp("", true);
       setSelectedStudent(null);
-      setGiftEnabled(Object.fromEntries(gifts.map((gift) => [gift.id, false])));
 
       markAsSaved();
 
@@ -1099,9 +993,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       setGiftCountsUnchecked(
         Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
       );
-      setGiftEnabledUnchecked(
-        Object.fromEntries(gifts.map((gift) => [gift.id, false])),
-      );
+      setTargetAllocationsUnchecked({});
+      setTargetBoxAllocationsUnchecked({});
+      setFilterStudentIds(new Set());
+      setShowAllGifts(true);
       return;
     }
 
@@ -1119,9 +1014,6 @@ export function BondView({ students, gifts }: BondViewProps) {
       updateCurrentBondExp("0", true);
       updateTargetBondExp("", true);
       setSelectedStudent(null);
-      setGiftEnabledUnchecked(
-        Object.fromEntries(gifts.map((gift) => [gift.id, false])),
-      );
       return;
     }
 
@@ -1132,69 +1024,72 @@ export function BondView({ students, gifts }: BondViewProps) {
     setSelectedTargetId(value as Id<"giftTarget">);
   }
 
-  useEffect(() => {
-    if (isSignedIn) {
-      setGiftEnabledUnchecked(
-        Object.fromEntries(gifts.map((gift) => [gift.id, false])),
-      );
-
-      setGiftBoxesEnabledUnchecked(false);
-    }
-  }, [isSignedIn]);
+  const createInventoryMutation = useMutation(api.gifts.createInventory);
+  const createTargetMutation = useMutation(api.gifts.createTarget);
+  const updateInventoryMutation = useMutation(api.gifts.updateInventory);
+  const updateTargetMutation = useMutation(api.gifts.updateTarget);
+  const destroyInventoryMutation = useMutation(api.gifts.destroyInventory);
+  const destroyTargetMutation = useMutation(api.gifts.destroyTarget);
 
   useEffect(() => {
-    if (inventoryQuery.status !== "success") {
+    if (inventoryQuery.status !== "success" || !inventoryQuery.data) {
       return;
     }
 
-    const newGiftCounts: Record<number, number> = {};
-
+    const inventoryCounts: Record<number, number> = {};
     for (const gift of inventoryQuery.data.inventory.gifts) {
-      newGiftCounts[gift.id] = gift.count;
+      inventoryCounts[gift.id] = gift.count;
     }
 
     setGiftCountsUnchecked((prev) => ({
       ...prev,
-      ...newGiftCounts,
+      ...inventoryCounts,
     }));
 
     if (typeof inventoryQuery.data.inventory.giftBoxes === "number") {
       setGiftBoxesUsedUnchecked(inventoryQuery.data.inventory.giftBoxes);
     }
-  }, [inventoryQuery.status]);
+
+    const newTargetAllocations: TargetAllocations = {};
+    const newBoxAllocations: TargetBoxAllocations = {};
+
+    for (const target of inventoryQuery.data.targets) {
+      newTargetAllocations[target._id] = buildTargetAllocationsFromDoc(
+        target,
+        giftIds,
+        inventoryCounts,
+      );
+      newBoxAllocations[target._id] = normalizeTargetGiftBoxCount(
+        target,
+        inventoryQuery.data.inventory.giftBoxes ?? 0,
+      );
+    }
+
+    setTargetAllocationsUnchecked(newTargetAllocations);
+    setTargetBoxAllocationsUnchecked(newBoxAllocations);
+    setFilterStudentIds(
+      new Set(inventoryQuery.data.targets.map((target) => target.studentId)),
+    );
+  }, [inventoryQuery.status, inventoryQuery.data?.inventory._id, giftIds]);
 
   useEffect(() => {
-    if (!inventoryQuery.data) {
+    if (!inventoryQuery.data || !selectedTargetId) {
       return;
     }
 
     const target = inventoryQuery.data.targets.find(
-      (t) => t._id === selectedTargetId,
+      (entry) => entry._id === selectedTargetId,
     );
     if (!target) {
       return;
     }
 
-    const newGiftEnabled: Record<number, boolean> = {};
-
-    for (const gift of target.gifts) {
-      newGiftEnabled[gift.id] = gift.enabled;
-    }
-
-    setGiftEnabledUnchecked((prev) => ({
-      ...prev,
-      ...newGiftEnabled,
-    }));
-
-    if (typeof target.useGiftBoxes === "boolean") {
-      setGiftBoxesEnabledUnchecked(target.useGiftBoxes);
-    }
-
-    setSelectedStudent(students.find((s) => s.id === target.studentId) || null);
-
+    setSelectedStudent(
+      students.find((student) => student.id === target.studentId) || null,
+    );
     updateCurrentBondExp(target.currentExp.toString(), true);
     updateTargetBondExp(target.targetExp?.toString() ?? "", true);
-  }, [selectedTargetId]);
+  }, [selectedTargetId, inventoryQuery.data, students]);
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-6">
@@ -1329,9 +1224,10 @@ export function BondView({ students, gifts }: BondViewProps) {
                         {t("tools.bond.inventory.target.none")}
                       </SelectItem>
 
-                      {inventoryQuery.data?.targets.map((target) => (
+                      {inventoryTargets.map((target) => (
                         <SelectItem key={target._id} value={target._id}>
-                          {studentMap[target.studentId]?.name ??
+                          {studentWithGiftsMap.get(target.studentId)?.name ??
+                            studentMap[target.studentId]?.name ??
                             t("tools.bond.inventory.target.unknown", {
                               studentId: target.studentId,
                             })}
@@ -1394,14 +1290,11 @@ export function BondView({ students, gifts }: BondViewProps) {
           </TooltipProvider>
         </Authenticated>
 
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           <Label className="shrink-0">{t("tools.bond.sort.label")}</Label>
 
-          <Select
-            value={sortMethod}
-            onValueChange={(value) => setSortMethod(value as GiftSortMethod)}
-          >
-            <SelectTrigger>
+          <Select value={sortMethod} onValueChange={setSortMethod}>
+            <SelectTrigger className="min-w-[180px]">
               <SelectValue />
             </SelectTrigger>
 
@@ -1409,140 +1302,58 @@ export function BondView({ students, gifts }: BondViewProps) {
               <SelectItem value="default">
                 {t("tools.bond.sort.default")}
               </SelectItem>
-              <SelectItem value="by-relevance" disabled={!selectedStudent}>
-                {selectedStudent
-                  ? t("tools.bond.sort.relevance.student", {
-                      studentName: selectedStudent.name,
-                    })
-                  : t("tools.bond.sort.relevance.noStudent")}
-              </SelectItem>
+
+              {filterTargetOptions.map((target) => (
+                <SelectItem key={target.studentId} value={target.studentId}>
+                  {t("tools.bond.sort.relevance.student", {
+                    studentName: target.studentName,
+                  })}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+
+          {showTargetRows && filterTargetOptions.length > 0 && (
+            <>
+              <Label className="shrink-0">{t("tools.bond.filter.label")}</Label>
+              <GiftPreferenceFilter
+                showAllGifts={showAllGifts}
+                filterStudentIds={filterStudentIds}
+                targets={filterTargetOptions}
+                onShowAllGiftsChange={handleShowAllGiftsChange}
+                onFilterStudentToggle={handleFilterStudentToggle}
+              />
+            </>
+          )}
         </div>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-8 justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {sortedGifts.map((gift) => (
-            <div
+            <GiftAllocationCard
               key={gift.id}
-              className="flex flex-col items-center gap-2 relative"
-            >
-              <Popover>
-                <PopoverTrigger className="flex-1 flex">
-                  <GiftItemCard gift={gift} />
-                </PopoverTrigger>
-
-                <PopoverContent className="w-[90vw] md:w-[450px] ring-4 max-h-[500px] overflow-y-auto shadow-lg ring-black/75 dark:ring-white/75 p-0">
-                  <GiftInfo gift={gift} />
-                </PopoverContent>
-              </Popover>
-
-              <Input
-                type="number"
-                value={giftCounts[gift.id]}
-                min={0}
-                onClick={(e) => {
-                  e.currentTarget.select();
-                }}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-
-                  if (Number.isNaN(value)) {
-                    updateCount(gift.id, 0);
-                  } else {
-                    updateCount(gift.id, value);
-                  }
-                }}
-                className={cn("w-16 no-arrows", {
-                  "border-green-200 shadow-green-200 focus-visible:ring-green-200/50 bg-green-200/10":
-                    giftCounts[gift.id] > 0 && giftEnabled[gift.id],
-                })}
-              />
-
-              {selectedStudent && (
-                <div className="absolute -top-3 -right-3">
-                  {(gift.adoredBy.some((s) => s.id === selectedStudent.id) ||
-                    (gift.isLovedByEveryone && gift.expValue === 60)) && (
-                    <Image
-                      src={giftAdoredImage}
-                      alt={t("tools.bond.item.adored")}
-                      className="size-8"
-                      title={`${gift.expValue * 4} EXP`}
-                    />
-                  )}
-
-                  {(gift.lovedBy.some((s) => s.id === selectedStudent.id) ||
-                    (gift.isLovedByEveryone && gift.expValue !== 60)) && (
-                    <Image
-                      src={giftLovedImage}
-                      alt={t("tools.bond.item.loved")}
-                      className="size-8"
-                      title={`${gift.expValue * 3} EXP`}
-                    />
-                  )}
-
-                  {gift.likedBy.some((s) => s.id === selectedStudent.id) && (
-                    <Image
-                      src={giftLikedImage}
-                      alt={t("tools.bond.item.liked")}
-                      className="size-8"
-                      title={`${gift.expValue * 2} EXP`}
-                    />
-                  )}
-                </div>
-              )}
-
-              <Authenticated>
-                <Switch
-                  checked={giftEnabled[gift.id]}
-                  onCheckedChange={(checked) => {
-                    setGiftEnabled((prev) => ({
-                      ...prev,
-                      [gift.id]: checked,
-                    }));
-                  }}
-                />
-              </Authenticated>
-            </div>
+              gift={gift}
+              inventoryTotal={giftCounts[gift.id] ?? 0}
+              targets={showTargetRows ? inventoryTargets : []}
+              studentMap={studentWithGiftsMap}
+              targetAllocations={targetAllocations}
+              onInventoryTotalChange={(value) => updateCount(gift.id, value)}
+              onAllocationChange={updateAllocation}
+              onTargetSelect={setSelectedTargetId}
+              selectedStudent={showTargetRows ? null : selectedStudent}
+              targetProjectedRanks={targetProjectedRanks}
+            />
           ))}
 
-          <div className="flex flex-col items-center gap-2 relative">
-            <ItemCard
-              name={t("tools.bond.choiceBox.name")}
-              iconName="item_icon_favor_selection"
-              description={t("tools.bond.choiceBox.description")}
-              rarity="SR"
-              className="cursor-pointer"
-            />
-
-            <Input
-              type="number"
-              value={giftBoxesUsed}
-              min={0}
-              onClick={(e) => {
-                e.currentTarget.select();
-              }}
-              onChange={(e) => {
-                const value = Number(e.target.value);
-
-                if (Number.isNaN(value)) {
-                  setGiftBoxesUsed(0);
-                } else {
-                  setGiftBoxesUsed(Math.max(0, value));
-                }
-              }}
-              className={cn("w-16 no-arrows", {
-                "border-green-200 shadow-green-200 focus-visible:ring-green-200/50 bg-green-200/10":
-                  giftBoxesUsed > 0 && giftBoxesEnabled,
-              })}
-            />
-
-            <Authenticated>
-              <Switch
-                checked={giftBoxesEnabled}
-                onCheckedChange={setGiftBoxesEnabled}
-              />
-            </Authenticated>
-          </div>
+          <GiftChoiceBoxCard
+            inventoryTotal={giftBoxesUsed}
+            targets={showTargetRows ? inventoryTargets : []}
+            studentMap={studentWithGiftsMap}
+            boxAllocations={targetBoxAllocations}
+            onInventoryTotalChange={setGiftBoxesUsed}
+            onAllocationChange={updateBoxAllocation}
+            onTargetSelect={setSelectedTargetId}
+            targetProjectedRanks={targetProjectedRanks}
+          />
         </div>
       </div>
 
@@ -1559,7 +1370,7 @@ export function BondView({ students, gifts }: BondViewProps) {
         >
           <Button variant="outline" className="w-full justify-between">
             {selectedStudent
-              ? `${selectedStudent.name}`
+              ? selectedStudent.name
               : t("tools.bond.student.select")}
             <ChevronsUpDownIcon />
           </Button>
@@ -1581,16 +1392,18 @@ export function BondView({ students, gifts }: BondViewProps) {
               />
 
               <div className="flex-1 flex flex-col gap-4">
-                <div className="flex gap-2 items-center">
-                  <Switch
-                    id="only-relevant-gifts"
-                    checked={onlyDisplayRelevantGifts}
-                    onCheckedChange={setOnlyDisplayRelevantGifts}
-                  />
-                  <Label htmlFor="only-relevant-gifts">
-                    {t("tools.bond.student.onlyFavorite")}
-                  </Label>
-                </div>
+                {!showTargetRows && (
+                  <div className="flex gap-2 items-center">
+                    <Switch
+                      id="only-relevant-gifts"
+                      checked={onlyDisplayRelevantGifts}
+                      onCheckedChange={setOnlyDisplayRelevantGifts}
+                    />
+                    <Label htmlFor="only-relevant-gifts">
+                      {t("tools.bond.student.onlyFavorite")}
+                    </Label>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex flex-col gap-1">
@@ -1652,14 +1465,18 @@ export function BondView({ students, gifts }: BondViewProps) {
               </div>
             </div>
 
-            {selectedStudent && hasIrrelevantGifts && (
+            {hasIrrelevantGifts && (
               <Alert>
                 <AlertCircleIcon />
                 <AlertTitle>
                   {t("tools.bond.student.irrelevantGifts.title")}
                 </AlertTitle>
                 <AlertDescription>
-                  {t("tools.bond.student.irrelevantGifts.description")}
+                  {t(
+                    showTargetRows
+                      ? "tools.bond.student.irrelevantGifts.description"
+                      : "tools.bond.student.irrelevantGifts.onlyFavoriteDescription",
+                  )}
                 </AlertDescription>
               </Alert>
             )}
@@ -1673,10 +1490,9 @@ export function BondView({ students, gifts }: BondViewProps) {
 
             <GiftBreakdown
               gifts={gifts}
-              giftCounts={giftCounts}
-              giftEnabled={giftEnabled}
-              giftBoxesUsed={giftBoxesUsed}
-              selectedStudentId={selectedStudent.id}
+              allocatedCounts={allocatedGiftCounts}
+              allocatedBoxCount={allocatedBoxCount}
+              selectedStudent={selectedStudent}
               exp={totalExp}
             >
               <Button variant="outline">

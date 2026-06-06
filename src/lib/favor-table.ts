@@ -520,6 +520,26 @@ export const favorTableMap: Record<number, FavorTableEntry> = favorTable.reduce(
   {} as Record<number, FavorTableEntry>,
 );
 
+export function getBondLevelFromTotalExp(exp: number): number {
+  let nextLevel: FavorTableEntry = favorTable[0];
+
+  for (const entry of favorTable) {
+    nextLevel = entry;
+    if (entry.totalExp > exp) {
+      break;
+    }
+  }
+
+  if (nextLevel.level === 101) {
+    return favorTable[99].level;
+  }
+
+  return (
+    favorTable.find((entry) => entry.level === nextLevel.level - 1) ??
+    favorTable[0]
+  ).level;
+}
+
 export type LessonsFavorTableEntry = {
   minRank: number;
   maxRank: number;

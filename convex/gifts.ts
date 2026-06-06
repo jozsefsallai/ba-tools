@@ -1,6 +1,26 @@
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 
+const targetGiftValidator = v.object({
+  id: v.number(),
+  count: v.number(),
+});
+
+function normalizeTargetGifts(gifts: { id: number; count: number }[]) {
+  return gifts.map(({ id, count }) => ({
+    id,
+    count,
+    enabled: count > 0,
+  }));
+}
+
+function normalizeGiftBoxCount(giftBoxCount: number) {
+  return {
+    giftBoxCount,
+    useGiftBoxes: giftBoxCount > 0,
+  };
+}
+
 export const getOwn = authenticatedQuery({
   handler: async (ctx) => {
     return await ctx.db
@@ -64,19 +84,12 @@ export const createTarget = authenticatedMutation({
     studentId: v.string(),
     currentExp: v.optional(v.number()),
     targetExp: v.optional(v.number()),
-    gifts: v.optional(
-      v.array(
-        v.object({
-          id: v.number(),
-          enabled: v.boolean(),
-        }),
-      ),
-    ),
-    useGiftBoxes: v.optional(v.boolean()),
+    gifts: v.optional(v.array(targetGiftValidator)),
+    giftBoxCount: v.optional(v.number()),
   },
   handler: async (
     ctx,
-    { giftInventoryId, studentId, currentExp, targetExp, gifts, useGiftBoxes },
+    { giftInventoryId, studentId, currentExp, targetExp, gifts, giftBoxCount },
   ) => {
     const giftInventory = await ctx.db.get(giftInventoryId);
 
@@ -93,14 +106,16 @@ export const createTarget = authenticatedMutation({
       throw new Error("Gift Target for this student already exists");
     }
 
+    const boxCount = giftBoxCount ?? 0;
+
     const giftTargetId = await ctx.db.insert("giftTarget", {
       userId: ctx.user._id,
       giftInventoryId,
       studentId,
       currentExp: currentExp ?? 0,
       targetExp,
-      gifts: gifts ?? [],
-      useGiftBoxes: useGiftBoxes ?? false,
+      gifts: gifts ? normalizeTargetGifts(gifts) : [],
+      ...normalizeGiftBoxCount(boxCount),
     });
 
     return giftTargetId;
@@ -130,7 +145,7 @@ export const updateInventory = authenticatedMutation({
 
     await ctx.db.patch(id, {
       name: name ?? giftInventory.name,
-      gifts: [...giftInventory.gifts, ...(gifts ?? [])],
+      gifts: gifts ?? giftInventory.gifts,
       giftBoxes: giftBoxes ?? giftInventory.giftBoxes,
     });
   },
@@ -142,19 +157,12 @@ export const updateTarget = authenticatedMutation({
     studentId: v.optional(v.string()),
     currentExp: v.optional(v.number()),
     targetExp: v.optional(v.number()),
-    gifts: v.optional(
-      v.array(
-        v.object({
-          id: v.number(),
-          enabled: v.boolean(),
-        }),
-      ),
-    ),
-    useGiftBoxes: v.optional(v.boolean()),
+    gifts: v.optional(v.array(targetGiftValidator)),
+    giftBoxCount: v.optional(v.number()),
   },
   handler: async (
     ctx,
-    { id, studentId, currentExp, targetExp, gifts, useGiftBoxes },
+    { id, studentId, currentExp, targetExp, gifts, giftBoxCount },
   ) => {
     const giftTarget = await ctx.db.get(id);
 
@@ -162,13 +170,18 @@ export const updateTarget = authenticatedMutation({
       throw new Error("Gift Target not found");
     }
 
-    await ctx.db.patch(id, {
+    const patch: Record<string, unknown> = {
       studentId: studentId ?? giftTarget.studentId,
       currentExp: currentExp ?? giftTarget.currentExp,
       targetExp: targetExp ?? giftTarget.targetExp,
-      gifts: [...giftTarget.gifts, ...(gifts ?? [])],
-      useGiftBoxes: useGiftBoxes ?? giftTarget.useGiftBoxes,
-    });
+      gifts: gifts ? normalizeTargetGifts(gifts) : giftTarget.gifts,
+    };
+
+    if (typeof giftBoxCount === "number") {
+      Object.assign(patch, normalizeGiftBoxCount(giftBoxCount));
+    }
+
+    await ctx.db.patch(id, patch);
   },
 });
 

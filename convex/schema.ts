@@ -202,10 +202,12 @@ export default defineSchema({
     gifts: v.array(
       v.object({
         id: v.number(),
-        enabled: v.boolean(),
+        enabled: v.optional(v.boolean()),
+        count: v.optional(v.number()),
       }),
     ),
     useGiftBoxes: v.optional(v.boolean()),
+    giftBoxCount: v.optional(v.number()),
   })
     .index("by_userId", ["userId"])
     .index("by_giftInventory", ["giftInventoryId"])

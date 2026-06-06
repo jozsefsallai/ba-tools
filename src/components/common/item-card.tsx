@@ -21,12 +21,12 @@ export function ItemCard({
 }: ItemCardProps) {
   return (
     <article
-      className={cn("flex flex-col items-center gap-1 w-20 flex-1", className)}
+      className={cn("flex flex-col items-center gap-1 w-20 shrink-0", className)}
       title={description ? `${name}\n${description}` : name}
     >
       <div
         className={cn(
-          "rounded-md skew-x-[-11deg] ring-2 ring-black dark:ring-white",
+          "rounded-md skew-x-[-11deg] ring-2 ring-black dark:ring-white overflow-hidden",
           {
             "bg-[#b5cada]": rarity === "N",
             "bg-[#9fe3fa]": rarity === "R",
@@ -39,7 +39,7 @@ export function ItemCard({
           <img
             src={buildItemIconUrl(iconName)}
             alt={name}
-            className="max-w-full"
+            className="w-16 max-w-full block"
           />
         </div>
       </div>

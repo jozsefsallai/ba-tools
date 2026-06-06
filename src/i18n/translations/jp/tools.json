@@ -167,6 +167,18 @@
         "noStudent": "生徒の好み"
       }
     },
+
+    "filter": {
+      "label": "表示：",
+      "allGifts": "すべてのギフト",
+      "filtered": "絞り込み中",
+      "preferredByGroup": "好みの生徒"
+    },
+
+    "giftCard": {
+      "total": "合計",
+      "projectedRank": "予想ランク {rank}"
+    },
     "item": {
       "adored": "大好き",
       "loved": "好き",
@@ -192,7 +204,8 @@
       "targetExp": "目標のEXP",
       "irrelevantGifts": {
         "title": "お知らせ",
-        "description": "選択したギフトの一部は、現在選んでいる生徒に関係がないため表示されていないよ。「好みのギフトのみ表示」のチェックを外すと変更できるようになるよ。"
+        "description": "割り当て済みのギフトの一部が、現在の表示フィルターによって非表示になっているよ。左側のフィルター設定を変更すると確認・編集できるよ。",
+        "onlyFavoriteDescription": "選択したギフトの一部は、現在選んでいる生徒に関係がないため表示されていないよ。「好みのギフトのみ表示」のチェックを外すと変更できるようになるよ。"
       },
       "breakdown": "ギフトの内訳を表示"
     },
