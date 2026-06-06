@@ -36,6 +36,7 @@ import {
   Grid2x2Icon,
   HeartIcon,
   ListOrderedIcon,
+  LogIn,
   MessageCircleHeartIcon,
   RectangleEllipsisIcon,
   TrainTrackIcon,
@@ -330,16 +331,10 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="gap-2">
         <div className="flex items-center justify-center gap-2 group-data-[collapsible=icon]:flex-col">
           <LocaleToggle />
           <ThemeToggle />
-
-          <Unauthenticated>
-            <Button asChild size="icon" variant="outline">
-              <SignInButton mode="modal" oauthFlow="popup" />
-            </Button>
-          </Unauthenticated>
 
           <Authenticated>
             <UserButton>
@@ -365,6 +360,17 @@ export function AppSidebar() {
             </UserButton>
           </Authenticated>
         </div>
+
+        <Unauthenticated>
+          <SignInButton mode="modal" oauthFlow="popup">
+            <Button className="w-full group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:px-0">
+              <LogIn className="h-[1.2rem] w-[1.2rem]" />
+              <span className="group-data-[collapsible=icon]:sr-only">
+                {t("common.signIn")}
+              </span>
+            </Button>
+          </SignInButton>
+        </Unauthenticated>
       </SidebarFooter>
     </Sidebar>
   );
