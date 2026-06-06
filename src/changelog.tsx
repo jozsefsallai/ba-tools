@@ -42,6 +42,33 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "June 6, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Added ability to specify number of gifts to give to a specific bond target.",
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description: "Updated UI of Relationship Rank Calculator tool.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Optimized database queries for Relationship Rank Calculator tool to improve page load time.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "It is now possible to select the same student as a target (i.e. self-target). This is useful for students such as Neru (School), Mika (Swimsuit), Aris (Armed), etc. who need to be activated first.",
+      },
+    ],
+  },
+  {
     date: "June 4, 2026",
     features: [],
     fixes: [],
