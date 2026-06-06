@@ -1,9 +1,14 @@
-import { BondView } from "@/app/bond/_components/bond-view";
+import {
+  BondView,
+  type GiftWithStudents,
+  type StudentWithGifts,
+} from "@/app/bond/_components/bond-view";
 import { InventoryTip } from "@/app/bond/_components/inventory-tip";
 import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
+import type { Gift, Student } from "@/lib/db/client";
 import { HelpCircleIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -26,27 +31,39 @@ export default async function BondPage() {
       name: "asc",
     },
     include: {
-      giftsAdored: true,
-      giftsLoved: true,
-      giftsLiked: true,
+      giftsAdored: {
+        select: {
+          id: true,
+        },
+      },
+      giftsLoved: {
+        select: {
+          id: true,
+        },
+      },
+      giftsLiked: {
+        select: {
+          id: true,
+        },
+      },
     },
   });
 
   const gifts = await db.gift.findMany({
     include: {
       adoredBy: {
-        orderBy: {
-          name: "asc",
+        select: {
+          id: true,
         },
       },
       lovedBy: {
-        orderBy: {
-          name: "asc",
+        select: {
+          id: true,
         },
       },
       likedBy: {
-        orderBy: {
-          name: "asc",
+        select: {
+          id: true,
         },
       },
     },
@@ -54,6 +71,58 @@ export default async function BondPage() {
       id: "asc",
     },
   });
+
+  const studentMap = new Map<string, Student>();
+  const giftMap = new Map<number, Gift>();
+
+  for (const student of students) {
+    studentMap.set(student.id, student);
+  }
+
+  for (const gift of gifts) {
+    giftMap.set(gift.id, gift);
+  }
+
+  const studentsWithGifts: StudentWithGifts[] = [];
+  const giftsWithStudents: GiftWithStudents[] = [];
+
+  for (const student of students) {
+    const giftsAdored = student.giftsAdored
+      .map((gift) => giftMap.get(gift.id))
+      .filter((gift): gift is Gift => !!gift);
+    const giftsLoved = student.giftsLoved
+      .map((gift) => giftMap.get(gift.id))
+      .filter((gift): gift is Gift => !!gift);
+    const giftsLiked = student.giftsLiked
+      .map((gift) => giftMap.get(gift.id))
+      .filter((gift): gift is Gift => !!gift);
+
+    studentsWithGifts.push({
+      ...student,
+      giftsAdored,
+      giftsLoved,
+      giftsLiked,
+    });
+  }
+
+  for (const gift of gifts) {
+    const adoredBy = gift.adoredBy
+      .map((student) => studentMap.get(student.id))
+      .filter((student): student is Student => !!student);
+    const lovedBy = gift.lovedBy
+      .map((student) => studentMap.get(student.id))
+      .filter((student): student is Student => !!student);
+    const likedBy = gift.likedBy
+      .map((student) => studentMap.get(student.id))
+      .filter((student): student is Student => !!student);
+
+    giftsWithStudents.push({
+      ...gift,
+      adoredBy,
+      lovedBy,
+      likedBy,
+    });
+  }
 
   return (
     <div className="flex flex-col gap-10">
@@ -74,7 +143,7 @@ export default async function BondPage() {
 
       <Suspense>
         <DirtyStateTrackerProvider loggedInOnly>
-          <BondView students={students} gifts={gifts} />
+          <BondView students={studentsWithGifts} gifts={giftsWithStudents} />
         </DirtyStateTrackerProvider>
       </Suspense>
     </div>
