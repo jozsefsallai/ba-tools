@@ -1104,6 +1104,7 @@
     },
     "errors": {
       "generic": "Plana couldn't respond.",
+      "filtered": "Plana couldn't respond to that message.",
       "notConfigured": "Plana AI needs an API key. Open settings to add one.",
       "retry": "Try again"
     }

@@ -31,12 +31,12 @@ export function ChatErrorMessage({
 
       <div
         className={cn(
-          "max-w-[82%] rounded-2xl rounded-bl-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-relaxed text-destructive shadow-sm md:max-w-[70%]",
+          "max-w-[82%] rounded-2xl rounded-bl-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm leading-relaxed text-foreground shadow-sm md:max-w-[70%] dark:border-destructive/60 dark:bg-destructive/20",
         )}
       >
         <p>{message}</p>
         <Button
-          className="mt-3 border-destructive/30 bg-background/80 text-destructive hover:bg-destructive/15 hover:text-destructive"
+          className="mt-3"
           onClick={onRetry}
           size="sm"
           type="button"

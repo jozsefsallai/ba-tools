@@ -964,6 +964,7 @@
     },
     "errors": {
       "generic": "プラナが応答できませんでした。",
+      "filtered": "そのメッセージには応答できませんでした。",
       "notConfigured": "Plana AIにはAPIキーが必要です。設定から追加してください。",
       "retry": "もう一度試す"
     }

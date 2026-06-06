@@ -11,13 +11,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { PlanaExpression } from "@/lib/plana";
 import { cn } from "@/lib/utils";
 import { Chat, useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { type ChatInit, DefaultChatTransport, type UIMessage } from "ai";
 import { PlusIcon, SettingsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getExpressionFromText } from "./message-utils";
+import {
+  getExpressionFromText,
+  getResponseFailureErrorKey,
+  getVisibleAssistantText,
+} from "./message-utils";
 
 type PlanaChatMessage = UIMessage<unknown, Record<string, never>>;
+type PlanaResponseErrorKey = "filtered" | "generic";
+type ResponseFinishPayload = Parameters<
+  NonNullable<ChatInit<PlanaChatMessage>["onFinish"]>
+>[0];
 type PlanaBranch = {
   activeIndex: number;
   siblings: PlanaChatMessage[];
@@ -82,6 +90,11 @@ export function PlanaChat() {
   const [optimisticExpression, setOptimisticExpression] =
     useState<PlanaExpression | null>(null);
   const wasBusyRef = useRef(false);
+  const responseFinishRef = useRef<(payload: ResponseFinishPayload) => void>(
+    () => {},
+  );
+  const [responseError, setResponseError] =
+    useState<PlanaResponseErrorKey | null>(null);
   const chat = useMemo(
     () =>
       new Chat<PlanaChatMessage>({
@@ -104,6 +117,7 @@ export function PlanaChat() {
             },
           }),
         }),
+        onFinish: (payload) => responseFinishRef.current(payload),
       }),
     [],
   );
@@ -117,22 +131,58 @@ export function PlanaChat() {
     status,
     stop,
   } = useChat<PlanaChatMessage>({ chat });
+
+  function clearAllErrors() {
+    clearError();
+    setResponseError(null);
+  }
+
+  responseFinishRef.current = ({
+    finishReason,
+    isAbort,
+    isError,
+    message,
+    messages: finishedMessages,
+  }) => {
+    if (isAbort || isError) {
+      return;
+    }
+
+    const explicitErrorKey = getResponseFailureErrorKey(finishReason);
+    const visibleText = getVisibleAssistantText(message);
+    const lastMessage = finishedMessages.at(-1);
+    const missingResponse = lastMessage?.role === "user";
+    const emptyAssistantResponse =
+      lastMessage?.role === "assistant" && visibleText.length === 0;
+
+    if (!explicitErrorKey && !missingResponse && !emptyAssistantResponse) {
+      return;
+    }
+
+    setResponseError(explicitErrorKey ?? "generic");
+
+    if (emptyAssistantResponse) {
+      setMessages(finishedMessages.slice(0, -1));
+    }
+  };
+
   const isBusy = status === "submitted" || status === "streaming";
   const latestExpression = getLatestAssistantExpression(messages);
-  const planaExpression: PlanaExpression =
-    status === "error"
-      ? "sad"
-      : isBusy
-        ? optimisticExpression || "thinking"
-        : latestExpression || optimisticExpression || "idle";
+  const hasError = (status === "error" && !!error) || !!responseError;
+  const planaExpression: PlanaExpression = hasError
+    ? "sad"
+    : isBusy || optimisticExpression
+      ? (optimisticExpression ?? "thinking")
+      : (latestExpression ?? "idle");
   const latestAssistantMessageId = [...messages]
     .reverse()
     .find((message) => message.role === "assistant")?.id;
-  const hasError = status === "error" && !!error;
   const errorMessage = hasError
-    ? error.message === "Plana AI is not configured"
+    ? error?.message === "Plana AI is not configured"
       ? t("tools.plana.errors.notConfigured")
-      : t("tools.plana.errors.generic")
+      : responseError === "filtered"
+        ? t("tools.plana.errors.filtered")
+        : t("tools.plana.errors.generic")
     : "";
   const shouldShowTypingPlaceholder =
     isBusy && messages.at(-1)?.role === "user";
@@ -185,6 +235,12 @@ export function PlanaChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, status, shouldShowTypingPlaceholder, hasError]);
+
+  useEffect(() => {
+    if (isBusy && !hasError) {
+      setOptimisticExpression((current) => current ?? "thinking");
+    }
+  }, [hasError, isBusy]);
 
   useEffect(() => {
     if (wasBusyRef.current && !isBusy) {
@@ -254,7 +310,7 @@ export function PlanaChat() {
   }, []);
 
   function sendText(text: string) {
-    clearError();
+    clearAllErrors();
     setOptimisticExpression("thinking");
     setInputDraft("");
     void sendMessage({ text });
@@ -262,7 +318,7 @@ export function PlanaChat() {
 
   function clearChat() {
     stop();
-    clearError();
+    clearAllErrors();
     branchesRef.current = {};
     bumpBranches();
     setInputDraft("");
@@ -271,7 +327,7 @@ export function PlanaChat() {
   }
 
   function handleRetry() {
-    clearError();
+    clearAllErrors();
     setOptimisticExpression("thinking");
 
     if (latestAssistantMessageId) {
@@ -296,7 +352,7 @@ export function PlanaChat() {
       upsertBranchSibling(parentUserMessageId, assistantMessage, true);
     }
 
-    clearError();
+    clearAllErrors();
     setOptimisticExpression("thinking");
     void regenerate({ messageId: assistantMessage.id });
   }
@@ -344,25 +400,15 @@ export function PlanaChat() {
   }
 
   function rewindTo(assistantMessage: PlanaChatMessage) {
-    const parentUserMessageId = findParentUserMessageId(
-      messages,
-      assistantMessage.id,
+    const assistantIndex = messages.findIndex(
+      (message) => message.id === assistantMessage.id,
     );
 
-    if (!parentUserMessageId) {
+    if (assistantIndex === -1) {
       return;
     }
 
-    const parentIndex = messages.findIndex(
-      (message) => message.id === parentUserMessageId,
-    );
-
-    if (parentIndex === -1) {
-      return;
-    }
-
-    const parentText = getTextFromMessage(messages[parentIndex]);
-    const nextMessages = messages.slice(0, parentIndex);
+    const nextMessages = messages.slice(0, assistantIndex + 1);
     const remainingUserIds = new Set(
       nextMessages
         .filter((message) => message.role === "user")
@@ -370,15 +416,36 @@ export function PlanaChat() {
     );
 
     stop();
-    clearError();
+    clearAllErrors();
     setMessages(nextMessages);
     branchesRef.current = Object.fromEntries(
       Object.entries(branchesRef.current).filter(([userMessageId]) =>
         remainingUserIds.has(userMessageId),
       ),
     );
+
+    const parentUserMessageId = findParentUserMessageId(
+      messages,
+      assistantMessage.id,
+    );
+
+    if (parentUserMessageId) {
+      const branch = branchesRef.current[parentUserMessageId];
+
+      if (branch) {
+        const siblingIndex = branch.siblings.findIndex(
+          (message) => message.id === assistantMessage.id,
+        );
+
+        if (siblingIndex !== -1) {
+          branch.siblings = branch.siblings.slice(0, siblingIndex + 1);
+          branch.activeIndex = siblingIndex;
+        }
+      }
+    }
+
     bumpBranches();
-    setInputDraft(parentText);
+    setInputDraft("");
 
     requestAnimationFrame(() => {
       inputRef.current?.focus();

@@ -14,7 +14,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   RefreshCwIcon,
-  RotateCcwIcon,
+  RewindIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -165,7 +165,7 @@ export function ChatMessage({
               <TooltipTrigger asChild>
                 <Button
                   aria-label={t("tools.plana.input.regenerate")}
-                  className="border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
+                  className="border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
                   onClick={() => onRegenerate(message)}
                   size="icon-sm"
                   type="button"
@@ -190,7 +190,7 @@ export function ChatMessage({
                   type="button"
                   variant="outline"
                 >
-                  <RotateCcwIcon />
+                  <RewindIcon />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">

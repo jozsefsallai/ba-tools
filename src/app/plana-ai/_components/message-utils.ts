@@ -1,4 +1,5 @@
 import type { PlanaExpression } from "@/lib/plana";
+import type { FinishReason, UIMessage } from "ai";
 
 const ALLOWED_EXPRESSIONS = new Set<string>([
   "idle",
@@ -117,4 +118,26 @@ export function stripPlanaMetadata(text: string) {
     .replace(LEGACY_TOOL_OUTPUT_REGEX, "")
     .replace(PARTIAL_LEGACY_TOOL_OUTPUT_REGEX, "")
     .trimStart();
+}
+
+export function getVisibleAssistantText(message: UIMessage) {
+  return message.parts
+    .filter((part) => part.type === "text")
+    .map((part) => stripPlanaMetadata(part.text))
+    .join("")
+    .trim();
+}
+
+export function getResponseFailureErrorKey(
+  finishReason: FinishReason | undefined,
+) {
+  if (finishReason === "content-filter") {
+    return "filtered" as const;
+  }
+
+  if (finishReason === "error") {
+    return "generic" as const;
+  }
+
+  return null;
 }
