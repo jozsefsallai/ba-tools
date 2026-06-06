@@ -1061,6 +1061,24 @@
   "plana": {
     "title": "Plana AI",
     "subtitle": "Chat with Plana",
+    "needAccount": "You need an account to chat with Plana.",
+    "sidebar": {
+      "title": "Chats",
+      "open": "Open chat list",
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "newChat": "New chat",
+      "empty": "No saved chats yet.",
+      "chatActions": "Chat actions",
+      "renameChat": "Rename",
+      "renameTitle": "Rename chat",
+      "renameDescription": "Enter a new name for this chat.",
+      "renamePlaceholder": "Chat name",
+      "renameSave": "Save",
+      "deleteChat": "Delete chat",
+      "deleteTitle": "Delete chat?",
+      "deleteDescription": "This chat and all of its messages will be permanently deleted."
+    },
     "emptyState": {
       "heading": "Hello, Sensei.",
       "body": "I am ready to assist you. What would you like to discuss?",

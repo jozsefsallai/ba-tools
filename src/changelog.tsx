@@ -45,6 +45,11 @@ export const CHANGELOG: ChangelogItemData[] = [
     date: "June 6, 2026",
     features: [
       {
+        scope: CHANGELOG_SCOPES.plana,
+        description:
+          "Added chat persistence to Plana AI with multiple saved conversations, message regeneration variants, and infinite scroll history.",
+      },
+      {
         scope: CHANGELOG_SCOPES.bondCalculator,
         description:
           "Added ability to specify number of gifts to give to a specific bond target.",

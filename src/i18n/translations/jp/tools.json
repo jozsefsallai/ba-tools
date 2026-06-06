@@ -921,6 +921,24 @@
   "plana": {
     "title": "Plana AI",
     "subtitle": "プラナとチャット",
+    "needAccount": "プラナとチャットするにはアカウントが必要です。",
+    "sidebar": {
+      "title": "チャット",
+      "open": "チャット一覧を開く",
+      "collapse": "サイドバーを折りたたむ",
+      "expand": "サイドバーを展開",
+      "newChat": "新しいチャット",
+      "empty": "保存されたチャットはまだありません。",
+      "chatActions": "チャット操作",
+      "renameChat": "名前を変更",
+      "renameTitle": "チャット名を変更",
+      "renameDescription": "このチャットの新しい名前を入力してください。",
+      "renamePlaceholder": "チャット名",
+      "renameSave": "保存",
+      "deleteChat": "チャットを削除",
+      "deleteTitle": "チャットを削除しますか？",
+      "deleteDescription": "このチャットとすべてのメッセージが完全に削除されます。"
+    },
     "emptyState": {
       "heading": "こんにちは、先生。",
       "body": "いつでもお手伝いできます。何について話しましょうか？",

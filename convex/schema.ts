@@ -93,6 +93,17 @@ export const pvpFormationStudentItem = v.object({
   damage: v.optional(v.number()),
 });
 
+export const planaMessagePart = v.object({
+  type: v.literal("text"),
+  text: v.string(),
+});
+
+export const planaAssistantVariant = v.object({
+  clientId: v.string(),
+  parts: v.array(planaMessagePart),
+  createdAt: v.number(),
+});
+
 export default defineSchema({
   users: defineTable({
     name: v.optional(v.string()),
@@ -248,4 +259,20 @@ export default defineSchema({
   })
     .index("by_supportCreatedOn", ["supportCreatedOn"])
     .index("by_bmcSupportId", ["bmcSupportId"]),
+
+  planaChat: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    updatedAt: v.number(),
+  }).index("by_userId_updatedAt", ["userId", "updatedAt"]),
+
+  planaTurn: defineTable({
+    chatId: v.id("planaChat"),
+    userId: v.id("users"),
+    order: v.number(),
+    userClientId: v.string(),
+    userParts: v.array(planaMessagePart),
+    selectedVariantIndex: v.number(),
+    assistantVariants: v.array(planaAssistantVariant),
+  }).index("by_chatId_order", ["chatId", "order"]),
 });
