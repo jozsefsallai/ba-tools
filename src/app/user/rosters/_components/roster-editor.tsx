@@ -18,6 +18,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
+import { revalidateRosterPublicCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
   GAME_SERVERS,
@@ -255,6 +256,13 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     }));
 
     try {
+      const previousRoster = query.data
+        ? {
+            gameServer: query.data.gameServer,
+            friendCode: query.data.friendCode,
+          }
+        : undefined;
+
       await updateMutation({
         id: rosterId,
         name,
@@ -266,6 +274,8 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         friendCode,
         students: studentsToSave,
       });
+
+      await revalidateRosterPublicCache(gameServer, friendCode, previousRoster);
 
       toast.success(t("tools.roster.editor.toasts.success"));
     } catch (err) {

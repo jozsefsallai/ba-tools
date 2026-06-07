@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
+import { revalidateRosterPublicCache } from "@/lib/cache";
 import { GAME_SERVERS, GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
@@ -51,6 +52,10 @@ export function CreateRoster() {
         gameServer,
         friendCode,
       });
+
+      if (visibility === "public" && friendCode.trim()) {
+        await revalidateRosterPublicCache(gameServer, friendCode);
+      }
 
       toast.success(t("tools.roster.create.toasts.success"));
       router.push(`/user/rosters/${id}`);

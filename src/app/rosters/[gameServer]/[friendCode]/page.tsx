@@ -1,11 +1,12 @@
 import { RosterView } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-view";
+import { OG_HEIGHT, OG_WIDTH } from "@/lib/og-image.server";
+import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import { truncateText } from "@/lib/text-utils";
 import { GAME_SERVERS, type GameServer } from "@/lib/types";
-import { buildStudentIconUrlFromId } from "@/lib/url";
-import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 import removeMd from "remove-markdown";
-import { api } from "~convex/api";
+
+export const revalidate = 86_400;
 
 type PageParams = {
   gameServer: GameServer;
@@ -24,10 +25,7 @@ export async function generateMetadata({
   }
 
   try {
-    const roster = await fetchQuery(api.roster.getByGameServerAndFriendCode, {
-      gameServer,
-      friendCode,
-    });
+    const roster = await getCachedPublicRoster(gameServer, friendCode);
 
     const title = roster.name
       ? `${roster.name}'s Roster / ${roster.friendCode} (${roster.gameServer}) - Joe's Blue Archive Tools`
@@ -44,23 +42,29 @@ export async function generateMetadata({
         )
       : `View ${roster.name ?? roster.friendCode}'s Blue Archive roster.`;
 
-    const image = roster.studentRepId
-      ? buildStudentIconUrlFromId(roster.studentRepId)
-      : undefined;
+    const ogImagePath = `/rosters/${gameServer}/${friendCode}/opengraph-image?v=${roster.lastUpdated}`;
 
     return {
       title,
       description,
       twitter: {
-        card: "summary",
+        card: "summary_large_image",
+        images: [ogImagePath],
       },
       openGraph: {
         title,
         description,
-        images: image ? [image] : undefined,
+        images: [
+          {
+            url: ogImagePath,
+            width: OG_WIDTH,
+            height: OG_HEIGHT,
+            alt: "Roster preview",
+          },
+        ],
       },
     };
-  } catch (err) {
+  } catch {
     return redirect("/404");
   }
 }
