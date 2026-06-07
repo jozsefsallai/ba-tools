@@ -48,18 +48,6 @@ export type RosterEditorProps = {
   rosterId: Id<"roster">;
 };
 
-function isReleasedOnServer(student: Student, gameServer: GameServer): boolean {
-  if (gameServer === "JP") {
-    return student.isReleasedJP;
-  }
-
-  if (gameServer === "CN") {
-    return student.isReleasedCN;
-  }
-
-  return student.isReleasedGlobal;
-}
-
 function createRosterItem(
   student: Student,
   savedItem?: Doc<"roster">["students"][number],
@@ -149,15 +137,6 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     setRosterItems(items);
   }, []);
 
-  const filteredRosterItems = useMemo(() => {
-    return rosterItems.filter((item) =>
-      isReleasedOnServer(item.student, gameServer),
-    );
-  }, [rosterItems, gameServer]);
-
-  const hiddenNotReleasedCount =
-    rosterItems.length - filteredRosterItems.length;
-
   const addableStudents = useMemo(() => {
     const rosterStudentIds = new Set(
       rosterItems.map((item) => item.student.id),
@@ -165,11 +144,9 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
     return students.filter(
       (student) =>
-        student.devName !== "CH0258_02" &&
-        isReleasedOnServer(student, gameServer) &&
-        !rosterStudentIds.has(student.id),
+        student.devName !== "CH0258_02" && !rosterStudentIds.has(student.id),
     );
-  }, [students, rosterItems, gameServer]);
+  }, [students, rosterItems]);
 
   useEffect(() => {
     if (query.status !== "success" || !query.data) {
@@ -474,15 +451,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
           </StudentPicker>
         </div>
 
-        {hiddenNotReleasedCount > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {t("tools.roster.editor.hiddenNotReleased", {
-              count: hiddenNotReleasedCount,
-            })}
-          </p>
-        )}
-
-        {filteredRosterItems.length === 0 ? (
+        {rosterItems.length === 0 ? (
           <MessageBox>{t("tools.roster.editor.emptyState")}</MessageBox>
         ) : (
           <>
@@ -496,7 +465,6 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
               updateRosterItem={updateRosterItem}
               onRemove={removeStudent}
               onReorder={reorderRosterItems}
-              isReleasedOnServer={isReleasedOnServer}
             />
           </>
         )}

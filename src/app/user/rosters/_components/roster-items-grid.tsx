@@ -22,7 +22,6 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Student } from "~prisma";
 
 export type RosterItemsGridProps = {
   items: RosterItem[];
@@ -33,51 +32,21 @@ export type RosterItemsGridProps = {
   ) => void;
   onRemove: (studentId: string) => void;
   onReorder: (items: RosterItem[]) => void;
-  isReleasedOnServer: (student: Student, gameServer: GameServer) => boolean;
 };
 
-function reorderVisibleRosterItems(
+function reorderRosterItems(
   items: RosterItem[],
   activeId: string,
   overId: string,
-  gameServer: GameServer,
-  isReleasedOnServer: (student: Student, gameServer: GameServer) => boolean,
 ): RosterItem[] {
-  const isVisible = (item: RosterItem) =>
-    isReleasedOnServer(item.student, gameServer);
-
-  const visibleIds = items.filter(isVisible).map((item) => item.student.id);
-
-  const oldIndex = visibleIds.indexOf(activeId);
-  const newIndex = visibleIds.indexOf(overId);
+  const oldIndex = items.findIndex((item) => item.student.id === activeId);
+  const newIndex = items.findIndex((item) => item.student.id === overId);
 
   if (oldIndex === -1 || newIndex === -1) {
     return items;
   }
 
-  const reorderedVisibleIds = arrayMove(visibleIds, oldIndex, newIndex);
-  const itemById = new Map(items.map((item) => [item.student.id, item]));
-  const visibleQueue = [...reorderedVisibleIds];
-
-  return items.map((item) => {
-    if (isVisible(item)) {
-      const nextId = visibleQueue.shift();
-
-      if (!nextId) {
-        return item;
-      }
-
-      const nextItem = itemById.get(nextId);
-
-      if (!nextItem) {
-        return item;
-      }
-
-      return nextItem;
-    }
-
-    return item;
-  });
+  return arrayMove(items, oldIndex, newIndex);
 }
 
 type SortableRosterItemProps = {
@@ -133,12 +102,7 @@ export function RosterItemsGrid({
   updateRosterItem,
   onRemove,
   onReorder,
-  isReleasedOnServer,
 }: RosterItemsGridProps) {
-  const visibleItems = items.filter((item) =>
-    isReleasedOnServer(item.student, gameServer),
-  );
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -156,17 +120,11 @@ export function RosterItemsGrid({
     }
 
     onReorder(
-      reorderVisibleRosterItems(
-        items,
-        active.id as string,
-        over.id as string,
-        gameServer,
-        isReleasedOnServer,
-      ),
+      reorderRosterItems(items, active.id as string, over.id as string),
     );
   }
 
-  const sortableIds = visibleItems.map((item) => item.student.id);
+  const sortableIds = items.map((item) => item.student.id);
 
   return (
     <DndContext
@@ -176,7 +134,7 @@ export function RosterItemsGrid({
     >
       <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {visibleItems.map((rosterItem) => (
+          {items.map((rosterItem) => (
             <SortableRosterItem
               key={rosterItem.student.id}
               rosterItem={rosterItem}
