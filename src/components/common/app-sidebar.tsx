@@ -35,6 +35,7 @@ import {
   GemIcon,
   Grid2x2Icon,
   HeartIcon,
+  IdCardIcon,
   ListOrderedIcon,
   LogIn,
   MessageCircleHeartIcon,
@@ -220,6 +221,11 @@ export function AppSidebar() {
         type: "formation",
         viewAllHref: "/user/formations",
       },
+    },
+    {
+      href: "/user/rosters",
+      text: t("common.header.nav.misc.roster"),
+      icon: IdCardIcon,
     },
     {
       href: "/title-generator",

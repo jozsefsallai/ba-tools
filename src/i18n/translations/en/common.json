@@ -60,6 +60,7 @@
       "misc": {
         "title": "Misc Tools",
         "formationDisplay": "Formation Display",
+        "roster": "My Roster",
         "titleGenerator": "Title Generator",
         "gachaRateStats": "Gacha Rate Stats",
         "scenarioImageGenerator": "Scenario Image Generator",

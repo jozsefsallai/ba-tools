@@ -7,6 +7,7 @@ import {
   GemIcon,
   Grid2X2Icon,
   HeartIcon,
+  IdCardIcon,
   ListOrderedIcon,
   RectangleEllipsisIcon,
   TrainTrackIcon,
@@ -65,6 +66,13 @@ export async function ToolsAndResources() {
       path: "/formation-display",
       icon: <UsersIcon className="size-10 text-orange-500 shrink-0" />,
       description: t("static.home.toollist.formationDisplay.description"),
+    },
+    {
+      name: t("static.home.toollist.roster.title"),
+      path: "/user/rosters",
+      icon: <IdCardIcon className="size-10 text-teal-500 shrink-0" />,
+      description: t("static.home.toollist.roster.description"),
+      isNew: true,
     },
     {
       name: t("static.home.toollist.titleGenerator.title"),

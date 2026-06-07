@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useSidebar } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { revalidateRosterPublicCache } from "@/lib/cache";
@@ -87,6 +88,7 @@ function createRosterItem(
 export function RosterEditor({ rosterId }: RosterEditorProps) {
   const t = useTranslations();
   const { students } = useStudents();
+  const { state: sidebarState, isMobile } = useSidebar();
 
   const query = useQueryWithStatus(api.roster.getOwnById, {
     id: rosterId,
@@ -500,8 +502,24 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent z-50 p-4 pt-8 flex justify-center">
-        <Button onClick={handleWantsToUpdate} disabled={isSaving}>
+      <div
+        className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-gradient-to-t from-black/70 to-transparent p-4 pt-8 transition-[left] duration-200 ease-linear"
+        style={
+          isMobile
+            ? undefined
+            : {
+                left:
+                  sidebarState === "collapsed"
+                    ? "var(--sidebar-width-icon)"
+                    : "var(--sidebar-width)",
+              }
+        }
+      >
+        <Button
+          className="pointer-events-auto"
+          onClick={handleWantsToUpdate}
+          disabled={isSaving}
+        >
           <SaveIcon />
           {isSaving ? t("common.saving") : t("common.saveChanges")}
         </Button>

@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useMemo } from "react";
 import { useQuery } from "convex/react";
+import { useTranslations } from "next-intl";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -56,6 +56,15 @@ function usePageBreadcrumbs(): BreadcrumbInfo | null {
         label: t("common.header.nav.misc.formationDisplay"),
         group: t("common.header.nav.misc.title"),
       },
+      "/user/rosters": {
+        label: t("common.header.nav.misc.roster"),
+        group: t("common.header.nav.misc.title"),
+      },
+      "/rosters/": {
+        label: t("common.header.nav.misc.roster"),
+        group: t("common.header.nav.misc.title"),
+        href: "/user/rosters",
+      },
       "/title-generator": {
         label: t("common.header.nav.misc.titleGenerator"),
         group: t("common.header.nav.misc.title"),
@@ -88,7 +97,6 @@ function usePageBreadcrumbs(): BreadcrumbInfo | null {
       },
       "/user/formations": { label: "My Formations" },
       "/user/timelines": { label: "My Timelines" },
-      "/user/rosters": { label: "My Rosters" },
       "/pvp": { label: "PvP" },
       "/credits": { label: "Credits" },
       "/changelog": { label: "Changelog" },

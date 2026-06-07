@@ -30,6 +30,10 @@
         "title": "Formation Display",
         "description": "Display a formation of students in a design that's similar to what you'd see in-game. Useful for YouTube thumbnails or spreadsheets."
       },
+      "roster": {
+        "title": "My Roster",
+        "description": "Build and share your Blue Archive student roster with levels, skills, equipment, and featured borrow slots."
+      },
       "titleGenerator": {
         "title": "Title Generator",
         "description": "Generate fully rendered user titles for boss completions, relationship rank, talent levels, school clubs, as well as generic titles with custom text."

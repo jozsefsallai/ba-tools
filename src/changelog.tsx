@@ -24,6 +24,7 @@ export const CHANGELOG_SCOPES = {
   docs: "Documentation",
   mcp: "MCP Server",
   birthdays: "Student Birthdays",
+  roster: "My Roster",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -41,6 +42,26 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "June 7, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description: (
+          <>
+            Added{" "}
+            <Link href="/user/rosters" className="font-semibold underline">
+              My Roster
+            </Link>{" "}
+            tool. You can use this tool to create and manage your rosters which
+            you can share publicly. This tool requires an account.
+          </>
+        ),
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
   {
     date: "June 6, 2026",
     features: [

@@ -61,6 +61,7 @@
       "misc": {
         "title": "その他",
         "formationDisplay": "編成表示",
+        "roster": "マイロスター",
         "titleGenerator": "称号ジェネレーター",
         "gachaRateStats": "ガチャ確率統計",
         "scenarioImageGenerator": "シナリオ画像メーカー",
