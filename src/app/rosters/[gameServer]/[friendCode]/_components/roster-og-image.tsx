@@ -38,13 +38,13 @@ function normalizeIntroduction(introduction?: string): string | undefined {
     return undefined;
   }
 
-  const firstLine = introduction.split("\n")[0].trim();
+  const joinedLines = introduction.split("\n").join(" ").trim();
 
-  if (firstLine.length > 100) {
-    return `${firstLine.slice(0, 97)}...`;
+  if (joinedLines.length > 100) {
+    return `${joinedLines.slice(0, 97)}...`;
   }
 
-  return firstLine;
+  return joinedLines;
 }
 
 export function RosterOgImage({
