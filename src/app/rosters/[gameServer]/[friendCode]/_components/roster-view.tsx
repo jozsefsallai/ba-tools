@@ -486,24 +486,24 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-4">
+    <div className="flex min-w-0 max-w-full flex-col gap-10">
+      <div className="flex min-w-0 flex-col gap-4">
+        <div className="flex min-w-0 flex-col items-start gap-4 sm:flex-row">
           {studentRep && (
             <img
               src={buildStudentPortraitUrl(studentRep)}
               alt={studentRep.name}
-              className="w-32 shrink-0"
+              className="w-20 shrink-0 sm:w-32"
             />
           )}
 
-          <div className="flex-1 flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-bold font-nexon-football-gothic italic">
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
+            <div className="flex min-w-0 flex-col gap-2">
+              <h1 className="text-2xl font-bold font-nexon-football-gothic italic break-words sm:text-3xl">
                 {query.data.name ?? query.data.friendCode}
               </h1>
 
-              <div className="flex gap-2 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
                 <Badge
                   className="cursor-pointer"
                   onClick={copyFriendCodeToClipboard}
@@ -521,7 +521,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
             </div>
 
             {query.data.introduction && (
-              <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">
+              <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none break-words">
                 <MarkdownRenderer>{query.data.introduction}</MarkdownRenderer>
               </div>
             )}
@@ -540,11 +540,11 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
       <Separator />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex min-w-0 flex-col gap-6">
         <h2 className="text-2xl font-bold">{t("tools.roster.title")}</h2>
 
-        <Card className="py-0">
-          <CardContent>
+        <Card className="min-w-0 py-0">
+          <CardContent className="px-4 sm:px-6">
             <Accordion type="multiple">
               <AccordionItem value="filters">
                 <AccordionTrigger>
@@ -560,7 +560,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       placeholder={t("tools.roster.view.searchByName")}
                     />
 
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                       <div className="flex flex-col gap-1">
                         <Label className="text-xs">
                           {t("tools.roster.view.minStarLevel")}
@@ -683,7 +683,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                       <div className="flex flex-col gap-1">
                         <Label className="text-xs">
                           {t("tools.roster.view.minAttackTalent")}
@@ -736,7 +736,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                       <div className="flex flex-col gap-1">
                         <Label className="text-xs">
                           {t("tools.roster.view.minGear1Tier")}
@@ -877,7 +877,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
         <Separator />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
+        <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4">
           {sortedAndFilteredRosterStudents.map((item) => (
             <RosterItem key={item.studentId} item={item} />
           ))}

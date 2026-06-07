@@ -1,19 +1,13 @@
 "use client";
 
+import { RosterBondRank } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-bond-rank";
+import { RosterItemStudentIcon } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-item-student-icon";
+import { RosterStatBadge } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-stat-badge";
+import { RosterStatRow } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-stat-row";
 import type { RosterStudentData } from "@/app/rosters/[gameServer]/[friendCode]/types";
-import { StudentCard } from "@/components/common/student-card";
-
-import bondImage from "@/assets/images/bond.png";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 export type RosterItemProps = {
   item: RosterStudentData;
@@ -27,176 +21,105 @@ export function RosterItem({ item, featured = false }: RosterItemProps) {
     <TooltipProvider>
       <div
         className={cn(
-          "flex items-start gap-4 md:gap-6 rounded-md p-4",
+          "min-w-0 max-w-full rounded-md p-3 md:px-4 md:py-5",
           featured
             ? "border-primary ring-1 ring-primary/30 bg-primary/5 shadow-sm"
             : "bg-card border",
         )}
       >
-        <div style={{ zoom: featured ? 0.95 : 0.85 }}>
-          <StudentCard
+        <div className="flex min-w-0 items-start gap-3 md:gap-6">
+          <RosterItemStudentIcon
             student={item.student}
             level={item.level}
             starLevel={item.starLevel}
             ueLevel={item.ueLevel}
-            borrowed={featured}
+            featured={featured}
           />
-        </div>
 
-        <div className="flex-1 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <div className="md:text-xl font-bold">
-              {item.student.name.split(" / ")[0]}
-            </div>
-          </div>
+          <div className="relative min-w-0 flex-1 pr-11 md:pr-0">
+            <RosterBondRank rank={item.relationshipRank} variant="inline" />
 
-          <div className="flex items-center gap-2">
-            <div className="text-xs font-semibold">
-              {t("tools.roster.view.skills")}
-            </div>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">{item.ex}</Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>{t("tools.roster.view.exSkill")}</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">{item.basic}</Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>
-                {t("tools.roster.view.basicSkill")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">{item.enhanced}</Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>
-                {t("tools.roster.view.enhancedSkill")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">{item.sub}</Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>{t("tools.roster.view.subskill")}</TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="text-xs font-semibold">
-              {t("tools.roster.view.equipment")}
-            </div>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">
-                  {item.equipmentSlot1 ? `T${item.equipmentSlot1}` : "XX"}
-                </Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>
-                {item.student.equipment[0] ??
-                  t("tools.roster.view.equipmentSlot1")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">
-                  {item.equipmentSlot2 ? `T${item.equipmentSlot2}` : "XX"}
-                </Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>
-                {item.student.equipment[1] ??
-                  t("tools.roster.view.equipmentSlot2")}
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary">
-                  {item.equipmentSlot3 ? `T${item.equipmentSlot3}` : "XX"}
-                </Badge>
-              </TooltipTrigger>
-
-              <TooltipContent>
-                {item.student.equipment[2] ??
-                  t("tools.roster.view.equipmentSlot3")}
-              </TooltipContent>
-            </Tooltip>
-
-            {!!item.equipmentSlot4 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="secondary">T{item.equipmentSlot4}</Badge>
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  {t("tools.roster.view.bondItem")}
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-
-          {!!(item.attackLevel || item.hpLevel || item.healLevel) && (
-            <div className="flex items-center gap-2">
-              <div className="text-xs font-semibold">
-                {t("tools.roster.view.talents")}
+            <div className="flex flex-col gap-1.5 md:gap-3">
+              <div className="min-w-0 text-base font-bold leading-snug break-words sm:text-lg md:text-xl">
+                {item.student.name.split(" / ")[0]}
               </div>
 
-              {!!item.attackLevel && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="secondary">ATK{item.attackLevel}</Badge>
-                  </TooltipTrigger>
+              <RosterStatRow label={t("tools.roster.view.skills")}>
+                <RosterStatBadge label={t("tools.roster.view.exSkill")}>
+                  {item.ex}
+                </RosterStatBadge>
+                <RosterStatBadge label={t("tools.roster.view.basicSkill")}>
+                  {item.basic}
+                </RosterStatBadge>
+                <RosterStatBadge label={t("tools.roster.view.enhancedSkill")}>
+                  {item.enhanced}
+                </RosterStatBadge>
+                <RosterStatBadge label={t("tools.roster.view.subskill")}>
+                  {item.sub}
+                </RosterStatBadge>
+              </RosterStatRow>
 
-                  <TooltipContent>
-                    {t("tools.roster.view.attackTalentLevel")}
-                  </TooltipContent>
-                </Tooltip>
-              )}
+              <RosterStatRow label={t("tools.roster.view.equipment")}>
+                <RosterStatBadge
+                  label={
+                    item.student.equipment[0] ??
+                    t("tools.roster.view.equipmentSlot1")
+                  }
+                >
+                  {item.equipmentSlot1 ? `T${item.equipmentSlot1}` : "XX"}
+                </RosterStatBadge>
+                <RosterStatBadge
+                  label={
+                    item.student.equipment[1] ??
+                    t("tools.roster.view.equipmentSlot2")
+                  }
+                >
+                  {item.equipmentSlot2 ? `T${item.equipmentSlot2}` : "XX"}
+                </RosterStatBadge>
+                <RosterStatBadge
+                  label={
+                    item.student.equipment[2] ??
+                    t("tools.roster.view.equipmentSlot3")
+                  }
+                >
+                  {item.equipmentSlot3 ? `T${item.equipmentSlot3}` : "XX"}
+                </RosterStatBadge>
+                {!!item.equipmentSlot4 && (
+                  <RosterStatBadge label={t("tools.roster.view.bondItem")}>
+                    T{item.equipmentSlot4}
+                  </RosterStatBadge>
+                )}
+              </RosterStatRow>
 
-              {!!item.hpLevel && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="secondary">HP{item.hpLevel}</Badge>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    {t("tools.roster.view.hpTalentLevel")}
-                  </TooltipContent>
-                </Tooltip>
-              )}
-
-              {!!item.healLevel && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="secondary">HEAL{item.healLevel}</Badge>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    {t("tools.roster.view.healTalentLevel")}
-                  </TooltipContent>
-                </Tooltip>
+              {!!(item.attackLevel || item.hpLevel || item.healLevel) && (
+                <RosterStatRow label={t("tools.roster.view.talents")}>
+                  {!!item.attackLevel && (
+                    <RosterStatBadge
+                      label={t("tools.roster.view.attackTalentLevel")}
+                    >
+                      ATK{item.attackLevel}
+                    </RosterStatBadge>
+                  )}
+                  {!!item.hpLevel && (
+                    <RosterStatBadge
+                      label={t("tools.roster.view.hpTalentLevel")}
+                    >
+                      HP{item.hpLevel}
+                    </RosterStatBadge>
+                  )}
+                  {!!item.healLevel && (
+                    <RosterStatBadge
+                      label={t("tools.roster.view.healTalentLevel")}
+                    >
+                      HEAL{item.healLevel}
+                    </RosterStatBadge>
+                  )}
+                </RosterStatRow>
               )}
             </div>
-          )}
-        </div>
+          </div>
 
-        <div className="flex flex-col items-center border rounded-md p-2">
-          <Image src={bondImage} alt="🩷" className="size-4" />
-          <span className="text-sm font-semibold">{item.relationshipRank}</span>
+          <RosterBondRank rank={item.relationshipRank} variant="column" />
         </div>
       </div>
     </TooltipProvider>
