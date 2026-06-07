@@ -1,17 +1,18 @@
 "use client";
 
+import { FeaturedBorrowSections } from "@/app/rosters/[gameServer]/[friendCode]/_components/featured-borrow-sections";
 import { RosterItem } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-item";
 import type {
-  RosterStudentsSortOption,
   RosterStudentData,
+  RosterStudentsSortOption,
 } from "@/app/rosters/[gameServer]/[friendCode]/types";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,18 +29,18 @@ import { Separator } from "@/components/ui/separator";
 import { useStudents } from "@/hooks/use-students";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
-  GAME_SERVER_NAMES,
-  type StarLevel,
-  type UELevel,
-  type GameServer,
-  type Student,
   type BorrowSlotGameMode,
+  GAME_SERVER_NAMES,
+  type GameServer,
+  type StarLevel,
+  type Student,
+  type UELevel,
 } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { format } from "date-fns";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 
@@ -535,6 +536,8 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
         </div>
       </div>
 
+      <FeaturedBorrowSections featuredStudents={featuredStudents} />
+
       <Separator />
 
       <div className="flex flex-col gap-6">
@@ -544,7 +547,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
           <CardContent>
             <Accordion type="multiple">
               <AccordionItem value="filters">
-                <AccordionTrigger>{t("tools.roster.view.filters")}</AccordionTrigger>
+                <AccordionTrigger>
+                  {t("tools.roster.view.filters")}
+                </AccordionTrigger>
 
                 <AccordionContent className="pt-2 pb-6">
                   <div className="flex flex-col gap-4">
@@ -557,7 +562,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
                     <div className="grid grid-cols-5 gap-2">
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minStarLevel")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minStarLevel")}
+                        </Label>
 
                         <Select
                           value={minStarLevel?.toString() ?? ""}
@@ -570,7 +577,11 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           }
                         >
                           <SelectTrigger className="w-full">
-                            {minStarLevel ? <SelectValue /> : t("tools.roster.view.any")}
+                            {minStarLevel ? (
+                              <SelectValue />
+                            ) : (
+                              t("tools.roster.view.any")
+                            )}
                           </SelectTrigger>
 
                           <SelectContent>
@@ -584,7 +595,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minUELevel")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minUELevel")}
+                        </Label>
 
                         <Select
                           value={minUELevel?.toString() ?? ""}
@@ -597,11 +610,17 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                           }
                         >
                           <SelectTrigger className="w-full h-auto">
-                            {minUELevel ? <SelectValue /> : t("tools.roster.view.any")}
+                            {minUELevel ? (
+                              <SelectValue />
+                            ) : (
+                              t("tools.roster.view.any")
+                            )}
                           </SelectTrigger>
 
                           <SelectContent>
-                            <SelectItem value="_">{t("tools.roster.view.any")}</SelectItem>
+                            <SelectItem value="_">
+                              {t("tools.roster.view.any")}
+                            </SelectItem>
                             <SelectItem value="1">1</SelectItem>
                             <SelectItem value="2">2</SelectItem>
                             <SelectItem value="3">3</SelectItem>
@@ -611,7 +630,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minLevel")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minLevel")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -626,7 +647,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.maxLevel")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.maxLevel")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -662,7 +685,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
                     <div className="grid grid-cols-5 gap-2">
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minAttackTalent")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minAttackTalent")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -677,7 +702,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minHPTalent")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minHPTalent")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -692,7 +719,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minHealingTalent")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minHealingTalent")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -709,7 +738,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
                     <div className="grid grid-cols-5 gap-2">
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minGear1Tier")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minGear1Tier")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -724,7 +755,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minGear2Tier")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minGear2Tier")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -739,7 +772,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minGear3Tier")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minGear3Tier")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -754,7 +789,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                       </div>
 
                       <div className="flex flex-col gap-1">
-                        <Label className="text-xs">{t("tools.roster.view.minBondGearTier")}</Label>
+                        <Label className="text-xs">
+                          {t("tools.roster.view.minBondGearTier")}
+                        </Label>
 
                         <Input
                           type="number"
@@ -773,7 +810,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
               </AccordionItem>
 
               <AccordionItem value="sort">
-                <AccordionTrigger>{t("tools.roster.view.sort")}</AccordionTrigger>
+                <AccordionTrigger>
+                  {t("tools.roster.view.sort")}
+                </AccordionTrigger>
 
                 <AccordionContent className="pt-2 pb-6">
                   <Select
@@ -787,16 +826,28 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value="default">{t("tools.roster.view.sortOptions.default")}</SelectItem>
-                      <SelectItem value="nameAsc">{t("tools.roster.view.sortOptions.nameAsc")}</SelectItem>
-                      <SelectItem value="nameDesc">{t("tools.roster.view.sortOptions.nameDesc")}</SelectItem>
-                      <SelectItem value="levelAsc">{t("tools.roster.view.sortOptions.levelAsc")}</SelectItem>
-                      <SelectItem value="levelDesc">{t("tools.roster.view.sortOptions.levelDesc")}</SelectItem>
+                      <SelectItem value="default">
+                        {t("tools.roster.view.sortOptions.default")}
+                      </SelectItem>
+                      <SelectItem value="nameAsc">
+                        {t("tools.roster.view.sortOptions.nameAsc")}
+                      </SelectItem>
+                      <SelectItem value="nameDesc">
+                        {t("tools.roster.view.sortOptions.nameDesc")}
+                      </SelectItem>
+                      <SelectItem value="levelAsc">
+                        {t("tools.roster.view.sortOptions.levelAsc")}
+                      </SelectItem>
+                      <SelectItem value="levelDesc">
+                        {t("tools.roster.view.sortOptions.levelDesc")}
+                      </SelectItem>
                       <SelectItem value="relationshipRankAsc">
                         {t("tools.roster.view.sortOptions.relationshipRankAsc")}
                       </SelectItem>
                       <SelectItem value="relationshipRankDesc">
-                        {t("tools.roster.view.sortOptions.relationshipRankDesc")}
+                        {t(
+                          "tools.roster.view.sortOptions.relationshipRankDesc",
+                        )}
                       </SelectItem>
                       <SelectItem value="atkTalentAsc">
                         {t("tools.roster.view.sortOptions.atkTalentAsc")}
@@ -826,7 +877,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
         <Separator />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
           {sortedAndFilteredRosterStudents.map((item) => (
             <RosterItem key={item.studentId} item={item} />
           ))}

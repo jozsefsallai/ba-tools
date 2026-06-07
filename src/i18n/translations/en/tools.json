@@ -857,8 +857,13 @@
       "hiddenNotReleased": "{count, plural, one {# student hidden (not released on this server)} other {# students hidden (not released on this server)}}",
       "toasts": {
         "success": "Roster updated successfully!",
-        "fail": "Failed to update roster. Please try again."
-      }
+        "fail": "Failed to update roster. Please try again.",
+        "shareLinkCopied": "Share link copied to clipboard!",
+        "shareLinkCopyFailed": "Failed to copy share link."
+      },
+      "openPublicPage": "Open public roster page",
+      "copyShareLink": "Copy share link",
+      "shareLinkCopied": "Copied!"
     },
 
     "view": {
@@ -896,6 +901,16 @@
       "attackTalentLevel": "Attack Talent Level",
       "hpTalentLevel": "HP Talent Level",
       "healTalentLevel": "Heal Talent Level",
+
+      "featuredBorrow": {
+        "title": "Featured Borrow Students",
+        "modes": {
+          "raid": "Total Assault, Grand Assault, Allied Operation",
+          "jfd": "Joint Firing Drill",
+          "conquest": "Conquest",
+          "tower": "Final Restriction Release"
+        }
+      },
 
       "sortOptions": {
         "default": "Default",

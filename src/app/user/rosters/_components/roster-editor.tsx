@@ -27,8 +27,11 @@ import {
 } from "@/lib/types";
 import { useMutation } from "convex/react";
 import {
+  CheckIcon,
   ChevronDownIcon,
   ChevronsUpDownIcon,
+  CopyIcon,
+  ExternalLinkIcon,
   SaveIcon,
   XIcon,
 } from "lucide-react";
@@ -98,6 +101,19 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   const [gameServer, setGameServer] = useState<GameServer>("JP");
   const [friendCode, setFriendCode] = useState("");
   const [rosterItems, setRosterItems] = useState<RosterItem[]>([]);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+
+  const publicRosterPath = useMemo(() => {
+    const code = friendCode.trim();
+
+    if (!code) {
+      return null;
+    }
+
+    return `/rosters/${gameServer}/${code}`;
+  }, [gameServer, friendCode]);
+
+  const canCopyShareLink = publicRosterPath !== null && visibility === "public";
 
   const updateRosterItem = useCallback(
     (studentId: string, updatedItem: Partial<RosterItem>) => {
@@ -188,6 +204,26 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   }, [students, rosterId, query.status, query.data]);
 
   const updateMutation = useMutation(api.roster.update);
+
+  async function handleCopyShareLink() {
+    if (!canCopyShareLink || !publicRosterPath || copiedShareLink) {
+      return;
+    }
+
+    try {
+      const url = new URL(publicRosterPath, window.location.origin).toString();
+      await navigator.clipboard.writeText(url);
+      setCopiedShareLink(true);
+      toast.success(t("tools.roster.editor.toasts.shareLinkCopied"));
+
+      setTimeout(() => {
+        setCopiedShareLink(false);
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      toast.error(t("tools.roster.editor.toasts.shareLinkCopyFailed"));
+    }
+  }
 
   async function handleWantsToUpdate() {
     if (isSaving) {
@@ -376,6 +412,32 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
             onChange={(e) => setFriendCode(e.target.value)}
             placeholder="ABCDEFGH"
           />
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            disabled={!publicRosterPath}
+            onClick={() => {
+              if (publicRosterPath) {
+                window.open(publicRosterPath, "_blank", "noopener,noreferrer");
+              }
+            }}
+          >
+            <ExternalLinkIcon />
+            {t("tools.roster.editor.openPublicPage")}
+          </Button>
+
+          <Button
+            variant="outline"
+            disabled={!canCopyShareLink}
+            onClick={handleCopyShareLink}
+          >
+            {copiedShareLink ? <CheckIcon /> : <CopyIcon />}
+            {copiedShareLink
+              ? t("tools.roster.editor.shareLinkCopied")
+              : t("tools.roster.editor.copyShareLink")}
+          </Button>
         </div>
       </div>
 

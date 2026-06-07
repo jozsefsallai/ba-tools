@@ -730,8 +730,13 @@
       "hiddenNotReleased": "{count, plural, other {このサーバー未実装の生徒が # 人非表示}}",
       "toasts": {
         "success": "ロスターを更新したよ！",
-        "fail": "ロスターの更新に失敗したよ。もう一度試してみてね。"
-      }
+        "fail": "ロスターの更新に失敗したよ。もう一度試してみてね。",
+        "shareLinkCopied": "共有リンクをクリップボードにコピーしたよ！",
+        "shareLinkCopyFailed": "共有リンクのコピーに失敗したよ。"
+      },
+      "openPublicPage": "公開ロスターページを開く",
+      "copyShareLink": "共有リンクをコピー",
+      "shareLinkCopied": "コピーしたよ！"
     },
     "view": {
       "loadingRoster": "ロスターを読み込み中...",
@@ -767,6 +772,15 @@
       "attackTalentLevel": "攻撃力 強化レベル",
       "hpTalentLevel": "最大HP 強化レベル",
       "healTalentLevel": "治癒力 強化レベル",
+      "featuredBorrow": {
+        "title": "おすすめ助っ人",
+        "modes": {
+          "raid": "総力戦・大決戦・合同戦",
+          "jfd": "合同火力演習",
+          "conquest": "領域解放",
+          "tower": "制約解除決戦"
+        }
+      },
       "sortOptions": {
         "default": "デフォルト",
         "nameAsc": "名前（昇順）",

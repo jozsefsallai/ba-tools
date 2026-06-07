@@ -4,32 +4,42 @@ import type { RosterStudentData } from "@/app/rosters/[gameServer]/[friendCode]/
 import { StudentCard } from "@/components/common/student-card";
 
 import bondImage from "@/assets/images/bond.png";
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 export type RosterItemProps = {
   item: RosterStudentData;
+  featured?: boolean;
 };
 
-export function RosterItem({ item }: RosterItemProps) {
+export function RosterItem({ item, featured = false }: RosterItemProps) {
   const t = useTranslations();
 
   return (
     <TooltipProvider>
-      <div className="flex items-start gap-4 md:gap-6 bg-card border rounded-md p-4">
-        <div style={{ zoom: 0.85 }}>
+      <div
+        className={cn(
+          "flex items-start gap-4 md:gap-6 rounded-md p-4",
+          featured
+            ? "border-primary ring-1 ring-primary/30 bg-primary/5 shadow-sm"
+            : "bg-card border",
+        )}
+      >
+        <div style={{ zoom: featured ? 0.95 : 0.85 }}>
           <StudentCard
             student={item.student}
             level={item.level}
             starLevel={item.starLevel}
             ueLevel={item.ueLevel}
+            borrowed={featured}
           />
         </div>
 

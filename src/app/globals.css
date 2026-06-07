@@ -166,6 +166,8 @@
   --color-type-blue: #226f9c;
   --color-type-purple: #794394;
   --color-type-green: #11736b;
+
+  --breakpoint-3xl: 120rem;
 }
 
 @layer base {
