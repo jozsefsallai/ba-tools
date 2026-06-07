@@ -4,6 +4,7 @@ import {
   type RosterItem,
   RosterItemEditor,
 } from "@/app/user/rosters/_components/roster-item-editor";
+import { useGridColumnCount } from "@/hooks/use-grid-column-count";
 import type { GameServer } from "@/lib/types";
 import {
   DndContext,
@@ -22,6 +23,8 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { memo, useCallback, useMemo } from "react";
+import { WindowVirtualizer } from "virtua";
 
 export type RosterItemsGridProps = {
   items: RosterItem[];
@@ -49,6 +52,16 @@ function reorderRosterItems(
   return arrayMove(items, oldIndex, newIndex);
 }
 
+function chunkItems<T>(items: T[], size: number): T[][] {
+  const rows: T[][] = [];
+
+  for (let index = 0; index < items.length; index += size) {
+    rows.push(items.slice(index, index + size));
+  }
+
+  return rows;
+}
+
 type SortableRosterItemProps = {
   rosterItem: RosterItem;
   gameServer: GameServer;
@@ -59,7 +72,7 @@ type SortableRosterItemProps = {
   onRemove: (studentId: string) => void;
 };
 
-function SortableRosterItem({
+const SortableRosterItem = memo(function SortableRosterItem({
   rosterItem,
   gameServer,
   updateRosterItem,
@@ -94,15 +107,48 @@ function SortableRosterItem({
       />
     </div>
   );
-}
+});
 
-export function RosterItemsGrid({
+type RosterItemRowProps = {
+  row: RosterItem[];
+  gameServer: GameServer;
+  updateRosterItem: (
+    studentId: string,
+    updatedItem: Partial<RosterItem>,
+  ) => void;
+  onRemove: (studentId: string) => void;
+};
+
+const RosterItemRow = memo(function RosterItemRow({
+  row,
+  gameServer,
+  updateRosterItem,
+  onRemove,
+}: RosterItemRowProps) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+      {row.map((rosterItem) => (
+        <SortableRosterItem
+          key={rosterItem.student.id}
+          rosterItem={rosterItem}
+          gameServer={gameServer}
+          updateRosterItem={updateRosterItem}
+          onRemove={onRemove}
+        />
+      ))}
+    </div>
+  );
+});
+
+export const RosterItemsGrid = memo(function RosterItemsGrid({
   items,
   gameServer,
   updateRosterItem,
   onRemove,
   onReorder,
 }: RosterItemsGridProps) {
+  const columnCount = useGridColumnCount();
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -114,17 +160,28 @@ export function RosterItemsGrid({
     }),
   );
 
-  function handleDragEnd({ active, over }: DragEndEvent) {
-    if (!over || active.id === over.id) {
-      return;
-    }
+  const handleDragEnd = useCallback(
+    ({ active, over }: DragEndEvent) => {
+      if (!over || active.id === over.id) {
+        return;
+      }
 
-    onReorder(
-      reorderRosterItems(items, active.id as string, over.id as string),
-    );
-  }
+      onReorder(
+        reorderRosterItems(items, active.id as string, over.id as string),
+      );
+    },
+    [items, onReorder],
+  );
 
-  const sortableIds = items.map((item) => item.student.id);
+  const sortableIds = useMemo(
+    () => items.map((item) => item.student.id),
+    [items],
+  );
+
+  const itemRows = useMemo(
+    () => chunkItems(items, columnCount),
+    [items, columnCount],
+  );
 
   return (
     <DndContext
@@ -133,18 +190,18 @@ export function RosterItemsGrid({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((rosterItem) => (
-            <SortableRosterItem
-              key={rosterItem.student.id}
-              rosterItem={rosterItem}
+        <WindowVirtualizer>
+          {itemRows.map((row) => (
+            <RosterItemRow
+              key={row.map((item) => item.student.id).join("-")}
+              row={row}
               gameServer={gameServer}
               updateRosterItem={updateRosterItem}
               onRemove={onRemove}
             />
           ))}
-        </div>
+        </WindowVirtualizer>
       </SortableContext>
     </DndContext>
   );
-}
+});

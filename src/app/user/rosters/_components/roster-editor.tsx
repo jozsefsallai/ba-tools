@@ -38,7 +38,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
@@ -72,6 +72,268 @@ function createRosterItem(
     featuredBorrowSlot: savedItem?.featuredBorrowSlot ?? null,
   };
 }
+
+type RosterEditorDetailsProps = {
+  name: string;
+  setName: (value: string) => void;
+  introduction: string;
+  setIntroduction: (value: string) => void;
+  visibility: "private" | "public";
+  setVisibility: (value: "private" | "public") => void;
+  accountLevel: number;
+  setAccountLevel: (value: number) => void;
+  studentRep: Student | null;
+  setStudentRep: (value: Student | null) => void;
+  gameServer: GameServer;
+  setGameServer: (value: GameServer) => void;
+  friendCode: string;
+  setFriendCode: (value: string) => void;
+  publicRosterPath: string | null;
+  canCopyShareLink: boolean;
+  copiedShareLink: boolean;
+  onCopyShareLink: () => void;
+};
+
+const RosterEditorDetails = memo(function RosterEditorDetails({
+  name,
+  setName,
+  introduction,
+  setIntroduction,
+  visibility,
+  setVisibility,
+  accountLevel,
+  setAccountLevel,
+  studentRep,
+  setStudentRep,
+  gameServer,
+  setGameServer,
+  friendCode,
+  setFriendCode,
+  publicRosterPath,
+  canCopyShareLink,
+  copiedShareLink,
+  onCopyShareLink,
+}: RosterEditorDetailsProps) {
+  const t = useTranslations();
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h2 className="text-lg font-bold">{t("tools.roster.editor.title")}</h2>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="name">
+          {t("common.inGameNickname")}{" "}
+          <small className="text-muted-foreground text-xs">
+            {t("common.optional")}
+          </small>
+        </Label>
+
+        <Input
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Joe"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="introduction">
+          {t("common.introduction")}
+          <small className="text-muted-foreground text-xs">
+            {t("common.optionalSupportsMarkdown")}
+          </small>
+        </Label>
+
+        <Textarea
+          id="introduction"
+          value={introduction}
+          onChange={(e) => setIntroduction(e.target.value)}
+          placeholder="Hello."
+          className="resize-none min-h-24"
+        />
+
+        <MarkdownTips />
+      </div>
+
+      <div className="flex gap-2 items-center">
+        <Label className="shrink-0">{t("common.visibility")}</Label>
+
+        <Select
+          value={visibility}
+          onValueChange={(val) => setVisibility(val as "public" | "private")}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="private">{t("common.private")}</SelectItem>
+            <SelectItem value="public">{t("common.public")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="accountLevel">{t("common.accountLevel")}</Label>
+
+        <Input
+          id="accountLevel"
+          type="number"
+          min={1}
+          max={90}
+          value={accountLevel}
+          onChange={(e) => setAccountLevel(Number(e.target.value))}
+          placeholder="1"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <Label className="shrink-0" htmlFor="studentRep">
+          {t("common.studentRep")}
+        </Label>
+
+        <div>
+          <StudentPicker
+            onStudentSelected={(student) => setStudentRep(student)}
+            className="w-[200px] md:w-[350px]"
+          >
+            <Button variant="outline">
+              {studentRep ? studentRep.name : t("common.selectStudent")}
+              <ChevronDownIcon />
+            </Button>
+          </StudentPicker>
+        </div>
+
+        {studentRep && (
+          <Button variant="outline" onClick={() => setStudentRep(null)}>
+            <XIcon />
+          </Button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="gameServer">{t("common.gameServer")}</Label>
+
+        <Select
+          value={gameServer}
+          onValueChange={(val) => setGameServer(val as GameServer)}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {GAME_SERVERS.map((server) => (
+              <SelectItem key={server} value={server}>
+                {GAME_SERVER_NAMES[server]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="friendCode">{t("common.friendCode")}</Label>
+
+        <Input
+          id="friendCode"
+          value={friendCode}
+          onChange={(e) => setFriendCode(e.target.value)}
+          placeholder="ABCDEFGH"
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          disabled={!publicRosterPath}
+          onClick={() => {
+            if (publicRosterPath) {
+              window.open(publicRosterPath, "_blank", "noopener,noreferrer");
+            }
+          }}
+        >
+          <ExternalLinkIcon />
+          {t("tools.roster.editor.openPublicPage")}
+        </Button>
+
+        <Button
+          variant="outline"
+          disabled={!canCopyShareLink}
+          onClick={onCopyShareLink}
+        >
+          {copiedShareLink ? <CheckIcon /> : <CopyIcon />}
+          {copiedShareLink
+            ? t("tools.roster.editor.shareLinkCopied")
+            : t("tools.roster.editor.copyShareLink")}
+        </Button>
+      </div>
+    </div>
+  );
+});
+
+type RosterStudentsPanelProps = {
+  rosterItems: RosterItem[];
+  gameServer: GameServer;
+  addableStudents: Student[];
+  addStudent: (student: Student) => void;
+  updateRosterItem: (
+    studentId: string,
+    updatedItem: Partial<RosterItem>,
+  ) => void;
+  removeStudent: (studentId: string) => void;
+  reorderRosterItems: (items: RosterItem[]) => void;
+};
+
+const RosterStudentsPanel = memo(function RosterStudentsPanel({
+  rosterItems,
+  gameServer,
+  addableStudents,
+  addStudent,
+  updateRosterItem,
+  removeStudent,
+  reorderRosterItems,
+}: RosterStudentsPanelProps) {
+  const t = useTranslations();
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg font-bold">{t("tools.roster.title")}</h2>
+
+        <StudentPicker
+          students={addableStudents}
+          onStudentSelected={addStudent}
+          className="w-[200px] md:w-[250px]"
+        >
+          <Button
+            variant="outline"
+            className="w-[200px] md:w-[250px] justify-between"
+          >
+            {t("tools.roster.editor.addStudent")}
+            <ChevronsUpDownIcon />
+          </Button>
+        </StudentPicker>
+      </div>
+
+      {rosterItems.length === 0 ? (
+        <MessageBox>{t("tools.roster.editor.emptyState")}</MessageBox>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground">
+            {t("tools.roster.editor.reorderHint")}
+          </p>
+
+          <RosterItemsGrid
+            items={rosterItems}
+            gameServer={gameServer}
+            updateRosterItem={updateRosterItem}
+            onRemove={removeStudent}
+            onReorder={reorderRosterItems}
+          />
+        </>
+      )}
+    </div>
+  );
+});
 
 export function RosterEditor({ rosterId }: RosterEditorProps) {
   const t = useTranslations();
@@ -185,7 +447,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
   const updateMutation = useMutation(api.roster.update);
 
-  async function handleCopyShareLink() {
+  const handleCopyShareLink = useCallback(async () => {
     if (!canCopyShareLink || !publicRosterPath || copiedShareLink) {
       return;
     }
@@ -203,7 +465,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       console.error(err);
       toast.error(t("tools.roster.editor.toasts.shareLinkCopyFailed"));
     }
-  }
+  }, [canCopyShareLink, publicRosterPath, copiedShareLink, t]);
 
   async function handleWantsToUpdate() {
     if (isSaving) {
@@ -279,196 +541,38 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">{t("tools.roster.editor.title")}</h2>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="name">
-            {t("common.inGameNickname")}{" "}
-            <small className="text-muted-foreground text-xs">
-              {t("common.optional")}
-            </small>
-          </Label>
-
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Joe"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="introduction">
-            {t("common.introduction")}
-            <small className="text-muted-foreground text-xs">
-              {t("common.optionalSupportsMarkdown")}
-            </small>
-          </Label>
-
-          <Textarea
-            id="introduction"
-            value={introduction}
-            onChange={(e) => setIntroduction(e.target.value)}
-            placeholder="Hello."
-            className="resize-none min-h-24"
-          />
-
-          <MarkdownTips />
-        </div>
-
-        <div className="flex gap-2 items-center">
-          <Label className="shrink-0">{t("common.visibility")}</Label>
-
-          <Select
-            value={visibility}
-            onValueChange={(val) => setVisibility(val as "public" | "private")}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="private">{t("common.private")}</SelectItem>
-              <SelectItem value="public">{t("common.public")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="accountLevel">{t("common.accountLevel")}</Label>
-
-          <Input
-            id="accountLevel"
-            type="number"
-            min={1}
-            max={90}
-            value={accountLevel}
-            onChange={(e) => setAccountLevel(Number(e.target.value))}
-            placeholder="1"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <Label className="shrink-0" htmlFor="studentRep">
-            {t("common.studentRep")}
-          </Label>
-
-          <div>
-            <StudentPicker
-              onStudentSelected={(student) => setStudentRep(student)}
-              className="w-[200px] md:w-[350px]"
-            >
-              <Button variant="outline">
-                {studentRep ? studentRep.name : t("common.selectStudent")}
-                <ChevronDownIcon />
-              </Button>
-            </StudentPicker>
-          </div>
-
-          {studentRep && (
-            <Button variant="outline" onClick={() => setStudentRep(null)}>
-              <XIcon />
-            </Button>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="gameServer">{t("common.gameServer")}</Label>
-
-          <Select
-            value={gameServer}
-            onValueChange={(val) => setGameServer(val as GameServer)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {GAME_SERVERS.map((server) => (
-                <SelectItem key={server} value={server}>
-                  {GAME_SERVER_NAMES[server]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="friendCode">{t("common.friendCode")}</Label>
-
-          <Input
-            id="friendCode"
-            value={friendCode}
-            onChange={(e) => setFriendCode(e.target.value)}
-            placeholder="ABCDEFGH"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            disabled={!publicRosterPath}
-            onClick={() => {
-              if (publicRosterPath) {
-                window.open(publicRosterPath, "_blank", "noopener,noreferrer");
-              }
-            }}
-          >
-            <ExternalLinkIcon />
-            {t("tools.roster.editor.openPublicPage")}
-          </Button>
-
-          <Button
-            variant="outline"
-            disabled={!canCopyShareLink}
-            onClick={handleCopyShareLink}
-          >
-            {copiedShareLink ? <CheckIcon /> : <CopyIcon />}
-            {copiedShareLink
-              ? t("tools.roster.editor.shareLinkCopied")
-              : t("tools.roster.editor.copyShareLink")}
-          </Button>
-        </div>
-      </div>
+      <RosterEditorDetails
+        name={name}
+        setName={setName}
+        introduction={introduction}
+        setIntroduction={setIntroduction}
+        visibility={visibility}
+        setVisibility={setVisibility}
+        accountLevel={accountLevel}
+        setAccountLevel={setAccountLevel}
+        studentRep={studentRep}
+        setStudentRep={setStudentRep}
+        gameServer={gameServer}
+        setGameServer={setGameServer}
+        friendCode={friendCode}
+        setFriendCode={setFriendCode}
+        publicRosterPath={publicRosterPath}
+        canCopyShareLink={canCopyShareLink}
+        copiedShareLink={copiedShareLink}
+        onCopyShareLink={handleCopyShareLink}
+      />
 
       <Separator />
 
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold">{t("tools.roster.title")}</h2>
-
-          <StudentPicker
-            students={addableStudents}
-            onStudentSelected={addStudent}
-            className="w-[200px] md:w-[250px]"
-          >
-            <Button
-              variant="outline"
-              className="w-[200px] md:w-[250px] justify-between"
-            >
-              {t("tools.roster.editor.addStudent")}
-              <ChevronsUpDownIcon />
-            </Button>
-          </StudentPicker>
-        </div>
-
-        {rosterItems.length === 0 ? (
-          <MessageBox>{t("tools.roster.editor.emptyState")}</MessageBox>
-        ) : (
-          <>
-            <p className="text-sm text-muted-foreground">
-              {t("tools.roster.editor.reorderHint")}
-            </p>
-
-            <RosterItemsGrid
-              items={rosterItems}
-              gameServer={gameServer}
-              updateRosterItem={updateRosterItem}
-              onRemove={removeStudent}
-              onReorder={reorderRosterItems}
-            />
-          </>
-        )}
-      </div>
+      <RosterStudentsPanel
+        rosterItems={rosterItems}
+        gameServer={gameServer}
+        addableStudents={addableStudents}
+        addStudent={addStudent}
+        updateRosterItem={updateRosterItem}
+        removeStudent={removeStudent}
+        reorderRosterItems={reorderRosterItems}
+      />
 
       <div
         className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-gradient-to-t from-black/70 to-transparent p-4 pt-8 transition-[left] duration-200 ease-linear"

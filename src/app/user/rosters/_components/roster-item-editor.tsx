@@ -55,6 +55,18 @@ export type RosterItemEditorProps = {
   dragHandleProps?: HTMLAttributes<HTMLButtonElement>;
 };
 
+function rosterItemEditorPropsAreEqual(
+  prev: RosterItemEditorProps,
+  next: RosterItemEditorProps,
+): boolean {
+  return (
+    prev.gameServer === next.gameServer &&
+    prev.rosterItem === next.rosterItem &&
+    prev.updateRosterItem === next.updateRosterItem &&
+    prev.onRemove === next.onRemove
+  );
+}
+
 export const RosterItemEditor = React.memo(
   ({
     gameServer,
@@ -643,4 +655,5 @@ export const RosterItemEditor = React.memo(
       </div>
     );
   },
+  rosterItemEditorPropsAreEqual,
 );
