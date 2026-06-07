@@ -36,6 +36,7 @@ export type StudentPickerHandle = {
 
 export type StudentPickerProps = PropsWithChildren<{
   onStudentSelected?: (student: Student) => void | Promise<void>;
+  students?: Student[];
   className?: string;
   placeholder?: string;
   noStudentText?: string;
@@ -70,6 +71,7 @@ function StudentItem({
 export const StudentPicker = React.memo(
   ({
     onStudentSelected,
+    students: studentsProp,
     className,
     placeholder,
     noStudentText,
@@ -78,7 +80,8 @@ export const StudentPicker = React.memo(
   }: StudentPickerProps) => {
     const t = useTranslations();
 
-    const { students } = useStudents();
+    const { students: allStudents } = useStudents();
+    const students = studentsProp ?? allStudents;
 
     const [studentPopoverOpen, setStudentPopoverOpen] = useState(false);
     const [searchInput, setSearchInput] = useState("");

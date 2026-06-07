@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  type RosterItem,
-  RosterItemEditor,
-} from "@/app/user/rosters/_components/roster-item-editor";
+import type { RosterItem } from "@/app/user/rosters/_components/roster-item-editor";
+import { RosterItemsGrid } from "@/app/user/rosters/_components/roster-items-grid";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -22,23 +20,65 @@ import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
-  GAME_SERVER_NAMES,
   GAME_SERVERS,
-  type StarLevel,
+  GAME_SERVER_NAMES,
   type GameServer,
+  type StarLevel,
 } from "@/lib/types";
-import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
-import { ChevronDownIcon, SaveIcon, XIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ChevronsUpDownIcon,
+  SaveIcon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
-import type { Id } from "~convex/dataModel";
+import type { Doc, Id } from "~convex/dataModel";
+import type { Student } from "~prisma";
 
 export type RosterEditorProps = {
   rosterId: Id<"roster">;
 };
+
+function isReleasedOnServer(student: Student, gameServer: GameServer): boolean {
+  if (gameServer === "JP") {
+    return student.isReleasedJP;
+  }
+
+  if (gameServer === "CN") {
+    return student.isReleasedCN;
+  }
+
+  return student.isReleasedGlobal;
+}
+
+function createRosterItem(
+  student: Student,
+  savedItem?: Doc<"roster">["students"][number],
+): RosterItem {
+  return {
+    student,
+    starLevel: savedItem?.starLevel ?? (student.rarity as StarLevel),
+    ueLevel: savedItem?.ueLevel ?? 1,
+    level: savedItem?.level ?? 1,
+    relationshipRank: savedItem?.relationshipRank ?? 1,
+    ex: savedItem?.ex ?? 1,
+    basic: savedItem?.basic ?? 1,
+    enhanced: savedItem?.enhanced ?? 1,
+    sub: savedItem?.sub ?? 1,
+    equipmentSlot1: savedItem?.equipmentSlot1 ?? 0,
+    equipmentSlot2: savedItem?.equipmentSlot2 ?? 0,
+    equipmentSlot3: savedItem?.equipmentSlot3 ?? 0,
+    equipmentSlot4: savedItem?.equipmentSlot4 ?? 0,
+    attackLevel: savedItem?.attackLevel ?? 0,
+    hpLevel: savedItem?.hpLevel ?? 0,
+    healLevel: savedItem?.healLevel ?? 0,
+    featuredBorrowSlot: savedItem?.featuredBorrowSlot ?? null,
+  };
+}
 
 export function RosterEditor({ rosterId }: RosterEditorProps) {
   const t = useTranslations();
@@ -70,17 +110,47 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     [],
   );
 
+  const addStudent = useCallback((student: Student) => {
+    setRosterItems((items) => {
+      if (items.some((item) => item.student.id === student.id)) {
+        return items;
+      }
+
+      return [...items, createRosterItem(student)];
+    });
+  }, []);
+
+  const removeStudent = useCallback((studentId: string) => {
+    setRosterItems((items) =>
+      items.filter((item) => item.student.id !== studentId),
+    );
+  }, []);
+
+  const reorderRosterItems = useCallback((items: RosterItem[]) => {
+    setRosterItems(items);
+  }, []);
+
   const filteredRosterItems = useMemo(() => {
-    if (gameServer === "JP") {
-      return rosterItems.filter((item) => item.student.isReleasedJP);
-    }
-
-    if (gameServer === "CN") {
-      return rosterItems.filter((item) => item.student.isReleasedCN);
-    }
-
-    return rosterItems.filter((item) => item.student.isReleasedGlobal);
+    return rosterItems.filter((item) =>
+      isReleasedOnServer(item.student, gameServer),
+    );
   }, [rosterItems, gameServer]);
+
+  const hiddenNotReleasedCount =
+    rosterItems.length - filteredRosterItems.length;
+
+  const addableStudents = useMemo(() => {
+    const rosterStudentIds = new Set(
+      rosterItems.map((item) => item.student.id),
+    );
+
+    return students.filter(
+      (student) =>
+        student.devName !== "CH0258_02" &&
+        isReleasedOnServer(student, gameServer) &&
+        !rosterStudentIds.has(student.id),
+    );
+  }, [students, rosterItems, gameServer]);
 
   useEffect(() => {
     if (query.status !== "success" || !query.data) {
@@ -103,36 +173,19 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     }
 
     setRosterItems(
-      students
-        .filter((student) => student.devName !== "CH0258_02") // tank b.hoshi
-        .map((student) => {
-          const item = query.data.students.find(
-            (i) => i.studentId === student.id,
-          );
+      query.data.students
+        .map((item) => {
+          const student = students.find((s) => s.id === item.studentId);
 
-          return {
-            enabled: !!item,
-            student,
-            starLevel: item?.starLevel ?? (student.rarity as StarLevel),
-            ueLevel: item?.ueLevel ?? 1,
-            level: item?.level ?? 1,
-            relationshipRank: item?.relationshipRank ?? 1,
-            ex: item?.ex ?? 1,
-            basic: item?.basic ?? 1,
-            enhanced: item?.enhanced ?? 1,
-            sub: item?.sub ?? 1,
-            equipmentSlot1: item?.equipmentSlot1 ?? 0,
-            equipmentSlot2: item?.equipmentSlot2 ?? 0,
-            equipmentSlot3: item?.equipmentSlot3 ?? 0,
-            equipmentSlot4: item?.equipmentSlot4 ?? 0,
-            attackLevel: item?.attackLevel ?? 0,
-            hpLevel: item?.hpLevel ?? 0,
-            healLevel: item?.healLevel ?? 0,
-            featuredBorrowSlot: item?.featuredBorrowSlot ?? null,
-          };
-        }),
+          if (!student || student.devName === "CH0258_02") {
+            return null;
+          }
+
+          return createRosterItem(student, item);
+        })
+        .filter((item): item is RosterItem => item !== null),
     );
-  }, [students, rosterId, query.status]);
+  }, [students, rosterId, query.status, query.data]);
 
   const updateMutation = useMutation(api.roster.update);
 
@@ -145,27 +198,25 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
     const studentRepId = studentRep ? studentRep.id : undefined;
 
-    const students = rosterItems
-      .filter((item) => item.enabled)
-      .map((item) => ({
-        studentId: item.student.id,
-        starLevel: item.starLevel,
-        ueLevel: item.ueLevel ?? undefined,
-        level: item.level,
-        relationshipRank: item.relationshipRank,
-        ex: item.ex,
-        basic: item.basic,
-        enhanced: item.enhanced,
-        sub: item.sub,
-        equipmentSlot1: item.equipmentSlot1,
-        equipmentSlot2: item.equipmentSlot2,
-        equipmentSlot3: item.equipmentSlot3,
-        equipmentSlot4: item.equipmentSlot4,
-        attackLevel: item.attackLevel,
-        hpLevel: item.hpLevel,
-        healLevel: item.healLevel,
-        featuredBorrowSlot: item.featuredBorrowSlot ?? undefined,
-      }));
+    const studentsToSave = rosterItems.map((item) => ({
+      studentId: item.student.id,
+      starLevel: item.starLevel,
+      ueLevel: item.ueLevel ?? undefined,
+      level: item.level,
+      relationshipRank: item.relationshipRank,
+      ex: item.ex,
+      basic: item.basic,
+      enhanced: item.enhanced,
+      sub: item.sub,
+      equipmentSlot1: item.equipmentSlot1,
+      equipmentSlot2: item.equipmentSlot2,
+      equipmentSlot3: item.equipmentSlot3,
+      equipmentSlot4: item.equipmentSlot4,
+      attackLevel: item.attackLevel,
+      hpLevel: item.hpLevel,
+      healLevel: item.healLevel,
+      featuredBorrowSlot: item.featuredBorrowSlot ?? undefined,
+    }));
 
     try {
       await updateMutation({
@@ -177,7 +228,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         studentRepId,
         gameServer,
         friendCode,
-        students,
+        students: studentsToSave,
       });
 
       toast.success(t("tools.roster.editor.toasts.success"));
@@ -330,15 +381,51 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
       <Separator />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredRosterItems.map((rosterItem) => (
-          <RosterItemEditor
-            key={rosterItem.student.id}
-            gameServer={gameServer}
-            rosterItem={rosterItem}
-            updateRosterItem={updateRosterItem}
-          />
-        ))}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-bold">{t("tools.roster.title")}</h2>
+
+          <StudentPicker
+            students={addableStudents}
+            onStudentSelected={addStudent}
+            className="w-[200px] md:w-[250px]"
+          >
+            <Button
+              variant="outline"
+              className="w-[200px] md:w-[250px] justify-between"
+            >
+              {t("tools.roster.editor.addStudent")}
+              <ChevronsUpDownIcon />
+            </Button>
+          </StudentPicker>
+        </div>
+
+        {hiddenNotReleasedCount > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {t("tools.roster.editor.hiddenNotReleased", {
+              count: hiddenNotReleasedCount,
+            })}
+          </p>
+        )}
+
+        {filteredRosterItems.length === 0 ? (
+          <MessageBox>{t("tools.roster.editor.emptyState")}</MessageBox>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              {t("tools.roster.editor.reorderHint")}
+            </p>
+
+            <RosterItemsGrid
+              items={rosterItems}
+              gameServer={gameServer}
+              updateRosterItem={updateRosterItem}
+              onRemove={removeStudent}
+              onReorder={reorderRosterItems}
+              isReleasedOnServer={isReleasedOnServer}
+            />
+          </>
+        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent z-50 p-4 pt-8 flex justify-center">

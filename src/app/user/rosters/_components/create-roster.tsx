@@ -14,8 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
-import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
-import type { Student } from "~prisma";
+import { GAME_SERVERS, GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -23,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
+import type { Student } from "~prisma";
 
 export function CreateRoster() {
   const t = useTranslations();

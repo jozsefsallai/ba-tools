@@ -849,6 +849,12 @@
     "editor": {
       "title": "Edit Roster",
       "failedToLoad": "Failed to load roster.",
+      "addStudent": "Add Student",
+      "emptyState": "No students in this roster yet. Add a student to get started.",
+      "removeStudent": "Remove student",
+      "reorderStudent": "Drag to reorder",
+      "reorderHint": "Drag students by the grip handle to reorder them.",
+      "hiddenNotReleased": "{count, plural, one {# student hidden (not released on this server)} other {# students hidden (not released on this server)}}",
       "toasts": {
         "success": "Roster updated successfully!",
         "fail": "Failed to update roster. Please try again."

@@ -722,6 +722,12 @@
     "editor": {
       "title": "ロスターを編集",
       "failedToLoad": "ロスターの読み込みに失敗したよ。",
+      "addStudent": "生徒を追加",
+      "emptyState": "まだロスターに生徒がいないよ。生徒を追加して始めてね。",
+      "removeStudent": "生徒を削除",
+      "reorderStudent": "ドラッグして並べ替え",
+      "reorderHint": "グリップをドラッグして生徒の順番を変えられるよ。",
+      "hiddenNotReleased": "{count, plural, other {このサーバー未実装の生徒が # 人非表示}}",
       "toasts": {
         "success": "ロスターを更新したよ！",
         "fail": "ロスターの更新に失敗したよ。もう一度試してみてね。"

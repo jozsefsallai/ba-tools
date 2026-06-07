@@ -10,23 +10,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
-  BORROW_SLOT_GAMEMODE_NAMES,
   BORROW_SLOT_GAMEMODES,
-  type GameServer,
+  BORROW_SLOT_GAMEMODE_NAMES,
   type BorrowSlotGameMode,
+  type GameServer,
   type StarLevel,
   type UELevel,
 } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
-import type { Student } from "~prisma";
-import React, { useCallback, useMemo } from "react";
+import { GripVerticalIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import React, { useCallback, useMemo, type HTMLAttributes } from "react";
+import type { Student } from "~prisma";
 
 export type RosterItem = {
-  enabled: boolean;
   student: Student;
   starLevel: StarLevel;
   ueLevel: UELevel | null;
@@ -53,30 +51,32 @@ export type RosterItemEditorProps = {
     studentId: string,
     updatedItem: Partial<RosterItem>,
   ) => void;
+  onRemove: (studentId: string) => void;
+  dragHandleProps?: HTMLAttributes<HTMLButtonElement>;
 };
 
 export const RosterItemEditor = React.memo(
-  ({ gameServer, rosterItem, updateRosterItem }: RosterItemEditorProps) => {
+  ({
+    gameServer,
+    rosterItem,
+    updateRosterItem,
+    onRemove,
+    dragHandleProps,
+  }: RosterItemEditorProps) => {
     const t = useTranslations();
-    const handleEnabledChange = useCallback(
-      (newValue: boolean) => {
-        updateRosterItem(rosterItem.student.id, { enabled: newValue });
-      },
-      [updateRosterItem],
-    );
 
     const handleStarLevelChange = useCallback(
       (newLevel: StarLevel) => {
         updateRosterItem(rosterItem.student.id, { starLevel: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleUELevelChange = useCallback(
       (newLevel: UELevel | null) => {
         updateRosterItem(rosterItem.student.id, { ueLevel: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleLevelChange = useCallback(
@@ -87,7 +87,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { level: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleRelaationshipRankChange = useCallback(
@@ -98,7 +98,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { relationshipRank: newRank });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleEXLevelChange = useCallback(
@@ -109,7 +109,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { ex: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleBasicLevelChange = useCallback(
@@ -120,7 +120,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { basic: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleEnhancedLevelChange = useCallback(
@@ -131,7 +131,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { enhanced: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleSubLevelChange = useCallback(
@@ -142,7 +142,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { sub: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleEquipmentSlotTierChange = useCallback(
@@ -158,7 +158,7 @@ export const RosterItemEditor = React.memo(
           [`equipmentSlot${slot}`]: newTier,
         });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleAttackLevelChange = useCallback(
@@ -169,7 +169,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { attackLevel: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleHPLevelChange = useCallback(
@@ -180,7 +180,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { hpLevel: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleHealLevelChange = useCallback(
@@ -191,7 +191,7 @@ export const RosterItemEditor = React.memo(
 
         updateRosterItem(rosterItem.student.id, { healLevel: newLevel });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
 
     const handleFeaturedBorrowSlotChange = useCallback(
@@ -200,8 +200,20 @@ export const RosterItemEditor = React.memo(
           featuredBorrowSlot: newMode,
         });
       },
-      [updateRosterItem],
+      [updateRosterItem, rosterItem.student.id],
     );
+
+    const hasBondItem = useMemo(() => {
+      if (gameServer === "JP") {
+        return rosterItem.student.hasBondGearJP;
+      }
+
+      if (gameServer === "CN") {
+        return rosterItem.student.hasBondGearCN;
+      }
+
+      return rosterItem.student.hasBondGearGlobal;
+    }, [rosterItem.student, gameServer]);
 
     const handleMaxButtonClick = useCallback(() => {
       updateRosterItem(rosterItem.student.id, {
@@ -221,69 +233,67 @@ export const RosterItemEditor = React.memo(
         hpLevel: 25,
         healLevel: 25,
       });
-    }, [updateRosterItem]);
+    }, [updateRosterItem, rosterItem.student.id, hasBondItem]);
 
-    const hasBondItem = useMemo(() => {
-      if (gameServer === "JP") {
-        return rosterItem.student.hasBondGearJP;
-      }
-
-      if (gameServer === "CN") {
-        return rosterItem.student.hasBondGearCN;
-      }
-
-      return rosterItem.student.hasBondGearGlobal;
-    }, [rosterItem, gameServer]);
+    const handleRemove = useCallback(() => {
+      onRemove(rosterItem.student.id);
+    }, [onRemove, rosterItem.student.id]);
 
     return (
-      <div
-        className={cn("flex items-start gap-4 md:gap-6 border rounded-md p-4", {
-          "bg-card": rosterItem.enabled,
-          "grayscale opacity-75": !rosterItem.enabled,
-        })}
-      >
+      <div className="flex items-start gap-4 md:gap-6 bg-card border rounded-md p-4">
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => handleEnabledChange(!rosterItem.enabled)}
-            className="cursor-pointer"
-          >
-            <img
-              src={buildStudentPortraitUrl(rosterItem.student)}
-              alt={rosterItem.student.name.split(" / ")[0]}
-              className="w-12"
-            />
-          </button>
+          <img
+            src={buildStudentPortraitUrl(rosterItem.student)}
+            alt={rosterItem.student.name.split(" / ")[0]}
+            className="w-12"
+          />
 
           <Button
             onClick={handleMaxButtonClick}
-            disabled={!rosterItem.enabled}
             variant="outline"
             size="sm"
             className="w-12 text-xs"
           >
             {t("tools.roster.rosterItemEditor.max")}
           </Button>
+
+          {dragHandleProps && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-12 cursor-grab active:cursor-grabbing"
+              aria-label={t("tools.roster.editor.reorderStudent")}
+              {...dragHandleProps}
+            >
+              <GripVerticalIcon />
+            </Button>
+          )}
         </div>
 
         <div className="flex-1 flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <div className="md:text-xl font-bold">
+          <div className="flex items-center justify-between gap-2">
+            <div className="md:text-xl font-bold truncate">
               {rosterItem.student.name.split(" / ")[0]}
             </div>
 
-            <Switch
-              key={`roster-item-${rosterItem.student.id}`}
-              className="self-center"
-              checked={rosterItem.enabled}
-              onCheckedChange={handleEnabledChange}
-            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0"
+              onClick={handleRemove}
+              aria-label={t("tools.roster.editor.removeStudent")}
+            >
+              <XIcon />
+            </Button>
           </div>
 
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-4 items-center gap-1">
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.level")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.level")}
+                </Label>
 
                 <Input
                   type="number"
@@ -292,12 +302,13 @@ export const RosterItemEditor = React.memo(
                   value={rosterItem?.level ?? ""}
                   onChange={(e) => handleLevelChange(Number(e.target.value))}
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.star")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.star")}
+                </Label>
 
                 <Select
                   value={rosterItem?.starLevel?.toString() ?? ""}
@@ -306,7 +317,6 @@ export const RosterItemEditor = React.memo(
                       Number.parseInt(value, 10) as StarLevel,
                     )
                   }
-                  disabled={!rosterItem.enabled}
                 >
                   <SelectTrigger className="w-full py-1 px-2 h-auto">
                     {rosterItem?.starLevel ? <SelectValue /> : "N/A"}
@@ -323,7 +333,9 @@ export const RosterItemEditor = React.memo(
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.ue")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.ue")}
+                </Label>
 
                 <Select
                   value={rosterItem?.ueLevel?.toString() ?? ""}
@@ -334,7 +346,6 @@ export const RosterItemEditor = React.memo(
                         : (Number.parseInt(value, 10) as UELevel),
                     )
                   }
-                  disabled={!rosterItem.enabled}
                 >
                   <SelectTrigger className="w-full py-1 px-2 h-auto">
                     {rosterItem?.ueLevel ? <SelectValue /> : "N/A"}
@@ -346,13 +357,14 @@ export const RosterItemEditor = React.memo(
                     <SelectItem value="2">2</SelectItem>
                     <SelectItem value="3">3</SelectItem>
                     <SelectItem value="4">4</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.bond")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.bond")}
+                </Label>
 
                 <Input
                   type="number"
@@ -363,16 +375,19 @@ export const RosterItemEditor = React.memo(
                     handleRelaationshipRankChange(Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-5 items-center gap-1">
-              <Label className="text-xs pt-[15px]">{t("tools.roster.rosterItemEditor.skills")}</Label>
+              <Label className="text-xs pt-[15px]">
+                {t("tools.roster.rosterItemEditor.skills")}
+              </Label>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.ex")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.ex")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.ex")}
@@ -382,12 +397,13 @@ export const RosterItemEditor = React.memo(
                   value={rosterItem?.ex ?? ""}
                   onChange={(e) => handleEXLevelChange(Number(e.target.value))}
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.basic")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.basic")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.basic")}
@@ -399,12 +415,13 @@ export const RosterItemEditor = React.memo(
                     handleBasicLevelChange(Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.enhanced")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.enhanced")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.enh")}
@@ -416,12 +433,13 @@ export const RosterItemEditor = React.memo(
                     handleEnhancedLevelChange(Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.sub")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.sub")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.sub")}
@@ -431,21 +449,26 @@ export const RosterItemEditor = React.memo(
                   value={rosterItem?.sub ?? ""}
                   onChange={(e) => handleSubLevelChange(Number(e.target.value))}
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-5 items-center gap-1">
-              <Label className="text-xs pt-[15px]">{t("tools.roster.rosterItemEditor.equipment")}</Label>
+              <Label className="text-xs pt-[15px]">
+                {t("tools.roster.rosterItemEditor.equipment")}
+              </Label>
 
               <div className="flex flex-col">
                 <Label className="text-[10px]">
-                  {rosterItem.student.equipment[0] ?? t("tools.roster.rosterItemEditor.slot1")}
+                  {rosterItem.student.equipment[0] ??
+                    t("tools.roster.rosterItemEditor.slot1")}
                 </Label>
 
                 <Input
-                  placeholder={rosterItem.student.equipment[0] ?? t("tools.roster.rosterItemEditor.s1")}
+                  placeholder={
+                    rosterItem.student.equipment[0] ??
+                    t("tools.roster.rosterItemEditor.s1")
+                  }
                   type="number"
                   min={0}
                   max={10}
@@ -454,17 +477,20 @@ export const RosterItemEditor = React.memo(
                     handleEquipmentSlotTierChange(1, Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
                 <Label className="text-[10px]">
-                  {rosterItem.student.equipment[1] ?? t("tools.roster.rosterItemEditor.slot2")}
+                  {rosterItem.student.equipment[1] ??
+                    t("tools.roster.rosterItemEditor.slot2")}
                 </Label>
 
                 <Input
-                  placeholder={rosterItem.student.equipment[1] ?? t("tools.roster.rosterItemEditor.s2")}
+                  placeholder={
+                    rosterItem.student.equipment[1] ??
+                    t("tools.roster.rosterItemEditor.s2")
+                  }
                   type="number"
                   min={0}
                   max={10}
@@ -473,17 +499,20 @@ export const RosterItemEditor = React.memo(
                     handleEquipmentSlotTierChange(2, Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
                 <Label className="text-[10px]">
-                  {rosterItem.student.equipment[2] ?? t("tools.roster.rosterItemEditor.slot3")}
+                  {rosterItem.student.equipment[2] ??
+                    t("tools.roster.rosterItemEditor.slot3")}
                 </Label>
 
                 <Input
-                  placeholder={rosterItem.student.equipment[2] ?? t("tools.roster.rosterItemEditor.s3")}
+                  placeholder={
+                    rosterItem.student.equipment[2] ??
+                    t("tools.roster.rosterItemEditor.s3")
+                  }
                   type="number"
                   min={0}
                   max={10}
@@ -492,14 +521,14 @@ export const RosterItemEditor = React.memo(
                     handleEquipmentSlotTierChange(3, Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               {hasBondItem && (
                 <div className="flex flex-col">
                   <Label className="text-[10px]">
-                    {rosterItem.student.equipment[3] ?? t("tools.roster.rosterItemEditor.bondItem")}
+                    {rosterItem.student.equipment[3] ??
+                      t("tools.roster.rosterItemEditor.bondItem")}
                   </Label>
 
                   <Input
@@ -512,17 +541,20 @@ export const RosterItemEditor = React.memo(
                       handleEquipmentSlotTierChange(4, Number(e.target.value))
                     }
                     className="w-full py-1 px-2 h-auto"
-                    disabled={!rosterItem.enabled}
                   />
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-5 items-center gap-1">
-              <Label className="text-xs pt-[15px]">{t("tools.roster.rosterItemEditor.talent")}</Label>
+              <Label className="text-xs pt-[15px]">
+                {t("tools.roster.rosterItemEditor.talent")}
+              </Label>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.attack")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.attack")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.atk")}
@@ -534,12 +566,13 @@ export const RosterItemEditor = React.memo(
                     handleAttackLevelChange(Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.hp")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.hp")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.hp")}
@@ -549,12 +582,13 @@ export const RosterItemEditor = React.memo(
                   value={rosterItem?.hpLevel ?? ""}
                   onChange={(e) => handleHPLevelChange(Number(e.target.value))}
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
 
               <div className="flex flex-col">
-                <Label className="text-[10px]">{t("tools.roster.rosterItemEditor.healing")}</Label>
+                <Label className="text-[10px]">
+                  {t("tools.roster.rosterItemEditor.healing")}
+                </Label>
 
                 <Input
                   placeholder={t("tools.roster.rosterItemEditor.heal")}
@@ -566,13 +600,14 @@ export const RosterItemEditor = React.memo(
                     handleHealLevelChange(Number(e.target.value))
                   }
                   className="w-full py-1 px-2 h-auto"
-                  disabled={!rosterItem.enabled}
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-1">
-              <Label className="text-xs">{t("tools.roster.rosterItemEditor.featuredBorrowSlot")}</Label>
+              <Label className="text-xs">
+                {t("tools.roster.rosterItemEditor.featuredBorrowSlot")}
+              </Label>
 
               <Select
                 value={rosterItem?.featuredBorrowSlot ?? ""}
@@ -581,14 +616,19 @@ export const RosterItemEditor = React.memo(
                     value === "_" ? null : (value as BorrowSlotGameMode),
                   )
                 }
-                disabled={!rosterItem.enabled}
               >
                 <SelectTrigger className="w-full py-1 px-2 h-auto">
-                  {rosterItem?.featuredBorrowSlot ? <SelectValue /> : t("tools.roster.rosterItemEditor.none")}
+                  {rosterItem?.featuredBorrowSlot ? (
+                    <SelectValue />
+                  ) : (
+                    t("tools.roster.rosterItemEditor.none")
+                  )}
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value="_">{t("tools.roster.rosterItemEditor.notFeatured")}</SelectItem>
+                  <SelectItem value="_">
+                    {t("tools.roster.rosterItemEditor.notFeatured")}
+                  </SelectItem>
 
                   {BORROW_SLOT_GAMEMODES.map((mode) => (
                     <SelectItem key={mode} value={mode}>
