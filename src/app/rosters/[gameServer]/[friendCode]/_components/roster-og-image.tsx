@@ -40,8 +40,8 @@ function normalizeIntroduction(introduction?: string): string | undefined {
 
   const joinedLines = introduction.split("\n").join(" ").trim();
 
-  if (joinedLines.length > 100) {
-    return `${joinedLines.slice(0, 97)}...`;
+  if (joinedLines.length > 128) {
+    return `${joinedLines.slice(0, 125)}...`;
   }
 
   return joinedLines;
