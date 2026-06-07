@@ -44,4 +44,14 @@ export const BORROW_SLOT_GAMEMODE_NAMES: Record<BorrowSlotGameMode, string> = {
   tower: "Final Restriction Release",
 };
 
+export const BORROW_SLOT_GAMEMODE_SHORT_NAMES: Record<
+  BorrowSlotGameMode,
+  string
+> = {
+  raid: "Total & Grand Assault, Allied Ops.",
+  jfd: "Joint Firing Drill",
+  conquest: "Conquest",
+  tower: "Final Restriction Release",
+};
+
 export type { Student };

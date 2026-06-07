@@ -21,7 +21,7 @@ const ATTACK_TYPE_COLORS: Record<AttackType, string> = {
   Mixed: "#52525c",
 };
 
-const SCALE = 0.82;
+const SCALE = 1.2;
 
 function dim(value: number) {
   return Math.round(value * SCALE);
@@ -187,8 +187,8 @@ export function OgStudentCard({ student, assets }: OgStudentCardProps) {
                 tw="flex items-center justify-center font-semibold"
                 style={{
                   position: "absolute",
-                  top: 0,
-                  left: 0,
+                  top: 4,
+                  left: -2,
                   width: STAR_SIZE,
                   height: STAR_SIZE,
                   fontFamily: "Nexon Football Gothic",

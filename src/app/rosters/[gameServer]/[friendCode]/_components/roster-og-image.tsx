@@ -11,6 +11,7 @@ export type FeaturedBorrowCategory = {
 
 export type RosterOgImageProps = {
   name: string;
+  introduction?: string;
   friendCode: string;
   serverName: string;
   accountLevel: number;
@@ -32,8 +33,23 @@ const colors = {
   border: "#52525c",
 };
 
+function normalizeIntroduction(introduction?: string): string | undefined {
+  if (!introduction) {
+    return undefined;
+  }
+
+  const firstLine = introduction.split("\n")[0].trim();
+
+  if (firstLine.length > 100) {
+    return `${firstLine.slice(0, 97)}...`;
+  }
+
+  return firstLine;
+}
+
 export function RosterOgImage({
   name,
+  introduction,
   friendCode,
   serverName,
   accountLevel,
@@ -41,9 +57,11 @@ export function RosterOgImage({
   featuredBorrowCategories,
   assets,
 }: RosterOgImageProps) {
+  const normalizedIntroduction = normalizeIntroduction(introduction);
+
   return (
     <div
-      tw="flex w-full h-full items-center justify-center px-16 py-10"
+      tw="flex w-full h-full items-center justify-center px-8 py-5"
       style={{
         backgroundColor: colors.background,
         fontFamily: "Noto Sans",
@@ -83,22 +101,36 @@ export function RosterOgImage({
             tw="flex"
             style={{
               fontFamily: "Nexon Football Gothic",
-              fontSize: 48,
+              fontSize: 56,
               fontWeight: 700,
               transform: "skewX(-12deg)",
               color: colors.foreground,
               lineHeight: 1.1,
-              marginBottom: 20,
+              marginBottom: 6,
             }}
           >
             {name}
           </div>
 
+          {normalizedIntroduction && (
+            <div
+              tw="flex"
+              style={{
+                fontSize: 24,
+                color: colors.mutedForeground,
+                lineHeight: 1.25,
+                marginBottom: 16,
+              }}
+            >
+              {normalizedIntroduction}
+            </div>
+          )}
+
           <div tw="flex flex-wrap items-center" style={{ gap: 10 }}>
             <div
               tw="flex font-semibold rounded-full px-4 py-2"
               style={{
-                fontSize: 22,
+                fontSize: 28,
                 color: colors.primaryForeground,
                 backgroundColor: colors.primary,
               }}
@@ -109,7 +141,7 @@ export function RosterOgImage({
             <div
               tw="flex font-semibold rounded-full px-4 py-2"
               style={{
-                fontSize: 22,
+                fontSize: 28,
                 color: colors.secondaryForeground,
                 backgroundColor: colors.secondary,
               }}
@@ -120,7 +152,7 @@ export function RosterOgImage({
             <div
               tw="flex font-semibold rounded-full px-4 py-2"
               style={{
-                fontSize: 22,
+                fontSize: 28,
                 color: colors.foreground,
                 backgroundColor: "transparent",
                 border: `1px solid ${colors.border}`,
@@ -137,9 +169,10 @@ export function RosterOgImage({
                   key={category.label}
                   tw="flex flex-col"
                   style={{
-                    width: 380,
+                    width: 440,
                     gap: 6,
                     padding: 14,
+                    paddingLeft: 20,
                     borderRadius: 10,
                     backgroundColor: colors.card,
                     border: `1px solid ${colors.border}`,
@@ -148,7 +181,7 @@ export function RosterOgImage({
                   <div
                     tw="flex"
                     style={{
-                      fontSize: 15,
+                      fontSize: 22,
                       fontWeight: 700,
                       color: colors.foreground,
                       lineHeight: 1.25,

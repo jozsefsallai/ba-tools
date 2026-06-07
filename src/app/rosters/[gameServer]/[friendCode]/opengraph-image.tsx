@@ -5,7 +5,7 @@ import { OG_HEIGHT, OG_WIDTH, makeOgImage } from "@/lib/og-image.server";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import {
   BORROW_SLOT_GAMEMODES,
-  BORROW_SLOT_GAMEMODE_NAMES,
+  BORROW_SLOT_GAMEMODE_SHORT_NAMES,
   GAME_SERVERS,
   GAME_SERVER_NAMES,
   type GameServer,
@@ -67,7 +67,7 @@ export default async function Image({
   );
 
   const featuredBorrowCategories = BORROW_SLOT_GAMEMODES.map((mode) => ({
-    label: BORROW_SLOT_GAMEMODE_NAMES[mode],
+    label: BORROW_SLOT_GAMEMODE_SHORT_NAMES[mode],
     students: roster.students
       .filter((student) => student.featuredBorrowSlot === mode)
       .slice(0, 3)
@@ -102,6 +102,7 @@ export default async function Image({
   const png = await makeOgImage(
     <RosterOgImage
       name={roster.name ?? roster.friendCode}
+      introduction={roster.introduction}
       friendCode={roster.friendCode}
       serverName={GAME_SERVER_NAMES[roster.gameServer]}
       accountLevel={roster.accountLevel}
