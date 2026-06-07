@@ -41,6 +41,7 @@ export async function ToolsAndResources() {
       path: "/timeline-visualizer",
       icon: <ListOrderedIcon className="size-10 text-yellow-500 shrink-0" />,
       description: t("static.home.toollist.timelineVisualizer.description"),
+      isHot: true,
     },
     {
       name: t("static.home.toollist.inventoryManagement.title"),
@@ -59,7 +60,6 @@ export async function ToolsAndResources() {
       path: "/raid-score-calculator",
       icon: <CalculatorIcon className="size-10 text-blue-500 shrink-0" />,
       description: t("static.home.toollist.raidScore.description"),
-      isNew: true,
     },
     {
       name: t("static.home.toollist.formationDisplay.title"),
