@@ -72,18 +72,15 @@ export function StudentCard({
         })}
       >
         <div
-          className={cn(
-            "flex relative h-[86px] w-[93px] p-[2px] overflow-hidden",
-            {
-              "rounded-[11%] pb-[10px]": !isSkillCard,
-              "rounded-[2px]": isSkillCard,
-              "bg-type-red": student.attackType === "Explosion",
-              "bg-type-yellow": student.attackType === "Pierce",
-              "bg-type-blue": student.attackType === "Mystic",
-              "bg-type-purple": student.attackType === "Sonic",
-              "bg-type-green": student.attackType === "Chemical",
-            },
-          )}
+          className={cn("flex relative h-[86px] w-[93px] p-[2px]", {
+            "rounded-[11%] pb-[10px]": !isSkillCard,
+            "rounded-[2px]": isSkillCard,
+            "bg-type-red": student.attackType === "Explosion",
+            "bg-type-yellow": student.attackType === "Pierce",
+            "bg-type-blue": student.attackType === "Mystic",
+            "bg-type-purple": student.attackType === "Sonic",
+            "bg-type-green": student.attackType === "Chemical",
+          })}
         >
           {!isSkillCard && (
             <div

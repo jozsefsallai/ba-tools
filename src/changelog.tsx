@@ -59,7 +59,13 @@ export const CHANGELOG: ChangelogItemData[] = [
         ),
       },
     ],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Fixed a bug on Firefox where certain items in student cards did not render.",
+      },
+    ],
     changes: [],
   },
   {
