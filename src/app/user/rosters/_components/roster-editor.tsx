@@ -55,7 +55,7 @@ function createRosterItem(
   return {
     student,
     starLevel: savedItem?.starLevel ?? (student.rarity as StarLevel),
-    ueLevel: savedItem?.ueLevel ?? 1,
+    ueLevel: savedItem?.ueLevel ?? null,
     level: savedItem?.level ?? 1,
     relationshipRank: savedItem?.relationshipRank ?? 1,
     ex: savedItem?.ex ?? 1,

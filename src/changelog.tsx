@@ -43,6 +43,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "June 10, 2026",
+    features: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          "Fixed a bug where UE levels couldn't be unset properly in the roster editor.",
+      },
+    ],
+    changes: [],
+  },
+  {
     date: "June 7, 2026",
     features: [
       {
