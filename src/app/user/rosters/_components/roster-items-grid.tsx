@@ -35,6 +35,7 @@ export type RosterItemsGridProps = {
   ) => void;
   onRemove: (studentId: string) => void;
   onReorder: (items: RosterItem[]) => void;
+  reorderEnabled?: boolean;
 };
 
 function reorderRosterItems(
@@ -117,6 +118,7 @@ type RosterItemRowProps = {
     updatedItem: Partial<RosterItem>,
   ) => void;
   onRemove: (studentId: string) => void;
+  reorderEnabled: boolean;
 };
 
 const RosterItemRow = memo(function RosterItemRow({
@@ -124,18 +126,29 @@ const RosterItemRow = memo(function RosterItemRow({
   gameServer,
   updateRosterItem,
   onRemove,
+  reorderEnabled,
 }: RosterItemRowProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
-      {row.map((rosterItem) => (
-        <SortableRosterItem
-          key={rosterItem.student.id}
-          rosterItem={rosterItem}
-          gameServer={gameServer}
-          updateRosterItem={updateRosterItem}
-          onRemove={onRemove}
-        />
-      ))}
+      {row.map((rosterItem) =>
+        reorderEnabled ? (
+          <SortableRosterItem
+            key={rosterItem.student.id}
+            rosterItem={rosterItem}
+            gameServer={gameServer}
+            updateRosterItem={updateRosterItem}
+            onRemove={onRemove}
+          />
+        ) : (
+          <RosterItemEditor
+            key={rosterItem.student.id}
+            gameServer={gameServer}
+            rosterItem={rosterItem}
+            updateRosterItem={updateRosterItem}
+            onRemove={onRemove}
+          />
+        ),
+      )}
     </div>
   );
 });
@@ -146,6 +159,7 @@ export const RosterItemsGrid = memo(function RosterItemsGrid({
   updateRosterItem,
   onRemove,
   onReorder,
+  reorderEnabled = true,
 }: RosterItemsGridProps) {
   const columnCount = useGridColumnCount();
 
@@ -183,6 +197,25 @@ export const RosterItemsGrid = memo(function RosterItemsGrid({
     [items, columnCount],
   );
 
+  const grid = (
+    <WindowVirtualizer>
+      {itemRows.map((row) => (
+        <RosterItemRow
+          key={row.map((item) => item.student.id).join("-")}
+          row={row}
+          gameServer={gameServer}
+          updateRosterItem={updateRosterItem}
+          onRemove={onRemove}
+          reorderEnabled={reorderEnabled}
+        />
+      ))}
+    </WindowVirtualizer>
+  );
+
+  if (!reorderEnabled) {
+    return grid;
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -190,17 +223,7 @@ export const RosterItemsGrid = memo(function RosterItemsGrid({
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
-        <WindowVirtualizer>
-          {itemRows.map((row) => (
-            <RosterItemRow
-              key={row.map((item) => item.student.id).join("-")}
-              row={row}
-              gameServer={gameServer}
-              updateRosterItem={updateRosterItem}
-              onRemove={onRemove}
-            />
-          ))}
-        </WindowVirtualizer>
+        {grid}
       </SortableContext>
     </DndContext>
   );

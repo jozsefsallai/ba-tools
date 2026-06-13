@@ -2,6 +2,7 @@
 
 import type { RosterItem } from "@/app/user/rosters/_components/roster-item-editor";
 import { RosterItemsGrid } from "@/app/user/rosters/_components/roster-items-grid";
+import { SearchBar } from "@/components/common/list-controls";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -23,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
+import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import {
   GAME_SERVERS,
   GAME_SERVER_NAMES,
@@ -320,6 +322,29 @@ const RosterStudentsPanel = memo(function RosterStudentsPanel({
   reorderRosterItems,
 }: RosterStudentsPanelProps) {
   const t = useTranslations();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const isSearching = searchQuery.trim().length > 0;
+
+  const filteredRosterItems = useMemo(() => {
+    const trimmed = searchQuery.trim();
+
+    if (!trimmed) {
+      return rosterItems;
+    }
+
+    const { ordered } = orderStudentsByFuzzyNameQuery(
+      rosterItems.map((item) => item.student),
+      trimmed,
+    );
+    const itemByStudentId = new Map(
+      rosterItems.map((item) => [item.student.id, item]),
+    );
+
+    return ordered
+      .map((student) => itemByStudentId.get(student.id))
+      .filter((item): item is RosterItem => item !== undefined);
+  }, [rosterItems, searchQuery]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -345,17 +370,30 @@ const RosterStudentsPanel = memo(function RosterStudentsPanel({
         <MessageBox>{t("tools.roster.editor.emptyState")}</MessageBox>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            {t("tools.roster.editor.reorderHint")}
-          </p>
-
-          <RosterItemsGrid
-            items={rosterItems}
-            gameServer={gameServer}
-            updateRosterItem={updateRosterItem}
-            onRemove={removeStudent}
-            onReorder={reorderRosterItems}
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder={t("tools.roster.view.searchByName")}
           />
+
+          {!isSearching && (
+            <p className="text-sm text-muted-foreground">
+              {t("tools.roster.editor.reorderHint")}
+            </p>
+          )}
+
+          {filteredRosterItems.length === 0 ? (
+            <MessageBox>{t("common.noResults")}</MessageBox>
+          ) : (
+            <RosterItemsGrid
+              items={filteredRosterItems}
+              gameServer={gameServer}
+              updateRosterItem={updateRosterItem}
+              onRemove={removeStudent}
+              onReorder={reorderRosterItems}
+              reorderEnabled={!isSearching}
+            />
+          )}
         </>
       )}
     </div>
