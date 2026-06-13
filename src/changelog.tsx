@@ -43,6 +43,37 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "June 13, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          "Added the ability to import/export rosters to/from Justin's Planner.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          "Added the ability to search for students by name in the roster editor.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description: "Added quick reorder students to the roster editor.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          "Added dirty state tracking and save confirmation dialog to the roster editor.",
+      },
+    ],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Improved stability of the dirty state tracker.",
+      },
+    ],
+  },
+  {
     date: "June 10, 2026",
     features: [],
     fixes: [
