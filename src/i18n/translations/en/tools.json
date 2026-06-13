@@ -863,7 +863,23 @@
       },
       "openPublicPage": "Open public roster page",
       "copyShareLink": "Copy share link",
-      "shareLinkCopied": "Copied!"
+      "shareLinkCopied": "Copied!",
+      "importJustinPlanner": {
+        "trigger": "Import from Justin Planner",
+        "title": "Import roster from Justin Planner",
+        "description": "Paste the JSON you copied from Justin Planner. This will replace the students currently in this roster. You'll still need to press Save to persist the changes.",
+        "toasts": {
+          "success": "Roster imported. Don't forget to save.",
+          "invalidData": "Invalid JSON.",
+          "invalidJustinData": "Not a valid Justin Planner export."
+        }
+      },
+      "exportJustinPlanner": {
+        "trigger": "Export to Justin Planner",
+        "title": "Export roster to Justin Planner",
+        "description": "Copy the JSON below and paste it into Justin Planner.",
+        "warning": "Importing this JSON into Justin Planner will fully replace your existing data there."
+      }
     },
 
     "view": {

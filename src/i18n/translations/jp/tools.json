@@ -736,7 +736,23 @@
       },
       "openPublicPage": "公開ロスターページを開く",
       "copyShareLink": "共有リンクをコピー",
-      "shareLinkCopied": "コピーしたよ！"
+      "shareLinkCopied": "コピーしたよ！",
+      "importJustinPlanner": {
+        "trigger": "Justin Plannerからインポート",
+        "title": "Justin Plannerからロスターをインポート",
+        "description": "Justin PlannerからコピーしたJSONを貼り付けてね。現在のロスターの生徒が置き換わるよ。変更を保存するには、あとで保存ボタンを押してね。",
+        "toasts": {
+          "success": "ロスターをインポートしたよ。保存を忘れないでね。",
+          "invalidData": "無効なJSONだよ。",
+          "invalidJustinData": "有効なJustin Plannerのエクスポートじゃないよ。"
+        }
+      },
+      "exportJustinPlanner": {
+        "trigger": "Justin Plannerにエクスポート",
+        "title": "Justin Plannerにロスターをエクスポート",
+        "description": "下のJSONをコピーして、Justin Plannerに貼り付けてね。",
+        "warning": "このJSONをJustin Plannerにインポートすると、Justin Plannerの既存データがすべて置き換わるよ。"
+      }
     },
     "view": {
       "loadingRoster": "ロスターを読み込み中...",

@@ -5,6 +5,8 @@ import { RosterItemsGrid } from "@/app/user/rosters/_components/roster-items-gri
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
+import { ExportJustinRosterDialog } from "@/components/dialogs/export-justin-roster-dialog";
+import { ImportJustinRosterDialog } from "@/components/dialogs/import-justin-roster-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,8 +35,10 @@ import {
   ChevronDownIcon,
   ChevronsUpDownIcon,
   CopyIcon,
+  DownloadIcon,
   ExternalLinkIcon,
   SaveIcon,
+  UploadIcon,
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -92,6 +96,9 @@ type RosterEditorDetailsProps = {
   canCopyShareLink: boolean;
   copiedShareLink: boolean;
   onCopyShareLink: () => void;
+  students: Student[];
+  rosterItems: RosterItem[];
+  onImportFromJustin: (items: RosterItem[]) => void;
 };
 
 const RosterEditorDetails = memo(function RosterEditorDetails({
@@ -113,6 +120,9 @@ const RosterEditorDetails = memo(function RosterEditorDetails({
   canCopyShareLink,
   copiedShareLink,
   onCopyShareLink,
+  students,
+  rosterItems,
+  onImportFromJustin,
 }: RosterEditorDetailsProps) {
   const t = useTranslations();
 
@@ -265,6 +275,23 @@ const RosterEditorDetails = memo(function RosterEditorDetails({
             ? t("tools.roster.editor.shareLinkCopied")
             : t("tools.roster.editor.copyShareLink")}
         </Button>
+
+        <ImportJustinRosterDialog
+          students={students}
+          onImport={onImportFromJustin}
+        >
+          <Button variant="outline">
+            <UploadIcon />
+            {t("tools.roster.editor.importJustinPlanner.trigger")}
+          </Button>
+        </ImportJustinRosterDialog>
+
+        <ExportJustinRosterDialog rosterItems={rosterItems}>
+          <Button variant="outline">
+            <DownloadIcon />
+            {t("tools.roster.editor.exportJustinPlanner.trigger")}
+          </Button>
+        </ExportJustinRosterDialog>
       </div>
     </div>
   );
@@ -396,6 +423,10 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   }, []);
 
   const reorderRosterItems = useCallback((items: RosterItem[]) => {
+    setRosterItems(items);
+  }, []);
+
+  const onImportFromJustin = useCallback((items: RosterItem[]) => {
     setRosterItems(items);
   }, []);
 
@@ -560,6 +591,9 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         canCopyShareLink={canCopyShareLink}
         copiedShareLink={copiedShareLink}
         onCopyShareLink={handleCopyShareLink}
+        students={students}
+        rosterItems={rosterItems}
+        onImportFromJustin={onImportFromJustin}
       />
 
       <Separator />
