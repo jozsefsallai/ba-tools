@@ -853,7 +853,13 @@
       "emptyState": "No students in this roster yet. Add a student to get started.",
       "removeStudent": "Remove student",
       "reorderStudent": "Drag to reorder",
-      "reorderHint": "Drag students by the grip handle to reorder them.",
+      "reorderHint": "Drag students by the grip handle to reorder them, or use Quick Reorder Students for a compact list view.",
+      "reorderStudents": {
+        "trigger": "Quick Reorder Students",
+        "title": "Quick Reorder Students",
+        "description": "Drag students to change their display order on your roster.",
+        "done": "Done"
+      },
       "hiddenNotReleased": "{count, plural, one {# student hidden (not released on this server)} other {# students hidden (not released on this server)}}",
       "toasts": {
         "success": "Roster updated successfully!",

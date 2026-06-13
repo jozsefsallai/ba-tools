@@ -726,7 +726,13 @@
       "emptyState": "まだロスターに生徒がいないよ。生徒を追加して始めてね。",
       "removeStudent": "生徒を削除",
       "reorderStudent": "ドラッグして並べ替え",
-      "reorderHint": "グリップをドラッグして生徒の順番を変えられるよ。",
+      "reorderHint": "グリップをドラッグして並べ替えられるよ。生徒が多いときは「クイック生徒並べ替え」が便利だよ。",
+      "reorderStudents": {
+        "trigger": "クイック生徒並べ替え",
+        "title": "クイック生徒並べ替え",
+        "description": "ドラッグしてロスターでの表示順を変えられるよ。",
+        "done": "完了"
+      },
       "hiddenNotReleased": "{count, plural, other {このサーバー未実装の生徒が # 人非表示}}",
       "toasts": {
         "success": "ロスターを更新したよ！",

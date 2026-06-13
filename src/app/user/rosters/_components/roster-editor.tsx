@@ -8,6 +8,7 @@ import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
 import { ExportJustinRosterDialog } from "@/components/dialogs/export-justin-roster-dialog";
 import { ImportJustinRosterDialog } from "@/components/dialogs/import-justin-roster-dialog";
+import { ReorderRosterDialog } from "@/components/dialogs/reorder-roster-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,7 @@ import {
   CopyIcon,
   DownloadIcon,
   ExternalLinkIcon,
+  ListOrderedIcon,
   SaveIcon,
   UploadIcon,
   XIcon,
@@ -323,7 +325,6 @@ const RosterStudentsPanel = memo(function RosterStudentsPanel({
 }: RosterStudentsPanelProps) {
   const t = useTranslations();
   const [searchQuery, setSearchQuery] = useState("");
-
   const isSearching = searchQuery.trim().length > 0;
 
   const filteredRosterItems = useMemo(() => {
@@ -348,22 +349,36 @@ const RosterStudentsPanel = memo(function RosterStudentsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-bold">{t("tools.roster.title")}</h2>
 
-        <StudentPicker
-          students={addableStudents}
-          onStudentSelected={addStudent}
-          className="w-[200px] md:w-[250px]"
-        >
-          <Button
-            variant="outline"
-            className="w-[200px] md:w-[250px] justify-between"
+        <div className="flex flex-wrap items-center gap-2">
+          {rosterItems.length > 0 && (
+            <ReorderRosterDialog
+              rosterItems={rosterItems}
+              onReorder={reorderRosterItems}
+            >
+              <Button variant="outline">
+                <ListOrderedIcon />
+                {t("tools.roster.editor.reorderStudents.trigger")}
+              </Button>
+            </ReorderRosterDialog>
+          )}
+
+          <StudentPicker
+            students={addableStudents}
+            onStudentSelected={addStudent}
+            className="w-[200px] md:w-[250px]"
           >
-            {t("tools.roster.editor.addStudent")}
-            <ChevronsUpDownIcon />
-          </Button>
-        </StudentPicker>
+            <Button
+              variant="outline"
+              className="w-[200px] md:w-[250px] justify-between"
+            >
+              {t("tools.roster.editor.addStudent")}
+              <ChevronsUpDownIcon />
+            </Button>
+          </StudentPicker>
+        </div>
       </div>
 
       {rosterItems.length === 0 ? (
