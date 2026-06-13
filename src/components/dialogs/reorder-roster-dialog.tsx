@@ -96,7 +96,7 @@ const SortableRosterRow = memo(function SortableRosterRow({
       <img
         src={iconUrl}
         alt={rosterItem.student.name}
-        className="size-10 shrink-0 rounded-md"
+        className="size-10 shrink-0 object-cover rounded-full"
       />
 
       <div className="min-w-0 flex-1 truncate text-sm">
