@@ -870,6 +870,10 @@
       "openPublicPage": "Open public roster page",
       "copyShareLink": "Copy share link",
       "shareLinkCopied": "Copied!",
+      "saveDialog": {
+        "title": "Save roster?",
+        "description": "You have unsaved changes in your roster. Would you like to save them before leaving the page?"
+      },
       "importJustinPlanner": {
         "trigger": "Import from Justin Planner",
         "title": "Import roster from Justin Planner",

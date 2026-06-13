@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/nextjs";
 import {
-  createContext,
   type SetStateAction,
+  createContext,
   useCallback,
   useContext,
   useEffect,
@@ -151,7 +151,7 @@ export function useDirtyStateTracker(
       state.lastSavedValue = state.currentValue;
       markDirty(key, false);
     }
-  }, [enabled, stateRegistry, markDirty]);
+  }, [enabled, isSignedIn, markDirty, options.loggedInOnly, stateRegistry]);
 
   const useSaveableState = useCallback(
     <T>(
@@ -171,12 +171,14 @@ export function useDirtyStateTracker(
           return;
         }
 
-        stateRegistry.set(stateKey, {
-          currentValue: value,
-          lastSavedValue: value,
-          isDirty: false,
-          equalityFn,
-        });
+        if (!stateRegistry.has(stateKey)) {
+          stateRegistry.set(stateKey, {
+            currentValue: value,
+            lastSavedValue: value,
+            isDirty: false,
+            equalityFn,
+          });
+        }
 
         return () => {
           stateRegistry.delete(stateKey);
@@ -217,22 +219,27 @@ export function useDirtyStateTracker(
         [stateKey, equalityFn, markDirty, stateRegistry],
       );
 
-      const setValueUnchecked = useCallback((newValue: SetStateAction<T>) => {
-        const resolvedValue =
-          typeof newValue === "function"
-            ? (newValue as (prevState: T) => T)(value)
-            : newValue;
+      const setValueUnchecked = useCallback(
+        (newValue: SetStateAction<T>) => {
+          setValue((prev) => {
+            const resolvedValue =
+              typeof newValue === "function"
+                ? (newValue as (prevState: T) => T)(prev)
+                : newValue;
 
-        setValue(resolvedValue);
+            const entry = stateRegistry.get(stateKey);
 
-        const entry = stateRegistry.get(stateKey);
+            if (entry) {
+              entry.currentValue = resolvedValue;
+              entry.lastSavedValue = resolvedValue;
+              markDirty(stateKey, false);
+            }
 
-        if (entry) {
-          entry.currentValue = resolvedValue;
-          entry.lastSavedValue = resolvedValue;
-          entry.isDirty = false;
-        }
-      }, []);
+            return resolvedValue;
+          });
+        },
+        [stateKey, markDirty, stateRegistry],
+      );
 
       return [value, setSaveableValue, setValueUnchecked];
     },

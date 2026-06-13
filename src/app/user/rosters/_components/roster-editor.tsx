@@ -5,10 +5,12 @@ import { RosterItemsGrid } from "@/app/user/rosters/_components/roster-items-gri
 import { SearchBar } from "@/components/common/list-controls";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
+import { SaveStatus } from "@/components/common/save-status";
 import { StudentPicker } from "@/components/common/student-picker";
 import { ExportJustinRosterDialog } from "@/components/dialogs/export-justin-roster-dialog";
 import { ImportJustinRosterDialog } from "@/components/dialogs/import-justin-roster-dialog";
 import { ReorderRosterDialog } from "@/components/dialogs/reorder-roster-dialog";
+import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +24,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
+import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useStudents } from "@/hooks/use-students";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
@@ -46,7 +49,8 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigationGuard } from "next-navigation-guard";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
@@ -79,6 +83,46 @@ function createRosterItem(
     healLevel: savedItem?.healLevel ?? 0,
     featuredBorrowSlot: savedItem?.featuredBorrowSlot ?? null,
   };
+}
+
+function compareRosterItem(a: RosterItem, b: RosterItem): boolean {
+  return (
+    a.student.id === b.student.id &&
+    a.starLevel === b.starLevel &&
+    (a.ueLevel ?? null) === (b.ueLevel ?? null) &&
+    a.level === b.level &&
+    a.relationshipRank === b.relationshipRank &&
+    a.ex === b.ex &&
+    a.basic === b.basic &&
+    a.enhanced === b.enhanced &&
+    a.sub === b.sub &&
+    a.equipmentSlot1 === b.equipmentSlot1 &&
+    a.equipmentSlot2 === b.equipmentSlot2 &&
+    a.equipmentSlot3 === b.equipmentSlot3 &&
+    a.equipmentSlot4 === b.equipmentSlot4 &&
+    a.attackLevel === b.attackLevel &&
+    a.hpLevel === b.hpLevel &&
+    a.healLevel === b.healLevel &&
+    (a.featuredBorrowSlot ?? null) === (b.featuredBorrowSlot ?? null)
+  );
+}
+
+function compareStudentRep(a: Student | null, b: Student | null): boolean {
+  return (a?.id ?? null) === (b?.id ?? null);
+}
+
+function compareRosterItems(a: RosterItem[], b: RosterItem[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; i++) {
+    if (!compareRosterItem(a[i], b[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 type RosterEditorDetailsProps = {
@@ -420,21 +464,37 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   const { students } = useStudents();
   const { state: sidebarState, isMobile } = useSidebar();
 
+  const { hasUnsavedChanges, useSaveableState, markAsSaved } =
+    useDirtyStateTracker();
+
   const query = useQueryWithStatus(api.roster.getOwnById, {
     id: rosterId,
   });
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const [name, setName] = useState("");
-  const [introduction, setIntroduction] = useState("");
-  const [visibility, setVisibility] = useState<"private" | "public">("private");
-  const [accountLevel, setAccountLevel] = useState<number>(1);
-  const [studentRep, setStudentRep] = useState<Student | null>(null);
-  const [gameServer, setGameServer] = useState<GameServer>("JP");
-  const [friendCode, setFriendCode] = useState("");
-  const [rosterItems, setRosterItems] = useState<RosterItem[]>([]);
+  const navigationGuard = useNavigationGuard({
+    enabled: hasUnsavedChanges && !isSaving,
+  });
+
+  const [name, setName, setNameUnchecked] = useSaveableState("");
+  const [introduction, setIntroduction, setIntroductionUnchecked] =
+    useSaveableState("");
+  const [visibility, setVisibility, setVisibilityUnchecked] = useSaveableState<
+    "private" | "public"
+  >("private");
+  const [accountLevel, setAccountLevel, setAccountLevelUnchecked] =
+    useSaveableState<number>(1);
+  const [studentRep, setStudentRep, setStudentRepUnchecked] =
+    useSaveableState<Student | null>(null, compareStudentRep);
+  const [gameServer, setGameServer, setGameServerUnchecked] =
+    useSaveableState<GameServer>("JP");
+  const [friendCode, setFriendCode, setFriendCodeUnchecked] =
+    useSaveableState("");
+  const [rosterItems, setRosterItems, setRosterItemsUnchecked] =
+    useSaveableState<RosterItem[]>([], compareRosterItems);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const hydratedRosterIdRef = useRef<Id<"roster"> | null>(null);
 
   const publicRosterPath = useMemo(() => {
     const code = friendCode.trim();
@@ -456,32 +516,44 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         ),
       );
     },
-    [],
+    [setRosterItems],
   );
 
-  const addStudent = useCallback((student: Student) => {
-    setRosterItems((items) => {
-      if (items.some((item) => item.student.id === student.id)) {
-        return items;
-      }
+  const addStudent = useCallback(
+    (student: Student) => {
+      setRosterItems((items) => {
+        if (items.some((item) => item.student.id === student.id)) {
+          return items;
+        }
 
-      return [...items, createRosterItem(student)];
-    });
-  }, []);
+        return [...items, createRosterItem(student)];
+      });
+    },
+    [setRosterItems],
+  );
 
-  const removeStudent = useCallback((studentId: string) => {
-    setRosterItems((items) =>
-      items.filter((item) => item.student.id !== studentId),
-    );
-  }, []);
+  const removeStudent = useCallback(
+    (studentId: string) => {
+      setRosterItems((items) =>
+        items.filter((item) => item.student.id !== studentId),
+      );
+    },
+    [setRosterItems],
+  );
 
-  const reorderRosterItems = useCallback((items: RosterItem[]) => {
-    setRosterItems(items);
-  }, []);
+  const reorderRosterItems = useCallback(
+    (items: RosterItem[]) => {
+      setRosterItems(items);
+    },
+    [setRosterItems],
+  );
 
-  const onImportFromJustin = useCallback((items: RosterItem[]) => {
-    setRosterItems(items);
-  }, []);
+  const onImportFromJustin = useCallback(
+    (items: RosterItem[]) => {
+      setRosterItems(items);
+    },
+    [setRosterItems],
+  );
 
   const addableStudents = useMemo(() => {
     const rosterStudentIds = new Set(
@@ -499,22 +571,30 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       return;
     }
 
-    setName(query.data.name ?? "");
-    setIntroduction(query.data.introduction ?? "");
-    setVisibility(query.data.visibility);
-    setAccountLevel(query.data.accountLevel);
-    setGameServer(query.data.gameServer);
-    setFriendCode(query.data.friendCode);
+    if (query.data._id !== rosterId) {
+      return;
+    }
+
+    if (hydratedRosterIdRef.current === rosterId) {
+      return;
+    }
+
+    setNameUnchecked(query.data.name ?? "");
+    setIntroductionUnchecked(query.data.introduction ?? "");
+    setVisibilityUnchecked(query.data.visibility);
+    setAccountLevelUnchecked(query.data.accountLevel);
+    setGameServerUnchecked(query.data.gameServer);
+    setFriendCodeUnchecked(query.data.friendCode);
 
     if (query.data.studentRepId) {
       const rep =
         students.find((s) => s.id === query.data.studentRepId) ?? null;
-      setStudentRep(rep);
+      setStudentRepUnchecked(rep);
     } else {
-      setStudentRep(null);
+      setStudentRepUnchecked(null);
     }
 
-    setRosterItems(
+    setRosterItemsUnchecked(
       query.data.students
         .map((item) => {
           const student = students.find((s) => s.id === item.studentId);
@@ -527,7 +607,37 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         })
         .filter((item): item is RosterItem => item !== null),
     );
-  }, [students, rosterId, query.status, query.data]);
+
+    hydratedRosterIdRef.current = rosterId;
+  }, [rosterId, query.status]);
+
+  const syncSavedBaseline = useCallback(() => {
+    setNameUnchecked(name);
+    setIntroductionUnchecked(introduction);
+    setVisibilityUnchecked(visibility);
+    setAccountLevelUnchecked(accountLevel);
+    setStudentRepUnchecked(studentRep);
+    setGameServerUnchecked(gameServer);
+    setFriendCodeUnchecked(friendCode);
+    setRosterItemsUnchecked(rosterItems);
+  }, [
+    name,
+    introduction,
+    visibility,
+    accountLevel,
+    studentRep,
+    gameServer,
+    friendCode,
+    rosterItems,
+    setNameUnchecked,
+    setIntroductionUnchecked,
+    setVisibilityUnchecked,
+    setAccountLevelUnchecked,
+    setStudentRepUnchecked,
+    setGameServerUnchecked,
+    setFriendCodeUnchecked,
+    setRosterItemsUnchecked,
+  ]);
 
   const updateMutation = useMutation(api.roster.update);
 
@@ -602,6 +712,13 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
       await revalidateRosterPublicCache(gameServer, friendCode, previousRoster);
 
+      syncSavedBaseline();
+      markAsSaved();
+
+      if (navigationGuard.active) {
+        navigationGuard.accept();
+      }
+
       toast.success(t("tools.roster.editor.toasts.success"));
     } catch (err) {
       console.error("Failed to update roster", err);
@@ -674,15 +791,23 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
               }
         }
       >
-        <Button
-          className="pointer-events-auto"
-          onClick={handleWantsToUpdate}
-          disabled={isSaving}
-        >
-          <SaveIcon />
-          {isSaving ? t("common.saving") : t("common.saveChanges")}
-        </Button>
+        <div className="pointer-events-auto flex flex-col items-center gap-2">
+          <SaveStatus isDirty={hasUnsavedChanges} isSaving={isSaving} />
+          <Button onClick={handleWantsToUpdate} disabled={isSaving}>
+            <SaveIcon />
+            {isSaving ? t("common.saving") : t("common.saveChanges")}
+          </Button>
+        </div>
       </div>
+
+      <SaveDialog
+        open={navigationGuard.active}
+        title={t("tools.roster.editor.saveDialog.title")}
+        description={t("tools.roster.editor.saveDialog.description")}
+        onYes={handleWantsToUpdate}
+        onNo={navigationGuard.accept}
+        onCancel={navigationGuard.reject}
+      />
     </div>
   );
 }

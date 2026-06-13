@@ -743,6 +743,10 @@
       "openPublicPage": "公開ロスターページを開く",
       "copyShareLink": "共有リンクをコピー",
       "shareLinkCopied": "コピーしたよ！",
+      "saveDialog": {
+        "title": "ロスターを保存する？",
+        "description": "保存されていない変更があるよ。ページを離れる前に保存しておく？"
+      },
       "importJustinPlanner": {
         "trigger": "Justin Plannerからインポート",
         "title": "Justin Plannerからロスターをインポート",
