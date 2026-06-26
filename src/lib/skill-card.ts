@@ -114,6 +114,19 @@ export const skillCardVariantMap = {
       image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0334_02"),
     },
   ],
+
+  shun_swimsuit: [
+    {
+      id: "default",
+      name: "Default",
+      image: null,
+    },
+    {
+      id: "redraw",
+      name: "Redraw",
+      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0355_01_1"),
+    },
+  ],
 } as const satisfies Record<string, SkillCardVariantData[]>;
 
 export type SkillCardVariant = keyof typeof skillCardVariantMap;
