@@ -139,7 +139,7 @@ export function RosterOwnerActions({
                 variant="outline"
                 size="icon"
                 onClick={handleCopyImage}
-                disabled={copiedImage || isCopyingImage}
+                disabled={copiedImage}
               >
                 {copiedImage ? <CheckIcon /> : <ImageIcon />}
                 <span className="sr-only">
