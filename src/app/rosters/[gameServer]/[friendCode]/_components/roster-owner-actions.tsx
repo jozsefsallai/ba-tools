@@ -64,13 +64,13 @@ export function RosterOwnerActions({
       await navigator.clipboard.writeText(url);
       setCopiedLink(true);
       toast.success(t("tools.roster.editor.toasts.shareLinkCopied"));
-
-      setTimeout(() => {
-        setCopiedLink(false);
-      }, 3000);
     } catch (err) {
       console.error(err);
       toast.error(t("tools.roster.editor.toasts.shareLinkCopyFailed"));
+    } finally {
+      setTimeout(() => {
+        setCopiedLink(false);
+      }, 3000);
     }
   }, [copiedLink, publicRosterPath, t]);
 
@@ -78,6 +78,8 @@ export function RosterOwnerActions({
     if (copiedImage || !canCopyImage) {
       return;
     }
+
+    setCopiedImage(true);
 
     try {
       const ogImageUrl = `${publicRosterPath}/opengraph-image?v=${lastUpdated}`;
@@ -91,15 +93,14 @@ export function RosterOwnerActions({
       await navigator.clipboard.write([
         new ClipboardItem({ [blob.type]: blob }),
       ]);
-      setCopiedImage(true);
       toast.success(t("tools.roster.view.toasts.imageCardCopied"));
-
-      setTimeout(() => {
-        setCopiedImage(false);
-      }, 3000);
     } catch (err) {
       console.error(err);
       toast.error(t("tools.roster.view.toasts.imageCardCopyFailed"));
+    } finally {
+      setTimeout(() => {
+        setCopiedImage(false);
+      }, 3000);
     }
   }, [canCopyImage, copiedImage, lastUpdated, publicRosterPath, t]);
 
@@ -138,7 +139,7 @@ export function RosterOwnerActions({
                 variant="outline"
                 size="icon"
                 onClick={handleCopyImage}
-                disabled={copiedImage}
+                disabled={copiedImage || isCopyingImage}
               >
                 {copiedImage ? <CheckIcon /> : <ImageIcon />}
                 <span className="sr-only">
