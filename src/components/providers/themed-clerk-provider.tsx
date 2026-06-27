@@ -24,7 +24,7 @@ export function ThemedClerkProvider({ children }: PropsWithChildren) {
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: resolvedTheme === "dark" ? clerkDark : undefined,
+        theme: resolvedTheme === "dark" ? clerkDark : undefined,
       }}
       localization={clerkLocale}
     >
