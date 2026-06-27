@@ -2,6 +2,7 @@
 
 import { FeaturedBorrowSections } from "@/app/rosters/[gameServer]/[friendCode]/_components/featured-borrow-sections";
 import { RosterItem } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-item";
+import { RosterOwnerActions } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-owner-actions";
 import type {
   RosterStudentData,
   RosterStudentsSortOption,
@@ -499,9 +500,18 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
 
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             <div className="flex min-w-0 flex-col gap-2">
-              <h1 className="text-2xl font-bold font-nexon-football-gothic italic break-words sm:text-3xl">
-                {query.data.name ?? query.data.friendCode}
-              </h1>
+              <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+                <h1 className="text-2xl font-bold font-nexon-football-gothic italic break-words sm:text-3xl">
+                  {query.data.name ?? query.data.friendCode}
+                </h1>
+
+                <RosterOwnerActions
+                  gameServer={gameServer}
+                  friendCode={friendCode}
+                  lastUpdated={query.data.lastUpdated}
+                  visibility={query.data.visibility}
+                />
+              </div>
 
               <div className="flex flex-wrap gap-2 items-center">
                 <Badge

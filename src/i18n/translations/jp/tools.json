@@ -767,6 +767,13 @@
     "view": {
       "loadingRoster": "ロスターを読み込み中...",
       "failedToLoad": "ロスターの読み込みに失敗したよ。",
+      "copyShareLink": "リンクをコピー",
+      "copyImageCard": "画像カードをコピー",
+      "imageCardCopied": "コピーしたよ！",
+      "toasts": {
+        "imageCardCopied": "画像カードをクリップボードにコピーしたよ！",
+        "imageCardCopyFailed": "画像カードのコピーに失敗したよ。"
+      },
       "lastUpdated": "最終更新：",
       "filters": "フィルター",
       "sort": "並び替え",

@@ -895,6 +895,13 @@
     "view": {
       "loadingRoster": "Loading roster...",
       "failedToLoad": "Failed to load roster.",
+      "copyShareLink": "Copy link",
+      "copyImageCard": "Copy image card",
+      "imageCardCopied": "Copied!",
+      "toasts": {
+        "imageCardCopied": "Image card copied to clipboard!",
+        "imageCardCopyFailed": "Failed to copy image card."
+      },
       "lastUpdated": "Last updated:",
       "filters": "Filters",
       "sort": "Sort",
