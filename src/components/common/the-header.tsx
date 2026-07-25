@@ -52,6 +52,10 @@ function usePageBreadcrumbs(): BreadcrumbInfo | null {
         label: t("common.header.nav.gameplay.raidScore"),
         group: t("common.header.nav.gameplay.title"),
       },
+      "/student-exp-calculator": {
+        label: t("common.header.nav.gameplay.studentExp"),
+        group: t("common.header.nav.gameplay.title"),
+      },
       "/formation-display": {
         label: t("common.header.nav.misc.formationDisplay"),
         group: t("common.header.nav.misc.title"),

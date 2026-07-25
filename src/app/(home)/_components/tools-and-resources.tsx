@@ -3,6 +3,7 @@ import {
   BookOpenTextIcon,
   CakeIcon,
   CalculatorIcon,
+  ClipboardMinusIcon,
   DicesIcon,
   GemIcon,
   Grid2X2Icon,
@@ -62,6 +63,15 @@ export async function ToolsAndResources() {
       description: t("static.home.toollist.raidScore.description"),
     },
     {
+      name: t("static.home.toollist.studentExp.title"),
+      path: "/student-exp-calculator",
+      icon: (
+        <ClipboardMinusIcon className="size-10 text-emerald-500 shrink-0" />
+      ),
+      description: t("static.home.toollist.studentExp.description"),
+      isNew: true,
+    },
+    {
       name: t("static.home.toollist.formationDisplay.title"),
       path: "/formation-display",
       icon: <UsersIcon className="size-10 text-orange-500 shrink-0" />,
@@ -72,7 +82,6 @@ export async function ToolsAndResources() {
       path: "/user/rosters",
       icon: <IdCardIcon className="size-10 text-teal-500 shrink-0" />,
       description: t("static.home.toollist.roster.description"),
-      isNew: true,
     },
     {
       name: t("static.home.toollist.titleGenerator.title"),
@@ -105,7 +114,6 @@ export async function ToolsAndResources() {
       path: "/birthdays",
       icon: <CakeIcon className="size-10 text-pink-400 shrink-0" />,
       description: t("static.home.toollist.birthdays.description"),
-      isNew: true,
     },
   ];
 

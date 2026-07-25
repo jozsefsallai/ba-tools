@@ -313,6 +313,41 @@
       }
     }
   },
+  "studentExp": {
+    "title": "生徒EXP計算機",
+    "description": "持っているレポートの数とレベル範囲を指定すると、その範囲で何人の生徒を育成できるか、余るレポートがいくつあるかを計算できるよ。",
+    "reports": {
+      "n": {
+        "label": "初級レポート",
+        "short": "初級"
+      },
+      "r": {
+        "label": "中級レポート",
+        "short": "中級"
+      },
+      "sr": {
+        "label": "上級レポート",
+        "short": "上級"
+      },
+      "ssr": {
+        "label": "最上級レポート",
+        "short": "最上級"
+      }
+    },
+    "levelRange": {
+      "label": "レベル範囲",
+      "from": "{level} から",
+      "to": "{level} まで"
+    },
+    "results": {
+      "title": "結果",
+      "students": "育成できる生徒数",
+      "expPerStudent": "1人あたりのEXP",
+      "totalExp": "合計EXP",
+      "leftoverExp": "余りのEXP",
+      "leftoverReports": "余りのレポート"
+    }
+  },
   "gachaStats": {
     "title": "ガチャ確率統計",
     "description": "ブルアカのガチャ結果の統計を出すためのツールだよ。10連ごとに引けた★3生徒の数を入力して、「結果を追加」ボタンを押してね。もし入力を間違えたら、各履歴の横にある「削除」ボタンで消せるよ。",

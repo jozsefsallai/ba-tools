@@ -26,6 +26,10 @@
         "title": "Raid Score Calculator",
         "description": "Convert between clear time and raid score for various bosses and difficulties. Supports multiple teams and remaining time input (for single teams)."
       },
+      "studentExp": {
+        "title": "Student EXP Calculator",
+        "description": "Calculate how many students you can level up across a level range with the Activity Reports you have, and see how many reports you'll have left over."
+      },
       "formationDisplay": {
         "title": "Formation Display",
         "description": "Display a formation of students in a design that's similar to what you'd see in-game. Useful for YouTube thumbnails or spreadsheets."

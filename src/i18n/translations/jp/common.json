@@ -56,7 +56,8 @@
         "timelineVisualizer": "TL可視化ツール",
         "inventoryManagement": "在庫管理",
         "railroadPuzzleSolver": "鉄道パズル解答器",
-        "raidScore": "総力戦スコア計算機"
+        "raidScore": "総力戦スコア計算機",
+        "studentExp": "生徒EXP計算機"
       },
       "misc": {
         "title": "その他",

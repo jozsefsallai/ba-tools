@@ -368,6 +368,45 @@
     }
   },
 
+  "studentExp": {
+    "title": "Student EXP Calculator",
+    "description": "Enter how many Activity Reports you have and a level range. The tool calculates how many students you can raise across that range and how many reports you'll have left over.",
+
+    "reports": {
+      "n": {
+        "label": "Novice Activity Reports",
+        "short": "Novice"
+      },
+      "r": {
+        "label": "Normal Activity Reports",
+        "short": "Normal"
+      },
+      "sr": {
+        "label": "Advanced Activity Reports",
+        "short": "Advanced"
+      },
+      "ssr": {
+        "label": "Superior Activity Reports",
+        "short": "Superior"
+      }
+    },
+
+    "levelRange": {
+      "label": "Level Range",
+      "from": "From {level}",
+      "to": "To {level}"
+    },
+
+    "results": {
+      "title": "Results",
+      "students": "Students leveled",
+      "expPerStudent": "EXP per student",
+      "totalExp": "Total EXP",
+      "leftoverExp": "Leftover EXP",
+      "leftoverReports": "Leftover reports"
+    }
+  },
+
   "gachaStats": {
     "title": "Gacha Rate Stats",
     "description": "A tool you can use to get basic stats about your Blue Archive gacha pulls. Enter how many 3★ students you got on each 10-pull and click on the <strong>Add attempt</strong> button to add it to the stats. You can use the <strong>Remove</strong> button next to each attempt to remove it if you've made a mistake.",

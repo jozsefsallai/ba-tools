@@ -18,6 +18,7 @@ export const CHANGELOG_SCOPES = {
   globalBanners: "Global Banners",
   titleGenerator: "Title Generator",
   raidSoreCalc: "Raid Score Calculator",
+  studentExpCalculator: "Student EXP Calculator",
   pvp: "PVP Tracker",
   games: "Games",
   content: "Content",
@@ -42,6 +43,18 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "July 25, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.studentExpCalculator,
+        description:
+          "Added a Student EXP Calculator to see how many students you can level up with your owned Activity Reports.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
   {
     date: "June 13, 2026",
     features: [

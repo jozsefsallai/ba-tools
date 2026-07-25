@@ -55,7 +55,8 @@
         "timelineVisualizer": "Timeline Visualizer",
         "inventoryManagement": "Inventory Management",
         "railroadPuzzleSolver": "Railroad Puzzle Solver",
-        "raidScore": "Raid Score Calculator"
+        "raidScore": "Raid Score Calculator",
+        "studentExp": "Student EXP Calculator"
       },
       "misc": {
         "title": "Misc Tools",

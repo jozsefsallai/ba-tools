@@ -29,6 +29,7 @@ import {
   CakeIcon,
   CalculatorIcon,
   ChartNoAxesGanttIcon,
+  ClipboardMinusIcon,
   CogIcon,
   DicesIcon,
   EllipsisIcon,
@@ -212,6 +213,11 @@ export function AppSidebar() {
       href: "/raid-score-calculator",
       text: t("common.header.nav.gameplay.raidScore"),
       icon: CalculatorIcon,
+    },
+    {
+      href: "/student-exp-calculator",
+      text: t("common.header.nav.gameplay.studentExp"),
+      icon: ClipboardMinusIcon,
     },
   ];
 
