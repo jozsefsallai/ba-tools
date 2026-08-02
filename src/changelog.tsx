@@ -44,6 +44,45 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "August 2, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to specify a background color for exporting timelines as PNG.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added options for PNG export background color on public-facing timeline pages, which will override the preferences specified by the timeline's creator.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Added a user preference for auto-populating gifts in single-target gift inventories. When enabled, changing the total count for a specific gift will automatically set that amount as the number of gifts of that kind that you want to give to the target student. Gift inventories with multiple bond targets are unaffected by this change.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          "Added sorting by Name, Relationship Rank, and Level in the Quick Reorder Students modal of the Roster editor.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed \"Student's Preferences\" sorting option not being available when selecting a student on the sidebar while no gift inventory is selected or when you're logged out.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          'The "Done" button of the Quick Reorder Students modal will now be disabled if no changes were made to the order of students in the roster.',
+      },
+    ],
+  },
+  {
     date: "July 25, 2026",
     features: [
       {
