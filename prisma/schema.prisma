@@ -173,6 +173,17 @@ enum BannerKind {
   JP
 }
 
+enum BannerCounterKind {
+  Points
+  Charge
+}
+
+enum BannerChargeCategory {
+  Standard
+  Unique
+  Anniversary
+}
+
 model Student {
   id           String @id
   devName      String
@@ -317,6 +328,9 @@ model Banner {
   baseThreeStarRate Int @default(30)
 
   kind BannerKind
+
+  counterKind    BannerCounterKind    @default(Points)
+  chargeCategory BannerChargeCategory @default(Standard)
 }
 
 model GameBanner {

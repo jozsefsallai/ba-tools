@@ -1,5 +1,9 @@
 import z from "zod";
-import { BannerKind } from "../lib/db/client";
+import {
+  BannerChargeCategory,
+  BannerCounterKind,
+  BannerKind,
+} from "../lib/db/client";
 
 export const rawGameBanner = z.object({
   start: z.tuple([z.number().int(), z.number().int(), z.number().int()]),
@@ -31,6 +35,8 @@ export const rawBanner = z.object({
   isPickup: z.boolean(),
   isFest: z.boolean(),
   kind: z.enum(BannerKind),
+  counterKind: z.enum(BannerCounterKind),
+  chargeCategory: z.enum(BannerChargeCategory).optional(),
   pickupStudents: z.array(z.string()).optional(),
   extraStudents: z.array(z.string()).optional(),
   additionalThreeStarStudents: z.array(z.string()).optional(),

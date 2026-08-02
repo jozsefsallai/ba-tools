@@ -243,6 +243,8 @@ export const setBannersTask: Task<
           baseThreeStarRate,
 
           kind: banner.kind,
+          counterKind: banner.counterKind,
+          chargeCategory: banner.chargeCategory,
         },
       });
     }
