@@ -11,6 +11,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { buildStudentIconUrl } from "@/lib/url";
 import {
   DndContext,
@@ -30,7 +36,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVerticalIcon } from "lucide-react";
+import { ChevronDownIcon, GripVerticalIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   type PropsWithChildren,
@@ -46,10 +52,43 @@ export type ReorderRosterDialogProps = PropsWithChildren & {
   onReorder: (items: RosterItem[]) => void;
 };
 
+type SortKey = "name" | "relationshipRank" | "level";
+
 const restrictToVerticalAxis: Modifier = ({ transform }) => ({
   ...transform,
   x: 0,
 });
+
+function sortRosterItems(items: RosterItem[], key: SortKey): RosterItem[] {
+  const sorted = [...items];
+
+  switch (key) {
+    case "name":
+      sorted.sort((a, b) => a.student.name.localeCompare(b.student.name));
+      break;
+    case "relationshipRank":
+      sorted.sort((a, b) => b.relationshipRank - a.relationshipRank);
+      break;
+    case "level":
+      sorted.sort((a, b) => b.level - a.level);
+      break;
+  }
+
+  return sorted;
+}
+
+function hasRosterOrderChanged(
+  original: RosterItem[],
+  draft: RosterItem[],
+): boolean {
+  if (original.length !== draft.length) {
+    return true;
+  }
+
+  return draft.some(
+    (item, index) => item.student.id !== original[index]?.student.id,
+  );
+}
 
 type SortableRosterRowProps = {
   rosterItem: RosterItem;
@@ -137,6 +176,11 @@ export function ReorderRosterDialog({
     [draftItems],
   );
 
+  const hasChanges = useMemo(
+    () => hasRosterOrderChanged(rosterItems, draftItems),
+    [rosterItems, draftItems],
+  );
+
   const handleDragEnd = useCallback(({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) {
       return;
@@ -156,7 +200,15 @@ export function ReorderRosterDialog({
     });
   }, []);
 
+  const handleSort = useCallback((key: SortKey) => {
+    setDraftItems((current) => sortRosterItems(current, key));
+  }, []);
+
   function handleDone() {
+    if (!hasChanges) {
+      return;
+    }
+
     onReorder(draftItems);
     setOpen(false);
   }
@@ -193,8 +245,30 @@ export function ReorderRosterDialog({
           </SortableContext>
         </DndContext>
 
-        <DialogFooter>
-          <Button type="button" onClick={handleDone}>
+        <DialogFooter className="sm:justify-between">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="outline">
+                {t("tools.roster.editor.reorderStudents.sortBy")}
+                <ChevronDownIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => handleSort("name")}>
+                {t("tools.roster.editor.reorderStudents.sortOptions.name")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSort("relationshipRank")}>
+                {t(
+                  "tools.roster.editor.reorderStudents.sortOptions.relationshipRank",
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleSort("level")}>
+                {t("tools.roster.editor.reorderStudents.sortOptions.level")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button type="button" onClick={handleDone} disabled={!hasChanges}>
             {t("tools.roster.editor.reorderStudents.done")}
           </Button>
         </DialogFooter>

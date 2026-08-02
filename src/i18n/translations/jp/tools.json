@@ -766,6 +766,12 @@
         "trigger": "クイック生徒並べ替え",
         "title": "クイック生徒並べ替え",
         "description": "ドラッグしてロスターでの表示順を変えられるよ。",
+        "sortBy": "並び替え...",
+        "sortOptions": {
+          "name": "名前",
+          "relationshipRank": "絆ランク",
+          "level": "レベル"
+        },
         "done": "完了"
       },
       "hiddenNotReleased": "{count, plural, other {このサーバー未実装の生徒が # 人非表示}}",

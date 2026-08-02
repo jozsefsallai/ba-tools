@@ -907,6 +907,12 @@
         "trigger": "Quick Reorder Students",
         "title": "Quick Reorder Students",
         "description": "Drag students to change their display order on your roster.",
+        "sortBy": "Sort by...",
+        "sortOptions": {
+          "name": "Name",
+          "relationshipRank": "Relationship Rank",
+          "level": "Level"
+        },
         "done": "Done"
       },
       "hiddenNotReleased": "{count, plural, one {# student hidden (not released on this server)} other {# students hidden (not released on this server)}}",
