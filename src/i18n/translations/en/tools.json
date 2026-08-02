@@ -33,7 +33,10 @@
         "scale": "Scale",
         "itemSpacing": "Item Spacing",
         "vsSize": "Vertical Separator Size",
-        "hsSize": "Horizontal Separator Size"
+        "hsSize": "Horizontal Separator Size",
+        "exportWithTransparentBackground": "Export With Transparent Background",
+        "exportBackgroundColor": "Export Background Color",
+        "exportBackgroundOpacity": "Export Background Opacity"
       },
 
       "save": {

@@ -1,20 +1,15 @@
 "use client";
 
+import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
 import {
   type TimelineItem,
   TimelinePreview,
 } from "@/app/timeline-visualizer/_components/timeline-preview";
+import { ExportBackgroundControls } from "@/components/common/export-background-controls";
+import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
-import { useQueryWithStatus } from "@/lib/convex";
-import type { Student } from "~prisma";
-import { useMemo, useRef, useState } from "react";
-import { api } from "~convex/api";
-import type { Id } from "~convex/dataModel";
-import { v4 as uuid } from "uuid";
-import html2canvas from "html2canvas-pro";
-import { trimTransparentPixels } from "@/lib/canvas";
-import { encodePngWithItxt } from "@/lib/png-metadata";
-import { sleep } from "@/lib/sleep";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -23,15 +18,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import slugify from "slugify";
-import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useStudents } from "@/hooks/use-students";
+import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
+import { useQueryWithStatus } from "@/lib/convex";
+import { encodePngWithItxt } from "@/lib/png-metadata";
+import { sleep } from "@/lib/sleep";
+import {
+  DEFAULT_EXPORT_BACKGROUND_COLOR,
+  DEFAULT_EXPORT_BACKGROUND_OPACITY,
+  DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
+} from "@/lib/storage/timeline";
+import html2canvas from "html2canvas-pro";
 import { DownloadIcon, PencilIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import Link from "next/link";
-import { useStudents } from "@/hooks/use-students";
+import { useEffect, useMemo, useRef, useState } from "react";
+import slugify from "slugify";
+import { v4 as uuid } from "uuid";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
+import type { Student } from "~prisma";
 
 export type TimelineViewProps = {
   id: string;
@@ -45,10 +51,40 @@ export function TimelineView({ id }: TimelineViewProps) {
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
   const [scale, setScale] = useState(1);
+  const [exportWithTransparentBackground, setExportWithTransparentBackground] =
+    useState(DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND);
+  const [exportBackgroundColor, setExportBackgroundColor] = useState(
+    DEFAULT_EXPORT_BACKGROUND_COLOR,
+  );
+  const [exportBackgroundOpacity, setExportBackgroundOpacity] = useState(
+    DEFAULT_EXPORT_BACKGROUND_OPACITY,
+  );
 
   const query = useQueryWithStatus(api.timeline.getById, {
     id: id as Id<"timeline">,
   });
+
+  useEffect(() => {
+    if (query.status !== "success") {
+      return;
+    }
+
+    setExportWithTransparentBackground(
+      query.data.exportWithTransparentBackground ??
+        DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
+    );
+    setExportBackgroundColor(
+      query.data.exportBackgroundColor ?? DEFAULT_EXPORT_BACKGROUND_COLOR,
+    );
+    setExportBackgroundOpacity(
+      query.data.exportBackgroundOpacity ?? DEFAULT_EXPORT_BACKGROUND_OPACITY,
+    );
+  }, [
+    query.status,
+    query.data?.exportWithTransparentBackground,
+    query.data?.exportBackgroundColor,
+    query.data?.exportBackgroundOpacity,
+  ]);
 
   const items = useMemo<TimelineItem[]>(() => {
     if (!query.data) {
@@ -104,7 +140,15 @@ export function TimelineView({ id }: TimelineViewProps) {
       backgroundColor: null,
     });
 
-    const trimmedCanvas = trimTransparentPixels(canvas);
+    let trimmedCanvas = trimTransparentPixels(canvas);
+
+    if (!exportWithTransparentBackground) {
+      trimmedCanvas = compositeCanvasBackground(
+        trimmedCanvas,
+        exportBackgroundColor,
+        exportBackgroundOpacity,
+      );
+    }
 
     const trimmedName = (query.data.name ?? "").trim();
     const filename =
@@ -120,6 +164,9 @@ export function TimelineView({ id }: TimelineViewProps) {
       itemSpacing: query.data.itemSpacing,
       verticalSeparatorSize: query.data.verticalSeparatorSize,
       horizontalSeparatorSize: query.data.horizontalSeparatorSize,
+      exportWithTransparentBackground,
+      exportBackgroundColor,
+      exportBackgroundOpacity,
       name: query.data.name ?? undefined,
       description: query.data.description ?? undefined,
     };
@@ -207,39 +254,62 @@ export function TimelineView({ id }: TimelineViewProps) {
         busy={generationInProgress}
       />
 
-      <div className="flex items-center justify-center gap-4">
-        <div className="flex items-center gap-2">
-          <Label className="shrink-0">{t("common.scale")}</Label>
+      <div className="flex flex-col gap-4 items-center">
+        <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label className="shrink-0">{t("common.scale")}</Label>
 
-          <Select
-            value={scale.toString()}
-            onValueChange={(val) => setScale(Number.parseInt(val, 10))}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+            <Select
+              value={scale.toString()}
+              onValueChange={(val) => setScale(Number.parseInt(val, 10))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
 
-            <SelectContent>
-              <SelectItem value="1">1x</SelectItem>
-              <SelectItem value="2">2x</SelectItem>
-              <SelectItem value="3">3x</SelectItem>
-              <SelectItem value="4">4x</SelectItem>
-              <SelectItem value="5">5x</SelectItem>
-            </SelectContent>
-          </Select>
+              <SelectContent>
+                <SelectItem value="1">1x</SelectItem>
+                <SelectItem value="2">2x</SelectItem>
+                <SelectItem value="3">3x</SelectItem>
+                <SelectItem value="4">4x</SelectItem>
+                <SelectItem value="5">5x</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex gap-4 items-center justify-center">
+            <CopyTextTimelineButton items={items} />
+
+            <Button
+              onClick={getTimelineImage}
+              disabled={items.length === 0 || generationInProgress}
+            >
+              <DownloadIcon />
+              {t("common.downloadImage")}
+            </Button>
+          </div>
         </div>
 
-        <div className="flex gap-4 items-center justify-center">
-          <CopyTextTimelineButton items={items} />
-
-          <Button
-            onClick={getTimelineImage}
-            disabled={items.length === 0 || generationInProgress}
-          >
-            <DownloadIcon />
-            {t("common.downloadImage")}
-          </Button>
-        </div>
+        <ExportBackgroundControls
+          idPrefix="tl-view-export-bg"
+          transparentBackground={exportWithTransparentBackground}
+          backgroundColor={exportBackgroundColor}
+          backgroundOpacity={exportBackgroundOpacity}
+          onTransparentBackgroundChange={setExportWithTransparentBackground}
+          onBackgroundColorChange={setExportBackgroundColor}
+          onBackgroundOpacityChange={setExportBackgroundOpacity}
+          labels={{
+            transparentBackground: t(
+              "tools.timeline.tabs.appearance.exportWithTransparentBackground",
+            ),
+            backgroundColor: t(
+              "tools.timeline.tabs.appearance.exportBackgroundColor",
+            ),
+            backgroundOpacity: t(
+              "tools.timeline.tabs.appearance.exportBackgroundOpacity",
+            ),
+          }}
+        />
       </div>
     </div>
   );

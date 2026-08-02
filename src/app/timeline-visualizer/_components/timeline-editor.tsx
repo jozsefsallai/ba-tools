@@ -1,18 +1,25 @@
 "use client";
 
+import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
+import { ImportTextTimelineButton } from "@/app/timeline-visualizer/_components/import-text-timeline-button";
 import {
   type TimelineItem,
   TimelinePreview,
 } from "@/app/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/timeline-visualizer/_components/timeline-quick-add";
+import { ExportBackgroundControls } from "@/components/common/export-background-controls";
+import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
+import { SaveStatus } from "@/components/common/save-status";
 import {
   StudentPicker,
   type StudentPickerHandle,
 } from "@/components/common/student-picker";
 import { ExportTimelineDataDialog } from "@/components/dialogs/export-timeline-data-dialog";
 import { ImportTimelineDataDialog } from "@/components/dialogs/import-timeline-data-dialog";
+import { SaveDialog } from "@/components/dialogs/save-dialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,48 +29,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { trimTransparentPixels } from "@/lib/canvas";
-import { decodePngItxt, encodePngWithItxt } from "@/lib/png-metadata";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useUserPreferences } from "@/hooks/use-preferences";
+import { useStudents } from "@/hooks/use-students";
+import { clearCache } from "@/lib/cache";
+import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
+import { decodePngItxt, encodePngWithItxt } from "@/lib/png-metadata";
 import { sleep } from "@/lib/sleep";
 import {
-  timelineStorage,
+  DEFAULT_EXPORT_BACKGROUND_COLOR,
+  DEFAULT_EXPORT_BACKGROUND_OPACITY,
+  DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
   type TimelineStorageData,
+  timelineStorage,
 } from "@/lib/storage/timeline";
-import type { Student } from "~prisma";
+import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/nextjs";
 import { Authenticated, useMutation } from "convex/react";
 import html2canvas from "html2canvas-pro";
 import {
-  ChevronsUpDownIcon,
   ChevronUpIcon,
+  ChevronsUpDownIcon,
   DownloadIcon,
   ImageUpIcon,
   SaveIcon,
   ShareIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useNavigationGuard } from "next-navigation-guard";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import slugify from "slugify";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import slugify from "slugify";
-import { CopyTextTimelineButton } from "@/app/timeline-visualizer/_components/copy-text-timeline-button";
-import { clearCache } from "@/lib/cache";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { useUserPreferences } from "@/hooks/use-preferences";
-import { Textarea } from "@/components/ui/textarea";
-import { MarkdownTips } from "@/components/common/markdown-tips";
-import { useStudents } from "@/hooks/use-students";
-import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
-import { useNavigationGuard } from "next-navigation-guard";
-import { SaveStatus } from "@/components/common/save-status";
-import { SaveDialog } from "@/components/dialogs/save-dialog";
-import { useUser } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
-import { ImportTextTimelineButton } from "@/app/timeline-visualizer/_components/import-text-timeline-button";
+import type { Student } from "~prisma";
 
 export function TimelineEditor() {
   const t = useTranslations();
@@ -186,6 +190,28 @@ export function TimelineEditor() {
   );
   const [horizontalSeparatorSizeStr, setHorizontalSeparatorSizeStr] = useState(
     preferences.timelineVisualizer.defaultHorizontalSeparatorSize.toString(),
+  );
+
+  const [
+    exportWithTransparentBackground,
+    setExportWithTransparentBackground,
+    setExportWithTransparentBackgroundUnchecked,
+  ] = useSaveableState(
+    preferences.timelineVisualizer.defaultExportWithTransparentBackground,
+  );
+  const [
+    exportBackgroundColor,
+    setExportBackgroundColor,
+    setExportBackgroundColorUnchecked,
+  ] = useSaveableState(
+    preferences.timelineVisualizer.defaultExportBackgroundColor,
+  );
+  const [
+    exportBackgroundOpacity,
+    setExportBackgroundOpacity,
+    setExportBackgroundOpacityUnchecked,
+  ] = useSaveableState(
+    preferences.timelineVisualizer.defaultExportBackgroundOpacity,
   );
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
@@ -347,6 +373,9 @@ export function TimelineEditor() {
       itemSpacing,
       verticalSeparatorSize,
       horizontalSeparatorSize,
+      exportWithTransparentBackground,
+      exportBackgroundColor,
+      exportBackgroundOpacity,
       name: name.length > 0 ? name : undefined,
       description: description.length > 0 ? description : undefined,
     };
@@ -368,7 +397,15 @@ export function TimelineEditor() {
       backgroundColor: null,
     });
 
-    const trimmedCanvas = trimTransparentPixels(canvas);
+    let trimmedCanvas = trimTransparentPixels(canvas);
+
+    if (!exportWithTransparentBackground) {
+      trimmedCanvas = compositeCanvasBackground(
+        trimmedCanvas,
+        exportBackgroundColor,
+        exportBackgroundOpacity,
+      );
+    }
 
     const trimmedName = name.trim();
     const filename =
@@ -428,6 +465,9 @@ export function TimelineEditor() {
       itemSpacing,
       verticalSeparatorSize,
       horizontalSeparatorSize,
+      exportWithTransparentBackground,
+      exportBackgroundColor,
+      exportBackgroundOpacity,
       name: name.length > 0 ? name : undefined,
       description: description.length > 0 ? description : undefined,
       visibility,
@@ -517,6 +557,16 @@ export function TimelineEditor() {
     setVerticalSeparatorSizeUnchecked(storedData.verticalSeparatorSize || 70);
     setHorizontalSeparatorSizeUnchecked(
       storedData.horizontalSeparatorSize || 50,
+    );
+    setExportWithTransparentBackgroundUnchecked(
+      storedData.exportWithTransparentBackground ??
+        DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
+    );
+    setExportBackgroundColorUnchecked(
+      storedData.exportBackgroundColor ?? DEFAULT_EXPORT_BACKGROUND_COLOR,
+    );
+    setExportBackgroundOpacityUnchecked(
+      storedData.exportBackgroundOpacity ?? DEFAULT_EXPORT_BACKGROUND_OPACITY,
     );
     setItemSpacingStr((storedData.itemSpacing || 10).toString());
     setVerticalSeparatorSizeStr(
@@ -619,6 +669,15 @@ export function TimelineEditor() {
       setItemSpacingUnchecked(10);
       setVerticalSeparatorSizeUnchecked(70);
       setHorizontalSeparatorSizeUnchecked(50);
+      setExportWithTransparentBackgroundUnchecked(
+        preferences.timelineVisualizer.defaultExportWithTransparentBackground,
+      );
+      setExportBackgroundColorUnchecked(
+        preferences.timelineVisualizer.defaultExportBackgroundColor,
+      );
+      setExportBackgroundOpacityUnchecked(
+        preferences.timelineVisualizer.defaultExportBackgroundOpacity,
+      );
       setItemSpacingStr("10");
       setVerticalSeparatorSizeStr("70");
       setHorizontalSeparatorSizeStr("50");
@@ -668,6 +727,16 @@ export function TimelineEditor() {
       setHorizontalSeparatorSizeUnchecked(
         query.data.horizontalSeparatorSize || 50,
       );
+      setExportWithTransparentBackgroundUnchecked(
+        query.data.exportWithTransparentBackground ??
+          DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
+      );
+      setExportBackgroundColorUnchecked(
+        query.data.exportBackgroundColor ?? DEFAULT_EXPORT_BACKGROUND_COLOR,
+      );
+      setExportBackgroundOpacityUnchecked(
+        query.data.exportBackgroundOpacity ?? DEFAULT_EXPORT_BACKGROUND_OPACITY,
+      );
       setItemSpacingStr((query.data.itemSpacing || 10).toString());
       setVerticalSeparatorSizeStr(
         (query.data.verticalSeparatorSize || 70).toString(),
@@ -695,6 +764,15 @@ export function TimelineEditor() {
     );
     setHorizontalSeparatorSizeUnchecked(
       preferences.timelineVisualizer.defaultHorizontalSeparatorSize,
+    );
+    setExportWithTransparentBackgroundUnchecked(
+      preferences.timelineVisualizer.defaultExportWithTransparentBackground,
+    );
+    setExportBackgroundColorUnchecked(
+      preferences.timelineVisualizer.defaultExportBackgroundColor,
+    );
+    setExportBackgroundOpacityUnchecked(
+      preferences.timelineVisualizer.defaultExportBackgroundOpacity,
     );
 
     setItemSpacingStr(
@@ -910,72 +988,99 @@ export function TimelineEditor() {
             </Authenticated>
 
             <TabsContent value="appearance">
-              <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
-                <div className="flex gap-2 items-center">
-                  <Label className="shrink-0">
-                    {t("tools.timeline.tabs.appearance.scale")}
-                  </Label>
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-center">
+                  <div className="flex gap-2 items-center">
+                    <Label className="shrink-0">
+                      {t("tools.timeline.tabs.appearance.scale")}
+                    </Label>
 
-                  <Select
-                    value={scale.toString()}
-                    onValueChange={(val) => setScale(Number.parseInt(val, 10))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <Select
+                      value={scale.toString()}
+                      onValueChange={(val) =>
+                        setScale(Number.parseInt(val, 10))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
 
-                    <SelectContent>
-                      <SelectItem value="1">1x</SelectItem>
-                      <SelectItem value="2">2x</SelectItem>
-                      <SelectItem value="3">3x</SelectItem>
-                      <SelectItem value="4">4x</SelectItem>
-                      <SelectItem value="5">5x</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        <SelectItem value="1">1x</SelectItem>
+                        <SelectItem value="2">2x</SelectItem>
+                        <SelectItem value="3">3x</SelectItem>
+                        <SelectItem value="4">4x</SelectItem>
+                        <SelectItem value="5">5x</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <Label className="shrink-0">
+                      {t("tools.timeline.tabs.appearance.itemSpacing")}
+                    </Label>
+
+                    <Input
+                      type="number"
+                      value={itemSpacingStr}
+                      onChange={(e) => setItemSpacingStr(e.target.value)}
+                      className="w-20"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <Label className="shrink-0">
+                      {t("tools.timeline.tabs.appearance.vsSize")}
+                    </Label>
+
+                    <Input
+                      type="number"
+                      value={verticalSeparatorSizeStr}
+                      onChange={(e) =>
+                        setVerticalSeparatorSizeStr(e.target.value)
+                      }
+                      className="w-20"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <Label className="shrink-0">
+                      {t("tools.timeline.tabs.appearance.hsSize")}
+                    </Label>
+
+                    <Input
+                      type="number"
+                      value={horizontalSeparatorSizeStr}
+                      onChange={(e) =>
+                        setHorizontalSeparatorSizeStr(e.target.value)
+                      }
+                      className="w-20"
+                    />
+                  </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
-                  <Label className="shrink-0">
-                    {t("tools.timeline.tabs.appearance.itemSpacing")}
-                  </Label>
-
-                  <Input
-                    type="number"
-                    value={itemSpacingStr}
-                    onChange={(e) => setItemSpacingStr(e.target.value)}
-                    className="w-20"
-                  />
-                </div>
-
-                <div className="flex gap-2 items-center">
-                  <Label className="shrink-0">
-                    {t("tools.timeline.tabs.appearance.vsSize")}
-                  </Label>
-
-                  <Input
-                    type="number"
-                    value={verticalSeparatorSizeStr}
-                    onChange={(e) =>
-                      setVerticalSeparatorSizeStr(e.target.value)
-                    }
-                    className="w-20"
-                  />
-                </div>
-
-                <div className="flex gap-2 items-center">
-                  <Label className="shrink-0">
-                    {t("tools.timeline.tabs.appearance.hsSize")}
-                  </Label>
-
-                  <Input
-                    type="number"
-                    value={horizontalSeparatorSizeStr}
-                    onChange={(e) =>
-                      setHorizontalSeparatorSizeStr(e.target.value)
-                    }
-                    className="w-20"
-                  />
-                </div>
+                <ExportBackgroundControls
+                  idPrefix="tl-export-bg"
+                  transparentBackground={exportWithTransparentBackground}
+                  backgroundColor={exportBackgroundColor}
+                  backgroundOpacity={exportBackgroundOpacity}
+                  onTransparentBackgroundChange={
+                    setExportWithTransparentBackground
+                  }
+                  onBackgroundColorChange={setExportBackgroundColor}
+                  onBackgroundOpacityChange={setExportBackgroundOpacity}
+                  labels={{
+                    transparentBackground: t(
+                      "tools.timeline.tabs.appearance.exportWithTransparentBackground",
+                    ),
+                    backgroundColor: t(
+                      "tools.timeline.tabs.appearance.exportBackgroundColor",
+                    ),
+                    backgroundOpacity: t(
+                      "tools.timeline.tabs.appearance.exportBackgroundOpacity",
+                    ),
+                  }}
+                />
               </div>
             </TabsContent>
 

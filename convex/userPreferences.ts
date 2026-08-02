@@ -26,6 +26,9 @@ export const update = authenticatedMutation({
         defaultItemSpacing: v.optional(v.number()),
         defaultVerticalSeparatorSize: v.optional(v.number()),
         defaultHorizontalSeparatorSize: v.optional(v.number()),
+        defaultExportWithTransparentBackground: v.optional(v.boolean()),
+        defaultExportBackgroundColor: v.optional(v.string()),
+        defaultExportBackgroundOpacity: v.optional(v.number()),
       }),
     ),
     formationDisplay: v.optional(
@@ -52,6 +55,7 @@ export const update = authenticatedMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         timelineVisualizer: {
+          ...defaultUserPreferences.timelineVisualizer,
           ...existing.timelineVisualizer,
           ...args.timelineVisualizer,
         },

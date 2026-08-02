@@ -1,3 +1,42 @@
+export function hexToRgba(hexColor: string, opacityPercent: number): string {
+  const hex = hexColor.replace("#", "");
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : hex;
+
+  const r = Number.parseInt(normalized.slice(0, 2), 16);
+  const g = Number.parseInt(normalized.slice(2, 4), 16);
+  const b = Number.parseInt(normalized.slice(4, 6), 16);
+  const a = Math.min(100, Math.max(0, opacityPercent)) / 100;
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+export function compositeCanvasBackground(
+  canvas: HTMLCanvasElement,
+  hexColor: string,
+  opacityPercent: number,
+): HTMLCanvasElement {
+  const output = document.createElement("canvas");
+  output.width = canvas.width;
+  output.height = canvas.height;
+
+  const ctx = output.getContext("2d");
+  if (!ctx) {
+    return canvas;
+  }
+
+  ctx.fillStyle = hexToRgba(hexColor, opacityPercent);
+  ctx.fillRect(0, 0, output.width, output.height);
+  ctx.drawImage(canvas, 0, 0);
+
+  return output;
+}
+
 // adapted from https://gist.github.com/remy/784508
 export function trimTransparentPixels(
   canvas: HTMLCanvasElement,

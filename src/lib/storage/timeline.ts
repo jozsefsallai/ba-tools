@@ -28,7 +28,14 @@ export type TimelineStorageData = {
   itemSpacing: number;
   verticalSeparatorSize: number;
   horizontalSeparatorSize: number;
+  exportWithTransparentBackground?: boolean;
+  exportBackgroundColor?: string;
+  exportBackgroundOpacity?: number;
 };
+
+export const DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND = true;
+export const DEFAULT_EXPORT_BACKGROUND_COLOR = "#000000";
+export const DEFAULT_EXPORT_BACKGROUND_OPACITY = 100;
 
 class TimelineStorage extends Storage<TimelineStorageData> {
   constructor() {

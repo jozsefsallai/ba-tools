@@ -120,6 +120,9 @@ export default defineSchema({
       defaultItemSpacing: v.number(),
       defaultVerticalSeparatorSize: v.number(),
       defaultHorizontalSeparatorSize: v.number(),
+      defaultExportWithTransparentBackground: v.optional(v.boolean()),
+      defaultExportBackgroundColor: v.optional(v.string()),
+      defaultExportBackgroundOpacity: v.optional(v.number()),
     }),
     formationDisplay: v.object({
       defaultScale: v.number(),
@@ -162,6 +165,9 @@ export default defineSchema({
     itemSpacing: v.optional(v.number()),
     verticalSeparatorSize: v.optional(v.number()),
     horizontalSeparatorSize: v.optional(v.number()),
+    exportWithTransparentBackground: v.optional(v.boolean()),
+    exportBackgroundColor: v.optional(v.string()),
+    exportBackgroundOpacity: v.optional(v.number()),
   }).index("by_userId", ["userId"]),
 
   timelineGroup: defineTable({

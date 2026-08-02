@@ -29,7 +29,10 @@
         "scale": "スケール",
         "itemSpacing": "アイテムの間隔",
         "vsSize": "スペース（縦）のサイズ",
-        "hsSize": "スペース（横）のサイズ"
+        "hsSize": "スペース（横）のサイズ",
+        "exportWithTransparentBackground": "透明背景でエクスポート",
+        "exportBackgroundColor": "エクスポート背景色",
+        "exportBackgroundOpacity": "エクスポート背景の不透明度"
       },
       "save": {
         "title": "保存・出力",

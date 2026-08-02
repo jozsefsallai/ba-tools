@@ -1,5 +1,6 @@
 "use client";
 
+import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -215,6 +216,53 @@ export function UserPreferences() {
             )}
           </div>
         </div>
+
+        <ExportBackgroundControls
+          idPrefix="tl-default-export-bg"
+          className="justify-between md:justify-between w-full"
+          transparentBackground={
+            newPreferences.timelineVisualizer
+              .defaultExportWithTransparentBackground
+          }
+          backgroundColor={
+            newPreferences.timelineVisualizer.defaultExportBackgroundColor
+          }
+          backgroundOpacity={
+            newPreferences.timelineVisualizer.defaultExportBackgroundOpacity
+          }
+          onTransparentBackgroundChange={(checked) =>
+            setPreference(
+              "timelineVisualizer",
+              "defaultExportWithTransparentBackground",
+              checked,
+            )
+          }
+          onBackgroundColorChange={(color) =>
+            setPreference(
+              "timelineVisualizer",
+              "defaultExportBackgroundColor",
+              color,
+            )
+          }
+          onBackgroundOpacityChange={(opacity) =>
+            setPreference(
+              "timelineVisualizer",
+              "defaultExportBackgroundOpacity",
+              opacity,
+            )
+          }
+          labels={{
+            transparentBackground: t(
+              "common.userPreferences.timelineVisualizer.defaultExportWithTransparentBackground",
+            ),
+            backgroundColor: t(
+              "common.userPreferences.timelineVisualizer.defaultExportBackgroundColor",
+            ),
+            backgroundOpacity: t(
+              "common.userPreferences.timelineVisualizer.defaultExportBackgroundOpacity",
+            ),
+          }}
+        />
       </div>
 
       <Separator />

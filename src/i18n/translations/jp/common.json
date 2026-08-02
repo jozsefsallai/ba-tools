@@ -324,6 +324,9 @@
       "defaultItemSpacing": "デフォルトのアイテム間隔",
       "defaultVerticalSeparatorSize": "デフォルトの縦スペースサイズ",
       "defaultHorizontalSeparatorSize": "デフォルトの横スペースサイズ",
+      "defaultExportWithTransparentBackground": "デフォルトで透明背景でエクスポート",
+      "defaultExportBackgroundColor": "デフォルトのエクスポート背景色",
+      "defaultExportBackgroundOpacity": "デフォルトのエクスポート背景の不透明度",
       "triggerAutoFocus": "発動条件にオートフォーカス",
       "triggerAutoFocusHint": "有効にすると、生徒を選択した時にエディタの発動条件入力欄へ自動でフォーカスするよ。その状態でEnterキーを押すと、新しい生徒の選択に素早く戻れるよ。"
     },

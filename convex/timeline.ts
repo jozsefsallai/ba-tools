@@ -1,12 +1,12 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { query } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import {
   timelineSeparatorItem,
   timelineStudentItem,
   timelineTextItem,
 } from "./schema";
-import { query } from "./_generated/server";
 
 export const getOwn = authenticatedQuery({
   handler: async (ctx) => {
@@ -38,9 +38,7 @@ export const searchOwn = authenticatedQuery({
       .order("desc")
       .collect();
     const term = args.search.toLowerCase();
-    return all.filter((item) =>
-      (item.name ?? "").toLowerCase().includes(term),
-    );
+    return all.filter((item) => (item.name ?? "").toLowerCase().includes(term));
   },
 });
 
@@ -56,6 +54,9 @@ export const create = authenticatedMutation({
     itemSpacing: v.optional(v.number()),
     verticalSeparatorSize: v.optional(v.number()),
     horizontalSeparatorSize: v.optional(v.number()),
+    exportWithTransparentBackground: v.optional(v.boolean()),
+    exportBackgroundColor: v.optional(v.string()),
+    exportBackgroundOpacity: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const timeline = {
@@ -68,6 +69,9 @@ export const create = authenticatedMutation({
       itemSpacing: args.itemSpacing,
       verticalSeparatorSize: args.verticalSeparatorSize,
       horizontalSeparatorSize: args.horizontalSeparatorSize,
+      exportWithTransparentBackground: args.exportWithTransparentBackground,
+      exportBackgroundColor: args.exportBackgroundColor,
+      exportBackgroundOpacity: args.exportBackgroundOpacity,
     };
 
     const id = await ctx.db.insert("timeline", timeline);
@@ -88,6 +92,9 @@ export const update = authenticatedMutation({
     itemSpacing: v.optional(v.number()),
     verticalSeparatorSize: v.optional(v.number()),
     horizontalSeparatorSize: v.optional(v.number()),
+    exportWithTransparentBackground: v.optional(v.boolean()),
+    exportBackgroundColor: v.optional(v.string()),
+    exportBackgroundOpacity: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const timeline = {
@@ -99,6 +106,9 @@ export const update = authenticatedMutation({
       itemSpacing: args.itemSpacing,
       verticalSeparatorSize: args.verticalSeparatorSize,
       horizontalSeparatorSize: args.horizontalSeparatorSize,
+      exportWithTransparentBackground: args.exportWithTransparentBackground,
+      exportBackgroundColor: args.exportBackgroundColor,
+      exportBackgroundOpacity: args.exportBackgroundOpacity,
     };
 
     const current = await ctx.db.get(args.id);
