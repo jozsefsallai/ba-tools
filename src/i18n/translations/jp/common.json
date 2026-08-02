@@ -334,6 +334,11 @@
       "defaultDisplayRoleIcons": "デフォルトで役割アイコンを表示",
       "defaultVerticalGroups": "デフォルトで垂直グループ化",
       "defaultRowGap": "デフォルトの行間隔（px）"
+    },
+    "bond": {
+      "title": "絆ランク計算機",
+      "autoPopulateSingleTargetGifts": "単一ターゲット所持ギフトを自動入力",
+      "autoPopulateSingleTargetGiftsHint": "有効にすると、所持ギフトの合計数を変更した時、ターゲットが1人だけの所持ギフトでは、その生徒への贈与数が自動で同じ値に設定されるよ。"
     }
   },
   "themeToggle": {

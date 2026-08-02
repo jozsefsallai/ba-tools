@@ -1,6 +1,6 @@
+import { defaultUserPreferences } from "@/lib/user-preferences";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
-import { defaultUserPreferences } from "@/lib/user-preferences";
 
 export const get = authenticatedQuery({
   handler: async (ctx) => {
@@ -37,6 +37,11 @@ export const update = authenticatedMutation({
         defaultRowGap: v.optional(v.number()),
       }),
     ),
+    bond: v.optional(
+      v.object({
+        autoPopulateSingleTargetGifts: v.optional(v.boolean()),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -54,6 +59,10 @@ export const update = authenticatedMutation({
           ...existing.formationDisplay,
           ...args.formationDisplay,
         },
+        bond: {
+          ...(existing.bond ?? defaultUserPreferences.bond),
+          ...args.bond,
+        },
       });
 
       return await ctx.db.get(existing._id);
@@ -68,6 +77,10 @@ export const update = authenticatedMutation({
       formationDisplay: {
         ...defaultUserPreferences.formationDisplay,
         ...args.formationDisplay,
+      },
+      bond: {
+        ...defaultUserPreferences.bond,
+        ...args.bond,
       },
     });
   },

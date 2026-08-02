@@ -128,6 +128,11 @@ export default defineSchema({
       defaultGroupsVertical: v.boolean(),
       defaultRowGap: v.optional(v.number()),
     }),
+    bond: v.optional(
+      v.object({
+        autoPopulateSingleTargetGifts: v.boolean(),
+      }),
+    ),
   }).index("by_userId", ["userId"]),
 
   formation: defineTable({

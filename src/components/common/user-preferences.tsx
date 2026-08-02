@@ -53,6 +53,7 @@ export function UserPreferences() {
       await savePreferences({
         timelineVisualizer: newPreferences.timelineVisualizer,
         formationDisplay: newPreferences.formationDisplay,
+        bond: newPreferences.bond,
       });
       toast.success(t("common.userPreferences.toasts.saved"));
     } catch (err) {
@@ -65,16 +66,22 @@ export function UserPreferences() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-lg font-semibold">{t("common.userPreferences.title")}</h1>
+      <h1 className="text-lg font-semibold">
+        {t("common.userPreferences.title")}
+      </h1>
 
       <Separator />
 
       <div className="flex flex-col gap-4 text-sm">
-        <h2 className="text-base font-semibold">{t("common.userPreferences.timelineVisualizer.title")}</h2>
+        <h2 className="text-base font-semibold">
+          {t("common.userPreferences.timelineVisualizer.title")}
+        </h2>
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label className="shrink-0">{t("common.userPreferences.timelineVisualizer.defaultScale")}</Label>
+            <Label className="shrink-0">
+              {t("common.userPreferences.timelineVisualizer.defaultScale")}
+            </Label>
 
             <div>
               <Select
@@ -106,7 +113,9 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="tl-default-item-spacing">
-              {t("common.userPreferences.timelineVisualizer.defaultItemSpacing")}
+              {t(
+                "common.userPreferences.timelineVisualizer.defaultItemSpacing",
+              )}
             </Label>
 
             <div>
@@ -133,7 +142,9 @@ export function UserPreferences() {
               className="shrink-0"
               htmlFor="tl-default-vertical-separator-size"
             >
-              {t("common.userPreferences.timelineVisualizer.defaultVerticalSeparatorSize")}
+              {t(
+                "common.userPreferences.timelineVisualizer.defaultVerticalSeparatorSize",
+              )}
             </Label>
 
             <div>
@@ -160,7 +171,9 @@ export function UserPreferences() {
               className="shrink-0"
               htmlFor="tl-default-horizontal-separator-size"
             >
-              {t("common.userPreferences.timelineVisualizer.defaultHorizontalSeparatorSize")}
+              {t(
+                "common.userPreferences.timelineVisualizer.defaultHorizontalSeparatorSize",
+              )}
             </Label>
 
             <div>
@@ -197,7 +210,9 @@ export function UserPreferences() {
           </div>
 
           <div className="text-xs text-muted-foreground">
-            {t("common.userPreferences.timelineVisualizer.triggerAutoFocusHint")}
+            {t(
+              "common.userPreferences.timelineVisualizer.triggerAutoFocusHint",
+            )}
           </div>
         </div>
       </div>
@@ -205,11 +220,15 @@ export function UserPreferences() {
       <Separator />
 
       <div className="flex flex-col gap-4 text-sm">
-        <h2 className="text-base font-semibold">{t("common.userPreferences.formationDisplay.title")}</h2>
+        <h2 className="text-base font-semibold">
+          {t("common.userPreferences.formationDisplay.title")}
+        </h2>
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label className="shrink-0">{t("common.userPreferences.formationDisplay.defaultScale")}</Label>
+            <Label className="shrink-0">
+              {t("common.userPreferences.formationDisplay.defaultScale")}
+            </Label>
 
             <div>
               <Select
@@ -241,7 +260,9 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="echelontool-display-overline">
-              {t("common.userPreferences.formationDisplay.defaultDisplayOverline")}
+              {t(
+                "common.userPreferences.formationDisplay.defaultDisplayOverline",
+              )}
             </Label>
 
             <Switch
@@ -261,7 +282,9 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="echelontool-display-role">
-              {t("common.userPreferences.formationDisplay.defaultDisplayRoleIcons")}
+              {t(
+                "common.userPreferences.formationDisplay.defaultDisplayRoleIcons",
+              )}
             </Label>
 
             <Switch
@@ -281,7 +304,9 @@ export function UserPreferences() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
             <Label className="shrink-0" htmlFor="echelontool-vertical-groups">
-              {t("common.userPreferences.formationDisplay.defaultVerticalGroups")}
+              {t(
+                "common.userPreferences.formationDisplay.defaultVerticalGroups",
+              )}
             </Label>
 
             <Switch
@@ -300,10 +325,7 @@ export function UserPreferences() {
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 justify-between">
-            <Label
-              className="shrink-0"
-              htmlFor="echelontool-default-row-gap"
-            >
+            <Label className="shrink-0" htmlFor="echelontool-default-row-gap">
               {t("common.userPreferences.formationDisplay.defaultRowGap")}
             </Label>
 
@@ -327,6 +349,34 @@ export function UserPreferences() {
                 }
               }}
             />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div className="flex flex-col gap-4 text-sm">
+        <h2 className="text-base font-semibold">
+          {t("common.userPreferences.bond.title")}
+        </h2>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 justify-between">
+            <Label className="shrink-0" htmlFor="bond-auto-populate-gifts">
+              {t("common.userPreferences.bond.autoPopulateSingleTargetGifts")}
+            </Label>
+
+            <Switch
+              id="bond-auto-populate-gifts"
+              checked={newPreferences.bond.autoPopulateSingleTargetGifts}
+              onCheckedChange={(checked) =>
+                setPreference("bond", "autoPopulateSingleTargetGifts", checked)
+              }
+            />
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            {t("common.userPreferences.bond.autoPopulateSingleTargetGiftsHint")}
           </div>
         </div>
       </div>

@@ -360,6 +360,11 @@
       "defaultDisplayRoleIcons": "Default display role icons",
       "defaultVerticalGroups": "Default vertical groups",
       "defaultRowGap": "Default row spacing (px)"
+    },
+    "bond": {
+      "title": "Relationship Rank Calculator",
+      "autoPopulateSingleTargetGifts": "Auto-populate gifts for single-target inventories",
+      "autoPopulateSingleTargetGiftsHint": "When enabled, changing your total count for a gift will automatically set that as the amount you want to give to a student if the gift inventory only contains one target."
     }
   },
 

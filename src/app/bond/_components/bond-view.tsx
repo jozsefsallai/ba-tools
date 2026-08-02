@@ -47,6 +47,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
@@ -88,6 +89,7 @@ export function BondView({ students, gifts }: BondViewProps) {
   const t = useTranslations();
   const { isSignedIn } = useUser();
   const { studentMap } = useStudents();
+  const { preferences } = useUserPreferences();
 
   const giftIds = useMemo(() => gifts.map((gift) => gift.id), [gifts]);
 
@@ -217,6 +219,23 @@ export function BondView({ students, gifts }: BondViewProps) {
       })),
     [inventoryTargets, studentWithGiftsMap, studentMap, t],
   );
+
+  const sortTargetOptions = useMemo(() => {
+    if (filterTargetOptions.length > 0) {
+      return filterTargetOptions;
+    }
+
+    if (selectedStudent) {
+      return [
+        {
+          studentId: selectedStudent.id,
+          studentName: selectedStudent.name,
+        },
+      ];
+    }
+
+    return [];
+  }, [filterTargetOptions, selectedStudent]);
 
   const showTargetRows = isSignedIn && !!selectedInvenetoryId;
 
@@ -507,6 +526,20 @@ export function BondView({ students, gifts }: BondViewProps) {
       ...prev,
       [giftId]: count,
     }));
+
+    if (
+      preferences.bond.autoPopulateSingleTargetGifts &&
+      inventoryTargets.length === 1
+    ) {
+      const soleTarget = inventoryTargets[0];
+      setTargetAllocations((prev) => ({
+        ...prev,
+        [soleTarget._id]: {
+          ...(prev[soleTarget._id] ?? {}),
+          [giftId]: count,
+        },
+      }));
+    }
   }
 
   function updateAllocation(
@@ -528,6 +561,21 @@ export function BondView({ students, gifts }: BondViewProps) {
       ...prev,
       [targetId]: value,
     }));
+  }
+
+  function updateGiftBoxesUsed(count: number) {
+    setGiftBoxesUsed(count);
+
+    if (
+      preferences.bond.autoPopulateSingleTargetGifts &&
+      inventoryTargets.length === 1
+    ) {
+      const soleTarget = inventoryTargets[0];
+      setTargetBoxAllocations((prev) => ({
+        ...prev,
+        [soleTarget._id]: count,
+      }));
+    }
   }
 
   function handleShowAllGiftsChange(checked: boolean) {
@@ -1303,7 +1351,7 @@ export function BondView({ students, gifts }: BondViewProps) {
                 {t("tools.bond.sort.default")}
               </SelectItem>
 
-              {filterTargetOptions.map((target) => (
+              {sortTargetOptions.map((target) => (
                 <SelectItem key={target.studentId} value={target.studentId}>
                   {t("tools.bond.sort.relevance.student", {
                     studentName: target.studentName,
@@ -1349,7 +1397,7 @@ export function BondView({ students, gifts }: BondViewProps) {
             targets={showTargetRows ? inventoryTargets : []}
             studentMap={studentWithGiftsMap}
             boxAllocations={targetBoxAllocations}
-            onInventoryTotalChange={setGiftBoxesUsed}
+            onInventoryTotalChange={updateGiftBoxesUsed}
             onAllocationChange={updateBoxAllocation}
             onTargetSelect={setSelectedTargetId}
             targetProjectedRanks={targetProjectedRanks}

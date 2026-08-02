@@ -3,7 +3,11 @@ import type { Doc } from "~convex/dataModel";
 export const defaultUserPreferences: Pick<
   Doc<"userPreferences">,
   "formationDisplay" | "timelineVisualizer"
-> = {
+> & {
+  bond: {
+    autoPopulateSingleTargetGifts: boolean;
+  };
+} = {
   timelineVisualizer: {
     triggerAutoFocus: false,
     defaultScale: 1,
@@ -17,6 +21,9 @@ export const defaultUserPreferences: Pick<
     defaultNoDisplayRole: false,
     defaultGroupsVertical: false,
     defaultRowGap: 8,
+  },
+  bond: {
+    autoPopulateSingleTargetGifts: false,
   },
 };
 
