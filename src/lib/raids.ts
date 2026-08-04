@@ -1,4 +1,4 @@
-export type RaidDuration = 180 | 240 | 290;
+export type RaidDuration = 180 | 240 | 270;
 
 export const RAID_DURATIONS: {
   label: "3min" | "4min" | "4min30sec";
@@ -19,6 +19,7 @@ export const RAID_DURATIONS: {
       "hieronymus",
       "perorodzilla",
       "hod",
+      "goz",
       "gregorius",
       "hovercraft",
       "kurokage",
@@ -27,7 +28,7 @@ export const RAID_DURATIONS: {
   },
   {
     label: "4min30sec",
-    value: 290,
+    value: 270,
     raids: ["yesod", "drumbarka"],
   },
 ];
@@ -58,7 +59,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 229000,
       240: 277000,
-      290: 304700,
+      270: 304700,
     },
     timeScoreMultiplier: 120,
   },
@@ -69,7 +70,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 458000,
       240: 554000,
-      290: 609400,
+      270: 609400,
     },
     timeScoreMultiplier: 240,
   },
@@ -80,7 +81,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 916000,
       240: 1108000,
-      290: 1218800,
+      270: 1218800,
     },
     timeScoreMultiplier: 480,
   },
@@ -91,7 +92,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 1832000,
       240: 2216000,
-      290: 2437600,
+      270: 2437600,
     },
     timeScoreMultiplier: 960,
   },
@@ -102,7 +103,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 5392000,
       240: 6160000,
-      290: 6578880,
+      270: 6578880,
     },
     timeScoreMultiplier: 1440,
   },
@@ -113,7 +114,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 12449600,
       240: 14216000,
-      290: 14941016,
+      270: 14941016,
     },
     timeScoreMultiplier: 1920,
   },
@@ -124,7 +125,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 18876000,
       240: 19508000,
-      290: 20302000,
+      270: 20302000,
     },
     timeScoreMultiplier: 2400,
   },
@@ -135,7 +136,7 @@ export const RAID_DIFFICULTY_DATA: RaidDifficultyData[] = [
     hpScore: {
       180: 25525000,
       240: 26315000,
-      290: 26954000,
+      270: 26954000,
     },
     timeScoreMultiplier: 2880,
   },

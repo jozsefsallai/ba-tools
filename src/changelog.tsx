@@ -44,6 +44,21 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "August 4, 2026",
+    features: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.raidSoreCalc,
+        description: "Fixed duration of 4:30 raids being interpreted as 4:50.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.raidSoreCalc,
+        description: "Added Goz to the list of raids.",
+      },
+    ],
+    changes: [],
+  },
+  {
     date: "August 2, 2026",
     features: [
       {
