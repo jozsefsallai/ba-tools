@@ -15,6 +15,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { revalidateRosterPublicCache } from "@/lib/cache";
+import {
+  FRIEND_CODE_LENGTH,
+  isValidFriendCode,
+  sanitizeFriendCodeInput,
+} from "@/lib/friend-code";
 import { GAME_SERVERS, GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
 import { useMutation } from "convex/react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
@@ -40,8 +45,13 @@ export function CreateRoster() {
   const router = useRouter();
 
   const createMutation = useMutation(api.roster.create);
+  const friendCodeValid = isValidFriendCode(friendCode);
 
   async function handleCreate() {
+    if (!friendCodeValid) {
+      return;
+    }
+
     try {
       const id = await createMutation({
         name: name.length > 0 ? name : undefined,
@@ -53,7 +63,7 @@ export function CreateRoster() {
         friendCode,
       });
 
-      if (visibility === "public" && friendCode.trim()) {
+      if (visibility === "public") {
         await revalidateRosterPublicCache(gameServer, friendCode);
       }
 
@@ -185,13 +195,27 @@ export function CreateRoster() {
         <Input
           id="friendCode"
           value={friendCode}
-          onChange={(e) => setFriendCode(e.target.value)}
+          onChange={(e) =>
+            setFriendCode(sanitizeFriendCodeInput(e.target.value))
+          }
           placeholder="ABCDEFGH"
+          maxLength={FRIEND_CODE_LENGTH}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="text"
         />
+
+        <p className="text-muted-foreground text-xs">
+          {t("tools.roster.friendCodeRequirements")}
+        </p>
       </div>
 
       <div>
-        <Button onClick={handleCreate} disabled={name.length === 0}>
+        <Button
+          onClick={handleCreate}
+          disabled={name.length === 0 || !friendCodeValid}
+        >
           {t("tools.roster.create.submit")}
         </Button>
       </div>

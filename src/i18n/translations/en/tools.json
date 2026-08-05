@@ -880,6 +880,7 @@
 
   "roster": {
     "title": "Roster",
+    "friendCodeRequirements": "Must be exactly 8 uppercase letters (A-Z).",
 
     "myRosters": {
       "title": "My Rosters",

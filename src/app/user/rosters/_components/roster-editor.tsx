@@ -28,6 +28,11 @@ import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useStudents } from "@/hooks/use-students";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
+import {
+  FRIEND_CODE_LENGTH,
+  isValidFriendCode,
+  sanitizeFriendCodeInput,
+} from "@/lib/friend-code";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import {
   GAME_SERVERS,
@@ -294,9 +299,20 @@ const RosterEditorDetails = memo(function RosterEditorDetails({
         <Input
           id="friendCode"
           value={friendCode}
-          onChange={(e) => setFriendCode(e.target.value)}
+          onChange={(e) =>
+            setFriendCode(sanitizeFriendCodeInput(e.target.value))
+          }
           placeholder="ABCDEFGH"
+          maxLength={FRIEND_CODE_LENGTH}
+          autoCapitalize="characters"
+          autoCorrect="off"
+          spellCheck={false}
+          inputMode="text"
         />
+
+        <p className="text-muted-foreground text-xs">
+          {t("tools.roster.friendCodeRequirements")}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -496,15 +512,15 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   const [copiedShareLink, setCopiedShareLink] = useState(false);
   const hydratedRosterIdRef = useRef<Id<"roster"> | null>(null);
 
-  const publicRosterPath = useMemo(() => {
-    const code = friendCode.trim();
+  const friendCodeValid = isValidFriendCode(friendCode);
 
-    if (!code) {
+  const publicRosterPath = useMemo(() => {
+    if (!friendCodeValid) {
       return null;
     }
 
-    return `/rosters/${gameServer}/${code}`;
-  }, [gameServer, friendCode]);
+    return `/rosters/${gameServer}/${friendCode}`;
+  }, [gameServer, friendCode, friendCodeValid]);
 
   const canCopyShareLink = publicRosterPath !== null && visibility === "public";
 
@@ -662,7 +678,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
   }, [canCopyShareLink, publicRosterPath, copiedShareLink, t]);
 
   async function handleWantsToUpdate() {
-    if (isSaving) {
+    if (isSaving || !friendCodeValid) {
       return;
     }
 
@@ -793,7 +809,10 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       >
         <div className="pointer-events-auto flex flex-col items-center gap-2">
           <SaveStatus isDirty={hasUnsavedChanges} isSaving={isSaving} />
-          <Button onClick={handleWantsToUpdate} disabled={isSaving}>
+          <Button
+            onClick={handleWantsToUpdate}
+            disabled={isSaving || !friendCodeValid}
+          >
             <SaveIcon />
             {isSaving ? t("common.saving") : t("common.saveChanges")}
           </Button>

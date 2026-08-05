@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isValidFriendCode } from "@/lib/friend-code";
 import type { GameServer } from "@/lib/types";
 import { fetchQuery } from "convex/nextjs";
 import { unstable_cache } from "next/cache";
@@ -18,6 +19,10 @@ export async function getCachedPublicRoster(
   friendCode: string,
 ) {
   const code = friendCode.trim();
+
+  if (!isValidFriendCode(code)) {
+    throw new Error("Roster not found");
+  }
 
   return unstable_cache(
     async () =>

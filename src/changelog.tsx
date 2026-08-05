@@ -44,6 +44,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "August 5, 2026",
+    features: [],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.roster,
+        description:
+          "Friend codes in the roster tool are now checked for validity. Existing rosters that use invalid friend codes will no longer be accessible until the roster is corrected.",
+      },
+    ],
+  },
+  {
     date: "August 4, 2026",
     features: [],
     fixes: [

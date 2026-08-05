@@ -1,4 +1,5 @@
 import { RosterView } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-view";
+import { isValidFriendCode } from "@/lib/friend-code";
 import { OG_HEIGHT, OG_WIDTH } from "@/lib/og-image.server";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import { truncateText } from "@/lib/text-utils";
@@ -20,7 +21,7 @@ export async function generateMetadata({
 }) {
   const { gameServer, friendCode } = await params;
 
-  if (!GAME_SERVERS.includes(gameServer)) {
+  if (!GAME_SERVERS.includes(gameServer) || !isValidFriendCode(friendCode)) {
     return redirect("/404");
   }
 
@@ -75,5 +76,10 @@ export default async function RosterPage({
   params: Promise<PageParams>;
 }) {
   const { gameServer, friendCode } = await params;
+
+  if (!GAME_SERVERS.includes(gameServer) || !isValidFriendCode(friendCode)) {
+    redirect("/404");
+  }
+
   return <RosterView gameServer={gameServer} friendCode={friendCode} />;
 }

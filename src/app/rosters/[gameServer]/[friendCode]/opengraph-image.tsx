@@ -1,5 +1,6 @@
 import { RosterOgImage } from "@/app/rosters/[gameServer]/[friendCode]/_components/roster-og-image";
 import { db } from "@/lib/db";
+import { isValidFriendCode } from "@/lib/friend-code";
 import { getOgAssetUrls } from "@/lib/og-assets.server";
 import { OG_HEIGHT, OG_WIDTH, makeOgImage } from "@/lib/og-image.server";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
@@ -34,7 +35,7 @@ export default async function Image({
 }) {
   const { gameServer, friendCode } = await params;
 
-  if (!GAME_SERVERS.includes(gameServer)) {
+  if (!GAME_SERVERS.includes(gameServer) || !isValidFriendCode(friendCode)) {
     notFound();
   }
 

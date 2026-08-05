@@ -742,6 +742,7 @@
   },
   "roster": {
     "title": "名簿・ロスター",
+    "friendCodeRequirements": "半角大文字の英字（A-Z）ちょうど8文字にしてね。",
     "myRosters": {
       "title": "マイロスター",
       "newRoster": "新しいロスターを作成",

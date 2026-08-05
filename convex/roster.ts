@@ -1,8 +1,15 @@
-import { v } from "convex/values";
-import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
-import { query } from "~convex/server";
+import { isValidFriendCode } from "@/lib/friend-code";
 import { GAME_SERVERS } from "@/lib/types";
+import { v } from "convex/values";
+import { query } from "~convex/server";
+import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { rosterItem } from "./schema";
+
+function assertValidFriendCode(friendCode: string) {
+  if (!isValidFriendCode(friendCode)) {
+    throw new Error("Friend code must be exactly 8 uppercase letters (A–Z).");
+  }
+}
 
 export const getOwn = authenticatedQuery({
   handler: async (ctx) => {
@@ -35,6 +42,10 @@ export const getByGameServerAndFriendCode = query({
     friendCode: v.string(),
   },
   handler: async (ctx, { gameServer, friendCode }) => {
+    if (!isValidFriendCode(friendCode)) {
+      throw new Error("Roster not found");
+    }
+
     const roster = await ctx.db
       .query("roster")
       .withIndex("by_gameServerAndFriendCode", (q) =>
@@ -89,6 +100,8 @@ export const create = authenticatedMutation({
       friendCode,
     },
   ) => {
+    assertValidFriendCode(friendCode);
+
     const existing = await ctx.db
       .query("roster")
       .withIndex("by_gameServerAndFriendCode", (q) =>
@@ -151,6 +164,10 @@ export const update = authenticatedMutation({
 
     if (!roster || roster.userId !== ctx.user._id) {
       throw new Error("Roster not found");
+    }
+
+    if (friendCode !== undefined) {
+      assertValidFriendCode(friendCode);
     }
 
     if (gameServer && friendCode) {
