@@ -53,6 +53,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Friend codes in the roster tool are now checked for validity. Existing rosters that use invalid friend codes will no longer be accessible until the roster is corrected.",
       },
+      {
+        scope: CHANGELOG_SCOPES.gachaRateStats,
+        description: "Improved appearance of the tool on mobile devices.",
+      },
     ],
   },
   {

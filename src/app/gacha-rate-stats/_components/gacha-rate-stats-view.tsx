@@ -18,8 +18,8 @@ function Attempt({
   const t = useTranslations();
 
   return (
-    <div className="flex gap-2 items-center justify-between border mb-2 px-4 py-2">
-      <div>
+    <div className="flex gap-2 items-center justify-between border mb-2 px-3 py-2 sm:px-4">
+      <div className="min-w-0 text-sm sm:text-base">
         {t.rich("tools.gachaStats.attempt", {
           strong: (children) => <strong>{children}</strong>,
           attempt: index + 1,
@@ -27,7 +27,11 @@ function Attempt({
         })}
       </div>
 
-      <Button variant="outline" onClick={() => onWantsToRemoveAttempt(index)}>
+      <Button
+        variant="outline"
+        className="shrink-0 h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
+        onClick={() => onWantsToRemoveAttempt(index)}
+      >
         {t("tools.gachaStats.remove")}
       </Button>
     </div>
@@ -41,9 +45,9 @@ interface InfoBoxProps {
 
 function InfoBox({ main, description }: InfoBoxProps) {
   return (
-    <div className="flex flex-col gap-2 items-center justify-center">
-      <h1 className="font-bold text-5xl">{main}</h1>
-      <p className="text-xl">{description}</p>
+    <div className="flex flex-col gap-1 items-center justify-center sm:gap-2">
+      <h1 className="font-bold text-3xl sm:text-5xl">{main}</h1>
+      <p className="text-sm text-center sm:text-xl">{description}</p>
     </div>
   );
 }
@@ -91,7 +95,7 @@ function TotalThreeStars({ attempts }: CounterProps) {
 
 function Statistics({ attempts }: CounterProps) {
   return (
-    <div className="flex gap-8 p-8 border-2 rounded-lg bg-accent/40">
+    <div className="flex w-full justify-around gap-2 p-4 border-2 rounded-lg bg-accent/40 sm:w-auto sm:justify-center sm:gap-8 sm:p-8">
       <ThreeStarRate attempts={attempts} />
       <TotalPulls attempts={attempts} />
       <TotalThreeStars attempts={attempts} />
@@ -113,14 +117,14 @@ export function GachaRateStatsView() {
   }
 
   return (
-    <div className="flex items-start justify-center pt-20">
-      <div className="flex flex-col gap-20 items-center">
+    <div className="flex w-full min-w-0 items-start justify-center pt-8 sm:pt-20">
+      <div className="flex w-full min-w-0 flex-col gap-10 items-center sm:w-auto sm:gap-20">
         <Statistics attempts={attempts} />
 
-        <div className="flex flex-col items-center">
-          <p className="mb-3">{t("tools.gachaStats.question")}</p>
+        <div className="flex w-full flex-col items-center sm:w-auto">
+          <p className="mb-3 text-center">{t("tools.gachaStats.question")}</p>
 
-          <div className="flex gap-3">
+          <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:flex-nowrap sm:gap-3">
             {Array.from({ length: 11 }, (_, i) => (
               <Button key={`add-${i}`} size="sm" onClick={() => addAttempt(i)}>
                 {i}
