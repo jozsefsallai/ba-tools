@@ -33,6 +33,9 @@ export type FormationRowLabel = {
 
 export type FormationRowLabelDefaults = Required<FormationRowLabel>;
 
+export const DEFAULT_NEW_FORMATION_STUDENT_LEVEL = 90;
+export const DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL: StarLevel = 3;
+
 export const DEFAULT_FORMATIONATION_ROW_LABEL: FormationRowLabelDefaults = {
   text: "",
   side: "right",

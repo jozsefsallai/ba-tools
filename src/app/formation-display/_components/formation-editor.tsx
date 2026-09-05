@@ -50,6 +50,8 @@ import { useQueryWithStatus } from "@/lib/convex";
 import type { EchelonData } from "@/lib/echelon-parser";
 import {
   DEFAULT_FORMATIONATION_ROW_LABEL,
+  DEFAULT_NEW_FORMATION_STUDENT_LEVEL,
+  DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
   type FormationRowLabel,
   type FormationRowLabelSide,
   createDefaultFormationRowLabel,
@@ -229,6 +231,12 @@ export function FormationEditor() {
     const item: StudentItem = {
       id: uuid(),
       student,
+      ...(formationId
+        ? {}
+        : {
+            level: DEFAULT_NEW_FORMATION_STUDENT_LEVEL,
+            starLevel: DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
+          }),
     };
 
     setRows((prev) => {

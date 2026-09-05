@@ -45,6 +45,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 5, 2026",
+    features: [],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description: "Students will now be lv.90 and 3* by default.",
+      },
+    ],
+  },
+  {
     date: "September 2, 2026",
     features: [],
     fixes: [],
