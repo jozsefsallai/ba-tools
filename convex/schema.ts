@@ -309,6 +309,30 @@ export default defineSchema({
     gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
   }).index("by_userId", ["userId"]),
 
+  pvpFormationPreset: defineTable({
+    userId: v.id("users"),
+    seasonId: v.id("pvpSeason"),
+    name: v.string(),
+    matchType: v.optional(
+      v.union(v.literal("attack"), v.literal("defense"), v.literal("both")),
+    ),
+    team: v.array(pvpFormationStudentItem),
+    usedByMe: v.boolean(),
+  })
+    .index("by_seasonId", ["seasonId"])
+    .index("by_userId_seasonId", ["userId", "seasonId"]),
+
+  pvpEnemyPreset: defineTable({
+    userId: v.id("users"),
+    seasonId: v.id("pvpSeason"),
+    name: v.string(),
+    opponentName: v.optional(v.string()),
+    opponentStudentRepId: v.optional(v.string()),
+  })
+    .index("by_seasonId", ["seasonId"])
+    .index("by_userId_seasonId", ["userId", "seasonId"])
+    .index("by_seasonId_opponentName", ["seasonId", "opponentName"]),
+
   pvpMatchRecord: defineTable({
     userId: v.id("users"),
     seasonId: v.id("pvpSeason"),
@@ -316,6 +340,7 @@ export default defineSchema({
     ownRank: v.optional(v.number()),
     opponentName: v.optional(v.string()),
     opponentStudentRepId: v.optional(v.string()),
+    enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
     opponentRank: v.optional(v.number()),
     matchType: v.union(v.literal("attack"), v.literal("defense")),
     ownTeam: v.array(pvpFormationStudentItem),
@@ -324,7 +349,9 @@ export default defineSchema({
     videoUrl: v.optional(v.string()),
   })
     .index("by_userId", ["userId"])
-    .index("by_seasonId", ["seasonId"]),
+    .index("by_seasonId", ["seasonId"])
+    .index("by_seasonId_date", ["seasonId", "date"])
+    .index("by_enemyPresetId_date", ["enemyPresetId", "date"]),
 
   recruitmentAccount: defineTable({
     userId: v.id("users"),

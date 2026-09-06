@@ -7,10 +7,10 @@ import { StudentCard } from "@/components/common/student-card";
 import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "~prisma";
 import { ShieldIcon, SwordIcon } from "lucide-react";
 import { useMemo } from "react";
 import type { Doc } from "~convex/dataModel";
+import type { Student } from "~prisma";
 
 const RANK_THRESHOLDS = {
   PLATINUM: 100,
@@ -113,9 +113,11 @@ export function PVPFormation({
 
         <div className="font-bold">{name}</div>
 
-        <div className="text-sm text-muted-foreground">
-          (rank: <PVPRank rank={rank} />)
-        </div>
+        {rank !== undefined && (
+          <div className="text-sm text-muted-foreground">
+            (rank: <PVPRank rank={rank} />)
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-3" style={{ zoom: 0.8 }}>

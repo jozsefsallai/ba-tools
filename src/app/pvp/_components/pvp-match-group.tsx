@@ -1,7 +1,9 @@
 import { PVPMatch } from "@/app/pvp/_components/pvp-match";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { useState } from "react";
 import type { Doc, Id } from "~convex/dataModel";
 
 export type PVPMatchGroupItem = {
@@ -16,6 +18,7 @@ export type PVPMatchGroupProps = {
 
 export function PVPMatchGroup({ seasonId, group }: PVPMatchGroupProps) {
   const t = useTranslations();
+  const [expanded, setExpanded] = useState(false);
 
   const formattedDate = useMemo(() => {
     return format(new Date(group.dayTimestamp), "MMMM d, yyyy");
@@ -63,9 +66,28 @@ export function PVPMatchGroup({ seasonId, group }: PVPMatchGroupProps) {
       </div>
 
       <div className="flex flex-col gap-2">
-        {group.matches.map((match) => (
+        {group.matches.length === 0 && (
+          <p className="rounded border border-dashed p-4 text-sm text-muted-foreground">
+            No recorded PVP matches on this day.
+          </p>
+        )}
+
+        {(expanded ? group.matches : group.matches.slice(0, 3)).map((match) => (
           <PVPMatch key={match._id} seasonId={seasonId} match={match} />
         ))}
+
+        {group.matches.length > 3 && (
+          <Button
+            variant="outline"
+            onClick={() => setExpanded((value) => !value)}
+          >
+            {expanded
+              ? "Show fewer matches"
+              : t("tools.pvp.matchGroup.loadMore", {
+                  count: group.matches.length - 3,
+                })}
+          </Button>
+        )}
       </div>
     </div>
   );

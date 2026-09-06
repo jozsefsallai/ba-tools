@@ -10,5 +10,6 @@ export type PVPFormationStudentItem = {
 };
 
 export type PVPMatchType = "attack" | "defense";
+export type PVPFormationPresetType = PVPMatchType | "both";
 
 export type PVPMatchResult = "win" | "loss";

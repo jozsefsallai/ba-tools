@@ -2,6 +2,8 @@
 
 import { PVPMatchFormationEditorItem } from "@/app/pvp/_components/pvp-match-formation-editor-item";
 import type { PVPFormationStudentItem } from "@/app/pvp/_lib/types";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export type PVPMatchFormationEditorProps = {
   formation: PVPFormationStudentItem[];
@@ -9,6 +11,10 @@ export type PVPMatchFormationEditorProps = {
   onMoveUp?(idx: number): void;
   onMoveDown?(idx: number): void;
   strikerPrefix?: "A" | "D";
+  advanced?: boolean;
+  showDamage?: boolean;
+  compactAdvanced?: boolean;
+  onAdvancedChange?(advanced: boolean): void;
 };
 
 export function PVPMatchFormationEditor({
@@ -17,9 +23,24 @@ export function PVPMatchFormationEditor({
   onMoveUp,
   onMoveDown,
   strikerPrefix,
+  advanced = false,
+  onAdvancedChange,
+  showDamage = true,
+  compactAdvanced = false,
 }: PVPMatchFormationEditorProps) {
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-2">
+        <Switch
+          id={`pvp-advanced-${strikerPrefix ?? "formation"}`}
+          checked={advanced}
+          onCheckedChange={onAdvancedChange}
+        />
+
+        <Label htmlFor={`pvp-advanced-${strikerPrefix ?? "formation"}`}>
+          Advanced Mode
+        </Label>
+      </div>
       {formation.map((item, idx) => (
         <PVPMatchFormationEditorItem
           key={idx}
@@ -29,6 +50,9 @@ export function PVPMatchFormationEditor({
           onUpdate={onUpdate}
           onMoveUp={onMoveUp}
           onMoveDown={onMoveDown}
+          advanced={advanced}
+          showDamage={showDamage}
+          compactAdvanced={compactAdvanced}
         />
       ))}
     </div>

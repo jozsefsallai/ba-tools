@@ -477,7 +477,7 @@
     "rowLabel": {
       "enabled": "行テキスト",
       "text": "テキスト",
-      "textPlaceholder": "この行のラベル…",
+      "textPlaceholder": "この行のラベル...",
       "side": "位置",
       "sideLeft": "左",
       "sideRight": "右",

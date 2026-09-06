@@ -2,29 +2,20 @@
 
 import type { PVPFormationStudentItem } from "@/app/pvp/_lib/types";
 import { EmptyCard } from "@/components/common/empty-card";
+import {
+  StarLevelInput,
+  type StarLevelInputValue,
+} from "@/components/common/star-level-input";
 import { StudentCard } from "@/components/common/student-card";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  STAR_LEVELS,
-  type StarLevel,
-  UE_LEVELS,
-  type UELevel,
-} from "@/lib/types";
 import { cn } from "@/lib/utils";
-import type { Student } from "~prisma";
 import { ChevronDownIcon, ChevronUpIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type FormEvent, useCallback, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import type { Student } from "~prisma";
 
 export type PVPMatchFormationEditorItemProps = {
   item: PVPFormationStudentItem;
@@ -33,6 +24,9 @@ export type PVPMatchFormationEditorItemProps = {
   onUpdate(idx: number, item: Partial<PVPFormationStudentItem>): any;
   onMoveUp?(idx: number): void;
   onMoveDown?(idx: number): void;
+  advanced?: boolean;
+  showDamage?: boolean;
+  compactAdvanced?: boolean;
 };
 
 export function PVPMatchFormationEditorItem({
@@ -42,10 +36,18 @@ export function PVPMatchFormationEditorItem({
   onUpdate,
   onMoveUp,
   onMoveDown,
+  advanced = false,
+  showDamage = true,
+  compactAdvanced = false,
 }: PVPMatchFormationEditorItemProps) {
   const t = useTranslations();
   const [levelStr, setLevelStr] = useState(item.level?.toString() ?? "");
   const [damageStr, setDamageStr] = useState(item.damage?.toString() ?? "");
+
+  // Preset/report hydration updates the controlled values in the parent.
+  // Keep the text inputs visually in sync without losing in-progress edits.
+  useEffect(() => setLevelStr(item.level?.toString() ?? ""), [item.level]);
+  useEffect(() => setDamageStr(item.damage?.toString() ?? ""), [item.damage]);
 
   const handleStudentUpdate = useCallback(
     (student: Student) => {
@@ -77,28 +79,12 @@ export function PVPMatchFormationEditorItem({
     [onUpdate, index],
   );
 
-  const handleStarLevelUpdate = useCallback(
-    (starLevel: string) => {
-      if (starLevel === "_") {
-        onUpdate(index, { starLevel: undefined });
-        return;
-      }
-
+  const handleStarsUpdate = useCallback(
+    (value: StarLevelInputValue) => {
       onUpdate(index, {
-        starLevel: Number.parseInt(starLevel, 10) as StarLevel,
+        starLevel: value.starLevel,
+        ueLevel: value.ueLevel,
       });
-    },
-    [onUpdate, index],
-  );
-
-  const handleUELevelUpdate = useCallback(
-    (ueLevel: string) => {
-      if (ueLevel === "_") {
-        onUpdate(index, { ueLevel: undefined });
-        return;
-      }
-
-      onUpdate(index, { ueLevel: Number.parseInt(ueLevel, 10) as UELevel });
     },
     [onUpdate, index],
   );
@@ -185,86 +171,85 @@ export function PVPMatchFormationEditorItem({
               <XIcon />
             </Button>
           )}
+          {advanced && compactAdvanced && (
+            <>
+              <div className="flex w-20 flex-col gap-1">
+                <Label className="text-xs">
+                  {t("tools.pvp.formationEditorItem.level")}
+                </Label>
+
+                <Input
+                  type="number"
+                  min={1}
+                  max={90}
+                  value={levelStr}
+                  onChange={handleLevelUpdate}
+                />
+              </div>
+
+              <div className="flex items-end">
+                <StarLevelInput
+                  value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
+                  onValueChanged={handleStarsUpdate}
+                  imageClassName="size-6"
+                />
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          <div className="flex flex-col gap-1">
-            <Label className="text-xs">
-              {t("tools.pvp.formationEditorItem.level")}
-            </Label>
-            <Input
-              type="number"
-              min={1}
-              max={90}
-              value={levelStr}
-              onChange={handleLevelUpdate}
-            />
+        {(showDamage || (advanced && !compactAdvanced)) && (
+          <div
+            className={cn(
+              "grid gap-4",
+              advanced ? "grid-cols-4" : "grid-cols-1",
+            )}
+          >
+            {advanced && !compactAdvanced && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs">
+                  {t("tools.pvp.formationEditorItem.level")}
+                </Label>
+
+                <Input
+                  type="number"
+                  min={1}
+                  max={90}
+                  value={levelStr}
+                  onChange={handleLevelUpdate}
+                />
+              </div>
+            )}
+
+            {advanced && !compactAdvanced && (
+              <div className="col-span-2 flex flex-col gap-1">
+                <Label className="text-xs">
+                  {t("tools.pvp.formationEditorItem.starLevel")}
+                </Label>
+
+                <StarLevelInput
+                  value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
+                  onValueChanged={handleStarsUpdate}
+                />
+              </div>
+            )}
+
+            {showDamage && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-xs">
+                  {t("tools.pvp.formationEditorItem.damage")}
+                </Label>
+
+                <Input
+                  type="number"
+                  min={0}
+                  value={damageStr}
+                  onChange={handleDamageUpdate}
+                />
+              </div>
+            )}
           </div>
-
-          <div className="flex flex-col gap-1">
-            <Label className="text-xs">
-              {t("tools.pvp.formationEditorItem.starLevel")}
-            </Label>
-            <Select
-              value={item.starLevel?.toString() ?? "_"}
-              onValueChange={handleStarLevelUpdate}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="_">
-                  {t("tools.pvp.formationEditorItem.none")}
-                </SelectItem>
-
-                {STAR_LEVELS.map((level) => (
-                  <SelectItem key={level} value={level.toString()}>
-                    {level}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <Label className="text-xs">
-              {t("tools.pvp.formationEditorItem.ueLevel")}
-            </Label>
-            <Select
-              value={item.ueLevel?.toString() ?? "_"}
-              onValueChange={handleUELevelUpdate}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="_">
-                  {t("tools.pvp.formationEditorItem.none")}
-                </SelectItem>
-
-                {UE_LEVELS.map((level) => (
-                  <SelectItem key={level} value={level.toString()}>
-                    {level}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <Label className="text-xs">
-              {t("tools.pvp.formationEditorItem.damage")}
-            </Label>
-            <Input
-              type="number"
-              min={0}
-              value={damageStr}
-              onChange={handleDamageUpdate}
-            />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

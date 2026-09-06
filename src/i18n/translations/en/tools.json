@@ -563,7 +563,7 @@
     "rowLabel": {
       "enabled": "Row text",
       "text": "Text",
-      "textPlaceholder": "Label for this row…",
+      "textPlaceholder": "Label for this row...",
       "side": "Side",
       "sideLeft": "Left",
       "sideRight": "Right",
@@ -776,7 +776,8 @@
       "defenses": "Defenses:",
       "won": "won",
       "lost": "lost",
-      "total": "total"
+      "total": "total",
+      "loadMore": "{count, plural, one {Load 1 more match} other {Load # more matches}}"
     },
 
     "toasts": {

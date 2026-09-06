@@ -24,7 +24,7 @@ function deriveChatTitle(parts: { type: "text"; text: string }[]) {
     return text;
   }
 
-  return `${text.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}…`;
+  return `${text.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}...`;
 }
 
 async function getOwnedChat(
@@ -338,7 +338,7 @@ export const renameChat = authenticatedMutation({
     const nextTitle =
       trimmed.length <= CHAT_TITLE_MAX_LENGTH
         ? trimmed
-        : `${trimmed.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}…`;
+        : `${trimmed.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}...`;
 
     await ctx.db.patch(chatId, { title: nextTitle });
   },
