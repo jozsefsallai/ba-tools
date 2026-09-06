@@ -60,7 +60,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
             </Button>
 
             <Button variant="outline" asChild>
-              <Link href={`/pvp/${seasonId}/presets/enemies`}>
+              <Link href={`/pvp/${seasonId}/presets/opponents`}>
                 {t("tools.pvp.season.enemyPresets")}
               </Link>
             </Button>

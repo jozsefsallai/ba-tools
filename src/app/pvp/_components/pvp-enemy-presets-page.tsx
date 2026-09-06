@@ -35,7 +35,7 @@ export function PVPEnemyPresetsPage({
         </div>
 
         <Button asChild>
-          <Link href={`/pvp/${seasonId}/presets/enemies/new`}>
+          <Link href={`/pvp/${seasonId}/presets/opponents/new`}>
             {t("tools.pvp.presets.createEnemy")}
           </Link>
         </Button>
@@ -82,7 +82,7 @@ export function PVPEnemyPresetsPage({
                 <div className="flex shrink-0 gap-2">
                   <Button size="sm" variant="outline" asChild>
                     <Link
-                      href={`/pvp/${seasonId}/presets/enemies/${preset._id}/teams`}
+                      href={`/pvp/${seasonId}/presets/opponents/${preset._id}/teams`}
                     >
                       {t("tools.pvp.presets.teams")}
                     </Link>
@@ -90,7 +90,7 @@ export function PVPEnemyPresetsPage({
 
                   <Button size="sm" variant="outline" asChild>
                     <Link
-                      href={`/pvp/${seasonId}/presets/enemies/${preset._id}`}
+                      href={`/pvp/${seasonId}/presets/opponents/${preset._id}`}
                     >
                       {t("tools.pvp.presets.edit")}
                     </Link>

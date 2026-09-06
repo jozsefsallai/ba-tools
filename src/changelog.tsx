@@ -55,7 +55,7 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
-          "Added per-season enemy presets. These allow you to identify enemies more easily when recording PVP matches. They also allow you to see the historical teams of a particular enemy. Selecting an enemy preset will automatically fill their last used team into the match editor.",
+          "Added per-season opponent presets. These allow you to identify opponents more easily when recording PVP matches. They also allow you to see the historical teams of a particular opponent. Selecting an opponent preset will automatically fill their last used team into the match editor.",
       },
       {
         scope: CHANGELOG_SCOPES.pvp,

@@ -1,4 +1,4 @@
-import { PVPEnemyPresetsPage } from "@/app/pvp/_components/pvp-enemy-presets-page";
+import { PVPEnemyPresetForm } from "@/app/pvp/_components/pvp-enemy-preset-form";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
@@ -6,16 +6,16 @@ import type { Id } from "~convex/dataModel";
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return {
-    title: `${t("tools.pvp.presets.enemyTitle")} - ${t("common.appName")}`,
+    title: `${t("tools.pvp.presets.createEnemy")} - ${t("common.appName")}`,
     description: t("tools.pvp.presets.enemyDescription"),
   };
 }
 
-export default async function EnemyPresetsPage({
+export default async function NewOpponentPresetPage({
   params,
 }: {
   params: Promise<{ seasonId: string }>;
 }) {
   const { seasonId } = await params;
-  return <PVPEnemyPresetsPage seasonId={seasonId as Id<"pvpSeason">} />;
+  return <PVPEnemyPresetForm seasonId={seasonId as Id<"pvpSeason">} />;
 }

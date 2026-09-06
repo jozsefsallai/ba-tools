@@ -59,7 +59,7 @@ export function PVPEnemyPresetForm({
         });
       }
 
-      router.push(`/pvp/${seasonId}/presets/enemies`);
+      router.push(`/pvp/${seasonId}/presets/opponents`);
     } finally {
       setSaving(false);
     }
@@ -70,7 +70,7 @@ export function PVPEnemyPresetForm({
       <div>
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/pvp/${seasonId}/presets/enemies`}>
+            <Link href={`/pvp/${seasonId}/presets/opponents`}>
               <ChevronLeftIcon />
             </Link>
           </Button>
@@ -108,7 +108,7 @@ export function PVPEnemyPresetForm({
       <div className="flex justify-end gap-2">
         <Button
           variant="outline"
-          onClick={() => router.push(`/pvp/${seasonId}/presets/enemies`)}
+          onClick={() => router.push(`/pvp/${seasonId}/presets/opponents`)}
         >
           {t("tools.pvp.presets.cancel")}
         </Button>

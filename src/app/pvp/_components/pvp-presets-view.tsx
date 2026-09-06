@@ -44,7 +44,7 @@ export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
           variant="outline"
           asChild
         >
-          <Link href={`/pvp/${seasonId}/presets/enemies`}>
+          <Link href={`/pvp/${seasonId}/presets/opponents`}>
             <span>
               <strong className="block text-base">
                 {t("tools.pvp.presets.enemyTitle")}

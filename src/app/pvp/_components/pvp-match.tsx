@@ -11,8 +11,8 @@ import {
   PencilIcon,
   TrashIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";

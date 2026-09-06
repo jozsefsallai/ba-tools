@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function EnemyPresetTeamsRoute({
+export default async function OpponentPresetTeamsRoute({
   params,
 }: {
   params: Promise<{ seasonId: string; presetId: string }>;
