@@ -44,6 +44,7 @@ import {
   RectangleEllipsisIcon,
   ShieldIcon,
   SquareText,
+  SwordsIcon,
   TrainTrackIcon,
   UsersIcon,
 } from "lucide-react";
@@ -219,6 +220,11 @@ export function AppSidebar() {
       href: "/student-exp-calculator",
       text: t("common.header.nav.gameplay.studentExp"),
       icon: ClipboardMinusIcon,
+    },
+    {
+      href: "/pvp",
+      text: t("common.header.nav.gameplay.pvp"),
+      icon: SwordsIcon,
     },
   ];
 

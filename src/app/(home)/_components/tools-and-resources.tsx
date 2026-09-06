@@ -12,6 +12,7 @@ import {
   ListOrderedIcon,
   RectangleEllipsisIcon,
   SquareText,
+  SwordsIcon,
   TrainTrackIcon,
   UsersIcon,
 } from "lucide-react";
@@ -70,6 +71,13 @@ export async function ToolsAndResources() {
         <ClipboardMinusIcon className="size-10 text-emerald-500 shrink-0" />
       ),
       description: t("static.home.toollist.studentExp.description"),
+      isNew: true,
+    },
+    {
+      name: t("static.home.toollist.pvp.title"),
+      path: "/pvp",
+      icon: <SwordsIcon className="size-10 text-indigo-500 shrink-0" />,
+      description: t("static.home.toollist.pvp.description"),
       isNew: true,
     },
     {

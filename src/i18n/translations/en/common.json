@@ -56,7 +56,8 @@
         "inventoryManagement": "Inventory Management",
         "railroadPuzzleSolver": "Railroad Puzzle Solver",
         "raidScore": "Raid Score Calculator",
-        "studentExp": "Student EXP Calculator"
+        "studentExp": "Student EXP Calculator",
+        "pvp": "PVP Tracker"
       },
       "misc": {
         "title": "Misc Tools",

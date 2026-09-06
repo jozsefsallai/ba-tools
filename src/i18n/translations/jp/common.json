@@ -57,7 +57,8 @@
         "inventoryManagement": "在庫管理",
         "railroadPuzzleSolver": "鉄道パズル解答器",
         "raidScore": "総力戦スコア計算機",
-        "studentExp": "生徒EXP計算機"
+        "studentExp": "生徒EXP計算機",
+        "pvp": "戦術対抗戦トラッカー"
       },
       "misc": {
         "title": "その他",
