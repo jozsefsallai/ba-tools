@@ -45,6 +45,39 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 6, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added per-season formation presets. These allow you to reuse attack or defense formations when recording PVP matches.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added per-season enemy presets. These allow you to identify enemies more easily when recording PVP matches. They also allow you to see the historical teams of a particular enemy. Selecting an enemy preset will automatically fill their last used team into the match editor.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added ability to extract data about a PVP match from a screenshot using a multimodal LLM. Please note that this feature currently ONLY supports English and Japanese languages.",
+      },
+    ],
+    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "The season overview page now displays an agenda-like interface for the last 7 days. Each day will display the last 3 matches by default, with an option to load the remaining matches. You may also paginate between days.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          'By default, the match editor will not require you to specify the level and star/UE level of the students in the formations. An "Advanced Mode" toggle has been added to the match editor to allow you to specify these details.',
+      },
+    ],
+  },
+  {
     date: "September 5, 2026",
     features: [],
     fixes: [],
