@@ -18,6 +18,7 @@ export type StarLevelInputProps = {
   className?: string;
   imageClassName?: string;
   disabled?: boolean;
+  tabIndexStart?: number;
 };
 
 const TOTAL_YELLOW_STARS = 5;
@@ -53,6 +54,7 @@ export function StarLevelInput({
   className,
   imageClassName,
   disabled = false,
+  tabIndexStart,
 }: StarLevelInputProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -75,6 +77,9 @@ export function StarLevelInput({
             key={index}
             type="button"
             disabled={disabled}
+            tabIndex={
+              tabIndexStart === undefined ? undefined : tabIndexStart + i
+            }
             aria-pressed={isPressed}
             aria-label={
               isBlue ? `UE ${index - TOTAL_YELLOW_STARS}` : `${index} stars`

@@ -807,6 +807,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               onMoveUp={handleOwnItemMoveUp}
               onMoveDown={handleOwnItemMoveDown}
               strikerPrefix={matchType === "attack" ? "A" : "D"}
+              studentTabIndexStart={1}
+              propertyTabIndexStart={13}
               advanced={ownAdvanced}
               onAdvancedChange={setOwnAdvanced}
             />
@@ -923,6 +925,11 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                     <Button
                       variant="outline"
                       className="flex-1 justify-between"
+                      tabIndex={
+                        13 +
+                        ownTeam.length * (ownAdvanced ? 11 : 1) +
+                        opponentTeam.length * (opponentAdvanced ? 11 : 1)
+                      }
                     >
                       {opponentStudentRep
                         ? opponentStudentRep.name
@@ -965,6 +972,10 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               onMoveUp={handleOpponentItemMoveUp}
               onMoveDown={handleOpponentItemMoveDown}
               strikerPrefix={matchType === "defense" ? "A" : "D"}
+              studentTabIndexStart={7}
+              propertyTabIndexStart={
+                13 + ownTeam.length * (ownAdvanced ? 11 : 1)
+              }
               advanced={opponentAdvanced}
               onAdvancedChange={setOpponentAdvanced}
             />

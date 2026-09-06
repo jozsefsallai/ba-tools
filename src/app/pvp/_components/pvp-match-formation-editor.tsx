@@ -16,6 +16,8 @@ export type PVPMatchFormationEditorProps = {
   showDamage?: boolean;
   compactAdvanced?: boolean;
   onAdvancedChange?(advanced: boolean): void;
+  studentTabIndexStart?: number;
+  propertyTabIndexStart?: number;
 };
 
 export function PVPMatchFormationEditor({
@@ -28,6 +30,8 @@ export function PVPMatchFormationEditor({
   onAdvancedChange,
   showDamage = true,
   compactAdvanced = false,
+  studentTabIndexStart = 1,
+  propertyTabIndexStart = 7,
 }: PVPMatchFormationEditorProps) {
   const t = useTranslations();
 
@@ -56,6 +60,11 @@ export function PVPMatchFormationEditor({
           advanced={advanced}
           showDamage={showDamage}
           compactAdvanced={compactAdvanced}
+          studentTabIndex={studentTabIndexStart + idx}
+          propertyTabIndexStart={
+            propertyTabIndexStart +
+            idx * (advanced ? (showDamage ? 11 : 10) : showDamage ? 1 : 0)
+          }
         />
       ))}
     </div>

@@ -27,6 +27,8 @@ export type PVPMatchFormationEditorItemProps = {
   advanced?: boolean;
   showDamage?: boolean;
   compactAdvanced?: boolean;
+  studentTabIndex?: number;
+  propertyTabIndexStart?: number;
 };
 
 export function PVPMatchFormationEditorItem({
@@ -39,10 +41,21 @@ export function PVPMatchFormationEditorItem({
   advanced = false,
   showDamage = true,
   compactAdvanced = false,
+  studentTabIndex,
+  propertyTabIndexStart,
 }: PVPMatchFormationEditorItemProps) {
   const t = useTranslations();
   const [levelStr, setLevelStr] = useState(item.level?.toString() ?? "");
   const [damageStr, setDamageStr] = useState(item.damage?.toString() ?? "");
+  const levelTabIndex = advanced ? propertyTabIndexStart : undefined;
+  const starTabIndex =
+    advanced && propertyTabIndexStart !== undefined
+      ? propertyTabIndexStart + 1
+      : undefined;
+  const damageTabIndex =
+    showDamage && propertyTabIndexStart !== undefined
+      ? propertyTabIndexStart + (advanced ? 10 : 0)
+      : undefined;
 
   // Preset/report hydration updates the controlled values in the parent.
   // Keep the text inputs visually in sync without losing in-progress edits.
@@ -146,7 +159,11 @@ export function PVPMatchFormationEditorItem({
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex items-center gap-1">
           <StudentPicker onStudentSelected={handleStudentUpdate}>
-            <Button variant="outline" className="flex-1 justify-between">
+            <Button
+              variant="outline"
+              className="flex-1 justify-between"
+              tabIndex={studentTabIndex}
+            >
               {item.student
                 ? item.student.name
                 : t("tools.pvp.formationEditorItem.selectStudent")}
@@ -183,6 +200,7 @@ export function PVPMatchFormationEditorItem({
                   min={1}
                   max={90}
                   value={levelStr}
+                  tabIndex={levelTabIndex}
                   onChange={handleLevelUpdate}
                 />
               </div>
@@ -192,6 +210,7 @@ export function PVPMatchFormationEditorItem({
                   value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
                   onValueChanged={handleStarsUpdate}
                   imageClassName="size-6"
+                  tabIndexStart={starTabIndex}
                 />
               </div>
             </>
@@ -216,6 +235,7 @@ export function PVPMatchFormationEditorItem({
                   min={1}
                   max={90}
                   value={levelStr}
+                  tabIndex={levelTabIndex}
                   onChange={handleLevelUpdate}
                 />
               </div>
@@ -230,6 +250,7 @@ export function PVPMatchFormationEditorItem({
                 <StarLevelInput
                   value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
                   onValueChanged={handleStarsUpdate}
+                  tabIndexStart={starTabIndex}
                 />
               </div>
             )}
@@ -244,6 +265,7 @@ export function PVPMatchFormationEditorItem({
                   type="number"
                   min={0}
                   value={damageStr}
+                  tabIndex={damageTabIndex}
                   onChange={handleDamageUpdate}
                 />
               </div>
