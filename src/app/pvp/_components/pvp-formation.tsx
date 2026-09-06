@@ -8,6 +8,7 @@ import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { ShieldIcon, SwordIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import type { Doc } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -61,6 +62,8 @@ export function PVPFormation({
   damageChartOpen,
   highestDamage,
 }: PVPFormationProps) {
+  const t = useTranslations();
+
   const { studentMap } = useStudents();
 
   const strikers = useMemo(() => {
@@ -104,7 +107,9 @@ export function PVPFormation({
             },
           )}
         >
-          {result === "win" ? "WIN" : "LOSE"}
+          {result === "win"
+            ? t("tools.pvp.match.win")
+            : t("tools.pvp.match.loss")}
         </div>
 
         {studentRep && studentPortraitUrl && (

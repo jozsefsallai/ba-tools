@@ -13,7 +13,7 @@ export type FeaturedBorrowSectionsProps = {
 export function FeaturedBorrowSections({
   featuredStudents,
 }: FeaturedBorrowSectionsProps) {
-  const t = useTranslations("tools.roster.view.featuredBorrow");
+  const t = useTranslations();
 
   const modesWithStudents = BORROW_SLOT_GAMEMODES.filter(
     (mode) => featuredStudents[mode].length > 0,
@@ -29,7 +29,7 @@ export function FeaturedBorrowSections({
         <Card key={mode} className="min-w-0">
           <CardHeader className="px-4 pb-2 sm:px-6">
             <CardTitle className="text-sm leading-snug break-words sm:text-base">
-              {t(`modes.${mode}`)}
+              {t(`tools.roster.view.featuredBorrow.modes.${mode}`)}
             </CardTitle>
           </CardHeader>
 

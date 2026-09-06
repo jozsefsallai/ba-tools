@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useStudents } from "@/hooks/use-students";
 import { useMutation } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ export function PVPEnemyPresetForm({
   seasonId: Id<"pvpSeason">;
   preset?: Doc<"pvpEnemyPreset">;
 }) {
+  const t = useTranslations();
   const router = useRouter();
   const { studentMap } = useStudents();
 
@@ -73,14 +75,19 @@ export function PVPEnemyPresetForm({
             </Link>
           </Button>
           <h1 className="text-xl font-bold">
-            {preset ? "Edit Enemy Preset" : "Create Enemy Preset"}
+            {preset
+              ? t("tools.pvp.presets.editEnemy")
+              : t("tools.pvp.presets.createEnemy")}
           </h1>
         </div>
       </div>
 
       <div className="grid gap-4 rounded-lg border p-4 md:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <Label htmlFor="enemy-preset-name">Enemy name</Label>
+          <Label htmlFor="enemy-preset-name">
+            {t("tools.pvp.presets.enemyName")}
+          </Label>
+
           <Input
             id="enemy-preset-name"
             value={name}
@@ -89,10 +96,10 @@ export function PVPEnemyPresetForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label>Student representative</Label>
+          <Label>{t("tools.pvp.presets.studentRep")}</Label>
           <StudentPicker onStudentSelected={setStudentRep}>
             <Button variant="outline" className="w-full justify-start">
-              {studentRep?.name ?? "Select student"}
+              {studentRep?.name ?? t("tools.pvp.presets.selectStudent")}
             </Button>
           </StudentPicker>
         </div>
@@ -103,11 +110,15 @@ export function PVPEnemyPresetForm({
           variant="outline"
           onClick={() => router.push(`/pvp/${seasonId}/presets/enemies`)}
         >
-          Cancel
+          {t("tools.pvp.presets.cancel")}
         </Button>
 
         <Button disabled={!name.trim() || saving} onClick={() => void save()}>
-          {saving ? "Saving..." : preset ? "Save Changes" : "Create Preset"}
+          {saving
+            ? t("tools.pvp.presets.saving")
+            : preset
+              ? t("tools.pvp.presets.saveChanges")
+              : t("tools.pvp.presets.create")}
         </Button>
       </div>
     </div>

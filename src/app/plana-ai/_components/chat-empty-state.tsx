@@ -1,7 +1,7 @@
 "use client";
 
-import { getSenseiDisplayName } from "@/app/plana-ai/_lib/sensei-name";
 import { PlanaChatAvatar } from "@/app/plana-ai/_components/plana-chat-avatar";
+import { getSenseiDisplayName } from "@/app/plana-ai/_lib/sensei-name";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
@@ -16,35 +16,31 @@ const SUGGESTION_KEYS: SuggestionKey[] = [
   "affection",
 ];
 
-function getGreetingSuggestion(
-  t: ReturnType<typeof useTranslations<"tools.plana.emptyState.suggestions">>,
-) {
-  const hour = new Date().getHours();
-
-  if (hour >= 5 && hour < 12) {
-    return t("greetingMorning");
-  }
-
-  if (hour < 5) {
-    return t("greetingNight");
-  }
-
-  if (hour < 18) {
-    return t("greetingAfternoon");
-  }
-
-  return t("greetingEvening");
-}
-
 export function ChatEmptyState({
   onSelectSuggestion,
 }: {
   onSelectSuggestion: (message: string) => void;
 }) {
   const t = useTranslations();
-  const tSuggestions = useTranslations("tools.plana.emptyState.suggestions");
   const { user } = useUser();
   const senseiName = getSenseiDisplayName(user);
+  const getGreetingSuggestion = () => {
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 12) {
+      return t("tools.plana.emptyState.suggestions.greetingMorning");
+    }
+
+    if (hour < 5) {
+      return t("tools.plana.emptyState.suggestions.greetingNight");
+    }
+
+    if (hour < 18) {
+      return t("tools.plana.emptyState.suggestions.greetingAfternoon");
+    }
+
+    return t("tools.plana.emptyState.suggestions.greetingEvening");
+  };
   const heading = senseiName
     ? t("tools.plana.emptyState.headingNamed", { name: senseiName })
     : t("tools.plana.emptyState.heading");
@@ -67,7 +63,7 @@ export function ChatEmptyState({
           {SUGGESTION_KEYS.map((key) => {
             const suggestion =
               key === "greeting"
-                ? getGreetingSuggestion(tSuggestions)
+                ? getGreetingSuggestion()
                 : t(`tools.plana.emptyState.suggestions.${key}`);
 
             return (

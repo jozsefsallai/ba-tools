@@ -82,7 +82,7 @@ export function PVPMatchGroup({ seasonId, group }: PVPMatchGroupProps) {
             onClick={() => setExpanded((value) => !value)}
           >
             {expanded
-              ? "Show fewer matches"
+              ? t("tools.pvp.matchGroup.showFewer")
               : t("tools.pvp.matchGroup.loadMore", {
                   count: group.matches.length - 3,
                 })}

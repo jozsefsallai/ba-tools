@@ -716,6 +716,77 @@
     "title": "PVP Tracker",
     "description": "This tool allows you to track your PVP battles in Blue Archive.",
     "needAccount": "You need an account to use the PVP Tracker tool.",
+    "presets": {
+      "title": "PVP Presets",
+      "formationTitle": "Formation Presets",
+      "enemyTitle": "Enemy Presets",
+      "formationDescription": "Preset formations you can reuse across PVP matches in this season.",
+      "enemyDescription": "Enemies you've encountered this season. Selecting an enemy will automatically load their last used team when recording a match.",
+      "createFormation": "Create Formation Preset",
+      "createEnemy": "Create Enemy Preset",
+      "editFormation": "Edit Formation Preset",
+      "editEnemy": "Edit Enemy Preset",
+      "formationName": "Name",
+      "enemyName": "Enemy name",
+      "studentRep": "Student representative",
+      "selectStudent": "Select student",
+      "usedByMe": "Used By Me",
+      "formationType": "Formation type",
+      "attack": "Attack",
+      "defense": "Defense",
+      "both": "Both",
+      "back": "Back",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "teams": "Teams",
+      "teamsTitle": "Enemy Preset Teams",
+      "saveChanges": "Save Changes",
+      "saveFormationTitle": "Save Formation Preset",
+      "saveFormationDescription": "Give this formation preset a name and choose whether it should be prioritized for your own formations.",
+      "savePreset": "Save Preset",
+      "formationSaved": "Formation preset saved.",
+      "videoPlaceholder": "https://... (optional)",
+      "create": "Create Preset",
+      "saving": "Saving...",
+      "loadingFormations": "Loading formation presets...",
+      "loadingEnemies": "Loading enemy presets...",
+      "loadingTeams": "Loading enemy teams...",
+      "loadingFormation": "Loading formation preset...",
+      "loadingEnemy": "Loading enemy preset...",
+      "notFound": "Preset not found.",
+      "noFormations": "No formation presets match this filter.",
+      "noEnemies": "No enemy presets yet.",
+      "noTeams": "No matches have been attached to this enemy preset.",
+      "deleteFormationTitle": "Delete formation preset?",
+      "deleteFormationDescription": "This formation preset will be permanently deleted. Matches using this formation preset will be unaffected.",
+      "deleteEnemyTitle": "Delete enemy preset?",
+      "deleteEnemyDescription": "This enemy preset will be permanently deleted. Existing matches will be kept.",
+      "teamsUsedBy": "Teams Used by {name}",
+      "enemyPreset": "Enemy preset",
+      "filterFormationType": "Formation type"
+    },
+    "presetPicker": {
+      "loading": "Loading presets...",
+      "search": "Search presets...",
+      "empty": "No matching presets.",
+      "autofill": "Autofill from preset",
+      "attachEnemy": "Attach enemy preset"
+    },
+    "advancedMode": "Advanced Mode",
+    "reportImport": {
+      "title": "Import Combat Report",
+      "disclaimer": "Drop a screenshot here or choose one from your device. The extraction may contain mistakes; double-check every field before saving the match.",
+      "drop": "Drop screenshot here",
+      "browse": "or click to browse",
+      "reading": "Reading screenshot...",
+      "extracting": "Extracting battle details...",
+      "applying": "Matching students and applying results...",
+      "invalid": "This is not a valid PVP combat report.",
+      "failed": "Failed to import combat report.",
+      "success": "Combat report imported. Review the match before saving.",
+      "cancel": "Cancel"
+    },
 
     "seasons": {
       "createNew": "Create New Season",
@@ -725,7 +796,10 @@
 
     "season": {
       "title": "Season: {name}",
+      "unknown": "Unknown",
       "recordNewMatch": "Record New Match",
+      "formationPresets": "Formation Presets",
+      "enemyPresets": "Enemy Presets",
       "failedToLoad": "Failed to load PVP matches for this season."
     },
 
@@ -777,7 +851,8 @@
       "won": "won",
       "lost": "lost",
       "total": "total",
-      "loadMore": "{count, plural, one {Load 1 more match} other {Load # more matches}}"
+      "loadMore": "{count, plural, one {Load 1 more match} other {Load # more matches}}",
+      "showFewer": "Show fewer matches"
     },
 
     "toasts": {

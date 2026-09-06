@@ -1,14 +1,15 @@
 import { PVPMatchEditView } from "@/app/pvp/_components/pvp-match-edit-view";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
 
-export const metadata: Metadata = {
-  title: "Edit PVP Match - Joe's Blue Archive Tools",
-  description: "Edit PVP match.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return {
+    title: `${t("tools.pvp.match.editMatch")} - ${t("common.appName")}`,
+    description: t("tools.pvp.description"),
+  };
+}
 
 export default async function PVPMatchPage({
   params,

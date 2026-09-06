@@ -15,6 +15,7 @@ import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
@@ -23,6 +24,7 @@ import type { Id } from "~convex/dataModel";
 export function PVPFormationPresetsPage({
   seasonId,
 }: { seasonId: Id<"pvpSeason"> }) {
+  const t = useTranslations();
   const { studentMap } = useStudents();
 
   const presets = useQuery(api.pvp.listFormationPresets, { seasonId });
@@ -52,18 +54,22 @@ export function PVPFormationPresetsPage({
             </Link>
           </Button>
 
-          <h1 className="text-xl font-bold">Formation Presets</h1>
+          <h1 className="text-xl font-bold">
+            {t("tools.pvp.presets.formationTitle")}
+          </h1>
         </div>
 
         <Button asChild>
           <Link href={`/pvp/${seasonId}/presets/formations/new`}>
-            Create Formation Preset
+            {t("tools.pvp.presets.createFormation")}
           </Link>
         </Button>
       </div>
 
       <div className="flex w-full max-w-sm items-center gap-3">
-        <Label htmlFor="formation-type-filter">Formation type</Label>
+        <Label htmlFor="formation-type-filter">
+          {t("tools.pvp.presets.formationType")}
+        </Label>
 
         <Select
           value={filter}
@@ -74,20 +80,26 @@ export function PVPFormationPresetsPage({
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="both">Both</SelectItem>
-            <SelectItem value="attack">Attack</SelectItem>
-            <SelectItem value="defense">Defense</SelectItem>
+            <SelectItem value="both">{t("tools.pvp.presets.both")}</SelectItem>
+
+            <SelectItem value="attack">
+              {t("tools.pvp.presets.attack")}
+            </SelectItem>
+
+            <SelectItem value="defense">
+              {t("tools.pvp.presets.defense")}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {presets === undefined ? (
         <div className="rounded-lg border p-6 text-sm text-muted-foreground">
-          Loading formation presets...
+          {t("tools.pvp.presets.loadingFormations")}
         </div>
       ) : visiblePresets?.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          No formation presets match this filter.
+          {t("tools.pvp.presets.noFormations")}
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -104,7 +116,11 @@ export function PVPFormationPresetsPage({
                 <div>
                   <h2 className="font-semibold">{preset.name}</h2>
                   <span className="text-xs uppercase text-muted-foreground">
-                    {preset.matchType ?? "Both"}
+                    {preset.matchType === "attack"
+                      ? t("tools.pvp.presets.attack")
+                      : preset.matchType === "defense"
+                        ? t("tools.pvp.presets.defense")
+                        : t("tools.pvp.presets.both")}
                   </span>
                 </div>
 
@@ -113,18 +129,20 @@ export function PVPFormationPresetsPage({
                     <Link
                       href={`/pvp/${seasonId}/presets/formations/${preset._id}`}
                     >
-                      Edit
+                      {t("tools.pvp.presets.edit")}
                     </Link>
                   </Button>
 
                   <ConfirmDialog
-                    title="Delete formation preset?"
-                    description="This formation preset will be permanently deleted."
+                    title={t("tools.pvp.presets.deleteFormationTitle")}
+                    description={t(
+                      "tools.pvp.presets.deleteFormationDescription",
+                    )}
                     confirmVariant="destructive"
                     onConfirm={() => remove({ presetId: preset._id })}
                   >
                     <Button size="sm" variant="destructive">
-                      Delete
+                      {t("tools.pvp.presets.delete")}
                     </Button>
                   </ConfirmDialog>
                 </div>

@@ -4,6 +4,7 @@ import { PVPMatchFormationEditorItem } from "@/app/pvp/_components/pvp-match-for
 import type { PVPFormationStudentItem } from "@/app/pvp/_lib/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useTranslations } from "next-intl";
 
 export type PVPMatchFormationEditorProps = {
   formation: PVPFormationStudentItem[];
@@ -28,6 +29,8 @@ export function PVPMatchFormationEditor({
   showDamage = true,
   compactAdvanced = false,
 }: PVPMatchFormationEditorProps) {
+  const t = useTranslations();
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-2">
@@ -38,7 +41,7 @@ export function PVPMatchFormationEditor({
         />
 
         <Label htmlFor={`pvp-advanced-${strikerPrefix ?? "formation"}`}>
-          Advanced Mode
+          {t("tools.pvp.advancedMode")}
         </Label>
       </div>
       {formation.map((item, idx) => (

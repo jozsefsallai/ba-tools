@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { Id } from "~convex/dataModel";
 
 export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
+  const t = useTranslations();
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
@@ -14,7 +17,7 @@ export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
             <ChevronLeftIcon />
           </Link>
         </Button>
-        <h1 className="text-xl font-bold">PVP Presets</h1>
+        <h1 className="text-xl font-bold">{t("tools.pvp.presets.title")}</h1>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -25,10 +28,12 @@ export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
         >
           <Link href={`/pvp/${seasonId}/presets/formations`}>
             <span>
-              <strong className="block text-base">Formation Presets</strong>
+              <strong className="block text-base">
+                {t("tools.pvp.presets.formationTitle")}
+              </strong>
 
               <span className="text-sm font-normal text-muted-foreground">
-                Reusable six-student teams.
+                {t("tools.pvp.presets.formationDescription")}
               </span>
             </span>
           </Link>
@@ -41,10 +46,12 @@ export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
         >
           <Link href={`/pvp/${seasonId}/presets/enemies`}>
             <span>
-              <strong className="block text-base">Enemy Presets</strong>
+              <strong className="block text-base">
+                {t("tools.pvp.presets.enemyTitle")}
+              </strong>
 
               <span className="text-sm font-normal text-muted-foreground">
-                Named enemies and their historical teams.
+                {t("tools.pvp.presets.enemyDescription")}
               </span>
             </span>
           </Link>

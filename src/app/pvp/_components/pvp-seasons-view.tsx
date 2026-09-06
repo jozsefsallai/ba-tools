@@ -4,8 +4,8 @@ import { MessageBox } from "@/components/common/message-box";
 import { NewPVPSeasonDialog } from "@/components/dialogs/new-pvp-season-dialog";
 import { useQueryWithStatus } from "@/lib/convex";
 import { PlusIcon } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { api } from "~convex/api";
 
 export function PVPSeasonsView() {
@@ -29,7 +29,9 @@ export function PVPSeasonsView() {
       <NewPVPSeasonDialog>
         <div className="border border-dashed flex flex-col gap-2 items-center justify-center h-full rounded-md p-4 hover:bg-accent cursor-pointer">
           <PlusIcon className="size-8" />
-          <div className="text-xl font-medium">{t("tools.pvp.seasons.createNew")}</div>
+          <div className="text-xl font-medium">
+            {t("tools.pvp.seasons.createNew")}
+          </div>
         </div>
       </NewPVPSeasonDialog>
 

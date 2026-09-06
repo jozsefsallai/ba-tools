@@ -48,20 +48,20 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
         <div className="flex gap-2 items-center justify-between">
           <h1 className="text-xl font-bold">
             {t("tools.pvp.season.title", {
-              name: query.data.season?.name ?? "Unknown",
+              name: query.data.season?.name ?? t("tools.pvp.season.unknown"),
             })}
           </h1>
 
           <div className="flex items-center gap-2">
             <Button variant="outline" asChild>
               <Link href={`/pvp/${seasonId}/presets/formations`}>
-                Formation Presets
+                {t("tools.pvp.season.formationPresets")}
               </Link>
             </Button>
 
             <Button variant="outline" asChild>
               <Link href={`/pvp/${seasonId}/presets/enemies`}>
-                Enemy Presets
+                {t("tools.pvp.season.enemyPresets")}
               </Link>
             </Button>
 

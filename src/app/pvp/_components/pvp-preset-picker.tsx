@@ -16,6 +16,7 @@ import {
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { Student } from "~prisma";
 
@@ -43,6 +44,7 @@ export function PVPPresetPicker({
   search: string;
   onSearchChange: (value: string) => void;
 }) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const loading = presets === undefined;
 
@@ -55,7 +57,7 @@ export function PVPPresetPicker({
           className={cn("w-full justify-between", className)}
           disabled={loading}
         >
-          {loading ? "Loading presets..." : placeholder}
+          {loading ? t("tools.pvp.presetPicker.loading") : placeholder}
           <ChevronsUpDownIcon />
         </Button>
       </PopoverTrigger>
@@ -63,13 +65,13 @@ export function PVPPresetPicker({
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command>
           <CommandInput
-            placeholder="Search presets..."
+            placeholder={t("tools.pvp.presetPicker.search")}
             value={search}
             onValueChange={onSearchChange}
           />
 
           <CommandList>
-            <CommandEmpty>No matching presets.</CommandEmpty>
+            <CommandEmpty>{t("tools.pvp.presetPicker.empty")}</CommandEmpty>
 
             {(presets ?? []).map((preset) => (
               <CommandItem

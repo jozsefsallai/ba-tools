@@ -6,6 +6,7 @@ import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -13,6 +14,7 @@ import type { Id } from "~convex/dataModel";
 export function PVPEnemyPresetsPage({
   seasonId,
 }: { seasonId: Id<"pvpSeason"> }) {
+  const t = useTranslations();
   const { studentMap } = useStudents();
 
   const presets = useQuery(api.pvp.listEnemyPresets, { seasonId });
@@ -27,23 +29,25 @@ export function PVPEnemyPresetsPage({
               <ChevronLeftIcon />
             </Link>
           </Button>
-          <h1 className="text-xl font-bold">Enemy Presets</h1>
+          <h1 className="text-xl font-bold">
+            {t("tools.pvp.presets.enemyTitle")}
+          </h1>
         </div>
 
         <Button asChild>
           <Link href={`/pvp/${seasonId}/presets/enemies/new`}>
-            Create Enemy Preset
+            {t("tools.pvp.presets.createEnemy")}
           </Link>
         </Button>
       </div>
 
       {presets === undefined ? (
         <div className="rounded-lg border p-6 text-sm text-muted-foreground">
-          Loading enemy presets...
+          {t("tools.pvp.presets.loadingEnemies")}
         </div>
       ) : presets.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          No enemy presets yet.
+          {t("tools.pvp.presets.noEnemies")}
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -70,7 +74,7 @@ export function PVPEnemyPresetsPage({
                   <div className="min-w-0">
                     <h2 className="truncate font-semibold">{preset.name}</h2>
                     <p className="text-xs text-muted-foreground">
-                      Enemy preset
+                      {t("tools.pvp.presets.enemyPreset")}
                     </p>
                   </div>
                 </div>
@@ -80,7 +84,7 @@ export function PVPEnemyPresetsPage({
                     <Link
                       href={`/pvp/${seasonId}/presets/enemies/${preset._id}/teams`}
                     >
-                      Teams
+                      {t("tools.pvp.presets.teams")}
                     </Link>
                   </Button>
 
@@ -88,18 +92,18 @@ export function PVPEnemyPresetsPage({
                     <Link
                       href={`/pvp/${seasonId}/presets/enemies/${preset._id}`}
                     >
-                      Edit
+                      {t("tools.pvp.presets.edit")}
                     </Link>
                   </Button>
 
                   <ConfirmDialog
-                    title="Delete enemy preset?"
-                    description="This enemy preset will be permanently deleted. Existing matches will be kept."
+                    title={t("tools.pvp.presets.deleteEnemyTitle")}
+                    description={t("tools.pvp.presets.deleteEnemyDescription")}
                     confirmVariant="destructive"
                     onConfirm={() => remove({ presetId: preset._id })}
                   >
                     <Button size="sm" variant="destructive">
-                      Delete
+                      {t("tools.pvp.presets.delete")}
                     </Button>
                   </ConfirmDialog>
                 </div>

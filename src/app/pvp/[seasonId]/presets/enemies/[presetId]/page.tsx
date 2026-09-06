@@ -1,30 +1,26 @@
-"use client";
-
-import { PVPEnemyPresetForm } from "@/app/pvp/_components/pvp-enemy-preset-form";
-import { MessageBox } from "@/components/common/message-box";
-import { useQuery } from "convex/react";
-import { use } from "react";
-import { api } from "~convex/api";
+import { PVPEnemyPresetEditPage } from "@/app/pvp/_components/pvp-enemy-preset-edit-page";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
 
-export default function EditEnemyPresetPage({
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return {
+    title: `${t("tools.pvp.presets.editEnemy")} - ${t("common.appName")}`,
+    description: t("tools.pvp.presets.enemyDescription"),
+  };
+}
+
+export default async function EditEnemyPresetRoute({
   params,
 }: {
   params: Promise<{ seasonId: string; presetId: string }>;
 }) {
-  const resolvedParams = use(params);
-  const seasonId = resolvedParams.seasonId as Id<"pvpSeason">;
-
-  const presets = useQuery(api.pvp.listEnemyPresets, { seasonId });
-  const preset = presets?.find((item) => item._id === resolvedParams.presetId);
-
-  if (presets === undefined) {
-    return <MessageBox>Loading enemy preset...</MessageBox>;
-  }
-
-  if (!preset) {
-    return <MessageBox>Enemy preset not found.</MessageBox>;
-  }
-
-  return <PVPEnemyPresetForm seasonId={seasonId} preset={preset} />;
+  const resolved = await params;
+  return (
+    <PVPEnemyPresetEditPage
+      seasonId={resolved.seasonId as Id<"pvpSeason">}
+      presetId={resolved.presetId as Id<"pvpEnemyPreset">}
+    />
+  );
 }

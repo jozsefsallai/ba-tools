@@ -321,7 +321,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     });
 
     setSavePresetDialogOpen(false);
-    toast.success("Formation preset saved.");
+    toast.success(t("tools.pvp.presets.formationSaved"));
   }
 
   async function handleCombatReport(file: File) {
@@ -336,7 +336,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       const parsed = await parsePvpCombatReport(form);
 
       if (!parsed.valid) {
-        toast.error("This is not a valid PVP combat report.");
+        toast.error(t("tools.pvp.reportImport.invalid"));
         return;
       }
 
@@ -391,11 +391,11 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         }
       }
 
-      toast.success("Combat report imported. Review the match before saving.");
+      toast.success(t("tools.pvp.reportImport.success"));
       setReportDialogOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to import combat report.");
+      toast.error(t("tools.pvp.reportImport.failed"));
     } finally {
       setReportStatus("idle");
     }
@@ -525,7 +525,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               variant="outline"
               onClick={() => setReportDialogOpen(true)}
             >
-              Import Combat Report
+              {t("tools.pvp.reportImport.title")}
             </Button>
           )}
         </div>
@@ -534,11 +534,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Import Combat Report</DialogTitle>
+            <DialogTitle>{t("tools.pvp.reportImport.title")}</DialogTitle>
             <DialogDescription>
-              Drop a screenshot here or choose one from your device. The
-              extraction may contain mistakes; double-check every field before
-              saving the match.
+              {t("tools.pvp.reportImport.disclaimer")}
             </DialogDescription>
           </DialogHeader>
 
@@ -557,18 +555,19 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             {reportStatus === "idle" && (
               <>
                 <span className="font-medium text-foreground">
-                  Drop screenshot here
+                  {t("tools.pvp.reportImport.drop")}
                 </span>
-                <span>or click to browse</span>
+                <span>{t("tools.pvp.reportImport.browse")}</span>
               </>
             )}
 
-            {reportStatus === "reading" && "Reading screenshot..."}
+            {reportStatus === "reading" && t("tools.pvp.reportImport.reading")}
 
-            {reportStatus === "extracting" && "Extracting battle details..."}
+            {reportStatus === "extracting" &&
+              t("tools.pvp.reportImport.extracting")}
 
             {reportStatus === "applying" &&
-              "Matching students and applying results..."}
+              t("tools.pvp.reportImport.applying")}
           </button>
 
           <input
@@ -590,7 +589,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               onClick={() => setReportDialogOpen(false)}
               disabled={reportStatus !== "idle"}
             >
-              Cancel
+              {t("tools.pvp.reportImport.cancel")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -602,15 +601,19 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Formation Preset</DialogTitle>
+            <DialogTitle>
+              {t("tools.pvp.presets.saveFormationTitle")}
+            </DialogTitle>
+
             <DialogDescription>
-              Give this formation preset a name and choose whether it should be
-              prioritized for your own formations.
+              {t("tools.pvp.presets.saveFormationDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="save-pvp-preset-name">Name</Label>
+            <Label htmlFor="save-pvp-preset-name">
+              {t("tools.pvp.presets.formationName")}
+            </Label>
 
             <Input
               id="save-pvp-preset-name"
@@ -626,7 +629,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 onCheckedChange={setSavePresetUsedByMe}
               />
 
-              <Label htmlFor="save-pvp-preset-used-by-me">Used By Me</Label>
+              <Label htmlFor="save-pvp-preset-used-by-me">
+                {t("tools.pvp.presets.usedByMe")}
+              </Label>
             </div>
           </div>
 
@@ -636,7 +641,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               variant="outline"
               onClick={() => setSavePresetDialogOpen(false)}
             >
-              Cancel
+              {t("tools.pvp.reportImport.cancel")}
             </Button>
 
             <Button
@@ -644,7 +649,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               disabled={!savePresetName.trim()}
               onClick={() => void saveFormationPreset()}
             >
-              Save Preset
+              {t("tools.pvp.presets.savePreset")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -691,7 +696,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             type="url"
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
-            placeholder="https://... (optional)"
+            placeholder={t("tools.pvp.presets.videoPlaceholder")}
           />
         </div>
 
@@ -789,7 +794,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                     preset.matchType === matchType,
                 )
                 .sort((a, b) => Number(b.usedByMe) - Number(a.usedByMe))}
-              placeholder="Autofill from preset"
+              placeholder={t("tools.pvp.presetPicker.autofill")}
               studentMap={studentMap}
               search={ownFormationSearch}
               onSearchChange={setOwnFormationSearch}
@@ -824,7 +829,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               presets={enemyPresets}
               placeholder={
                 enemyPresets?.find((item) => item._id === enemyPresetId)
-                  ?.name ?? "Attach enemy preset"
+                  ?.name ?? t("tools.pvp.presetPicker.attachEnemy")
               }
               className="w-1/2 min-w-44"
               studentMap={studentMap}
@@ -947,7 +952,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                   preset.matchType ===
                     (matchType === "attack" ? "defense" : "attack"),
               )}
-              placeholder="Autofill from preset"
+              placeholder={t("tools.pvp.presetPicker.autofill")}
               studentMap={studentMap}
               search={enemyFormationSearch}
               onSearchChange={setEnemyFormationSearch}

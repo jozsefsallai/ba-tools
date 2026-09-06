@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { useStudents } from "@/hooks/use-students";
 import { useMutation } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -34,6 +35,7 @@ export function PVPFormationPresetForm({
   seasonId: Id<"pvpSeason">;
   preset?: Doc<"pvpFormationPreset">;
 }) {
+  const t = useTranslations();
   const router = useRouter();
   const { studentMap } = useStudents();
 
@@ -116,14 +118,19 @@ export function PVPFormationPresetForm({
             </Link>
           </Button>
           <h1 className="text-xl font-bold">
-            {preset ? "Edit Formation Preset" : "Create Formation Preset"}
+            {preset
+              ? t("tools.pvp.presets.editFormation")
+              : t("tools.pvp.presets.createFormation")}
           </h1>
         </div>
       </div>
 
       <div className="grid gap-4 rounded-lg border p-4 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-end">
         <div className="flex flex-col gap-1">
-          <Label htmlFor="formation-preset-name">Name</Label>
+          <Label htmlFor="formation-preset-name">
+            {t("tools.pvp.presets.formationName")}
+          </Label>
+
           <Input
             id="formation-preset-name"
             value={name}
@@ -138,11 +145,13 @@ export function PVPFormationPresetForm({
             onCheckedChange={setUsedByMe}
           />
 
-          <Label htmlFor="formation-used-by-me">Used By Me</Label>
+          <Label htmlFor="formation-used-by-me">
+            {t("tools.pvp.presets.usedByMe")}
+          </Label>
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label>Team Type</Label>
+          <Label>{t("tools.pvp.presets.formationType")}</Label>
 
           <Select
             value={matchType}
@@ -154,9 +163,17 @@ export function PVPFormationPresetForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="attack">Attack</SelectItem>
-              <SelectItem value="defense">Defense</SelectItem>
-              <SelectItem value="both">Both</SelectItem>
+              <SelectItem value="attack">
+                {t("tools.pvp.presets.attack")}
+              </SelectItem>
+
+              <SelectItem value="defense">
+                {t("tools.pvp.presets.defense")}
+              </SelectItem>
+
+              <SelectItem value="both">
+                {t("tools.pvp.presets.both")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -177,11 +194,15 @@ export function PVPFormationPresetForm({
           variant="outline"
           onClick={() => router.push(`/pvp/${seasonId}/presets/formations`)}
         >
-          Cancel
+          {t("tools.pvp.presets.cancel")}
         </Button>
 
         <Button disabled={!name.trim() || saving} onClick={() => void save()}>
-          {saving ? "Saving..." : preset ? "Save Changes" : "Create Preset"}
+          {saving
+            ? t("tools.pvp.presets.saving")
+            : preset
+              ? t("tools.pvp.presets.saveChanges")
+              : t("tools.pvp.presets.create")}
         </Button>
       </div>
     </div>
