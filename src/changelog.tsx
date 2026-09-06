@@ -73,7 +73,26 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
-          'By default, the match editor will not require you to specify the level and star/UE level of the students in the formations. An "Advanced Mode" toggle has been added to the match editor to allow you to specify these details.',
+          "Recording a new PVP session will now autofill your formation with your last used formation.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          'By default, the match editor will not give you the option to specify the level and star/UE level of the students in the formations. An "Advanced Mode" toggle has been added to the match editor to allow you to specify these details.',
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Improved tab navigation in the match formation editor.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Only strikers or specials can be selected in their respective slots.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "It is no longer possible to select a student if they were already selected in another slot.",
       },
     ],
   },

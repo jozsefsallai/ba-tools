@@ -4,6 +4,7 @@ import { PVPMatchFormationEditorItem } from "@/app/pvp/_components/pvp-match-for
 import type { PVPFormationStudentItem } from "@/app/pvp/_lib/types";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useStudents } from "@/hooks/use-students";
 import { useTranslations } from "next-intl";
 
 export type PVPMatchFormationEditorProps = {
@@ -34,6 +35,7 @@ export function PVPMatchFormationEditor({
   propertyTabIndexStart = 7,
 }: PVPMatchFormationEditorProps) {
   const t = useTranslations();
+  const { students: allStudents } = useStudents();
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,6 +67,19 @@ export function PVPMatchFormationEditor({
             propertyTabIndexStart +
             idx * (advanced ? (showDamage ? 11 : 10) : showDamage ? 1 : 0)
           }
+          students={allStudents.filter((student) => {
+            const isCurrentStudent = student.id === item.student?.id;
+            const isCorrectClass =
+              idx < 4
+                ? student.combatClass === "Main"
+                : student.combatClass === "Support";
+            const isUsedElsewhere = formation.some(
+              (otherItem, otherIdx) =>
+                otherIdx !== idx && otherItem.student?.id === student.id,
+            );
+
+            return isCurrentStudent || (isCorrectClass && !isUsedElsewhere);
+          })}
         />
       ))}
     </div>

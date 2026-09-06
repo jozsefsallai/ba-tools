@@ -29,6 +29,7 @@ export type PVPMatchFormationEditorItemProps = {
   compactAdvanced?: boolean;
   studentTabIndex?: number;
   propertyTabIndexStart?: number;
+  students: Student[];
 };
 
 export function PVPMatchFormationEditorItem({
@@ -43,6 +44,7 @@ export function PVPMatchFormationEditorItem({
   compactAdvanced = false,
   studentTabIndex,
   propertyTabIndexStart,
+  students,
 }: PVPMatchFormationEditorItemProps) {
   const t = useTranslations();
   const [levelStr, setLevelStr] = useState(item.level?.toString() ?? "");
@@ -158,7 +160,10 @@ export function PVPMatchFormationEditorItem({
 
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex items-center gap-1">
-          <StudentPicker onStudentSelected={handleStudentUpdate}>
+          <StudentPicker
+            students={students}
+            onStudentSelected={handleStudentUpdate}
+          >
             <Button
               variant="outline"
               className="flex-1 justify-between"
