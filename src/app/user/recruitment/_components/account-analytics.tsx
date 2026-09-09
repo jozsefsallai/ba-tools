@@ -8,10 +8,12 @@ import {
 import {
   type AccountAggregates,
   type AggregateBucket,
-  RECRUITMENT_COLORS,
-  type RecruitmentKind,
+  HARD_PITY,
+  SOFT_PITY,
+  type RecruitmentSessionKind,
   type RecruitmentStats,
   applySessionToAggregates,
+  calculateRecruitmentStats,
   emptyAccountAggregates,
 } from "@/lib/recruitment";
 import { useTranslations } from "next-intl";
@@ -21,30 +23,56 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
+  Cell,
   ReferenceLine,
   XAxis,
   YAxis,
 } from "recharts";
 
+const PITY_COLORS = {
+  beforeSoftPity: "#22c55e",
+  softWin: "#a3e635",
+  afterSoftPity: "#f59e0b",
+  hardPity: "#ef4444",
+} as const;
+
 type Session = {
   _id: string;
   date: number;
-  kind: RecruitmentKind;
+  kind: RecruitmentSessionKind;
   isFestBanner?: boolean;
   totalPulls: number;
-  pickupsObtained: { charge: number; studentId: string }[];
+  permanentPulls?: number;
+  limitedPulls?: number;
+  pickupsObtained: {
+    charge: number;
+    studentId: string;
+    kind?: "permanent" | "limited";
+  }[];
   threeStarCount: number;
+  startCharge: number;
+  permanentStartCharge?: number;
+  limitedStartCharge?: number;
+  rebateTicketsFromPreviousSession: number;
+  rebateTicketsUsed?: number;
   stats: Omit<
     RecruitmentStats,
-    "pullsPerPU" | "pullsPerThreeStar" | "pickupClassifications"
+    | "pullsPerPU"
+    | "pullsPerThreeStar"
+    | "pickupClassifications"
+    | "pools"
+    | "permanentEndCharge"
+    | "limitedEndCharge"
   > & {
     pullsPerPU?: number | null;
     pullsPerThreeStar?: number | null;
+    permanentEndCharge?: number;
+    limitedEndCharge?: number;
+    pools?: RecruitmentStats["pools"];
     pickupClassifications: {
       charge: number;
       studentId: string;
+      kind?: "permanent" | "limited";
       classification: string;
     }[];
   };
@@ -61,10 +89,6 @@ export function AccountAnalytics({
 }) {
   const t = useTranslations();
   const [filter, setFilter] = useState<Filter>("all");
-  const filteredSessions = useMemo(
-    () => sessions.filter((session) => matchesFilter(session, filter)),
-    [sessions, filter],
-  );
   const sourceAggregates = useMemo(
     () => aggregates ?? rebuildAggregate(sessions),
     [aggregates, sessions],
@@ -140,86 +164,10 @@ export function AccountAnalytics({
         />
       </div>
       <div className="grid w-full gap-4">
-        <RateHistoryChart sessions={filteredSessions} />
         <PitySummary aggregate={aggregate} />
         <PickupDistributionChart aggregate={aggregate} />
       </div>
     </section>
-  );
-}
-
-function RateHistoryChart({ sessions }: { sessions: Session[] }) {
-  const t = useTranslations();
-  const data = sessions
-    .slice()
-    .sort((a, b) => a.date - b.date)
-    .map((session) => ({
-      name: new Date(session.date).toLocaleDateString(),
-      threeStarRate: session.stats.experiencedThreeStarRate,
-      puRate: session.stats.experiencedPURate,
-    }));
-
-  return (
-    <ChartCard title={t("tools.recruitment.rateHistory")}>
-      {data.length === 0 ? (
-        <EmptyChart />
-      ) : (
-        <ChartContainer
-          config={{
-            threeStarRate: {
-              label: t("tools.recruitment.experiencedThreeStarRate"),
-              color: RECRUITMENT_COLORS.base.accent,
-            },
-            puRate: {
-              label: t("tools.recruitment.experiencedPURate"),
-              color: RECRUITMENT_COLORS.limited.accent,
-            },
-          }}
-        >
-          <LineChart
-            accessibilityLayer
-            data={data}
-            margin={{ left: 8, right: 8 }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis dataKey="name" tickLine={false} axisLine={false} />
-            <YAxis unit="%" tickLine={false} axisLine={false} />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  formatter={(value, name) => (
-                    <div className="flex w-full items-center justify-between gap-6">
-                      <span className="text-muted-foreground">
-                        {name === "threeStarRate"
-                          ? t("tools.recruitment.experiencedThreeStarRate")
-                          : t("tools.recruitment.experiencedPURate")}
-                      </span>
-                      <span className="font-mono font-medium tabular-nums">
-                        {Number(value).toFixed(2)}%
-                      </span>
-                    </div>
-                  )}
-                />
-              }
-            />
-            <Line
-              dataKey="threeStarRate"
-              dot
-              activeDot={{ r: 4 }}
-              stroke="var(--color-threeStarRate)"
-              strokeWidth={2}
-            />
-            <Line
-              dataKey="puRate"
-              dot
-              activeDot={{ r: 4 }}
-              stroke="var(--color-puRate)"
-              strokeWidth={2}
-            />
-          </LineChart>
-        </ChartContainer>
-      )}
-    </ChartCard>
   );
 }
 
@@ -233,22 +181,22 @@ function PitySummary({ aggregate }: { aggregate: AggregateBucket }) {
     {
       key: "beforeSoftPity",
       value: aggregate.naturalPickups,
-      color: RECRUITMENT_COLORS.base.accent,
+      color: PITY_COLORS.beforeSoftPity,
     },
     {
       key: "softWin",
       value: aggregate.softWinPickups,
-      color: RECRUITMENT_COLORS.base.trackAccent,
+      color: PITY_COLORS.softWin,
     },
     {
       key: "afterSoftPity",
       value: aggregate.softLossPickups,
-      color: RECRUITMENT_COLORS.limited.trackAccent,
+      color: PITY_COLORS.afterSoftPity,
     },
     {
       key: "hardPity",
       value: aggregate.hardPityPickups,
-      color: RECRUITMENT_COLORS.limited.accent,
+      color: PITY_COLORS.hardPity,
     },
   ];
   const total = values.reduce((sum, item) => sum + item.value, 0);
@@ -299,6 +247,14 @@ function classificationLabel(
   return t(`tools.recruitment.classifications.${key}` as never);
 }
 
+function chargeBucketColor(start: number) {
+  const end = start + 9;
+  if (end < SOFT_PITY) return PITY_COLORS.beforeSoftPity;
+  if (start <= SOFT_PITY && end >= SOFT_PITY) return PITY_COLORS.softWin;
+  if (end < HARD_PITY) return PITY_COLORS.afterSoftPity;
+  return PITY_COLORS.hardPity;
+}
+
 function PickupDistributionChart({
   aggregate,
 }: { aggregate: AggregateBucket }) {
@@ -317,7 +273,7 @@ function PickupDistributionChart({
         config={{
           count: {
             label: t("tools.recruitment.pickups"),
-            color: RECRUITMENT_COLORS.limited.accent,
+            color: PITY_COLORS.afterSoftPity,
           },
         }}
       >
@@ -333,21 +289,32 @@ function PickupDistributionChart({
           <ChartTooltip
             content={
               <ChartTooltipContent
-                labelFormatter={(value) => `${value}-${Number(value) + 9}`}
+                labelFormatter={(_value, tooltipPayload) => {
+                  const charge = Number(tooltipPayload?.[0]?.payload?.charge);
+                  if (!Number.isFinite(charge)) return "";
+                  return `${charge}-${charge + 9}`;
+                }}
               />
             }
           />
           <ReferenceLine
-            x={100}
-            stroke={RECRUITMENT_COLORS.base.accent}
+            x={SOFT_PITY}
+            stroke={PITY_COLORS.softWin}
             strokeDasharray="4 4"
           />
           <ReferenceLine
-            x={200}
-            stroke={RECRUITMENT_COLORS.limited.accent}
+            x={HARD_PITY}
+            stroke={PITY_COLORS.hardPity}
             strokeDasharray="4 4"
           />
-          <Bar dataKey="count" fill="var(--color-count)" radius={2} />
+          <Bar dataKey="count" radius={2}>
+            {data.map((entry) => (
+              <Cell
+                fill={chargeBucketColor(entry.charge)}
+                key={entry.charge}
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ChartContainer>
     </ChartCard>
@@ -392,13 +359,6 @@ function rate(numerator: number, denominator: number) {
 
 function average(numerator: number, denominator: number) {
   return denominator === 0 ? "N/A" : (numerator / denominator).toFixed(2);
-}
-
-function matchesFilter(session: Session, filter: Filter) {
-  if (filter === "all") return true;
-  if (filter === "fest") return session.isFestBanner === true;
-  if (filter === "limited") return session.kind === "limited";
-  return session.kind === "permanent";
 }
 
 function emptyBucket(): AggregateBucket {
@@ -449,37 +409,8 @@ function mergeBuckets(first: AggregateBucket, second: AggregateBucket) {
 function rebuildAggregate(sessions: Session[]) {
   let result = emptyAccountAggregates();
   for (const session of sessions) {
-    const stats: RecruitmentStats = {
-      ...session.stats,
-      pullsPerPU: session.stats.pullsPerPU ?? null,
-      pullsPerThreeStar: session.stats.pullsPerThreeStar ?? null,
-      pickupClassifications: session.stats.pickupClassifications.map(
-        (pickup) => ({
-          ...pickup,
-          classification:
-            pickup.classification === "natural"
-              ? "beforeSoftPity"
-              : pickup.classification === "afterSoftLoss"
-                ? "afterSoftPity"
-                : pickup.classification,
-        }),
-      ) as RecruitmentStats["pickupClassifications"],
-    };
-    result = applySessionToAggregates(
-      result,
-      session.kind,
-      session.isFestBanner ?? false,
-      {
-        startCharge: 0,
-        totalPulls: session.totalPulls,
-        threeStarCount: session.threeStarCount,
-        rebateTicketsFromPreviousSession: 0,
-        rebateTicketsUsed: session.stats.rebateTicketsUsed,
-        pickupsObtained: session.pickupsObtained,
-      },
-      stats,
-      1,
-    );
+    const stats = calculateRecruitmentStats(session);
+    result = applySessionToAggregates(result, session, stats, 1);
   }
   return result;
 }

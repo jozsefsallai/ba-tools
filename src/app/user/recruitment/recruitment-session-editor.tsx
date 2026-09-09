@@ -27,10 +27,13 @@ import {
 } from "@/components/ui/popover";
 import { useStudents } from "@/hooks/use-students";
 import {
+  type CanonicalPickup,
   RECRUITMENT_COLORS,
-  type RecruitmentPickup,
+  type RecruitmentKind,
   type RecruitmentSessionInput,
   calculateRecruitmentStats,
+  normalizeRecruitmentSession,
+  pickupPoolKind,
 } from "@/lib/recruitment";
 import { buildStudentIconUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";
@@ -52,8 +55,9 @@ import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
 type Props = { accountId: string; sessionId?: string };
-type RecruitmentPickupDraft = Omit<RecruitmentPickup, "charge"> & {
+type RecruitmentPickupDraft = Omit<CanonicalPickup, "charge" | "kind"> & {
   charge: NumericInputValue;
+  kind?: RecruitmentKind;
 };
 
 export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
@@ -74,46 +78,49 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
   const [date, setDate] = useState<Date>(new Date());
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [kind, setKind] = useState<"permanent" | "limited">("limited");
   const [isFestBanner, setIsFestBanner] = useState(false);
-  const [startCharge, setStartCharge] = useState<NumericInputValue>(0);
+  const [permanentStartCharge, setPermanentStartCharge] =
+    useState<NumericInputValue>(0);
+  const [limitedStartCharge, setLimitedStartCharge] =
+    useState<NumericInputValue>(0);
   const [previousTickets, setPreviousTickets] = useState<NumericInputValue>(0);
   const [rebateTicketsUsed, setRebateTicketsUsed] =
     useState<NumericInputValue>();
-  const [totalPulls, setTotalPulls] = useState<NumericInputValue>(0);
+  const [permanentPulls, setPermanentPulls] = useState<NumericInputValue>(0);
+  const [limitedPulls, setLimitedPulls] = useState<NumericInputValue>(0);
   const [threeStarCount, setThreeStarCount] = useState<NumericInputValue>(0);
   const [pickups, setPickups] = useState<RecruitmentPickupDraft[]>([]);
 
   useEffect(() => {
     if (sessionResult) {
+      const normalized = normalizeRecruitmentSession(sessionResult);
       setName(sessionResult.name);
       setDate(new Date(sessionResult.date));
-      setKind(sessionResult.kind);
       setIsFestBanner(sessionResult.isFestBanner ?? false);
-      setStartCharge(sessionResult.startCharge);
+      setPermanentStartCharge(normalized.permanentStartCharge);
+      setLimitedStartCharge(normalized.limitedStartCharge);
       setPreviousTickets(sessionResult.rebateTicketsFromPreviousSession);
       setRebateTicketsUsed(sessionResult.rebateTicketsUsed);
-      setTotalPulls(sessionResult.totalPulls);
+      setPermanentPulls(normalized.permanentPulls);
+      setLimitedPulls(normalized.limitedPulls);
       setThreeStarCount(sessionResult.threeStarCount);
-      setPickups(sessionResult.pickupsObtained);
+      setPickups(normalized.pickupsObtained);
     } else if (accountResult && !sessionId) {
-      setStartCharge(
-        kind === "limited"
-          ? accountResult.account.limitedCharge
-          : accountResult.account.permanentCharge,
+      setPermanentStartCharge(accountResult.account.permanentCharge);
+      setLimitedStartCharge(accountResult.account.limitedCharge);
+      setPreviousTickets(
+        accountResult.sessions[0]?.stats.remainingRebateTickets ?? 0,
       );
-      const previous = accountResult.sessions.find(
-        (session) => session.kind === kind,
-      );
-      setPreviousTickets(previous?.stats.remainingRebateTickets ?? 0);
       setRebateTicketsUsed(undefined);
     }
-  }, [sessionResult, accountResult, sessionId, kind]);
+  }, [sessionResult, accountResult, sessionId]);
 
   const input = useMemo<RecruitmentSessionInput | null>(() => {
     if (
-      startCharge === "" ||
-      totalPulls === "" ||
+      permanentStartCharge === "" ||
+      limitedStartCharge === "" ||
+      permanentPulls === "" ||
+      limitedPulls === "" ||
       threeStarCount === "" ||
       previousTickets === "" ||
       (rebateTicketsUsed !== undefined && rebateTicketsUsed === "") ||
@@ -121,20 +128,48 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
     ) {
       return null;
     }
-    return {
-      startCharge,
-      totalPulls,
-      threeStarCount,
-      rebateTicketsFromPreviousSession: previousTickets,
-      rebateTicketsUsed,
-      pickupsObtained: pickups as RecruitmentPickup[],
-    };
+    try {
+      return normalizeRecruitmentSession({
+        permanentStartCharge,
+        limitedStartCharge,
+        permanentPulls,
+        limitedPulls,
+        threeStarCount,
+        rebateTicketsFromPreviousSession: previousTickets,
+        rebateTicketsUsed,
+        isFestBanner,
+        pickupsObtained: pickups.map((pickup) => ({
+          charge: pickup.charge as number,
+          studentId: pickup.studentId,
+          kind: pickup.kind,
+        })),
+      });
+    } catch {
+      return {
+        permanentStartCharge,
+        limitedStartCharge,
+        permanentPulls,
+        limitedPulls,
+        threeStarCount,
+        rebateTicketsFromPreviousSession: previousTickets,
+        rebateTicketsUsed,
+        isFestBanner,
+        pickupsObtained: pickups.map((pickup) => ({
+          charge: pickup.charge as number,
+          studentId: pickup.studentId,
+          kind: pickup.kind ?? "permanent",
+        })),
+      };
+    }
   }, [
-    startCharge,
-    totalPulls,
+    permanentStartCharge,
+    limitedStartCharge,
+    permanentPulls,
+    limitedPulls,
     threeStarCount,
     previousTickets,
     rebateTicketsUsed,
+    isFestBanner,
     pickups,
   ]);
   const stats = useMemo(() => {
@@ -148,8 +183,10 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
       };
     }
   }, [
-    startCharge,
-    totalPulls,
+    permanentStartCharge,
+    limitedStartCharge,
+    permanentPulls,
+    limitedPulls,
     threeStarCount,
     previousTickets,
     rebateTicketsUsed,
@@ -203,10 +240,11 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
           sessionId: sessionId as Id<"recruitmentSession">,
           name: name.trim(),
           date: date.getTime(),
-          kind,
           isFestBanner,
-          startCharge: input.startCharge,
-          totalPulls: input.totalPulls,
+          permanentStartCharge: input.permanentStartCharge,
+          limitedStartCharge: input.limitedStartCharge,
+          permanentPulls: input.permanentPulls,
+          limitedPulls: input.limitedPulls,
           pickupsObtained: input.pickupsObtained,
           threeStarCount: input.threeStarCount,
           rebateTicketsUsed: stats.value.rebateTicketsUsed,
@@ -216,10 +254,11 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
           recruitmentAccountId: accountId as Id<"recruitmentAccount">,
           name: name.trim(),
           date: date.getTime(),
-          kind,
           isFestBanner,
-          startCharge: input.startCharge,
-          totalPulls: input.totalPulls,
+          permanentStartCharge: input.permanentStartCharge,
+          limitedStartCharge: input.limitedStartCharge,
+          permanentPulls: input.permanentPulls,
+          limitedPulls: input.limitedPulls,
           pickupsObtained: input.pickupsObtained,
           threeStarCount: input.threeStarCount,
           rebateTicketsUsed: stats.value.rebateTicketsUsed,
@@ -312,42 +351,6 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
             </Popover>
           </div>
         </div>
-        {!sessionId && (
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              style={
-                kind === "permanent"
-                  ? {
-                      borderColor: RECRUITMENT_COLORS.base.labelBorderActive,
-                      backgroundColor: RECRUITMENT_COLORS.base.trackAccent,
-                      color: RECRUITMENT_COLORS.base.labelTextActive,
-                    }
-                  : undefined
-              }
-              onClick={() => setKind("permanent")}
-            >
-              {t("tools.recruitment.permanent")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              style={
-                kind === "limited"
-                  ? {
-                      borderColor: RECRUITMENT_COLORS.limited.labelBorderActive,
-                      backgroundColor: RECRUITMENT_COLORS.limited.trackAccent,
-                      color: RECRUITMENT_COLORS.limited.labelTextActive,
-                    }
-                  : undefined
-              }
-              onClick={() => setKind("limited")}
-            >
-              {t("tools.recruitment.limited")}
-            </Button>
-          </div>
-        )}
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -356,28 +359,29 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
           />
           {t("tools.recruitment.festBanner")}
         </label>
-        <div className="grid gap-4 sm:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex flex-col gap-2">
-            <Label>{t("tools.recruitment.startCharge")}</Label>
+            <Label>{t("tools.recruitment.permanentStartCharge")}</Label>
             <NumericInput
               min={0}
               max={200}
-              value={startCharge}
-              onValueChange={setStartCharge}
+              value={permanentStartCharge}
+              onValueChange={setPermanentStartCharge}
             />
             <p className="text-xs text-muted-foreground">
-              {t("tools.recruitment.startChargeHint")}
+              {t("tools.recruitment.permanentStartChargeHint")}
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <Label>{t("tools.recruitment.totalPulls")}</Label>
+            <Label>{t("tools.recruitment.limitedStartCharge")}</Label>
             <NumericInput
               min={0}
-              value={totalPulls}
-              onValueChange={setTotalPulls}
+              max={200}
+              value={limitedStartCharge}
+              onValueChange={setLimitedStartCharge}
             />
             <p className="text-xs text-muted-foreground">
-              {t("tools.recruitment.totalPullsHint")}
+              {t("tools.recruitment.limitedStartChargeHint")}
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -389,6 +393,28 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
             />
             <p className="text-xs text-muted-foreground">
               {t("tools.recruitment.threeStarsHint")}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label>{t("tools.recruitment.permanentPulls")}</Label>
+            <NumericInput
+              min={0}
+              value={permanentPulls}
+              onValueChange={setPermanentPulls}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("tools.recruitment.permanentPullsHint")}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label>{t("tools.recruitment.limitedPulls")}</Label>
+            <NumericInput
+              min={0}
+              value={limitedPulls}
+              onValueChange={setLimitedPulls}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("tools.recruitment.limitedPullsHint")}
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -420,7 +446,7 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
           </div>
           {pickups.map((pickup, index) => (
             <div
-              className="grid items-center gap-3 rounded-lg border bg-card p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1fr)_7rem_auto]"
+              className="grid items-center gap-3 rounded-lg border bg-card p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1fr)_auto_7rem_auto]"
               key={`${index}-${pickup.studentId}`}
             >
               <span className="hidden size-7 place-items-center rounded-full bg-muted text-xs font-semibold text-muted-foreground sm:grid">
@@ -430,7 +456,13 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
                 onStudentSelected={(student) =>
                   setPickups(
                     pickups.map((item, i) =>
-                      i === index ? { ...item, studentId: student.id } : item,
+                      i === index
+                        ? {
+                            ...item,
+                            studentId: student.id,
+                            kind: pickupPoolKind(student),
+                          }
+                        : item,
                     ),
                   )
                 }
@@ -461,6 +493,7 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
                   })()}
                 </Button>
               </StudentPicker>
+              <PickupPoolBadge kind={pickup.kind} />
               <div className="flex min-w-0 flex-col gap-1">
                 <Label className="text-xs text-muted-foreground">
                   {t("tools.recruitment.pickupCharge")}
@@ -496,8 +529,16 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
       </fieldset>
       <div className="grid gap-3 rounded-md border p-4 text-sm sm:grid-cols-3">
         <div>
-          {t("tools.recruitment.endCharge")}:{" "}
-          <strong>{stats.value?.endCharge ?? "—"}</strong>
+          {t("tools.recruitment.permanentEndCharge")}:{" "}
+          <strong style={{ color: RECRUITMENT_COLORS.base.labelTextActive }}>
+            {stats.value?.permanentEndCharge ?? "—"}
+          </strong>
+        </div>
+        <div>
+          {t("tools.recruitment.limitedEndCharge")}:{" "}
+          <strong style={{ color: RECRUITMENT_COLORS.limited.labelTextActive }}>
+            {stats.value?.limitedEndCharge ?? "—"}
+          </strong>
         </div>
         <div>
           {t("tools.recruitment.softPity")}:{" "}
@@ -596,5 +637,29 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
         )}
       </div>
     </div>
+  );
+}
+
+function PickupPoolBadge({ kind }: { kind?: RecruitmentKind }) {
+  const t = useTranslations();
+  if (!kind) {
+    return (
+      <span className="text-xs text-muted-foreground">
+        {t("tools.recruitment.pickupPoolPending")}
+      </span>
+    );
+  }
+  const colors =
+    kind === "limited" ? RECRUITMENT_COLORS.limited : RECRUITMENT_COLORS.base;
+  return (
+    <span
+      className="rounded-full border px-2 py-0.5 text-xs font-medium uppercase"
+      style={{
+        borderColor: colors.labelBorderActive,
+        color: colors.labelTextActive,
+      }}
+    >
+      {t(`tools.recruitment.${kind}`)}
+    </span>
   );
 }

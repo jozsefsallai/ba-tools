@@ -172,7 +172,7 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
       {result.sessions.length === 0 ? (
         <MessageBox>{t("tools.recruitment.noSessions")}</MessageBox>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {result.sessions.map((session) => (
             <Link
               href={`/user/recruitment/${accountId}/sessions/${session._id}`}
@@ -180,35 +180,74 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
             >
               <Card
                 className="h-full transition-colors hover:bg-accent"
-                style={{
-                  borderColor:
-                    session.kind === "limited"
-                      ? RECRUITMENT_COLORS.limited.labelBorderActive
-                      : RECRUITMENT_COLORS.base.labelBorderActive,
-                }}
+                style={
+                  session.kind === "mixed"
+                    ? {
+                        borderTopColor:
+                          RECRUITMENT_COLORS.base.labelBorderActive,
+                        borderLeftColor:
+                          RECRUITMENT_COLORS.base.labelBorderActive,
+                        borderBottomColor:
+                          RECRUITMENT_COLORS.limited.labelBorderActive,
+                        borderRightColor:
+                          RECRUITMENT_COLORS.limited.labelBorderActive,
+                      }
+                    : {
+                        borderColor:
+                          session.kind === "permanent"
+                            ? RECRUITMENT_COLORS.base.labelBorderActive
+                            : RECRUITMENT_COLORS.limited.labelBorderActive,
+                      }
+                }
               >
                 <CardHeader>
                   <CardTitle className="flex justify-between gap-2 text-base">
                     <span>{session.name}</span>
                     <span
-                      className="text-xs uppercase"
+                      className={`text-xs uppercase${
+                        session.kind === "mixed" ? " text-muted-foreground" : ""
+                      }`}
                       style={{
                         color:
-                          session.kind === "limited"
-                            ? RECRUITMENT_COLORS.limited.labelTextActive
-                            : RECRUITMENT_COLORS.base.labelTextActive,
+                          session.kind === "permanent"
+                            ? RECRUITMENT_COLORS.base.labelTextActive
+                            : session.kind === "limited"
+                              ? RECRUITMENT_COLORS.limited.labelTextActive
+                              : undefined,
                       }}
                     >
-                      {session.isFestBanner
-                        ? t("tools.recruitment.festLimited")
-                        : t(`tools.recruitment.${session.kind}`)}
+                      {session.kind === "mixed"
+                        ? t("tools.recruitment.mixed")
+                        : session.isFestBanner
+                          ? t("tools.recruitment.festLimited")
+                          : t(`tools.recruitment.${session.kind}`)}
                     </span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {new Date(session.date).toLocaleDateString()}
                   </p>
+                  {session.pickupsObtained.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {session.pickupsObtained.map((pickup, index) => (
+                        <img
+                          key={`${pickup.studentId}-${index}`}
+                          src={buildStudentIconUrlFromId(pickup.studentId)}
+                          alt=""
+                          className="size-8 rounded-full border-2 border-background object-cover shadow-sm"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
+                <CardContent className="grid grid-cols-2 gap-2 text-sm">
+                  <Stat
+                    label={t("tools.recruitment.totalPulls")}
+                    value={session.totalPulls}
+                  />
+                  <Stat
+                    label={t("tools.recruitment.paidPulls")}
+                    value={session.stats.paidPulls}
+                  />
                   <Stat
                     label={t("tools.recruitment.pickups")}
                     value={session.stats.pickupCount}
@@ -216,6 +255,14 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
                   <Stat
                     label={t("tools.recruitment.threeStars")}
                     value={session.threeStarCount}
+                  />
+                  <Stat
+                    label={t("tools.recruitment.experiencedPURate")}
+                    value={`${session.stats.experiencedPURate.toFixed(2)}%`}
+                  />
+                  <Stat
+                    label={t("tools.recruitment.experiencedThreeStarRate")}
+                    value={`${session.stats.experiencedThreeStarRate.toFixed(2)}%`}
                   />
                   <Stat
                     label={t("tools.recruitment.softPity")}
@@ -235,32 +282,44 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
                         : session.stats.hardPities
                     }
                   />
-                  <Stat
-                    label={t("tools.recruitment.totalPulls")}
-                    value={session.totalPulls}
-                  />
-                  <Stat
-                    label={t("tools.recruitment.paidPulls")}
-                    value={session.stats.paidPulls}
-                  />
-                  <Stat
-                    label={t("tools.recruitment.experiencedThreeStarRate")}
-                    value={`${session.stats.experiencedThreeStarRate.toFixed(2)}%`}
-                  />
-                  <Stat
-                    label={t("tools.recruitment.experiencedPURate")}
-                    value={`${session.stats.experiencedPURate.toFixed(2)}%`}
-                  />
-                  <div className="flex items-center justify-end gap-1">
-                    {session.pickupsObtained.map((pickup, index) => (
-                      <img
-                        key={`${pickup.studentId}-${index}`}
-                        src={buildStudentIconUrlFromId(pickup.studentId)}
-                        alt=""
-                        className="size-8 rounded-full border-2 border-background object-cover shadow-sm"
+                  {session.kind === "mixed" ? (
+                    <>
+                      <Stat
+                        color={RECRUITMENT_COLORS.limited.labelTextActive}
+                        label={t("tools.recruitment.remainingLimitedCharge")}
+                        value={
+                          session.stats.limitedEndCharge ??
+                          session.stats.pools?.limited.endCharge ??
+                          "—"
+                        }
                       />
-                    ))}
-                  </div>
+                      <Stat
+                        color={RECRUITMENT_COLORS.base.labelTextActive}
+                        label={t("tools.recruitment.remainingPermanentCharge")}
+                        value={
+                          session.stats.permanentEndCharge ??
+                          session.stats.pools?.permanent.endCharge ??
+                          session.stats.endCharge
+                        }
+                      />
+                    </>
+                  ) : (
+                    <Stat
+                      color={
+                        session.kind === "limited"
+                          ? RECRUITMENT_COLORS.limited.labelTextActive
+                          : RECRUITMENT_COLORS.base.labelTextActive
+                      }
+                      label={t("tools.recruitment.remainingCharge")}
+                      value={
+                        session.kind === "limited"
+                          ? (session.stats.limitedEndCharge ??
+                            session.stats.endCharge)
+                          : (session.stats.permanentEndCharge ??
+                            session.stats.endCharge)
+                      }
+                    />
+                  )}
                 </CardContent>
               </Card>
             </Link>
@@ -271,11 +330,21 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number | string;
+  color?: string;
+}) {
   return (
     <div>
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="font-semibold">{value}</div>
+      <div className="font-semibold" style={{ color }}>
+        {value}
+      </div>
     </div>
   );
 }

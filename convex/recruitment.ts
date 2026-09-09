@@ -1,10 +1,13 @@
 import { GAME_SERVERS } from "@/lib/types";
 import { v } from "convex/values";
 import {
-  type RecruitmentPickup,
+  type RecruitmentKind,
+  type RecruitmentSessionKind,
   applySessionToAggregates,
   calculateRecruitmentStats,
   emptyAccountAggregates,
+  normalizeRecruitmentSession,
+  toStoredSessionFields,
   validateRecruitmentSession,
 } from "../src/lib/recruitment";
 import { internalMutation } from "./_generated/server";
@@ -13,33 +16,29 @@ import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 const pickupValidator = v.object({
   charge: v.number(),
   studentId: v.string(),
+  kind: v.optional(v.union(v.literal("permanent"), v.literal("limited"))),
 });
 
 const sessionArgs = {
   name: v.string(),
   date: v.number(),
-  kind: v.union(v.literal("permanent"), v.literal("limited")),
   isFestBanner: v.boolean(),
-  startCharge: v.number(),
-  totalPulls: v.number(),
+  permanentStartCharge: v.number(),
+  limitedStartCharge: v.number(),
+  permanentPulls: v.number(),
+  limitedPulls: v.number(),
   pickupsObtained: v.array(pickupValidator),
   threeStarCount: v.number(),
   rebateTicketsUsed: v.number(),
 };
 
-function statsFor(session: {
-  startCharge: number;
-  totalPulls: number;
-  pickupsObtained: RecruitmentPickup[];
-  threeStarCount: number;
-  rebateTicketsFromPreviousSession: number;
-  rebateTicketsUsed?: number;
-  isFestBanner?: boolean;
-}) {
+function statsFor(session: Parameters<typeof normalizeRecruitmentSession>[0]) {
   return calculateRecruitmentStats(session);
 }
 
-function computedStatsFor(session: Parameters<typeof statsFor>[0]) {
+function computedStatsFor(
+  session: Parameters<typeof normalizeRecruitmentSession>[0],
+) {
   const stats = statsFor(session);
   return {
     ...stats,
@@ -48,29 +47,32 @@ function computedStatsFor(session: Parameters<typeof statsFor>[0]) {
   };
 }
 
-function inputFor(session: any) {
-  return {
-    startCharge: session.startCharge,
-    totalPulls: session.totalPulls,
-    threeStarCount: session.threeStarCount,
-    rebateTicketsFromPreviousSession: session.rebateTicketsFromPreviousSession,
-    rebateTicketsUsed: session.rebateTicketsUsed,
-    pickupsObtained: session.pickupsObtained,
-  };
+function sessionTouchesKind(
+  session: {
+    kind: RecruitmentSessionKind;
+    permanentPulls?: number;
+    limitedPulls?: number;
+    totalPulls: number;
+  },
+  kind: RecruitmentKind,
+) {
+  const input = normalizeRecruitmentSession({
+    ...session,
+    threeStarCount: 0,
+    rebateTicketsFromPreviousSession: 0,
+    pickupsObtained: [],
+  });
+  return kind === "permanent"
+    ? input.permanentPulls > 0
+    : input.limitedPulls > 0;
 }
 
 async function getLatestSession(
   ctx: { db: any },
   accountId: any,
-  kind: "permanent" | "limited",
+  kind?: RecruitmentKind,
 ) {
-  const account = await ctx.db.get(accountId);
-  const latestId =
-    kind === "permanent"
-      ? account?.latestPermanentSessionId
-      : account?.latestLimitedSessionId;
-  if (latestId) return await ctx.db.get(latestId);
-  return (
+  const sessions = (
     await ctx.db
       .query("recruitmentSession")
       .withIndex("by_recruitmentAccountId_date", (q: any) =>
@@ -78,7 +80,11 @@ async function getLatestSession(
       )
       .order("desc")
       .collect()
-  ).find((session: any) => session.kind === kind);
+  ).sort(
+    (a: any, b: any) => b.date - a.date || b._creationTime - a._creationTime,
+  );
+  if (!kind) return sessions[0];
+  return sessions.find((session: any) => sessionTouchesKind(session, kind));
 }
 
 async function assertAccount(
@@ -103,6 +109,34 @@ async function assertSession(
   return session;
 }
 
+function storedStartCharge(
+  session: any,
+  kind: RecruitmentKind,
+): number | undefined {
+  if (kind === "permanent") {
+    return (
+      session.permanentStartCharge ??
+      (session.kind === "limited" ? undefined : session.startCharge)
+    );
+  }
+  return (
+    session.limitedStartCharge ??
+    (session.kind === "limited" ? session.startCharge : undefined)
+  );
+}
+
+function poolStartCharge(
+  session: any,
+  kind: RecruitmentKind,
+  previousEndCharge: number | undefined,
+  preserve: boolean,
+): number {
+  const stored = storedStartCharge(session, kind);
+  if (preserve) return stored ?? previousEndCharge ?? 0;
+  if (previousEndCharge != null) return previousEndCharge;
+  return stored ?? 0;
+}
+
 async function rebuildAccountAnalytics(
   ctx: { db: any },
   account: any,
@@ -122,43 +156,45 @@ async function rebuildAccountAnalytics(
 
   let aggregates = emptyAccountAggregates();
   const previousByKind: Record<
-    "permanent" | "limited",
-    { endCharge: number; remainingRebateTickets: number } | undefined
+    RecruitmentKind,
+    { endCharge: number } | undefined
   > = {
     permanent: undefined,
     limited: undefined,
   };
-  const latest: Record<"permanent" | "limited", any> = {
+  const latest: Record<RecruitmentKind, any> = {
     permanent: undefined,
     limited: undefined,
   };
+  let previousRebateTickets: number | undefined;
 
   for (const session of sessions) {
-    const kind = session.kind as "permanent" | "limited";
-    const previous = previousByKind[kind];
-    const startCharge =
-      previous && session._id !== preserveStartChargeFor
-        ? previous.endCharge
-        : session.startCharge;
-    const rebateTicketsFromPreviousSession = previous
-      ? previous.remainingRebateTickets
-      : session.rebateTicketsFromPreviousSession;
-    const input = {
-      ...inputFor(session),
-      startCharge,
+    const preserve = session._id === preserveStartChargeFor;
+    const permanentStartCharge = poolStartCharge(
+      session,
+      "permanent",
+      previousByKind.permanent?.endCharge,
+      preserve,
+    );
+    const limitedStartCharge = poolStartCharge(
+      session,
+      "limited",
+      previousByKind.limited?.endCharge,
+      preserve,
+    );
+    const rebateTicketsFromPreviousSession =
+      previousRebateTickets ?? session.rebateTicketsFromPreviousSession;
+    const input = normalizeRecruitmentSession({
+      ...session,
+      permanentStartCharge,
+      limitedStartCharge,
       rebateTicketsFromPreviousSession,
-    };
+    });
     let stats: ReturnType<typeof statsFor>;
     let computedStats: ReturnType<typeof computedStatsFor>;
     try {
-      stats = statsFor({
-        ...input,
-        isFestBanner: session.isFestBanner ?? false,
-      });
-      computedStats = computedStatsFor({
-        ...input,
-        isFestBanner: session.isFestBanner ?? false,
-      });
+      stats = statsFor(input);
+      computedStats = computedStatsFor(input);
     } catch (error) {
       if (
         error instanceof Error &&
@@ -167,38 +203,51 @@ async function rebuildAccountAnalytics(
             "The first pickup charge must be higher than the starting charge.")
       ) {
         throw new Error(
-          `Cannot recalculate "${session.name}": its recorded pickup charges are lower than the recalculated starting charge (${startCharge}). Edit this session or adjust the earlier session so the pull history is consistent.`,
+          `Cannot recalculate "${session.name}": its recorded pickup charges are lower than the recalculated starting charge (${permanentStartCharge}/${limitedStartCharge}). Edit this session or adjust the earlier session so the pull history is consistent.`,
         );
       }
       throw error;
     }
 
+    const stored = toStoredSessionFields(input);
     if (
-      session.startCharge !== startCharge ||
+      session.startCharge !== stored.startCharge ||
+      session.kind !== stored.kind ||
+      session.totalPulls !== stored.totalPulls ||
+      session.permanentPulls !== stored.permanentPulls ||
+      session.limitedPulls !== stored.limitedPulls ||
+      session.permanentStartCharge !== stored.permanentStartCharge ||
+      session.limitedStartCharge !== stored.limitedStartCharge ||
       session.rebateTicketsFromPreviousSession !==
         rebateTicketsFromPreviousSession ||
+      JSON.stringify(session.pickupsObtained) !==
+        JSON.stringify(stored.pickupsObtained) ||
       JSON.stringify(session.computedStats) !== JSON.stringify(computedStats)
     ) {
       await ctx.db.patch(session._id, {
-        startCharge,
+        kind: stored.kind,
+        startCharge: stored.startCharge,
+        totalPulls: stored.totalPulls,
+        permanentPulls: stored.permanentPulls,
+        limitedPulls: stored.limitedPulls,
+        permanentStartCharge: stored.permanentStartCharge,
+        limitedStartCharge: stored.limitedStartCharge,
+        pickupsObtained: stored.pickupsObtained,
         rebateTicketsFromPreviousSession,
         computedStats,
       });
     }
 
-    aggregates = applySessionToAggregates(
-      aggregates,
-      kind,
-      session.isFestBanner ?? false,
-      input,
-      stats,
-      1,
-    );
-    previousByKind[kind] = {
-      endCharge: stats.endCharge,
-      remainingRebateTickets: stats.remainingRebateTickets,
-    };
-    latest[kind] = session;
+    aggregates = applySessionToAggregates(aggregates, input, stats, 1);
+    if (input.permanentPulls > 0) {
+      previousByKind.permanent = { endCharge: stats.permanentEndCharge };
+      latest.permanent = session;
+    }
+    if (input.limitedPulls > 0) {
+      previousByKind.limited = { endCharge: stats.limitedEndCharge };
+      latest.limited = session;
+    }
+    previousRebateTickets = stats.remainingRebateTickets;
   }
 
   await ctx.db.patch(account._id, {
@@ -232,21 +281,25 @@ export const getAccount = authenticatedQuery({
       .order("desc")
       .collect();
 
+    const ordered = sessions.sort(
+      (a, b) => b.date - a.date || b._creationTime - a._creationTime,
+    );
+    const latestPermanent = ordered.find((session) =>
+      sessionTouchesKind(session, "permanent"),
+    );
+    const latestLimited = ordered.find((session) =>
+      sessionTouchesKind(session, "limited"),
+    );
+
     return {
       account,
-      sessions: sessions
-        .sort((a, b) => b.date - a.date || b._creationTime - a._creationTime)
-        .map((session) => ({
-          ...session,
-          stats: session.computedStats ?? computedStatsFor(session),
-          isLatest:
-            session._id ===
-            sessions
-              .filter((item) => item.kind === session.kind)
-              .sort(
-                (a, b) => b.date - a.date || b._creationTime - a._creationTime,
-              )[0]?._id,
-        })),
+      sessions: ordered.map((session) => ({
+        ...session,
+        stats: session.computedStats ?? computedStatsFor(session),
+        isLatest:
+          session._id === latestPermanent?._id ||
+          session._id === latestLimited?._id,
+      })),
     };
   },
 });
@@ -259,15 +312,22 @@ export const getSession = authenticatedQuery({
     if (session.userId !== ctx.user._id) {
       throw new Error("Recruitment session not found.");
     }
-    const latest = await getLatestSession(
+    const latestPermanent = await getLatestSession(
       ctx,
       session.recruitmentAccountId,
-      session.kind,
+      "permanent",
+    );
+    const latestLimited = await getLatestSession(
+      ctx,
+      session.recruitmentAccountId,
+      "limited",
     );
     return {
       ...session,
       stats: session.computedStats ?? computedStatsFor(session),
-      isLatest: latest?._id === session._id,
+      isLatest:
+        latestPermanent?._id === session._id ||
+        latestLimited?._id === session._id,
     };
   },
 });
@@ -356,29 +416,30 @@ export const createSession = authenticatedMutation({
         "Recruitment sessions must be created in chronological order.",
       );
     }
-    const previous = await getLatestSession(
-      ctx,
-      args.recruitmentAccountId,
-      args.kind,
-    );
+    const previous = await getLatestSession(ctx, args.recruitmentAccountId);
+    const input = normalizeRecruitmentSession({
+      permanentStartCharge: args.permanentStartCharge,
+      limitedStartCharge: args.limitedStartCharge,
+      permanentPulls: args.permanentPulls,
+      limitedPulls: args.limitedPulls,
+      threeStarCount: args.threeStarCount,
+      rebateTicketsFromPreviousSession: previous
+        ? statsFor(previous).remainingRebateTickets
+        : 0,
+      rebateTicketsUsed: args.rebateTicketsUsed,
+      isFestBanner: args.isFestBanner,
+      pickupsObtained: args.pickupsObtained,
+    });
+    validateRecruitmentSession(input);
+    const stored = toStoredSessionFields(input);
     const session = {
       userId: ctx.user._id,
       recruitmentAccountId: args.recruitmentAccountId,
       name: args.name,
       date: args.date,
-      kind: args.kind,
-      isFestBanner: args.isFestBanner,
-      rebateTicketsFromPreviousSession: previous
-        ? statsFor(previous).remainingRebateTickets
-        : 0,
-      startCharge: args.startCharge,
-      totalPulls: args.totalPulls,
-      pickupsObtained: args.pickupsObtained,
-      threeStarCount: args.threeStarCount,
-      rebateTicketsUsed: args.rebateTicketsUsed,
+      ...stored,
     };
-    validateRecruitmentSession(session);
-    const computedStats = computedStatsFor(session);
+    const computedStats = computedStatsFor(input);
     const sessionId = await ctx.db.insert("recruitmentSession", {
       ...session,
       computedStats,
@@ -395,31 +456,24 @@ export const updateSession = authenticatedMutation({
   },
   handler: async (ctx, args) => {
     const session = await assertSession(ctx, args.sessionId);
-    if (args.kind !== session.kind) {
-      throw new Error("A session's banner type cannot be changed.");
-    }
-    const updated = {
+    const input = normalizeRecruitmentSession({
       ...session,
-      name: args.name,
-      date: args.date,
-      isFestBanner: args.isFestBanner,
-      startCharge: args.startCharge,
-      totalPulls: args.totalPulls,
-      pickupsObtained: args.pickupsObtained,
+      permanentStartCharge: args.permanentStartCharge,
+      limitedStartCharge: args.limitedStartCharge,
+      permanentPulls: args.permanentPulls,
+      limitedPulls: args.limitedPulls,
       threeStarCount: args.threeStarCount,
       rebateTicketsUsed: args.rebateTicketsUsed,
-    };
-    validateRecruitmentSession(updated);
-    const computedStats = computedStatsFor(updated);
+      isFestBanner: args.isFestBanner,
+      pickupsObtained: args.pickupsObtained,
+    });
+    validateRecruitmentSession(input);
+    const stored = toStoredSessionFields(input);
+    const computedStats = computedStatsFor(input);
     await ctx.db.patch(args.sessionId, {
       name: args.name,
       date: args.date,
-      isFestBanner: args.isFestBanner,
-      startCharge: args.startCharge,
-      totalPulls: args.totalPulls,
-      pickupsObtained: args.pickupsObtained,
-      threeStarCount: args.threeStarCount,
-      rebateTicketsUsed: args.rebateTicketsUsed,
+      ...stored,
       computedStats,
     });
     const account = await assertAccount(ctx, session.recruitmentAccountId);

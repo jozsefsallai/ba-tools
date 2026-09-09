@@ -163,6 +163,11 @@ function AcquisitionCard({
             charge: pickup.charge,
           })}
         </div>
+        {pickup.kind && (
+          <div className="text-xs text-muted-foreground">
+            {t(`tools.recruitment.${pickup.kind}`)}
+          </div>
+        )}
         <div className="text-xs text-muted-foreground">{classification}</div>
       </div>
     </div>

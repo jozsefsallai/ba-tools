@@ -127,6 +127,16 @@ const recruitmentAggregateBucket = v.object({
   pickupChargeHistogram: v.array(v.number()),
 });
 
+const recruitmentPoolStats = v.object({
+  startCharge: v.number(),
+  pulls: v.number(),
+  endCharge: v.number(),
+  pickupCount: v.number(),
+  softPityWins: v.number(),
+  softPityLosses: v.number(),
+  hardPities: v.number(),
+});
+
 const recruitmentComputedStats = v.object({
   endCharge: v.number(),
   pickupCount: v.number(),
@@ -144,10 +154,19 @@ const recruitmentComputedStats = v.object({
   rebatePulls: v.number(),
   pyroxenesSpent: v.number(),
   pyroxenesSaved: v.number(),
+  permanentEndCharge: v.optional(v.number()),
+  limitedEndCharge: v.optional(v.number()),
+  pools: v.optional(
+    v.object({
+      permanent: recruitmentPoolStats,
+      limited: recruitmentPoolStats,
+    }),
+  ),
   pickupClassifications: v.array(
     v.object({
       charge: v.number(),
       studentId: v.string(),
+      kind: v.optional(v.union(v.literal("permanent"), v.literal("limited"))),
       classification: v.union(
         v.literal("beforeSoftPity"),
         v.literal("softWin"),
@@ -379,7 +398,11 @@ export default defineSchema({
     recruitmentAccountId: v.id("recruitmentAccount"),
     name: v.string(),
     date: v.number(),
-    kind: v.union(v.literal("permanent"), v.literal("limited")),
+    kind: v.union(
+      v.literal("permanent"),
+      v.literal("limited"),
+      v.literal("mixed"),
+    ),
 
     // whether this session took place on a fest banner with doubled 3★ rates
     isFestBanner: v.optional(v.boolean()),
@@ -391,11 +414,18 @@ export default defineSchema({
     rebateTicketsUsed: v.optional(v.number()),
 
     // number of charge points at the start of the session, generally auto
-    // populated from the recruitment account
+    // populated from the recruitment account. For mixed sessions this is the
+    // permanent start charge (legacy field; prefer permanentStartCharge).
     startCharge: v.number(),
 
-    // total number of pulls (including rebate tickets)
+    // total number of pulls (including rebate tickets). For mixed sessions this
+    // is permanentPulls + limitedPulls (legacy field).
     totalPulls: v.number(),
+
+    permanentPulls: v.optional(v.number()),
+    limitedPulls: v.optional(v.number()),
+    permanentStartCharge: v.optional(v.number()),
+    limitedStartCharge: v.optional(v.number()),
 
     // list of PUs obtained in the session, including dupes + at what charge
     // you obtained them
@@ -403,6 +433,7 @@ export default defineSchema({
       v.object({
         charge: v.number(),
         studentId: v.string(),
+        kind: v.optional(v.union(v.literal("permanent"), v.literal("limited"))),
       }),
     ),
 

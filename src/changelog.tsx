@@ -45,6 +45,37 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 9, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Added ability to have recruitment sessions with both permanent and limited pulls.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description: "Updated layout of the recruitment account page.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description: "Removed rate history graph in account analytics.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Changed colors in account analytics graphs to better represent different outcomes.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Fixed a tooltip display bug in the PU Charge Distribution graph.",
+      },
+    ],
+  },
+  {
     date: "September 6, 2026",
     features: [
       {
