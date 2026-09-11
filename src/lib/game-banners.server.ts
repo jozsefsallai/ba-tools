@@ -36,7 +36,7 @@ export type PublicGameBanner = {
   pickupStudents: PublicBannerStudent[];
 };
 
-export const getCachedGameBanners = unstable_cache(
+const getCachedGameBannersData = unstable_cache(
   async (): Promise<PublicGameBanner[]> => {
     return db.gameBanner.findMany({
       where: {
@@ -80,3 +80,15 @@ export const getCachedGameBanners = unstable_cache(
     tags: [GAME_BANNERS_CACHE_TAG],
   },
 );
+
+export async function getCachedGameBanners(): Promise<PublicGameBanner[]> {
+  const banners = await getCachedGameBannersData();
+
+  return banners.map((banner) => ({
+    ...banner,
+    startDate: new Date(banner.startDate),
+    endDate: new Date(banner.endDate),
+    createdAt: new Date(banner.createdAt),
+    updatedAt: new Date(banner.updatedAt),
+  }));
+}
