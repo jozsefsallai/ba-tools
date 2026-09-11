@@ -2,9 +2,9 @@
 
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "~prisma";
-import { useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useCallback, useMemo } from "react";
+import type { Student } from "~prisma";
 
 export type TimelineQuickAddProps = {
   students: Student[];
@@ -41,6 +41,7 @@ function StudentItem({
       <img
         src={image}
         alt={student.name}
+        crossOrigin="anonymous"
         className="w-full h-full object-cover skew-x-[11deg]"
       />
     </div>

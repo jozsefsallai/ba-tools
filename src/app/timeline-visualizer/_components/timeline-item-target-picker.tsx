@@ -2,8 +2,8 @@
 
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import type { Student } from "~prisma";
 import { useMemo } from "react";
+import type { Student } from "~prisma";
 
 export type TimelineItemTargetPickerProps = {
   uniqueStudents: Student[];
@@ -32,6 +32,7 @@ function StudentItem({ student }: { student: Student }) {
       <img
         src={image}
         alt={student.name}
+        crossOrigin="anonymous"
         className="w-full h-full object-cover skew-x-[11deg]"
       />
     </div>

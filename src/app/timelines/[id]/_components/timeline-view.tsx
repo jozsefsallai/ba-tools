@@ -22,6 +22,7 @@ import { useStudents } from "@/hooks/use-students";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { encodePngWithItxt } from "@/lib/png-metadata";
+import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
 import { sleep } from "@/lib/sleep";
 import {
   DEFAULT_EXPORT_BACKGROUND_COLOR,
@@ -139,6 +140,7 @@ export function TimelineView({ id }: TimelineViewProps) {
       scale,
       backgroundColor: null,
       useCORS: true,
+      onclone: prepareCdnImagesForScreenshot,
     });
 
     let trimmedCanvas = trimTransparentPixels(canvas);

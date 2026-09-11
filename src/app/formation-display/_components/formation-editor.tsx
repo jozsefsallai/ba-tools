@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
 import type { Student } from "@/lib/types";
 import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon, ImportIcon, PlusIcon } from "lucide-react";
@@ -377,6 +378,7 @@ export function FormationEditor() {
       backgroundColor: null,
       scale,
       useCORS: true,
+      onclone: prepareCdnImagesForScreenshot,
     });
 
     const src = canvas.toDataURL("image/png");

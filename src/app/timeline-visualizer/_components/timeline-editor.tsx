@@ -38,6 +38,7 @@ import { clearCache } from "@/lib/cache";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { decodePngItxt, encodePngWithItxt } from "@/lib/png-metadata";
+import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
 import { sleep } from "@/lib/sleep";
 import {
   DEFAULT_EXPORT_BACKGROUND_COLOR,
@@ -396,6 +397,7 @@ export function TimelineEditor() {
       scale,
       backgroundColor: null,
       useCORS: true,
+      onclone: prepareCdnImagesForScreenshot,
     });
 
     let trimmedCanvas = trimTransparentPixels(canvas);

@@ -102,6 +102,7 @@ export function StudentCard({
             <img
               src={iconUrl}
               alt={student.name}
+              crossOrigin="anonymous"
               width={isSkillCard ? 107 : 102}
               className={cn("max-w-none skew-x-[11deg]", {
                 "ml-[-6px]": !isSkillCard,

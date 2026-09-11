@@ -19,16 +19,16 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVerticalIcon, XIcon } from "lucide-react";
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 
 type StarterOrderPanelProps = {
   row?: {
@@ -170,6 +170,7 @@ export function StarterOrderPanel({
                         <img
                           src={buildStudentIconUrl(item.student)}
                           alt={item.student?.name}
+                          crossOrigin="anonymous"
                           className="size-8 rounded-md"
                         />
                         <div className="flex-1 truncate text-sm">

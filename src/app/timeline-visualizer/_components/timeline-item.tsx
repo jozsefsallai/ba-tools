@@ -19,15 +19,15 @@ import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Student } from "~prisma";
 import {
   ChevronDownIcon,
-  ChevronsUpDownIcon,
   ChevronUpIcon,
+  ChevronsUpDownIcon,
   CopyIcon,
   GripVerticalIcon,
   XIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   type SetStateAction,
   useCallback,
@@ -36,7 +36,7 @@ import {
   useState,
 } from "react";
 import { v4 as uuid } from "uuid";
-import { useTranslations } from "next-intl";
+import type { Student } from "~prisma";
 
 export type TimelineItemProps = {
   item: TimelineItemType;
@@ -253,6 +253,7 @@ export function TimelineItem({
               <img
                 src={buildStudentIconUrl(item.student)}
                 alt={item.student.name}
+                crossOrigin="anonymous"
                 className="h-14"
               />
 
