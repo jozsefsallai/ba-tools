@@ -1,5 +1,7 @@
 import { FavorEmblem } from "@/app/api/emblem/_components/favor-emblem";
+import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import { db } from "@/lib/db";
+import { getCachedEmblemStudent } from "@/lib/emblem-student.server";
 import {
   FAVOR_EMBLEM_EXTRA_ARONA,
   FAVOR_EMBLEM_EXTRA_PLANA,
@@ -11,7 +13,6 @@ import {
   makeEmblem,
   processTrailingPart,
 } from "@/lib/emblems.server";
-import type { Student } from "~prisma";
 import { NextResponse } from "next/server";
 
 type RouteParams = {
@@ -100,40 +101,19 @@ export async function GET(
   const { student: rawStudent, rank: rawRank } = await params;
   const nameOverride = new URL(req.url).searchParams.get("name") ?? undefined;
 
-  const numberParsedStudent = Number.parseInt(rawStudent, 10);
+  const finalRawStudent = rawStudent;
 
-  let finalRawStudent = rawStudent;
-
-  if (finalRawStudent === "hoshino_battle") {
-    finalRawStudent = "hoshino_battle_tank";
-  }
-
-  let student: Student | FavorEmblemExtra | null;
+  let student:
+    | Awaited<ReturnType<typeof getCachedEmblemStudent>>
+    | FavorEmblemExtra
+    | null;
 
   if (finalRawStudent === "arona" || finalRawStudent === "Arona") {
     student = FAVOR_EMBLEM_EXTRA_ARONA;
   } else if (finalRawStudent === "plana" || finalRawStudent === "Plana") {
     student = FAVOR_EMBLEM_EXTRA_PLANA;
   } else {
-    student = await db.student.findFirst({
-      where: {
-        OR: [
-          {
-            devName: finalRawStudent,
-          },
-          {
-            id: finalRawStudent,
-          },
-          ...(Number.isNaN(numberParsedStudent)
-            ? []
-            : [
-                {
-                  schaleDbId: numberParsedStudent,
-                },
-              ]),
-        ],
-      },
-    });
+    student = await getCachedEmblemStudent(finalRawStudent);
   }
 
   if (!student) {
@@ -172,12 +152,5 @@ export async function GET(
     width,
   );
 
-  return new Response(
-    typeof output === "string" ? output : (output.buffer as ArrayBuffer),
-    {
-      headers: {
-        "Content-Type": png ? "image/png" : "image/svg+xml",
-      },
-    },
-  );
+  return createEmblemResponse(output, png);
 }

@@ -1,4 +1,5 @@
 import { TowerEmblem } from "@/app/api/emblem/_components/tower-emblem";
+import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import { TOWER_EMBLEM_BOSSES, TOWER_EMBLEM_DEFENSE_TYPES } from "@/lib/emblems";
 import {
   DEFAULT_SIZES,
@@ -113,12 +114,5 @@ export async function GET(
     width,
   );
 
-  return new Response(
-    typeof output === "string" ? output : (output.buffer as ArrayBuffer),
-    {
-      headers: {
-        "Content-Type": png ? "image/png" : "image/svg+xml",
-      },
-    },
-  );
+  return createEmblemResponse(output, png);
 }

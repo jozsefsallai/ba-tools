@@ -138,6 +138,7 @@ export function TimelineView({ id }: TimelineViewProps) {
     const canvas = await html2canvas(containerRef.current, {
       scale,
       backgroundColor: null,
+      useCORS: true,
     });
 
     let trimmedCanvas = trimTransparentPixels(canvas);

@@ -1,11 +1,11 @@
 import type { Student } from "@/lib/types";
 
 export function buildCDNUrl(key: string) {
-  return `/cdn/${key}`;
+  return `${process.env.NEXT_PUBLIC_IMAGE_CDN_URL}/${key}`;
 }
 
 export function buildCDNAbsoluteUrl(key: string) {
-  return `${process.env.IMAGE_CDN_URL}/${key}`;
+  return `${process.env.NEXT_PUBLIC_IMAGE_CDN_URL}/${key}`;
 }
 
 export function buildStudentIconUrlFromId(studentId: string) {
@@ -16,11 +16,11 @@ export function buildStudentPortraitUrlFromId(studentId: string) {
   return buildCDNUrl(`v2/images/students/portraits/${studentId}.png`);
 }
 
-export function buildStudentIconUrl(student: Student) {
+export function buildStudentIconUrl(student: Pick<Student, "id">) {
   return buildStudentIconUrlFromId(student.id);
 }
 
-export function buildStudentPortraitUrl(student: Student) {
+export function buildStudentPortraitUrl(student: Pick<Student, "id">) {
   return buildStudentPortraitUrlFromId(student.id);
 }
 
@@ -28,7 +28,7 @@ export function buildItemIconUrl(iconName: string) {
   return buildCDNUrl(`v2/images/items/${iconName}.webp`);
 }
 
-export function buildSkillPortraitUrl(student: Student) {
+export function buildSkillPortraitUrl(student: Pick<Student, "devName">) {
   return buildCDNUrl(
     `v2/images/skill-portraits/Skill_Portrait_${student.devName}.png`,
   );

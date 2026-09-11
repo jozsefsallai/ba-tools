@@ -9,38 +9,49 @@ import satori from "satori";
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
 
-export async function loadNotoSansFonts(): Promise<Font[]> {
-  const notoSansPath = buildCDNAbsoluteUrl(
-    "v2/fonts/noto-sans/NotoSans-Regular.ttf",
-  );
+let notoSansFontsPromise: Promise<Font[]> | undefined;
 
-  const notoSansSemiboldPath = buildCDNAbsoluteUrl(
-    "v2/fonts/noto-sans/NotoSans-SemiBold.ttf",
-  );
+export function loadNotoSansFonts(): Promise<Font[]> {
+  if (!notoSansFontsPromise) {
+    notoSansFontsPromise = (async () => {
+      const notoSansPath = buildCDNAbsoluteUrl(
+        "v2/fonts/noto-sans/NotoSans-Regular.ttf",
+      );
 
-  const notoSans = await fetch(notoSansPath).then((res) => res.arrayBuffer());
-  const notoSansSemibold = await fetch(notoSansSemiboldPath).then((res) =>
-    res.arrayBuffer(),
-  );
+      const notoSansSemiboldPath = buildCDNAbsoluteUrl(
+        "v2/fonts/noto-sans/NotoSans-SemiBold.ttf",
+      );
 
-  return [
-    {
-      name: "Noto Sans",
-      data: notoSans,
-      weight: 400,
-      style: "normal",
-    },
-    {
-      name: "Noto Sans",
-      data: notoSansSemibold,
-      weight: 600,
-      style: "normal",
-    },
-  ];
+      const [notoSans, notoSansSemibold] = await Promise.all([
+        fetch(notoSansPath).then((res) => res.arrayBuffer()),
+        fetch(notoSansSemiboldPath).then((res) => res.arrayBuffer()),
+      ]);
+
+      return [
+        {
+          name: "Noto Sans",
+          data: notoSans,
+          weight: 400,
+          style: "normal",
+        },
+        {
+          name: "Noto Sans",
+          data: notoSansSemibold,
+          weight: 600,
+          style: "normal",
+        },
+      ];
+    })();
+  }
+
+  return notoSansFontsPromise.catch((error) => {
+    notoSansFontsPromise = undefined;
+    throw error;
+  });
 }
 
 export async function loadOgImageFonts(): Promise<Font[]> {
-  const fonts = await loadNotoSansFonts();
+  const fonts = [...(await loadNotoSansFonts())];
 
   const nexonPath = path.join(
     process.cwd(),

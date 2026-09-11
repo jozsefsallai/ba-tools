@@ -1,4 +1,5 @@
 import { BasicEmblem } from "@/app/api/emblem/_components/basic-emblem";
+import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import { DEFAULT_BASIC_EMBLEM_TEXTS } from "@/lib/emblems";
 import {
   DEFAULT_SIZES,
@@ -47,12 +48,5 @@ export async function GET(
 
   const output = await makeEmblem(<BasicEmblem text={finalText} />, png, width);
 
-  return new Response(
-    typeof output === "string" ? output : (output.buffer as ArrayBuffer),
-    {
-      headers: {
-        "Content-Type": png ? "image/png" : "image/svg+xml",
-      },
-    },
-  );
+  return createEmblemResponse(output, png);
 }

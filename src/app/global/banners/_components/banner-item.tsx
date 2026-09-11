@@ -1,5 +1,6 @@
 "use client";
 
+import type { BannerStudent } from "@/app/global/banners/types";
 import { StudentCard } from "@/components/common/student-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { PublicGameBanner } from "@/lib/game-banners.server";
 import { cn } from "@/lib/utils";
-import type { GameBanner, Student } from "~prisma";
 import { ChevronDown, ChevronUp, InfoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Fragment, useState } from "react";
@@ -19,8 +20,8 @@ import { Fragment, useState } from "react";
 const PICKUP_STUDENTS_COLLAPSED_COUNT = 3;
 
 export type BannerItemProps = {
-  banner: GameBanner & {
-    pickupStudents: Student[];
+  banner: Omit<PublicGameBanner, "pickupStudents"> & {
+    pickupStudents: BannerStudent[];
   };
 };
 

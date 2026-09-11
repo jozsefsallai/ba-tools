@@ -1,6 +1,7 @@
 import { updateGameBannerGroupSchema } from "@/lib/admin/game-banner-schemas";
 import { requireSuperUser } from "@/lib/auth/require-super-user";
 import { db } from "@/lib/db";
+import { invalidateGameBannersCache } from "@/lib/game-banners.server";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -50,6 +51,7 @@ export async function PATCH(req: Request) {
     },
   });
 
+  invalidateGameBannersCache();
   return NextResponse.json({
     ok: true,
     updatedCount: result.count,

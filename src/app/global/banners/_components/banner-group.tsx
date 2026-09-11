@@ -1,4 +1,5 @@
 import { BannerItem } from "@/app/global/banners/_components/banner-item";
+import type { BannerStudent } from "@/app/global/banners/types";
 import {
   Card,
   CardContent,
@@ -6,14 +7,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { PublicGameBanner } from "@/lib/game-banners.server";
 import { cn } from "@/lib/utils";
-import type { GameBanner, Student } from "~prisma";
 import { format } from "date-fns";
 import { getTranslations } from "next-intl/server";
 
 export type BannerGroupProps = {
   dates: [number, number];
-  banners: Array<GameBanner & { pickupStudents: Student[] }>;
+  banners: Array<
+    Omit<PublicGameBanner, "pickupStudents"> & {
+      pickupStudents: BannerStudent[];
+    }
+  >;
 };
 
 export async function BannerGroup({ dates, banners }: BannerGroupProps) {

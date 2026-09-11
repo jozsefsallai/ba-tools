@@ -1,7 +1,7 @@
 import charBg from "@/assets/images/char-bg.png";
 import iconAssist from "@/assets/images/icon_assist.png";
-import iconMulliganYellow from "@/assets/images/icon_mulligan_yellow.png";
 import iconMulliganBlue from "@/assets/images/icon_mulligan_blue.png";
+import iconMulliganYellow from "@/assets/images/icon_mulligan_yellow.png";
 
 import { StudentRoleIcon } from "@/components/common/student-role-icon";
 import { StudentStar } from "@/components/common/student-star";
@@ -13,7 +13,10 @@ import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
 export type StudentCardProps = {
-  student: Student;
+  student: Pick<
+    Student,
+    "id" | "name" | "combatRole" | "attackType" | "devName"
+  >;
   noDisplayRole?: boolean;
   level?: number;
   starLevel?: StarLevel;

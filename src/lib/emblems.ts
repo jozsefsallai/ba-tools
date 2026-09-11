@@ -368,13 +368,15 @@ export type BossEmblemParams = {
 };
 
 export type FavorEmblemParams = {
-  student: Student | FavorEmblemExtra;
+  student:
+    | Pick<Student, "id" | "devName" | "firstName" | "lastName">
+    | FavorEmblemExtra;
   rank: FavorEmblemRank;
   nameOverride?: string;
 };
 
 export type PotentialEmblemParams = {
-  student: Student;
+  student: Pick<Student, "id" | "devName" | "firstName" | "lastName">;
   rank: PotentialEmblemRank;
   nameOverride?: string;
 };

@@ -376,6 +376,7 @@ export function FormationEditor() {
     const canvas = await html2canvas(containerRef.current, {
       backgroundColor: null,
       scale,
+      useCORS: true,
     });
 
     const src = canvas.toDataURL("image/png");

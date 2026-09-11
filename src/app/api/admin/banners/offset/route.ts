@@ -3,6 +3,7 @@ import { offsetGameBannersSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireSuperUser } from "@/lib/auth/require-super-user";
 import { db } from "@/lib/db";
+import { invalidateGameBannersCache } from "@/lib/game-banners.server";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
     updated.push(serializeGameBanner(next));
   }
 
+  invalidateGameBannersCache();
   return NextResponse.json({
     ok: true,
     updatedCount: updated.length,

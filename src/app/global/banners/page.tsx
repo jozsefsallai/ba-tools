@@ -1,7 +1,7 @@
 import { BannerList } from "@/app/global/banners/_components/banner-list";
 import type { BannerGroups } from "@/app/global/banners/types";
 import { Separator } from "@/components/ui/separator";
-import { db } from "@/lib/db";
+import { getCachedGameBanners } from "@/lib/game-banners.server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -16,23 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 async function getBannerGroups(): Promise<BannerGroups> {
-  const banners = await db.gameBanner.findMany({
-    where: {
-      endDate: {
-        gt: new Date(),
-      },
-    },
-    orderBy: {
-      startDate: "asc",
-    },
-    include: {
-      pickupStudents: true,
-    },
-  });
+  const banners = await getCachedGameBanners();
 
   const groups: BannerGroups = new Map();
 

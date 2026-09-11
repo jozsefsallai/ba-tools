@@ -1,4 +1,5 @@
 import { BossEmblem } from "@/app/api/emblem/_components/boss-emblem";
+import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import {
   BOSS_EMBLEM_RARITIES,
   VALID_BOSS_EMBLEM_COMBINATIONS,
@@ -100,12 +101,5 @@ export async function GET(
     width,
   );
 
-  return new Response(
-    typeof output === "string" ? output : (output.buffer as ArrayBuffer),
-    {
-      headers: {
-        "Content-Type": png ? "image/png" : "image/svg+xml",
-      },
-    },
-  );
+  return createEmblemResponse(output, png);
 }

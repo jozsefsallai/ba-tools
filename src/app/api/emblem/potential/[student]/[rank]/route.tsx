@@ -1,5 +1,7 @@
 import { PotentialEmblem } from "@/app/api/emblem/_components/potential-emblem";
+import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import { db } from "@/lib/db";
+import { getCachedEmblemStudent } from "@/lib/emblem-student.server";
 import type { PotentialEmblemRank } from "@/lib/emblems";
 import {
   DEFAULT_SIZES,
@@ -77,33 +79,7 @@ export async function GET(
   const { student: rawStudent, rank: rawRank } = await params;
   const nameOverride = new URL(req.url).searchParams.get("name") ?? undefined;
 
-  const numberParsedStudent = Number.parseInt(rawStudent, 10);
-
-  let finalRawStudent = rawStudent;
-
-  if (finalRawStudent === "hoshino_battle") {
-    finalRawStudent = "hoshino_battle_tank";
-  }
-
-  const student = await db.student.findFirst({
-    where: {
-      OR: [
-        {
-          devName: finalRawStudent,
-        },
-        {
-          id: finalRawStudent,
-        },
-        ...(Number.isNaN(numberParsedStudent)
-          ? []
-          : [
-              {
-                schaleDbId: numberParsedStudent,
-              },
-            ]),
-      ],
-    },
-  });
+  const student = await getCachedEmblemStudent(rawStudent);
 
   if (!student) {
     return NextResponse.json(
@@ -145,12 +121,5 @@ export async function GET(
     width,
   );
 
-  return new Response(
-    typeof output === "string" ? output : (output.buffer as ArrayBuffer),
-    {
-      headers: {
-        "Content-Type": png ? "image/png" : "image/svg+xml",
-      },
-    },
-  );
+  return createEmblemResponse(output, png);
 }

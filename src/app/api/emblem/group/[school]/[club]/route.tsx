@@ -1,4 +1,5 @@
 import { GroupEmblem } from "@/app/api/emblem/_components/group-emblem";
+import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import {
   GROUP_EMBLEM_CLUBS,
   GROUP_EMBLEM_SCHOOLS,
@@ -82,12 +83,5 @@ export async function GET(
     width,
   );
 
-  return new Response(
-    typeof output === "string" ? output : (output.buffer as ArrayBuffer),
-    {
-      headers: {
-        "Content-Type": png ? "image/png" : "image/svg+xml",
-      },
-    },
-  );
+  return createEmblemResponse(output, png);
 }

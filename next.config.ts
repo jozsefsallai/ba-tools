@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
-import withSerwistInit from "@serwist/next";
 import createMDX from "@next/mdx";
+import withSerwistInit from "@serwist/next";
+import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withSerwist = withSerwistInit({
@@ -11,10 +11,10 @@ const withSerwist = withSerwistInit({
 
 const withNextIntl = createNextIntlPlugin();
 
-const IMAGE_CDN_URL = process.env.IMAGE_CDN_URL;
+const IMAGE_CDN_URL = process.env.NEXT_PUBLIC_IMAGE_CDN_URL;
 
 if (!IMAGE_CDN_URL) {
-  throw new Error("IMAGE_CDN_URL is not set");
+  throw new Error("NEXT_PUBLIC_IMAGE_CDN_URL is not set");
 }
 
 const url = new URL(IMAGE_CDN_URL);
@@ -36,15 +36,6 @@ const nextConfig: NextConfig = {
   },
 
   serverExternalPackages: ["@resvg/resvg-js", "chromadb"],
-
-  async rewrites() {
-    return [
-      {
-        source: "/cdn/:path*",
-        destination: `${IMAGE_CDN_URL}/:path*`,
-      },
-    ];
-  },
 
   async redirects() {
     return [
