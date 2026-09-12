@@ -197,9 +197,8 @@ export function FormationEditor() {
 
   const [activeRowIndex, setActiveRowIndex] = useState(0);
 
-  const [scale, setScale, setScaleUnchecked] = useSaveableState(
-    preferences.formationDisplay.defaultScale,
-  );
+  const [scale, setScale] = useState(preferences.formationDisplay.defaultScale);
+  const scaleTouchedRef = useRef(false);
   const [displayOverline, setDisplayOverline, setDisplayOverlineUnchecked] =
     useSaveableState(preferences.formationDisplay.defaultDisplayOverline);
   const [displayRoleIcon, setDisplayRoleIcon, setDisplayRoleIconUnchecked] =
@@ -548,7 +547,6 @@ export function FormationEditor() {
       setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
       setFormationTypeUnchecked(undefined);
       setActiveRowIndex(0);
-      setScaleUnchecked(1);
       setDisplayOverlineUnchecked(false);
       setDisplayRoleIconUnchecked(true);
       setGroupsVerticalUnchecked(false);
@@ -598,7 +596,6 @@ export function FormationEditor() {
       setRowGapUnchecked(query.data.rowGap ?? 8);
       setFormationTypeUnchecked(query.data.type);
       setActiveRowIndex(0);
-      setScaleUnchecked(1);
       setDisplayOverlineUnchecked(query.data.displayOverline || false);
       setDisplayRoleIconUnchecked(!query.data.noDisplayRole);
       setGroupsVerticalUnchecked(query.data.groupsVertical || false);
@@ -611,6 +608,14 @@ export function FormationEditor() {
   }, [formationId, query.status]);
 
   useEffect(() => {
+    if (scaleTouchedRef.current) {
+      return;
+    }
+
+    setScale(preferences.formationDisplay.defaultScale);
+  }, [preferences.formationDisplay.defaultScale]);
+
+  useEffect(() => {
     const rosterEmpty = rows.every(
       (row) => row.strikers.length === 0 && row.specials.length === 0,
     );
@@ -619,7 +624,6 @@ export function FormationEditor() {
       return;
     }
 
-    setScaleUnchecked(preferences.formationDisplay.defaultScale);
     setDisplayOverlineUnchecked(
       preferences.formationDisplay.defaultDisplayOverline,
     );
@@ -1315,7 +1319,10 @@ export function FormationEditor() {
 
                   <Select
                     value={scale.toString()}
-                    onValueChange={(val) => setScale(Number.parseInt(val, 10))}
+                    onValueChange={(val) => {
+                      scaleTouchedRef.current = true;
+                      setScale(Number.parseInt(val, 10));
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue />
