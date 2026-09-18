@@ -1,40 +1,14 @@
 import "server-only";
 
+import type { PublicGameBanner } from "@/app/global/banners/types";
 import { db } from "@/lib/db";
 import { revalidateTag, unstable_cache } from "next/cache";
-import type { Student } from "~prisma";
 
 export const GAME_BANNERS_CACHE_TAG = "game-banners";
 
 export function invalidateGameBannersCache() {
   revalidateTag(GAME_BANNERS_CACHE_TAG, { expire: 0 });
 }
-
-export type PublicBannerStudent = {
-  id: string;
-  devName: string;
-  schaleDbId: number;
-  name: string;
-  lastName: string;
-  firstName: string;
-  combatRole: Student["combatRole"];
-  attackType: Student["attackType"];
-  rarity: number;
-  isFestGlobal: boolean;
-  isLimitedGlobal: boolean;
-};
-
-export type PublicGameBanner = {
-  id: string;
-  name: string | null;
-  startDate: Date;
-  endDate: Date;
-  freePulls: number;
-  isSelectablePickup: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  pickupStudents: PublicBannerStudent[];
-};
 
 const getCachedGameBannersData = unstable_cache(
   async (): Promise<PublicGameBanner[]> => {

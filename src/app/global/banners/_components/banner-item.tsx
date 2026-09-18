@@ -1,6 +1,9 @@
 "use client";
 
-import type { BannerStudent } from "@/app/global/banners/types";
+import type {
+  BannerStudent,
+  PublicGameBanner,
+} from "@/app/global/banners/types";
 import { StudentCard } from "@/components/common/student-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +14,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { PublicGameBanner } from "@/lib/game-banners.server";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp, InfoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
