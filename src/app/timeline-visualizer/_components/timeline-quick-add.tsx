@@ -41,7 +41,6 @@ function StudentItem({
       <img
         src={image}
         alt={student.name}
-        crossOrigin="anonymous"
         className="w-full h-full object-cover skew-x-[11deg]"
       />
     </div>

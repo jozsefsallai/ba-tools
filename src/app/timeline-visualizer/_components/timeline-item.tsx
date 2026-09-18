@@ -253,7 +253,6 @@ export function TimelineItem({
               <img
                 src={buildStudentIconUrl(item.student)}
                 alt={item.student.name}
-                crossOrigin="anonymous"
                 className="h-14"
               />
 

@@ -14,7 +14,6 @@ export function prepareCdnImagesForScreenshot(document: Document) {
       continue;
     }
 
-    image.crossOrigin = "anonymous";
     imageUrl.searchParams.set("cors", SCREENSHOT_CORS_QUERY);
     image.src = imageUrl.toString();
   }

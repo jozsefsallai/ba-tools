@@ -170,7 +170,6 @@ export function StarterOrderPanel({
                         <img
                           src={buildStudentIconUrl(item.student)}
                           alt={item.student?.name}
-                          crossOrigin="anonymous"
                           className="size-8 rounded-md"
                         />
                         <div className="flex-1 truncate text-sm">
