@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { Plana } from "@/components/plana";
 
 import { DonationBox } from "@/app/(home)/_components/donation-box";
-import { IspNotice } from "@/app/(home)/_components/isp-notice";
 import { ResetInfo } from "@/app/(home)/_components/reset-info";
 import { StudentOfTheDay } from "@/app/(home)/_components/student-of-the-day";
 import { ToolsAndResources } from "@/app/(home)/_components/tools-and-resources";
@@ -34,8 +33,6 @@ export default async function Home() {
 
   return (
     <article className="flex flex-col gap-4 max-w-4xl mx-auto">
-      <IspNotice />
-
       <h1 className="text-4xl">{t("static.home.welcome")}</h1>
 
       <p>
