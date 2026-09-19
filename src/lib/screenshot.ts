@@ -1,5 +1,3 @@
-const SCREENSHOT_CORS_QUERY = "1";
-
 export function prepareCdnImagesForScreenshot(document: Document) {
   const publicCdnUrl = process.env.NEXT_PUBLIC_IMAGE_CDN_URL;
   if (!publicCdnUrl) {
@@ -8,6 +6,8 @@ export function prepareCdnImagesForScreenshot(document: Document) {
 
   const cdnOrigin = new URL(publicCdnUrl).origin;
 
+  const timestamp = Date.now();
+
   for (const image of document.images) {
     const imageUrl = new URL(image.src, document.baseURI);
     if (imageUrl.origin !== cdnOrigin) {
@@ -15,7 +15,7 @@ export function prepareCdnImagesForScreenshot(document: Document) {
     }
 
     image.crossOrigin = "anonymous";
-    imageUrl.searchParams.set("cors", SCREENSHOT_CORS_QUERY);
+    imageUrl.searchParams.set("ts", timestamp.toString());
     image.src = imageUrl.toString();
   }
 }
