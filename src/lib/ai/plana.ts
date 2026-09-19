@@ -1,4 +1,4 @@
-import { planaExpressions } from "@/lib/plana";
+import { planaExpressions } from "@/lib/plana-expressions";
 
 export const PLANA_CHARACTER_BIBLE = `
 ### CORE IDENTITY ###

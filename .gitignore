@@ -50,3 +50,4 @@ public/sw.js.map
 public/swe-worker-*.js
 
 certificates
+.profiles/

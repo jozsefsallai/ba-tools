@@ -1,4 +1,4 @@
-import type { PlanaExpression } from "@/lib/plana";
+import type { PlanaExpression } from "@/lib/plana-expressions";
 import type { FinishReason, UIMessage } from "ai";
 
 const ALLOWED_EXPRESSIONS = new Set<string>([

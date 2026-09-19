@@ -17,11 +17,16 @@ import {
 import { Plana } from "@/components/plana";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { PlanaExpression } from "@/lib/plana";
+import type { PlanaExpression } from "@/lib/plana-expressions";
 import { cn } from "@/lib/utils";
 import { Chat, useChat } from "@ai-sdk/react";
 import { type ChatInit, DefaultChatTransport } from "ai";
-import { LoaderCircleIcon, PanelLeftIcon, PlusIcon, SettingsIcon } from "lucide-react";
+import {
+  LoaderCircleIcon,
+  PanelLeftIcon,
+  PlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Id } from "~convex/dataModel";
