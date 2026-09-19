@@ -37,12 +37,6 @@ const nextConfig: NextConfig = {
 
   serverExternalPackages: ["@resvg/resvg-js", "chromadb"],
 
-  experimental: {
-    rootParams: true,
-  },
-
-  cacheComponents: true,
-
   async redirects() {
     return [
       {

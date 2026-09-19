@@ -1,8 +1,12 @@
 import { SpineRenderer } from "@/lib/spine";
-import type { Bone } from "@esotericsoftware/spine-pixi-v7";
 import type * as PIXI from "pixi.js-v7";
 
 import { z } from "zod";
+
+type SpineBone = {
+  x: number;
+  y: number;
+};
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -45,7 +49,7 @@ export class Plana {
 
   private isPatting = false;
 
-  private touchPoint: Bone | null = null;
+  private touchPoint: SpineBone | null = null;
 
   private originalX = 0;
   private originalY = 0;
@@ -142,7 +146,7 @@ export class Plana {
       startAnim: Plana.EXPRESSION_ANIM_MAP.idle,
     });
 
-    this.touchPoint = this.renderer.findBone("Touch_Point") as Bone | null;
+    this.touchPoint = this.renderer.findBone("Touch_Point") as SpineBone | null;
     if (this.touchPoint) {
       this.originalX = this.touchPoint.x;
       this.originalY = this.touchPoint.y;
