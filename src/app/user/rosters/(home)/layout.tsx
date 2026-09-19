@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
 export default async function MyRostersHomeLayout({
   children,
 }: PropsWithChildren) {
+  await auth.protect();
   const t = await getTranslations();
 
   return (

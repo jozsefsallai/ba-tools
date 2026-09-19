@@ -31,8 +31,7 @@ export function FormationsBrowser() {
   );
 
   const items = isSearching ? (searchResults ?? []) : paginatedResults;
-  const isInitialLoad =
-    !isSearching && status === "LoadingFirstPage";
+  const isInitialLoad = !isSearching && status === "LoadingFirstPage";
   const isSearchLoading = isSearching && searchResults === undefined;
 
   if (isInitialLoad) {
@@ -63,9 +62,7 @@ export function FormationsBrowser() {
         <FormationEntry key={formation._id} entry={formation} />
       ))}
 
-      {!isSearching && (
-        <LoadMoreButton status={status} loadMore={loadMore} />
-      )}
+      {!isSearching && <LoadMoreButton status={status} loadMore={loadMore} />}
     </div>
   );
 }

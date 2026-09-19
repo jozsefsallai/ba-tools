@@ -1,14 +1,12 @@
 "use server";
 
 import { extractPvpBattleInfo } from "@/lib/pvp";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 
 const MAX_REPORT_SIZE = 10 * 1024 * 1024;
 
 export async function parsePvpCombatReport(formData: FormData) {
-  if (!(await currentUser())) {
-    throw new Error("Unauthorized");
-  }
+  await auth.protect();
 
   const file = formData.get("screenshot");
 

@@ -31,8 +31,7 @@ export function OwnTimelineBrowser() {
   );
 
   const items = isSearching ? (searchResults ?? []) : paginatedResults;
-  const isInitialLoad =
-    !isSearching && status === "LoadingFirstPage";
+  const isInitialLoad = !isSearching && status === "LoadingFirstPage";
   const isSearchLoading = isSearching && searchResults === undefined;
 
   if (isInitialLoad) {
@@ -63,9 +62,7 @@ export function OwnTimelineBrowser() {
         <OwnTimelineEntry key={entry._id} entry={entry} />
       ))}
 
-      {!isSearching && (
-        <LoadMoreButton status={status} loadMore={loadMore} />
-      )}
+      {!isSearching && <LoadMoreButton status={status} loadMore={loadMore} />}
     </div>
   );
 }

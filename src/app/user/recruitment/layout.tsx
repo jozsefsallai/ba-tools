@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
@@ -13,5 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RecruitmentLayout({
   children,
 }: PropsWithChildren) {
+  await auth.protect();
   return children;
 }

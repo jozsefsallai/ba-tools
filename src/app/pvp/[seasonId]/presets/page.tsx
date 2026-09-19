@@ -1,4 +1,5 @@
 import { PVPPresetsView } from "@/app/pvp/_components/pvp-presets-view";
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
@@ -16,6 +17,7 @@ export default async function PVPPresetsPage({
 }: {
   params: Promise<{ seasonId: string }>;
 }) {
+  await auth.protect();
   const { seasonId } = await params;
   return <PVPPresetsView seasonId={seasonId as Id<"pvpSeason">} />;
 }

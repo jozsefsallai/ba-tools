@@ -1,3 +1,4 @@
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import type { PropsWithChildren } from "react";
 
@@ -12,5 +13,6 @@ export const metadata: Metadata = {
 export default async function MyTimelinesLayout({
   children,
 }: PropsWithChildren) {
+  await auth.protect();
   return children;
 }

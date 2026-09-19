@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
+import { auth } from "@clerk/nextjs/server";
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
 export default async function MyTimelinesOthersLayout({
   children,
 }: PropsWithChildren) {
+  await auth.protect();
   const t = await getTranslations();
 
   return (

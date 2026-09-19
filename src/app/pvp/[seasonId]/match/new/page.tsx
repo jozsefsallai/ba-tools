@@ -1,4 +1,5 @@
 import { PVPMatchEditor } from "@/app/pvp/_components/pvp-match-editor";
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
@@ -16,6 +17,7 @@ export default async function NewPVPMatchPage({
 }: {
   params: Promise<{ seasonId: Id<"pvpSeason"> }>;
 }) {
+  await auth.protect();
   const { seasonId } = await params;
   return <PVPMatchEditor seasonId={seasonId} />;
 }

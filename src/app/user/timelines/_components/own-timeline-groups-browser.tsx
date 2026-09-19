@@ -4,8 +4,8 @@ import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
 import { MessageBox } from "@/components/common/message-box";
 import { useDebounce } from "@/hooks/use-debounce";
 import { usePaginatedQuery, useQuery } from "convex/react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
@@ -46,8 +46,7 @@ export function OwnTimelineGroupsBrowser() {
   );
 
   const items = isSearching ? (searchResults ?? []) : paginatedResults;
-  const isInitialLoad =
-    !isSearching && status === "LoadingFirstPage";
+  const isInitialLoad = !isSearching && status === "LoadingFirstPage";
   const isSearchLoading = isSearching && searchResults === undefined;
 
   if (isInitialLoad) {
@@ -76,9 +75,7 @@ export function OwnTimelineGroupsBrowser() {
         </div>
       )}
 
-      {!isSearching && (
-        <LoadMoreButton status={status} loadMore={loadMore} />
-      )}
+      {!isSearching && <LoadMoreButton status={status} loadMore={loadMore} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
-import type { PropsWithChildren } from "react";
 import { getTranslations } from "next-intl/server";
+import type { PropsWithChildren } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -14,5 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MyRostersLayout({ children }: PropsWithChildren) {
+  await auth.protect();
   return children;
 }

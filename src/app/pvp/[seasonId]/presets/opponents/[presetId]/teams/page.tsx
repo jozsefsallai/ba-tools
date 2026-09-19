@@ -1,4 +1,5 @@
 import { PVPEnemyPresetTeamsPage } from "@/app/pvp/_components/pvp-enemy-preset-teams-page";
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
@@ -16,6 +17,7 @@ export default async function OpponentPresetTeamsRoute({
 }: {
   params: Promise<{ seasonId: string; presetId: string }>;
 }) {
+  await auth.protect();
   const resolved = await params;
   return (
     <PVPEnemyPresetTeamsPage

@@ -1,9 +1,10 @@
 import { FormationsBrowser } from "@/app/user/formations/_components/formations-browser";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
@@ -17,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function MyFormationsPage() {
+  await auth.protect();
   const t = await getTranslations();
 
   return (

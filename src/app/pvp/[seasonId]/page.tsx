@@ -1,4 +1,5 @@
 import { PVPSeasonView } from "@/app/pvp/_components/pvp-season-view";
+import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
@@ -18,6 +19,7 @@ export default async function PVPSeasonPage({
     seasonId: Id<"pvpSeason">;
   }>;
 }) {
+  await auth.protect();
   const { seasonId } = await params;
   return <PVPSeasonView seasonId={seasonId} />;
 }

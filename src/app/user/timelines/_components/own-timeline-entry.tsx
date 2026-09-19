@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Student } from "~prisma";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { GlobeIcon, GripVerticalIcon, LockIcon } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
+import type { Student } from "~prisma";
 
 export type OwnTimelineEntryProps = {
   entry: FunctionReturnType<typeof api.timeline.getOwn>[number];

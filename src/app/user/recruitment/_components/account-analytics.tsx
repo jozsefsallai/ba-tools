@@ -9,9 +9,9 @@ import {
   type AccountAggregates,
   type AggregateBucket,
   HARD_PITY,
-  SOFT_PITY,
   type RecruitmentSessionKind,
   type RecruitmentStats,
+  SOFT_PITY,
   applySessionToAggregates,
   calculateRecruitmentStats,
   emptyAccountAggregates,
@@ -309,10 +309,7 @@ function PickupDistributionChart({
           />
           <Bar dataKey="count" radius={2}>
             {data.map((entry) => (
-              <Cell
-                fill={chargeBucketColor(entry.charge)}
-                key={entry.charge}
-              />
+              <Cell fill={chargeBucketColor(entry.charge)} key={entry.charge} />
             ))}
           </Bar>
         </BarChart>

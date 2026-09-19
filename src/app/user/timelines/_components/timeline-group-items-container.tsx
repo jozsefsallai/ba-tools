@@ -2,17 +2,17 @@
 
 import { OwnTimelineEntry } from "@/app/user/timelines/_components/own-timeline-entry";
 import {
-  closestCenter,
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";

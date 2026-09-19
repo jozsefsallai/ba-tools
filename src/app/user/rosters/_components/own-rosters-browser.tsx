@@ -3,8 +3,8 @@
 import { OwnRostersBrowserItem } from "@/app/user/rosters/_components/own-rosters-browser-item";
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { api } from "~convex/api";
 
 export function OwnRostersBrowser() {

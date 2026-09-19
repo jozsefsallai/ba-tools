@@ -1,7 +1,9 @@
+import { auth } from "@clerk/nextjs/server";
 import type { PropsWithChildren } from "react";
 
-export default function RecruitmentAccountLayout({
+export default async function RecruitmentAccountLayout({
   children,
 }: PropsWithChildren) {
+  await auth.protect();
   return children;
 }
