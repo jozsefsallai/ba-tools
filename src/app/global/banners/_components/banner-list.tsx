@@ -1,4 +1,5 @@
 import { BannerGroup } from "@/app/global/banners/_components/banner-group";
+import { BannersTooltipProvider } from "@/app/global/banners/_components/banners-tooltip-provider";
 import type { BannerGroups } from "@/app/global/banners/types";
 
 export type BannerListProps = {
@@ -7,14 +8,16 @@ export type BannerListProps = {
 
 export function BannerList({ bannerGroups }: BannerListProps) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-      {Array.from(bannerGroups.entries()).map(([key, banners]) => {
-        const dates = key.split(",").map((t) => Number.parseInt(t, 10)) as [
-          number,
-          number,
-        ];
-        return <BannerGroup key={key} dates={dates} banners={banners} />;
-      })}
-    </section>
+    <BannersTooltipProvider>
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+        {Array.from(bannerGroups.entries()).map(([key, banners]) => {
+          const dates = key.split(",").map((t) => Number.parseInt(t, 10)) as [
+            number,
+            number,
+          ];
+          return <BannerGroup key={key} dates={dates} banners={banners} />;
+        })}
+      </section>
+    </BannersTooltipProvider>
   );
 }

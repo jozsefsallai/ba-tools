@@ -1,5 +1,3 @@
-"use client";
-
 import { BannerItem } from "@/app/global/banners/_components/banner-item";
 import type {
   BannerStudent,
@@ -14,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 export type BannerGroupProps = {
   dates: [number, number];
@@ -25,8 +23,8 @@ export type BannerGroupProps = {
   >;
 };
 
-export function BannerGroup({ dates, banners }: BannerGroupProps) {
-  const t = useTranslations();
+export async function BannerGroup({ dates, banners }: BannerGroupProps) {
+  const t = await getTranslations();
 
   const formattedStartDate = format(new Date(dates[0]), "MMM d, yyyy");
   const formattedEndDate = format(new Date(dates[1]), "MMM d, yyyy");
@@ -59,6 +57,10 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
     count: durationDays,
   });
 
+  const sortedBanners = [...banners].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+
   return (
     <Card
       className={cn("bg-card/60", {
@@ -79,15 +81,9 @@ export function BannerGroup({ dates, banners }: BannerGroupProps) {
 
       <CardContent className="flex-1">
         <div className="flex flex-col gap-4">
-          {[...banners]
-            .sort(
-              (a, b) =>
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime(),
-            )
-            .map((banner) => (
-              <BannerItem key={banner.id} banner={banner} />
-            ))}
+          {sortedBanners.map((banner) => (
+            <BannerItem key={banner.id} banner={banner} />
+          ))}
         </div>
       </CardContent>
 

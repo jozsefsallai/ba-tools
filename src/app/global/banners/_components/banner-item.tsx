@@ -1,23 +1,10 @@
-"use client";
-
+import { BannerPickupList } from "@/app/global/banners/_components/banner-pickup-list";
 import type {
   BannerStudent,
   PublicGameBanner,
 } from "@/app/global/banners/types";
-import { StudentCard } from "@/components/common/student-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp, InfoIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Fragment, useState } from "react";
+import { getTranslations } from "next-intl/server";
 
 const PICKUP_STUDENTS_COLLAPSED_COUNT = 3;
 
@@ -27,19 +14,12 @@ export type BannerItemProps = {
   };
 };
 
-export function BannerItem({ banner }: BannerItemProps) {
-  const t = useTranslations();
+export async function BannerItem({ banner }: BannerItemProps) {
+  const t = await getTranslations();
+
   const hasFestStudent = banner.pickupStudents.some(
     (student) => student.isFestGlobal,
   );
-
-  const canCollapse =
-    banner.pickupStudents.length > PICKUP_STUDENTS_COLLAPSED_COUNT;
-  const [isExpanded, setIsExpanded] = useState(false);
-  const displayedStudents =
-    canCollapse && !isExpanded
-      ? banner.pickupStudents.slice(0, PICKUP_STUDENTS_COLLAPSED_COUNT)
-      : banner.pickupStudents;
 
   return (
     <div>
@@ -68,158 +48,16 @@ export function BannerItem({ banner }: BannerItemProps) {
               <div className="text-sm text-muted-foreground text-center">
                 {t("static.banners.item.selectablePickup")}
               </div>
-
-              <Separator className="mb-2" />
+              <div className="border-border shrink-0 bg-border h-px w-full mb-2" />
             </>
           )}
 
-          {displayedStudents.map((student, idx) => (
-            <Fragment key={student.id}>
-              <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between relative">
-                <TooltipProvider>
-                  <div className="flex items-center gap-4 md:gap-6">
-                    <div className="relative">
-                      <div style={{ zoom: 0.85 }}>
-                        <StudentCard student={student} />
-                      </div>
-
-                      <Badge
-                        className={cn(
-                          "absolute -top-2 -left-2 border-2 border-white shadow-md",
-                          {
-                            "bg-purple-700": student.rarity === 3,
-                            "bg-yellow-700": student.rarity === 2,
-                            "bg-blue-700": student.rarity === 1,
-                          },
-                        )}
-                      >
-                        {student.rarity}★
-                      </Badge>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
-                      <div className="md:text-xl font-bold">{student.name}</div>
-
-                      <div className="flex items-center gap-4">
-                        {student.isFestGlobal && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge>{t("static.banners.item.fest")}</Badge>
-                            </TooltipTrigger>
-
-                            <TooltipContent className="text-center">
-                              {t.rich(
-                                banner.isSelectablePickup
-                                  ? "static.banners.item.festTooltip2"
-                                  : "static.banners.item.festTooltip",
-                                {
-                                  strong: (chunks) => <strong>{chunks}</strong>,
-                                  br: () => <br />,
-                                },
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-
-                        {student.isLimitedGlobal && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge>{t("static.banners.item.limited")}</Badge>
-                            </TooltipTrigger>
-
-                            <TooltipContent>
-                              {t.rich("static.banners.item.limitedTooltip", {
-                                strong: (chunks) => <strong>{chunks}</strong>,
-                              })}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-
-                        {banner.freePulls > 0 && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge variant="outline">
-                                {t("static.banners.item.freePulls", {
-                                  count: banner.freePulls,
-                                })}
-                              </Badge>
-                            </TooltipTrigger>
-
-                            <TooltipContent className="text-center">
-                              {t.rich("static.banners.item.freePullsTooltip", {
-                                strong: (chunks) => <strong>{chunks}</strong>,
-                                br: () => <br />,
-                                count: banner.freePulls,
-                              })}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button asChild variant="outline" size="sm">
-                        <a
-                          href={`https://schaledb.com/student/${student.schaleDbId}`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <InfoIcon />
-                          <span className="md:hidden">
-                            {t("static.banners.item.viewOnSchaleDB")}
-                          </span>
-                        </a>
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>
-                      {t.rich("static.banners.item.viewStudentOnSchaleDB", {
-                        strong: (chunks) => <strong>{chunks}</strong>,
-                        name: student.name,
-                      })}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
-              {idx < displayedStudents.length - 1 && (
-                <Separator className="mb-1" />
-              )}
-            </Fragment>
-          ))}
-
-          {canCollapse && (
-            <>
-              {!isExpanded && (
-                <div
-                  className="absolute inset-x-0 -left-2 -right-2 bottom-0 h-32 pointer-events-none"
-                  aria-hidden
-                  style={{
-                    background:
-                      "linear-gradient(to bottom, transparent 0%, var(--card) 75%)",
-                  }}
-                />
-              )}
-
-              <div className="relative z-10 flex justify-center">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => setIsExpanded((prev) => !prev)}
-                >
-                  {isExpanded ? (
-                    <ChevronUp className="h-4 w-4 mr-1" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 mr-1" />
-                  )}
-                </Button>
-              </div>
-            </>
-          )}
+          <BannerPickupList
+            students={banner.pickupStudents}
+            isSelectablePickup={banner.isSelectablePickup}
+            freePulls={banner.freePulls}
+            collapsedCount={PICKUP_STUDENTS_COLLAPSED_COUNT}
+          />
         </div>
       </div>
     </div>

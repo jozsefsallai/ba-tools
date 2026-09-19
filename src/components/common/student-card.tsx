@@ -10,7 +10,6 @@ import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { buildSkillPortraitUrl, buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
 
 export type StudentCardProps = {
   student: Pick<
@@ -44,22 +43,15 @@ export function StudentCard({
   style,
   isSkillCard,
 }: StudentCardProps) {
-  const iconUrl = useMemo(() => {
-    const fallback = isSkillCard
-      ? buildSkillPortraitUrl(student)
-      : buildStudentIconUrl(student);
+  const fallback = isSkillCard
+    ? buildSkillPortraitUrl(student)
+    : buildStudentIconUrl(student);
 
-    if (!variantId) {
-      return fallback;
-    }
-
+  let iconUrl = fallback;
+  if (variantId) {
     const variant = skillCardVariantMap[student.id as SkillCardVariant];
-    if (!variant) {
-      return fallback;
-    }
-
-    return variant.find((v) => v.id === variantId)?.image ?? fallback;
-  }, [student, variantId]);
+    iconUrl = variant?.find((v) => v.id === variantId)?.image ?? fallback;
+  }
 
   return (
     <div className="flex relative" style={style}>
