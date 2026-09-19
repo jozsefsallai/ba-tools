@@ -1,10 +1,12 @@
+"use client";
+
 import { BannerPickupList } from "@/app/global/banners/_components/banner-pickup-list";
 import type {
   BannerStudent,
   PublicGameBanner,
 } from "@/app/global/banners/types";
 import { cn } from "@/lib/utils";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 
 const PICKUP_STUDENTS_COLLAPSED_COUNT = 3;
 
@@ -14,8 +16,8 @@ export type BannerItemProps = {
   };
 };
 
-export async function BannerItem({ banner }: BannerItemProps) {
-  const t = await getTranslations();
+export function BannerItem({ banner }: BannerItemProps) {
+  const t = useTranslations();
 
   const hasFestStudent = banner.pickupStudents.some(
     (student) => student.isFestGlobal,

@@ -1,5 +1,5 @@
-import { BannerList } from "@/app/global/banners/_components/banner-list";
-import type { BannerGroups } from "@/app/global/banners/types";
+import { BannerListLazy } from "@/app/global/banners/_components/banner-list-lazy";
+import type { BannerGroupEntry } from "@/app/global/banners/types";
 import { Separator } from "@/components/ui/separator";
 import { getCachedGameBanners } from "@/lib/game-banners.server";
 import type { Metadata } from "next";
@@ -16,24 +16,24 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-async function getBannerGroups(): Promise<BannerGroups> {
+async function getBannerGroups(): Promise<BannerGroupEntry[]> {
   const banners = await getCachedGameBanners();
 
-  const groups: BannerGroups = new Map();
+  const groups = new Map<string, BannerGroupEntry>();
 
   for (const banner of banners) {
-    const key = [banner.startDate.getTime(), banner.endDate.getTime()].join(
-      ",",
-    );
+    const startTime = banner.startDate.getTime();
+    const endTime = banner.endDate.getTime();
+    const key = `${startTime},${endTime}`;
 
     if (!groups.has(key)) {
-      groups.set(key, []);
+      groups.set(key, { startTime, endTime, banners: [] });
     }
 
-    groups.get(key)?.push(banner);
+    groups.get(key)?.banners.push(banner);
   }
 
-  return groups;
+  return Array.from(groups.values());
 }
 
 export default async function BannersPage() {
@@ -58,7 +58,7 @@ export default async function BannersPage() {
 
       <Separator />
 
-      <BannerList bannerGroups={bannerGroups} />
+      <BannerListLazy bannerGroups={bannerGroups} />
     </div>
   );
 }
