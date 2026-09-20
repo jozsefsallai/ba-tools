@@ -46,12 +46,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
+import { useRouter } from "@/i18n/navigation";
 import { clearCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import type { EchelonData } from "@/lib/echelon-parser";
 import {
   DEFAULT_FORMATIONATION_ROW_LABEL,
-  DEFAULT_NEW_FORMATION_STUDENT_LEVEL,
   DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
   type FormationRowLabel,
   type FormationRowLabelSide,
@@ -68,7 +68,6 @@ import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { useRouter } from "@/i18n/navigation";
 
 type FormationEditorRow = {
   id: string;
@@ -232,12 +231,12 @@ export function FormationEditor() {
     const item: StudentItem = {
       id: uuid(),
       student,
-      ...(formationId
-        ? {}
-        : {
-            level: DEFAULT_NEW_FORMATION_STUDENT_LEVEL,
-            starLevel: DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
-          }),
+      ...(preferences.formationDisplay.defaultLevelEnabled
+        ? { level: preferences.formationDisplay.defaultLevel }
+        : {}),
+      ...(!formationId
+        ? { starLevel: DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL }
+        : {}),
     };
 
     setRows((prev) => {

@@ -399,6 +399,63 @@ export function UserPreferences() {
             />
           </div>
         </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 justify-between">
+            <Label
+              className="shrink-0"
+              htmlFor="echelontool-default-level-enabled"
+            >
+              {t("common.userPreferences.formationDisplay.defaultLevelEnabled")}
+            </Label>
+
+            <Switch
+              id="echelontool-default-level-enabled"
+              checked={newPreferences.formationDisplay.defaultLevelEnabled}
+              onCheckedChange={(checked) =>
+                setPreference(
+                  "formationDisplay",
+                  "defaultLevelEnabled",
+                  checked,
+                )
+              }
+            />
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            {t(
+              "common.userPreferences.formationDisplay.defaultLevelEnabledHint",
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 justify-between">
+            <Label className="shrink-0" htmlFor="echelontool-default-level">
+              {t("common.userPreferences.formationDisplay.defaultLevel")}
+            </Label>
+
+            <Input
+              id="echelontool-default-level"
+              type="number"
+              className="w-20"
+              min={1}
+              max={90}
+              disabled={!newPreferences.formationDisplay.defaultLevelEnabled}
+              value={newPreferences.formationDisplay.defaultLevel.toString()}
+              onChange={(e) => {
+                const n = Number.parseInt(e.target.value, 10);
+                if (!Number.isNaN(n)) {
+                  setPreference(
+                    "formationDisplay",
+                    "defaultLevel",
+                    Math.min(90, Math.max(1, n)),
+                  );
+                }
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <Separator />

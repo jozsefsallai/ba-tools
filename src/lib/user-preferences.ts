@@ -15,6 +15,8 @@ export type UserPreferences = {
     defaultNoDisplayRole: boolean;
     defaultGroupsVertical: boolean;
     defaultRowGap: number;
+    defaultLevelEnabled: boolean;
+    defaultLevel: number;
   };
   bond: {
     autoPopulateSingleTargetGifts: boolean;
@@ -38,6 +40,8 @@ export const defaultUserPreferences: UserPreferences = {
     defaultNoDisplayRole: false,
     defaultGroupsVertical: false,
     defaultRowGap: 8,
+    defaultLevelEnabled: true,
+    defaultLevel: 90,
   },
   bond: {
     autoPopulateSingleTargetGifts: false,

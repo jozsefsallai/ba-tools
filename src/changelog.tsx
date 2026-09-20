@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
+import type { ReactNode } from "react";
 
 export const CHANGELOG_SCOPES = {
   website: "Website",
@@ -46,7 +46,13 @@ export type ChangelogItemData = {
 export const CHANGELOG: ChangelogItemData[] = [
   {
     date: "September 20, 2026",
-    features: [],
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Default student level when adding students is now configurable in Preferences.",
+      },
+    ],
     changes: [
       {
         scope: CHANGELOG_SCOPES.website,

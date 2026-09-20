@@ -38,6 +38,8 @@ export const update = authenticatedMutation({
         defaultNoDisplayRole: v.optional(v.boolean()),
         defaultGroupsVertical: v.optional(v.boolean()),
         defaultRowGap: v.optional(v.number()),
+        defaultLevelEnabled: v.optional(v.boolean()),
+        defaultLevel: v.optional(v.number()),
       }),
     ),
     bond: v.optional(

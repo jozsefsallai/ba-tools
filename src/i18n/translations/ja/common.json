@@ -344,7 +344,10 @@
       "defaultDisplayOverline": "デフォルトでオーバーラインを表示",
       "defaultDisplayRoleIcons": "デフォルトで役割アイコンを表示",
       "defaultVerticalGroups": "デフォルトで垂直グループ化",
-      "defaultRowGap": "デフォルトの行間隔（px）"
+      "defaultRowGap": "デフォルトの行間隔（px）",
+      "defaultLevelEnabled": "デフォルトレベルを有効にする",
+      "defaultLevelEnabledHint": "有効にすると、編成表示で新しく追加した生徒のレベルがデフォルト値に自動設定されるよ。",
+      "defaultLevel": "デフォルトレベル"
     },
     "bond": {
       "title": "絆ランク計算機",

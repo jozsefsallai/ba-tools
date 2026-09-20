@@ -217,6 +217,8 @@ export default defineSchema({
       defaultNoDisplayRole: v.boolean(),
       defaultGroupsVertical: v.boolean(),
       defaultRowGap: v.optional(v.number()),
+      defaultLevelEnabled: v.optional(v.boolean()),
+      defaultLevel: v.optional(v.number()),
     }),
     bond: v.optional(
       v.object({

@@ -370,7 +370,10 @@
       "defaultDisplayOverline": "Default display overline",
       "defaultDisplayRoleIcons": "Default display role icons",
       "defaultVerticalGroups": "Default vertical groups",
-      "defaultRowGap": "Default row spacing (px)"
+      "defaultRowGap": "Default row spacing (px)",
+      "defaultLevelEnabled": "Default level enabled",
+      "defaultLevelEnabledHint": "When enabled, newly added students in Formation Display will automatically be set to the default level.",
+      "defaultLevel": "Default level"
     },
     "bond": {
       "title": "Relationship Rank Calculator",
