@@ -52,6 +52,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.website,
         description: "Locale switching is now route-based.",
       },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Added improved 404 page.",
+      },
     ],
     fixes: [],
   },

@@ -1,24 +1,17 @@
-"use client";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-import { Plana } from "@/components/plana";
-import { useTranslations } from "next-intl";
+import { LocaleNotFoundView } from "@/app/[locale]/_components/locale-not-found-view";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+
+  return {
+    title: `${t("common.notFound.code")} - ${t("common.notFound.title")} - ${t("common.appName")}`,
+    description: t("common.notFound.description"),
+  };
+}
 
 export default function NotFound() {
-  const t = useTranslations();
-
-  return (
-    <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2 items-center">
-          <h1 className="text-xl font-bold">{t("common.notFound.title")}</h1>
-        </div>
-
-        <p>{t("common.notFound.description")}</p>
-      </div>
-
-      <div className="fixed md:absolute z-20 md:z-0 -bottom-30 md:-bottom-10 left-1/2 -translate-x-1/2">
-        <Plana expression="confused" inline />
-      </div>
-    </div>
-  );
+  return <LocaleNotFoundView />;
 }
