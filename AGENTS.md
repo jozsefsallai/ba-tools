@@ -53,7 +53,7 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 ## Key Quirks
 
 - **`reactStrictMode: false`** — intentional; the Spine skeletal animation renderer breaks under Strict Mode double-invocation. Do not re-enable.
-- **i18n is cookie-based**, not URL-segment-based. Cookie: `_ba_tools__locale`. Locales: `en` (default), `jp`. Three message namespaces: `common`, `static`, `tools`. Non-English translations deep-merge with English fallback.
+- **i18n uses locale-based routing** via next-intl (`localePrefix: "as-needed"`). English is unprefixed (`/bond`); Japanese is `/ja/...`. Locales: `en` (default), `ja`. Page locale comes from the `[locale]` segment / `next/root-params` (not `cookies()` in RSC). A next-intl locale cookie remembers an explicit choice so unprefixed paths can redirect (e.g. `/bond` → `/ja/bond`); `Accept-Language` detection is off. Three message namespaces: `common`, `static`, `tools`. Non-English translations deep-merge with English fallback. Navigation helpers live in `src/i18n/navigation.ts`.
 - **Biome** handles lint + format (not ESLint/Prettier). `noUnusedImports` is an error. `next lint` is still available for Next.js-specific rules.
 - **Shadcn/ui**: add components via `npx shadcn@latest add <component>`, not manually.
 - **PWA (Serwist)**: service worker built from `src/sw.ts` → `public/sw.js`. Disabled in development.

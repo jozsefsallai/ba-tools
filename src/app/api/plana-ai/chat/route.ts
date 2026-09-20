@@ -1,7 +1,7 @@
 import { streamPlanaResponse } from "@/lib/ai/chat";
 import { canAccessPlanaAi } from "@/lib/ai/plana-access";
 import { PlanaNotConfiguredError } from "@/lib/ai/providers";
-import { getSenseiDisplayName } from "@/app/plana-ai/_lib/sensei-name";
+import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import type { UIMessage } from "ai";
 import { fetchQuery } from "convex/nextjs";

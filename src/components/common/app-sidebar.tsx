@@ -49,11 +49,10 @@ import {
   UsersIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { api } from "~convex/api";
+import { getPathname, Link, usePathname } from "@/i18n/navigation";
 
 type NavLink = {
   href: string;
@@ -181,6 +180,7 @@ function NavItem({
 
 export function AppSidebar() {
   const t = useTranslations();
+  const locale = useLocale();
   const pathname = usePathname();
   const { user } = useUser();
   const canShowPlanaAi = canAccessPlanaAi(user);
@@ -386,12 +386,12 @@ export function AppSidebar() {
             <UserButton>
               <UserButton.MenuItems>
                 <UserButton.Link
-                  href="/user/formations"
+                  href={getPathname({ href: "/user/formations", locale })}
                   label="My formations"
                   labelIcon={<UsersIcon className="size-4" />}
                 />
                 <UserButton.Link
-                  href="/user/timelines"
+                  href={getPathname({ href: "/user/timelines", locale })}
                   label="My timelines"
                   labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
                 />

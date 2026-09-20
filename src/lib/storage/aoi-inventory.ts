@@ -1,4 +1,4 @@
-import type { BlockedCoords } from "@/app/inventory-management/_components/grid";
+import type { BlockedCoords } from "@/app/[locale]/inventory-management/_components/grid";
 import { Storage } from "@/lib/storage";
 import type { InventoryManagementItem } from "@/workers/types";
 

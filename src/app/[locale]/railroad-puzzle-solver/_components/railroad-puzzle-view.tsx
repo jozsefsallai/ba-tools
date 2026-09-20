@@ -1,0 +1,587 @@
+"use client";
+
+import { useState, useEffect, type CSSProperties, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { puzzles, type RailroadPuzzlePreset } from "../_lib/presets";
+
+import { Hexagon } from "./hexagon";
+import { cn } from "@/lib/utils";
+import styles from "./hexagon.module.css";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import type {
+  RailPieceCountMap,
+  RailType,
+  Tile,
+} from "@/app/[locale]/railroad-puzzle-solver/_lib/types";
+import {
+  findShortestRailPaths,
+  solveRailroadPuzzle,
+} from "@/app/[locale]/railroad-puzzle-solver/_lib/solver";
+import { ResultTileArrow } from "@/app/[locale]/railroad-puzzle-solver/_components/result-tile-arrow";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import minigameCurrencyIcon from "../_assets/minigame-currency-icon.png";
+import aobahuh from "../_assets/aobahuh.png";
+import Image from "next/image";
+import { getNeighbor } from "@/app/[locale]/railroad-puzzle-solver/_lib/utils";
+import { useInterval } from "usehooks-ts";
+import { Howl } from "howler";
+
+type HexagonMapStyles = CSSProperties & {
+  "--railroad-cell-height": string;
+};
+
+export function RailroadPuzzleView() {
+  const t = useTranslations();
+
+  const railTypeLabels: Record<RailType, string> = useMemo(
+    () => ({
+      STRAIGHT: t("tools.railroad.railTypes.straight"),
+      SLIGHTLY_CURVED: t("tools.railroad.railTypes.slightlyCurved"),
+      VERY_CURVED: t("tools.railroad.railTypes.veryCurved"),
+    }),
+    [t],
+  );
+
+  const [selectedPreset, setSelectedPreset] = useState<RailroadPuzzlePreset>(
+    puzzles[0],
+  );
+
+  const [railInventory, setRailInventory] = useState<Record<RailType, number>>({
+    STRAIGHT: 0,
+    SLIGHTLY_CURVED: 0,
+    VERY_CURVED: 0,
+  });
+
+  const [solveInstantly, setSolveInstantly] = useState(true);
+
+  const [resultMap, setResultMap] = useState<Map<string, Tile>>(new Map());
+
+  const [minRailConfigs, setMinRailConfigs] = useState<RailPieceCountMap[]>([]);
+
+  const [aobaRail, setAobaRail] = useState<Tile | null>(null);
+  const [railingAoba, setRailingAoba] = useState(false);
+  const [howls, setHowls] = useState<Howl[]>([]);
+
+  useEffect(() => {
+    setRailInventory(selectedPreset.defaultAvailableRails);
+    setResultMap(new Map());
+    setMinRailConfigs([]);
+  }, [selectedPreset]);
+
+  const railsUsed = useMemo(() => {
+    if (resultMap.size === 0) {
+      return null;
+    }
+
+    const count = Array.from(resultMap.values()).reduce((acc, tile) => {
+      return tile.state.type === "RAIL_PIECE" ? acc + 1 : acc;
+    }, 0);
+
+    return count;
+  }, [resultMap]);
+
+  function handleRailCountChange(railType: RailType, count: number): void {
+    setRailInventory((prev) => ({
+      ...prev,
+      [railType]: count,
+    }));
+
+    setResultMap(new Map());
+  }
+
+  function solve() {
+    setResultMap(new Map());
+
+    const result = solveRailroadPuzzle({
+      grid: selectedPreset.grid,
+      availableRails: railInventory,
+    });
+
+    if (!result) {
+      return false;
+    }
+
+    const newResultMap = new Map<string, Tile>();
+
+    for (const tile of result) {
+      const key = `${tile.y},${tile.x}`;
+      newResultMap.set(key, tile);
+    }
+
+    setResultMap(newResultMap);
+    return true;
+  }
+
+  function handleSolveClick() {
+    const solved = solve();
+    if (!solved) {
+      toast.error(t("tools.railroad.toasts.noSolution"));
+      return;
+    }
+  }
+
+  useEffect(() => {
+    if (!solveInstantly) {
+      return;
+    }
+
+    solve();
+  }, [railInventory, solveInstantly]);
+
+  function handleGetMinimalConfigsClick() {
+    setMinRailConfigs([]);
+
+    const solutions = findShortestRailPaths({
+      grid: selectedPreset.grid,
+      availableRails: selectedPreset.defaultAvailableRails,
+    });
+
+    const minResults: RailPieceCountMap[] = [];
+
+    for (const solution of solutions) {
+      const railCount: RailPieceCountMap = {
+        STRAIGHT: 0,
+        SLIGHTLY_CURVED: 0,
+        VERY_CURVED: 0,
+      };
+
+      for (const tile of solution) {
+        if (tile.state.type === "RAIL_PIECE") {
+          railCount[tile.state.railType]++;
+        }
+      }
+
+      if (
+        !minResults.find(
+          (r) =>
+            r.STRAIGHT === railCount.STRAIGHT &&
+            r.SLIGHTLY_CURVED === railCount.SLIGHTLY_CURVED &&
+            r.VERY_CURVED === railCount.VERY_CURVED,
+        )
+      ) {
+        minResults.push(railCount);
+      }
+    }
+
+    setMinRailConfigs(minResults);
+  }
+
+  const flatTiles = useMemo(
+    () => selectedPreset.grid.tiles.flat(),
+    [selectedPreset],
+  );
+
+  useInterval(
+    () => {
+      if (aobaRail === null) {
+        setRailingAoba(false);
+        return;
+      }
+
+      let nextCoords: [number, number] | null = null;
+
+      switch (aobaRail.state.type) {
+        case "START":
+          nextCoords = getNeighbor(aobaRail.x, aobaRail.y, aobaRail.state.exit);
+          break;
+        case "GOAL":
+          setAobaRail(null);
+          setRailingAoba(false);
+          return;
+        default: {
+          const placedRail = resultMap.get(`${aobaRail.y},${aobaRail.x}`);
+          if (
+            placedRail &&
+            (placedRail.state.type === "RAIL_PIECE" ||
+              placedRail.state.type === "STATION_RAIL_PIECE")
+          ) {
+            nextCoords = getNeighbor(
+              aobaRail.x,
+              aobaRail.y,
+              placedRail.state.exit,
+            );
+          } else {
+            nextCoords = null;
+          }
+        }
+      }
+
+      const nextTile =
+        nextCoords &&
+        flatTiles.find((t) => t.x === nextCoords[0] && t.y === nextCoords[1]);
+
+      if (!nextTile) {
+        setAobaRail(null);
+        setRailingAoba(false);
+        toast.error(t("tools.railroad.toasts.aobaDerailed"));
+        return;
+      }
+
+      setAobaRail(nextTile);
+    },
+    railingAoba ? 500 : null,
+  );
+
+  function startAoba() {
+    if (resultMap.size === 0) {
+      toast.error(t("tools.railroad.toasts.noSolutionForAoba"));
+      return;
+    }
+
+    const startTile = flatTiles.find((t) => t.state.type === "START");
+
+    if (startTile) {
+      setAobaRail(startTile);
+    } else {
+      setRailingAoba(false);
+      toast.error(t("tools.railroad.toasts.startTileNotFound"));
+      return;
+    }
+
+    setRailingAoba(true);
+
+    const randomHowl = howls[Math.floor(Math.random() * howls.length)];
+    randomHowl.play();
+  }
+
+  function stopAoba() {
+    setAobaRail(null);
+    setRailingAoba(false);
+
+    for (const howl of howls) {
+      if (howl.playing()) {
+        howl.stop();
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (howls.length > 0) {
+      return;
+    }
+
+    const aobaHowl = new Howl({
+      src: ["/assets/audio/Aoba_Minigame_Train_Start.ogg"],
+    });
+
+    const hikariHowl = new Howl({
+      src: ["/assets/audio/Hikari_Minigame_Train_Start.ogg"],
+    });
+
+    const nozomiHowl = new Howl({
+      src: ["/assets/audio/Nozomi_Minigame_Train_Start.ogg"],
+    });
+
+    setHowls([aobaHowl, hikariHowl, nozomiHowl]);
+
+    return () => {
+      aobaHowl.unload();
+      hikariHowl.unload();
+      nozomiHowl.unload();
+      setHowls([]);
+    };
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-8 items-center justify-center">
+      <div
+        className={cn(styles.railroadMap, "max-w-full overflow-x-auto")}
+        style={{ "--railroad-cell-height": "75px" } as HexagonMapStyles}
+      >
+        <TooltipProvider>
+          {selectedPreset.grid.tiles.map((row, rowIndex) => (
+            <div className={cn(styles.mapRow)} key={rowIndex}>
+              {row.map((tile, colIndex) => {
+                const key = `${rowIndex},${colIndex}`;
+                const finalTile = resultMap.get(key) ?? tile;
+
+                return (
+                  <Hexagon key={key} state={finalTile.state}>
+                    <div className="flex flex-col items-center justify-center text-xs">
+                      <div>{key}</div>
+
+                      {finalTile.state.type === "START" && <div>START</div>}
+                      {finalTile.state.type === "GOAL" && <div>GOAL</div>}
+                      {finalTile.state.type === "STATION" && <div>STATION</div>}
+                      {finalTile.state.type === "STATION_RAIL_PIECE" && (
+                        <ResultTileArrow tile={finalTile} />
+                      )}
+
+                      {finalTile.state.type === "RAIL_PIECE" && (
+                        <ResultTileArrow tile={finalTile} />
+                      )}
+                    </div>
+
+                    {aobaRail &&
+                      aobaRail.x === colIndex &&
+                      aobaRail.y === rowIndex && (
+                        <div className="absolute top-5 pointer-events-none select-none">
+                          <Image
+                            src={aobahuh}
+                            alt="Aoba"
+                            className="animate-bounce"
+                            width={48}
+                            height={48}
+                          />
+                        </div>
+                      )}
+                  </Hexagon>
+                );
+              })}
+            </div>
+          ))}
+        </TooltipProvider>
+      </div>
+
+      <div className="flex gap-4 items-center justify-between text-sm text-muted-foreground w-full">
+        <div>
+          <strong>{t("tools.railroad.railPiecesUsed")}</strong>{" "}
+          {railsUsed !== null ? railsUsed : "..."}
+        </div>
+        <div>
+          {railsUsed !== null && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center">
+                    <Image
+                      src={minigameCurrencyIcon}
+                      alt="Highlander Commemorative Sticker"
+                      className="w-12"
+                    />
+
+                    <span className="-ml-1">{150 * railsUsed}x</span>
+                  </div>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  Highlander Commemorative Sticker
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      </div>
+
+      <Card className="w-full">
+        <CardContent>
+          <div className="flex flex-col gap-8 md:gap-4">
+            <div className="flex gap-2 items-center">
+              <Label className="shrink-0">{t("tools.railroad.map")}</Label>
+              <Select
+                value={selectedPreset.name}
+                onValueChange={(value) => {
+                  const preset = puzzles.find((p) => p.name === value);
+                  if (preset) {
+                    setSelectedPreset(preset);
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {puzzles.map((puzzle) => (
+                    <SelectItem key={puzzle.name} value={puzzle.name}>
+                      {puzzle.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
+              <strong className="text-sm md:w-[150px]">
+                {t("tools.railroad.usedRailPieces")}
+              </strong>
+
+              {Object.keys(railInventory).map((key) => {
+                const railType = key as RailType;
+                const maxRails = selectedPreset.defaultAvailableRails[railType];
+
+                return (
+                  <div className="flex gap-2 items-center" key={railType}>
+                    <Label>{railTypeLabels[railType]}</Label>
+                    <div className="flex gap-1 items-center">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={maxRails}
+                        step={1}
+                        value={railInventory[railType]?.toString()}
+                        onChange={(e) =>
+                          handleRailCountChange(
+                            railType,
+                            Math.min(
+                              Math.max(0, Number.parseInt(e.target.value, 10)),
+                              maxRails,
+                            ),
+                          )
+                        }
+                        className="w-16"
+                      />
+
+                      <div className="text-sm text-muted-foreground shrink-0">
+                        / {maxRails}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-6 gap-y-4 md:items-center">
+              <strong className="text-sm md:w-[150px]">
+                {t("tools.railroad.remainingRailPieces")}
+              </strong>
+
+              {Object.keys(railInventory).map((key) => {
+                const railType = key as RailType;
+                const maxRails = selectedPreset.defaultAvailableRails[railType];
+
+                return (
+                  <div className="flex gap-2 items-center" key={railType}>
+                    <Label>{railTypeLabels[railType]}</Label>
+                    <div className="flex gap-1 items-center">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={maxRails}
+                        step={1}
+                        value={(maxRails - railInventory[railType]).toString()}
+                        onChange={(e) =>
+                          handleRailCountChange(
+                            railType,
+                            Math.min(
+                              Math.max(
+                                0,
+                                maxRails - Number.parseInt(e.target.value, 10),
+                              ),
+                              maxRails,
+                            ),
+                          )
+                        }
+                        className="w-16"
+                      />
+
+                      <div className="text-sm text-muted-foreground shrink-0">
+                        / {maxRails}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <Switch
+                id="solve-instantly"
+                checked={solveInstantly}
+                onCheckedChange={setSolveInstantly}
+              />
+
+              <Label htmlFor="solve-instantly">
+                {t("tools.railroad.solveInstantly")}
+              </Label>
+
+              <div className="text-xs text-muted-foreground">
+                {t("tools.railroad.solveInstantlyHint")}
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-center">
+              {aobaRail === null && (
+                <Button
+                  variant="outline"
+                  onClick={startAoba}
+                  disabled={resultMap.size === 0}
+                >
+                  {t("tools.railroad.launchAoba")}
+                </Button>
+              )}
+
+              {aobaRail !== null && (
+                <Button variant="outline" onClick={stopAoba}>
+                  {t("tools.railroad.stopAoba")}
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                onClick={handleGetMinimalConfigsClick}
+                disabled={aobaRail !== null}
+              >
+                {t("tools.railroad.getMinimalConfigs")}
+              </Button>
+
+              <Button onClick={handleSolveClick} disabled={aobaRail !== null}>
+                {t("tools.railroad.solve")}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {minRailConfigs.length > 0 && (
+        <Card>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <div className="text-lg font-semibold">
+                {t("tools.railroad.minimalConfigs", {
+                  count: minRailConfigs.length,
+                })}
+              </div>
+
+              <div className="flex flex-col md:flex-row flex-wrap gap-4">
+                {minRailConfigs.map((config, index) => (
+                  <Button
+                    variant="outline"
+                    onClick={() => setRailInventory(config)}
+                    key={index}
+                    className="h-auto p-6 font-normal"
+                  >
+                    <div className="flex-1 flex flex-col gap-2">
+                      {Object.keys(config).map((key) => {
+                        const railType = key as RailType;
+
+                        return (
+                          <div
+                            className="flex gap-2 items-center"
+                            key={railType}
+                          >
+                            <span className="font-medium">
+                              {railTypeLabels[railType]}:
+                            </span>
+
+                            <span>{config[railType]}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

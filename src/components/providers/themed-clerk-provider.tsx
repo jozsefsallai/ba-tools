@@ -16,7 +16,7 @@ export function ThemedClerkProvider({ children }: PropsWithChildren) {
     switch (locale) {
       case "en":
         return enUS;
-      case "jp":
+      case "ja":
         return jaJP;
     }
   }, [locale]);

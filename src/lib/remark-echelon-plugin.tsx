@@ -1,4 +1,4 @@
-import { FormationPreview } from "@/app/formation-display/_components/formation-preview";
+import { FormationPreview } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { useStudents } from "@/hooks/use-students";
 import { parseEchelon } from "@/lib/echelon-parser";
 import { inferFormationType } from "@/lib/formation-type";

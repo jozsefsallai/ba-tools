@@ -45,8 +45,18 @@ const nextConfig: NextConfig = {
         statusCode: 307,
       },
       {
+        source: "/ja/aoba-railing-simulator",
+        destination: "/ja/railroad-puzzle-solver",
+        statusCode: 307,
+      },
+      {
         source: "/timelines",
         destination: "/timeline-visualizer",
+        statusCode: 307,
+      },
+      {
+        source: "/ja/timelines",
+        destination: "/ja/timeline-visualizer",
         statusCode: 307,
       },
     ];

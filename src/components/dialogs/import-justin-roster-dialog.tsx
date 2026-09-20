@@ -1,6 +1,6 @@
 "use client";
 
-import type { RosterItem } from "@/app/user/rosters/_components/roster-item-editor";
+import type { RosterItem } from "@/app/[locale]/user/rosters/_components/roster-item-editor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

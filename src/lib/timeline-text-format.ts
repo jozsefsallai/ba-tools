@@ -3,7 +3,7 @@ import type {
   StudentItem,
   TextItem,
   TimelineItem,
-} from "@/app/timeline-visualizer/_components/timeline-preview";
+} from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { getShorthand } from "@/lib/student-utils";
 import { commandScore } from "@/lib/text-score";
 import type { Student } from "~prisma";

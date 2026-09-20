@@ -3,7 +3,7 @@
 import {
   type InventoryManagementPreset,
   inventoryManagementPresets,
-} from "@/app/inventory-management/_lib/presets";
+} from "@/app/[locale]/inventory-management/_lib/presets";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

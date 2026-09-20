@@ -12,10 +12,11 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
+import { Link, usePathname } from "@/i18n/navigation";
 
 type BreadcrumbInfo = {
   label: string;
@@ -196,7 +197,9 @@ export function InsetHeader() {
           {breadcrumbs?.group && (
             <>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/">{breadcrumbs.group}</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/">{breadcrumbs.group}</Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
             </>
@@ -205,8 +208,8 @@ export function InsetHeader() {
             itemName ? (
               <>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href={breadcrumbs.href}>
-                    {breadcrumbs.label}
+                  <BreadcrumbLink asChild>
+                    <Link href={breadcrumbs.href}>{breadcrumbs.label}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />

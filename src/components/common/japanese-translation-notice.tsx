@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 
-const STORAGE_KEY = "jp-translation-notice-dismissed";
+const STORAGE_KEY = "ja-translation-notice-dismissed";
 
 export function JapaneseTranslationNotice() {
   const [isDismissed, setIsDismissed] = useState(true);

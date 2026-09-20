@@ -9,7 +9,7 @@ function getStudentName(student: Student, locale: Locale) {
   switch (locale) {
     case "en":
       return student.name;
-    case "jp":
+    case "ja":
       return student.nameJP;
     default:
       return student.name;

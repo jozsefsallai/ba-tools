@@ -183,7 +183,7 @@ html[lang="en"] {
   --font-sans: var(--font-outfit);
 }
 
-html[lang="jp"] {
+html[lang="ja"] {
   --font-sans: var(--font-noto-sans-jp);
 }
 

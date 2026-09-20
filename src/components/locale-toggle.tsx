@@ -1,6 +1,5 @@
 "use client";
 
-import { setLocale } from "@/actions/set-locale";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,18 +14,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { SupportedLocale } from "@/i18n/constants";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { GlobeIcon, InfoIcon } from "lucide-react";
 import { useLocale } from "next-intl";
 
 export function LocaleToggle() {
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  async function toggleLocale(newLocale: SupportedLocale) {
+  function toggleLocale(newLocale: SupportedLocale) {
     if (locale === newLocale) {
       return;
     }
 
-    await setLocale(newLocale);
+    router.replace(pathname, { locale: newLocale });
   }
 
   return (
@@ -47,7 +49,7 @@ export function LocaleToggle() {
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuItem
-                onClick={() => toggleLocale("jp")}
+                onClick={() => toggleLocale("ja")}
                 className="flex items-center justify-between gap-2"
               >
                 <div>日本語</div>

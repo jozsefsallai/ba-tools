@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
 
 export const CHANGELOG_SCOPES = {
   website: "Website",
@@ -44,6 +44,17 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "September 20, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Locale switching is now route-based.",
+      },
+    ],
+    fixes: [],
+  },
   {
     date: "September 9, 2026",
     features: [],

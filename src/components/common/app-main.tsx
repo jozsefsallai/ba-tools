@@ -3,8 +3,8 @@
 import { JapaneseTranslationNotice } from "@/components/common/japanese-translation-notice";
 import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
-import { usePathname } from "next/navigation";
 import type { PropsWithChildren } from "react";
+import { usePathname } from "@/i18n/navigation";
 
 export function AppMain({ children }: PropsWithChildren) {
   const pathname = usePathname();
@@ -20,7 +20,7 @@ export function AppMain({ children }: PropsWithChildren) {
     >
       {children}
 
-      {locale === "jp" && !isPlanaAi ? <JapaneseTranslationNotice /> : null}
+      {locale === "ja" && !isPlanaAi ? <JapaneseTranslationNotice /> : null}
     </div>
   );
 }

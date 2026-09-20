@@ -1,13 +1,13 @@
 "use client";
 
 import { AppMain } from "@/components/common/app-main";
+import { AppSidebar } from "@/components/common/app-sidebar";
 import { TheFooter } from "@/components/common/the-footer";
 import { InsetHeader } from "@/components/common/the-header";
-import { AppSidebar } from "@/components/common/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
-import type { PropsWithChildren } from "react";
+import { Suspense, type PropsWithChildren } from "react";
 
 type AppShellProps = PropsWithChildren<{
   commitHash: string;
@@ -25,7 +25,9 @@ export function AppShell({ children, commitHash }: AppShellProps) {
           isPlanaAi && "flex min-h-0 flex-1 flex-col overflow-hidden",
         )}
       >
-        <InsetHeader />
+        <Suspense fallback={<div className="h-12 shrink-0 border-b" />}>
+          <InsetHeader />
+        </Suspense>
 
         <AppMain>{children}</AppMain>
 

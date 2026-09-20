@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { PublicGameBanner } from "@/app/global/banners/types";
+import type { PublicGameBanner } from "@/app/[locale]/global/banners/types";
 import { db } from "@/lib/db";
 import { revalidateTag, unstable_cache } from "next/cache";
 

@@ -1,7 +1,7 @@
 import type {
   SeparatorItem,
   TextItem,
-} from "@/app/timeline-visualizer/_components/timeline-preview";
+} from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { Storage } from "@/lib/storage";
 
 type RawBaseItem = {

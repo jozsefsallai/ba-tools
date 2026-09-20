@@ -1,20 +1,22 @@
-import {
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE_KEY,
-  type SupportedLocale,
-} from "@/i18n/constants";
 import { getMessagesForLocale } from "@/i18n/messages";
+import { routing } from "@/i18n/routing";
+import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import * as rootParams from "next/root-params";
 
-export default getRequestConfig(async () => {
-  const cookieStore = await cookies();
-  const locale = cookieStore.get(LOCALE_COOKIE_KEY)?.value || DEFAULT_LOCALE;
-
-  const messages = await getMessagesForLocale(locale);
+export default getRequestConfig(async ({ locale }) => {
+  if (!locale) {
+    const paramValue = await rootParams.locale();
+    if (hasLocale(routing.locales, paramValue)) {
+      locale = paramValue;
+    } else {
+      notFound();
+    }
+  }
 
   return {
-    locale: locale as SupportedLocale,
-    messages,
+    locale,
+    messages: await getMessagesForLocale(locale),
   };
 });
