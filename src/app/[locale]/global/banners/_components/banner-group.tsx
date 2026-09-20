@@ -1,5 +1,3 @@
-"use client";
-
 import { BannerItem } from "@/app/[locale]/global/banners/_components/banner-item";
 import type {
   BannerStudent,
@@ -14,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 export type BannerGroupProps = {
   dates: [number, number];
@@ -25,8 +23,8 @@ export type BannerGroupProps = {
   >;
 };
 
-export function BannerGroup({ dates, banners }: BannerGroupProps) {
-  const t = useTranslations();
+export async function BannerGroup({ dates, banners }: BannerGroupProps) {
+  const t = await getTranslations();
 
   const formattedStartDate = format(new Date(dates[0]), "MMM d, yyyy");
   const formattedEndDate = format(new Date(dates[1]), "MMM d, yyyy");

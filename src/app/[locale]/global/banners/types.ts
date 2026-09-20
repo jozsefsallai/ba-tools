@@ -26,10 +26,6 @@ export type PublicGameBanner = {
   pickupStudents: PublicBannerStudent[];
 };
 
-export type BannerGroupEntry = {
-  startTime: number;
-  endTime: number;
-  banners: PublicGameBanner[];
-};
+export type BannerGroups = Map<string, Array<PublicGameBanner>>;
 
 export type BannerStudent = PublicBannerStudent;
