@@ -10,7 +10,7 @@
       "items": {
         "title": "Items",
         "addStudent": "Add Student",
-        "addHS": "Add Horizonatal Separator",
+        "addHS": "Add Horizontal Separator",
         "addVS": "Add Vertical Separator",
         "addText": "Add Text"
       },
