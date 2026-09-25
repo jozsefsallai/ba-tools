@@ -45,6 +45,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 25, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description:
+          "Improved starter skill queueing. Initial selections and deselections should work just like in the game now.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "September 20, 2026",
     features: [
       {

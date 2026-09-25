@@ -59,7 +59,11 @@ import {
   persistedSlotsToStudentItems,
   studentItemsToPersistedSlots,
 } from "@/lib/formation-display-utils";
-import { type FormationType, inferFormationType } from "@/lib/formation-type";
+import {
+  type FormationType,
+  inferFormationType,
+  resolveStarterOrders,
+} from "@/lib/formation-type";
 import { cn } from "@/lib/utils";
 import { Authenticated, useMutation } from "convex/react";
 import { useNavigationGuard } from "next-navigation-guard";
@@ -286,15 +290,72 @@ export function FormationEditor() {
   const updateItem = useCallback(
     (itemId: string, newData: Partial<Omit<StudentItem, "student" | "id">>) => {
       setRows((prev) =>
-        prev.map((row) => ({
-          ...row,
-          strikers: row.strikers.map((item) =>
-            item.id === itemId ? { ...item, ...newData } : item,
-          ),
-          specials: row.specials.map((item) =>
-            item.id === itemId ? { ...item, ...newData } : item,
-          ),
-        })),
+        prev.map((row) => {
+          const rowItems = [...row.strikers, ...row.specials];
+          const item = rowItems.find((candidate) => candidate.id === itemId);
+
+          if (!item) {
+            return row;
+          }
+
+          const isEnablingStarter = newData.starter === true && !item.starter;
+          const isDisablingStarter = newData.starter === false && item.starter;
+          let effectiveData = newData;
+          if (isEnablingStarter) {
+            const starterCount = rowItems.filter(
+              (candidate) => candidate.starter,
+            ).length;
+
+            effectiveData = {
+              ...newData,
+              starterOrder: starterCount + 1,
+            };
+          }
+
+          const updatedItems = rowItems.map((candidate) =>
+            candidate.id === itemId
+              ? { ...candidate, ...effectiveData }
+              : candidate,
+          );
+
+          if (isEnablingStarter || isDisablingStarter) {
+            const resolvedOrders = isEnablingStarter
+              ? resolveStarterOrders(rowItems)
+              : resolveStarterOrders(updatedItems);
+            const nextStarterOrder = new Map(resolvedOrders);
+
+            if (isEnablingStarter) {
+              nextStarterOrder.set(
+                itemId,
+                rowItems.filter((candidate) => candidate.starter).length + 1,
+              );
+            }
+
+            for (let i = 0; i < updatedItems.length; i++) {
+              const candidate = updatedItems[i];
+              if (!candidate) {
+                continue;
+              }
+
+              updatedItems[i] = candidate.starter
+                ? {
+                    ...candidate,
+                    starterOrder: nextStarterOrder.get(candidate.id),
+                  }
+                : candidate;
+            }
+          }
+
+          return {
+            ...row,
+            strikers: updatedItems.filter((candidate) =>
+              row.strikers.some((item) => item.id === candidate.id),
+            ),
+            specials: updatedItems.filter((candidate) =>
+              row.specials.some((item) => item.id === candidate.id),
+            ),
+          };
+        }),
       );
     },
     [setRows],
