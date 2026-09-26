@@ -77,6 +77,16 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.pvp,
         description: "Opponent teams will no longer display duplicates.",
       },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          'Empty text objects will be displayed as "(No Text)" to allow editing and removal.',
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "The options popover will now automatically open and the field will be focused automatically when you add a text item.",
+      },
     ],
     fixes: [],
   },

@@ -1,25 +1,24 @@
 "use client";
 
 import { StudentCard } from "@/components/common/student-card";
-import type { Student } from "~prisma";
 import {
-  useCallback,
-  useState,
   type ReactNode,
   type RefObject,
   type SetStateAction,
+  useCallback,
+  useState,
 } from "react";
+import type { Student } from "~prisma";
 
-import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
-import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import { TimelinePreviewTrigger } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview-trigger";
 import { TimelineItemPopover } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-popover";
+import { TimelinePreviewTrigger } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview-trigger";
+import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   DndContext,
-  DragOverlay,
   type DragEndEvent,
+  DragOverlay,
   type DragStartEvent,
   KeyboardSensor,
   PointerSensor,
@@ -27,14 +26,15 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
+  SortableContext,
   arrayMove,
   rectSortingStrategy,
-  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CornerRightDownIcon, MoveHorizontalIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type BaseItem = {
   type: "student" | "separator" | "text";
@@ -78,6 +78,9 @@ export type EditableConfig = {
   /** When set, student popover should focus the trigger field once then clear via callback */
   focusTriggerFieldItemId: string | null;
   onFocusTriggerFieldConsumed: () => void;
+  /** When set, text popover should focus and select the text field once then clear via callback */
+  focusTextFieldItemId: string | null;
+  onFocusTextFieldConsumed: () => void;
 };
 
 export type TimelinePreviewProps = {
@@ -440,6 +443,10 @@ export function TimelinePreview({
       return <>{item.text}</>;
     }
 
+    if (item.type === "text") {
+      return <>(No Text)</>;
+    }
+
     return null;
   }
 
@@ -521,6 +528,8 @@ export function TimelinePreview({
         onTriggerKeyDown,
         focusTriggerFieldItemId,
         onFocusTriggerFieldConsumed,
+        focusTextFieldItemId,
+        onFocusTextFieldConsumed,
       } = editableConfig;
 
       const isEditableVerticalSeparator =
@@ -558,6 +567,8 @@ export function TimelinePreview({
               onTriggerKeyDown={onTriggerKeyDown}
               autoFocusTrigger={focusTriggerFieldItemId === item.id}
               onAutoFocusTriggerConsumed={onFocusTriggerFieldConsumed}
+              autoFocusText={focusTextFieldItemId === item.id}
+              onAutoFocusTextConsumed={onFocusTextFieldConsumed}
             />
           }
         >

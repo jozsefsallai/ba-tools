@@ -17,8 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
-import type { Student } from "~prisma";
 import { ChevronsUpDownIcon, CopyIcon, Trash2Icon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   type SetStateAction,
   useCallback,
@@ -28,7 +28,7 @@ import {
   useState,
 } from "react";
 import { v4 as uuid } from "uuid";
-import { useTranslations } from "next-intl";
+import type { Student } from "~prisma";
 
 function isTimelinePreviewAnchorTarget(target: EventTarget | null) {
   return (
@@ -50,6 +50,9 @@ export type TimelineItemPopoverProps = {
   /** Focus trigger input after open (e.g. new student with auto-focus preference) */
   autoFocusTrigger?: boolean;
   onAutoFocusTriggerConsumed?: () => void;
+  /** Focus and select text input after open (e.g. newly added text) */
+  autoFocusText?: boolean;
+  onAutoFocusTextConsumed?: () => void;
 };
 
 export function TimelineItemPopover({
@@ -61,6 +64,8 @@ export function TimelineItemPopover({
   onTriggerKeyDown,
   autoFocusTrigger = false,
   onAutoFocusTriggerConsumed,
+  autoFocusText = false,
+  onAutoFocusTextConsumed,
 }: TimelineItemPopoverProps) {
   const t = useTranslations();
 
@@ -176,6 +181,50 @@ export function TimelineItemPopover({
       clearTimeout(timeout);
     };
   }, [item.id, item.type, autoFocusTrigger, onAutoFocusTriggerConsumed]);
+
+  useLayoutEffect(() => {
+    if (item.type !== "text" || !autoFocusText) {
+      return;
+    }
+
+    let consumed = false;
+
+    const finish = () => {
+      if (consumed) {
+        return;
+      }
+
+      consumed = true;
+      onAutoFocusTextConsumed?.();
+    };
+
+    const tryFocus = () => {
+      const el = document.getElementById(
+        `pop-text-${item.id}`,
+      ) as HTMLTextAreaElement | null;
+
+      if (!el) {
+        return;
+      }
+
+      el.focus();
+      el.select();
+      finish();
+    };
+
+    tryFocus();
+
+    const frame = requestAnimationFrame(tryFocus);
+    const timeout = window.setTimeout(() => {
+      tryFocus();
+      finish();
+    }, 100);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timeout);
+    };
+  }, [item.id, item.type, autoFocusText, onAutoFocusTextConsumed]);
 
   useEffect(() => {
     if (!separatorOverride) {
@@ -345,6 +394,7 @@ export function TimelineItemPopover({
 
       {item.type === "text" && (
         <Textarea
+          id={`pop-text-${item.id}`}
           value={item.text}
           placeholder={t("tools.timeline.editor.text.placeholder")}
           onChange={handleTextUpdate}

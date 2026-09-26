@@ -34,6 +34,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
+import { useRouter } from "@/i18n/navigation";
 import { clearCache } from "@/lib/cache";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
@@ -69,7 +70,6 @@ import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
-import { useRouter } from "@/i18n/navigation";
 
 export function TimelineEditor() {
   const t = useTranslations();
@@ -222,6 +222,9 @@ export function TimelineEditor() {
   const [focusTriggerFieldItemId, setFocusTriggerFieldItemId] = useState<
     string | null
   >(null);
+  const [focusTextFieldItemId, setFocusTextFieldItemId] = useState<
+    string | null
+  >(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -256,6 +259,10 @@ export function TimelineEditor() {
     setFocusTriggerFieldItemId(null);
   }, []);
 
+  const clearFocusTextFieldRequest = useCallback(() => {
+    setFocusTextFieldItemId(null);
+  }, []);
+
   const addStudent = useCallback(
     (student: Student) => {
       const id = uuid();
@@ -287,14 +294,17 @@ export function TimelineEditor() {
   }, []);
 
   const addText = useCallback(() => {
+    const id = uuid();
     setItems((prev) => [
       ...prev,
       {
         type: "text",
-        id: uuid(),
+        id,
         text: "Enter text",
       },
     ]);
+    setSelectedItemId(id);
+    setFocusTextFieldItemId(id);
   }, []);
 
   const removeItem = useCallback((itemId: string) => {
@@ -338,6 +348,8 @@ export function TimelineEditor() {
       onTriggerKeyDown: handleTriggerKeyDown,
       focusTriggerFieldItemId,
       onFocusTriggerFieldConsumed: clearFocusTriggerFieldRequest,
+      focusTextFieldItemId,
+      onFocusTextFieldConsumed: clearFocusTextFieldRequest,
     }),
     [
       selectedItemId,
@@ -348,6 +360,8 @@ export function TimelineEditor() {
       handleTriggerKeyDown,
       focusTriggerFieldItemId,
       clearFocusTriggerFieldRequest,
+      focusTextFieldItemId,
+      clearFocusTextFieldRequest,
     ],
   );
 
