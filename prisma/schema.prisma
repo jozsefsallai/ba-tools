@@ -77,6 +77,7 @@ enum Club {
   PublishingDepartment
   FoxSquad
   DivingClub
+  Class183
   EmptyClub
 }
 

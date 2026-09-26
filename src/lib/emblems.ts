@@ -234,6 +234,7 @@ export const GROUP_EMBLEM_CLUBS: EmblemConfigItem<Club>[] = [
   { id: "PublishingDepartment", name: "Publishing Department" },
   { id: "FoxSquad", name: "FOX Squad" },
   { id: "DivingClub", name: "Diving Club" },
+  { id: "Class183", name: "Spec Ops No. 183" },
 ];
 
 export const GROUP_EMBLEM_VALID_COMBINATIONS: {
@@ -292,6 +293,7 @@ export const GROUP_EMBLEM_VALID_COMBINATIONS: {
   { club: "PublishingDepartment", school: "RedWinter" },
   { club: "FoxSquad", school: "SRT" },
   { club: "DivingClub", school: "Odyssey" },
+  { club: "Class183", school: "RedWinter" },
 ];
 
 export const DEFAULT_BASIC_EMBLEM_TEXTS = [
