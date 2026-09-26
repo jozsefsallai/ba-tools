@@ -47,6 +47,11 @@ export const update = authenticatedMutation({
         autoPopulateSingleTargetGifts: v.optional(v.boolean()),
       }),
     ),
+    pvp: v.optional(
+      v.object({
+        hideEmptyAgendaDays: v.optional(v.boolean()),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -69,6 +74,10 @@ export const update = authenticatedMutation({
           ...(existing.bond ?? defaultUserPreferences.bond),
           ...args.bond,
         },
+        pvp: {
+          ...(existing.pvp ?? defaultUserPreferences.pvp),
+          ...args.pvp,
+        },
       });
 
       return await ctx.db.get(existing._id);
@@ -87,6 +96,10 @@ export const update = authenticatedMutation({
       bond: {
         ...defaultUserPreferences.bond,
         ...args.bond,
+      },
+      pvp: {
+        ...defaultUserPreferences.pvp,
+        ...args.pvp,
       },
     });
   },

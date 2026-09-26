@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
+import type { PVPFormationPresetType } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
@@ -19,7 +21,6 @@ import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export function PVPFormationPresetsPage({
   seasonId,
@@ -30,7 +31,7 @@ export function PVPFormationPresetsPage({
   const presets = useQuery(api.pvp.listFormationPresets, { seasonId });
   const remove = useMutation(api.pvp.deleteFormationPreset);
 
-  const [filter, setFilter] = useState<"attack" | "defense" | "both">("both");
+  const [filter, setFilter] = useState<PVPFormationPresetType>("both");
 
   const visiblePresets = useMemo(
     () =>

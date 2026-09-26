@@ -4,6 +4,8 @@ import { parsePvpCombatReport } from "@/actions/pvp-combat-report";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import { PVPPresetPicker } from "@/app/[locale]/pvp/_components/pvp-preset-picker";
 import type {
+  PVPEnemyTeam,
+  PVPFormationPresetType,
   PVPFormationStudentItem,
   PVPMatchResult,
   PVPMatchType,
@@ -36,8 +38,15 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useStudents } from "@/hooks/use-students";
+import { Link, useRouter } from "@/i18n/navigation";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { useMutation, useQuery } from "convex/react";
 import {
@@ -52,7 +61,6 @@ import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
-import { Link, useRouter } from "@/i18n/navigation";
 
 export type PVPMatchEditor = {
   seasonId: Id<"pvpSeason">;
@@ -109,7 +117,12 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const [savePresetKind, setSavePresetKind] = useState<"own" | "enemy">("own");
   const [savePresetName, setSavePresetName] = useState("");
   const [savePresetUsedByMe, setSavePresetUsedByMe] = useState(true);
+  const [savePresetMatchType, setSavePresetMatchType] =
+    useState<PVPFormationPresetType>("attack");
   const [savePresetDialogOpen, setSavePresetDialogOpen] = useState(false);
+  const [saveEnemyPresetDialogOpen, setSaveEnemyPresetDialogOpen] =
+    useState(false);
+  const [saveEnemyPresetName, setSaveEnemyPresetName] = useState("");
   const [ownFormationSearch, setOwnFormationSearch] = useState("");
   const [enemyFormationSearch, setEnemyFormationSearch] = useState("");
   const [enemyPresetSearch, setEnemyPresetSearch] = useState("");
@@ -128,11 +141,17 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     seasonId,
     search: useDebounce(enemyPresetSearch, 250),
   });
+  const enemyTeams = useQuery(
+    api.pvp.getEnemyPresetTeams,
+    enemyPresetId ? { presetId: enemyPresetId } : "skip",
+  );
   const defaults = useQuery(
     api.pvp.getSeasonDefaults,
     current ? "skip" : { seasonId },
   );
   const createFormationPreset = useMutation(api.pvp.createFormationPreset);
+  const createEnemyPreset = useMutation(api.pvp.createEnemyPreset);
+  const updateEnemyPreset = useMutation(api.pvp.updateEnemyPreset);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -295,6 +314,13 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     setSavePresetKind(kind);
     setSavePresetName("");
     setSavePresetUsedByMe(kind === "own");
+    setSavePresetMatchType(
+      kind === "own"
+        ? matchType
+        : matchType === "attack"
+          ? "defense"
+          : "attack",
+    );
     setSavePresetDialogOpen(true);
   }
 
@@ -309,7 +335,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     await createFormationPreset({
       seasonId,
       name: savePresetName,
-      matchType,
+      matchType: savePresetMatchType,
       usedByMe: savePresetUsedByMe,
       team: team.map((item) => ({
         studentId: item.student?.id,
@@ -322,6 +348,58 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     setSavePresetDialogOpen(false);
     toast.success(t("tools.pvp.presets.formationSaved"));
   }
+
+  async function saveOpponentPreset() {
+    if (!saveEnemyPresetName.trim()) {
+      return;
+    }
+
+    const attachedPreset = enemyPresets?.find(
+      (preset) => preset._id === enemyPresetId,
+    );
+
+    const presetName = saveEnemyPresetName.trim();
+
+    const id = attachedPreset
+      ? await updateEnemyPreset({
+          presetId: attachedPreset._id,
+          name: presetName,
+          opponentName: opponentName.trim() || presetName,
+          opponentStudentRepId: opponentStudentRep?.id,
+        }).then(() => attachedPreset._id)
+      : await createEnemyPreset({
+          seasonId,
+          name: presetName,
+          opponentName: opponentName.trim() || presetName,
+          opponentStudentRepId: opponentStudentRep?.id,
+        });
+
+    setEnemyPresetId(id);
+    setSaveEnemyPresetDialogOpen(false);
+    toast.success(t("tools.pvp.presets.enemySaved"));
+  }
+
+  const attachedOpponentPreset = enemyPresets?.find(
+    (preset) => preset._id === enemyPresetId,
+  );
+
+  const normalizedOpponentName = opponentName.trim().toLocaleLowerCase();
+
+  const matchingOpponentPreset = enemyPresets?.some(
+    (preset) =>
+      (preset.opponentName ?? preset.name).trim().toLocaleLowerCase() ===
+        normalizedOpponentName &&
+      preset.opponentStudentRepId === opponentStudentRep?.id,
+  );
+
+  const canSaveOpponent =
+    normalizedOpponentName.length > 0 &&
+    (!attachedOpponentPreset ||
+      (attachedOpponentPreset.opponentName ?? attachedOpponentPreset.name)
+        .trim()
+        .toLocaleLowerCase() !== normalizedOpponentName ||
+      attachedOpponentPreset.opponentStudentRepId !== opponentStudentRep?.id) &&
+    !matchingOpponentPreset;
 
   async function handleCombatReport(file: File) {
     try {
@@ -598,7 +676,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         open={savePresetDialogOpen}
         onOpenChange={setSavePresetDialogOpen}
       >
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {t("tools.pvp.presets.saveFormationTitle")}
@@ -609,32 +687,67 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="save-pvp-preset-name">
-              {t("tools.pvp.presets.formationName")}
-            </Label>
-
-            <Input
-              id="save-pvp-preset-name"
-              value={savePresetName}
-              onChange={(event) => setSavePresetName(event.target.value)}
-              autoFocus
-            />
-
-            <div className="flex items-center gap-2">
-              <Switch
-                id="save-pvp-preset-used-by-me"
-                checked={savePresetUsedByMe}
-                onCheckedChange={setSavePresetUsedByMe}
-              />
-
-              <Label htmlFor="save-pvp-preset-used-by-me">
-                {t("tools.pvp.presets.usedByMe")}
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="save-pvp-preset-name">
+                {t("tools.pvp.presets.formationName")}
               </Label>
+
+              <Input
+                id="save-pvp-preset-name"
+                value={savePresetName}
+                onChange={(event) => setSavePresetName(event.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="save-pvp-preset-type">
+                  {t("tools.pvp.presets.formationType")}
+                </Label>
+
+                <Select
+                  value={savePresetMatchType}
+                  onValueChange={(value) =>
+                    setSavePresetMatchType(value as PVPFormationPresetType)
+                  }
+                >
+                  <SelectTrigger id="save-pvp-preset-type">
+                    <SelectValue />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="attack">
+                      {t("tools.pvp.presets.attack")}
+                    </SelectItem>
+
+                    <SelectItem value="defense">
+                      {t("tools.pvp.presets.defense")}
+                    </SelectItem>
+
+                    <SelectItem value="both">
+                      {t("tools.pvp.presets.both")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="save-pvp-preset-used-by-me"
+                  checked={savePresetUsedByMe}
+                  onCheckedChange={setSavePresetUsedByMe}
+                />
+
+                <Label htmlFor="save-pvp-preset-used-by-me">
+                  {t("tools.pvp.presets.usedByMe")}
+                </Label>
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-1">
             <Button
               type="button"
               variant="outline"
@@ -647,6 +760,49 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               type="button"
               disabled={!savePresetName.trim()}
               onClick={() => void saveFormationPreset()}
+            >
+              {t("tools.pvp.presets.savePreset")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={saveEnemyPresetDialogOpen}
+        onOpenChange={setSaveEnemyPresetDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("tools.pvp.presets.saveEnemyTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("tools.pvp.presets.saveEnemyDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="save-enemy-preset-name">
+              {t("tools.pvp.presets.enemyName")}
+            </Label>
+
+            <Input
+              id="save-enemy-preset-name"
+              value={saveEnemyPresetName}
+              onChange={(event) => setSaveEnemyPresetName(event.target.value)}
+              autoFocus
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSaveEnemyPresetDialogOpen(false)}
+            >
+              {t("tools.pvp.presets.cancel")}
+            </Button>
+
+            <Button
+              disabled={!saveEnemyPresetName.trim()}
+              onClick={() => void saveOpponentPreset()}
             >
               {t("tools.pvp.presets.savePreset")}
             </Button>
@@ -857,7 +1013,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                   preset.latestTeam
                 ) {
                   setOpponentTeam(
-                    preset.latestTeam.map((item) => ({
+                    (preset.latestTeam as PVPEnemyTeam["team"]).map((item) => ({
                       student: item.studentId
                         ? studentMap[item.studentId]
                         : undefined,
@@ -872,8 +1028,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           </CardHeader>
 
           <CardContent className="flex flex-col gap-6">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col gap-1">
+            <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto]">
+              <div className="flex min-w-0 flex-col gap-1">
                 <Label htmlFor="opponent-name" className="text-xs">
                   {t("tools.pvp.match.opponentName")}
                 </Label>
@@ -885,7 +1041,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex min-w-0 flex-col gap-1">
                 <Label htmlFor="opponent-rank" className="text-xs">
                   {t("tools.pvp.match.opponentRank")}
                 </Label>
@@ -914,32 +1070,36 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex min-w-0 flex-col gap-1">
                 <Label htmlFor="opponent-student-rep" className="text-xs">
                   {t("tools.pvp.match.opponentStudentRep")}
                 </Label>
 
-                <div className="flex gap-1">
+                <div className="flex min-w-0 gap-1">
                   <StudentPicker onStudentSelected={setOpponentStudentRep}>
                     <Button
                       variant="outline"
-                      className="flex-1 justify-between"
+                      className="min-w-0 flex-1 justify-between"
                       tabIndex={
                         13 +
                         ownTeam.length * (ownAdvanced ? 11 : 1) +
                         opponentTeam.length * (opponentAdvanced ? 11 : 1)
                       }
                     >
-                      {opponentStudentRep
-                        ? opponentStudentRep.name
-                        : t("common.selectStudent")}
-                      <ChevronDownIcon />
+                      <span className="truncate">
+                        {opponentStudentRep
+                          ? opponentStudentRep.name
+                          : t("common.selectStudent")}
+                      </span>
+                      <ChevronDownIcon className="shrink-0" />
                     </Button>
                   </StudentPicker>
 
                   {opponentStudentRep && (
                     <Button
                       variant="outline"
+                      size="icon"
+                      className="shrink-0"
                       onClick={() => setOpponentStudentRep(undefined)}
                     >
                       <XIcon />
@@ -947,8 +1107,87 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                   )}
                 </div>
               </div>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        disabled={!canSaveOpponent}
+                        aria-label={t("tools.pvp.presets.saveEnemy")}
+                        onClick={() => {
+                          setSaveEnemyPresetName(
+                            attachedOpponentPreset?.name || opponentName,
+                          );
+                          setSaveEnemyPresetDialogOpen(true);
+                        }}
+                      >
+                        <SaveIcon />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    {t("tools.pvp.presets.saveEnemyTooltip")}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <Separator />
+
+            {enemyPresetId && enemyTeams && enemyTeams.teams.length > 0 && (
+              <Select
+                onValueChange={(value) => {
+                  const selected = (enemyTeams.teams as PVPEnemyTeam[]).find(
+                    (item) => item.teamKey === value,
+                  );
+
+                  if (selected) {
+                    setOpponentTeam(
+                      selected.team.map((item) => ({
+                        student: item.studentId
+                          ? studentMap[item.studentId]
+                          : undefined,
+                        level: item.level,
+                        starLevel: item.starLevel,
+                        ueLevel: item.ueLevel,
+                      })),
+                    );
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={t("tools.pvp.presets.selectKnownTeam")}
+                  />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {(enemyTeams.teams as PVPEnemyTeam[]).map((item) => (
+                    <SelectItem key={item.teamKey} value={item.teamKey}>
+                      {item.roles === "both"
+                        ? `${t("tools.pvp.presets.attack")} / ${t("tools.pvp.presets.defense")}`
+                        : item.roles === "attack"
+                          ? t("tools.pvp.presets.attack")
+                          : t("tools.pvp.presets.defense")}{" "}
+                      —{" "}
+                      {item.team
+                        .filter((slot) => slot.studentId)
+                        .map((slot) =>
+                          slot.studentId
+                            ? studentMap[slot.studentId]?.name
+                            : "",
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
 
             <PVPPresetPicker
               presets={enemyFormationPresets?.filter(

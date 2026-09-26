@@ -3,13 +3,13 @@
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export function PVPEnemyPresetsPage({
   seasonId,

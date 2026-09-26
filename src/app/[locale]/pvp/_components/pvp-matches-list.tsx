@@ -5,20 +5,27 @@ import {
   type PVPMatchGroupItem,
 } from "@/app/[locale]/pvp/_components/pvp-match-group";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import { addDays, format, startOfDay, subDays } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import type { Doc, Id } from "~convex/dataModel";
-import { useRouter } from "@/i18n/navigation";
 
 export type PVPMatchesListProps = {
   seasonId: Id<"pvpSeason">;
   matches: Array<Doc<"pvpMatchRecord">>;
+  hideEmptyDays?: boolean;
 };
 
-export function PVPMatchesList({ seasonId, matches }: PVPMatchesListProps) {
+export function PVPMatchesList({
+  seasonId,
+  matches,
+  hideEmptyDays = false,
+}: PVPMatchesListProps) {
   const router = useRouter();
+  const t = useTranslations();
   const searchParams = useSearchParams();
 
   const selectedEnd = searchParams.get("end")
@@ -83,13 +90,22 @@ export function PVPMatchesList({ seasonId, matches }: PVPMatchesListProps) {
           Next 7 days <ChevronRightIcon />
         </Button>
       </div>
-      {groupedMatches.map((group) => (
-        <PVPMatchGroup
-          key={group.dayTimestamp}
-          seasonId={seasonId}
-          group={group}
-        />
-      ))}
+      {groupedMatches
+        .filter((group) => !hideEmptyDays || group.matches.length > 0)
+        .map((group) => (
+          <PVPMatchGroup
+            key={group.dayTimestamp}
+            seasonId={seasonId}
+            group={group}
+          />
+        ))}
+
+      {hideEmptyDays &&
+        groupedMatches.every((group) => group.matches.length === 0) && (
+          <p className="rounded border border-dashed p-4 text-sm text-muted-foreground">
+            {t("tools.pvp.season.noMatchesInRange")}
+          </p>
+        )}
     </div>
   );
 }

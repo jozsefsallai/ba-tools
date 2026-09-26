@@ -45,6 +45,42 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 26, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added ability to add teams to opponent presets without creating a PVP match record.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added Battle History page for opponents.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added ability to save an opponent preset directly from the match editor.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "When saving a formation preset through the match editor, you can now specify the type of the formation. The default value of this option will be automatically inferred from the type of the match and whether the team belongs to you or the opponent.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added a toggle to hide days without matches from the agenda view. This can be toggled in the PVP season view as well as your user preferences.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Opponent teams will no longer display duplicates.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "September 25, 2026",
     features: [],
     changes: [

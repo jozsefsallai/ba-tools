@@ -40,6 +40,10 @@ export function UserPreferencesProvider({ children }: PropsWithChildren) {
           ...defaultUserPreferences.bond,
           ...data.bond,
         },
+        pvp: {
+          ...defaultUserPreferences.pvp,
+          ...data.pvp,
+        },
       };
     }
 

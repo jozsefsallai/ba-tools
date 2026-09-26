@@ -225,6 +225,11 @@ export default defineSchema({
         autoPopulateSingleTargetGifts: v.boolean(),
       }),
     ),
+    pvp: v.optional(
+      v.object({
+        hideEmptyAgendaDays: v.boolean(),
+      }),
+    ),
   }).index("by_userId", ["userId"]),
 
   formation: defineTable({
@@ -338,9 +343,11 @@ export default defineSchema({
       v.union(v.literal("attack"), v.literal("defense"), v.literal("both")),
     ),
     team: v.array(pvpFormationStudentItem),
+    teamKey: v.optional(v.string()),
     usedByMe: v.boolean(),
   })
     .index("by_seasonId", ["seasonId"])
+    .index("by_seasonId_teamKey", ["seasonId", "teamKey"])
     .index("by_userId_seasonId", ["userId", "seasonId"]),
 
   pvpEnemyPreset: defineTable({
@@ -354,6 +361,23 @@ export default defineSchema({
     .index("by_userId_seasonId", ["userId", "seasonId"])
     .index("by_seasonId_opponentName", ["seasonId", "opponentName"]),
 
+  pvpEnemyTeam: defineTable({
+    userId: v.id("users"),
+    seasonId: v.id("pvpSeason"),
+    enemyPresetId: v.id("pvpEnemyPreset"),
+    teamKey: v.optional(v.string()),
+    team: v.array(pvpFormationStudentItem),
+    matchType: v.union(
+      v.literal("attack"),
+      v.literal("defense"),
+      v.literal("both"),
+    ),
+    updatedAt: v.number(),
+  })
+    .index("by_enemyPresetId", ["enemyPresetId"])
+    .index("by_enemyPresetId_teamKey", ["enemyPresetId", "teamKey"])
+    .index("by_seasonId", ["seasonId"]),
+
   pvpMatchRecord: defineTable({
     userId: v.id("users"),
     seasonId: v.id("pvpSeason"),
@@ -365,13 +389,17 @@ export default defineSchema({
     opponentRank: v.optional(v.number()),
     matchType: v.union(v.literal("attack"), v.literal("defense")),
     ownTeam: v.array(pvpFormationStudentItem),
+    ownTeamKey: v.optional(v.string()),
     opponentTeam: v.array(pvpFormationStudentItem),
+    opponentTeamKey: v.optional(v.string()),
     result: v.union(v.literal("win"), v.literal("loss")),
     videoUrl: v.optional(v.string()),
   })
     .index("by_userId", ["userId"])
     .index("by_seasonId", ["seasonId"])
     .index("by_seasonId_date", ["seasonId", "date"])
+    .index("by_seasonId_ownTeamKey", ["seasonId", "ownTeamKey"])
+    .index("by_seasonId_opponentTeamKey", ["seasonId", "opponentTeamKey"])
     .index("by_enemyPresetId_date", ["enemyPresetId", "date"]),
 
   recruitmentAccount: defineTable({

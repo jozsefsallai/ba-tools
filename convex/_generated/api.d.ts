@@ -13,6 +13,8 @@ import type * as formation from "../formation.js";
 import type * as gifts from "../gifts.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_teamKey from "../lib/teamKey.js";
+import type * as migrations from "../migrations.js";
 import type * as planaChat from "../planaChat.js";
 import type * as pvp from "../pvp.js";
 import type * as recruitment from "../recruitment.js";
@@ -34,6 +36,8 @@ declare const fullApi: ApiFromModules<{
   gifts: typeof gifts;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  "lib/teamKey": typeof lib_teamKey;
+  migrations: typeof migrations;
   planaChat: typeof planaChat;
   pvp: typeof pvp;
   recruitment: typeof recruitment;
@@ -70,4 +74,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  migrations: import("@convex-dev/migrations/_generated/component.js").ComponentApi<"migrations">;
+};

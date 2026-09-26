@@ -3,14 +3,18 @@
 import { PVPMatchesList } from "@/app/[locale]/pvp/_components/pvp-matches-list";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useUserPreferences } from "@/hooks/use-preferences";
+import { Link } from "@/i18n/navigation";
 import { useQueryWithStatus } from "@/lib/convex";
-import { addDays, startOfDay, subDays } from "date-fns";
+import { addDays, format, startOfDay, subDays } from "date-fns";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export type PVPSeasonViewProps = {
   seasonId: Id<"pvpSeason">;
@@ -18,6 +22,7 @@ export type PVPSeasonViewProps = {
 
 export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
   const t = useTranslations();
+  const { preferences, savePreferences } = useUserPreferences();
   const searchParams = useSearchParams();
 
   const end = searchParams.get("end")
@@ -29,6 +34,18 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
     startDate: subDays(end, 6).getTime(),
     endDate: addDays(end, 1).getTime(),
   });
+
+  async function setHideEmptyDays(checked: boolean) {
+    try {
+      await savePreferences({
+        ...preferences,
+        pvp: { ...preferences.pvp, hideEmptyAgendaDays: checked },
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error(t("common.userPreferences.toasts.saveFailed"));
+    }
+  }
 
   if (query.status === "pending") {
     return <MessageBox>{t("common.loading")}</MessageBox>;
@@ -73,9 +90,33 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
             </Button>
           </div>
         </div>
+        <div className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2">
+          <span className="text-sm text-muted-foreground">
+            {t("tools.pvp.season.displayingDateRange", {
+              start: format(subDays(end, 6), "MMM d, yyyy"),
+              end: format(end, "MMM d, yyyy"),
+            })}
+          </span>
+
+          <div className="flex items-center gap-2">
+            <Label htmlFor="pvp-hide-empty-days">
+              {t("tools.pvp.season.hideEmptyDays")}
+            </Label>
+
+            <Switch
+              id="pvp-hide-empty-days"
+              checked={preferences.pvp.hideEmptyAgendaDays}
+              onCheckedChange={(checked) => void setHideEmptyDays(checked)}
+            />
+          </div>
+        </div>
       </div>
 
-      <PVPMatchesList seasonId={seasonId} matches={query.data.matches} />
+      <PVPMatchesList
+        seasonId={seasonId}
+        matches={query.data.matches}
+        hideEmptyDays={preferences.pvp.hideEmptyAgendaDays}
+      />
     </div>
   );
 }

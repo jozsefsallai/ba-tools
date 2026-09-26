@@ -27,6 +27,9 @@ export type GameServer = (typeof GAME_SERVERS)[number];
 
 export type BorrowSlotGameMode = (typeof BORROW_SLOT_GAMEMODES)[number];
 
+export type PVPMatchType = "attack" | "defense";
+export type PVPFormationPresetType = PVPMatchType | "both";
+
 export const GAME_SERVER_NAMES: Record<GameServer, string> = {
   JP: "Japan",
   KR: "Korea",

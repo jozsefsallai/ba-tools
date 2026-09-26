@@ -21,6 +21,9 @@ export type UserPreferences = {
   bond: {
     autoPopulateSingleTargetGifts: boolean;
   };
+  pvp: {
+    hideEmptyAgendaDays: boolean;
+  };
 };
 
 export const defaultUserPreferences: UserPreferences = {
@@ -45,5 +48,8 @@ export const defaultUserPreferences: UserPreferences = {
   },
   bond: {
     autoPopulateSingleTargetGifts: false,
+  },
+  pvp: {
+    hideEmptyAgendaDays: false,
   },
 };

@@ -1,5 +1,10 @@
-import type { StarLevel, UELevel } from "@/lib/types";
+import type { PVPFormationPresetType, StarLevel, UELevel } from "@/lib/types";
 import type { Student } from "~prisma";
+
+export type {
+  PVPFormationPresetType,
+  PVPMatchType,
+} from "@/lib/types";
 
 export type PVPFormationStudentItem = {
   student?: Student;
@@ -9,7 +14,19 @@ export type PVPFormationStudentItem = {
   damage?: number;
 };
 
-export type PVPMatchType = "attack" | "defense";
-export type PVPFormationPresetType = PVPMatchType | "both";
+export type PVPFormationStudentRecord = {
+  studentId?: string;
+  level?: number;
+  starLevel?: StarLevel;
+  ueLevel?: UELevel;
+};
+
+export type PVPEnemyTeam = {
+  teamKey: string;
+  team: PVPFormationStudentRecord[];
+  roles: PVPFormationPresetType;
+  updatedAt?: number;
+  manualTeamId?: string;
+};
 
 export type PVPMatchResult = "win" | "loss";

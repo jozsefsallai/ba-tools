@@ -1,7 +1,14 @@
-import { GAME_SERVERS, type StarLevel, type UELevel } from "@/lib/types";
+import {
+  GAME_SERVERS,
+  type PVPFormationPresetType,
+  type PVPMatchType,
+  type StarLevel,
+  type UELevel,
+} from "@/lib/types";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { getTeamKey } from "./lib/teamKey";
 import { pvpFormationStudentItem } from "./schema";
 
 const emptyTeam = () => [{}, {}, {}, {}, {}, {}];
@@ -16,6 +23,112 @@ function withoutDamage(
   }>,
 ) {
   return team.map(({ damage: _damage, ...item }) => item);
+}
+
+const enemyTeamRole = (matchType: PVPMatchType): PVPMatchType => {
+  return matchType === "attack" ? "defense" : "attack";
+};
+
+async function findManualEnemyTeam(ctx: any, presetId: any, teamKey: string) {
+  const teams = await ctx.db
+    .query("pvpEnemyTeam")
+    .withIndex("by_enemyPresetId", (q: any) => q.eq("enemyPresetId", presetId))
+    .collect();
+
+  return teams.find(
+    (team: any) =>
+      team.teamKey === teamKey || getTeamKey(team.team) === teamKey,
+  );
+}
+
+function mergeEnemyRoles(
+  current: Set<"attack" | "defense">,
+  role: PVPFormationPresetType,
+) {
+  if (role === "both" || role === "attack") {
+    current.add("attack");
+  }
+
+  if (role === "both" || role === "defense") {
+    current.add("defense");
+  }
+}
+
+function roleFromSet(roles: Set<"attack" | "defense">): PVPFormationPresetType {
+  return roles.size === 2 ? "both" : roles.has("attack") ? "attack" : "defense";
+}
+
+async function getUniqueEnemyTeamsForPreset(ctx: any, preset: any) {
+  const matches = await ctx.db
+    .query("pvpMatchRecord")
+    .withIndex("by_enemyPresetId_date", (q: any) =>
+      q.eq("enemyPresetId", preset._id),
+    )
+    .order("desc")
+    .collect();
+
+  const manualTeams = await ctx.db
+    .query("pvpEnemyTeam")
+    .withIndex("by_enemyPresetId", (q: any) =>
+      q.eq("enemyPresetId", preset._id),
+    )
+    .collect();
+
+  const byKey = new Map<string, any>();
+
+  const add = (
+    team: any[],
+    role: PVPFormationPresetType,
+    updatedAt: number,
+    manualTeamId?: any,
+  ) => {
+    if (!team.some((item) => item.studentId)) {
+      return;
+    }
+
+    const normalized = withoutDamage(team);
+    const key = getTeamKey(normalized);
+    const existing = byKey.get(key);
+
+    if (!existing) {
+      const roles = new Set<"attack" | "defense">();
+
+      mergeEnemyRoles(roles, role);
+
+      byKey.set(key, {
+        team: normalized,
+        teamKey: key,
+        roles,
+        updatedAt,
+        manualTeamId,
+      });
+
+      return;
+    }
+
+    mergeEnemyRoles(existing.roles, role);
+    existing.manualTeamId = manualTeamId ?? existing.manualTeamId;
+
+    if (updatedAt >= existing.updatedAt) {
+      existing.team = normalized;
+      existing.updatedAt = updatedAt;
+    }
+  };
+
+  for (const match of matches) {
+    add(match.opponentTeam, enemyTeamRole(match.matchType), match.date);
+  }
+
+  for (const manual of manualTeams) {
+    add(manual.team, manual.matchType, manual.updatedAt, manual._id);
+  }
+
+  return [...byKey.values()]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .map((item) => ({
+      ...item,
+      roles: roleFromSet(item.roles),
+    }));
 }
 
 async function getSeasonForUser(ctx: any, seasonId: any) {
@@ -179,17 +292,21 @@ export const listEnemyPresets = authenticatedQuery({
     return await Promise.all(
       filtered.map(async (preset) => ({
         ...preset,
-        latestTeam: (
-          await ctx.db
-            .query("pvpMatchRecord")
-            .withIndex("by_enemyPresetId_date", (q) =>
-              q.eq("enemyPresetId", preset._id),
-            )
-            .order("desc")
-            .first()
-        )?.opponentTeam,
+        latestTeam: (await getUniqueEnemyTeamsForPreset(ctx, preset))[0]?.team,
       })),
     );
+  },
+});
+
+export const getEnemyPresetTeams = authenticatedQuery({
+  args: { presetId: v.id("pvpEnemyPreset") },
+  handler: async (ctx, { presetId }) => {
+    const preset = await ctx.db.get(presetId);
+    if (!preset || preset.userId !== ctx.user._id) {
+      throw new Error("Preset not found");
+    }
+
+    return { preset, teams: await getUniqueEnemyTeamsForPreset(ctx, preset) };
   },
 });
 
@@ -297,7 +414,9 @@ export const recordMatch = authenticatedMutation({
       opponentRank,
       matchType,
       ownTeam,
+      ownTeamKey: getTeamKey(ownTeam),
       opponentTeam,
+      opponentTeamKey: getTeamKey(opponentTeam),
       result,
       videoUrl,
     });
@@ -352,7 +471,11 @@ export const updateMatch = authenticatedMutation({
       opponentRank: opponentRank ?? match.opponentRank,
       matchType: matchType ?? match.matchType,
       ownTeam: ownTeam ?? match.ownTeam,
+      ownTeamKey: ownTeam ? getTeamKey(ownTeam) : match.ownTeamKey,
       opponentTeam: opponentTeam ?? match.opponentTeam,
+      opponentTeamKey: opponentTeam
+        ? getTeamKey(opponentTeam)
+        : match.opponentTeamKey,
       result: result ?? match.result,
       videoUrl: videoUrl ?? match.videoUrl,
     });
@@ -409,6 +532,15 @@ export const deleteSeason = authenticatedMutation({
       await ctx.db.delete(preset._id);
     }
 
+    const enemyTeams = await ctx.db
+      .query("pvpEnemyTeam")
+      .withIndex("by_seasonId", (q) => q.eq("seasonId", seasonId))
+      .collect();
+
+    for (const team of enemyTeams) {
+      await ctx.db.delete(team._id);
+    }
+
     await ctx.db.delete(seasonId);
   },
 });
@@ -434,6 +566,7 @@ export const createFormationPreset = authenticatedMutation({
       name: name.trim(),
       matchType,
       team: withoutDamage(team),
+      teamKey: getTeamKey(team),
       usedByMe,
     });
   },
@@ -460,6 +593,7 @@ export const updateFormationPreset = authenticatedMutation({
       name: name?.trim() ?? preset.name,
       matchType: matchType ?? preset.matchType,
       team: team ? withoutDamage(team) : preset.team,
+      teamKey: team ? getTeamKey(team) : preset.teamKey,
       usedByMe: usedByMe ?? preset.usedByMe,
     });
   },
@@ -539,6 +673,144 @@ export const deleteEnemyPreset = authenticatedMutation({
       await ctx.db.patch(match._id, { enemyPresetId: undefined });
     }
 
+    const teams = await ctx.db
+      .query("pvpEnemyTeam")
+      .withIndex("by_enemyPresetId", (q) => q.eq("enemyPresetId", presetId))
+      .collect();
+
+    for (const team of teams) {
+      await ctx.db.delete(team._id);
+    }
+
     await ctx.db.delete(presetId);
+  },
+});
+
+export const createEnemyTeam = authenticatedMutation({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    enemyPresetId: v.id("pvpEnemyPreset"),
+    matchType: v.union(
+      v.literal("attack"),
+      v.literal("defense"),
+      v.literal("both"),
+    ),
+    team: v.array(pvpFormationStudentItem),
+  },
+  handler: async (ctx, args) => {
+    await getSeasonForUser(ctx, args.seasonId);
+    const preset = await ctx.db.get(args.enemyPresetId);
+
+    if (
+      !preset ||
+      preset.userId !== ctx.user._id ||
+      preset.seasonId !== args.seasonId
+    ) {
+      throw new Error("Preset not found");
+    }
+
+    if (!args.team.some((item) => item.studentId)) {
+      throw new Error("Team must contain at least one student");
+    }
+
+    const team = withoutDamage(args.team);
+    const teamKey = getTeamKey(team);
+    const existing = await findManualEnemyTeam(
+      ctx,
+      args.enemyPresetId,
+      teamKey,
+    );
+    const updatedAt = Date.now();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        team,
+        matchType:
+          existing.matchType === "both" || args.matchType === "both"
+            ? "both"
+            : existing.matchType === args.matchType
+              ? existing.matchType
+              : "both",
+        updatedAt,
+      });
+
+      return existing._id;
+    }
+
+    return await ctx.db.insert("pvpEnemyTeam", {
+      userId: ctx.user._id,
+      seasonId: args.seasonId,
+      enemyPresetId: args.enemyPresetId,
+      teamKey,
+      team,
+      matchType: args.matchType,
+      updatedAt,
+    });
+  },
+});
+
+export const updateEnemyTeam = authenticatedMutation({
+  args: {
+    teamId: v.id("pvpEnemyTeam"),
+    matchType: v.optional(
+      v.union(v.literal("attack"), v.literal("defense"), v.literal("both")),
+    ),
+    team: v.optional(v.array(pvpFormationStudentItem)),
+  },
+  handler: async (ctx, args) => {
+    const current = await ctx.db.get(args.teamId);
+
+    if (!current || current.userId !== ctx.user._id) {
+      throw new Error("Team not found");
+    }
+
+    if (args.team && !args.team.some((item) => item.studentId)) {
+      throw new Error("Team must contain at least one student");
+    }
+
+    const team = args.team ? withoutDamage(args.team) : current.team;
+    const teamKey = getTeamKey(team);
+    const collision =
+      teamKey === current.teamKey || getTeamKey(current.team) === teamKey
+        ? null
+        : await findManualEnemyTeam(ctx, current.enemyPresetId, teamKey);
+
+    if (collision) {
+      await ctx.db.patch(collision._id, {
+        matchType:
+          collision.matchType === "both" ||
+          (args.matchType ?? current.matchType) === "both"
+            ? "both"
+            : collision.matchType === (args.matchType ?? current.matchType)
+              ? collision.matchType
+              : "both",
+        team,
+        updatedAt: Date.now(),
+      });
+
+      await ctx.db.delete(current._id);
+      return collision._id;
+    }
+
+    await ctx.db.patch(current._id, {
+      team,
+      teamKey,
+      matchType: args.matchType ?? current.matchType,
+      updatedAt: Date.now(),
+    });
+    return current._id;
+  },
+});
+
+export const deleteEnemyTeam = authenticatedMutation({
+  args: { teamId: v.id("pvpEnemyTeam") },
+  handler: async (ctx, { teamId }) => {
+    const team = await ctx.db.get(teamId);
+
+    if (!team || team.userId !== ctx.user._id) {
+      throw new Error("Team not found");
+    }
+
+    await ctx.db.delete(teamId);
   },
 });

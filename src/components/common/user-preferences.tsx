@@ -55,6 +55,7 @@ export function UserPreferences() {
         timelineVisualizer: newPreferences.timelineVisualizer,
         formationDisplay: newPreferences.formationDisplay,
         bond: newPreferences.bond,
+        pvp: newPreferences.pvp,
       });
       toast.success(t("common.userPreferences.toasts.saved"));
     } catch (err) {
@@ -483,6 +484,28 @@ export function UserPreferences() {
           <div className="text-xs text-muted-foreground">
             {t("common.userPreferences.bond.autoPopulateSingleTargetGiftsHint")}
           </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      <div className="flex flex-col gap-4 text-sm">
+        <h2 className="text-base font-semibold">
+          {t("common.userPreferences.pvp.title")}
+        </h2>
+
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor="pvp-hide-empty-agenda-days">
+            {t("common.userPreferences.pvp.hideEmptyAgendaDays")}
+          </Label>
+
+          <Switch
+            id="pvp-hide-empty-agenda-days"
+            checked={newPreferences.pvp.hideEmptyAgendaDays}
+            onCheckedChange={(checked) =>
+              setPreference("pvp", "hideEmptyAgendaDays", checked)
+            }
+          />
         </div>
       </div>
 
