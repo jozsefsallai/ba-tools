@@ -310,7 +310,10 @@ export function TimelineItemPopover({
 
   return (
     <PopoverContent
-      className="w-80 max-w-[calc(100vw-2rem)] flex flex-col gap-3 overflow-hidden"
+      className="w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-1rem)] flex flex-col gap-3 overflow-x-hidden overflow-y-auto"
+      style={{
+        maxHeight: "calc(var(--radix-popover-content-available-height) - 1rem)",
+      }}
       onOpenAutoFocus={(e) => e.preventDefault()}
       onPointerDownOutside={(e) => {
         if (isTimelinePreviewAnchorTarget(e.target)) e.preventDefault();
