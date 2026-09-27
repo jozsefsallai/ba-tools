@@ -17,7 +17,13 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
-import { ChevronsUpDownIcon, CopyIcon, Trash2Icon, XIcon } from "lucide-react";
+import {
+  ChevronsUpDownIcon,
+  CopyIcon,
+  PlusIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   type SetStateAction,
@@ -29,6 +35,8 @@ import {
 } from "react";
 import { v4 as uuid } from "uuid";
 import type { Student } from "~prisma";
+
+const MAX_TIMELINE_TARGETS = 10;
 
 function isTimelinePreviewAnchorTarget(target: EventTarget | null) {
   return (
@@ -86,6 +94,7 @@ export function TimelineItemPopover({
         onWantsToUpdate(item.id, { trigger: undefined });
         return;
       }
+
       onWantsToUpdate(item.id, { trigger: event.target.value });
     },
     [onWantsToUpdate, item.id],
@@ -93,12 +102,66 @@ export function TimelineItemPopover({
 
   const handleTargetUpdate = useCallback(
     (student: Student | null) => {
-      if (item.type !== "student") return;
+      if (item.type !== "student") {
+        return;
+      }
+
       if (!student || student.id === item.target?.id) {
         onWantsToUpdate(item.id, { target: undefined });
         return;
       }
+
+      if (item.extraTargets?.some((target) => target?.id === student.id)) {
+        return;
+      }
+
       onWantsToUpdate(item.id, { target: student });
+    },
+    [item, onWantsToUpdate],
+  );
+
+  const handleExtraTargetUpdate = useCallback(
+    (index: number, student: Student | null) => {
+      if (item.type !== "student") {
+        return;
+      }
+
+      const extraTargets = [...(item.extraTargets ?? [])];
+
+      if (
+        student &&
+        (student.id === item.target?.id ||
+          extraTargets.some(
+            (target, i) => i !== index && target?.id === student.id,
+          ))
+      ) {
+        return;
+      }
+
+      extraTargets[index] = student ?? undefined;
+      onWantsToUpdate(item.id, { extraTargets });
+    },
+    [item, onWantsToUpdate],
+  );
+
+  const addExtraTarget = useCallback(() => {
+    if (
+      item.type === "student" &&
+      (item.extraTargets?.length ?? 0) < MAX_TIMELINE_TARGETS - 1
+    ) {
+      onWantsToUpdate(item.id, {
+        extraTargets: [...(item.extraTargets ?? []), undefined],
+      });
+    }
+  }, [item, onWantsToUpdate]);
+
+  const removeExtraTarget = useCallback(
+    (index: number) => {
+      if (item.type === "student") {
+        onWantsToUpdate(item.id, {
+          extraTargets: (item.extraTargets ?? []).filter((_, i) => i !== index),
+        });
+      }
     },
     [item, onWantsToUpdate],
   );
@@ -247,7 +310,7 @@ export function TimelineItemPopover({
 
   return (
     <PopoverContent
-      className="w-80 flex flex-col gap-3"
+      className="w-80 max-w-[calc(100vw-2rem)] flex flex-col gap-3 overflow-hidden"
       onOpenAutoFocus={(e) => e.preventDefault()}
       onPointerDownOutside={(e) => {
         if (isTimelinePreviewAnchorTarget(e.target)) e.preventDefault();
@@ -300,8 +363,9 @@ export function TimelineItemPopover({
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+          <Separator />
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Label className="shrink-0" htmlFor={`pop-target-${item.id}`}>
                 {t("tools.timeline.editor.student.target.label")}
               </Label>
@@ -309,10 +373,15 @@ export function TimelineItemPopover({
                 onStudentSelected={handleTargetUpdate}
                 className="w-full z-[60]"
               >
-                <Button variant="outline" className="flex-1 justify-between">
-                  {item.target
-                    ? item.target.name
-                    : t("tools.timeline.editor.student.target.select")}
+                <Button
+                  variant="outline"
+                  className="min-w-0 flex-1 justify-between"
+                >
+                  <span className="truncate">
+                    {item.target
+                      ? item.target.name
+                      : t("tools.timeline.editor.student.target.select")}
+                  </span>
                   <ChevronsUpDownIcon />
                 </Button>
               </StudentPicker>
@@ -328,13 +397,79 @@ export function TimelineItemPopover({
               )}
             </div>
             {uniqueStudents.length > 0 && (
-              <TimelineItemTargetPicker
-                uniqueStudents={uniqueStudents}
-                currentTarget={item.target}
-                onToggle={handleTargetUpdate}
-              />
+              <div className="max-w-full overflow-x-auto">
+                <TimelineItemTargetPicker
+                  uniqueStudents={uniqueStudents}
+                  currentTarget={item.target}
+                  onToggle={handleTargetUpdate}
+                />
+              </div>
             )}
+
+            {item.extraTargets?.map((extraTarget, index) => (
+              <div
+                key={`${item.id}-extra-target-${index}`}
+                className="flex min-w-0 flex-col gap-2"
+              >
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <Label className="shrink-0">
+                    {t("tools.timeline.editor.student.target.extraLabel", {
+                      index: index + 2,
+                    })}
+                  </Label>
+                  <StudentPicker
+                    onStudentSelected={(student) =>
+                      handleExtraTargetUpdate(index, student)
+                    }
+                    className="w-full z-[60]"
+                  >
+                    <Button
+                      variant="outline"
+                      className="min-w-0 flex-1 justify-between"
+                    >
+                      <span className="truncate">
+                        {extraTarget?.name ??
+                          t("tools.timeline.editor.student.target.select")}
+                      </span>
+                      <ChevronsUpDownIcon />
+                    </Button>
+                  </StudentPicker>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeExtraTarget(index)}
+                    aria-label={t("tools.timeline.editor.actions.remove")}
+                  >
+                    <XIcon />
+                  </Button>
+                </div>
+                {uniqueStudents.length > 0 && (
+                  <div className="max-w-full overflow-x-auto">
+                    <TimelineItemTargetPicker
+                      uniqueStudents={uniqueStudents}
+                      currentTarget={extraTarget}
+                      onToggle={(student) =>
+                        handleExtraTargetUpdate(index, student)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={addExtraTarget}
+              disabled={
+                (item.extraTargets?.length ?? 0) >= MAX_TIMELINE_TARGETS - 1
+              }
+            >
+              <PlusIcon />
+              {t("tools.timeline.editor.student.target.add")}
+            </Button>
           </div>
+          <Separator />
 
           <div className="flex items-center gap-2">
             <Switch

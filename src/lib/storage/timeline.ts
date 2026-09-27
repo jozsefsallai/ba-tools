@@ -12,6 +12,7 @@ type RawTimelineStudentItem = RawBaseItem & {
   type: "student";
   studentId: string;
   targetId?: string;
+  extraTargetIds?: string[];
   trigger?: string;
   copy?: boolean;
   variantId?: string;

@@ -85,7 +85,7 @@
         "example": "6 Kei\n3:35.000 (S.Nagisa → A.Aris)\n5 A.Aris [self] A.Aris [self]\n10 A.Aris (S.Seia → A.Aris) (D.Aru → A.Aris)\n8 Kei\n6 (S.Seia → A.Aris)\n6 A.Aris (D.Aru → A.Aris) '{Groggy here}'\n\n2:03.000 (S.Nagisa → A.Aris) Kei\n5 A.Aris [self] A.Aris [self] (Rio → Kei)\n8 A.Aris Kei (C) D.Aru S.Seia A.Aris",
         "rules": {
           "trigger": "Trigger before a student: 3, 3c, 2:45.900. If a trigger contains a space, wrap it in square brackets: [Cost Down].",
-          "target": "Target format: (Source -> Target), example: (Kisaki -> Mika).",
+          "target": "Target format: (Source -> Target 1, Target 2), example: (Kisaki -> Mika, Aris).",
           "notes": "Notes should be written after a student, using square brackets: S.Shiroko [delay if needed]",
           "copy": "Copied skill card marker: (C) after the student name/identifier.",
           "text": "Standalone text items should use curly brackets: '{Phase transition}'.",
@@ -118,7 +118,9 @@
 
         "target": {
           "label": "Target:",
-          "select": "Select Target Student"
+          "select": "Select Target Student",
+          "add": "Add Target",
+          "extraLabel": "Target {index}:"
         },
 
         "copy": {

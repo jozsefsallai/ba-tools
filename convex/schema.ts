@@ -45,6 +45,7 @@ export const timelineStudentItem = v.object({
   studentId: v.string(),
   trigger: v.optional(v.string()),
   targetId: v.optional(v.string()),
+  extraTargetIds: v.optional(v.array(v.string())),
   copy: v.optional(v.boolean()),
   variantId: v.optional(v.string()),
   notes: v.optional(v.string()),

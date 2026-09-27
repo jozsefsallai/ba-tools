@@ -76,7 +76,7 @@
         "example": "6 Kei\n3:35.000 (S.Nagisa → A.Aris)\n5 A.Aris [self] A.Aris [self]\n10 A.Aris (S.Seia → A.Aris) (D.Aru → A.Aris)\n8 Kei\n6 (S.Seia → A.Aris)\n6 A.Aris (D.Aru → A.Aris) '{Groggy here}'\n\n2:03.000 (S.Nagisa → A.Aris) Kei\n5 A.Aris [self] A.Aris [self] (Rio → Kei)\n8 A.Aris Kei (C) D.Aru S.Seia A.Aris",
         "rules": {
           "trigger": "トリガーは生徒の前に書いてね: 3, 3c, 2:45.900。トリガーにスペースがある場合は [Cost Down] のように角括弧で囲む。",
-          "target": "対象指定: (Source -> Target)、例: (Kisaki -> Mika)。",
+          "target": "対象指定: (Source -> Target 1, Target 2)、例: (Kisaki -> Mika, Aris)。",
           "notes": "メモは生徒の後ろに角括弧で書く: S.Shiroko [delay if needed]",
           "copy": "コピー済みスキルカードの印は (C)。生徒名/識別子の後ろに置く。",
           "text": "単独テキスト項目は波括弧を使う: '{Phase transition}'。",
@@ -105,7 +105,9 @@
         },
         "target": {
           "label": "対象：",
-          "select": "対象の生徒を選択"
+          "select": "対象の生徒を選択",
+          "add": "対象を追加",
+          "extraLabel": "対象 {index}："
         },
         "copy": {
           "label": "コピー"

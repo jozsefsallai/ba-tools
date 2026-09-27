@@ -14,6 +14,7 @@ import { TimelineItemPopover } from "@/app/[locale]/timeline-visualizer/_compone
 import { TimelinePreviewTrigger } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview-trigger";
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
+import { buildSkillPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import {
   DndContext,
@@ -46,6 +47,7 @@ export type StudentItem = BaseItem & {
   student: Student;
   trigger?: string;
   target?: Student;
+  extraTargets?: Array<Student | undefined>;
   copy?: boolean;
   variantId?: string;
   notes?: string;
@@ -93,6 +95,62 @@ export type TimelinePreviewProps = {
   onItemClicked?: (item: TimelineItem) => void;
   editableConfig?: EditableConfig;
 };
+
+const TARGET_BOX_WIDTH_PX = 93;
+const TARGET_BOX_HEIGHT_PX = 86;
+const TARGET_BOX_SPACING_PX = 70;
+
+function TargetTile({ student }: { student: Student }) {
+  return (
+    <div
+      className={cn(
+        "relative min-h-0 min-w-0 overflow-hidden border border-white/80",
+        {
+          "bg-type-red": student.attackType === "Explosion",
+          "bg-type-yellow": student.attackType === "Pierce",
+          "bg-type-blue": student.attackType === "Mystic",
+          "bg-type-purple": student.attackType === "Sonic",
+          "bg-type-green": student.attackType === "Chemical",
+        },
+      )}
+    >
+      <img
+        src={buildSkillPortraitUrl(student)}
+        alt={student.name}
+        className="absolute inset-0 h-full w-full object-cover object-center skew-x-[11deg] scale-x-[1.08]"
+      />
+    </div>
+  );
+}
+
+function TargetBox({ targets }: { targets: Student[] }) {
+  const isStack = targets.length <= 3;
+
+  return (
+    <div
+      className="skew-x-[-11deg] rounded-[2px] bg-black p-[2px] dark:bg-white"
+      style={{
+        width: TARGET_BOX_WIDTH_PX,
+        height: TARGET_BOX_HEIGHT_PX,
+      }}
+    >
+      <div
+        className={cn("grid h-full w-full overflow-hidden", {
+          "grid-cols-1": isStack,
+          "grid-rows-1": targets.length === 1,
+          "grid-rows-2": targets.length === 2,
+          "grid-rows-3": targets.length === 3,
+          "grid-cols-2 grid-rows-2": targets.length === 4,
+          "grid-cols-2 grid-rows-3": targets.length > 4,
+        })}
+      >
+        {targets.map((target) => (
+          <TargetTile key={target.id} student={target} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 type SortablePreviewItemProps = {
   id: string;
@@ -364,13 +422,56 @@ export function TimelinePreview({
 
   function renderItemContent(item: TimelineItem) {
     if (item.type === "student") {
+      const targets = [item.target, ...(item.extraTargets ?? [])].filter(
+        (target): target is Student => !!target,
+      );
+
+      const targetGroups =
+        targets.length > 4
+          ? [targets.slice(0, 4), targets.slice(4)]
+          : targets.length > 0
+            ? [targets]
+            : [];
+
+      const hasCompactTargetBox = targetGroups.some(
+        (group) => group.length > 1,
+      );
+
+      const renderTargetGroup = (group: Student[], index: number) =>
+        group.length === 1 ? (
+          <StudentCard
+            key={`target-group-${index}`}
+            isSkillCard
+            noDisplayRole
+            student={group[0]}
+          />
+        ) : (
+          <TargetBox key={`target-group-${index}`} targets={group} />
+        );
       return (
         <>
           <div className="relative">
-            {item.target && (
-              <div className="scale-75 absolute -bottom-14 left-1/2 -translate-x-1/2 -ml-2">
-                <StudentCard isSkillCard noDisplayRole student={item.target} />
-              </div>
+            {targetGroups.length > 0 && (
+              <>
+                <div
+                  className={cn("absolute left-1/2 -translate-x-1/2", {
+                    "-bottom-[74px] -ml-3": hasCompactTargetBox,
+                    "-bottom-14 -ml-2": !hasCompactTargetBox,
+                  })}
+                >
+                  <div className="scale-75">
+                    {renderTargetGroup(targetGroups[0], 0)}
+                  </div>
+                </div>
+
+                {targetGroups[1] && (
+                  <div className="absolute left-full top-1/2 -translate-y-[32px]">
+                    <div className="origin-top-left scale-75">
+                      {renderTargetGroup(targetGroups[1], 1)}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             <StudentCard
@@ -398,8 +499,8 @@ export function TimelinePreview({
               className={cn(
                 "font-nexon-football-gothic font-bold text-sm text-white px-3 -ml-6 whitespace-pre-wrap text-center",
                 {
-                  "mt-2": !item.target,
-                  "mt-12": !!item.target,
+                  "mt-2": targets.length === 0,
+                  "mt-12": targets.length > 0,
                 },
               )}
               style={{
@@ -452,11 +553,23 @@ export function TimelinePreview({
 
   function getItemStyle(item: TimelineItem, idx: number): React.CSSProperties {
     if (item.type === "student") {
+      const previousItem = idx > 0 ? items[idx - 1] : undefined;
+
+      const previousTargetCount =
+        previousItem?.type === "student"
+          ? [previousItem.target, ...(previousItem.extraTargets ?? [])].filter(
+              Boolean,
+            ).length
+          : 0;
+
       return {
         marginLeft:
           idx === 0 || items[idx - 1].type !== "student"
             ? undefined
-            : `${itemSpacing}px`,
+            : `${
+                itemSpacing +
+                (previousTargetCount > 4 ? TARGET_BOX_SPACING_PX : 0)
+              }px`,
       };
     }
 

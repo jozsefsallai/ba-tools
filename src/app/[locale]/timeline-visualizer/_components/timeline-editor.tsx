@@ -138,6 +138,16 @@ export function TimelineEditor() {
             return false;
           }
 
+          const extraA = (itemA.extraTargets ?? []).map((target) => target?.id);
+          const extraB = (itemB.extraTargets ?? []).map((target) => target?.id);
+
+          if (
+            extraA.length !== extraB.length ||
+            extraA.some((id, index) => id !== extraB[index])
+          ) {
+            return false;
+          }
+
           if (itemA.notes !== itemB.notes) {
             return false;
           }
@@ -376,6 +386,9 @@ export function TimelineEditor() {
             target: undefined,
             studentId: item.student.id,
             targetId: item.target?.id,
+            extraTargetIds: (item.extraTargets ?? [])
+              .map((target) => target?.id)
+              .filter((id): id is string => !!id),
             notes: item.notes,
           };
         }
@@ -471,6 +484,9 @@ export function TimelineEditor() {
             target: undefined,
             studentId: item.student.id,
             targetId: item.target?.id,
+            extraTargetIds: (item.extraTargets ?? [])
+              .map((target) => target?.id)
+              .filter((id): id is string => !!id),
             notes: item.notes,
           };
         }
@@ -549,11 +565,16 @@ export function TimelineEditor() {
           target = allStudents.find((s) => s.id === item.targetId);
         }
 
+        const extraTargets = (item.extraTargetIds ?? []).map((id) =>
+          allStudents.find((student) => student.id === id),
+        );
+
         newItems.push({
           type: "student",
           id: uuid(),
           student,
           target,
+          extraTargets,
           copy: item.copy,
           trigger: item.trigger,
           variantId: item.variantId,
@@ -717,11 +738,16 @@ export function TimelineEditor() {
             target = allStudents.find((s) => s.id === item.targetId);
           }
 
+          const extraTargets = (item.extraTargetIds ?? []).map((id) =>
+            allStudents.find((student) => student.id === id),
+          );
+
           newItems.push({
             type: "student",
             id: uuid(),
             student,
             target,
+            extraTargets,
             copy: item.copy,
             trigger: item.trigger,
             variantId: item.variantId,

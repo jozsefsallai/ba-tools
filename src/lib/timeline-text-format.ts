@@ -84,6 +84,7 @@ type StudentTokenData =
   | {
       student: Student;
       target?: Student;
+      extraTargets?: Student[];
     }
   | undefined;
 
@@ -108,16 +109,21 @@ function parseStudentToken(
       students,
       targetMatch[1],
     );
-    const targetStudent = resolveStudent(
-      shorthandIndex,
-      students,
-      targetMatch[2],
-    );
-    if (!sourceStudent || !targetStudent) {
+    const targetStudents = targetMatch[2]
+      .split(",")
+      .map((target) => resolveStudent(shorthandIndex, students, target));
+
+    if (!sourceStudent || targetStudents.some((target) => !target)) {
       return undefined;
     }
 
-    return { student: sourceStudent, target: targetStudent };
+    const [target, ...extraTargets] = targetStudents as Student[];
+
+    return {
+      student: sourceStudent,
+      target,
+      extraTargets,
+    };
   }
 
   if (token.startsWith("[") && token.endsWith("]")) {
@@ -179,9 +185,13 @@ export function serializeTimelineToText(items: TimelineItem[]): string {
         }
       }
 
-      if (item.target) {
-        const targetShorthand = getShorthand(item.target);
-        ex += `(${shorthand} → ${targetShorthand}) `;
+      const targetShorthands = [item.target, ...(item.extraTargets ?? [])]
+        .filter((target): target is Student => !!target)
+        .map(getShorthand);
+
+      if (targetShorthands.length > 0) {
+        const targets = targetShorthands.join(", ");
+        ex += `(${shorthand} → ${targets}) `;
       } else {
         ex += `${shorthand} `;
       }
@@ -340,12 +350,11 @@ export function parseTimelineFromText(
         students,
         targetMatch[1],
       );
-      const targetStudent = resolveStudent(
-        shorthandIndex,
-        students,
-        targetMatch[2],
-      );
-      if (!sourceStudent || !targetStudent) {
+      const targetStudents = targetMatch[2]
+        .split(",")
+        .map((target) => resolveStudent(shorthandIndex, students, target));
+
+      if (!sourceStudent || targetStudents.some((target) => !target)) {
         unresolved.push(content);
         activeStudentIndex = null;
         atLineStart = false;
@@ -353,14 +362,19 @@ export function parseTimelineFromText(
         continue;
       }
 
+      const [target, ...extraTargets] = targetStudents as Student[];
+
       items.push({
         type: "student",
         student: sourceStudent,
-        target: targetStudent,
+        target,
+        extraTargets,
       });
+
       activeStudentIndex = items.length - 1;
       atLineStart = false;
       i += 1;
+
       continue;
     }
 
@@ -370,6 +384,7 @@ export function parseTimelineFromText(
       activeStudentIndex = null;
       atLineStart = false;
       i += 1;
+
       continue;
     }
 
@@ -378,6 +393,7 @@ export function parseTimelineFromText(
       student: studentData.student,
       target: studentData.target,
     });
+
     activeStudentIndex = items.length - 1;
     atLineStart = false;
     i += 1;

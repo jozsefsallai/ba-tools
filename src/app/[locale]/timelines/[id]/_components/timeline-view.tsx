@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { encodePngWithItxt } from "@/lib/png-metadata";
@@ -38,7 +39,6 @@ import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
-import { Link } from "@/i18n/navigation";
 
 export type TimelineViewProps = {
   id: string;
@@ -106,11 +106,16 @@ export function TimelineView({ id }: TimelineViewProps) {
           target = allStudents.find((s) => s.id === item.targetId);
         }
 
+        const extraTargets = (item.extraTargetIds ?? []).map((id) =>
+          allStudents.find((student) => student.id === id),
+        );
+
         items.push({
           type: "student",
           id: uuid(),
           student,
           target,
+          extraTargets,
           copy: item.copy,
           trigger: item.trigger,
           variantId: item.variantId,
