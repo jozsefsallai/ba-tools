@@ -45,6 +45,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 27, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to specify multiple targets for a student item. This is useful for students like Swimsuit Ibuki.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
+  {
     date: "September 26, 2026",
     features: [
       {
