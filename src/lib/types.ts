@@ -13,6 +13,10 @@ export const GAME_SERVERS = [
   "CN",
 ] as const;
 
+export const PVP_SEASONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+
+export type PVPSeasonNumber = (typeof PVP_SEASONS)[number];
+
 export const BORROW_SLOT_GAMEMODES = [
   "raid",
   "jfd",

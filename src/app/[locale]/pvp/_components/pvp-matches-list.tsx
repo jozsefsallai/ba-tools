@@ -1,31 +1,77 @@
 "use client";
 
-import {
-  PVPMatchGroup,
-  type PVPMatchGroupItem,
-} from "@/app/[locale]/pvp/_components/pvp-match-group";
+import { PVPMatchGroup } from "@/app/[locale]/pvp/_components/pvp-match-group";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
+import { usePaginatedQuery } from "convex/react";
 import { addDays, format, startOfDay, subDays } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
-import type { Doc, Id } from "~convex/dataModel";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { api } from "~convex/api";
+import type { Id } from "~convex/dataModel";
+
+const DAY_PAGE_SIZE = 30;
 
 export type PVPMatchesListProps = {
   seasonId: Id<"pvpSeason">;
-  matches: Array<Doc<"pvpMatchRecord">>;
   hideEmptyDays?: boolean;
 };
 
+type PVPMatchDayProps = {
+  seasonId: Id<"pvpSeason">;
+  day: Date;
+  hideEmptyDays: boolean;
+  onStateChange: (dayTimestamp: number, hasMatches: boolean | null) => void;
+};
+
+function PVPMatchDay({
+  seasonId,
+  day,
+  hideEmptyDays,
+  onStateChange,
+}: PVPMatchDayProps) {
+  const dayStart = startOfDay(day).getTime();
+  const dayEnd = addDays(startOfDay(day), 1).getTime();
+
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.pvp.getMatchesForDay,
+    { seasonId, dayStart, dayEnd },
+    { initialNumItems: DAY_PAGE_SIZE },
+  );
+
+  useEffect(() => {
+    onStateChange(
+      dayStart,
+      status === "LoadingFirstPage" ? null : results.length > 0,
+    );
+  }, [dayStart, onStateChange, results.length, status]);
+
+  if (status === "LoadingFirstPage") {
+    return null;
+  }
+
+  if (hideEmptyDays && results.length === 0 && status === "Exhausted") {
+    return null;
+  }
+
+  return (
+    <PVPMatchGroup
+      seasonId={seasonId}
+      group={{ dayTimestamp: dayStart, matches: results }}
+      paginationStatus={status}
+      loadMore={loadMore}
+    />
+  );
+}
+
 export function PVPMatchesList({
   seasonId,
-  matches,
   hideEmptyDays = false,
 }: PVPMatchesListProps) {
-  const router = useRouter();
   const t = useTranslations();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const selectedEnd = searchParams.get("end")
@@ -38,36 +84,38 @@ export function PVPMatchesList({
     router.push(`?${params.toString()}`);
   };
 
-  const groupedMatches = useMemo<PVPMatchGroupItem[]>(() => {
-    const days: Record<number, Array<Doc<"pvpMatchRecord">>> = {};
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => subDays(selectedEnd, index)),
+    [selectedEnd],
+  );
 
-    const rangeStart = subDays(selectedEnd, 6).getTime();
-    const rangeEnd = addDays(selectedEnd, 1).getTime();
+  const [dayStates, setDayStates] = useState<Record<number, boolean | null>>(
+    {},
+  );
 
-    for (const match of matches.filter(
-      (item) => item.date >= rangeStart && item.date < rangeEnd,
-    )) {
-      const dayStart = new Date(match.date);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayKey = dayStart.getTime();
+  const rangeKey = selectedEnd.getTime();
 
-      if (!days[dayKey]) {
-        days[dayKey] = [];
-      }
+  useEffect(() => {
+    setDayStates({});
+  }, [rangeKey]);
 
-      days[dayKey].push(match);
-    }
+  const handleDayStateChange = useCallback(
+    (dayTimestamp: number, hasMatches: boolean | null) => {
+      setDayStates((current) => {
+        if (current[dayTimestamp] === hasMatches) {
+          return current;
+        }
 
-    return Array.from({ length: 7 }, (_, index) => {
-      const day = subDays(selectedEnd, index);
-      const dayKey = startOfDay(day).getTime();
+        return { ...current, [dayTimestamp]: hasMatches };
+      });
+    },
+    [],
+  );
 
-      return {
-        dayTimestamp: dayKey,
-        matches: days[dayKey] ?? [],
-      };
-    });
-  }, [matches, selectedEnd]);
+  const hasLoadingDay = days.some(
+    (day) => dayStates[startOfDay(day).getTime()] == null,
+  );
+  const hasMatches = Object.values(dayStates).some((value) => value === true);
 
   return (
     <div className="flex flex-col gap-4">
@@ -90,22 +138,20 @@ export function PVPMatchesList({
           Next 7 days <ChevronRightIcon />
         </Button>
       </div>
-      {groupedMatches
-        .filter((group) => !hideEmptyDays || group.matches.length > 0)
-        .map((group) => (
-          <PVPMatchGroup
-            key={group.dayTimestamp}
-            seasonId={seasonId}
-            group={group}
-          />
-        ))}
-
-      {hideEmptyDays &&
-        groupedMatches.every((group) => group.matches.length === 0) && (
-          <p className="rounded border border-dashed p-4 text-sm text-muted-foreground">
-            {t("tools.pvp.season.noMatchesInRange")}
-          </p>
-        )}
+      {days.map((day) => (
+        <PVPMatchDay
+          key={startOfDay(day).getTime()}
+          seasonId={seasonId}
+          day={day}
+          hideEmptyDays={hideEmptyDays}
+          onStateChange={handleDayStateChange}
+        />
+      ))}
+      {hideEmptyDays && !hasLoadingDay && !hasMatches && (
+        <p className="rounded border border-dashed p-4 text-sm text-muted-foreground">
+          {t("tools.pvp.season.noMatchesInRange")}
+        </p>
+      )}
     </div>
   );
 }

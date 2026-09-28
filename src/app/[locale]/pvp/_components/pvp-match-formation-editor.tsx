@@ -15,6 +15,7 @@ export type PVPMatchFormationEditorProps = {
   strikerPrefix?: "A" | "D";
   advanced?: boolean;
   showDamage?: boolean;
+  showAdvancedToggle?: boolean;
   compactAdvanced?: boolean;
   onAdvancedChange?(advanced: boolean): void;
   studentTabIndexStart?: number;
@@ -30,6 +31,7 @@ export function PVPMatchFormationEditor({
   advanced = false,
   onAdvancedChange,
   showDamage = true,
+  showAdvancedToggle = true,
   compactAdvanced = false,
   studentTabIndexStart = 1,
   propertyTabIndexStart = 7,
@@ -39,17 +41,19 @@ export function PVPMatchFormationEditor({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-2">
-        <Switch
-          id={`pvp-advanced-${strikerPrefix ?? "formation"}`}
-          checked={advanced}
-          onCheckedChange={onAdvancedChange}
-        />
+      {showAdvancedToggle && (
+        <div className="flex items-center gap-2">
+          <Switch
+            id={`pvp-advanced-${strikerPrefix ?? "formation"}`}
+            checked={advanced}
+            onCheckedChange={onAdvancedChange}
+          />
 
-        <Label htmlFor={`pvp-advanced-${strikerPrefix ?? "formation"}`}>
-          {t("tools.pvp.advancedMode")}
-        </Label>
-      </div>
+          <Label htmlFor={`pvp-advanced-${strikerPrefix ?? "formation"}`}>
+            {t("tools.pvp.advancedMode")}
+          </Label>
+        </div>
+      )}
       {formation.map((item, idx) => (
         <PVPMatchFormationEditorItem
           key={idx}

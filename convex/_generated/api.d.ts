@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as crons from "../crons.js";
 import type * as donations from "../donations.js";
 import type * as formation from "../formation.js";
 import type * as gifts from "../gifts.js";
@@ -17,6 +18,7 @@ import type * as lib_teamKey from "../lib/teamKey.js";
 import type * as migrations from "../migrations.js";
 import type * as planaChat from "../planaChat.js";
 import type * as pvp from "../pvp.js";
+import type * as pvpStats from "../pvpStats.js";
 import type * as recruitment from "../recruitment.js";
 import type * as roster from "../roster.js";
 import type * as timeline from "../timeline.js";
@@ -31,6 +33,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   donations: typeof donations;
   formation: typeof formation;
   gifts: typeof gifts;
@@ -40,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   planaChat: typeof planaChat;
   pvp: typeof pvp;
+  pvpStats: typeof pvpStats;
   recruitment: typeof recruitment;
   roster: typeof roster;
   timeline: typeof timeline;

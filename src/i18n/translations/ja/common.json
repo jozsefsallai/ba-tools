@@ -58,7 +58,8 @@
         "railroadPuzzleSolver": "鉄道パズル解答器",
         "raidScore": "総力戦スコア計算機",
         "studentExp": "生徒EXP計算機",
-        "pvp": "戦術対抗戦トラッカー"
+        "pvp": "戦術対抗戦トラッカー",
+        "pvpSearch": "戦術対抗戦カウンター検索"
       },
       "misc": {
         "title": "その他",
@@ -357,7 +358,9 @@
     },
     "pvp": {
       "title": "戦術対抗戦トラッカー",
-      "hideEmptyAgendaDays": "対戦記録のない戦術対抗戦の日を非表示"
+      "hideEmptyAgendaDays": "対戦記録のない戦術対抗戦の日を非表示",
+      "includeMatchesInStatisticsByDefault": "新しい対戦を公開統計に含める",
+      "includeMatchesInStatisticsByDefaultHint": "匿名化された編成と勝敗のみが集計されます。既存の対戦記録は変更されません。"
     }
   },
   "themeToggle": {

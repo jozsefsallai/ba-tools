@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link, usePathname } from "@/i18n/navigation";
 
 type BreadcrumbInfo = {
   label: string;
@@ -55,6 +55,10 @@ function usePageBreadcrumbs(): BreadcrumbInfo | null {
       },
       "/student-exp-calculator": {
         label: t("common.header.nav.gameplay.studentExp"),
+        group: t("common.header.nav.gameplay.title"),
+      },
+      "/pvp/search": {
+        label: t("common.header.nav.gameplay.pvpSearch"),
         group: t("common.header.nav.gameplay.title"),
       },
       "/pvp": {

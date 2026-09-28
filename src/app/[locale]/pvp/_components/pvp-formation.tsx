@@ -1,7 +1,10 @@
 "use client";
 
 import { PVPFormationDamageChart } from "@/app/[locale]/pvp/_components/pvp-formation-damage-chart";
-import type { PVPMatchResult, PVPMatchType } from "@/app/[locale]/pvp/_lib/types";
+import type {
+  PVPMatchResult,
+  PVPMatchType,
+} from "@/app/[locale]/pvp/_lib/types";
 import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
 import { useStudents } from "@/hooks/use-students";
@@ -50,6 +53,7 @@ export type PVPFormationProps = {
   studentRep?: Student | null;
   damageChartOpen: boolean;
   highestDamage: number;
+  showHeader?: boolean;
 };
 
 export function PVPFormation({
@@ -61,6 +65,7 @@ export function PVPFormation({
   studentRep,
   damageChartOpen,
   highestDamage,
+  showHeader = true,
 }: PVPFormationProps) {
   const t = useTranslations();
 
@@ -94,36 +99,42 @@ export function PVPFormation({
 
   return (
     <div className="flex flex-col gap-2 items-center">
-      <div className="flex items-center gap-2">
-        {kind === "attack" && <SwordIcon />}
-        {kind === "defense" && <ShieldIcon />}
+      {showHeader && (
+        <div className="flex items-center gap-2">
+          {kind === "attack" && <SwordIcon />}
+          {kind === "defense" && <ShieldIcon />}
 
-        <div
-          className={cn(
-            "font-nexon-football-gothic font-bold italic mt-1 mr-1",
-            {
-              "text-green-500": result === "win",
-              "text-red-500": result === "loss",
-            },
-          )}
-        >
-          {result === "win"
-            ? t("tools.pvp.match.win")
-            : t("tools.pvp.match.loss")}
-        </div>
-
-        {studentRep && studentPortraitUrl && (
-          <img src={studentPortraitUrl} alt={studentRep.name} className="h-6" />
-        )}
-
-        <div className="font-bold">{name}</div>
-
-        {rank !== undefined && (
-          <div className="text-sm text-muted-foreground">
-            (rank: <PVPRank rank={rank} />)
+          <div
+            className={cn(
+              "font-nexon-football-gothic font-bold italic mt-1 mr-1",
+              {
+                "text-green-500": result === "win",
+                "text-red-500": result === "loss",
+              },
+            )}
+          >
+            {result === "win"
+              ? t("tools.pvp.match.win")
+              : t("tools.pvp.match.loss")}
           </div>
-        )}
-      </div>
+
+          {studentRep && studentPortraitUrl && (
+            <img
+              src={studentPortraitUrl}
+              alt={studentRep.name}
+              className="h-6"
+            />
+          )}
+
+          <div className="font-bold">{name}</div>
+
+          {rank !== undefined && (
+            <div className="text-sm text-muted-foreground">
+              (rank: <PVPRank rank={rank} />)
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex items-center gap-3" style={{ zoom: 0.8 }}>
         <div className="flex items-center gap-[2px]">

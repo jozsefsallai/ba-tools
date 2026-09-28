@@ -2,13 +2,25 @@ import {
   GAME_SERVERS,
   type PVPFormationPresetType,
   type PVPMatchType,
+  PVP_SEASONS,
   type StarLevel,
   type UELevel,
 } from "@/lib/types";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import {
+  authenticatedMutation,
+  authenticatedQuery,
+  staffMutation,
+} from "./lib/auth";
 import { getTeamKey } from "./lib/teamKey";
+import {
+  queueMatchRemoval,
+  queueMatchStats,
+  queueMatchStatsForSeason,
+  queueSeasonRebuild,
+  validatePvpTeam,
+} from "./pvpStats";
 import { pvpFormationStudentItem } from "./schema";
 
 const emptyTeam = () => [{}, {}, {}, {}, {}, {}];
@@ -151,19 +163,67 @@ export const getOwnSeasons = authenticatedQuery({
   },
 });
 
+export const getSeason = authenticatedQuery({
+  args: { seasonId: v.id("pvpSeason") },
+  handler: async (ctx, { seasonId }) => {
+    return await getSeasonForUser(ctx, seasonId);
+  },
+});
+
 export const createSeason = authenticatedMutation({
   args: {
     name: v.string(),
     gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
   },
-  handler: async (ctx, { name, gameServer }) => {
+  handler: async (ctx, { name, gameServer, seasonNumber }) => {
     const seasonId = await ctx.db.insert("pvpSeason", {
       userId: ctx.user._id,
       name,
       gameServer,
+      seasonNumber,
     });
 
     return seasonId;
+  },
+});
+
+export const updateSeasonNumber = authenticatedMutation({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+  },
+  handler: async (ctx, { seasonId, seasonNumber }) => {
+    await getSeasonForUser(ctx, seasonId);
+    await ctx.db.patch(seasonId, { seasonNumber });
+    await queueSeasonRebuild(ctx, seasonId);
+  },
+});
+
+export const updateSeason = authenticatedMutation({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    name: v.string(),
+    gameServer: v.union(...GAME_SERVERS.map((server) => v.literal(server))),
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+  },
+  handler: async (ctx, { seasonId, name, gameServer, seasonNumber }) => {
+    const season = await getSeasonForUser(ctx, seasonId);
+
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      throw new Error("Season name cannot be empty.");
+    }
+
+    await ctx.db.patch(seasonId, {
+      name: trimmedName,
+      gameServer,
+      seasonNumber,
+    });
+
+    if (season.seasonNumber !== seasonNumber) {
+      await queueSeasonRebuild(ctx, seasonId);
+    }
   },
 });
 
@@ -199,6 +259,7 @@ export const getSeasonDefaults = authenticatedQuery({
       .first();
 
     return {
+      season: await ctx.db.get(seasonId),
       ownTeam: latest ? withoutDamage(latest.ownTeam) : emptyTeam(),
     };
   },
@@ -238,13 +299,18 @@ export const getMatchesForDay = authenticatedQuery({
   handler: async (ctx, { seasonId, dayStart, dayEnd, paginationOpts }) => {
     await getSeasonForUser(ctx, seasonId);
 
+    const boundedPaginationOpts = {
+      ...paginationOpts,
+      numItems: Math.min(Math.max(paginationOpts.numItems, 1), 30),
+    };
+
     return await ctx.db
       .query("pvpMatchRecord")
       .withIndex("by_seasonId_date", (q) =>
         q.eq("seasonId", seasonId).gte("date", dayStart).lt("date", dayEnd),
       )
       .order("desc")
-      .paginate(paginationOpts);
+      .paginate(boundedPaginationOpts);
   },
 });
 
@@ -380,6 +446,7 @@ export const recordMatch = authenticatedMutation({
     opponentTeam: v.array(pvpFormationStudentItem),
     result: v.union(v.literal("win"), v.literal("loss")),
     videoUrl: v.optional(v.string()),
+    includeInStatistics: v.boolean(),
   },
   handler: async (
     ctx,
@@ -396,12 +463,16 @@ export const recordMatch = authenticatedMutation({
       opponentTeam,
       result,
       videoUrl,
+      includeInStatistics,
     },
   ) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
       throw new Error("Season not found");
     }
+
+    validatePvpTeam(ownTeam, "Your team");
+    validatePvpTeam(opponentTeam, "Opponent team");
 
     const matchId = await ctx.db.insert("pvpMatchRecord", {
       userId: ctx.user._id,
@@ -419,9 +490,89 @@ export const recordMatch = authenticatedMutation({
       opponentTeamKey: getTeamKey(opponentTeam),
       result,
       videoUrl,
+      includeInStatistics,
     });
 
+    await queueMatchStats(ctx, await ctx.db.get(matchId));
+
     return matchId;
+  },
+});
+
+export const bulkImportMatches = staffMutation({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    matches: v.array(
+      v.object({
+        attackTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+        defenseTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+        attackWins: v.boolean(),
+        videoUrl: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, { seasonId, matches }) => {
+    if (matches.length > 100) {
+      throw new Error("Bulk imports are limited to 100 matches per batch.");
+    }
+
+    const season = await ctx.db.get(seasonId);
+    if (!season || season.userId !== ctx.user._id) {
+      throw new Error("Season not found.");
+    }
+
+    const date = Date.now();
+    for (const imported of matches) {
+      validatePvpTeam(imported.attackTeam, "Attack team");
+      validatePvpTeam(imported.defenseTeam, "Defense team");
+
+      const matchId = await ctx.db.insert("pvpMatchRecord", {
+        userId: ctx.user._id,
+        seasonId,
+        date,
+        matchType: "attack",
+        ownTeam: imported.attackTeam,
+        ownTeamKey: getTeamKey(imported.attackTeam),
+        opponentTeam: imported.defenseTeam,
+        opponentTeamKey: getTeamKey(imported.defenseTeam),
+        result: imported.attackWins ? "win" : "loss",
+        videoUrl: imported.videoUrl,
+        includeInStatistics: true,
+      });
+
+      await queueMatchStatsForSeason(ctx, await ctx.db.get(matchId), season);
+    }
+
+    return matches.length;
+  },
+});
+
+export const clearSeasonMatches = staffMutation({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, { seasonId, cursor }) => {
+    const season = await ctx.db.get(seasonId);
+    if (!season || season.userId !== ctx.user._id) {
+      throw new Error("Season not found.");
+    }
+
+    const page = await ctx.db
+      .query("pvpMatchRecord")
+      .withIndex("by_seasonId", (q) => q.eq("seasonId", seasonId))
+      .paginate({ numItems: 100, cursor: cursor ?? null });
+
+    for (const match of page.page) {
+      await queueMatchRemoval(ctx, match._id);
+      await ctx.db.delete(match._id);
+    }
+
+    return {
+      deleted: page.page.length,
+      isDone: page.isDone,
+      continueCursor: page.continueCursor,
+    };
   },
 });
 
@@ -439,6 +590,7 @@ export const updateMatch = authenticatedMutation({
     opponentTeam: v.optional(v.array(pvpFormationStudentItem)),
     result: v.optional(v.union(v.literal("win"), v.literal("loss"))),
     videoUrl: v.optional(v.string()),
+    includeInStatistics: v.optional(v.boolean()),
   },
   handler: async (
     ctx,
@@ -455,12 +607,18 @@ export const updateMatch = authenticatedMutation({
       opponentTeam,
       result,
       videoUrl,
+      includeInStatistics,
     },
   ) => {
     const match = await ctx.db.get(matchId);
     if (!match || match.userId !== ctx.user._id) {
       throw new Error("Match not found");
     }
+
+    const nextOwnTeam = ownTeam ?? match.ownTeam;
+    const nextOpponentTeam = opponentTeam ?? match.opponentTeam;
+    validatePvpTeam(nextOwnTeam, "Your team");
+    validatePvpTeam(nextOpponentTeam, "Opponent team");
 
     await ctx.db.patch(matchId, {
       date: date ?? match.date,
@@ -470,14 +628,33 @@ export const updateMatch = authenticatedMutation({
       enemyPresetId: enemyPresetId ?? match.enemyPresetId,
       opponentRank: opponentRank ?? match.opponentRank,
       matchType: matchType ?? match.matchType,
-      ownTeam: ownTeam ?? match.ownTeam,
+      ownTeam: nextOwnTeam,
       ownTeamKey: ownTeam ? getTeamKey(ownTeam) : match.ownTeamKey,
-      opponentTeam: opponentTeam ?? match.opponentTeam,
+      opponentTeam: nextOpponentTeam,
       opponentTeamKey: opponentTeam
         ? getTeamKey(opponentTeam)
         : match.opponentTeamKey,
       result: result ?? match.result,
       videoUrl: videoUrl ?? match.videoUrl,
+      includeInStatistics:
+        includeInStatistics ?? match.includeInStatistics ?? false,
+    });
+
+    await queueMatchStats(ctx, {
+      ...match,
+      date: date ?? match.date,
+      ownRank: ownRank ?? match.ownRank,
+      opponentName: opponentName ?? match.opponentName,
+      opponentStudentRepId: opponentStudentRepId ?? match.opponentStudentRepId,
+      enemyPresetId: enemyPresetId ?? match.enemyPresetId,
+      opponentRank: opponentRank ?? match.opponentRank,
+      matchType: matchType ?? match.matchType,
+      ownTeam: ownTeam ?? match.ownTeam,
+      opponentTeam: opponentTeam ?? match.opponentTeam,
+      result: result ?? match.result,
+      videoUrl: videoUrl ?? match.videoUrl,
+      includeInStatistics:
+        includeInStatistics ?? match.includeInStatistics ?? false,
     });
 
     return await ctx.db.get(matchId);
@@ -492,6 +669,7 @@ export const deleteMatch = authenticatedMutation({
       throw new Error("Match not found");
     }
 
+    await queueMatchRemoval(ctx, matchId);
     await ctx.db.delete(matchId);
   },
 });
@@ -511,6 +689,7 @@ export const deleteSeason = authenticatedMutation({
       .collect();
 
     for (const match of matches) {
+      await queueMatchRemoval(ctx, match._id);
       await ctx.db.delete(match._id);
     }
 
@@ -539,6 +718,14 @@ export const deleteSeason = authenticatedMutation({
 
     for (const team of enemyTeams) {
       await ctx.db.delete(team._id);
+    }
+
+    const rebuild = await ctx.db
+      .query("pvpStatsRebuild")
+      .withIndex("by_seasonId", (q) => q.eq("seasonId", seasonId))
+      .unique();
+    if (rebuild) {
+      await ctx.db.delete(rebuild._id);
     }
 
     await ctx.db.delete(seasonId);

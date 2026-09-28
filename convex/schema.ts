@@ -1,6 +1,7 @@
 import {
   BORROW_SLOT_GAMEMODES,
   GAME_SERVERS,
+  PVP_SEASONS,
   STAR_LEVELS,
   UE_LEVELS,
 } from "@/lib/types";
@@ -198,6 +199,7 @@ export default defineSchema({
     username: v.string(),
     avatar: v.optional(v.string()),
     externalId: v.string(),
+    isSuperUser: v.optional(v.boolean()),
   }).index("by_externalId", ["externalId"]),
 
   userPreferences: defineTable({
@@ -229,6 +231,7 @@ export default defineSchema({
     pvp: v.optional(
       v.object({
         hideEmptyAgendaDays: v.boolean(),
+        includeMatchesInStatisticsByDefault: v.optional(v.boolean()),
       }),
     ),
   }).index("by_userId", ["userId"]),
@@ -334,6 +337,9 @@ export default defineSchema({
     userId: v.id("users"),
     name: v.string(),
     gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
+    seasonNumber: v.optional(
+      v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+    ),
   }).index("by_userId", ["userId"]),
 
   pvpFormationPreset: defineTable({
@@ -395,6 +401,7 @@ export default defineSchema({
     opponentTeamKey: v.optional(v.string()),
     result: v.union(v.literal("win"), v.literal("loss")),
     videoUrl: v.optional(v.string()),
+    includeInStatistics: v.optional(v.boolean()),
   })
     .index("by_userId", ["userId"])
     .index("by_seasonId", ["seasonId"])
@@ -402,6 +409,71 @@ export default defineSchema({
     .index("by_seasonId_ownTeamKey", ["seasonId", "ownTeamKey"])
     .index("by_seasonId_opponentTeamKey", ["seasonId", "opponentTeamKey"])
     .index("by_enemyPresetId_date", ["enemyPresetId", "date"]),
+
+  pvpStatsPending: defineTable({
+    matchId: v.id("pvpMatchRecord"),
+    queuedAt: v.number(),
+    remove: v.boolean(),
+    seasonNumber: v.optional(
+      v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+    ),
+    attackTeamKey: v.optional(v.string()),
+    defenseTeamKey: v.optional(v.string()),
+    attackTeam: v.optional(
+      v.array(v.object({ studentId: v.optional(v.string()) })),
+    ),
+    defenseTeam: v.optional(
+      v.array(v.object({ studentId: v.optional(v.string()) })),
+    ),
+    attackWon: v.optional(v.boolean()),
+  })
+    .index("by_matchId", ["matchId"])
+    .index("by_queuedAt", ["queuedAt"]),
+
+  pvpStatsContribution: defineTable({
+    matchId: v.id("pvpMatchRecord"),
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+    attackTeamKey: v.string(),
+    defenseTeamKey: v.string(),
+    attackWon: v.boolean(),
+  }).index("by_matchId", ["matchId"]),
+
+  pvpStatsAggregate: defineTable({
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+    attackTeamKey: v.string(),
+    defenseTeamKey: v.string(),
+    attackTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+    defenseTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+    wins: v.number(),
+    total: v.number(),
+    confidenceScore: v.number(),
+  })
+    .index("by_matchup", ["seasonNumber", "defenseTeamKey", "attackTeamKey"])
+    .index("by_seasonNumber", ["seasonNumber"])
+    .index("by_ranking", [
+      "seasonNumber",
+      "defenseTeamKey",
+      "confidenceScore",
+      "total",
+    ]),
+
+  pvpStatsSummary: defineTable({
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+    totalMatches: v.number(),
+    clears: v.number(),
+  }).index("by_seasonNumber", ["seasonNumber"]),
+
+  pvpStatsStatus: defineTable({
+    key: v.literal("global"),
+    lastCompletedAt: v.optional(v.number()),
+    nextExpectedAt: v.optional(v.number()),
+    isUpdating: v.boolean(),
+  }).index("by_key", ["key"]),
+
+  pvpStatsRebuild: defineTable({
+    seasonId: v.id("pvpSeason"),
+    cursor: v.optional(v.string()),
+  }).index("by_seasonId", ["seasonId"]),
 
   recruitmentAccount: defineTable({
     userId: v.id("users"),

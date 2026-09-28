@@ -20,6 +20,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Link, getPathname, usePathname } from "@/i18n/navigation";
 import { canAccessPlanaAi } from "@/lib/ai/plana-access";
 import { isSuperUser } from "@/lib/auth/super-user";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
@@ -52,7 +53,6 @@ import type { LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { api } from "~convex/api";
-import { getPathname, Link, usePathname } from "@/i18n/navigation";
 
 type NavLink = {
   href: string;
@@ -226,6 +226,11 @@ export function AppSidebar() {
       text: t("common.header.nav.gameplay.pvp"),
       icon: SwordsIcon,
     },
+    {
+      href: "/pvp/search",
+      text: t("common.header.nav.gameplay.pvpSearch"),
+      icon: SwordsIcon,
+    },
   ];
 
   const MISC_TOOLS: NavLink[] = [
@@ -337,6 +342,12 @@ export function AppSidebar() {
       : []),
   ];
 
+  const activeNavigationHref = NAVIGATION_GROUPS.flatMap((group) => group.links)
+    .filter(
+      (link) => pathname === link.href || pathname.startsWith(`${link.href}/`),
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -368,7 +379,7 @@ export function AppSidebar() {
                   <NavItem
                     key={link.href}
                     link={link}
-                    isActive={pathname.startsWith(link.href)}
+                    isActive={activeNavigationHref === link.href}
                   />
                 ))}
               </SidebarMenu>

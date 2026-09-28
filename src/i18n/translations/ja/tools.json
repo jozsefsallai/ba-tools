@@ -690,6 +690,8 @@
     "seasons": {
       "createNew": "新しいシーズンを作成",
       "server": "サーバー: {server}",
+      "number": "シーズン {number}",
+      "unassigned": "未設定",
       "failedToLoad": "シーズンの読み込みに失敗したよ。"
     },
     "season": {
@@ -701,13 +703,31 @@
       "hideEmptyDays": "対戦のない日を非表示",
       "displayingDateRange": "表示期間: {start} – {end}",
       "noMatchesInRange": "この期間に記録された対戦はありません。",
-      "failedToLoad": "このシーズンの対戦記録の読み込みに失敗したよ。"
+      "failedToLoad": "このシーズンの対戦記録の読み込みに失敗したよ。",
+      "seasonNumber": "ゲーム内シーズン",
+      "selectSeasonNumber": "選択",
+      "assignSeasonNumber": "公開統計に対戦を含める前に、ゲーム内シーズンを選択してください。",
+      "notConfiguredTitle": "シーズンが設定されていません",
+      "notConfiguredDescription": "このシーズンの対戦を記録するには、ゲーム内シーズン番号を指定する必要があります。下のボタンから設定してください。"
+    },
+    "seasonEdit": {
+      "edit": "シーズンを編集",
+      "title": "対抗戦シーズンを編集",
+      "description": "シーズン名、ゲーム地域、ゲーム内シーズンを変更します。",
+      "name": "シーズン名",
+      "gameServer": "ゲーム地域",
+      "seasonNumber": "ゲーム内シーズン",
+      "save": "変更を保存",
+      "saved": "対抗戦シーズンを更新しました。",
+      "saveFailed": "対抗戦シーズンの更新に失敗しました。"
     },
     "match": {
       "editMatch": "記録を編集",
       "recordNewMatch": "新しい対戦を記録",
       "date": "日付",
       "videoUrl": "動画URL",
+      "includeInStatistics": "この対戦を公開統計に含める",
+      "includeInStatisticsHint": "編成の順番と勝敗のみを集計します。反映には最大6時間かかります。",
       "matchType": "対戦タイプ",
       "result": "結果",
       "attack": "攻撃",
@@ -731,8 +751,78 @@
     },
     "newSeason": {
       "title": "新しい対抗戦シーズン",
-      "description": "シーズンの名前とゲームサーバーを入力してね。",
-      "seasonName": "シーズン名"
+      "description": "シーズン名、ゲームサーバー、ゲーム内シーズンを入力してね。",
+      "seasonName": "シーズン名",
+      "seasonNumber": "ゲーム内シーズン"
+    },
+
+    "bulkImport": {
+      "open": "対戦を一括インポート",
+      "title": "戦術対抗戦を一括インポート",
+      "description": "対戦の配列を含むJSONファイルを選択してください。すべての行と生徒を検証してから送信します。インポートした対戦は公開統計に含まれます。",
+      "chooseFile": "JSONファイルを選択",
+      "dropFile": "ここにドロップするかクリックして選択",
+      "replaceFile": "クリックして別のファイルを選択",
+      "studentsUnavailable": "生徒一覧を読み込み中です。少し待ってからもう一度お試しください。",
+      "validating": "対戦を検証中…",
+      "validationFailed": "ファイルに不正な行があります：",
+      "rootMustBeArray": "JSONのルートは対戦の配列である必要があります。",
+      "invalidJson": "ファイルは有効なJSONではありません。",
+      "invalidRow": "{row}行目はオブジェクトではありません。",
+      "invalidFormation": "{row}行目の攻撃編成と防衛編成は6スロットの配列である必要があります。",
+      "invalidResult": "{row}行目のattackWinsは真偽値である必要があります。",
+      "invalidVideoUrl": "{row}行目のvideoUrlは指定する場合、文字列である必要があります。",
+      "invalidStudentValue": "{row}行目の{slot}番スロットに不正な生徒指定があります。",
+      "missingStriker": "{row}行目の{label}編成にストライカーがいません。",
+      "unresolvedTitle": "次の生徒を照合できませんでした：",
+      "unresolvedStudent": "{value}（行：{rows}）",
+      "duplicatesIgnored": "重複した生徒を含む{count}行をスキップしました。",
+      "ready": "{count}件の対戦をインポートできます。",
+      "replaceExisting": "このシーズンの既存の対戦を先に削除する",
+      "replaceExistingDescription": "このアカウントのこのシーズンにある既存の対戦をすべて削除してから、このファイルをインポートします。",
+      "confirmReplaceExisting": "インポート前に、このシーズンの既存の対戦をすべて削除しますか？この操作は元に戻せません。",
+      "import": "対戦をインポート",
+      "importing": "インポート中…",
+      "clearingExisting": "既存の対戦を削除中…",
+      "progress": "{total}件中{processed}件をインポートしました。",
+      "completed": "{count}件の対戦をインポートしました。",
+      "failed": "すべての対戦をインポートする前に処理が停止しました。"
+    },
+
+    "stats": {
+      "title": "戦術対抗戦カウンター検索",
+      "description": "選択した防衛編成に有効なカウンター編成を検索できるよ。",
+      "openSearch": "戦術対抗戦のカウンターを検索",
+      "season": "ゲーム内シーズン",
+      "databaseSummary": "このシーズンの統計データベースには、{matches}件の対戦と{clears}件のクリアがあります。",
+      "attackWins": "攻撃側の勝利（クリア）",
+      "recordedMatches": "統計対象の対戦",
+      "databaseSummaryNote": "統計への使用が明示的に許可された対戦のみを集計しています。クリアは攻撃側が勝利した対戦です。",
+      "search": "検索",
+      "defenseTeam": "防衛編成",
+      "exactDefenseHint": "空欄を含む6つの配置順が完全に一致する編成を検索します。",
+      "excludeStudents": "カウンター編成から除外する生徒",
+      "addExcludedStudent": "除外する生徒を追加",
+      "excludeStudentPlaceholder": "除外する生徒を選択",
+      "removeExcludedStudent": "除外対象の生徒を削除",
+      "selectDefenseSlot": "防衛枠{slot}の生徒を選択",
+      "removeDefenseStudent": "防衛編成から{name}を削除",
+      "minimumWins": "最低勝利数",
+      "noMinimumWinsResults": "{wins}勝以上の編成は、現在読み込まれている結果にありません。",
+      "attackTeam": "攻撃編成",
+      "counterTeam": "カウンター編成",
+      "minimumStriker": "検索するにはストライカーを1人以上選択してください。",
+      "noResults": "この防衛編成とシーズンに一致する、公開対象の対戦記録はありません。",
+      "clearExclusionsAndSearch": "除外を解除して再検索",
+      "record": "勝ち {wins}、負け {losses}（{total}戦）",
+      "status": {
+        "label": "最終更新：{lastUpdated}。次回更新：{nextUpdate}。",
+        "in": "{duration}後",
+        "due": "更新予定",
+        "updating": "更新中",
+        "never": "未更新",
+        "unknown": "予定なし"
+      }
     },
     "formationEditorItem": {
       "selectStudent": "生徒を選択",
@@ -749,6 +839,7 @@
       "lost": "負け",
       "total": "合計",
       "loadMore": "{count}件の対戦をさらに読み込む",
+      "loadMoreGeneric": "対戦をさらに読み込む",
       "showFewer": "対戦を折りたたむ"
     },
     "toasts": {

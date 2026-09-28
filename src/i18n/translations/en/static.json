@@ -34,6 +34,10 @@
         "title": "PVP Tracker",
         "description": "Track your PVP battles, formations, and opponents across each season."
       },
+      "pvpSearch": {
+        "title": "PVP Counter Search",
+        "description": "Find counter teams with the best results against a selected defense formation."
+      },
       "formationDisplay": {
         "title": "Formation Display",
         "description": "Display a formation of students in a design that's similar to what you'd see in-game. Useful for YouTube thumbnails or spreadsheets."

@@ -507,6 +507,32 @@ export function UserPreferences() {
             }
           />
         </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor="pvp-include-matches-statistics">
+            {t(
+              "common.userPreferences.pvp.includeMatchesInStatisticsByDefault",
+            )}
+          </Label>
+
+          <Switch
+            id="pvp-include-matches-statistics"
+            checked={newPreferences.pvp.includeMatchesInStatisticsByDefault}
+            onCheckedChange={(checked) =>
+              setPreference(
+                "pvp",
+                "includeMatchesInStatisticsByDefault",
+                checked,
+              )
+            }
+          />
+        </div>
+
+        <div className="text-xs text-muted-foreground">
+          {t(
+            "common.userPreferences.pvp.includeMatchesInStatisticsByDefaultHint",
+          )}
+        </div>
       </div>
 
       <Separator />

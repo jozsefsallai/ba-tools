@@ -6,7 +6,7 @@ export const CHANGELOG_SCOPES = {
   backend: "Backend",
   homePage: "Home Page",
   plana: "Plana",
-  userCorner: "User Corner",
+  userCorner: "Accounts",
   authentication: "Authentication",
   bondCalculator: "Bond Calculator",
   timelineVisualizer: "Timeline Visualizer",
@@ -44,6 +44,28 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "September 28, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added PVP Counter Search tool.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Recorded matches can now be used in PVP statistics for the PVP Counter Search tool. Previously added matches will be unaffected. This setting can be controlled at a match-level and the default state of the setting can be configured in your user account preferences.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Seasons now require specifying the in-game season number. When opening an existing PVP season, you will be prompted to specify the season number if it is not already set.",
+      },
+    ],
+    fixes: [],
+  },
   {
     date: "September 27, 2026",
     features: [

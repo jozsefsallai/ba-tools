@@ -807,6 +807,8 @@
     "seasons": {
       "createNew": "Create New Season",
       "server": "Server: {server}",
+      "number": "Season {number}",
+      "unassigned": "Unassigned",
       "failedToLoad": "Failed to load PVP seasons."
     },
 
@@ -819,7 +821,23 @@
       "hideEmptyDays": "Hide days without matches",
       "displayingDateRange": "Showing {start} – {end}",
       "noMatchesInRange": "No recorded PVP matches in this date range.",
-      "failedToLoad": "Failed to load PVP matches for this season."
+      "failedToLoad": "Failed to load PVP matches for this season.",
+      "seasonNumber": "Game season",
+      "selectSeasonNumber": "Select",
+      "assignSeasonNumber": "Select the numbered game season before recording matches for public statistics.",
+      "notConfiguredTitle": "Season Not Configured",
+      "notConfiguredDescription": "Before you can record matches in this season, you must specify its in-game season number. Click the button below to set it."
+    },
+    "seasonEdit": {
+      "edit": "Edit Season",
+      "title": "Edit PVP season",
+      "description": "Update the season name, game region, or numbered game season.",
+      "name": "Season name",
+      "gameServer": "Game region",
+      "seasonNumber": "Game season",
+      "save": "Save changes",
+      "saved": "PVP season updated.",
+      "saveFailed": "Failed to update the PVP season."
     },
 
     "match": {
@@ -827,6 +845,8 @@
       "recordNewMatch": "Record New Match",
       "date": "Date",
       "videoUrl": "Video URL",
+      "includeInStatistics": "Include this match in public statistics",
+      "includeInStatisticsHint": "Statistics use only the ordered teams and outcome. Updates may take up to six hours.",
       "matchType": "Match type",
       "result": "Result",
       "attack": "Attack",
@@ -851,8 +871,78 @@
 
     "newSeason": {
       "title": "New PVP Season",
-      "description": "Enter the name and game server of this PVP season.",
-      "seasonName": "Season Name"
+      "description": "Enter the name, game server, and numbered game season.",
+      "seasonName": "Season Name",
+      "seasonNumber": "Game season"
+    },
+
+    "bulkImport": {
+      "open": "Bulk import matches",
+      "title": "Bulk import PVP matches",
+      "description": "Choose a JSON file containing an array of matches. All rows and students are validated before anything is sent. Imported matches are included in public statistics.",
+      "chooseFile": "Choose a JSON file",
+      "dropFile": "Drop it here or click to browse",
+      "replaceFile": "Click to choose a different file",
+      "studentsUnavailable": "The student catalog is still loading. Please try again in a moment.",
+      "validating": "Validating matches…",
+      "validationFailed": "The file contains invalid rows:",
+      "rootMustBeArray": "The JSON root must be an array of matches.",
+      "invalidJson": "The file is not valid JSON.",
+      "invalidRow": "Row {row} is not an object.",
+      "invalidFormation": "Row {row} must contain attack and defense arrays with exactly six slots.",
+      "invalidResult": "Row {row} must contain a boolean attackWins value.",
+      "invalidVideoUrl": "Row {row} must contain a string videoUrl when provided.",
+      "invalidStudentValue": "Row {row}, slot {slot} contains an invalid student value.",
+      "missingStriker": "Row {row} has no striker in the {label} team.",
+      "unresolvedTitle": "These students could not be matched:",
+      "unresolvedStudent": "{value} (row(s): {rows})",
+      "duplicatesIgnored": "Skipped {count, plural, =1 {1 row} other {# rows}} containing repeated students.",
+      "ready": "{count} matches are ready to import.",
+      "replaceExisting": "Delete this season's existing matches first",
+      "replaceExistingDescription": "This removes all previous matches from this season for your account before importing this file.",
+      "confirmReplaceExisting": "Delete all existing matches from this season before importing? This cannot be undone.",
+      "import": "Import matches",
+      "importing": "Importing…",
+      "clearingExisting": "Deleting existing matches…",
+      "progress": "Imported {processed} of {total} matches.",
+      "completed": "Imported {count} matches successfully.",
+      "failed": "The import stopped before all matches were imported."
+    },
+
+    "stats": {
+      "title": "PVP Counter Search",
+      "description": "Find counter teams with the best results against a selected defense formation.",
+      "openSearch": "Search PVP counters",
+      "season": "Game season",
+      "databaseSummary": "{clears} clears from {matches} recorded matches in the statistics database for this season.",
+      "attackWins": "Attacker wins (clears)",
+      "recordedMatches": "Opted-in matches",
+      "databaseSummaryNote": "Only matches explicitly included in statistics are counted. A clear means the attacking team won.",
+      "search": "Search",
+      "defenseTeam": "Defense team",
+      "exactDefenseHint": "Matches use the exact six-slot order, including empty positions.",
+      "excludeStudents": "Exclude students from counter teams",
+      "addExcludedStudent": "Add student to exclude",
+      "excludeStudentPlaceholder": "Select a student to exclude",
+      "removeExcludedStudent": "Remove excluded student",
+      "selectDefenseSlot": "Select a student for defense slot {slot}",
+      "removeDefenseStudent": "Remove {name} from the defense team",
+      "minimumWins": "Minimum wins",
+      "noMinimumWinsResults": "No loaded teams have at least {wins} wins.",
+      "attackTeam": "Attack team",
+      "counterTeam": "Counter team",
+      "minimumStriker": "Select at least one striker to search.",
+      "noResults": "No opted-in matches were found for this defense and season.",
+      "clearExclusionsAndSearch": "Clear exclusions and search again",
+      "record": "{wins, plural, =1 {# win} other {# wins}}, {losses, plural, =1 {# loss} other {# losses}} ({total, plural, =1 {# match} other {# matches}})",
+      "status": {
+        "label": "Last updated {lastUpdated}. Next update {nextUpdate}.",
+        "in": "in {duration}",
+        "due": "is due",
+        "updating": "is updating",
+        "never": "never",
+        "unknown": "is not scheduled"
+      }
     },
 
     "formationEditorItem": {
@@ -871,6 +961,7 @@
       "lost": "lost",
       "total": "total",
       "loadMore": "{count, plural, one {Load 1 more match} other {Load # more matches}}",
+      "loadMoreGeneric": "Load more matches",
       "showFewer": "Show fewer matches"
     },
 

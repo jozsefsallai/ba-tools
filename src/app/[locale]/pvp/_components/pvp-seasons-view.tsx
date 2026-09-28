@@ -2,11 +2,11 @@
 
 import { MessageBox } from "@/components/common/message-box";
 import { NewPVPSeasonDialog } from "@/components/dialogs/new-pvp-season-dialog";
+import { Link } from "@/i18n/navigation";
 import { useQueryWithStatus } from "@/lib/convex";
 import { PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
-import { Link } from "@/i18n/navigation";
 
 export function PVPSeasonsView() {
   const t = useTranslations();
@@ -42,6 +42,13 @@ export function PVPSeasonsView() {
             className="h-full flex flex-col items-center justify-center gap-2 border rounded-md p-4 hover:bg-accent relative"
           >
             <h2 className="text-2xl font-bold">{season.name}</h2>
+
+            <p className="text-sm font-medium">
+              {t("tools.pvp.seasons.number", {
+                number:
+                  season.seasonNumber ?? t("tools.pvp.seasons.unassigned"),
+              })}
+            </p>
 
             <p className="text-sm text-muted-foreground">
               {t("tools.pvp.seasons.server", { server: season.gameServer })}

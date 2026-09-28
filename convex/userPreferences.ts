@@ -50,6 +50,7 @@ export const update = authenticatedMutation({
     pvp: v.optional(
       v.object({
         hideEmptyAgendaDays: v.optional(v.boolean()),
+        includeMatchesInStatisticsByDefault: v.optional(v.boolean()),
       }),
     ),
   },

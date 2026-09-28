@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
   BookOpenTextIcon,
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
-import { Link } from "@/i18n/navigation";
 
 type Resource = {
   name: string;
@@ -44,13 +44,13 @@ export async function ToolsAndResources() {
       path: "/timeline-visualizer",
       icon: <ListOrderedIcon className="size-10 text-yellow-500 shrink-0" />,
       description: t("static.home.toollist.timelineVisualizer.description"),
-      isHot: true,
     },
     {
       name: t("static.home.toollist.inventoryManagement.title"),
       path: "/inventory-management",
       icon: <Grid2X2Icon className="size-10 text-purple-400 shrink-0" />,
       description: t("static.home.toollist.inventoryManagement.description"),
+      isHot: true,
     },
     {
       name: t("static.home.toollist.railroadPuzzleSolver.title"),
@@ -71,13 +71,19 @@ export async function ToolsAndResources() {
         <ClipboardMinusIcon className="size-10 text-emerald-500 shrink-0" />
       ),
       description: t("static.home.toollist.studentExp.description"),
-      isNew: true,
     },
     {
       name: t("static.home.toollist.pvp.title"),
       path: "/pvp",
       icon: <SwordsIcon className="size-10 text-indigo-500 shrink-0" />,
       description: t("static.home.toollist.pvp.description"),
+      isNew: true,
+    },
+    {
+      name: t("static.home.toollist.pvpSearch.title"),
+      path: "/pvp/search",
+      icon: <SwordsIcon className="size-10 text-indigo-300 shrink-0" />,
+      description: t("static.home.toollist.pvpSearch.description"),
       isNew: true,
     },
     {

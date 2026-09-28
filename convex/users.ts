@@ -1,6 +1,14 @@
-import { v, type Validator } from "convex/values";
 import type { UserJSON } from "@clerk/nextjs/server";
-import { internalMutation, type QueryCtx } from "./_generated/server";
+import { type Validator, v } from "convex/values";
+import { type QueryCtx, internalMutation } from "./_generated/server";
+
+type ClerkMetadata = {
+  isSuperUser?: unknown;
+};
+
+type ClerkWebhookUser = UserJSON & {
+  private_metadata?: ClerkMetadata | null;
+};
 
 async function getUserByExternalId(ctx: QueryCtx, externalId: string) {
   return await ctx.db
@@ -14,6 +22,12 @@ export const upsertFromClerk = internalMutation({
     data: v.any() as Validator<UserJSON>,
   },
   async handler(ctx, { data }) {
+    const clerkData = data as ClerkWebhookUser;
+    const isSuperUserFromClerk =
+      clerkData.public_metadata?.isSuperUser === true ||
+      clerkData.private_metadata?.isSuperUser === true ||
+      clerkData.unsafe_metadata?.isSuperUser === true;
+    const user = await getUserByExternalId(ctx, data.id);
     const userAttributes = {
       externalId: data.id,
       username: data.username ?? data.id,
@@ -22,9 +36,9 @@ export const upsertFromClerk = internalMutation({
         data.first_name || data.last_name
           ? `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim()
           : undefined,
+      isSuperUser: isSuperUserFromClerk,
     };
 
-    const user = await getUserByExternalId(ctx, data.id);
     if (!user) {
       await ctx.db.insert("users", userAttributes);
     } else {

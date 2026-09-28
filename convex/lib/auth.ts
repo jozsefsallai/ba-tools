@@ -1,7 +1,7 @@
 import {
-  customQuery,
   customCtx,
   customMutation,
+  customQuery,
 } from "convex-helpers/server/customFunctions";
 import { mutation, query } from "../_generated/server";
 
@@ -44,6 +44,34 @@ export const authenticatedMutation = customMutation(
 
     if (!user) {
       throw new Error("User not found.");
+    }
+
+    return {
+      ...ctx,
+      user,
+    };
+  }),
+);
+
+export const staffMutation = customMutation(
+  mutation,
+  customCtx(async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("This operation requires authentication.");
+    }
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_externalId", (q) => q.eq("externalId", identity.subject))
+      .unique();
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    if (user.isSuperUser !== true) {
+      throw new Error("This operation requires staff access.");
     }
 
     return {

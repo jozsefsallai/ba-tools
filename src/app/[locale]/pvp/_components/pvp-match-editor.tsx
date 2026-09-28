@@ -10,6 +10,7 @@ import type {
   PVPMatchResult,
   PVPMatchType,
 } from "@/app/[locale]/pvp/_lib/types";
+import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -45,6 +46,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
@@ -70,6 +72,7 @@ export type PVPMatchEditor = {
 export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const t = useTranslations();
   const { studentMap } = useStudents();
+  const { preferences } = useUserPreferences();
 
   const router = useRouter();
 
@@ -105,6 +108,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   ]);
 
   const [result, setResult] = useState<PVPMatchResult>("win");
+  const [includeInStatistics, setIncludeInStatistics] = useState(false);
+  const statisticsPreferenceTouched = useRef(false);
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [ownAdvanced, setOwnAdvanced] = useState(false);
   const [opponentAdvanced, setOpponentAdvanced] = useState(false);
@@ -145,15 +150,24 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     api.pvp.getEnemyPresetTeams,
     enemyPresetId ? { presetId: enemyPresetId } : "skip",
   );
-  const defaults = useQuery(
-    api.pvp.getSeasonDefaults,
-    current ? "skip" : { seasonId },
-  );
+  const defaults = useQuery(api.pvp.getSeasonDefaults, { seasonId });
   const createFormationPreset = useMutation(api.pvp.createFormationPreset);
   const createEnemyPreset = useMutation(api.pvp.createEnemyPreset);
   const updateEnemyPreset = useMutation(api.pvp.updateEnemyPreset);
 
   const [isSaving, setIsSaving] = useState(false);
+
+  const hasValidStatisticsTeams =
+    ownTeam.slice(0, 4).some((item) => item.student) &&
+    opponentTeam.slice(0, 4).some((item) => item.student);
+
+  useEffect(() => {
+    if (current || statisticsPreferenceTouched.current) {
+      return;
+    }
+
+    setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
+  }, [current, preferences.pvp.includeMatchesInStatisticsByDefault]);
 
   const handleItemUpdate = useCallback(
     (
@@ -507,6 +521,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       })),
       result,
       videoUrl: videoUrl.trim() === "" ? undefined : videoUrl.trim(),
+      includeInStatistics,
     };
 
     try {
@@ -578,7 +593,26 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
     setResult(current.result);
     setVideoUrl(current.videoUrl ?? "");
+    setIncludeInStatistics(current.includeInStatistics ?? false);
   }, [current, studentMap]);
+
+  if (!defaults) {
+    return <MessageBox>{t("common.loading")}</MessageBox>;
+  }
+
+  if (!defaults.season?.seasonNumber) {
+    return (
+      <MessageBox className="flex flex-col items-start gap-4">
+        <p>{t("tools.pvp.season.assignSeasonNumber")}</p>
+
+        <Button variant="outline" asChild>
+          <Link href={`/pvp/${seasonId}`}>
+            {t("common.backTo", { destination: t("tools.pvp.title") })}
+          </Link>
+        </Button>
+      </MessageBox>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-10">
@@ -895,6 +929,30 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2 -mt-4">
+        <div className="flex items-center gap-2">
+          <Switch
+            id="pvp-include-statistics"
+            checked={includeInStatistics}
+            disabled={
+              !hasValidStatisticsTeams || !defaults?.season?.seasonNumber
+            }
+            onCheckedChange={(checked) => {
+              statisticsPreferenceTouched.current = true;
+              setIncludeInStatistics(checked);
+            }}
+          />
+
+          <Label htmlFor="pvp-include-statistics">
+            {t("tools.pvp.match.includeInStatistics")}
+          </Label>
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          {t("tools.pvp.match.includeInStatisticsHint")}
+        </p>
       </div>
 
       <Separator />

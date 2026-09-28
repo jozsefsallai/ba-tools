@@ -23,6 +23,7 @@ export type UserPreferences = {
   };
   pvp: {
     hideEmptyAgendaDays: boolean;
+    includeMatchesInStatisticsByDefault: boolean;
   };
 };
 
@@ -51,5 +52,6 @@ export const defaultUserPreferences: UserPreferences = {
   },
   pvp: {
     hideEmptyAgendaDays: false,
+    includeMatchesInStatisticsByDefault: false,
   },
 };

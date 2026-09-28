@@ -20,7 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
+import {
+  GAME_SERVERS,
+  GAME_SERVER_NAMES,
+  type GameServer,
+  PVP_SEASONS,
+} from "@/lib/types";
 import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useRef, useState } from "react";
@@ -39,6 +44,7 @@ export function NewPVPSeasonDialog({
   const t = useTranslations();
   const [name, setName] = useState("");
   const [gameServer, setGameServer] = useState<GameServer>("JP");
+  const [seasonNumber, setSeasonNumber] = useState(11);
 
   const [requestInProgress, setRequestInProgress] = useState(false);
 
@@ -54,7 +60,11 @@ export function NewPVPSeasonDialog({
     setRequestInProgress(true);
 
     try {
-      const seasonId = await createMutation({ name, gameServer });
+      const seasonId = await createMutation({
+        name,
+        gameServer,
+        seasonNumber: seasonNumber as (typeof PVP_SEASONS)[number],
+      });
       await onCreate?.(seasonId);
       closeRef.current?.click();
     } catch (err) {
@@ -104,6 +114,29 @@ export function NewPVPSeasonDialog({
                 {GAME_SERVERS.map((server) => (
                   <SelectItem key={server} value={server}>
                     {GAME_SERVER_NAMES[server]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Label className="shrink-0 w-32">
+              {t("tools.pvp.newSeason.seasonNumber")}
+            </Label>
+
+            <Select
+              value={seasonNumber.toString()}
+              onValueChange={(value) => setSeasonNumber(Number(value))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                {PVP_SEASONS.map((season) => (
+                  <SelectItem key={season} value={season.toString()}>
+                    {season}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -57,7 +57,8 @@
         "railroadPuzzleSolver": "Railroad Puzzle Solver",
         "raidScore": "Raid Score Calculator",
         "studentExp": "Student EXP Calculator",
-        "pvp": "PVP Tracker"
+        "pvp": "PVP Tracker",
+        "pvpSearch": "PVP Counter Search"
       },
       "misc": {
         "title": "Misc Tools",
@@ -383,7 +384,9 @@
     },
     "pvp": {
       "title": "PVP Tracker",
-      "hideEmptyAgendaDays": "Hide PVP agenda days without recorded matches"
+      "hideEmptyAgendaDays": "Hide PVP agenda days without recorded matches",
+      "includeMatchesInStatisticsByDefault": "Include new matches in public statistics",
+      "includeMatchesInStatisticsByDefaultHint": "Only anonymous ordered teams and battle outcomes are included. Existing matches are unchanged."
     }
   },
 
