@@ -264,6 +264,56 @@ export function UserPreferences() {
             ),
           }}
         />
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 justify-between">
+            <Label className="shrink-0">
+              {t("common.userPreferences.timelineVisualizer.defaultVisibility")}
+            </Label>
+
+            <Select
+              value={newPreferences.timelineVisualizer.defaultVisibility}
+              onValueChange={(value) =>
+                setPreference(
+                  "timelineVisualizer",
+                  "defaultVisibility",
+                  value as "private" | "public",
+                )
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent align="end" className="z-[10001]">
+                <SelectItem value="private">{t("common.private")}</SelectItem>
+                <SelectItem value="public">{t("common.public")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 justify-between">
+            <Label className="shrink-0" htmlFor="tl-default-show-creator">
+              {t(
+                "common.userPreferences.timelineVisualizer.defaultShowCreator",
+              )}
+            </Label>
+
+            <Switch
+              id="tl-default-show-creator"
+              checked={newPreferences.timelineVisualizer.defaultShowCreator}
+              onCheckedChange={(checked) =>
+                setPreference(
+                  "timelineVisualizer",
+                  "defaultShowCreator",
+                  checked,
+                )
+              }
+            />
+          </div>
+        </div>
       </div>
 
       <Separator />

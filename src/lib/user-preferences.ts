@@ -8,6 +8,8 @@ export type UserPreferences = {
     defaultExportWithTransparentBackground: boolean;
     defaultExportBackgroundColor: string;
     defaultExportBackgroundOpacity: number;
+    defaultVisibility: "private" | "public";
+    defaultShowCreator: boolean;
   };
   formationDisplay: {
     defaultScale: number;
@@ -37,6 +39,8 @@ export const defaultUserPreferences: UserPreferences = {
     defaultExportWithTransparentBackground: true,
     defaultExportBackgroundColor: "#000000",
     defaultExportBackgroundOpacity: 100,
+    defaultVisibility: "private",
+    defaultShowCreator: false,
   },
   formationDisplay: {
     defaultScale: 1,

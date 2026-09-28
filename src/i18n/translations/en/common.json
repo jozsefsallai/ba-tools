@@ -364,7 +364,9 @@
       "defaultExportBackgroundColor": "Default export background color",
       "defaultExportBackgroundOpacity": "Default export background opacity",
       "triggerAutoFocus": "Auto-focus on Trigger",
-      "triggerAutoFocusHint": "When enabled, the editor will automatically focus on the trigger field when selecting a student. You can then press Enter while in the trigger field to select a new student."
+      "triggerAutoFocusHint": "When enabled, the editor will automatically focus on the trigger field when selecting a student. You can then press Enter while in the trigger field to select a new student.",
+      "defaultVisibility": "Default visibility",
+      "defaultShowCreator": "Default show creator name"
     },
     "formationDisplay": {
       "title": "Formation Display",

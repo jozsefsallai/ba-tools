@@ -56,6 +56,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Recorded matches can now be used in PVP statistics for the PVP Counter Search tool. Previously added matches will be unaffected. This setting can be controlled at a match-level and the default state of the setting can be configured in your user account preferences.",
       },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Added default visibility settings to user preferences.",
+      },
     ],
     changes: [
       {

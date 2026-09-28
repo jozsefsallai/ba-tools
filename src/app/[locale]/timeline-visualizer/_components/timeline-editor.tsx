@@ -96,9 +96,9 @@ export function TimelineEditor() {
   const [name, setName, setNameUnchecked] = useSaveableState("");
   const [visibility, setVisibility, setVisibilityUnchecked] = useSaveableState<
     "public" | "private"
-  >("private");
+  >(preferences.timelineVisualizer.defaultVisibility);
   const [showCreator, setShowCreator, setShowCreatorUnchecked] =
-    useSaveableState(false);
+    useSaveableState(preferences.timelineVisualizer.defaultShowCreator);
   const [description, setDescription, setDescriptionUnchecked] =
     useSaveableState("");
 
@@ -701,8 +701,10 @@ export function TimelineEditor() {
     if (!timelineId) {
       setNameUnchecked("");
       setDescriptionUnchecked("");
-      setVisibilityUnchecked("private");
-      setShowCreatorUnchecked(false);
+      setVisibilityUnchecked(preferences.timelineVisualizer.defaultVisibility);
+      setShowCreatorUnchecked(
+        preferences.timelineVisualizer.defaultShowCreator,
+      );
       setItemsUnchecked([]);
       setScaleUnchecked(1);
       setItemSpacingUnchecked(10);
@@ -802,6 +804,8 @@ export function TimelineEditor() {
     }
 
     setScaleUnchecked(preferences.timelineVisualizer.defaultScale);
+    setVisibilityUnchecked(preferences.timelineVisualizer.defaultVisibility);
+    setShowCreatorUnchecked(preferences.timelineVisualizer.defaultShowCreator);
     setItemSpacingUnchecked(preferences.timelineVisualizer.defaultItemSpacing);
     setVerticalSeparatorSizeUnchecked(
       preferences.timelineVisualizer.defaultVerticalSeparatorSize,

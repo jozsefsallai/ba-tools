@@ -213,6 +213,10 @@ export default defineSchema({
       defaultExportWithTransparentBackground: v.optional(v.boolean()),
       defaultExportBackgroundColor: v.optional(v.string()),
       defaultExportBackgroundOpacity: v.optional(v.number()),
+      defaultVisibility: v.optional(
+        v.union(v.literal("private"), v.literal("public")),
+      ),
+      defaultShowCreator: v.optional(v.boolean()),
     }),
     formationDisplay: v.object({
       defaultScale: v.number(),
