@@ -60,6 +60,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.timelineVisualizer,
         description: "Added default visibility settings to user preferences.",
       },
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "Added recommended preset notice.",
+      },
     ],
     changes: [
       {
