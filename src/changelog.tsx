@@ -67,6 +67,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Seasons now require specifying the in-game season number. When opening an existing PVP season, you will be prompted to specify the season number if it is not already set.",
       },
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "Updated appearance/layout of tutorial.",
+      },
     ],
     fixes: [],
   },
