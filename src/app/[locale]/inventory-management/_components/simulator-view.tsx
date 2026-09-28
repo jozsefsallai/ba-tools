@@ -10,6 +10,8 @@ import {
   type InventoryManagementPreset,
   inventoryManagementPresets,
 } from "@/app/[locale]/inventory-management/_lib/presets";
+import { MessageBox } from "@/components/common/message-box";
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { LoadInventoryPresetDialog } from "@/components/dialogs/load-inventory-management-preset-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,22 +29,26 @@ import {
   type AoiInventorySlot,
   aoiInventoryStorage,
 } from "@/lib/storage/aoi-inventory";
+import { createNativeModulesWorker } from "@/workers/create-native-modules-worker";
 import type {
-  InventoryManagementItem,
   InitEvent,
+  InventoryManagementItem,
   InventoryManagementResult,
   SimulateInventoryManagementEvent,
   WorkerResponse,
 } from "@/workers/types";
-import { createNativeModulesWorker } from "@/workers/create-native-modules-worker";
-import { MoveIcon, XIcon } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import {
+  CheckIcon,
+  CopyIcon,
+  LightbulbIcon,
+  MoveIcon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-import { MessageBox } from "@/components/common/message-box";
-import { useSearchParams } from "next/navigation";
-import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 
 function ItemSetup({
   title,
@@ -153,7 +159,89 @@ function ItemSetup({
   );
 }
 
-export function InventoryManagementSimulatorView() {
+function RecommendedPresetCard({
+  preset,
+  onApply,
+}: {
+  preset: InventoryManagementPreset;
+  onApply: () => void;
+}) {
+  const t = useTranslations();
+  const [copied, setCopied] = useState(false);
+
+  async function handleShare() {
+    if (copied) {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("preset", preset.id);
+    url.searchParams.delete("round");
+    url.searchParams.delete("slot");
+
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setCopied(true);
+      toast.success(t("tools.inventoryManagement.toasts.presetShareCopied"));
+      setTimeout(() => setCopied(false), 2500);
+    } catch (error) {
+      console.error(error);
+      toast.error(t("tools.inventoryManagement.toasts.presetShareFailed"));
+    }
+  }
+
+  return (
+    <Card className="relative w-full max-w-2xl overflow-hidden border-blue-500/25 bg-blue-500/[0.04] py-0 shadow-sm">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-12 -top-16 size-40 rounded-full bg-blue-500/10 blur-2xl"
+      />
+
+      <CardContent className="relative flex flex-col gap-4 p-5">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400">
+            <LightbulbIcon className="size-5" aria-hidden="true" />
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+              {t("tools.inventoryManagement.recommendedPreset.title")}
+            </p>
+            <p className="mt-1 truncate font-semibold">{preset.name}</p>
+            <p className="mt-1 text-sm leading-5 text-muted-foreground">
+              {t("tools.inventoryManagement.recommendedPreset.description")}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid w-full grid-cols-2 gap-2">
+          <Button className="w-full" onClick={onApply}>
+            <CheckIcon />
+            {t("tools.inventoryManagement.recommendedPreset.apply")}
+          </Button>
+
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={handleShare}
+            disabled={copied}
+          >
+            {copied ? <CheckIcon /> : <CopyIcon />}
+            {copied
+              ? t("tools.inventoryManagement.recommendedPreset.copied")
+              : t("tools.inventoryManagement.recommendedPreset.share")}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function InventoryManagementSimulatorView({
+  recommendedPresetId,
+}: {
+  recommendedPresetId?: string;
+}) {
   const t = useTranslations();
   const [ready, setReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
@@ -164,6 +252,11 @@ export function InventoryManagementSimulatorView() {
   const presetParam = searchParams.get("preset");
   const roundParam = searchParams.get("round");
   const slotParam = searchParams.get("slot");
+  const presetFromSearchParams = presetParam
+    ? inventoryManagementPresets.find(
+        (candidate) => candidate.id === presetParam,
+      )
+    : undefined;
 
   const [requestInProgress, setRequestInProgress] = useState(false);
 
@@ -211,6 +304,12 @@ export function InventoryManagementSimulatorView() {
     useState<InventoryManagementItem | null>(null);
 
   const [saveData, setSaveData] = useState<AoiInventoryData | null>(null);
+
+  const recommendedPreset = recommendedPresetId
+    ? inventoryManagementPresets.find(
+        (candidate) => candidate.id === recommendedPresetId,
+      )
+    : undefined;
 
   function handleWantsToBlockCell(coords: BlockedCoords) {
     const endX = coords.x + selectRegion.width - 1;
@@ -422,7 +521,10 @@ export function InventoryManagementSimulatorView() {
     setResults(undefined);
 
     toast.success(
-      t("tools.inventoryManagement.toasts.presetLoaded", { name: preset.name, round: roundIndex + 1 }),
+      t("tools.inventoryManagement.toasts.presetLoaded", {
+        name: preset.name,
+        round: roundIndex + 1,
+      }),
     );
   }
 
@@ -540,8 +642,16 @@ export function InventoryManagementSimulatorView() {
     <div className="flex flex-col gap-8 items-center justify-center">
       <div className="flex flex-col gap-4 justify-center items-center">
         <div className="text-muted-foreground text-sm">
-          <strong>{t("tools.inventoryManagement.remainingSlots")}</strong> {45 - blockedCells.length} / 45
+          <strong>{t("tools.inventoryManagement.remainingSlots")}</strong>{" "}
+          {45 - blockedCells.length} / 45
         </div>
+
+        {!preset && !presetFromSearchParams && recommendedPreset && (
+          <RecommendedPresetCard
+            preset={recommendedPreset}
+            onApply={() => handlePresetLoaded(recommendedPreset.id, 0)}
+          />
+        )}
 
         <Grid
           probabilities={results}
@@ -642,7 +752,9 @@ export function InventoryManagementSimulatorView() {
           </Select>
 
           <LoadInventoryPresetDialog onFinish={handlePresetLoaded}>
-            <Button variant="outline">{t("tools.inventoryManagement.loadPreset")}</Button>
+            <Button variant="outline">
+              {t("tools.inventoryManagement.loadPreset")}
+            </Button>
           </LoadInventoryPresetDialog>
 
           <Button variant="destructive" onClick={handleReset}>
@@ -655,15 +767,23 @@ export function InventoryManagementSimulatorView() {
         <Card className="py-2">
           <CardContent className="flex flex-col md:flex-row gap-2 items-center justify-between">
             <div className="text-sm text-muted-foreground text-center">
-              {t("tools.inventoryManagement.preset")} <strong>{preset.name}</strong>, {t("tools.inventoryManagement.round")}{" "}
+              {t("tools.inventoryManagement.preset")}{" "}
+              <strong>{preset.name}</strong>,{" "}
+              {t("tools.inventoryManagement.round")}{" "}
               <strong>{presetRoundIndex + 1}</strong>
             </div>
 
             <ConfirmDialog
               title={t("tools.inventoryManagement.confirmNextRound.title")}
-              description={t("tools.inventoryManagement.confirmNextRound.description")}
-              confirmText={t("tools.inventoryManagement.confirmNextRound.confirm")}
-              cancelText={t("tools.inventoryManagement.confirmNextRound.cancel")}
+              description={t(
+                "tools.inventoryManagement.confirmNextRound.description",
+              )}
+              confirmText={t(
+                "tools.inventoryManagement.confirmNextRound.confirm",
+              )}
+              cancelText={t(
+                "tools.inventoryManagement.confirmNextRound.cancel",
+              )}
               onConfirm={handleNextRound}
             >
               <Button variant="outline" size="sm">

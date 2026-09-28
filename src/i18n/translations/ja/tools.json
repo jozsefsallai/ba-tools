@@ -909,6 +909,13 @@
     "preset": "プリセット：",
     "round": "ラウンド",
     "nextRound": "次のラウンドへ",
+    "recommendedPreset": {
+      "title": "おすすめプリセット",
+      "description": "このイベント用の設定ですぐに始められるよ。",
+      "apply": "プリセットを適用",
+      "share": "プリセットを共有",
+      "copied": "コピーしたよ！"
+    },
     "confirmNextRound": {
       "title": "次のラウンドに進む？",
       "description": "次のラウンドを読み込んでも大丈夫？今の設定はリセットされるよ。",
@@ -941,7 +948,9 @@
       "presetLoaded": "プリセット「{name}、ラウンド {round}」を読み込んだよ。",
       "presetNotFound": "プリセットが見つからないよ。",
       "invalidRound": "選択したプリセットに該当するラウンドがないよ。",
-      "cannotBlockOutside": "グリッドの外側にあるマスはブロックできないよ。"
+      "cannotBlockOutside": "グリッドの外側にあるマスはブロックできないよ。",
+      "presetShareCopied": "プリセットのリンクをクリップボードにコピーしたよ！",
+      "presetShareFailed": "プリセットのリンクをコピーできなかったよ。"
     }
   },
   "roster": {

@@ -1042,6 +1042,14 @@
     "round": "round",
     "nextRound": "Next Round",
 
+    "recommendedPreset": {
+      "title": "Recommended preset",
+      "description": "Start with a ready-to-use setup for this event.",
+      "apply": "Apply preset",
+      "share": "Share preset",
+      "copied": "Copied!"
+    },
+
     "confirmNextRound": {
       "title": "Proceed to Next Round?",
       "description": "Are you sure you want to load the next round? This will reset the current setup.",
@@ -1079,7 +1087,9 @@
       "presetLoaded": "Preset \"{name}, round {round}\" loaded successfully.",
       "presetNotFound": "Preset not found.",
       "invalidRound": "Invalid round index for the selected preset.",
-      "cannotBlockOutside": "Cannot block cells outside the grid."
+      "cannotBlockOutside": "Cannot block cells outside the grid.",
+      "presetShareCopied": "Preset link copied to clipboard!",
+      "presetShareFailed": "Failed to copy preset link."
     }
   },
 

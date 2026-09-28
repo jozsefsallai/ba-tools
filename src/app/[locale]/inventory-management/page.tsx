@@ -45,7 +45,11 @@ export default async function InventoryManagementPage() {
       </div>
 
       <Suspense>
-        <InventoryManagementSimulatorView />
+        <InventoryManagementSimulatorView
+          recommendedPresetId={
+            process.env.INVENTORY_MANAGEMENT_RECOMMENDED_PRESET_ID
+          }
+        />
       </Suspense>
 
       <Separator />
