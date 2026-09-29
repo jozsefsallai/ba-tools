@@ -153,13 +153,27 @@ async function getSeasonForUser(ctx: any, seasonId: any) {
   return season;
 }
 
+function getSeasonSortOrder(season: {
+  _creationTime: number;
+  sortOrder?: number;
+}) {
+  return season.sortOrder ?? -season._creationTime;
+}
+
 export const getOwnSeasons = authenticatedQuery({
   handler: async (ctx) => {
-    return await ctx.db
+    const seasons = await ctx.db
       .query("pvpSeason")
       .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
-      .order("desc")
       .collect();
+
+    return seasons.sort((a, b) => {
+      if (Boolean(a.archived) !== Boolean(b.archived)) {
+        return a.archived ? 1 : -1;
+      }
+
+      return getSeasonSortOrder(a) - getSeasonSortOrder(b);
+    });
   },
 });
 
@@ -177,14 +191,79 @@ export const createSeason = authenticatedMutation({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
   },
   handler: async (ctx, { name, gameServer, seasonNumber }) => {
+    const seasons = await ctx.db
+      .query("pvpSeason")
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
+      .collect();
+
+    const activeSeasons = seasons.filter((season) => !season.archived);
+    const sortOrder = activeSeasons.length
+      ? Math.min(...activeSeasons.map(getSeasonSortOrder)) - 1
+      : 0;
+
     const seasonId = await ctx.db.insert("pvpSeason", {
       userId: ctx.user._id,
       name,
       gameServer,
       seasonNumber,
+      sortOrder,
     });
 
     return seasonId;
+  },
+});
+
+export const reorderSeasons = authenticatedMutation({
+  args: { seasonIds: v.array(v.id("pvpSeason")) },
+  handler: async (ctx, { seasonIds }) => {
+    const seasons = await ctx.db
+      .query("pvpSeason")
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
+      .collect();
+
+    const activeSeasons = seasons.filter((season) => !season.archived);
+    const requestedSeasons = new Set(seasonIds);
+
+    if (
+      requestedSeasons.size !== activeSeasons.length ||
+      !activeSeasons.every((season) => requestedSeasons.has(season._id))
+    ) {
+      throw new Error("Season order must include every active season once.");
+    }
+
+    for (const [sortOrder, seasonId] of seasonIds.entries()) {
+      await ctx.db.patch(seasonId, { sortOrder });
+    }
+  },
+});
+
+export const setSeasonArchived = authenticatedMutation({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    archived: v.boolean(),
+  },
+  handler: async (ctx, { seasonId, archived }) => {
+    await getSeasonForUser(ctx, seasonId);
+
+    if (archived) {
+      await ctx.db.patch(seasonId, { archived: true });
+      return;
+    }
+
+    const seasons = await ctx.db
+      .query("pvpSeason")
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
+      .collect();
+
+    const activeSeasons = seasons.filter(
+      (season) => season._id !== seasonId && !season.archived,
+    );
+
+    const sortOrder = activeSeasons.length
+      ? Math.min(...activeSeasons.map(getSeasonSortOrder)) - 1
+      : 0;
+
+    await ctx.db.patch(seasonId, { archived: false, sortOrder });
   },
 });
 

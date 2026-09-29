@@ -341,6 +341,8 @@ export default defineSchema({
     userId: v.id("users"),
     name: v.string(),
     gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
+    sortOrder: v.optional(v.number()),
+    archived: v.optional(v.boolean()),
     seasonNumber: v.optional(
       v.union(...PVP_SEASONS.map((season) => v.literal(season))),
     ),

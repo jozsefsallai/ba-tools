@@ -809,7 +809,20 @@
       "server": "Server: {server}",
       "number": "Season {number}",
       "unassigned": "Unassigned",
-      "failedToLoad": "Failed to load PVP seasons."
+      "failedToLoad": "Failed to load PVP seasons.",
+      "active": "Active",
+      "archived": "Archived ({count})",
+      "reorder": "Reorder {name}",
+      "actions": "Actions for {name}",
+      "archive": "Archive season",
+      "unarchive": "Unarchive season",
+      "empty": "No active PVP seasons yet.",
+      "archivedEmpty": "No archived PVP seasons.",
+      "archivedSuccess": "PVP season archived.",
+      "archiveFailed": "Failed to archive the PVP season.",
+      "unarchivedSuccess": "PVP season unarchived.",
+      "unarchiveFailed": "Failed to unarchive the PVP season.",
+      "reorderFailed": "Failed to save the season order."
     },
 
     "season": {

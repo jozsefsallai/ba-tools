@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 
-export function PVPView() {
+export function PVPView({
+  showArchived,
+  onShowArchivedChange,
+}: {
+  showArchived: boolean;
+  onShowArchivedChange: (showArchived: boolean) => void;
+}) {
   const { isLoaded, isSignedIn } = useUser();
   const t = useTranslations();
 
@@ -28,5 +34,10 @@ export function PVPView() {
     );
   }
 
-  return <PVPSeasonsView />;
+  return (
+    <PVPSeasonsView
+      onShowArchivedChange={onShowArchivedChange}
+      showArchived={showArchived}
+    />
+  );
 }

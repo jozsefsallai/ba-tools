@@ -692,7 +692,20 @@
       "server": "サーバー: {server}",
       "number": "シーズン {number}",
       "unassigned": "未設定",
-      "failedToLoad": "シーズンの読み込みに失敗したよ。"
+      "failedToLoad": "シーズンの読み込みに失敗したよ。",
+      "active": "使用中",
+      "archived": "アーカイブ済み ({count})",
+      "reorder": "{name}を並べ替える",
+      "actions": "{name}の操作",
+      "archive": "シーズンをアーカイブ",
+      "unarchive": "シーズンを元に戻す",
+      "empty": "使用中の対抗戦シーズンはまだありません。",
+      "archivedEmpty": "アーカイブ済みの対抗戦シーズンはありません。",
+      "archivedSuccess": "対抗戦シーズンをアーカイブしました。",
+      "archiveFailed": "対抗戦シーズンをアーカイブできませんでした。",
+      "unarchivedSuccess": "対抗戦シーズンを元に戻しました。",
+      "unarchiveFailed": "対抗戦シーズンを元に戻せませんでした。",
+      "reorderFailed": "シーズンの並び順を保存できませんでした。"
     },
     "season": {
       "title": "シーズン: {name}",

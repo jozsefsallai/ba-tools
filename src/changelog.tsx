@@ -64,6 +64,15 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.inventoryManagement,
         description: "Added recommended preset notice.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added ability to reorder PVP seasons.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added ability to archive PVP seasons. The season, as well as its recorded matches, will not be deleted and can be restored at any time. Matches from archived seasons may still be included in PVP statistics.",
+      },
     ],
     changes: [
       {
