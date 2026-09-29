@@ -191,7 +191,7 @@ function RecommendedPresetCard({
   }
 
   return (
-    <Card className="relative w-full max-w-2xl overflow-hidden border-blue-500/25 bg-blue-500/[0.04] py-0 shadow-sm">
+    <Card className="relative min-w-0 w-full max-w-[min(42rem,calc(100vw-2rem))] overflow-hidden border-blue-500/25 bg-blue-500/[0.04] py-0 shadow-sm">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -right-12 -top-16 size-40 rounded-full bg-blue-500/10 blur-2xl"
@@ -214,14 +214,14 @@ function RecommendedPresetCard({
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-2 gap-2">
-          <Button className="w-full" onClick={onApply}>
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+          <Button className="min-w-0 w-full" onClick={onApply}>
             <CheckIcon />
             {t("tools.inventoryManagement.recommendedPreset.apply")}
           </Button>
 
           <Button
-            className="w-full"
+            className="min-w-0 w-full"
             variant="outline"
             onClick={handleShare}
             disabled={copied}
@@ -639,8 +639,8 @@ export function InventoryManagementSimulatorView({
   }
 
   return (
-    <div className="flex flex-col gap-8 items-center justify-center">
-      <div className="flex flex-col gap-4 justify-center items-center">
+    <div className="flex min-w-0 flex-col items-center justify-center gap-8">
+      <div className="flex w-full min-w-0 flex-col items-center justify-center gap-4">
         <div className="text-muted-foreground text-sm">
           <strong>{t("tools.inventoryManagement.remainingSlots")}</strong>{" "}
           {45 - blockedCells.length} / 45
