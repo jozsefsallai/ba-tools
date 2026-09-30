@@ -45,6 +45,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "September 30, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added keyboard shortcut support to PVP macth importer.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
+  {
     date: "September 28, 2026",
     features: [
       {

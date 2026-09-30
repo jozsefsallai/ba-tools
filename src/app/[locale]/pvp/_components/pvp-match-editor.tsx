@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -58,7 +59,13 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ClipboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
@@ -492,6 +499,25 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     }
   }
 
+  function handleCombatReportPaste(event: ClipboardEvent<HTMLDivElement>) {
+    if (reportStatus !== "idle") {
+      return;
+    }
+
+    const imageItem = Array.from(event.clipboardData.items).find(
+      (item) => item.kind === "file" && item.type.startsWith("image/"),
+    );
+
+    const file = imageItem?.getAsFile();
+
+    if (!file) {
+      return;
+    }
+
+    event.preventDefault();
+    void handleCombatReport(file);
+  }
+
   async function handleWantsToUpdate() {
     setIsSaving(true);
 
@@ -643,11 +669,13 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       </div>
 
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
-        <DialogContent>
+        <DialogContent onPaste={handleCombatReportPaste}>
           <DialogHeader>
             <DialogTitle>{t("tools.pvp.reportImport.title")}</DialogTitle>
             <DialogDescription>
-              {t("tools.pvp.reportImport.disclaimer")}
+              {t.rich("tools.pvp.reportImport.disclaimer", {
+                shortcut: (children) => <Kbd>{children}</Kbd>,
+              })}
             </DialogDescription>
           </DialogHeader>
 
@@ -668,7 +696,13 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 <span className="font-medium text-foreground">
                   {t("tools.pvp.reportImport.drop")}
                 </span>
+
                 <span>{t("tools.pvp.reportImport.browse")}</span>
+
+                <span className="mt-2 flex items-center gap-1.5 text-xs">
+                  {t("tools.pvp.reportImport.pasteHint")}
+                  <Kbd>Ctrl/Cmd + V</Kbd>
+                </span>
               </>
             )}
 

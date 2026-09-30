@@ -792,9 +792,10 @@
     "advancedMode": "Advanced Mode",
     "reportImport": {
       "title": "Import Combat Report",
-      "disclaimer": "Drop a screenshot here or choose one from your device. The extraction may contain mistakes; double-check every field before saving the match.",
+      "disclaimer": "Drop a screenshot here, choose one from your device, or paste one with <shortcut>Ctrl/Cmd + V</shortcut>. The extraction may contain mistakes; double-check every field before saving the match.",
       "drop": "Drop screenshot here",
       "browse": "or click to browse",
+      "pasteHint": "Paste an image with",
       "reading": "Reading screenshot...",
       "extracting": "Extracting battle details...",
       "applying": "Matching students and applying results...",
