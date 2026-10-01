@@ -17,14 +17,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
+import {
+  buildPvpCounterSearchHref,
+  parsePvpCounterSearchParams,
+} from "@/lib/pvp-counter-link";
 import { Storage } from "@/lib/storage";
 import { type PVPSeasonNumber, PVP_SEASONS } from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { usePaginatedQuery, useQuery } from "convex/react";
-import { PlusIcon, SearchIcon, XIcon } from "lucide-react";
+import {
+  CheckIcon,
+  PlusIcon,
+  SearchIcon,
+  Share2Icon,
+  XIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 import type { PVPFormationStudentItem } from "../_lib/types";
@@ -65,14 +77,41 @@ function getSuccessRateClasses(successRate: number) {
 export function PVPStatsSearch() {
   const t = useTranslations();
   const { students, studentMap } = useStudents();
+
+  const searchParams = useSearchParams();
+  const searchParamsKey = searchParams.toString();
+
+  const initialSearch = useMemo(() => {
+    const params = new URLSearchParams(searchParamsKey);
+
+    return parsePvpCounterSearchParams({
+      season: params.get("season") ?? undefined,
+      defense: params.get("defense") ?? undefined,
+    });
+  }, [searchParamsKey]);
+
   const [seasonNumber, setSeasonNumber] = useState<PVPSeasonNumber>(11);
   const [defenseTeam, setDefenseTeam] = useState(blankTeam);
   const [excludedStudentIds, setExcludedStudentIds] = useState<string[]>([]);
+  const [excludedStudentsLoaded, setExcludedStudentsLoaded] = useState(false);
   const [minimumWins, setMinimumWins] = useState(0);
+  const [shareFeedback, setShareFeedback] = useState<"idle" | "copied">("idle");
   const [submittedSearch, setSubmittedSearch] =
     useState<SubmittedSearch | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const scrollToResultsRef = useRef(false);
+  const appliedInitialSearchRef = useRef<string | null>(null);
+  const shareFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    return () => {
+      if (shareFeedbackTimerRef.current) {
+        clearTimeout(shareFeedbackTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const saved = seasonStorage.get();
@@ -88,7 +127,60 @@ export function PVPStatsSearch() {
     if (saved) {
       setExcludedStudentIds(saved);
     }
+    setExcludedStudentsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!initialSearch || !excludedStudentsLoaded || !students.length) {
+      return;
+    }
+
+    const key = `${initialSearch.seasonNumber}:${initialSearch.defenseTeam
+      .map((slot) => slot.studentId ?? "")
+      .join(",")}`;
+
+    if (appliedInitialSearchRef.current === key) {
+      return;
+    }
+
+    const ids = initialSearch.defenseTeam
+      .map((slot) => slot.studentId)
+      .filter((id): id is string => Boolean(id));
+
+    const valid =
+      initialSearch.defenseTeam.length === 6 &&
+      initialSearch.defenseTeam.slice(0, 4).some((slot) => slot.studentId) &&
+      ids.every((id) => Boolean(studentMap[id])) &&
+      ids.length === new Set(ids).size;
+
+    appliedInitialSearchRef.current = key;
+
+    if (!valid) {
+      return;
+    }
+
+    setSeasonNumber(initialSearch.seasonNumber);
+
+    setDefenseTeam(
+      initialSearch.defenseTeam.map((slot) => ({
+        student: slot.studentId ? studentMap[slot.studentId] : undefined,
+      })),
+    );
+
+    scrollToResultsRef.current = true;
+
+    setSubmittedSearch({
+      seasonNumber: initialSearch.seasonNumber,
+      defenseTeam: initialSearch.defenseTeam,
+      excludedStudentIds,
+    });
+  }, [
+    excludedStudentsLoaded,
+    excludedStudentIds,
+    initialSearch,
+    studentMap,
+    students.length,
+  ]);
 
   useEffect(() => {
     seasonStorage.set(seasonNumber);
@@ -168,6 +260,43 @@ export function PVPStatsSearch() {
       defenseTeam: getDefenseTeamPayload(),
       excludedStudentIds,
     });
+  }
+
+  async function shareSearch() {
+    if (!canSearch) {
+      return;
+    }
+
+    const target = new URL(
+      buildPvpCounterSearchHref({
+        seasonNumber,
+        defenseTeam: getDefenseTeamPayload(),
+      }),
+      window.location.origin,
+    );
+
+    const shareUrl = new URL(window.location.href);
+    shareUrl.search = target.search;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl.toString());
+
+      setShareFeedback("copied");
+
+      if (shareFeedbackTimerRef.current) {
+        clearTimeout(shareFeedbackTimerRef.current);
+      }
+
+      shareFeedbackTimerRef.current = setTimeout(() => {
+        setShareFeedback("idle");
+        shareFeedbackTimerRef.current = null;
+      }, 2000);
+
+      toast.success(t("tools.pvp.stats.shareLinkCopied"));
+    } catch (error) {
+      console.error(error);
+      toast.error(t("tools.pvp.stats.shareLinkCopyFailed"));
+    }
   }
 
   function getDefenseTeamPayload() {
@@ -366,10 +495,24 @@ export function PVPStatsSearch() {
             />
           </div>
 
-          <Button className="mt-6" disabled={!canSearch} onClick={search}>
-            <SearchIcon />
-            {t("tools.pvp.stats.search")}
-          </Button>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Button disabled={!canSearch} onClick={search}>
+              <SearchIcon />
+              {t("tools.pvp.stats.search")}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!canSearch}
+              onClick={() => void shareSearch()}
+            >
+              {shareFeedback === "copied" ? <CheckIcon /> : <Share2Icon />}
+              {shareFeedback === "copied"
+                ? t("tools.pvp.stats.shareCopied")
+                : t("tools.pvp.stats.share")}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

@@ -19,6 +19,7 @@ export function PVPEnemyPresetHistoryPage({
 }) {
   const t = useTranslations();
   const history = useQuery(api.pvp.getEnemyPresetHistory, { presetId });
+  const season = useQuery(api.pvp.getSeasonDefaults, { seasonId });
 
   if (!history) {
     return <MessageBox>{t("tools.pvp.presets.loadingHistory")}</MessageBox>;
@@ -47,7 +48,12 @@ export function PVPEnemyPresetHistoryPage({
       ) : (
         <div className="flex flex-col gap-3">
           {history.matches.map((match) => (
-            <PVPMatch key={match._id} seasonId={seasonId} match={match} />
+            <PVPMatch
+              key={match._id}
+              seasonId={seasonId}
+              seasonNumber={season?.season?.seasonNumber}
+              match={match}
+            />
           ))}
         </div>
       )}

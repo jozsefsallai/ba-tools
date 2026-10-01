@@ -4,6 +4,8 @@ import { PVPFormation } from "@/app/[locale]/pvp/_components/pvp-formation";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
+import { buildPvpCounterSearchHref } from "@/lib/pvp-counter-link";
 import { useMutation } from "convex/react";
 import {
   ChevronDownIcon,
@@ -16,14 +18,14 @@ import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export type PVPMatchProps = {
   seasonId: Id<"pvpSeason">;
   match: Doc<"pvpMatchRecord">;
+  seasonNumber?: number;
 };
 
-export function PVPMatch({ seasonId, match }: PVPMatchProps) {
+export function PVPMatch({ seasonId, match, seasonNumber }: PVPMatchProps) {
   const t = useTranslations();
   const { studentMap } = useStudents();
 
@@ -72,10 +74,10 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
   }, [deleteMatchMutation, match._id, t]);
 
   return (
-    <article className="flex flex-col gap-4 border rounded-md p-6">
-      <div className="flex gap-4 items-start">
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="flex items-start gap-6">
+    <article className="pvp-match-card group relative flex min-w-0 flex-col gap-4 rounded-md border p-6">
+      <div className="flex min-w-0 flex-wrap items-start gap-4">
+        <div className="@container min-w-0 flex-1 basis-[700px]">
+          <div className="flex min-w-0 flex-col items-center gap-6 @min-[900px]:flex-row @min-[900px]:items-start">
             <PVPFormation
               name={t("tools.pvp.match.you")}
               kind={match.matchType}
@@ -103,9 +105,26 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
           </div>
         </div>
 
-        <div className="shrink-0 flex items-center gap-2">
+        <div className="pvp-match-actions flex w-full shrink-0 flex-wrap items-center justify-end gap-2">
+          {match.matchType === "attack" && seasonNumber && (
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={buildPvpCounterSearchHref({
+                  seasonNumber: seasonNumber as any,
+                  defenseTeam: match.opponentTeam,
+                })}
+              >
+                {t("tools.pvp.presets.findCounters")}
+              </Link>
+            </Button>
+          )}
+
           {hasDamageInputs && (
-            <Button variant="outline" onClick={handleToggleDamageChart}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleToggleDamageChart}
+            >
               {displayDamageChart && <ChevronDownIcon />}
               {!displayDamageChart && <ChevronRightIcon />}
               {displayDamageChart
@@ -114,7 +133,7 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
             </Button>
           )}
 
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="icon-sm" asChild>
             <Link href={`/pvp/${seasonId}/match/${match._id}`}>
               <PencilIcon />
             </Link>
@@ -126,7 +145,7 @@ export function PVPMatch({ seasonId, match }: PVPMatchProps) {
             confirmVariant="destructive"
             onConfirm={handleDeleteMatch}
           >
-            <Button variant="destructive">
+            <Button variant="destructive" size="icon-sm">
               <TrashIcon />
             </Button>
           </ConfirmDialog>

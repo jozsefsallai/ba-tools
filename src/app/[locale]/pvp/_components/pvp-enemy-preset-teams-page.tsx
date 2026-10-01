@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { buildPvpCounterSearchHref } from "@/lib/pvp-counter-link";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
@@ -44,6 +45,7 @@ export function PVPEnemyPresetTeamsPage({
 }) {
   const t = useTranslations();
   const teamsResult = useQuery(api.pvp.getEnemyPresetTeams, { presetId });
+  const seasonResult = useQuery(api.pvp.getSeasonDefaults, { seasonId });
   const createTeam = useMutation(api.pvp.createEnemyTeam);
   const updateTeam = useMutation(api.pvp.updateEnemyTeam);
   const deleteTeam = useMutation(api.pvp.deleteEnemyTeam);
@@ -60,6 +62,7 @@ export function PVPEnemyPresetTeamsPage({
   ]);
   const [matchType, setMatchType] = useState<PVPFormationPresetType>("both");
   const [advanced, setAdvanced] = useState(false);
+  const [teamFilter, setTeamFilter] = useState<PVPFormationPresetType>("both");
 
   function openTeamDialog(item?: PVPEnemyTeam) {
     setEditingTeamId(item?.manualTeamId as Id<"pvpEnemyTeam"> | undefined);
@@ -106,9 +109,16 @@ export function PVPEnemyPresetTeamsPage({
     return <MessageBox>{t("tools.pvp.presets.loadingTeams")}</MessageBox>;
   }
 
+  const filteredTeams = teamsResult.teams.filter(
+    (knownTeam) =>
+      teamFilter === "both" ||
+      knownTeam.roles === teamFilter ||
+      knownTeam.roles === "both",
+  );
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4">
+    <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex flex-wrap items-center gap-4">
         <Button variant="outline" size="sm" asChild>
           <Link href={`/pvp/${seasonId}/presets/opponents`}>
             <ChevronLeftIcon />
@@ -134,15 +144,48 @@ export function PVPEnemyPresetTeamsPage({
         </div>
       </div>
 
-      {!teamsResult || teamsResult.teams.length === 0 ? (
+      <div className="flex w-full max-w-sm items-center gap-3">
+        <Label htmlFor="enemy-formation-type-filter">
+          {t("tools.pvp.presets.filterFormationType")}
+        </Label>
+
+        <Select
+          value={teamFilter}
+          onValueChange={(value) =>
+            setTeamFilter(value as PVPFormationPresetType)
+          }
+        >
+          <SelectTrigger id="enemy-formation-type-filter" className="flex-1">
+            <SelectValue />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="both">{t("tools.pvp.presets.both")}</SelectItem>
+
+            <SelectItem value="attack">
+              {t("tools.pvp.presets.attack")}
+            </SelectItem>
+
+            <SelectItem value="defense">
+              {t("tools.pvp.presets.defense")}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {teamsResult.teams.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
           {t("tools.pvp.presets.noTeams")}
         </div>
+      ) : filteredTeams.length === 0 ? (
+        <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+          {t("tools.pvp.presets.noTeamsForFilter")}
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {teamsResult.teams.map((knownTeam) => (
+          {filteredTeams.map((knownTeam) => (
             <article
-              className="flex flex-wrap items-center gap-3 rounded-lg border p-4"
+              className="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border p-4"
               key={knownTeam.teamKey}
             >
               <div className="flex w-28 flex-col gap-1 text-sm text-muted-foreground">
@@ -188,6 +231,20 @@ export function PVPEnemyPresetTeamsPage({
                 },
               )}
               <div className="ml-auto flex gap-2">
+                {(knownTeam.roles === "defense" ||
+                  knownTeam.roles === "both") &&
+                  seasonResult?.season?.seasonNumber && (
+                    <Button size="sm" variant="outline" asChild>
+                      <Link
+                        href={buildPvpCounterSearchHref({
+                          seasonNumber: seasonResult.season.seasonNumber,
+                          defenseTeam: knownTeam.team,
+                        })}
+                      >
+                        {t("tools.pvp.presets.findCounters")}
+                      </Link>
+                    </Button>
+                  )}
                 {knownTeam.manualTeamId && (
                   <Button
                     size="sm"

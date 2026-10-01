@@ -50,8 +50,10 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { Storage } from "@/lib/storage";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { useMutation, useQuery } from "convex/react";
+import { format, isValid, parseISO } from "date-fns";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -75,6 +77,8 @@ export type PVPMatchEditor = {
   seasonId: Id<"pvpSeason">;
   current?: Doc<"pvpMatchRecord">;
 };
+
+const lastPvpMatchDateStorage = new Storage<string>("pvp_last_match_date");
 
 export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const t = useTranslations();
@@ -175,6 +179,24 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
     setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
   }, [current, preferences.pvp.includeMatchesInStatisticsByDefault]);
+
+  useEffect(() => {
+    if (current) {
+      return;
+    }
+
+    try {
+      const saved = lastPvpMatchDateStorage.get();
+      if (saved) {
+        const parsed = parseISO(saved);
+        if (isValid(parsed)) {
+          setDate(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [current]);
 
   const handleItemUpdate = useCallback(
     (
@@ -563,6 +585,12 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           seasonId,
           ...matchData,
         });
+
+        try {
+          lastPvpMatchDateStorage.set(format(date, "yyyy-MM-dd"));
+        } catch {
+          // ignore
+        }
 
         toast.success(t("tools.pvp.toasts.matchRecorded"));
         router.push(`/pvp/${seasonId}`);
@@ -986,6 +1014,10 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
         <p className="text-sm text-muted-foreground">
           {t("tools.pvp.match.includeInStatisticsHint")}
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          {t("tools.pvp.match.includeInStatisticsPreferenceHint")}
         </p>
       </div>
 

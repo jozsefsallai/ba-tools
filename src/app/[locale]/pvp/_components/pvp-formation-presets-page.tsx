@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { buildPvpCounterSearchHref } from "@/lib/pvp-counter-link";
 import type { PVPFormationPresetType } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export function PVPFormationPresetsPage({
   const { studentMap } = useStudents();
 
   const presets = useQuery(api.pvp.listFormationPresets, { seasonId });
+  const seasonResult = useQuery(api.pvp.getSeasonDefaults, { seasonId });
   const remove = useMutation(api.pvp.deleteFormationPreset);
 
   const [filter, setFilter] = useState<PVPFormationPresetType>("both");
@@ -125,7 +127,22 @@ export function PVPFormationPresetsPage({
                   </span>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap justify-end gap-2">
+                  {(preset.matchType === "defense" ||
+                    preset.matchType === "both") &&
+                    seasonResult?.season?.seasonNumber && (
+                      <Button size="sm" variant="outline" asChild>
+                        <Link
+                          href={buildPvpCounterSearchHref({
+                            seasonNumber: seasonResult.season.seasonNumber,
+                            defenseTeam: preset.team,
+                          })}
+                        >
+                          {t("tools.pvp.presets.findCounters")}
+                        </Link>
+                      </Button>
+                    )}
+
                   <Button size="sm" variant="outline" asChild>
                     <Link
                       href={`/pvp/${seasonId}/presets/formations/${preset._id}`}

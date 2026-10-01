@@ -198,6 +198,35 @@ html[lang="ja"] {
   appearance: textfield;
 }
 
+.pvp-match-actions {
+  order: 2;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pvp-match-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: color-mix(in oklab, var(--background) 95%, transparent);
+    padding: 0.25rem;
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-0.25rem);
+    transition: opacity 150ms ease, transform 150ms ease;
+  }
+
+  .pvp-match-card:hover .pvp-match-actions,
+  .pvp-match-card:focus-within .pvp-match-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+}
+
 @keyframes embarrassed-shake {
   0%,
   100% {

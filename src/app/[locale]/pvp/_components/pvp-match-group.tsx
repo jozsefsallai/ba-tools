@@ -23,6 +23,7 @@ export type PVPMatchGroupProps = {
     | "LoadingMore"
     | "Exhausted";
   loadMore: (numItems: number) => void;
+  seasonNumber?: number;
 };
 
 export function PVPMatchGroup({
@@ -30,6 +31,7 @@ export function PVPMatchGroup({
   group,
   paginationStatus,
   loadMore,
+  seasonNumber,
 }: PVPMatchGroupProps) {
   const t = useTranslations();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_MATCHES);
@@ -108,7 +110,12 @@ export function PVPMatchGroup({
         )}
 
         {group.matches.slice(0, visibleCount).map((match) => (
-          <PVPMatch key={match._id} seasonId={seasonId} match={match} />
+          <PVPMatch
+            key={match._id}
+            seasonId={seasonId}
+            seasonNumber={seasonNumber}
+            match={match}
+          />
         ))}
 
         {showLoadMoreButton && (

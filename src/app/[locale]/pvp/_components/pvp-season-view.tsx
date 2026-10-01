@@ -1,7 +1,10 @@
 "use client";
 
 import { PVPBulkImportDialog } from "@/app/[locale]/pvp/_components/pvp-bulk-import-dialog";
-import { PVPMatchesList } from "@/app/[locale]/pvp/_components/pvp-matches-list";
+import {
+  PVPMatchesList,
+  parsePvpAgendaDate,
+} from "@/app/[locale]/pvp/_components/pvp-matches-list";
 import { PVPSeasonEditDialog } from "@/app/[locale]/pvp/_components/pvp-season-edit-dialog";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
@@ -12,7 +15,7 @@ import { Link } from "@/i18n/navigation";
 import { isSuperUser } from "@/lib/auth/super-user";
 import { useQueryWithStatus } from "@/lib/convex";
 import { useUser } from "@clerk/nextjs";
-import { format, startOfDay, subDays } from "date-fns";
+import { format, subDays } from "date-fns";
 import { CalendarDaysIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -30,9 +33,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
   const { preferences, savePreferences } = useUserPreferences();
   const searchParams = useSearchParams();
 
-  const end = searchParams.get("end")
-    ? startOfDay(new Date(searchParams.get("end") as string))
-    : startOfDay(new Date());
+  const end = parsePvpAgendaDate(searchParams.get("end"));
 
   const query = useQueryWithStatus(api.pvp.getSeason, { seasonId });
 
@@ -96,9 +97,9 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex min-w-0 flex-col gap-10">
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2 items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-xl font-bold">
@@ -116,7 +117,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
             <PVPSeasonEditDialog season={season} />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {isSuperUser(user) && <PVPBulkImportDialog seasonId={seasonId} />}
 
             <Button variant="outline" asChild>
@@ -139,7 +140,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
             </Button>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2">
           <span className="text-sm text-muted-foreground">
             {t("tools.pvp.season.displayingDateRange", {
               start: format(subDays(end, 6), "MMM d, yyyy"),
@@ -147,7 +148,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
             })}
           </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Label htmlFor="pvp-hide-empty-days">
               {t("tools.pvp.season.hideEmptyDays")}
             </Label>
@@ -163,6 +164,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
 
       <PVPMatchesList
         seasonId={seasonId}
+        seasonNumber={season.seasonNumber}
         hideEmptyDays={preferences.pvp.hideEmptyAgendaDays}
       />
     </div>

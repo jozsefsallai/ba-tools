@@ -98,9 +98,9 @@ export function PVPFormation({
   }, [studentRep]);
 
   return (
-    <div className="flex flex-col gap-2 items-center">
+    <div className="flex min-w-0 flex-col items-center gap-2">
       {showHeader && (
-        <div className="flex items-center gap-2">
+        <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-center">
           {kind === "attack" && <SwordIcon />}
           {kind === "defense" && <ShieldIcon />}
 
@@ -136,8 +136,11 @@ export function PVPFormation({
         </div>
       )}
 
-      <div className="flex items-center gap-3" style={{ zoom: 0.8 }}>
-        <div className="flex items-center gap-[2px]">
+      <div
+        className="flex max-w-full flex-wrap items-center justify-center gap-3"
+        style={{ zoom: 0.8 }}
+      >
+        <div className="flex flex-wrap items-center justify-center gap-[2px]">
           {strikers.map((item, idx) =>
             item.student ? (
               <StudentCard
@@ -153,7 +156,7 @@ export function PVPFormation({
           )}
         </div>
 
-        <div className="flex items-center gap-[2px]">
+        <div className="flex flex-wrap items-center justify-center gap-[2px]">
           {specials.map((item, idx) =>
             item.student ? (
               <StudentCard
@@ -171,10 +174,12 @@ export function PVPFormation({
       </div>
 
       {damageChartOpen && (
-        <PVPFormationDamageChart
-          formation={formation}
-          highestDamage={highestDamage}
-        />
+        <div className="max-w-full overflow-x-auto">
+          <PVPFormationDamageChart
+            formation={formation}
+            highestDamage={highestDamage}
+          />
+        </div>
       )}
     </div>
   );

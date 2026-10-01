@@ -45,6 +45,48 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 1, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added a button to search for counters directly from opponent formations, formation presets, and recorded matches.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added a button to share a counter search setup (season and defense formation). Other filters remain the same.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added a formation type filter for opponent formations.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added notice about how to change the default behavior of including matches in statistics.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added ability to jump to a particular date in the agenda view.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "When creating matches, the last selected date will be used by default. This makes it easier to backfill older matches. The setting is saved on-device and does not sync across devices.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Fixed layout issues on smaller screen resoultions.",
+      },
+    ],
+  },
+  {
     date: "September 30, 2026",
     features: [
       {
