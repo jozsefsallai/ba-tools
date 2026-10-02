@@ -448,7 +448,15 @@ export default defineSchema({
     attackTeamKey: v.string(),
     defenseTeamKey: v.string(),
     attackWon: v.boolean(),
-  }).index("by_matchId", ["matchId"]),
+    videoUrl: v.optional(v.string()),
+  })
+    .index("by_matchId", ["matchId"])
+    .index("by_matchup_videoUrl", [
+      "seasonNumber",
+      "defenseTeamKey",
+      "attackTeamKey",
+      "videoUrl",
+    ]),
 
   pvpStatsAggregate: defineTable({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),

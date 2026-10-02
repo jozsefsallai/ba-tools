@@ -14,6 +14,7 @@ import type * as formation from "../formation.js";
 import type * as gifts from "../gifts.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_pvpVideo from "../lib/pvpVideo.js";
 import type * as lib_teamKey from "../lib/teamKey.js";
 import type * as migrations from "../migrations.js";
 import type * as planaChat from "../planaChat.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   gifts: typeof gifts;
   http: typeof http;
   "lib/auth": typeof lib_auth;
+  "lib/pvpVideo": typeof lib_pvpVideo;
   "lib/teamKey": typeof lib_teamKey;
   migrations: typeof migrations;
   planaChat: typeof planaChat;

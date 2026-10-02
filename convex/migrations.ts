@@ -1,6 +1,7 @@
 import { Migrations } from "@convex-dev/migrations";
-import { components, internal } from "./_generated/api";
-import type { DataModel } from "./_generated/dataModel";
+import { components, internal } from "~convex/api";
+import type { DataModel } from "~convex/dataModel";
+import { getPvpVideoUrl } from "./lib/pvpVideo";
 import { getTeamKey } from "./lib/teamKey";
 import schema from "./schema";
 
@@ -60,4 +61,18 @@ export const runPvpTeamKeyBackfill = migrations.runner([
   internal.migrations.backfillPvpEnemyTeamKeys,
   internal.migrations.backfillPvpMatchTeamKeys,
   internal.migrations.backfillPvpEnemyPresetRecency,
+]);
+
+export const backfillPvpStatsVideos = migrations.define({
+  table: "pvpStatsContribution",
+  migrateOne: async (ctx, contribution) => {
+    const match = await ctx.db.get(contribution.matchId);
+    return {
+      videoUrl: getPvpVideoUrl(match?.videoUrl),
+    };
+  },
+});
+
+export const runPvpVideoBackfill = migrations.runner([
+  internal.migrations.backfillPvpStatsVideos,
 ]);

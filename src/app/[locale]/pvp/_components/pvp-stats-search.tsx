@@ -1,5 +1,6 @@
 "use client";
 
+import { PVPCounterVideos } from "@/app/[locale]/pvp/_components/pvp-counter-videos";
 import { PVPDefenseTeamStrip } from "@/app/[locale]/pvp/_components/pvp-defense-team-strip";
 import { PVPFormation } from "@/app/[locale]/pvp/_components/pvp-formation";
 import { PVPStatsStatus } from "@/app/[locale]/pvp/_components/pvp-stats-status";
@@ -585,6 +586,15 @@ export function PVPStatsSearch() {
                   })}
                 </div>
               </div>
+
+              {submittedSearch && (
+                <PVPCounterVideos
+                  key={`${submittedSearch.seasonNumber}-${submittedSearch.defenseTeam.map((item) => item.studentId).join("-")}`}
+                  seasonNumber={submittedSearch.seasonNumber}
+                  attackTeam={result.attackTeam}
+                  defenseTeam={submittedSearch.defenseTeam}
+                />
+              )}
             </CardContent>
           </Card>
         ))}

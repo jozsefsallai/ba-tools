@@ -1,9 +1,13 @@
 import { PVP_SEASONS } from "@/lib/types";
-import { paginationOptsValidator } from "convex/server";
+import {
+  paginationOptsValidator,
+  paginationResultValidator,
+} from "convex/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-import type { Doc } from "./_generated/dataModel";
-import { internalMutation, query } from "./_generated/server";
+import { internal } from "~convex/api";
+import type { Doc } from "~convex/dataModel";
+import { internalMutation, query } from "~convex/server";
+import { getPvpVideoUrl } from "./lib/pvpVideo";
 import { getTeamKey } from "./lib/teamKey";
 
 type Team = Array<{ studentId?: string }>;
@@ -324,12 +328,16 @@ async function processPending(ctx: any, pending: any) {
 
   if (!pending.remove) {
     await addContribution(ctx, pending);
+
+    const match = await ctx.db.get(pending.matchId);
+
     await ctx.db.insert("pvpStatsContribution", {
       matchId: pending.matchId,
       seasonNumber: pending.seasonNumber,
       attackTeamKey: pending.attackTeamKey,
       defenseTeamKey: pending.defenseTeamKey,
       attackWon: pending.attackWon,
+      videoUrl: getPvpVideoUrl(match?.videoUrl),
     });
   }
 
@@ -504,6 +512,70 @@ export const search = query({
       page: filteredPage,
       isDone,
       continueCursor,
+    };
+  },
+});
+
+export const getMatchVideos = query({
+  args: {
+    seasonNumber: seasonNumberValidator,
+    attackTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+    defenseTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+    paginationOpts: paginationOptsValidator,
+  },
+  returns: paginationResultValidator(v.string()),
+  handler: async (
+    ctx,
+    { seasonNumber, attackTeam, defenseTeam, paginationOpts },
+  ) => {
+    validatePvpTeam(attackTeam);
+    validatePvpTeam(defenseTeam);
+
+    const attackTeamKey = getTeamKey(attackTeam);
+    const defenseTeamKey = getTeamKey(defenseTeam);
+
+    const page = await ctx.db
+      .query("pvpStatsContribution")
+      .withIndex("by_matchup_videoUrl", (q) =>
+        q
+          .eq("seasonNumber", seasonNumber)
+          .eq("defenseTeamKey", defenseTeamKey)
+          .eq("attackTeamKey", attackTeamKey)
+          .gt("videoUrl", undefined),
+      )
+      .paginate({
+        ...paginationOpts,
+        numItems: Math.min(paginationOpts.numItems, 20),
+        maximumRowsRead: Math.min(paginationOpts.maximumRowsRead ?? 30, 30),
+      });
+
+    const videos = await Promise.all(
+      page.page.map(async (contribution) => {
+        const match = await ctx.db.get(contribution.matchId);
+
+        if (!match?.includeInStatistics) {
+          return null;
+        }
+
+        const season = await ctx.db.get(match.seasonId);
+        const normalized = normalizeMatchForStats(match, season?.seasonNumber);
+
+        if (
+          !normalized ||
+          normalized.seasonNumber !== seasonNumber ||
+          normalized.attackTeamKey !== attackTeamKey ||
+          normalized.defenseTeamKey !== defenseTeamKey
+        ) {
+          return null;
+        }
+
+        return getPvpVideoUrl(match.videoUrl) ?? null;
+      }),
+    );
+
+    return {
+      ...page,
+      page: videos.filter((url): url is string => url !== null),
     };
   },
 });

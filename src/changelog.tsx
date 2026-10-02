@@ -50,6 +50,11 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
+          "Public PVP counter search results now show video links from shared matches when available.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
           "When recording a match, there is now a toggle which lets you pick the last used date or today's date. This setting persists on-device.",
       },
       {
