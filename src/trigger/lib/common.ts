@@ -102,6 +102,24 @@ export type RawStudentData = {
   LinkedCharacterId?: number | null;
   SearchTags: string[];
   Gear?: RawGearData;
+  StabilityPoint?: number;
+  AttackPower1?: number;
+  AttackPower100?: number;
+  MaxHP1?: number;
+  MaxHP100?: number;
+  DefensePower1?: number;
+  DefensePower100?: number;
+  HealPower1?: number;
+  HealPower100?: number;
+  DodgePoint?: number;
+  AccuracyPoint?: number;
+  CriticalPoint?: number;
+  CriticalDamageRate?: number;
+  AmmoCount?: number;
+  AmmoCost?: number;
+  Range?: number;
+  SightPoint?: number;
+  RegenCost?: number;
 };
 
 export async function fetchStudentsData(): Promise<

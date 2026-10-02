@@ -225,6 +225,26 @@ model Student {
   usesCover               Boolean
   equipment               EquipmentKind[]
 
+  // Student stats
+  stability         Int @default(0)
+  atkLevel1         Int @default(0)
+  atkLevel100       Int @default(0)
+  maxHPLevel1       Int @default(0)
+  maxHPLevel100     Int @default(0)
+  defLevel1         Int @default(0)
+  defLevel100       Int @default(0)
+  healLevel1        Int @default(0)
+  healLevel100      Int @default(0)
+  evasion           Int @default(0)
+  accuracy          Int @default(0)
+  crit              Int @default(0)
+  critDamagePercent Int @default(0)
+  ammoCount         Int @default(0)
+  ammoCost          Int @default(0)
+  range             Int @default(0)
+  sightRange        Int @default(0)
+  regenCost         Int @default(0)
+
   hasBondGearJP     Boolean @default(false)
   hasBondGearGlobal Boolean @default(false)
   hasBondGearCN     Boolean @default(false)
