@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
@@ -79,6 +80,7 @@ export type PVPMatchEditor = {
 };
 
 const lastPvpMatchDateStorage = new Storage<string>("pvp_last_match_date");
+const pvpDateModeStorage = new Storage<"today" | "last">("pvp_date_mode");
 
 export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const t = useTranslations();
@@ -89,6 +91,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [lastDate, setLastDate] = useState<Date>();
+  const [dateMode, setDateMode] = useState<"today" | "last">("today");
 
   const [date, setDate] = useState<Date>(new Date());
   const [ownRank, setOwnRank] = useState<number | undefined>();
@@ -204,16 +207,53 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   useEffect(() => {
     try {
       const saved = lastPvpMatchDateStorage.get();
+      const savedMode = pvpDateModeStorage.get();
+
       if (saved) {
         const parsed = parseISO(saved);
+
         if (isValid(parsed)) {
           setLastDate(parsed);
+
+          if (!current && savedMode === "last") {
+            setDateMode("last");
+            setDate(parsed);
+          }
         }
       }
     } catch {
       // ignore
     }
-  }, []);
+  }, [current]);
+
+  function setDateModeAndDefault(mode: "today" | "last") {
+    if (mode === "last" && !lastDate) {
+      return;
+    }
+
+    setDateMode(mode);
+    setDate(mode === "last" ? (lastDate ?? new Date()) : new Date());
+
+    try {
+      pvpDateModeStorage.set(mode);
+    } catch {
+      // ignore
+    }
+  }
+
+  function handleDateSelection(nextDate: Date | undefined) {
+    const selectedDate = nextDate ?? new Date();
+    setDate(selectedDate);
+
+    if (dateMode === "last") {
+      setLastDate(selectedDate);
+      try {
+        lastPvpMatchDateStorage.set(format(selectedDate, "yyyy-MM-dd"));
+      } catch {
+        // ignore
+      }
+    }
+  }
 
   const handleItemUpdate = useCallback(
     (
@@ -949,7 +989,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                   selected={date}
                   captionLayout="dropdown"
                   onSelect={(date) => {
-                    setDate(date ?? new Date());
+                    handleDateSelection(date);
                     setDatePopoverOpen(false);
                   }}
                 />
@@ -957,26 +997,33 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             </Popover>
 
             {!current && (
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
+              <ToggleGroup
+                type="single"
+                value={dateMode}
+                variant="default"
+                size="sm"
+                className="gap-1 rounded-lg border bg-muted/40 p-1 shadow-sm"
+                onValueChange={(value) => {
+                  if (value === "today" || value === "last") {
+                    setDateModeAndDefault(value);
+                  }
+                }}
+              >
+                <ToggleGroupItem
+                  value="last"
                   disabled={!lastDate}
-                  onClick={() => lastDate && setDate(lastDate)}
+                  className="rounded-md px-3 text-xs font-semibold hover:text-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground data-[state=on]:shadow-sm"
                 >
                   {t("tools.pvp.match.last")}
-                </Button>
+                </ToggleGroupItem>
 
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setDate(new Date())}
+                <ToggleGroupItem
+                  value="today"
+                  className="rounded-md px-3 text-xs font-semibold hover:text-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground data-[state=on]:shadow-sm"
                 >
                   {t("tools.pvp.match.today")}
-                </Button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             )}
           </div>
         </div>

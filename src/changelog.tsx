@@ -50,7 +50,7 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
-          "When recording a match, there are now buttons which lets you pick the last used date or today's date.",
+          "When recording a match, there is now a toggle which lets you pick the last used date or today's date. This setting persists on-device.",
       },
       {
         scope: CHANGELOG_SCOPES.pvp,
@@ -66,12 +66,12 @@ export const CHANGELOG: ChangelogItemData[] = [
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
-          "Recording new matches will no longer use the last selected date by default.",
+          "The opponent presets page and the opponent picker in the match editor will now sort opponents in the order of when they were last encountered.",
       },
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
-          "The opponent presets page and the opponent picker in the match editor will now sort opponents in the order of when they were last encountered.",
+          "Moved the save button of the match editor to the bottom right corner of the page.",
       },
     ],
     fixes: [
