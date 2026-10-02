@@ -52,7 +52,7 @@ import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Storage } from "@/lib/storage";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { format, isValid, parseISO } from "date-fns";
 import {
   ChevronDownIcon,
@@ -88,6 +88,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const router = useRouter();
 
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  const [lastDate, setLastDate] = useState<Date>();
 
   const [date, setDate] = useState<Date>(new Date());
   const [ownRank, setOwnRank] = useState<number | undefined>();
@@ -153,10 +154,30 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     seasonId,
     search: useDebounce(enemyFormationSearch, 250),
   });
-  const enemyPresets = useQuery(api.pvp.listEnemyPresets, {
-    seasonId,
-    search: useDebounce(enemyPresetSearch, 250),
-  });
+  const debouncedEnemyPresetSearch = useDebounce(enemyPresetSearch, 250);
+  const {
+    results: enemyPresets,
+    status: enemyPresetStatus,
+    loadMore: loadMoreEnemyPresets,
+  } = usePaginatedQuery(
+    api.pvp.listEnemyPresets,
+    { seasonId, search: debouncedEnemyPresetSearch },
+    { initialNumItems: 30 },
+  );
+  const selectedEnemyPreset = useQuery(
+    api.pvp.getEnemyPreset,
+    enemyPresetId ? { seasonId, presetId: enemyPresetId } : "skip",
+  );
+  const matchingEnemyPreset = useQuery(
+    api.pvp.getEnemyPresetByName,
+    opponentName.trim()
+      ? {
+          seasonId,
+          name: opponentName.trim(),
+          opponentStudentRepId: opponentStudentRep?.id,
+        }
+      : "skip",
+  );
   const enemyTeams = useQuery(
     api.pvp.getEnemyPresetTeams,
     enemyPresetId ? { presetId: enemyPresetId } : "skip",
@@ -181,22 +202,18 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   }, [current, preferences.pvp.includeMatchesInStatisticsByDefault]);
 
   useEffect(() => {
-    if (current) {
-      return;
-    }
-
     try {
       const saved = lastPvpMatchDateStorage.get();
       if (saved) {
         const parsed = parseISO(saved);
         if (isValid(parsed)) {
-          setDate(parsed);
+          setLastDate(parsed);
         }
       }
     } catch {
       // ignore
     }
-  }, [current]);
+  }, []);
 
   const handleItemUpdate = useCallback(
     (
@@ -397,9 +414,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       return;
     }
 
-    const attachedPreset = enemyPresets?.find(
-      (preset) => preset._id === enemyPresetId,
-    );
+    const attachedPreset =
+      selectedEnemyPreset ??
+      enemyPresets.find((preset) => preset._id === enemyPresetId);
 
     const presetName = saveEnemyPresetName.trim();
 
@@ -422,17 +439,15 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     toast.success(t("tools.pvp.presets.enemySaved"));
   }
 
-  const attachedOpponentPreset = enemyPresets?.find(
-    (preset) => preset._id === enemyPresetId,
-  );
+  const attachedOpponentPreset =
+    selectedEnemyPreset ??
+    enemyPresets.find((preset) => preset._id === enemyPresetId);
 
   const normalizedOpponentName = opponentName.trim().toLocaleLowerCase();
 
-  const matchingOpponentPreset = enemyPresets?.some(
-    (preset) =>
-      (preset.opponentName ?? preset.name).trim().toLocaleLowerCase() ===
-        normalizedOpponentName &&
-      preset.opponentStudentRepId === opponentStudentRep?.id,
+  const matchingOpponentPreset = Boolean(
+    matchingEnemyPreset &&
+      matchingEnemyPreset.opponentStudentRepId === opponentStudentRep?.id,
   );
 
   const canSaveOpponent =
@@ -588,6 +603,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
         try {
           lastPvpMatchDateStorage.set(format(date, "yyyy-MM-dd"));
+          setLastDate(date);
         } catch {
           // ignore
         }
@@ -912,32 +928,57 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             {t("tools.pvp.match.date")}
           </Label>
 
-          <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                id="match-date"
-                className="justify-between"
-              >
-                {date.toLocaleDateString()} <ChevronDownIcon />
-              </Button>
-            </PopoverTrigger>
+          <div className="flex items-center gap-2">
+            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="match-date"
+                  className="min-w-0 flex-1 justify-between"
+                >
+                  {date.toLocaleDateString()} <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
 
-            <PopoverContent
-              className="w-auto overflow-hidden p-0"
-              align="start"
-            >
-              <Calendar
-                mode="single"
-                selected={date}
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  setDate(date ?? new Date());
-                  setDatePopoverOpen(false);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    setDate(date ?? new Date());
+                    setDatePopoverOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+
+            {!current && (
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={!lastDate}
+                  onClick={() => lastDate && setDate(lastDate)}
+                >
+                  {t("tools.pvp.match.last")}
+                </Button>
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDate(new Date())}
+                >
+                  {t("tools.pvp.match.today")}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -1109,17 +1150,22 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             <PVPPresetPicker
               presets={enemyPresets}
               placeholder={
-                enemyPresets?.find((item) => item._id === enemyPresetId)
-                  ?.name ?? t("tools.pvp.presetPicker.attachEnemy")
+                selectedEnemyPreset?.name ??
+                t("tools.pvp.presetPicker.attachEnemy")
               }
               className="w-1/2 min-w-44"
               studentMap={studentMap}
               search={enemyPresetSearch}
               onSearchChange={setEnemyPresetSearch}
+              paginationStatus={enemyPresetStatus}
+              loadMore={loadMoreEnemyPresets}
               onSelect={(value) => {
                 setEnemyPresetId(value as Id<"pvpEnemyPreset">);
 
-                const preset = enemyPresets?.find((item) => item._id === value);
+                const preset =
+                  value === selectedEnemyPreset?._id
+                    ? selectedEnemyPreset
+                    : enemyPresets.find((item) => item._id === value);
 
                 if (!preset) {
                   return;
@@ -1353,12 +1399,14 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         </Card>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent z-50 p-4 pt-8 flex justify-center">
-        <Button onClick={handleWantsToUpdate} disabled={isSaving}>
-          <SaveIcon />
-          {isSaving ? t("common.saving") : t("common.saveChanges")}
-        </Button>
-      </div>
+      <Button
+        className="fixed bottom-4 right-4 z-50"
+        onClick={handleWantsToUpdate}
+        disabled={isSaving}
+      >
+        <SaveIcon />
+        {isSaving ? t("common.saving") : t("common.saveChanges")}
+      </Button>
     </div>
   );
 }

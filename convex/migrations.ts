@@ -33,8 +33,31 @@ export const backfillPvpMatchTeamKeys = migrations.define({
   }),
 });
 
+export const backfillPvpEnemyPresetRecency = migrations.define({
+  table: "pvpEnemyPreset",
+  migrateOne: async (ctx, preset) => {
+    const matches = await ctx.db
+      .query("pvpMatchRecord")
+      .withIndex("by_enemyPresetId_date", (q) =>
+        q.eq("enemyPresetId", preset._id),
+      )
+      .collect();
+
+    const lastRecordedAt = matches.reduce<number | undefined>(
+      (latest, match) =>
+        latest === undefined || match._creationTime > latest
+          ? match._creationTime
+          : latest,
+      undefined,
+    );
+
+    return { lastRecordedAt };
+  },
+});
+
 export const runPvpTeamKeyBackfill = migrations.runner([
   internal.migrations.backfillPvpFormationPresetTeamKeys,
   internal.migrations.backfillPvpEnemyTeamKeys,
   internal.migrations.backfillPvpMatchTeamKeys,
+  internal.migrations.backfillPvpEnemyPresetRecency,
 ]);

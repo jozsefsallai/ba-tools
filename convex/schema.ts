@@ -369,9 +369,15 @@ export default defineSchema({
     name: v.string(),
     opponentName: v.optional(v.string()),
     opponentStudentRepId: v.optional(v.string()),
+    lastRecordedAt: v.optional(v.number()),
   })
     .index("by_seasonId", ["seasonId"])
     .index("by_userId_seasonId", ["userId", "seasonId"])
+    .index("by_userId_seasonId_lastRecordedAt", [
+      "userId",
+      "seasonId",
+      "lastRecordedAt",
+    ])
     .index("by_seasonId_opponentName", ["seasonId", "opponentName"]),
 
   pvpEnemyTeam: defineTable({

@@ -17,7 +17,7 @@ import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDownIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Student } from "~prisma";
 
 type PresetOption = {
@@ -35,6 +35,8 @@ export function PVPPresetPicker({
   studentMap,
   search,
   onSearchChange,
+  paginationStatus,
+  loadMore,
 }: {
   presets: PresetOption[] | undefined;
   placeholder: string;
@@ -43,10 +45,55 @@ export function PVPPresetPicker({
   studentMap?: Record<string, Student>;
   search: string;
   onSearchChange: (value: string) => void;
+  paginationStatus?:
+    | "LoadingFirstPage"
+    | "CanLoadMore"
+    | "LoadingMore"
+    | "Exhausted";
+  loadMore?: (numItems: number) => void;
 }) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
-  const loading = presets === undefined;
+  const loadingMoreRef = useRef(false);
+  const loading =
+    presets === undefined || paginationStatus === "LoadingFirstPage";
+
+  useEffect(() => {
+    loadingMoreRef.current = paginationStatus === "LoadingMore";
+  }, [paginationStatus]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const list = document.querySelector<HTMLElement>(
+      "[data-slot=command-list]",
+    );
+
+    if (list) {
+      list.scrollTop = 0;
+    }
+  }, [open, search]);
+
+  useEffect(() => {
+    if (!open || paginationStatus !== "CanLoadMore" || !loadMore) {
+      return;
+    }
+
+    const list = document.querySelector<HTMLElement>(
+      "[data-slot=command-list]",
+    );
+
+    if (
+      list &&
+      list.scrollTop + list.clientHeight >= list.scrollHeight - 100 &&
+      !loadingMoreRef.current
+    ) {
+      loadingMoreRef.current = true;
+      loadMore(30);
+    }
+  }, [loadMore, open, paginationStatus, presets?.length]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -70,7 +117,22 @@ export function PVPPresetPicker({
             onValueChange={onSearchChange}
           />
 
-          <CommandList>
+          <CommandList
+            onScroll={(event) => {
+              if (
+                paginationStatus === "CanLoadMore" &&
+                loadMore &&
+                event.currentTarget.scrollTop +
+                  event.currentTarget.clientHeight >=
+                  event.currentTarget.scrollHeight - 100
+              ) {
+                if (!loadingMoreRef.current) {
+                  loadingMoreRef.current = true;
+                  loadMore(30);
+                }
+              }
+            }}
+          >
             <CommandEmpty>{t("tools.pvp.presetPicker.empty")}</CommandEmpty>
 
             {(presets ?? []).map((preset) => (
@@ -123,6 +185,12 @@ export function PVPPresetPicker({
                 )}
               </CommandItem>
             ))}
+
+            {paginationStatus === "LoadingMore" && (
+              <div className="px-3 py-2 text-center text-xs text-muted-foreground">
+                {t("common.loadingMore")}
+              </div>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

@@ -6,6 +6,7 @@ import {
   type StarLevel,
   type UELevel,
 } from "@/lib/types";
+import { stream } from "convex-helpers/server/stream";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import {
@@ -21,9 +22,55 @@ import {
   queueSeasonRebuild,
   validatePvpTeam,
 } from "./pvpStats";
-import { pvpFormationStudentItem } from "./schema";
+import schema, { pvpFormationStudentItem } from "./schema";
 
 const emptyTeam = () => [{}, {}, {}, {}, {}, {}];
+
+async function updateEnemyPresetRecency(ctx: any, presetId: any) {
+  const preset = await ctx.db.get(presetId);
+  if (!preset) {
+    return;
+  }
+
+  const matches = await ctx.db
+    .query("pvpMatchRecord")
+    .withIndex("by_enemyPresetId_date", (q: any) =>
+      q.eq("enemyPresetId", presetId),
+    )
+    .collect();
+
+  const lastRecordedAt = matches.reduce(
+    (latest: number | undefined, match: any) =>
+      latest === undefined || match._creationTime > latest
+        ? match._creationTime
+        : latest,
+    undefined,
+  );
+
+  if (preset.lastRecordedAt !== lastRecordedAt) {
+    await ctx.db.patch(presetId, { lastRecordedAt });
+  }
+}
+
+async function validateEnemyPresetForMatch(
+  ctx: any,
+  presetId: any,
+  seasonId: any,
+) {
+  if (!presetId) {
+    return;
+  }
+
+  const preset = await ctx.db.get(presetId);
+
+  if (
+    !preset ||
+    preset.userId !== ctx.user._id ||
+    preset.seasonId !== seasonId
+  ) {
+    throw new Error("Opponent preset not found");
+  }
+}
 
 function withoutDamage(
   team: Array<{
@@ -393,6 +440,42 @@ export const getMatchesForDay = authenticatedQuery({
   },
 });
 
+export const getDayStats = authenticatedQuery({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    dayStart: v.number(),
+    dayEnd: v.number(),
+  },
+  handler: async (ctx, { seasonId, dayStart, dayEnd }) => {
+    await getSeasonForUser(ctx, seasonId);
+
+    const matches = await ctx.db
+      .query("pvpMatchRecord")
+      .withIndex("by_seasonId_date", (q) =>
+        q.eq("seasonId", seasonId).gte("date", dayStart).lt("date", dayEnd),
+      )
+      .collect();
+
+    return matches.reduce(
+      (stats, match) => {
+        const key = match.matchType === "attack" ? "attack" : "defense";
+
+        if (match.result === "win") {
+          stats[key].wins += 1;
+        } else {
+          stats[key].losses += 1;
+        }
+
+        return stats;
+      },
+      {
+        attack: { wins: 0, losses: 0 },
+        defense: { wins: 0, losses: 0 },
+      },
+    );
+  },
+});
+
 export const listFormationPresets = authenticatedQuery({
   args: { seasonId: v.id("pvpSeason"), search: v.optional(v.string()) },
   handler: async (ctx, { seasonId, search }) => {
@@ -414,32 +497,64 @@ export const listFormationPresets = authenticatedQuery({
 });
 
 export const listEnemyPresets = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason"), search: v.optional(v.string()) },
-  handler: async (ctx, { seasonId, search }) => {
+  args: {
+    seasonId: v.id("pvpSeason"),
+    search: v.optional(v.string()),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, { seasonId, search, paginationOpts }) => {
     await getSeasonForUser(ctx, seasonId);
+    const query = search?.trim().toLowerCase();
 
-    const presets = await ctx.db
+    const boundedPaginationOpts = {
+      ...paginationOpts,
+      numItems: Math.min(Math.max(paginationOpts.numItems, 1), 30),
+    };
+
+    const page = await stream(ctx.db, schema)
       .query("pvpEnemyPreset")
-      .withIndex("by_userId_seasonId", (q) =>
+      .withIndex("by_userId_seasonId_lastRecordedAt", (q: any) =>
         q.eq("userId", ctx.user._id).eq("seasonId", seasonId),
       )
-      .collect();
+      .order("desc")
+      .filterWith(async (preset: any) =>
+        query
+          ? preset.name.toLowerCase().includes(query) ||
+            preset.opponentName?.toLowerCase().includes(query)
+          : true,
+      )
+      .paginate(boundedPaginationOpts);
 
-    const query = search?.trim().toLowerCase();
-    const filtered = query
-      ? presets.filter(
-          (preset) =>
-            preset.name.toLowerCase().includes(query) ||
-            preset.opponentName?.toLowerCase().includes(query),
-        )
-      : presets;
+    return {
+      ...page,
+      page: await Promise.all(
+        page.page.map(async (preset: any) => ({
+          ...preset,
+          latestTeam: (await getUniqueEnemyTeamsForPreset(ctx, preset))[0]
+            ?.team,
+        })),
+      ),
+    };
+  },
+});
 
-    return await Promise.all(
-      filtered.map(async (preset) => ({
-        ...preset,
-        latestTeam: (await getUniqueEnemyTeamsForPreset(ctx, preset))[0]?.team,
-      })),
-    );
+export const getEnemyPreset = authenticatedQuery({
+  args: { seasonId: v.id("pvpSeason"), presetId: v.id("pvpEnemyPreset") },
+  handler: async (ctx, { seasonId, presetId }) => {
+    const preset = await ctx.db.get(presetId);
+
+    if (
+      !preset ||
+      preset.userId !== ctx.user._id ||
+      preset.seasonId !== seasonId
+    ) {
+      throw new Error("Preset not found");
+    }
+
+    return {
+      ...preset,
+      latestTeam: (await getUniqueEnemyTeamsForPreset(ctx, preset))[0]?.team,
+    };
   },
 });
 
@@ -456,17 +571,29 @@ export const getEnemyPresetTeams = authenticatedQuery({
 });
 
 export const getEnemyPresetByName = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason"), name: v.string() },
-  handler: async (ctx, { seasonId, name }) => {
+  args: {
+    seasonId: v.id("pvpSeason"),
+    name: v.string(),
+    opponentStudentRepId: v.optional(v.string()),
+  },
+  handler: async (ctx, { seasonId, name, opponentStudentRepId }) => {
     await getSeasonForUser(ctx, seasonId);
 
-    return await ctx.db
+    const presets = await ctx.db
       .query("pvpEnemyPreset")
       .withIndex("by_seasonId_opponentName", (q) =>
         q.eq("seasonId", seasonId).eq("opponentName", name),
       )
       .order("asc")
-      .first();
+      .collect();
+
+    return (
+      presets.find(
+        (preset) =>
+          opponentStudentRepId === undefined ||
+          preset.opponentStudentRepId === opponentStudentRepId,
+      ) ?? null
+    );
   },
 });
 
@@ -553,6 +680,8 @@ export const recordMatch = authenticatedMutation({
     validatePvpTeam(ownTeam, "Your team");
     validatePvpTeam(opponentTeam, "Opponent team");
 
+    await validateEnemyPresetForMatch(ctx, enemyPresetId, seasonId);
+
     const matchId = await ctx.db.insert("pvpMatchRecord", {
       userId: ctx.user._id,
       seasonId,
@@ -573,6 +702,10 @@ export const recordMatch = authenticatedMutation({
     });
 
     await queueMatchStats(ctx, await ctx.db.get(matchId));
+
+    if (enemyPresetId) {
+      await updateEnemyPresetRecency(ctx, enemyPresetId);
+    }
 
     return matchId;
   },
@@ -643,8 +776,13 @@ export const clearSeasonMatches = staffMutation({
       .paginate({ numItems: 100, cursor: cursor ?? null });
 
     for (const match of page.page) {
+      const presetId = match.enemyPresetId;
       await queueMatchRemoval(ctx, match._id);
       await ctx.db.delete(match._id);
+
+      if (presetId) {
+        await updateEnemyPresetRecency(ctx, presetId);
+      }
     }
 
     return {
@@ -699,12 +837,17 @@ export const updateMatch = authenticatedMutation({
     validatePvpTeam(nextOwnTeam, "Your team");
     validatePvpTeam(nextOpponentTeam, "Opponent team");
 
+    const nextEnemyPresetId = enemyPresetId ?? match.enemyPresetId;
+    await validateEnemyPresetForMatch(ctx, nextEnemyPresetId, match.seasonId);
+
+    const previousEnemyPresetId = match.enemyPresetId;
+
     await ctx.db.patch(matchId, {
       date: date ?? match.date,
       ownRank: ownRank ?? match.ownRank,
       opponentName: opponentName ?? match.opponentName,
       opponentStudentRepId: opponentStudentRepId ?? match.opponentStudentRepId,
-      enemyPresetId: enemyPresetId ?? match.enemyPresetId,
+      enemyPresetId: nextEnemyPresetId,
       opponentRank: opponentRank ?? match.opponentRank,
       matchType: matchType ?? match.matchType,
       ownTeam: nextOwnTeam,
@@ -725,7 +868,7 @@ export const updateMatch = authenticatedMutation({
       ownRank: ownRank ?? match.ownRank,
       opponentName: opponentName ?? match.opponentName,
       opponentStudentRepId: opponentStudentRepId ?? match.opponentStudentRepId,
-      enemyPresetId: enemyPresetId ?? match.enemyPresetId,
+      enemyPresetId: nextEnemyPresetId,
       opponentRank: opponentRank ?? match.opponentRank,
       matchType: matchType ?? match.matchType,
       ownTeam: ownTeam ?? match.ownTeam,
@@ -735,6 +878,14 @@ export const updateMatch = authenticatedMutation({
       includeInStatistics:
         includeInStatistics ?? match.includeInStatistics ?? false,
     });
+
+    if (previousEnemyPresetId) {
+      await updateEnemyPresetRecency(ctx, previousEnemyPresetId);
+    }
+
+    if (nextEnemyPresetId && nextEnemyPresetId !== previousEnemyPresetId) {
+      await updateEnemyPresetRecency(ctx, nextEnemyPresetId);
+    }
 
     return await ctx.db.get(matchId);
   },
@@ -748,8 +899,13 @@ export const deleteMatch = authenticatedMutation({
       throw new Error("Match not found");
     }
 
+    const presetId = match.enemyPresetId;
     await queueMatchRemoval(ctx, matchId);
     await ctx.db.delete(matchId);
+
+    if (presetId) {
+      await updateEnemyPresetRecency(ctx, presetId);
+    }
   },
 });
 

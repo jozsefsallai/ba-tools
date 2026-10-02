@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRouter } from "@/i18n/navigation";
-import { usePaginatedQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { addDays, format, startOfDay, subDays } from "date-fns";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -74,6 +74,12 @@ function PVPMatchDay({
     { initialNumItems: DAY_PAGE_SIZE },
   );
 
+  const dayStats = useQuery(api.pvp.getDayStats, {
+    seasonId,
+    dayStart,
+    dayEnd,
+  });
+
   useEffect(() => {
     onStateChange(
       dayStart,
@@ -94,6 +100,7 @@ function PVPMatchDay({
       seasonId={seasonId}
       seasonNumber={seasonNumber}
       group={{ dayTimestamp: dayStart, matches: results }}
+      stats={dayStats}
       paginationStatus={status}
       loadMore={loadMore}
     />

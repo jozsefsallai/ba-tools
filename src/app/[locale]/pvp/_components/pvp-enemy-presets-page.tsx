@@ -2,12 +2,15 @@
 
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { useMutation, useQuery } from "convex/react";
-import { ChevronLeftIcon } from "lucide-react";
+import { useMutation, usePaginatedQuery } from "convex/react";
+import { ChevronLeftIcon, LoaderCircleIcon, SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -16,8 +19,17 @@ export function PVPEnemyPresetsPage({
 }: { seasonId: Id<"pvpSeason"> }) {
   const t = useTranslations();
   const { studentMap } = useStudents();
-
-  const presets = useQuery(api.pvp.listEnemyPresets, { seasonId });
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 250);
+  const {
+    results: presets,
+    status,
+    loadMore,
+  } = usePaginatedQuery(
+    api.pvp.listEnemyPresets,
+    { seasonId, search: debouncedSearch },
+    { initialNumItems: 30 },
+  );
   const remove = useMutation(api.pvp.deleteEnemyPreset);
 
   return (
@@ -41,11 +53,22 @@ export function PVPEnemyPresetsPage({
         </Button>
       </div>
 
-      {presets === undefined ? (
+      <div className="relative max-w-md">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+
+        <Input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder={t("tools.pvp.presets.searchEnemies")}
+          className="pl-9"
+        />
+      </div>
+
+      {status === "LoadingFirstPage" ? (
         <div className="rounded-lg border p-6 text-sm text-muted-foreground">
           {t("tools.pvp.presets.loadingEnemies")}
         </div>
-      ) : presets.length === 0 ? (
+      ) : presets.length === 0 && status === "Exhausted" ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
           {t("tools.pvp.presets.noEnemies")}
         </div>
@@ -111,6 +134,19 @@ export function PVPEnemyPresetsPage({
             );
           })}
         </div>
+      )}
+
+      {status === "CanLoadMore" && (
+        <Button variant="outline" onClick={() => loadMore(30)}>
+          {t("tools.pvp.presets.loadMoreEnemies")}
+        </Button>
+      )}
+
+      {status === "LoadingMore" && (
+        <Button variant="outline" disabled>
+          <LoaderCircleIcon className="animate-spin" />
+          {t("common.loadingMore")}
+        </Button>
       )}
     </div>
   );

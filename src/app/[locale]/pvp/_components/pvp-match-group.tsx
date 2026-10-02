@@ -24,6 +24,10 @@ export type PVPMatchGroupProps = {
     | "Exhausted";
   loadMore: (numItems: number) => void;
   seasonNumber?: number;
+  stats?: {
+    attack: { wins: number; losses: number };
+    defense: { wins: number; losses: number };
+  };
 };
 
 export function PVPMatchGroup({
@@ -32,6 +36,7 @@ export function PVPMatchGroup({
   paginationStatus,
   loadMore,
   seasonNumber,
+  stats,
 }: PVPMatchGroupProps) {
   const t = useTranslations();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_MATCHES);
@@ -57,29 +62,10 @@ export function PVPMatchGroup({
     return format(new Date(group.dayTimestamp), "MMMM d, yyyy");
   }, [group.dayTimestamp]);
 
-  const attackWins = useMemo(() => {
-    return group.matches.filter(
-      (match) => match.matchType === "attack" && match.result === "win",
-    ).length;
-  }, [group.matches]);
-
-  const attackLoses = useMemo(() => {
-    return group.matches.filter(
-      (match) => match.matchType === "attack" && match.result === "loss",
-    ).length;
-  }, [group.matches]);
-
-  const defenseWins = useMemo(() => {
-    return group.matches.filter(
-      (match) => match.matchType === "defense" && match.result === "win",
-    ).length;
-  }, [group.matches]);
-
-  const defenseLoses = useMemo(() => {
-    return group.matches.filter(
-      (match) => match.matchType === "defense" && match.result === "loss",
-    ).length;
-  }, [group.matches]);
+  const attackWins = stats?.attack.wins ?? 0;
+  const attackLoses = stats?.attack.losses ?? 0;
+  const defenseWins = stats?.defense.wins ?? 0;
+  const defenseLoses = stats?.defense.losses ?? 0;
 
   const hiddenLoadedMatches = group.matches.length - visibleCount;
   const showLoadMoreButton =
@@ -91,14 +77,20 @@ export function PVPMatchGroup({
         <h2 className="text-lg font-semibold">{formattedDate}</h2>
 
         <div className="text-sm text-muted-foreground">
-          <strong>{t("tools.pvp.matchGroup.attacks")}</strong> {attackWins}{" "}
-          {t("tools.pvp.matchGroup.won")}, {attackLoses}{" "}
-          {t("tools.pvp.matchGroup.lost")} ({attackWins + attackLoses}{" "}
-          {t("tools.pvp.matchGroup.total")}) &middot;{" "}
-          <strong>{t("tools.pvp.matchGroup.defenses")}</strong> {defenseWins}{" "}
-          {t("tools.pvp.matchGroup.won")}, {defenseLoses}{" "}
-          {t("tools.pvp.matchGroup.lost")} ({defenseWins + defenseLoses}{" "}
-          {t("tools.pvp.matchGroup.total")})
+          {stats ? (
+            <>
+              <strong>{t("tools.pvp.matchGroup.attacks")}</strong> {attackWins}{" "}
+              {t("tools.pvp.matchGroup.won")}, {attackLoses}{" "}
+              {t("tools.pvp.matchGroup.lost")} ({attackWins + attackLoses}{" "}
+              {t("tools.pvp.matchGroup.total")}) &middot;{" "}
+              <strong>{t("tools.pvp.matchGroup.defenses")}</strong>{" "}
+              {defenseWins} {t("tools.pvp.matchGroup.won")}, {defenseLoses}{" "}
+              {t("tools.pvp.matchGroup.lost")} ({defenseWins + defenseLoses}{" "}
+              {t("tools.pvp.matchGroup.total")})
+            </>
+          ) : (
+            t("common.loading")
+          )}
         </div>
       </div>
 

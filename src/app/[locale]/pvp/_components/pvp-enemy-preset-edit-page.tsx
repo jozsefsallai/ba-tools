@@ -16,10 +16,9 @@ export function PVPEnemyPresetEditPage({
 }) {
   const t = useTranslations();
 
-  const presets = useQuery(api.pvp.listEnemyPresets, { seasonId });
-  const preset = presets?.find((item) => item._id === presetId);
+  const preset = useQuery(api.pvp.getEnemyPreset, { seasonId, presetId });
 
-  if (presets === undefined) {
+  if (preset === undefined) {
     return <MessageBox>{t("tools.pvp.presets.loadingEnemy")}</MessageBox>;
   }
 

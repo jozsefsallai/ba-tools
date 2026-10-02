@@ -45,6 +45,44 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 2, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "When recording a match, there are now buttons which lets you pick the last used date or today's date.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added ability to search for opponents in the opponent presets page.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Opponent preset page now supports pagination.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Recording new matches will no longer use the last selected date by default.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "The opponent presets page and the opponent picker in the match editor will now sort opponents in the order of when they were last encountered.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Per-day PVP counts will no longer require loading all matches for that day to be accurate.",
+      },
+    ],
+  },
+  {
     date: "October 1, 2026",
     features: [
       {
