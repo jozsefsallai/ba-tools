@@ -14,6 +14,9 @@ import axios from "axios";
 
 const STUDENTS_TABLE = "https://schaledb.com/data/en/students.min.json";
 const STUDENTS_TABLE_JP = "https://schaledb.com/data/jp/students.min.json";
+const STUDENTS_TABLE_KR = "https://schaledb.com/data/kr/students.min.json";
+const STUDENTS_TABLE_TW = "https://schaledb.com/data/tw/students.min.json";
+const STUDENTS_TABLE_TH = "https://schaledb.com/data/th/students.min.json";
 
 type PerServerAttribute<T> = [jp: T, global: T, cn: T];
 
@@ -133,5 +136,26 @@ export async function fetchStudentsDataJP(): Promise<
   Record<string, RawStudentData>
 > {
   const response = await axios.get(STUDENTS_TABLE_JP);
+  return response.data;
+}
+
+export async function fetchStudentsDataKR(): Promise<
+  Record<string, RawStudentData>
+> {
+  const response = await axios.get(STUDENTS_TABLE_KR);
+  return response.data;
+}
+
+export async function fetchStudentsDataTW(): Promise<
+  Record<string, RawStudentData>
+> {
+  const response = await axios.get(STUDENTS_TABLE_TW);
+  return response.data;
+}
+
+export async function fetchStudentsDataTH(): Promise<
+  Record<string, RawStudentData>
+> {
+  const response = await axios.get(STUDENTS_TABLE_TH);
   return response.data;
 }

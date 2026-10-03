@@ -3,6 +3,9 @@ import { db } from "../lib/db";
 import {
   fetchStudentsData,
   fetchStudentsDataJP,
+  fetchStudentsDataKR,
+  fetchStudentsDataTH,
+  fetchStudentsDataTW,
   StudentLimitedType,
   type RawEffect,
   type RawStudentData,
@@ -236,9 +239,72 @@ function getStudentNameJP(student?: RawStudentData): string {
   return student.Name;
 }
 
+function getStudentNameKR(student?: RawStudentData): string {
+  if (!student) {
+    return "";
+  }
+
+  if (student.PathName === "hoshino_battle_dealer") {
+    return `${student.Name} / 딜러`;
+  }
+
+  if (student.PathName === "hoshino_battle_tank") {
+    return `${student.Name} / 탱커`;
+  }
+
+  if (student.PathName === "shunling_swimsuit") {
+    return "슈에링(수영복)";
+  }
+
+  return student.Name;
+}
+
+function getStudentNameTW(student?: RawStudentData): string {
+  if (!student) {
+    return "";
+  }
+
+  if (student.PathName === "hoshino_battle_dealer") {
+    return `${student.Name} / 輸出`;
+  }
+
+  if (student.PathName === "hoshino_battle_tank") {
+    return `${student.Name} / 坦克`;
+  }
+
+  if (student.PathName === "shunling_swimsuit") {
+    return "小旬（泳裝）";
+  }
+
+  return student.Name;
+}
+
+function getStudentNameTH(student?: RawStudentData): string {
+  if (!student) {
+    return "";
+  }
+
+  if (student.PathName === "hoshino_battle_dealer") {
+    return `${student.Name} / アタッカー`;
+  }
+
+  if (student.PathName === "hoshino_battle_tank") {
+    return `${student.Name} / タンク`;
+  }
+
+  if (student.PathName === "shunling_swimsuit") {
+    return "シュエリン（水着）";
+  }
+
+  return student.Name;
+}
+
 async function seedStudents() {
   const studentsData = await fetchStudentsData();
   const studentsDataJP = await fetchStudentsDataJP();
+  const studentsDataKR = await fetchStudentsDataKR();
+  const studentsDataTW = await fetchStudentsDataTW();
+  const studentsDataTH = await fetchStudentsDataTH();
 
   const rawStudents = Object.values(studentsData).sort(sortAltsLast);
 
@@ -260,13 +326,56 @@ async function seedStudents() {
     const jpStudent = studentsDataJP[data.Id];
     const nameJP = getStudentNameJP(jpStudent);
 
+    const krStudent = studentsDataKR[data.Id];
+    const nameKR = getStudentNameKR(krStudent);
+
+    const twStudent = studentsDataTW[data.Id];
+    const nameTW = getStudentNameTW(twStudent);
+
+    const thStudent = studentsDataTH[data.Id];
+    const nameTH = getStudentNameTH(thStudent);
+
     const studentName = getStudentName(data);
 
     const searchTagsSet = new Set<string>(data.SearchTags);
 
-    if (jpStudent && jpStudent.SearchTags.length > 0) {
-      for (const tag of jpStudent.SearchTags) {
-        searchTagsSet.add(tag);
+    if (jpStudent) {
+      searchTagsSet.add(jpStudent.Name);
+
+      if (jpStudent.SearchTags.length > 0) {
+        for (const tag of jpStudent.SearchTags) {
+          searchTagsSet.add(tag);
+        }
+      }
+    }
+
+    if (krStudent) {
+      searchTagsSet.add(krStudent.Name);
+
+      if (krStudent.SearchTags.length > 0) {
+        for (const tag of krStudent.SearchTags) {
+          searchTagsSet.add(tag);
+        }
+      }
+    }
+
+    if (twStudent) {
+      searchTagsSet.add(twStudent.Name);
+
+      if (twStudent.SearchTags.length > 0) {
+        for (const tag of twStudent.SearchTags) {
+          searchTagsSet.add(tag);
+        }
+      }
+    }
+
+    if (thStudent) {
+      searchTagsSet.add(thStudent.Name);
+
+      if (thStudent.SearchTags.length > 0) {
+        for (const tag of thStudent.SearchTags) {
+          searchTagsSet.add(tag);
+        }
       }
     }
 
@@ -283,6 +392,15 @@ async function seedStudents() {
           nameJP,
           firstNameJP: jpStudent?.PersonalName ?? "",
           lastNameJP: jpStudent?.FamilyName ?? "",
+          nameKR,
+          firstNameKR: krStudent?.PersonalName ?? "",
+          lastNameKR: krStudent?.FamilyName ?? "",
+          nameTW,
+          firstNameTW: twStudent?.PersonalName ?? "",
+          lastNameTW: twStudent?.FamilyName ?? "",
+          nameTH,
+          firstNameTH: thStudent?.PersonalName ?? "",
+          lastNameTH: thStudent?.FamilyName ?? "",
           school: data.School,
           club: data.Club,
           age: data.CharacterAge,
@@ -367,6 +485,15 @@ async function seedStudents() {
           nameJP,
           firstNameJP: jpStudent?.PersonalName ?? "",
           lastNameJP: jpStudent?.FamilyName ?? "",
+          nameKR,
+          firstNameKR: krStudent?.PersonalName ?? "",
+          lastNameKR: krStudent?.FamilyName ?? "",
+          nameTW,
+          firstNameTW: twStudent?.PersonalName ?? "",
+          lastNameTW: twStudent?.FamilyName ?? "",
+          nameTH,
+          firstNameTH: thStudent?.PersonalName ?? "",
+          lastNameTH: thStudent?.FamilyName ?? "",
           school: data.School,
           club: data.Club,
           age: data.CharacterAge,

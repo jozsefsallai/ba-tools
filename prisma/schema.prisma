@@ -200,6 +200,15 @@ model Student {
   nameJP        String  @default("")
   lastNameJP    String  @default("")
   firstNameJP   String  @default("")
+  nameKR        String  @default("")
+  lastNameKR    String  @default("")
+  firstNameKR   String  @default("")
+  nameTW        String  @default("")
+  lastNameTW    String  @default("")
+  firstNameTW   String  @default("")
+  nameTH        String  @default("")
+  lastNameTH    String  @default("")
+  firstNameTH   String  @default("")
   school        School
   club          Club
   age           String
