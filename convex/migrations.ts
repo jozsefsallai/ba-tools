@@ -76,3 +76,93 @@ export const backfillPvpStatsVideos = migrations.define({
 export const runPvpVideoBackfill = migrations.runner([
   internal.migrations.backfillPvpStatsVideos,
 ]);
+
+const legacyPvpAggregateTraitFields = ["attackTeam", "defenseTeam"] as const;
+
+export const compactPvpStatsAggregateTraits = migrations.define({
+  table: "pvpStatsAggregate",
+  migrateOne: async (ctx, doc) => {
+    const source = doc as Record<string, unknown>;
+    const next = { ...source };
+
+    let changed = false;
+
+    const attackTeam = Array.isArray(source.attackTeam)
+      ? source.attackTeam
+      : [];
+    const defenseTeam = Array.isArray(source.defenseTeam)
+      ? source.defenseTeam
+      : [];
+
+    const setSideFields = (team: unknown[], side: "attack" | "defense") => {
+      const prefix = side === "attack" ? "a" : "d";
+      const specialPrefix = side === "attack" ? "attack" : "defense";
+
+      for (let index = 0; index < 4; index += 1) {
+        const position = index + 1;
+        const teamStudentId = (
+          team[index] as { studentId?: unknown } | undefined
+        )?.studentId;
+
+        const studentId =
+          source[`${prefix}${position}StudentId`] ??
+          (typeof teamStudentId === "string" ? teamStudentId : undefined);
+
+        if (
+          studentId !== undefined &&
+          source[`${prefix}${position}StudentId`] === undefined
+        ) {
+          next[`${prefix}${position}StudentId`] = studentId;
+          changed = true;
+        }
+      }
+
+      for (const [offset, field] of [
+        [4, `${specialPrefix}S1StudentId`],
+        [5, `${specialPrefix}S2StudentId`],
+      ] as const) {
+        const studentId = (team[offset] as { studentId?: unknown } | undefined)
+          ?.studentId;
+
+        if (typeof studentId === "string" && source[field] === undefined) {
+          next[field] = studentId;
+          changed = true;
+        }
+      }
+
+      const specialKeyField = `${specialPrefix}SpecialTeamKey`;
+
+      if (source[specialKeyField] === undefined && team.length >= 6) {
+        next[specialKeyField] = getTeamKey(
+          team.slice(4) as Array<{ studentId?: string }>,
+        );
+
+        changed = true;
+      }
+    };
+
+    setSideFields(attackTeam, "attack");
+    setSideFields(defenseTeam, "defense");
+
+    for (const field of legacyPvpAggregateTraitFields) {
+      if (field in source) {
+        changed = true;
+        delete next[field];
+      }
+    }
+
+    if (changed) {
+      const compact = Object.fromEntries(
+        Object.entries(next).filter(
+          ([field]) => field !== "_id" && field !== "_creationTime",
+        ),
+      );
+
+      await ctx.db.replace(doc._id, compact as any);
+    }
+  },
+});
+
+export const runPvpStatsAggregateTraitCompaction = migrations.runner([
+  internal.migrations.compactPvpStatsAggregateTraits,
+]);

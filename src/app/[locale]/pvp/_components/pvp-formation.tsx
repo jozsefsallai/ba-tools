@@ -7,12 +7,19 @@ import type {
 } from "@/app/[locale]/pvp/_lib/types";
 import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { ShieldIcon, SwordIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import type { Doc } from "~convex/dataModel";
 import type { Student } from "~prisma";
 
@@ -54,6 +61,7 @@ export type PVPFormationProps = {
   damageChartOpen: boolean;
   highestDamage: number;
   showHeader?: boolean;
+  slotTooltips?: Array<ReactNode | undefined>;
 };
 
 export function PVPFormation({
@@ -66,6 +74,7 @@ export function PVPFormation({
   damageChartOpen,
   highestDamage,
   showHeader = true,
+  slotTooltips,
 }: PVPFormationProps) {
   const t = useTranslations();
 
@@ -97,90 +106,109 @@ export function PVPFormation({
     return buildStudentPortraitUrl(studentRep);
   }, [studentRep]);
 
-  return (
-    <div className="flex min-w-0 flex-col items-center gap-2">
-      {showHeader && (
-        <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-center">
-          {kind === "attack" && <SwordIcon />}
-          {kind === "defense" && <ShieldIcon />}
+  function renderStudentCard(item: (typeof strikers)[number], index: number) {
+    const tooltip = slotTooltips?.[index];
+    const highlighted = tooltip !== undefined;
 
-          <div
-            className={cn(
-              "font-nexon-football-gothic font-bold italic mt-1 mr-1",
-              {
-                "text-green-500": result === "win",
-                "text-red-500": result === "loss",
-              },
+    const card = item.student ? (
+      <StudentCard
+        student={item.student}
+        level={item.level}
+        starLevel={item.starLevel}
+        ueLevel={item.ueLevel}
+      />
+    ) : (
+      <EmptyCard />
+    );
+
+    const content = (
+      <div
+        key={index}
+        className={cn(
+          "rounded-[11%] transition-opacity",
+          highlighted && "opacity-75 brightness-90 saturate-75",
+        )}
+      >
+        {card}
+      </div>
+    );
+
+    if (!tooltip) {
+      return content;
+    }
+
+    return (
+      <Tooltip key={index}>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="top" className="max-w-64 text-center">
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <div className="flex min-w-0 flex-col items-center gap-2">
+        {showHeader && (
+          <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-center">
+            {kind === "attack" && <SwordIcon />}
+            {kind === "defense" && <ShieldIcon />}
+
+            <div
+              className={cn(
+                "font-nexon-football-gothic font-bold italic mt-1 mr-1",
+                {
+                  "text-green-500": result === "win",
+                  "text-red-500": result === "loss",
+                },
+              )}
+            >
+              {result === "win"
+                ? t("tools.pvp.match.win")
+                : t("tools.pvp.match.loss")}
+            </div>
+
+            {studentRep && studentPortraitUrl && (
+              <img
+                src={studentPortraitUrl}
+                alt={studentRep.name}
+                className="h-6"
+              />
             )}
-          >
-            {result === "win"
-              ? t("tools.pvp.match.win")
-              : t("tools.pvp.match.loss")}
+
+            <div className="font-bold">{name}</div>
+
+            {rank !== undefined && (
+              <div className="text-sm text-muted-foreground">
+                (rank: <PVPRank rank={rank} />)
+              </div>
+            )}
+          </div>
+        )}
+
+        <div
+          className="flex max-w-full flex-wrap items-center justify-center gap-3"
+          style={{ zoom: 0.8 }}
+        >
+          <div className="flex flex-wrap items-center justify-center gap-[2px]">
+            {strikers.map((item, idx) => renderStudentCard(item, idx))}
           </div>
 
-          {studentRep && studentPortraitUrl && (
-            <img
-              src={studentPortraitUrl}
-              alt={studentRep.name}
-              className="h-6"
+          <div className="flex flex-wrap items-center justify-center gap-[2px]">
+            {specials.map((item, idx) => renderStudentCard(item, idx + 4))}
+          </div>
+        </div>
+
+        {damageChartOpen && (
+          <div className="max-w-full overflow-x-auto">
+            <PVPFormationDamageChart
+              formation={formation}
+              highestDamage={highestDamage}
             />
-          )}
-
-          <div className="font-bold">{name}</div>
-
-          {rank !== undefined && (
-            <div className="text-sm text-muted-foreground">
-              (rank: <PVPRank rank={rank} />)
-            </div>
-          )}
-        </div>
-      )}
-
-      <div
-        className="flex max-w-full flex-wrap items-center justify-center gap-3"
-        style={{ zoom: 0.8 }}
-      >
-        <div className="flex flex-wrap items-center justify-center gap-[2px]">
-          {strikers.map((item, idx) =>
-            item.student ? (
-              <StudentCard
-                key={idx}
-                student={item.student}
-                level={item.level}
-                starLevel={item.starLevel}
-                ueLevel={item.ueLevel}
-              />
-            ) : (
-              <EmptyCard key={idx} />
-            ),
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-[2px]">
-          {specials.map((item, idx) =>
-            item.student ? (
-              <StudentCard
-                key={idx}
-                student={item.student}
-                level={item.level}
-                starLevel={item.starLevel}
-                ueLevel={item.ueLevel}
-              />
-            ) : (
-              <EmptyCard key={idx} />
-            ),
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-      {damageChartOpen && (
-        <div className="max-w-full overflow-x-auto">
-          <PVPFormationDamageChart
-            formation={formation}
-            highestDamage={highestDamage}
-          />
-        </div>
-      )}
-    </div>
+    </TooltipProvider>
   );
 }

@@ -460,10 +460,49 @@ export default defineSchema({
 
   pvpStatsAggregate: defineTable({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+
+    // Optional compatibility fields for migration
+    attackTeam: v.optional(
+      v.array(v.object({ studentId: v.optional(v.string()) })),
+    ),
+    defenseTeam: v.optional(
+      v.array(v.object({ studentId: v.optional(v.string()) })),
+    ),
+
     attackTeamKey: v.string(),
+    a1StudentId: v.optional(v.string()),
+    a1Range: v.optional(v.number()),
+    a1Tank: v.optional(v.boolean()),
+    a2StudentId: v.optional(v.string()),
+    a2Range: v.optional(v.number()),
+    a2Tank: v.optional(v.boolean()),
+    a3StudentId: v.optional(v.string()),
+    a3Range: v.optional(v.number()),
+    a3Tank: v.optional(v.boolean()),
+    a4StudentId: v.optional(v.string()),
+    a4Range: v.optional(v.number()),
+    a4Tank: v.optional(v.boolean()),
+    attackS1StudentId: v.optional(v.string()),
+    attackS2StudentId: v.optional(v.string()),
+    attackSpecialTeamKey: v.optional(v.string()),
+
     defenseTeamKey: v.string(),
-    attackTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
-    defenseTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+    d1StudentId: v.optional(v.string()),
+    d1Range: v.optional(v.number()),
+    d1Tank: v.optional(v.boolean()),
+    d2StudentId: v.optional(v.string()),
+    d2Range: v.optional(v.number()),
+    d2Tank: v.optional(v.boolean()),
+    d3StudentId: v.optional(v.string()),
+    d3Range: v.optional(v.number()),
+    d3Tank: v.optional(v.boolean()),
+    d4StudentId: v.optional(v.string()),
+    d4Range: v.optional(v.number()),
+    d4Tank: v.optional(v.boolean()),
+    defenseS1StudentId: v.optional(v.string()),
+    defenseS2StudentId: v.optional(v.string()),
+    defenseSpecialTeamKey: v.optional(v.string()),
+
     wins: v.number(),
     total: v.number(),
     confidenceScore: v.number(),
@@ -473,6 +512,110 @@ export default defineSchema({
     .index("by_ranking", [
       "seasonNumber",
       "defenseTeamKey",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_similarity_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d1Range",
+      "d1Tank",
+      "d2Range",
+      "d2Tank",
+      "d3Range",
+      "d3Tank",
+      "d4Range",
+      "d4Tank",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_special_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d1_student_id_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d1StudentId",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d1_range_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d1Range",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d1_tank_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d1Tank",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d2_student_id_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d2StudentId",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d2_range_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d2Range",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d2_tank_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d2Tank",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d3_student_id_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d3StudentId",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d3_range_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d3Range",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d3_tank_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d3Tank",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d4_student_id_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d4StudentId",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d4_range_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d4Range",
+      "confidenceScore",
+      "total",
+    ])
+    .index("by_d4_tank_ranking", [
+      "seasonNumber",
+      "defenseSpecialTeamKey",
+      "d4Tank",
       "confidenceScore",
       "total",
     ]),
@@ -488,6 +631,8 @@ export default defineSchema({
     lastCompletedAt: v.optional(v.number()),
     nextExpectedAt: v.optional(v.number()),
     isUpdating: v.boolean(),
+    traitsReady: v.optional(v.boolean()),
+    traitsUpdatedAt: v.optional(v.number()),
   }).index("by_key", ["key"]),
 
   pvpStatsRebuild: defineTable({

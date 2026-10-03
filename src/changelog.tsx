@@ -46,8 +46,24 @@ export type ChangelogItemData = {
 export const CHANGELOG: ChangelogItemData[] = [
   {
     date: "October 3, 2026",
-    features: [],
-    changes: [],
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Besides specific students, it is now possible to specify student ranges and any tank in a particular striker slot.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "The counter search will now also display similar defenses, which use different students with the same range or different tanks in the same slots.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Changed colors and UIs of the counter search page.",
+      },
+    ],
     fixes: [
       {
         scope: CHANGELOG_SCOPES.timelineVisualizer,

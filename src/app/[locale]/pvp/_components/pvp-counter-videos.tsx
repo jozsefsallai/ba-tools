@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import type { PVPSeasonNumber } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { usePaginatedQuery } from "convex/react";
 import { PlayIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -14,10 +15,12 @@ export function PVPCounterVideos({
   seasonNumber,
   attackTeam,
   defenseTeam,
+  dividerClassName,
 }: {
   seasonNumber: PVPSeasonNumber;
   attackTeam: Team;
   defenseTeam: Team;
+  dividerClassName?: string;
 }) {
   const t = useTranslations();
 
@@ -42,7 +45,12 @@ export function PVPCounterVideos({
   }
 
   return (
-    <div className="flex w-full flex-wrap items-center gap-2 border-t pt-3">
+    <div
+      className={cn(
+        "flex w-full flex-wrap items-center gap-2 border-t pt-3",
+        dividerClassName,
+      )}
+    >
       <span className="mr-1 text-xs text-muted-foreground">
         {t("tools.pvp.stats.matchVideos")}
       </span>

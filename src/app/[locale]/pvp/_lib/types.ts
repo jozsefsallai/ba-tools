@@ -1,4 +1,9 @@
-import type { PVPFormationPresetType, StarLevel, UELevel } from "@/lib/types";
+import type {
+  PVPCounterRange,
+  PVPFormationPresetType,
+  StarLevel,
+  UELevel,
+} from "@/lib/types";
 import type { Student } from "~prisma";
 
 export type {
@@ -12,6 +17,7 @@ export type PVPFormationStudentItem = {
   starLevel?: StarLevel;
   ueLevel?: UELevel;
   damage?: number;
+  counter?: { kind: "range"; value: PVPCounterRange } | { kind: "tank" };
 };
 
 export type PVPFormationStudentRecord = {

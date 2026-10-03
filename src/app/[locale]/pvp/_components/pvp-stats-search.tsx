@@ -23,7 +23,12 @@ import {
   parsePvpCounterSearchParams,
 } from "@/lib/pvp-counter-link";
 import { Storage } from "@/lib/storage";
-import { type PVPSeasonNumber, PVP_SEASONS } from "@/lib/types";
+import {
+  type PVPCounterDefenseSlot,
+  type PVPCounterRange,
+  type PVPSeasonNumber,
+  PVP_SEASONS,
+} from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { usePaginatedQuery, useQuery } from "convex/react";
@@ -51,33 +56,125 @@ const blankTeam = (): PVPFormationStudentItem[] => [{}, {}, {}, {}, {}, {}];
 
 type SubmittedSearch = {
   seasonNumber: PVPSeasonNumber;
-  defenseTeam: Array<{ studentId?: string }>;
+  defenseTeam: PVPCounterDefenseSlot[];
   excludedStudentIds: string[];
 };
 
-function getSuccessRateClasses(successRate: number) {
+const successRateStyles = {
+  perfect: {
+    card: "border-green-500/70 bg-green-500/[0.14]",
+    accent: "text-green-500/70",
+    divider: "border-green-500/35",
+  },
+  zero: {
+    card: "border-red-500/70 bg-red-500/[0.14]",
+    accent: "text-red-500/70",
+    divider: "border-red-500/35",
+  },
+  high: {
+    card: "border-emerald-400/40 bg-emerald-500/[0.06]",
+    accent: "text-emerald-400/40",
+    divider: "border-emerald-400/20",
+  },
+  aboveAverage: {
+    card: "border-lime-400/40 bg-lime-500/[0.05]",
+    accent: "text-lime-400/40",
+    divider: "border-lime-400/20",
+  },
+  average: {
+    card: "border-amber-400/40 bg-amber-500/[0.05]",
+    accent: "text-amber-400/40",
+    divider: "border-amber-400/20",
+  },
+  low: {
+    card: "border-orange-400/40 bg-orange-500/[0.05]",
+    accent: "text-orange-400/40",
+    divider: "border-orange-400/20",
+  },
+  veryLow: {
+    card: "border-rose-400/40 bg-rose-500/[0.05]",
+    accent: "text-rose-400/40",
+    divider: "border-rose-400/20",
+  },
+} as const;
+
+function getSuccessRateClasses(
+  successRate: number,
+  element: keyof (typeof successRateStyles)["perfect"] = "card",
+) {
+  if (successRate === 1) {
+    return successRateStyles.perfect[element];
+  }
+
+  if (successRate === 0) {
+    return successRateStyles.zero[element];
+  }
+
   if (successRate >= 0.8) {
-    return "border-emerald-400/40 bg-emerald-500/[0.06]";
+    return successRateStyles.high[element];
   }
 
   if (successRate >= 0.6) {
-    return "border-lime-400/40 bg-lime-500/[0.05]";
+    return successRateStyles.aboveAverage[element];
   }
 
   if (successRate >= 0.4) {
-    return "border-amber-400/40 bg-amber-500/[0.05]";
+    return successRateStyles.average[element];
   }
 
   if (successRate >= 0.2) {
-    return "border-orange-400/40 bg-orange-500/[0.05]";
+    return successRateStyles.low[element];
   }
 
-  return "border-rose-400/40 bg-rose-500/[0.05]";
+  return successRateStyles.veryLow[element];
 }
 
 export function PVPStatsSearch() {
   const t = useTranslations();
   const { students, studentMap } = useStudents();
+
+  function getDefenseChangeTooltips(
+    criteria: PVPCounterDefenseSlot[],
+    observed: Array<{ studentId?: string }>,
+  ) {
+    return criteria.map((slot, index) => {
+      const observedStudentId = observed[index]?.studentId;
+
+      const requestedStudentId =
+        "studentId" in slot ? slot.studentId : undefined;
+
+      let changed = false;
+
+      if (requestedStudentId !== undefined) {
+        changed = requestedStudentId !== observedStudentId;
+      } else {
+        const isEmpty =
+          !Object.hasOwn(slot, "range") && !Object.hasOwn(slot, "tank");
+        changed = isEmpty && observedStudentId !== undefined;
+      }
+
+      if (!changed) {
+        return undefined;
+      }
+
+      if ("tank" in slot && slot.tank === true) {
+        return t.rich("tools.pvp.stats.changedDefenseTank", {
+          b: (chunks) => <strong>{chunks}</strong>,
+        });
+      }
+
+      if ("range" in slot && slot.range !== undefined) {
+        return t.rich("tools.pvp.stats.changedDefenseRange", {
+          range: slot.range,
+          b: (chunks) => <strong>{chunks}</strong>,
+        });
+      }
+
+      return t.rich("tools.pvp.stats.changedDefenseStudent", {
+        b: (chunks) => <strong>{chunks}</strong>,
+      });
+    });
+  }
 
   const searchParams = useSearchParams();
   const searchParamsKey = searchParams.toString();
@@ -137,7 +234,9 @@ export function PVPStatsSearch() {
     }
 
     const key = `${initialSearch.seasonNumber}:${initialSearch.defenseTeam
-      .map((slot) => slot.studentId ?? "")
+      .map((slot) =>
+        "studentId" in slot ? (slot.studentId ?? "") : JSON.stringify(slot),
+      )
       .join(",")}`;
 
     if (appliedInitialSearchRef.current === key) {
@@ -145,12 +244,16 @@ export function PVPStatsSearch() {
     }
 
     const ids = initialSearch.defenseTeam
-      .map((slot) => slot.studentId)
+      .map((slot) => ("studentId" in slot ? slot.studentId : undefined))
       .filter((id): id is string => Boolean(id));
 
     const valid =
       initialSearch.defenseTeam.length === 6 &&
-      initialSearch.defenseTeam.slice(0, 4).some((slot) => slot.studentId) &&
+      initialSearch.defenseTeam
+        .slice(0, 4)
+        .some((slot) =>
+          "studentId" in slot ? Boolean(slot.studentId) : true,
+        ) &&
       ids.every((id) => Boolean(studentMap[id])) &&
       ids.length === new Set(ids).size;
 
@@ -163,16 +266,47 @@ export function PVPStatsSearch() {
     setSeasonNumber(initialSearch.seasonNumber);
 
     setDefenseTeam(
-      initialSearch.defenseTeam.map((slot) => ({
-        student: slot.studentId ? studentMap[slot.studentId] : undefined,
-      })),
+      initialSearch.defenseTeam.map((slot) => {
+        if ("range" in slot && slot.range !== undefined) {
+          return {
+            counter: {
+              kind: "range",
+              value: slot.range as PVPCounterRange,
+            },
+          };
+        }
+
+        if ("tank" in slot) {
+          return { counter: { kind: "tank" } };
+        }
+
+        return {
+          student: slot.studentId ? studentMap[slot.studentId] : undefined,
+        };
+      }),
     );
 
     scrollToResultsRef.current = true;
 
     setSubmittedSearch({
       seasonNumber: initialSearch.seasonNumber,
-      defenseTeam: initialSearch.defenseTeam,
+      defenseTeam: initialSearch.defenseTeam.map((slot, index) => {
+        if ("studentId" in slot && slot.studentId) {
+          const student = studentMap[slot.studentId];
+
+          if (index >= 4) {
+            return { studentId: slot.studentId };
+          }
+
+          return {
+            studentId: slot.studentId,
+            range: student?.range,
+            tank: student?.combatRole === "Tanker",
+          };
+        }
+
+        return slot;
+      }),
       excludedStudentIds,
     });
   }, [
@@ -191,20 +325,55 @@ export function PVPStatsSearch() {
     excludedStudentsStorage.set(excludedStudentIds);
   }, [excludedStudentIds]);
 
-  const canSearch = defenseTeam.slice(0, 4).some((item) => item.student);
+  const canSearch = defenseTeam
+    .slice(0, 4)
+    .some((item) => item.student || item.counter);
   const queryArgs = useMemo(() => submittedSearch ?? "skip", [submittedSearch]);
 
   const summary = useQuery(api.pvpStats.getSummary, { seasonNumber });
+  const traitsStatus = useQuery(api.pvpStats.getStatus);
 
-  const { results, status, loadMore } = usePaginatedQuery(
-    api.pvpStats.search,
-    queryArgs,
-    { initialNumItems: 20 },
-  );
+  const primaryQuery = usePaginatedQuery(api.pvpStats.search, queryArgs, {
+    initialNumItems: 20,
+  });
+
+  const similarArgs = useMemo(() => {
+    if (
+      !submittedSearch ||
+      (traitsStatus !== undefined && traitsStatus.traitsReady !== true) ||
+      !submittedSearch.defenseTeam.some(
+        (slot, index) =>
+          index < 4 &&
+          "studentId" in slot &&
+          Boolean(slot.studentId) &&
+          typeof slot.range === "number" &&
+          slot.range > 0 &&
+          typeof slot.tank === "boolean",
+      )
+    ) {
+      return "skip";
+    }
+
+    return {
+      ...submittedSearch,
+      matchMode: "similar" as const,
+      excludeDefenseTeam: submittedSearch.defenseTeam,
+    };
+  }, [submittedSearch, traitsStatus]);
+  const similarQuery = usePaginatedQuery(api.pvpStats.search, similarArgs, {
+    initialNumItems: 20,
+  });
+
+  const { results, status, loadMore } = primaryQuery;
+  const similarResults = similarQuery.results;
 
   const filteredResults = useMemo(
     () => results.filter((result) => result.wins >= minimumWins),
     [results, minimumWins],
+  );
+  const filteredSimilarResults = useMemo(
+    () => similarResults.filter((result) => result.wins >= minimumWins),
+    [similarResults, minimumWins],
   );
 
   useEffect(() => {
@@ -301,9 +470,28 @@ export function PVPStatsSearch() {
   }
 
   function getDefenseTeamPayload() {
-    return defenseTeam.map((item) => ({
-      studentId: item.student?.id,
-    }));
+    return defenseTeam.map((item, index) => {
+      if (item.counter?.kind === "range") {
+        return { range: item.counter.value };
+      }
+
+      if (item.counter?.kind === "tank") {
+        return { tank: true as const };
+      }
+
+      if (item.student) {
+        if (index >= 4) {
+          return { studentId: item.student.id };
+        }
+
+        return {
+          studentId: item.student.id,
+          range: item.student.range,
+          tank: item.student.combatRole === "Tanker",
+        };
+      }
+      return { studentId: undefined };
+    });
   }
 
   function moveDefense(from: number, to: number) {
@@ -415,6 +603,7 @@ export function PVPStatsSearch() {
             students={students}
             onUpdate={updateDefense}
             onMove={moveDefense}
+            searchMode
           />
 
           {!canSearch && (
@@ -518,9 +707,28 @@ export function PVPStatsSearch() {
       </Card>
 
       <div ref={resultsRef} className="scroll-mt-6 flex flex-col gap-4">
+        {submittedSearch && results.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold">
+              {t("tools.pvp.stats.exactResults")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("tools.pvp.stats.exactResultsDescription")}
+            </p>
+          </div>
+        )}
+
         {submittedSearch && status === "LoadingFirstPage" && (
           <MessageBox>{t("common.loading")}</MessageBox>
         )}
+
+        {submittedSearch &&
+          traitsStatus !== undefined &&
+          traitsStatus.traitsReady !== true && (
+            <MessageBox>
+              {t("tools.pvp.stats.status.traitsUpdating")}
+            </MessageBox>
+          )}
 
         {submittedSearch && status === "Exhausted" && results.length === 0 && (
           <MessageBox>
@@ -554,24 +762,64 @@ export function PVPStatsSearch() {
 
         {filteredResults.map((result, index) => (
           <Card
-            key={`${result.attackTeam.map((item) => item.studentId).join("-")}-${index}`}
+            key={`${result.matchupId}-${index}`}
             className={cn(
               "gap-0 border-l-2 py-3",
               getSuccessRateClasses(result.successRate),
             )}
           >
             <CardContent className="flex flex-wrap items-center justify-between gap-4 px-4 py-0 sm:px-5">
-              <PVPFormation
-                name={t("tools.pvp.stats.counterTeam")}
-                kind="attack"
-                result="win"
-                formation={
-                  result.attackTeam as Doc<"pvpMatchRecord">["ownTeam"]
-                }
-                damageChartOpen={false}
-                highestDamage={0}
-                showHeader={false}
-              />
+              <div className="flex flex-wrap items-start gap-8">
+                <div className="flex flex-col items-center gap-1">
+                  <div
+                    className={cn(
+                      "text-xs font-semibold uppercase tracking-wide",
+                      getSuccessRateClasses(result.successRate, "accent"),
+                    )}
+                  >
+                    {t("tools.pvp.stats.attackTeam")}
+                  </div>
+
+                  <PVPFormation
+                    name={t("tools.pvp.stats.attackTeam")}
+                    kind="attack"
+                    result="win"
+                    formation={
+                      result.attackTeam as Doc<"pvpMatchRecord">["ownTeam"]
+                    }
+                    damageChartOpen={false}
+                    highestDamage={0}
+                    showHeader={false}
+                  />
+                </div>
+
+                <div className="flex flex-col items-center gap-1">
+                  <div
+                    className={cn(
+                      "text-xs font-semibold uppercase tracking-wide",
+                      getSuccessRateClasses(result.successRate, "accent"),
+                    )}
+                  >
+                    {t("tools.pvp.stats.observedDefense")}
+                  </div>
+
+                  <PVPFormation
+                    name={t("tools.pvp.stats.observedDefense")}
+                    kind="defense"
+                    result="loss"
+                    formation={
+                      result.defenseTeam as Doc<"pvpMatchRecord">["ownTeam"]
+                    }
+                    slotTooltips={getDefenseChangeTooltips(
+                      submittedSearch?.defenseTeam ?? [],
+                      result.defenseTeam,
+                    )}
+                    damageChartOpen={false}
+                    highestDamage={0}
+                    showHeader={false}
+                  />
+                </div>
+              </div>
 
               <div className="text-right">
                 <div className="text-2xl font-bold">
@@ -589,15 +837,157 @@ export function PVPStatsSearch() {
 
               {submittedSearch && (
                 <PVPCounterVideos
-                  key={`${submittedSearch.seasonNumber}-${submittedSearch.defenseTeam.map((item) => item.studentId).join("-")}`}
+                  key={`${submittedSearch.seasonNumber}-${submittedSearch.defenseTeam
+                    .map((item) =>
+                      "studentId" in item
+                        ? item.studentId
+                        : JSON.stringify(item),
+                    )
+                    .join("-")}`}
                   seasonNumber={submittedSearch.seasonNumber}
                   attackTeam={result.attackTeam}
-                  defenseTeam={submittedSearch.defenseTeam}
+                  defenseTeam={result.defenseTeam}
+                  dividerClassName={getSuccessRateClasses(
+                    result.successRate,
+                    "divider",
+                  )}
                 />
               )}
             </CardContent>
           </Card>
         ))}
+
+        {submittedSearch && filteredSimilarResults.length > 0 && (
+          <>
+            <div className="mt-6 flex flex-col gap-1">
+              <h2 className="text-lg font-semibold">
+                {t("tools.pvp.stats.similarResults")}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {t("tools.pvp.stats.similarResultsDescription")}
+              </p>
+            </div>
+
+            {filteredSimilarResults.map((result, index) => (
+              <Card
+                key={`similar-${result.matchupId}-${index}`}
+                className={cn(
+                  "gap-0 border-l-2 py-3",
+                  getSuccessRateClasses(result.successRate),
+                )}
+              >
+                <CardContent className="flex flex-wrap items-center justify-between gap-4 px-4 py-0 sm:px-5">
+                  <div className="flex flex-wrap items-start gap-8">
+                    <div className="flex flex-col items-center gap-1">
+                      <div
+                        className={cn(
+                          "text-xs font-semibold uppercase tracking-wide",
+                          getSuccessRateClasses(result.successRate, "accent"),
+                        )}
+                      >
+                        {t("tools.pvp.stats.attackTeam")}
+                      </div>
+
+                      <PVPFormation
+                        name={t("tools.pvp.stats.attackTeam")}
+                        kind="attack"
+                        result="win"
+                        formation={
+                          result.attackTeam as Doc<"pvpMatchRecord">["ownTeam"]
+                        }
+                        damageChartOpen={false}
+                        highestDamage={0}
+                        showHeader={false}
+                      />
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1">
+                      <div
+                        className={cn(
+                          "text-xs font-semibold uppercase tracking-wide",
+                          getSuccessRateClasses(result.successRate, "accent"),
+                        )}
+                      >
+                        {t("tools.pvp.stats.observedDefense")}
+                      </div>
+
+                      <PVPFormation
+                        name={t("tools.pvp.stats.observedDefense")}
+                        kind="defense"
+                        result="loss"
+                        formation={
+                          result.defenseTeam as Doc<"pvpMatchRecord">["ownTeam"]
+                        }
+                        slotTooltips={getDefenseChangeTooltips(
+                          submittedSearch?.defenseTeam ?? [],
+                          result.defenseTeam,
+                        )}
+                        damageChartOpen={false}
+                        highestDamage={0}
+                        showHeader={false}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">
+                      {(result.successRate * 100).toFixed(1)}%
+                    </div>
+
+                    <div className="text-sm text-muted-foreground">
+                      {t("tools.pvp.stats.record", {
+                        wins: result.wins,
+                        losses: result.losses,
+                        total: result.total,
+                      })}
+                    </div>
+                  </div>
+
+                  <PVPCounterVideos
+                    seasonNumber={submittedSearch.seasonNumber}
+                    attackTeam={result.attackTeam}
+                    defenseTeam={result.defenseTeam}
+                    dividerClassName={getSuccessRateClasses(
+                      result.successRate,
+                      "divider",
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </>
+        )}
+
+        {submittedSearch &&
+          similarResults.length > 0 &&
+          filteredSimilarResults.length === 0 && (
+            <MessageBox>
+              {t("tools.pvp.stats.noMinimumWinsResults", {
+                wins: minimumWins,
+              })}
+            </MessageBox>
+          )}
+
+        {submittedSearch &&
+          similarQuery.status === "LoadingFirstPage" &&
+          similarArgs !== "skip" && (
+            <MessageBox>{t("common.loading")}</MessageBox>
+          )}
+
+        {submittedSearch &&
+          similarQuery.status === "Exhausted" &&
+          similarResults.length === 0 &&
+          similarArgs !== "skip" && (
+            <MessageBox>{t("tools.pvp.stats.noSimilarResults")}</MessageBox>
+          )}
+
+        {submittedSearch &&
+          similarArgs !== "skip" &&
+          similarQuery.status === "CanLoadMore" && (
+            <Button variant="outline" onClick={() => similarQuery.loadMore(20)}>
+              {t("common.loadMore")}
+            </Button>
+          )}
 
         {submittedSearch && status === "CanLoadMore" && (
           <Button variant="outline" onClick={() => loadMore(20)}>

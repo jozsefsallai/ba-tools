@@ -34,6 +34,14 @@ export type BorrowSlotGameMode = (typeof BORROW_SLOT_GAMEMODES)[number];
 export type PVPMatchType = "attack" | "defense";
 export type PVPFormationPresetType = PVPMatchType | "both";
 
+export const PVP_COUNTER_RANGES = [350, 450, 550, 650, 750, 850] as const;
+export type PVPCounterRange = (typeof PVP_COUNTER_RANGES)[number];
+
+export type PVPCounterDefenseSlot =
+  | { studentId?: string; range?: number; tank?: boolean }
+  | { range: PVPCounterRange }
+  | { tank: true };
+
 export const GAME_SERVER_NAMES: Record<GameServer, string> = {
   JP: "Japan",
   KR: "Korea",
