@@ -71,6 +71,40 @@ import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
 
+function serializeTimelineItems(
+  items: TimelineItem[],
+): TimelineStorageData["items"] {
+  return items.map((item) => {
+    if (item.type === "student") {
+      return {
+        type: "student",
+        studentId: item.student.id,
+        trigger: item.trigger,
+        targetId: item.target?.id,
+        extraTargetIds: (item.extraTargets ?? [])
+          .map((target) => target?.id)
+          .filter((id): id is string => !!id),
+        copy: item.copy,
+        variantId: item.variantId,
+        notes: item.notes,
+      };
+    }
+
+    if (item.type === "separator") {
+      return {
+        type: "separator",
+        orientation: item.orientation,
+        size: item.size,
+      };
+    }
+
+    return {
+      type: "text",
+      text: item.text,
+    };
+  });
+}
+
 export function TimelineEditor() {
   const t = useTranslations();
 
@@ -377,27 +411,7 @@ export function TimelineEditor() {
 
   function buildTimelineData() {
     return {
-      items: items.map((item) => {
-        if (item.type === "student") {
-          return {
-            ...item,
-            id: undefined,
-            student: undefined,
-            target: undefined,
-            studentId: item.student.id,
-            targetId: item.target?.id,
-            extraTargetIds: (item.extraTargets ?? [])
-              .map((target) => target?.id)
-              .filter((id): id is string => !!id),
-            notes: item.notes,
-          };
-        }
-
-        return {
-          ...item,
-          id: undefined,
-        };
-      }),
+      items: serializeTimelineItems(items),
       scale,
       itemSpacing,
       verticalSeparatorSize,
@@ -475,27 +489,7 @@ export function TimelineEditor() {
     setRequestInProgress(true);
 
     const data = {
-      items: items.map((item) => {
-        if (item.type === "student") {
-          return {
-            ...item,
-            id: undefined,
-            student: undefined,
-            target: undefined,
-            studentId: item.student.id,
-            targetId: item.target?.id,
-            extraTargetIds: (item.extraTargets ?? [])
-              .map((target) => target?.id)
-              .filter((id): id is string => !!id),
-            notes: item.notes,
-          };
-        }
-
-        return {
-          ...item,
-          id: undefined,
-        };
-      }),
+      items: serializeTimelineItems(items),
       itemSpacing,
       verticalSeparatorSize,
       horizontalSeparatorSize,

@@ -45,6 +45,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 3, 2026",
+    features: [],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Fixed a timeline item serialization bug regarding multiple targets.",
+      },
+    ],
+  },
+  {
     date: "October 2, 2026",
     features: [
       {
