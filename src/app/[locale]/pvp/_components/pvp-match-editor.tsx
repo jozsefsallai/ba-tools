@@ -446,7 +446,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     });
 
     setSavePresetDialogOpen(false);
-    toast.success(t("tools.pvp.presets.formationSaved"));
+    toast.success(t("tools.pvp.presets.formationSaved"), {
+      position: "top-right",
+    });
   }
 
   async function saveOpponentPreset() {
@@ -476,7 +478,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
     setEnemyPresetId(id);
     setSaveEnemyPresetDialogOpen(false);
-    toast.success(t("tools.pvp.presets.enemySaved"));
+    toast.success(t("tools.pvp.presets.enemySaved"), {
+      position: "top-right",
+    });
   }
 
   const attachedOpponentPreset =
@@ -511,7 +515,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       const parsed = await parsePvpCombatReport(form);
 
       if (!parsed.valid) {
-        toast.error(t("tools.pvp.reportImport.invalid"));
+        toast.error(t("tools.pvp.reportImport.invalid"), {
+          position: "top-right",
+        });
         return;
       }
 
@@ -566,11 +572,15 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         }
       }
 
-      toast.success(t("tools.pvp.reportImport.success"));
+      toast.success(t("tools.pvp.reportImport.success"), {
+        position: "top-right",
+      });
       setReportDialogOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error(t("tools.pvp.reportImport.failed"));
+      toast.error(t("tools.pvp.reportImport.failed"), {
+        position: "top-right",
+      });
     } finally {
       setReportStatus("idle");
     }
@@ -634,7 +644,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           ...matchData,
         });
 
-        toast.success(t("tools.pvp.toasts.matchUpdated"));
+        toast.success(t("tools.pvp.toasts.matchUpdated"), {
+          position: "top-right",
+        });
       } else {
         await recordMatchMutation({
           seasonId,
@@ -648,12 +660,16 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           // ignore
         }
 
-        toast.success(t("tools.pvp.toasts.matchRecorded"));
+        toast.success(t("tools.pvp.toasts.matchRecorded"), {
+          position: "top-right",
+        });
         router.push(`/pvp/${seasonId}`);
       }
     } catch (err) {
       console.error(err);
-      toast.error(t("tools.pvp.toasts.matchSaveFail"));
+      toast.error(t("tools.pvp.toasts.matchSaveFail"), {
+        position: "top-right",
+      });
     } finally {
       setIsSaving(false);
     }

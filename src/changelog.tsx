@@ -57,6 +57,16 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "The counter search will now also display similar defenses, which use different students with the same range or different tanks in the same slots.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          'The formation type filter in the "Teams Used by opponent" view will now persist on-device.',
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added number of encounters to individual teams used by opponents.",
+      },
     ],
     changes: [
       {
@@ -69,6 +79,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.timelineVisualizer,
         description:
           "Fixed a timeline item serialization bug regarding multiple targets.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Toasts on the PVP editor have been moved to the top right corner of the screen to prevent them from covering the save button.",
       },
     ],
   },

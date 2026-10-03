@@ -668,7 +668,8 @@
       "deleteEnemyDescription": "この相手プリセットは完全に削除されます。既存の対戦記録は残ります。",
       "teamsUsedBy": "{name}の使用編成",
       "enemyPreset": "相手プリセット",
-      "filterFormationType": "編成タイプ"
+      "filterFormationType": "編成タイプ",
+      "encounters": "<stat>{attack} <muted>ATK</muted></stat><stat>{defense} <muted>DEF</muted></stat><stat><muted>合計</muted> {total}</stat>"
     },
     "presetPicker": {
       "loading": "プリセットを読み込み中...",

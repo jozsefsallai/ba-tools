@@ -140,6 +140,7 @@ async function getUniqueEnemyTeamsForPreset(ctx: any, preset: any) {
     role: PVPFormationPresetType,
     updatedAt: number,
     manualTeamId?: any,
+    countEncounter = false,
   ) => {
     if (!team.some((item) => item.studentId)) {
       return;
@@ -154,12 +155,25 @@ async function getUniqueEnemyTeamsForPreset(ctx: any, preset: any) {
 
       mergeEnemyRoles(roles, role);
 
+      const encounterCounts = { attack: 0, defense: 0, total: 0 };
+
+      if (countEncounter) {
+        encounterCounts.total = 1;
+
+        if (role === "attack") {
+          encounterCounts.attack = 1;
+        } else if (role === "defense") {
+          encounterCounts.defense = 1;
+        }
+      }
+
       byKey.set(key, {
         team: normalized,
         teamKey: key,
         roles,
         updatedAt,
         manualTeamId,
+        encounterCounts,
       });
 
       return;
@@ -168,6 +182,15 @@ async function getUniqueEnemyTeamsForPreset(ctx: any, preset: any) {
     mergeEnemyRoles(existing.roles, role);
     existing.manualTeamId = manualTeamId ?? existing.manualTeamId;
 
+    if (countEncounter) {
+      if (role === "attack") {
+        existing.encounterCounts.attack += 1;
+      } else if (role === "defense") {
+        existing.encounterCounts.defense += 1;
+      }
+      existing.encounterCounts.total += 1;
+    }
+
     if (updatedAt >= existing.updatedAt) {
       existing.team = normalized;
       existing.updatedAt = updatedAt;
@@ -175,7 +198,13 @@ async function getUniqueEnemyTeamsForPreset(ctx: any, preset: any) {
   };
 
   for (const match of matches) {
-    add(match.opponentTeam, enemyTeamRole(match.matchType), match.date);
+    add(
+      match.opponentTeam,
+      enemyTeamRole(match.matchType),
+      match.date,
+      undefined,
+      true,
+    );
   }
 
   for (const manual of manualTeams) {

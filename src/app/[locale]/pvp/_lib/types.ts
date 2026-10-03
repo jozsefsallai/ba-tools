@@ -31,6 +31,11 @@ export type PVPEnemyTeam = {
   teamKey: string;
   team: PVPFormationStudentRecord[];
   roles: PVPFormationPresetType;
+  encounterCounts: {
+    attack: number;
+    defense: number;
+    total: number;
+  };
   updatedAt?: number;
   manualTeamId?: string;
 };

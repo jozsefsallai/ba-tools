@@ -784,7 +784,8 @@
       "deleteEnemyDescription": "This opponent preset will be permanently deleted. Existing matches will be kept.",
       "teamsUsedBy": "Teams Used by {name}",
       "enemyPreset": "Opponent preset",
-      "filterFormationType": "Formation type"
+      "filterFormationType": "Formation type",
+      "encounters": "<stat>{attack} <muted>ATK</muted></stat><stat>{defense} <muted>DEF</muted></stat><stat>{total} <muted>total</muted></stat>"
     },
     "presetPicker": {
       "loading": "Loading presets...",

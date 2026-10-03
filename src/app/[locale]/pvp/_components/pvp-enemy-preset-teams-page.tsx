@@ -28,13 +28,18 @@ import {
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
 import { buildPvpCounterSearchHref } from "@/lib/pvp-counter-link";
+import { Storage } from "@/lib/storage";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
+
+const teamFilterStorage = new Storage<PVPFormationPresetType>(
+  "pvp_enemy_team_filter_v1",
+);
 
 export function PVPEnemyPresetTeamsPage({
   seasonId,
@@ -63,6 +68,33 @@ export function PVPEnemyPresetTeamsPage({
   const [matchType, setMatchType] = useState<PVPFormationPresetType>("both");
   const [advanced, setAdvanced] = useState(false);
   const [teamFilter, setTeamFilter] = useState<PVPFormationPresetType>("both");
+
+  useEffect(() => {
+    try {
+      const saved = teamFilterStorage.get();
+
+      if (saved === "both" || saved === "attack" || saved === "defense") {
+        setTeamFilter(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function handleTeamFilterChange(value: string) {
+    if (value !== "both" && value !== "attack" && value !== "defense") {
+      return;
+    }
+
+    const nextFilter = value as PVPFormationPresetType;
+    setTeamFilter(nextFilter);
+
+    try {
+      teamFilterStorage.set(nextFilter);
+    } catch {
+      // ignore
+    }
+  }
 
   function openTeamDialog(item?: PVPEnemyTeam) {
     setEditingTeamId(item?.manualTeamId as Id<"pvpEnemyTeam"> | undefined);
@@ -149,12 +181,7 @@ export function PVPEnemyPresetTeamsPage({
           {t("tools.pvp.presets.filterFormationType")}
         </Label>
 
-        <Select
-          value={teamFilter}
-          onValueChange={(value) =>
-            setTeamFilter(value as PVPFormationPresetType)
-          }
-        >
+        <Select value={teamFilter} onValueChange={handleTeamFilterChange}>
           <SelectTrigger id="enemy-formation-type-filter" className="flex-1">
             <SelectValue />
           </SelectTrigger>
@@ -230,46 +257,60 @@ export function PVPEnemyPresetTeamsPage({
                   );
                 },
               )}
-              <div className="ml-auto flex gap-2">
-                {(knownTeam.roles === "defense" ||
-                  knownTeam.roles === "both") &&
-                  seasonResult?.season?.seasonNumber && (
-                    <Button size="sm" variant="outline" asChild>
-                      <Link
-                        href={buildPvpCounterSearchHref({
-                          seasonNumber: seasonResult.season.seasonNumber,
-                          defenseTeam: knownTeam.team,
-                        })}
-                      >
-                        {t("tools.pvp.presets.findCounters")}
-                      </Link>
+              <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+                <Badge variant="secondary" className="gap-3">
+                  {t.rich("tools.pvp.presets.encounters", {
+                    ...knownTeam.encounterCounts,
+                    stat: (children) => <span>{children}</span>,
+                    muted: (children) => (
+                      <span className="text-muted-foreground mx-0.5">
+                        {children}
+                      </span>
+                    ),
+                  })}
+                </Badge>
+
+                <div className="flex flex-wrap justify-end gap-2">
+                  {(knownTeam.roles === "defense" ||
+                    knownTeam.roles === "both") &&
+                    seasonResult?.season?.seasonNumber && (
+                      <Button size="sm" variant="outline" asChild>
+                        <Link
+                          href={buildPvpCounterSearchHref({
+                            seasonNumber: seasonResult.season.seasonNumber,
+                            defenseTeam: knownTeam.team,
+                          })}
+                        >
+                          {t("tools.pvp.presets.findCounters")}
+                        </Link>
+                      </Button>
+                    )}
+                  {knownTeam.manualTeamId && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openTeamDialog(knownTeam as PVPEnemyTeam)}
+                    >
+                      {t("tools.pvp.presets.edit")}
                     </Button>
                   )}
-                {knownTeam.manualTeamId && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openTeamDialog(knownTeam as PVPEnemyTeam)}
-                  >
-                    {t("tools.pvp.presets.edit")}
-                  </Button>
-                )}
-                {knownTeam.manualTeamId && (
-                  <ConfirmDialog
-                    title={t("tools.pvp.presets.deleteTeamTitle")}
-                    description={t("tools.pvp.presets.deleteTeamDescription")}
-                    confirmVariant="destructive"
-                    onConfirm={() =>
-                      deleteTeam({
-                        teamId: knownTeam.manualTeamId as Id<"pvpEnemyTeam">,
-                      })
-                    }
-                  >
-                    <Button size="sm" variant="destructive">
-                      {t("tools.pvp.presets.delete")}
-                    </Button>
-                  </ConfirmDialog>
-                )}
+                  {knownTeam.manualTeamId && (
+                    <ConfirmDialog
+                      title={t("tools.pvp.presets.deleteTeamTitle")}
+                      description={t("tools.pvp.presets.deleteTeamDescription")}
+                      confirmVariant="destructive"
+                      onConfirm={() =>
+                        deleteTeam({
+                          teamId: knownTeam.manualTeamId as Id<"pvpEnemyTeam">,
+                        })
+                      }
+                    >
+                      <Button size="sm" variant="destructive">
+                        {t("tools.pvp.presets.delete")}
+                      </Button>
+                    </ConfirmDialog>
+                  )}
+                </div>
               </div>
             </article>
           ))}
