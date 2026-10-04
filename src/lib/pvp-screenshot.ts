@@ -269,10 +269,16 @@ function detectModalBounds(image: HTMLImageElement) {
 
   const rowAverages = getAxisAverages(map, "row", 0, map.width);
 
-  const verticalRegion = getBrightRegion(
+  const detectedVerticalRegion = getBrightRegion(
     rowAverages,
     Math.round(map.height * 0.2),
   );
+
+  const verticalRegion =
+    detectedVerticalRegion.end - detectedVerticalRegion.start >=
+    map.height * 0.5
+      ? detectedVerticalRegion
+      : findContrastRegion(rowAverages, Math.round(map.height * 0.5));
 
   const columnAverages = getAxisAverages(
     map,
@@ -281,10 +287,16 @@ function detectModalBounds(image: HTMLImageElement) {
     verticalRegion.end,
   );
 
-  const horizontalRegion = getBrightRegion(
+  const detectedHorizontalRegion = getBrightRegion(
     columnAverages,
     Math.round(map.width * 0.2),
   );
+
+  const horizontalRegion =
+    detectedHorizontalRegion.end - detectedHorizontalRegion.start >=
+    map.width * 0.7
+      ? detectedHorizontalRegion
+      : findContrastRegion(columnAverages, Math.round(map.width * 0.7));
 
   return {
     bottom: Math.round(verticalRegion.end / map.scale),
@@ -317,23 +329,16 @@ async function getCroppedScreenshot(
 
         const cropWidth = Math.max(1, right - left);
         const cropHeight = Math.max(1, bottom - top);
-        const outputWidth = OUTPUT_WIDTH;
-        const outputHeight = Math.max(
-          1,
-          Math.round((cropHeight / cropWidth) * outputWidth),
-        );
+        const cropCanvas = document.createElement("canvas");
+        const cropContext = cropCanvas.getContext("2d");
 
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        if (!context) {
+        if (!cropContext) {
           throw new Error("Canvas rendering is unavailable.");
         }
 
-        canvas.width = outputWidth;
-        canvas.height = outputHeight;
-
-        context.drawImage(
+        cropCanvas.width = cropWidth;
+        cropCanvas.height = cropHeight;
+        cropContext.drawImage(
           image,
           left,
           top,
@@ -341,11 +346,38 @@ async function getCroppedScreenshot(
           cropHeight,
           0,
           0,
-          outputWidth,
+          cropWidth,
+          cropHeight,
+        );
+
+        const outputHeight = Math.max(
+          1,
+          Math.round((cropHeight / cropWidth) * OUTPUT_WIDTH),
+        );
+        const resizedCanvas = document.createElement("canvas");
+        const resizedContext = resizedCanvas.getContext("2d");
+
+        if (!resizedContext) {
+          throw new Error("Canvas rendering is unavailable.");
+        }
+
+        resizedCanvas.width = OUTPUT_WIDTH;
+        resizedCanvas.height = outputHeight;
+        resizedContext.imageSmoothingEnabled = true;
+        resizedContext.imageSmoothingQuality = "high";
+        resizedContext.drawImage(
+          cropCanvas,
+          0,
+          0,
+          cropWidth,
+          cropHeight,
+          0,
+          0,
+          OUTPUT_WIDTH,
           outputHeight,
         );
 
-        resolve(canvas);
+        resolve(resizedCanvas);
       } catch (error) {
         reject(error);
       }
@@ -357,6 +389,33 @@ async function getCroppedScreenshot(
 
     image.src = sourceUrl;
   });
+}
+
+function encodeCanvas(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Failed to encode screenshot modal"));
+          return;
+        }
+
+        resolve(blob);
+      },
+      "image/jpeg",
+      0.95,
+    );
+  });
+}
+
+export async function getScreenshotModal(input: File): Promise<Blob> {
+  const sourceUrl = URL.createObjectURL(input);
+
+  try {
+    return await encodeCanvas(await getCroppedScreenshot(sourceUrl));
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
 }
 
 function getROI(

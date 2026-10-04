@@ -11,13 +11,13 @@ export async function extractPvpBattleInfo(
   const result = await generateText({
     model: "google/gemini-2.5-flash-lite",
     system:
-      "Analyze the four labeled image regions from a Tactical Challenge battle report. Assess them together. The user is always represented by myUnits and the enemy by enemyUnits.",
+      "Analyze the four labeled image regions from a Tactical Challenge battle report. These are intentional crops and do not include the report title or the full surrounding UI; do not require those elements to mark the report valid. Assess the crops together. The user is always represented by myUnits and the enemy by enemyUnits.",
     output: Output.object({
       schema: z.object({
         valid: z
           .boolean()
           .describe(
-            "Whether the four supplied regions together form a valid Tactical Challenge Combat Report.",
+            "Whether the supplied crops visibly contain the expected Tactical Challenge report elements: a sword or shield and user result, an enemy name area, and both sides' unit damage charts. Do not reject the input merely because the crops omit the title or other screen chrome.",
           ),
         battle: z
           .object({
