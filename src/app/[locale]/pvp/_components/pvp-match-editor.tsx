@@ -51,6 +51,11 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { getScreenshotROIImages } from "@/lib/pvp-screenshot";
+import {
+  PVP_SCREENSHOT_MAX_INPUT_SIZE,
+  PVP_SCREENSHOT_MAX_ROI_SIZE,
+} from "@/lib/pvp-screenshot-types";
 import { Storage } from "@/lib/storage";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
@@ -507,8 +512,30 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     try {
       setReportStatus("reading");
 
+      if (
+        !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+        file.size === 0 ||
+        file.size > PVP_SCREENSHOT_MAX_INPUT_SIZE
+      ) {
+        throw new Error(
+          "Screenshot must be a supported image between 1 byte and 10 MB",
+        );
+      }
+
+      const images = await getScreenshotROIImages(file);
+      const totalSize = Object.values(images).reduce(
+        (total, image) => total + image.size,
+        0,
+      );
+
+      if (totalSize === 0 || totalSize > PVP_SCREENSHOT_MAX_ROI_SIZE) {
+        throw new Error("Screenshot regions must not exceed 3 MB");
+      }
+
       const form = new FormData();
-      form.set("screenshot", file);
+      for (const [name, image] of Object.entries(images)) {
+        form.set(name, image, `${name}.jpg`);
+      }
 
       setReportStatus("extracting");
 

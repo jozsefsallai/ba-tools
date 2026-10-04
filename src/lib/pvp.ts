@@ -1,38 +1,41 @@
+import type { PvpScreenshotROIMap } from "@/lib/pvp-screenshot-types";
+import { PVP_SCREENSHOT_ROI_MEDIA_TYPE } from "@/lib/pvp-screenshot-types";
 import { Output, generateText } from "ai";
 import z from "zod";
 
+export type PvpScreenshotROIImages = PvpScreenshotROIMap<Buffer>;
+
 export async function extractPvpBattleInfo(
-  screenshot: Buffer,
-  mediaType: "image/jpeg" | "image/png" | "image/webp" = "image/jpeg",
+  screenshots: PvpScreenshotROIImages,
 ) {
   const result = await generateText({
     model: "google/gemini-2.5-flash-lite",
     system:
-      "Analyze the provided screenshot and extract information about a Tactical Challenge battle. My user is always on the left half and the enemy is always on the right half.",
+      "Analyze the four labeled image regions from a Tactical Challenge battle report. Assess them together. The user is always represented by myUnits and the enemy by enemyUnits.",
     output: Output.object({
       schema: z.object({
         valid: z
           .boolean()
           .describe(
-            "Whether the supplied screenshot is a valid Tactical Challenge Combat Report screen.",
+            "Whether the four supplied regions together form a valid Tactical Challenge Combat Report.",
           ),
         battle: z
           .object({
             battleType: z
               .enum(["ATTACK", "DEFENSE"])
               .describe(
-                "This should be ATTACK if the icon on the left side resembles a sword and DEFENSE if it resembles a shield.",
+                "Use battleTypeAndResult: ATTACK when the icon is a sword and DEFENSE when it is a shield.",
               ),
             result: z
               .enum(["WIN", "LOSE"])
               .describe(
-                'Whether the text on the left side says "Win" or "Lose"',
+                "Use battleTypeAndResult to determine whether the user (not the opponent) won or lost.",
               ),
             enemyName: z
               .string()
               .nullable()
               .describe(
-                "The name of the enemy on the right side of the screen. If the enemy name is Anonymous, this value should be null.",
+                "Use enemyName. Extract only the enemy name. If it is Anonymous, return null.",
               ),
             myUnits: z
               .array(
@@ -45,12 +48,12 @@ export async function extractPvpBattleInfo(
                   damage: z
                     .number()
                     .describe(
-                      "The damage this student has dealt, the number above the bar in the chart.",
+                      "The damage this student has dealt, shown above the bar in myUnits.",
                     ),
                 }),
               )
               .describe(
-                "An array of students that the player (left side) has deployed.",
+                "Use myUnits to identify every student deployed by the user, including variants, and pair each with its damage dealt.",
               ),
             enemyUnits: z
               .array(
@@ -63,17 +66,17 @@ export async function extractPvpBattleInfo(
                   damage: z
                     .number()
                     .describe(
-                      "The damage this student has taken, the number above the bar in the chart.",
+                      "The damage this student has dealt, shown above the bar in enemyUnits.",
                     ),
                 }),
               )
               .describe(
-                "An array of students that the enemy (right side) has deployed.",
+                "Use enemyUnits to identify every student deployed by the enemy, including variants, and pair each with its damage dealt.",
               ),
           })
           .nullable()
           .describe(
-            "The battle information. Should be null if the provided screenshot is invalid.",
+            "The battle information. Should be null if the supplied regions are not a valid report.",
           ),
       }),
     }),
@@ -82,9 +85,40 @@ export async function extractPvpBattleInfo(
         role: "user",
         content: [
           {
+            type: "text",
+            text: "battleTypeAndResult: sword/shield icon and the user's result.",
+          },
+          {
             type: "file",
-            data: screenshot,
-            mediaType,
+            data: screenshots.battleTypeAndResult,
+            mediaType: PVP_SCREENSHOT_ROI_MEDIA_TYPE,
+          },
+          {
+            type: "text",
+            text: "enemyName: the enemy's name, it can contain any characters.",
+          },
+          {
+            type: "file",
+            data: screenshots.enemyName,
+            mediaType: PVP_SCREENSHOT_ROI_MEDIA_TYPE,
+          },
+          {
+            type: "text",
+            text: "myUnits: the user's students and their damage dealt",
+          },
+          {
+            type: "file",
+            data: screenshots.myUnits,
+            mediaType: PVP_SCREENSHOT_ROI_MEDIA_TYPE,
+          },
+          {
+            type: "text",
+            text: "enemyUnits: the enemy's students and their damage dealt",
+          },
+          {
+            type: "file",
+            data: screenshots.enemyUnits,
+            mediaType: PVP_SCREENSHOT_ROI_MEDIA_TYPE,
           },
         ],
       },

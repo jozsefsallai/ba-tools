@@ -45,6 +45,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 4, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Improved reliability of the screenshot extraction tool.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "October 3, 2026",
     features: [
       {

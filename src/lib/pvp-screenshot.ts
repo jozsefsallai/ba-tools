@@ -1,3 +1,9 @@
+import {
+  PVP_SCREENSHOT_REGIONS,
+  type PvpScreenshotROIMap,
+  type PvpScreenshotRegion,
+} from "@/lib/pvp-screenshot-types";
+
 type DetectedRegion = {
   end: number;
   start: number;
@@ -13,14 +19,8 @@ type LuminanceMap = {
 const MAX_ANALYSIS_SIZE = 900;
 const OUTPUT_WIDTH = 1920;
 
-type ScreenshotRegion =
-  | "battleTypeAndResult"
-  | "enemyName"
-  | "myUnits"
-  | "enemyUnits";
-
 export const PVP_SCREENSHOT_ROI_BOUNDS: Record<
-  ScreenshotRegion,
+  PvpScreenshotRegion,
   readonly [x: number, y: number, w: number, h: number]
 > = {
   battleTypeAndResult: [0, 122, 350, 125],
@@ -29,9 +29,9 @@ export const PVP_SCREENSHOT_ROI_BOUNDS: Record<
   enemyUnits: [1044, 280, 830, 540],
 };
 
-export type PVPScreenshotROIs = {
-  [region in ScreenshotRegion]: Uint8ClampedArray;
-};
+export type PVPScreenshotROIs = PvpScreenshotROIMap<Uint8ClampedArray>;
+
+export type PVPScreenshotROIImages = PvpScreenshotROIMap<Blob>;
 
 function createLuminanceMap(image: HTMLImageElement): LuminanceMap {
   const scale = Math.min(
@@ -375,6 +375,43 @@ function getROI(
   return new Uint8ClampedArray(imageData.data);
 }
 
+function encodeROI(
+  pixels: Uint8ClampedArray,
+  area: readonly number[],
+): Promise<Blob> {
+  const [, , width, height] = area;
+
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return Promise.reject(new Error("Failed to get canvas context"));
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const imageData = context.createImageData(width, height);
+  imageData.data.set(pixels);
+
+  context.putImageData(imageData, 0, 0);
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Failed to encode screenshot region"));
+          return;
+        }
+
+        resolve(blob);
+      },
+      "image/jpeg",
+      0.95,
+    );
+  });
+}
+
 export async function getScreenshotROIs(
   input: File,
 ): Promise<PVPScreenshotROIs> {
@@ -395,4 +432,22 @@ export async function getScreenshotROIs(
   } finally {
     URL.revokeObjectURL(sourceUrl);
   }
+}
+
+export async function getScreenshotROIImages(
+  input: File,
+): Promise<PVPScreenshotROIImages> {
+  const rois = await getScreenshotROIs(input);
+
+  const entries = await Promise.all(
+    PVP_SCREENSHOT_REGIONS.map(
+      async (region) =>
+        [
+          region,
+          await encodeROI(rois[region], PVP_SCREENSHOT_ROI_BOUNDS[region]),
+        ] as const,
+    ),
+  );
+
+  return Object.fromEntries(entries) as PVPScreenshotROIImages;
 }
