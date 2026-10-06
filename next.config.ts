@@ -6,6 +6,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
+  globPublicPatterns: ["!(ocr|pvp-icons){,/**}"],
   disable: process.env.NODE_ENV === "development",
 });
 
@@ -69,6 +70,30 @@ const nextConfig: NextConfig = {
 
   async headers() {
     return [
+      {
+        source: "/pvp-icons/manifest.json",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/pvp-icons/:asset.bin",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/ocr/:version/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/api/students",
         headers: [

@@ -7,8 +7,11 @@
     "dev": "npm-run-all --parallel dev:backend dev:frontend",
     "dev:backend": "convex dev",
     "dev:frontend": "next dev",
+    "predev:frontend": "pnpm run db:generate && pnpm run ocr:assets && pnpm run pvp:icon-assets",
     "predev": "convex dev --until-success && convex dashboard",
-    "build": "pnpm run db:generate && next build",
+    "build": "pnpm run db:generate && pnpm run pvp:icon-assets && next build --webpack",
+    "prebuild": "pnpm run ocr:assets",
+    "ocr:assets": "node --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-ocr.ts",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "biome lint . --write",
@@ -18,7 +21,8 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "jobs:dev": "trigger dev",
-    "jobs:deploy": "trigger deploy"
+    "jobs:deploy": "trigger deploy",
+    "pvp:icon-assets": "node --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",
@@ -110,6 +114,7 @@
     "svix": "^1.99.1",
     "tailwind-merge": "^3.7.0",
     "tailwindcss-animate": "^1.0.7",
+    "tesseract.js": "7.0.0",
     "trigger.dev": "^4.6.3",
     "unist-util-visit": "^5.1.0",
     "usehooks-ts": "^3.1.1",
@@ -134,6 +139,7 @@
     "node-loader": "^2.1.0",
     "npm-run-all": "^4.1.5",
     "tailwindcss": "^4.3.3",
+    "tsx": "4.21.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677"

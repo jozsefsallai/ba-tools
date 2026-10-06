@@ -272,6 +272,7 @@ export function PVPMatchFormationEditorItem({
                   value={damageStr}
                   tabIndex={damageTabIndex}
                   onChange={handleDamageUpdate}
+                  aria-invalid={item.report?.damage.uncertain || undefined}
                 />
               </div>
             )}

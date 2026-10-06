@@ -796,8 +796,11 @@
     },
     "advancedMode": "Advanced Mode",
     "reportImport": {
+      "loadingAssets": "Loading assets...",
+      "unreadable": "Could not read this field",
+      "otherReadings": "Other OCR readings",
       "title": "Import Combat Report",
-      "disclaimer": "Drop a screenshot here, choose one from your device, or paste one with <shortcut>Ctrl/Cmd + V</shortcut>. The extraction may contain mistakes; double-check every field before saving the match.",
+      "disclaimer": "Drop a screenshot here, choose one from your device, or paste one with <shortcut>Ctrl/Cmd + V</shortcut>. The screenshot is processed on your device. The extraction may contain mistakes; double-check every field before saving the match.",
       "drop": "Drop screenshot here",
       "browse": "or click to browse",
       "pasteHint": "Paste an image with",

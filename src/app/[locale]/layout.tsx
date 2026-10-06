@@ -28,6 +28,7 @@ const outfit = Outfit({
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
+  preload: false,
   weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
 });

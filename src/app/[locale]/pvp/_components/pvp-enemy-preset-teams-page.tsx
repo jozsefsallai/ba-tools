@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import { buildPvpCounterSearchHref } from "@/lib/pvp-counter-link";
+import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { Storage } from "@/lib/storage";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";

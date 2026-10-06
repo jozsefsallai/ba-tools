@@ -21,7 +21,7 @@ import { useStudents } from "@/hooks/use-students";
 import {
   buildPvpCounterSearchHref,
   parsePvpCounterSearchParams,
-} from "@/lib/pvp-counter-link";
+} from "@/lib/pvp/counter-link";
 import { Storage } from "@/lib/storage";
 import {
   type PVPCounterDefenseSlot,

@@ -1,6 +1,5 @@
 "use client";
 
-import { parsePvpCombatReport } from "@/actions/pvp-combat-report";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import { PVPPresetPicker } from "@/app/[locale]/pvp/_components/pvp-preset-picker";
 import type {
@@ -31,6 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -51,13 +51,15 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
-import { getScreenshotROIImages } from "@/lib/pvp-screenshot";
 import {
-  PVP_SCREENSHOT_MAX_INPUT_SIZE,
-  PVP_SCREENSHOT_MAX_ROI_SIZE,
-} from "@/lib/pvp-screenshot-types";
+  type PvpOcrProgress,
+  correctPvpImportedItem,
+  resolvePvpReportTeam,
+} from "@/lib/pvp";
+import type { PvpOcrClient } from "@/lib/pvp/ocr";
+import { getScreenshotROIs } from "@/lib/pvp/screenshot";
+import { PVP_SCREENSHOT_MAX_INPUT_SIZE } from "@/lib/pvp/screenshot-types";
 import { Storage } from "@/lib/storage";
-import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { format, isValid, parseISO } from "date-fns";
 import {
@@ -138,7 +140,60 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const [reportStatus, setReportStatus] = useState<
     "idle" | "reading" | "extracting" | "applying"
   >("idle");
+
   const reportInputRef = useRef<HTMLInputElement>(null);
+  const reportClientRef = useRef<Promise<PvpOcrClient> | null>(null);
+  const reportAbortRef = useRef<AbortController | null>(null);
+  const reportJobRef = useRef(0);
+  const [reportProgress, setReportProgress] = useState<PvpOcrProgress>();
+
+  const getReportClient = useCallback(() => {
+    reportClientRef.current ??= import("@/lib/pvp/ocr").then(
+      ({ PvpOcrClient }) => new PvpOcrClient(),
+    );
+    return reportClientRef.current;
+  }, []);
+
+  useEffect(
+    () => () => {
+      reportJobRef.current++;
+      reportAbortRef.current?.abort();
+      void reportClientRef.current?.then((client) => client.dispose());
+      reportClientRef.current = null;
+    },
+    [],
+  );
+
+  function changeReportDialog(open: boolean) {
+    setReportDialogOpen(open);
+
+    if (open) {
+      const job = reportJobRef.current;
+
+      void getReportClient()
+        .then((client) =>
+          client.warmup((progress) => {
+            if (job === reportJobRef.current) {
+              setReportProgress(
+                progress.stage === "loading" ? progress : undefined,
+              );
+            }
+          }),
+        )
+        .catch(() => {
+          if (job === reportJobRef.current) {
+            setReportProgress(undefined);
+          }
+        });
+    } else {
+      reportJobRef.current++;
+      reportAbortRef.current?.abort();
+      reportAbortRef.current = null;
+      setReportStatus("idle");
+      setReportProgress(undefined);
+    }
+  }
+
   const [savePresetKind, setSavePresetKind] = useState<"own" | "enemy">("own");
   const [savePresetName, setSavePresetName] = useState("");
   const [savePresetUsedByMe, setSavePresetUsedByMe] = useState(true);
@@ -267,10 +322,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       params: Partial<PVPFormationStudentItem>,
     ) => {
       const targetTeam = kind === "own" ? ownTeam : opponentTeam;
-      const updatedItem = {
-        ...targetTeam[idx],
-        ...params,
-      };
+      const updatedItem = correctPvpImportedItem(targetTeam[idx], params);
 
       const updatedTeam = [...targetTeam];
       updatedTeam[idx] = updatedItem;
@@ -509,6 +561,17 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     !matchingOpponentPreset;
 
   async function handleCombatReport(file: File) {
+    if (reportAbortRef.current) {
+      return;
+    }
+
+    const controller = new AbortController();
+    reportAbortRef.current = controller;
+
+    const job = ++reportJobRef.current;
+    const active = () =>
+      !controller.signal.aborted && job === reportJobRef.current;
+
     try {
       setReportStatus("reading");
 
@@ -522,94 +585,92 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         );
       }
 
-      const images = await getScreenshotROIImages(file);
-      const totalSize = Object.values(images).reduce(
-        (total, image) => total + image.size,
-        0,
-      );
+      const [rois, client] = await Promise.all([
+        getScreenshotROIs(file),
+        getReportClient(),
+      ]);
 
-      if (totalSize === 0 || totalSize > PVP_SCREENSHOT_MAX_ROI_SIZE) {
-        throw new Error("Screenshot regions must not exceed 3 MB");
-      }
-
-      const form = new FormData();
-      for (const [name, image] of Object.entries(images)) {
-        form.set(name, image, `${name}.jpg`);
+      if (!active()) {
+        return;
       }
 
       setReportStatus("extracting");
 
-      const parsed = await parsePvpCombatReport(form);
+      const parsed = await client.extract(rois, {
+        signal: controller.signal,
+        students: Object.values(studentMap),
+        onProgress: (progress) => {
+          if (active()) {
+            setReportProgress(
+              progress.stage === "loading" ? progress : undefined,
+            );
+          }
+        },
+      });
 
-      if (!parsed.valid) {
-        toast.error(t("tools.pvp.reportImport.invalid"), {
-          position: "top-right",
-        });
+      if (!active()) {
         return;
       }
 
+      if (!parsed.valid || !parsed.battle) {
+        toast.error(t("tools.pvp.reportImport.invalid"), {
+          position: "top-right",
+        });
+
+        return;
+      }
       setReportStatus("applying");
+      const battle = parsed.battle;
+      const students = Object.values(studentMap);
 
-      const resolve = (name: string) => {
-        return orderStudentsByFuzzyNameQuery(Object.values(studentMap), name)
-          .ordered[0];
-      };
+      setOwnTeam(resolvePvpReportTeam(battle.myUnits, students));
+      setOpponentTeam(resolvePvpReportTeam(battle.enemyUnits, students));
 
-      const team = (units: typeof parsed.battle.myUnits) => {
-        const next = [{}, {}, {}, {}, {}, {}] as PVPFormationStudentItem[];
-
-        let striker = 0;
-        let special = 4;
-
-        for (const unit of units) {
-          const student = resolve(unit.student);
-
-          if (!student) {
-            continue;
-          }
-
-          const index = student.combatClass === "Main" ? striker++ : special++;
-
-          if (index < 6) {
-            next[index] = { student, damage: unit.damage };
-          }
-        }
-
-        return next;
-      };
-
-      setMatchType(parsed.battle.battleType.toLowerCase() as PVPMatchType);
-      setResult(parsed.battle.result === "WIN" ? "win" : "loss");
-      setOpponentName(parsed.battle.enemyName ?? "");
-      setOwnTeam(team(parsed.battle.myUnits));
-      setOpponentTeam(team(parsed.battle.enemyUnits));
-
-      if (parsed.battle.enemyName) {
-        const preset = enemyPresets?.find(
-          (candidate) => candidate.opponentName === parsed.battle.enemyName,
+      if (battle.battleType.value) {
+        setMatchType(
+          battle.battleType.value === "ATTACK" ? "attack" : "defense",
         );
-
-        if (preset) {
-          setEnemyPresetId(preset._id);
-          setOpponentStudentRep(
-            preset.opponentStudentRepId
-              ? studentMap[preset.opponentStudentRepId]
-              : undefined,
-          );
-        }
       }
 
+      if (battle.result.value) {
+        setResult(battle.result.value === "WIN" ? "win" : "loss");
+      }
+
+      setOpponentName(battle.enemyName.value ?? "");
+      setEnemyPresetId(undefined);
+
+      const recognizedRep = battle.enemyStudentRep.iconMatch.studentId;
+      setOpponentStudentRep(
+        recognizedRep ? studentMap[recognizedRep] : undefined,
+      );
+
+      if (battle.enemyName.value) {
+        const preset = enemyPresets.find(
+          (candidate) => candidate.opponentName === battle.enemyName.value,
+        );
+        if (preset) {
+          setEnemyPresetId(preset._id);
+        }
+      }
       toast.success(t("tools.pvp.reportImport.success"), {
         position: "top-right",
       });
       setReportDialogOpen(false);
     } catch (error) {
+      if (!active()) {
+        return;
+      }
+
       console.error(error);
       toast.error(t("tools.pvp.reportImport.failed"), {
         position: "top-right",
       });
     } finally {
-      setReportStatus("idle");
+      if (job === reportJobRef.current) {
+        reportAbortRef.current = null;
+        setReportStatus("idle");
+        setReportProgress(undefined);
+      }
     }
   }
 
@@ -787,7 +848,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setReportDialogOpen(true)}
+              onClick={() => changeReportDialog(true)}
             >
               {t("tools.pvp.reportImport.title")}
             </Button>
@@ -795,7 +856,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         </div>
       </div>
 
-      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+      <Dialog open={reportDialogOpen} onOpenChange={changeReportDialog}>
         <DialogContent onPaste={handleCombatReportPaste}>
           <DialogHeader>
             <DialogTitle>{t("tools.pvp.reportImport.title")}</DialogTitle>
@@ -854,12 +915,20 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             }}
           />
 
+          {reportProgress && (
+            <div className="flex flex-col gap-2" aria-live="polite">
+              <p className="text-sm text-muted-foreground">
+                {t("tools.pvp.reportImport.loadingAssets")}
+              </p>
+              <Progress value={reportProgress.progress * 100} />
+            </div>
+          )}
+
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              onClick={() => setReportDialogOpen(false)}
-              disabled={reportStatus !== "idle"}
+              onClick={() => changeReportDialog(false)}
             >
               {t("tools.pvp.reportImport.cancel")}
             </Button>
@@ -1087,7 +1156,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
           <Select
             value={matchType}
-            onValueChange={(value) => setMatchType(value as PVPMatchType)}
+            onValueChange={(value) => {
+              setMatchType(value as PVPMatchType);
+            }}
           >
             <SelectTrigger>
               <SelectValue />
@@ -1110,7 +1181,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
           <Select
             value={result}
-            onValueChange={(value) => setResult(value as PVPMatchResult)}
+            onValueChange={(value) => {
+              setResult(value as PVPMatchResult);
+            }}
           >
             <SelectTrigger>
               <SelectValue />
@@ -1297,7 +1370,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 <Input
                   id="opponent-name"
                   value={opponentName}
-                  onChange={(e) => setOpponentName(e.target.value)}
+                  onChange={(e) => {
+                    setOpponentName(e.target.value);
+                  }}
                 />
               </div>
 

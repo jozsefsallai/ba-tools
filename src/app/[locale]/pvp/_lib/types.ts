@@ -1,3 +1,4 @@
+import type { PvpUnitImport } from "@/lib/pvp";
 import type {
   PVPCounterRange,
   PVPFormationPresetType,
@@ -12,6 +13,7 @@ export type {
 } from "@/lib/types";
 
 export type PVPFormationStudentItem = {
+  report?: PvpUnitImport;
   student?: Student;
   level?: number;
   starLevel?: StarLevel;

@@ -1,8 +1,8 @@
 import {
   PVP_SCREENSHOT_REGIONS,
+  PVP_SCREENSHOT_ROI_BOUNDS,
   type PvpScreenshotROIMap,
-  type PvpScreenshotRegion,
-} from "@/lib/pvp-screenshot-types";
+} from "@/lib/pvp/screenshot-types";
 
 type DetectedRegion = {
   end: number;
@@ -19,15 +19,7 @@ type LuminanceMap = {
 const MAX_ANALYSIS_SIZE = 900;
 const OUTPUT_WIDTH = 1920;
 
-export const PVP_SCREENSHOT_ROI_BOUNDS: Record<
-  PvpScreenshotRegion,
-  readonly [x: number, y: number, w: number, h: number]
-> = {
-  battleTypeAndResult: [0, 122, 350, 125],
-  enemyName: [1582, 100, 285, 80],
-  myUnits: [46, 280, 830, 540],
-  enemyUnits: [1044, 280, 830, 540],
-};
+export { PVP_SCREENSHOT_ROI_BOUNDS } from "@/lib/pvp/screenshot-types";
 
 export type PVPScreenshotROIs = PvpScreenshotROIMap<Uint8ClampedArray>;
 
@@ -480,6 +472,10 @@ export async function getScreenshotROIs(
     const screenshot = await getCroppedScreenshot(sourceUrl);
 
     return {
+      enemyStudentRep: getROI(
+        screenshot,
+        PVP_SCREENSHOT_ROI_BOUNDS.enemyStudentRep,
+      ),
       battleTypeAndResult: getROI(
         screenshot,
         PVP_SCREENSHOT_ROI_BOUNDS.battleTypeAndResult,
