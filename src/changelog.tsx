@@ -45,6 +45,24 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 7, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "PVP screenshots are processed mostly on-device now and they should be a lot more reliable.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "The PVP screenshot extraction engine can now properly differentiate the Dealer and Tank forms of Hoshino (Armed).",
+      },
+    ],
+  },
+  {
     date: "October 4, 2026",
     features: [],
     changes: [
