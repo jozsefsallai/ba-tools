@@ -347,6 +347,18 @@ export function PvpScreenshotDebugger() {
 
             {extraction?.battle && (
               <>
+                {extraction.battle.enemyNameRecognition && (
+                  <pre className="whitespace-pre-wrap break-all text-xs">
+                    {JSON.stringify(
+                      {
+                        ...extraction.battle.enemyNameRecognition,
+                        receipt: undefined,
+                      },
+                      null,
+                      2,
+                    )}
+                  </pre>
+                )}
                 {[
                   extraction.battle.battleType,
                   extraction.battle.result,

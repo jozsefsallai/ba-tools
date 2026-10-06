@@ -52,6 +52,7 @@ import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
 import { correctPvpImportedItem, resolvePvpReportTeam } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
+import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
 import { getScreenshotROIs } from "@/lib/pvp/screenshot";
 import {
   PVP_SCREENSHOT_INPUT_TYPES,
@@ -146,6 +147,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const reportClientRef = useRef<Promise<PvpOcrClient> | null>(null);
   const reportAbortRef = useRef<AbortController | null>(null);
   const reportJobRef = useRef(0);
+  const nameReceiptRef = useRef<string | undefined>(undefined);
+  const nameCacheEligibleRef = useRef(false);
+  const [nameUncertain, setNameUncertain] = useState(false);
   const reportWarmupGenerationRef = useRef(0);
   const [reportEngineStatus, setReportEngineStatus] = useState<
     "loading" | "ready" | "failed"
@@ -643,7 +647,17 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         setResult(battle.result.value === "WIN" ? "win" : "loss");
       }
 
-      setOpponentName(battle.enemyName.value ?? "");
+      nameReceiptRef.current = battle.enemyNameRecognition?.receipt;
+      nameCacheEligibleRef.current = battle.enemyName.value != null;
+
+      setNameUncertain(battle.enemyName.uncertain);
+
+      if (battle.enemyNameStatus === "anonymous") {
+        setOpponentName("");
+      } else if (battle.enemyName.value != null) {
+        setOpponentName(battle.enemyName.value);
+      }
+
       setEnemyPresetId(undefined);
 
       const recognizedRep = battle.enemyStudentRep.iconMatch.studentId;
@@ -731,6 +745,23 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       includeInStatistics,
     };
 
+    const cacheReceipt = nameCacheEligibleRef.current
+      ? nameReceiptRef.current
+      : undefined;
+
+    const cacheSavedName = async (matchId: Id<"pvpMatchRecord">) => {
+      if (!cacheReceipt) {
+        return;
+      }
+
+      try {
+        await saveOpponentNameCache(cacheReceipt, matchId, seasonId);
+      } catch {
+        toast.warning(t("tools.pvp.reportImport.cacheSaveFailed"), {
+          position: "top-right",
+        });
+      }
+    };
     try {
       if (current) {
         await updateMatchMutation({
@@ -738,14 +769,18 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           ...matchData,
         });
 
+        await cacheSavedName(current._id);
+
         toast.success(t("tools.pvp.toasts.matchUpdated"), {
           position: "top-right",
         });
       } else {
-        await recordMatchMutation({
+        const savedMatchId = await recordMatchMutation({
           seasonId,
           ...matchData,
         });
+
+        await cacheSavedName(savedMatchId);
 
         try {
           lastPvpMatchDateStorage.set(format(date, "yyyy-MM-dd"));
@@ -770,6 +805,10 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   }
 
   useEffect(() => {
+    nameReceiptRef.current = undefined;
+    nameCacheEligibleRef.current = false;
+    setNameUncertain(false);
+
     if (!current) {
       return;
     }
@@ -1370,6 +1409,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 }
 
                 setOpponentName(preset.opponentName ?? "");
+                nameCacheEligibleRef.current = true;
+                setNameUncertain(false);
                 setOpponentStudentRep(
                   preset.opponentStudentRepId
                     ? studentMap[preset.opponentStudentRepId]
@@ -1405,10 +1446,25 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
                 <Input
                   id="opponent-name"
                   value={opponentName}
+                  aria-invalid={nameUncertain}
+                  aria-describedby={
+                    nameUncertain ? "opponent-name-hint" : undefined
+                  }
                   onChange={(e) => {
                     setOpponentName(e.target.value);
+                    nameCacheEligibleRef.current = true;
+                    setNameUncertain(false);
                   }}
                 />
+
+                {nameUncertain && (
+                  <p
+                    id="opponent-name-hint"
+                    className="text-xs text-muted-foreground"
+                  >
+                    {t("tools.pvp.reportImport.nameUncertain")}
+                  </p>
+                )}
               </div>
 
               <div className="flex min-w-0 flex-col gap-1">

@@ -1,4 +1,5 @@
 import type { PvpIconMatch } from "@/lib/pvp/icon-match";
+import type { PvpOpponentNameRecognition } from "@/lib/pvp/opponent-name-types";
 import type { Student } from "@/lib/types";
 
 export const PVP_OCR_CONFIDENCE_THRESHOLD = 75;
@@ -31,6 +32,21 @@ export type PvpOcrReading = {
   preprocessing: string;
 };
 
+export function getPvpLevelEnd(
+  words: { text: string; confidence: number; bbox: { x1: number } }[],
+) {
+  const prefix = /^Lv[.．]?\p{Nd}+$/iu.test(words[0]?.text ?? "")
+    ? words.slice(0, 1)
+    : /^Lv[.．]?$/iu.test(words[0]?.text ?? "") &&
+        /^\p{Nd}+$/u.test(words[1]?.text ?? "")
+      ? words.slice(0, 2)
+      : [];
+
+  return prefix.length && prefix.every((word) => word.confidence >= 85)
+    ? prefix.at(-1)?.bbox.x1
+    : undefined;
+}
+
 export function parsePvpOpponentName(text: string): string | null {
   // Remove only the first level label; later labels can belong to the username.
   const level = /Lv\s*[.．]?\s*\p{Nd}+/iu.exec(text);
@@ -40,64 +56,6 @@ export function parsePvpOpponentName(text: string): string | null {
 
   const name = text.slice(level.index + level[0].length).trim();
   return name || null;
-}
-
-export function selectPvpOpponentReading(fields: PvpOcrField<string>[]) {
-  const readings = fields.flatMap((field) => field.alternatives ?? []);
-
-  const recognizedReadings = readings.map((reading) => ({
-    ...reading,
-    value: parsePvpOpponentName(reading.rawText),
-  }));
-
-  const readingsForName = (
-    text: string | null,
-    confidence = PVP_OCR_CONFIDENCE_THRESHOLD,
-  ) => {
-    return recognizedReadings.filter(
-      (reading) => reading.value === text && reading.confidence >= confidence,
-    );
-  };
-
-  const support = (text: string) => {
-    return new Set(readingsForName(text).map((reading) => reading.language))
-      .size;
-  };
-
-  const stability = (text: string) => {
-    return new Set(
-      readingsForName(text, 45).map(
-        (reading) => `${reading.language}:${reading.preprocessing}`,
-      ),
-    ).size;
-  };
-
-  const score = (field: PvpOcrField<string>) => {
-    return (
-      field.confidence +
-      Math.min(3, support(field.value ?? "")) * 2 +
-      Math.min(2, Math.max(0, stability(field.value ?? "") - 1)) * 8
-    );
-  };
-
-  const sorted = fields
-    .filter((field) => field.value != null)
-    .sort((a, b) => score(b) - score(a));
-
-  const best = sorted[0] ?? fields[0];
-
-  const conflicting = sorted.find((field) => field.value !== best.value);
-
-  const consistent = readingsForName(best.value).length >= 2;
-
-  return {
-    ...best,
-    alternatives: readings,
-    uncertain:
-      best.uncertain ||
-      !consistent ||
-      (conflicting != null && conflicting.confidence >= best.confidence - 8),
-  };
 }
 
 export type PvpStudentField = PvpOcrField<string> & {
@@ -113,6 +71,7 @@ export type PvpBattleInfo = {
   battleType: PvpOcrField<"ATTACK" | "DEFENSE">;
   result: PvpOcrField<"WIN" | "LOSE">;
   enemyName: PvpOcrField<string>;
+  enemyNameRecognition?: PvpOpponentNameRecognition;
   enemyNameStatus: "named" | "anonymous" | "unknown";
   enemyStudentRep: PvpStudentField;
   myUnits: PvpExtractedUnit[];

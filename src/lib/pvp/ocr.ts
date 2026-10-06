@@ -10,17 +10,17 @@ import {
   type PvpStudentField,
   type PvpStudentIdentity,
   getPvpEnemyNameStatus,
+  getPvpLevelEnd,
   parsePvpDamage,
-  parsePvpOpponentName,
   parsePvpResult,
-  selectPvpOpponentReading,
 } from "@/lib/pvp";
 import { recognizePvpAnonymousOpponent } from "@/lib/pvp/anonymous-icon";
-import { drawPvpCrop } from "@/lib/pvp/canvas";
+import { drawPvpCrop, drawPvpPixels } from "@/lib/pvp/canvas";
 import { PvpIconMatcher } from "@/lib/pvp/icon-matcher";
 import { getPvpOcrAssetBaseUrl } from "@/lib/pvp/ocr-asset-url";
 import assets from "@/lib/pvp/ocr-assets.json";
 import { type PvpPreparedReport, preprocessPvpText } from "@/lib/pvp/ocr-image";
+import { recognizeRemoteOpponentName } from "@/lib/pvp/opponent-name-client";
 import type { PVPScreenshotROIs } from "@/lib/pvp/screenshot-types";
 import type { PvpWorkerResponse } from "@/lib/pvp/worker-types";
 import { OEM, type Worker as OcrWorker, PSM, createWorker } from "tesseract.js";
@@ -193,7 +193,7 @@ export class PvpOcrClient {
 
     const { signal, onProgress } = options;
 
-    let language = "eng";
+    const language = "eng";
 
     const started = performance.now();
 
@@ -236,17 +236,6 @@ export class PvpOcrClient {
 
       const progress = () =>
         onProgress?.({ stage: "recognizing", progress: ++completed / total });
-
-      const initializeLanguage = async (locale: string) => {
-        language = locale;
-
-        await withAbort(
-          worker.reinitialize(locale, OEM.LSTM_ONLY, CONFIG),
-          signal,
-        );
-
-        onProgress?.({ stage: "recognizing", progress: completed / total });
-      };
 
       const recognize = async <T>(
         crop: PvpPixelImage | null,
@@ -403,6 +392,38 @@ export class PvpOcrClient {
         prepared.enemyStudentRep,
       );
 
+      let levelEnd: number | undefined;
+
+      if (!anonymousRep) {
+        await withAbort(
+          worker.setParameters({
+            tessedit_pageseg_mode: PSM.SINGLE_LINE,
+            tessedit_char_whitelist: "",
+            tessedit_char_blacklist: "",
+          }),
+          signal,
+        );
+
+        const canvas = document.createElement("canvas");
+
+        drawPvpPixels(canvas, prepared.enemyName);
+
+        const { data } = await withAbort(
+          worker.recognize(canvas, {}, { blocks: true }),
+          signal,
+        );
+
+        const words =
+          data.blocks?.[0]?.paragraphs?.[0]?.lines?.[0]?.words ?? [];
+
+        levelEnd = getPvpLevelEnd(words);
+      }
+      const nameRecognition = anonymousRep
+        ? undefined
+        : recognizeRemoteOpponentName(prepared.enemyName, signal, levelEnd);
+
+      void nameRecognition?.catch(() => {});
+
       const iconCrops = [
         ...unitCrops.map((unit) => unit.icon),
         ...(anonymousRep ? [] : [prepared.enemyStudentRep]),
@@ -463,29 +484,18 @@ export class PvpOcrClient {
         progress();
       }
 
-      const opponentReadings: PvpOcrField<string>[] = [];
-      for (const locale of anonymousRep ? [] : assets.languages) {
-        await initializeLanguage(locale);
+      const enemyNameRecognition = await nameRecognition;
 
-        opponentReadings.push(
-          await recognize(
-            prepared.enemyName,
-            "text",
-            parsePvpOpponentName,
-            false,
-          ),
-        );
-      }
-
-      const enemyName: PvpOcrField<string> = anonymousRep
-        ? {
-            value: null,
-            rawText: "",
-            confidence: anonymousRep.confidence,
-            uncertain: false,
-            crop: prepared.enemyName,
-          }
-        : selectPvpOpponentReading(opponentReadings);
+      const enemyName: PvpOcrField<string> = {
+        value: enemyNameRecognition?.name ?? null,
+        rawText:
+          enemyNameRecognition?.rawText ?? enemyNameRecognition?.name ?? "",
+        confidence:
+          anonymousRep?.confidence ??
+          (enemyNameRecognition?.source === "cache" ? 100 : 0),
+        uncertain: enemyNameRecognition?.uncertain ?? false,
+        crop: prepared.enemyName,
+      };
 
       progress();
 
@@ -502,6 +512,7 @@ export class PvpOcrClient {
           battleType: prepared.battleType,
           result,
           enemyName,
+          enemyNameRecognition,
           enemyNameStatus,
           enemyStudentRep,
           myUnits,

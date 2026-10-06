@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  serverExternalPackages: ["@resvg/resvg-js", "chromadb"],
+  serverExternalPackages: ["@resvg/resvg-js", "@napi-rs/image", "chromadb"],
 
   async redirects() {
     return [
