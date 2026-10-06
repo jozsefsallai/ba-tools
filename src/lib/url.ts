@@ -1,11 +1,12 @@
 import type { Student } from "@/lib/types";
 
 export function buildCDNUrl(key: string) {
-  return `${process.env.NEXT_PUBLIC_IMAGE_CDN_URL}/${key}`;
+  const base = process.env.NEXT_PUBLIC_IMAGE_CDN_URL?.replace(/\/+$/, "");
+  return `${base}/${key}`;
 }
 
 export function buildCDNAbsoluteUrl(key: string) {
-  return `${process.env.NEXT_PUBLIC_IMAGE_CDN_URL}/${key}`;
+  return buildCDNUrl(key);
 }
 
 export function buildStudentIconUrlFromId(studentId: string) {

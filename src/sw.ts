@@ -1,6 +1,17 @@
 /// <reference lib="webworker" />
+
+import {
+  getPvpIconAssetBaseUrl,
+  getPvpIconCatalogUrl,
+  getPvpOcrAssetBaseUrl,
+} from "@/lib/pvp/ocr-asset-url";
 import { defaultCache } from "@serwist/next/worker";
-import { CacheFirst, ExpirationPlugin, NetworkFirst, Serwist } from "serwist";
+import {
+  CacheFirst,
+  CacheableResponsePlugin,
+  ExpirationPlugin,
+  Serwist,
+} from "serwist";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
 declare global {
@@ -9,6 +20,10 @@ declare global {
   }
 }
 declare const self: ServiceWorkerGlobalScope;
+
+const ocrAssetUrl = getPvpOcrAssetBaseUrl();
+const iconAssetUrl = getPvpIconAssetBaseUrl();
+const iconCatalogUrl = getPvpIconCatalogUrl();
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -19,30 +34,32 @@ const serwist = new Serwist({
     {
       matcher: ({ url }) => {
         return (
-          url.origin === self.location.origin &&
-          url.pathname.startsWith("/ocr/")
+          url.origin === ocrAssetUrl.origin &&
+          url.pathname.startsWith(ocrAssetUrl.pathname)
         );
       },
-      handler: new CacheFirst({ cacheName: "pvp-ocr-assets" }),
+      handler: new CacheFirst({
+        cacheName: "pvp-ocr-assets",
+        plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
+      }),
     },
     {
       matcher: ({ url }) => {
-        return (
-          url.origin === self.location.origin &&
-          url.pathname === "/pvp-icons/manifest.json"
-        );
+        return url.href === iconCatalogUrl.href;
       },
-      handler: new NetworkFirst({
+      handler: new CacheFirst({
         cacheName: "pvp-icon-manifest",
-        networkTimeoutSeconds: 5,
-        plugins: [new ExpirationPlugin({ maxEntries: 1 })],
+        plugins: [new ExpirationPlugin({ maxEntries: 4 })],
       }),
     },
     {
       matcher: ({ url }) => {
         return (
-          url.origin === self.location.origin &&
-          /^\/pvp-icons\/[a-f0-9]{16}\.bin$/.test(url.pathname)
+          url.origin === iconAssetUrl.origin &&
+          url.pathname.startsWith(iconAssetUrl.pathname) &&
+          /^[a-f0-9]{16}\.bin$/.test(
+            url.pathname.slice(iconAssetUrl.pathname.length),
+          )
         );
       },
       handler: new CacheFirst({

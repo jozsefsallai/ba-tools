@@ -7,11 +7,11 @@
     "dev": "npm-run-all --parallel dev:backend dev:frontend",
     "dev:backend": "convex dev",
     "dev:frontend": "next dev",
-    "predev:frontend": "pnpm run db:generate && pnpm run ocr:assets && pnpm run pvp:icon-assets",
+    "predev:frontend": "pnpm run db:generate && pnpm run pvp:icon-assets",
     "predev": "convex dev --until-success && convex dashboard",
-    "build": "pnpm run db:generate && pnpm run pvp:icon-assets && next build --webpack",
-    "prebuild": "pnpm run ocr:assets",
-    "ocr:assets": "node --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-ocr.ts",
+    "build": "pnpm run db:generate && pnpm run ocr:assets && pnpm run ocr:upload && next build --webpack",
+    "ocr:assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-ocr.ts && pnpm run pvp:icon-assets",
+    "ocr:upload": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/upload-pvp-ocr.ts",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "biome lint . --write",
@@ -22,7 +22,7 @@
     "db:studio": "prisma studio",
     "jobs:dev": "trigger dev",
     "jobs:deploy": "trigger deploy",
-    "pvp:icon-assets": "node --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts"
+    "pvp:icon-assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",
@@ -124,6 +124,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1146.0",
     "@biomejs/biome": "^1.9.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/typography": "^0.5.20",

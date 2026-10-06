@@ -5,6 +5,10 @@ import {
   type PvpIconCatalog,
   type PvpIconMatch,
 } from "@/lib/pvp/icon-match";
+import {
+  getPvpIconAssetBaseUrl,
+  getPvpIconCatalogUrl,
+} from "@/lib/pvp/ocr-asset-url";
 
 import type {
   PvpIconWorkerRequest,
@@ -31,9 +35,8 @@ export class PvpIconMatcher {
     this.loading = (async () => {
       onProgress?.({ stage: "loading", progress: 0 });
 
-      const manifest = await fetch("/pvp-icons/manifest.json", {
-        cache: "no-cache",
-      });
+      const base = getPvpIconAssetBaseUrl();
+      const manifest = await fetch(getPvpIconCatalogUrl());
 
       if (!manifest.ok) {
         throw new Error("Unable to load student icon catalog");
@@ -49,7 +52,7 @@ export class PvpIconMatcher {
         throw new Error("Invalid student icon catalog");
       }
 
-      const response = await fetch(`/pvp-icons/${catalog.asset}`);
+      const response = await fetch(new URL(catalog.asset, base));
       if (!response.ok) {
         throw new Error("Unable to load student icon templates");
       }

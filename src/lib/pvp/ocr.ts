@@ -18,6 +18,7 @@ import {
 import { recognizePvpAnonymousOpponent } from "@/lib/pvp/anonymous-icon";
 import { drawPvpCrop } from "@/lib/pvp/canvas";
 import { PvpIconMatcher } from "@/lib/pvp/icon-matcher";
+import { getPvpOcrAssetBaseUrl } from "@/lib/pvp/ocr-asset-url";
 import assets from "@/lib/pvp/ocr-assets.json";
 import { type PvpPreparedReport, preprocessPvpText } from "@/lib/pvp/ocr-image";
 import type { PVPScreenshotROIs } from "@/lib/pvp/screenshot-types";
@@ -116,8 +117,8 @@ export class PvpOcrClient {
 
     if (!this.loading) {
       const generation = this.generation;
-      const base = new URL(`/ocr/${assets.version}/`, window.location.origin)
-        .href;
+      const assetUrl = getPvpOcrAssetBaseUrl();
+      const base = assetUrl.href;
 
       let rejectLoad: (error: Error) => void = () => {};
       const failure = new Promise<never>((_, reject) => {
@@ -132,7 +133,7 @@ export class PvpOcrClient {
           corePath: `${base}core`,
           langPath: `${base}lang`,
           cachePath: assets.version,
-          workerBlobURL: false,
+          workerBlobURL: assetUrl.origin !== window.location.origin,
           logger: (message) => {
             if (/loading/.test(message.status)) {
               this.listener?.({ stage: "loading", progress: message.progress });

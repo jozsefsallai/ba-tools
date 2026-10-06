@@ -15,7 +15,7 @@ import { Transformer } from "@napi-rs/image";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 
-const target = `${root}public/pvp-icons`;
+const target = `${root}.cache/pvp-ocr/v2/ocr/pvp-icons`;
 const cache = `${root}.cache/pvp-icons-v1`;
 
 const refresh = Date.now().toString();

@@ -1,12 +1,16 @@
+import { readFileSync } from "node:fs";
 import createMDX from "@next/mdx";
 import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+} from "next/constants";
 
 const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
-  globPublicPatterns: ["!(ocr|pvp-icons){,/**}"],
   disable: process.env.NODE_ENV === "development",
 });
 
@@ -71,30 +75,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/pvp-icons/manifest.json",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
-        ],
-      },
-      {
-        source: "/pvp-icons/:asset.bin",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/ocr/:version/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
         source: "/api/students",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
@@ -116,4 +96,22 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({});
 
-export default withSerwist(withNextIntl(withMDX(nextConfig)));
+export default function configuration(phase: string) {
+  const config = { ...nextConfig };
+
+  if (phase === PHASE_PRODUCTION_BUILD || phase === PHASE_DEVELOPMENT_SERVER) {
+    const iconCatalog = JSON.parse(
+      readFileSync(".cache/pvp-ocr/v2/ocr/pvp-icons/manifest.json", "utf8"),
+    );
+
+    if (!/^[a-f0-9]{16}\.bin$/.test(iconCatalog.asset)) {
+      throw new Error("Invalid PvP icon catalog; run pnpm run ocr:assets");
+    }
+
+    config.env = {
+      NEXT_PUBLIC_PVP_ICON_VERSION: iconCatalog.asset.slice(0, -4),
+    };
+  }
+
+  return withSerwist(withNextIntl(withMDX(config)));
+}

@@ -1,8 +1,19 @@
-import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdir,
+  readFile,
+  rename,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
+import {
+  PVP_OCR_CORE_VARIANTS,
+  getPvpOcrAssetBaseUrl,
+} from "@/lib/pvp/ocr-asset-url";
 import config from "@/lib/pvp/ocr-assets.json";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -26,7 +37,27 @@ for (const directory of [runtime, core]) {
   }
 }
 
-const target = join(root, "public/ocr", config.version);
+const assetUrl = getPvpOcrAssetBaseUrl();
+const target = join(root, ".cache/pvp-ocr/v2/ocr", config.version);
+
+const existingManifest = await readFile(join(target, "manifest.json"), "utf8")
+  .then((text) => JSON.parse(text))
+  .catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") {
+      return null;
+    }
+
+    throw error;
+  });
+
+if (
+  existingManifest &&
+  JSON.stringify(existingManifest) !== JSON.stringify(config)
+) {
+  throw new Error(
+    "OCR asset configuration changed; use a new version directory",
+  );
+}
 
 await mkdir(join(target, "core"), { recursive: true });
 await mkdir(join(target, "lang"), { recursive: true });
@@ -41,7 +72,7 @@ await copyFile(
 );
 await copyFile(join(core, "LICENSE"), join(target, "CORE-LICENSE"));
 
-for (const suffix of ["lstm", "simd-lstm", "relaxedsimd-lstm"]) {
+for (const suffix of PVP_OCR_CORE_VARIANTS) {
   for (const extension of ["wasm", "wasm.js"]) {
     const filename = `tesseract-core-${suffix}.${extension}`;
     await copyFile(join(core, filename), join(target, "core", filename));
@@ -70,7 +101,8 @@ await Promise.all(
     }
 
     const bytes = Buffer.from(await response.arrayBuffer());
-    await writeFile(filename, gzipSync(bytes, { level: 9 }));
+    await writeFile(`${filename}.tmp`, gzipSync(bytes, { level: 9 }));
+    await rename(`${filename}.tmp`, filename);
 
     console.log(
       `Prepared ${language} OCR data (${(bytes.length / 1024 / 1024).toFixed(1)} MiB uncompressed)`,
@@ -83,4 +115,5 @@ await writeFile(
   `${JSON.stringify(config, null, 2)}\n`,
 );
 
-console.log(`Self-hosted PvP OCR assets ready: /ocr/${config.version}`);
+console.log(`PvP OCR assets ready: ${target}`);
+console.log(`Upload this directory to ${assetUrl.href}`);
