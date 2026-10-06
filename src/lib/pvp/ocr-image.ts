@@ -1,23 +1,26 @@
-import type { PvpOcrField, PvpPixelImage } from "@/lib/pvp";
+import type {
+  PvpBattleInfo,
+  PvpOcrMode,
+  PvpPixelImage,
+  PvpUnitPosition,
+} from "@/lib/pvp";
 import {
+  type PVPScreenshotROIs,
   PVP_SCREENSHOT_ROI_BOUNDS,
-  type PvpScreenshotROIMap,
 } from "@/lib/pvp/screenshot-types";
 
 type Box = { x: number; y: number; width: number; height: number };
 
 type Component = Box & { count: number };
 
-export type PvpUnitCrops = {
-  sourceIndex: number;
-  combatClass: "Main" | "Support" | null;
+export type PvpUnitCrops = PvpUnitPosition & {
   icon: PvpPixelImage;
   damage: PvpPixelImage | null;
 };
 
 export type PvpPreparedReport = {
   valid: boolean;
-  battleType: PvpOcrField<"ATTACK" | "DEFENSE">;
+  battleType: PvpBattleInfo["battleType"];
   result: PvpPixelImage;
   enemyStudentRep: PvpPixelImage;
   enemyName: PvpPixelImage;
@@ -207,7 +210,7 @@ function segmentTeam(image: PvpPixelImage): PvpUnitCrops[] {
     return high - low > 35 && low < 210;
   }).filter((box) => box.width > 35 && box.height > 30);
 
-  const centers: { x: number; combatClass: "Main" | "Support" | null }[] =
+  const centers: { x: number; combatClass: PvpUnitPosition["combatClass"] }[] =
     bars.map((bar) => ({
       x: bar.x + bar.width / 2,
       combatClass: bar.combatClass,
@@ -301,7 +304,7 @@ function insidePolygon(x: number, y: number, polygon: Point[]) {
 
 export function classifyPvpBattleType(
   image: PvpPixelImage,
-): PvpOcrField<"ATTACK" | "DEFENSE"> {
+): PvpBattleInfo["battleType"] {
   const iconArea = cropPvpImage(image, {
     x: 0,
     y: 0,
@@ -413,9 +416,7 @@ export function classifyPvpBattleType(
   };
 }
 
-export function preparePvpReport(
-  rois: PvpScreenshotROIMap<Uint8ClampedArray>,
-): PvpPreparedReport {
+export function preparePvpReport(rois: PVPScreenshotROIs): PvpPreparedReport {
   const image = (region: keyof typeof rois): PvpPixelImage => {
     const [, , width, height] = PVP_SCREENSHOT_ROI_BOUNDS[region];
 
@@ -448,7 +449,7 @@ export function preparePvpReport(
 
 export function preprocessPvpText(
   image: PvpPixelImage,
-  mode: "text" | "digits" | "result",
+  mode: PvpOcrMode,
   threshold = false,
 ): PvpPixelImage {
   const pixels = new Uint8ClampedArray(image.pixels.length);

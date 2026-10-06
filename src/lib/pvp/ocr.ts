@@ -1,11 +1,14 @@
 import {
+  PVP_OCR_CONFIDENCE_THRESHOLD,
   type PvpExtractedUnit,
   type PvpExtractionResult,
   type PvpOcrField,
+  type PvpOcrMode,
   type PvpOcrProgress,
   type PvpOcrReading,
   type PvpPixelImage,
   type PvpStudentField,
+  type PvpStudentIdentity,
   getPvpEnemyNameStatus,
   parsePvpDamage,
   parsePvpOpponentName,
@@ -13,10 +16,12 @@ import {
   selectPvpOpponentReading,
 } from "@/lib/pvp";
 import { recognizePvpAnonymousOpponent } from "@/lib/pvp/anonymous-icon";
+import { drawPvpCrop } from "@/lib/pvp/canvas";
 import { PvpIconMatcher } from "@/lib/pvp/icon-matcher";
 import assets from "@/lib/pvp/ocr-assets.json";
 import { type PvpPreparedReport, preprocessPvpText } from "@/lib/pvp/ocr-image";
-import type { PvpScreenshotROIMap } from "@/lib/pvp/screenshot-types";
+import type { PVPScreenshotROIs } from "@/lib/pvp/screenshot-types";
+import type { PvpWorkerResponse } from "@/lib/pvp/worker-types";
 import { OEM, type Worker as OcrWorker, PSM, createWorker } from "tesseract.js";
 
 const CONFIG = {
@@ -27,8 +32,6 @@ const CONFIG = {
   load_bigram_dawg: "0",
   load_unambig_dawg: "0",
 };
-
-const CONFIDENCE_THRESHOLD = 75;
 
 function aborted() {
   return new DOMException("Screenshot import canceled", "AbortError");
@@ -51,7 +54,7 @@ function withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
 }
 
 function prepare(
-  rois: PvpScreenshotROIMap<Uint8ClampedArray>,
+  rois: PVPScreenshotROIs,
   signal: AbortSignal,
 ): Promise<PvpPreparedReport> {
   return new Promise((resolve, reject) => {
@@ -70,7 +73,7 @@ function prepare(
     };
 
     worker.onmessage = (
-      event: MessageEvent<{ result?: PvpPreparedReport; error?: string }>,
+      event: MessageEvent<PvpWorkerResponse<PvpPreparedReport>>,
     ) => {
       finish();
 
@@ -100,47 +103,6 @@ function prepare(
   });
 }
 
-export function drawPvpCrop(
-  canvas: HTMLCanvasElement,
-  image: PvpPixelImage,
-  scale = 1,
-  padding = 0,
-  deslant = 0,
-) {
-  const source = document.createElement("canvas");
-
-  source.width = image.width;
-  source.height = image.height;
-
-  const sourceContext = source.getContext("2d");
-  const context = canvas.getContext("2d");
-
-  if (!sourceContext || !context) {
-    throw new Error("Canvas rendering unavailable");
-  }
-
-  const data = sourceContext.createImageData(image.width, image.height);
-  data.data.set(image.pixels);
-
-  sourceContext.putImageData(data, 0, 0);
-
-  canvas.width =
-    (image.width + Math.abs(deslant) * image.height) * scale + padding * 2;
-  canvas.height = image.height * scale + padding * 2;
-
-  context.fillStyle = "white";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.setTransform(
-    1,
-    0,
-    deslant,
-    1,
-    padding + (deslant < 0 ? -deslant * image.height * scale : 0),
-    padding,
-  );
-  context.drawImage(source, 0, 0, image.width * scale, image.height * scale);
-}
-
 export class PvpOcrClient {
   private worker: OcrWorker | null = null;
   private icons = new PvpIconMatcher();
@@ -150,12 +112,6 @@ export class PvpOcrClient {
   private listener?: (progress: PvpOcrProgress) => void;
 
   async warmup(onProgress?: (progress: PvpOcrProgress) => void) {
-    if (this.worker) {
-      await this.icons.warmup(onProgress);
-      onProgress?.({ stage: "ready", progress: 1 });
-      return;
-    }
-
     this.listener = onProgress;
 
     if (!this.loading) {
@@ -223,11 +179,11 @@ export class PvpOcrClient {
   }
 
   async extract(
-    rois: PvpScreenshotROIMap<Uint8ClampedArray>,
+    rois: PVPScreenshotROIs,
     options: {
       signal: AbortSignal;
       onProgress?: (progress: PvpOcrProgress) => void;
-      students?: readonly { id: string; name: string }[];
+      students?: readonly PvpStudentIdentity[];
     },
   ): Promise<PvpExtractionResult> {
     if (this.busy) {
@@ -293,7 +249,7 @@ export class PvpOcrClient {
 
       const recognize = async <T>(
         crop: PvpPixelImage | null,
-        mode: "digits" | "text" | "result",
+        mode: PvpOcrMode,
         parse: (text: string) => T | null,
         countProgress = true,
       ): Promise<PvpOcrField<T>> => {
@@ -405,7 +361,7 @@ export class PvpOcrClient {
             confidence: data.confidence,
             uncertain:
               value == null ||
-              data.confidence < CONFIDENCE_THRESHOLD ||
+              data.confidence < PVP_OCR_CONFIDENCE_THRESHOLD ||
               (mode === "result" &&
                 !/^(win|lose)$/i.test(data.text.replace(/\s/g, ""))),
             crop,

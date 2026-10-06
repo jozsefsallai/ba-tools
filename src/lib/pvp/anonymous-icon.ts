@@ -1,13 +1,17 @@
 import type { PvpPixelImage, PvpStudentField } from "@/lib/pvp";
 import descriptor from "@/lib/pvp/anonymous-icon.json";
-import { type PvpIconCatalog, matchPvpIcon } from "@/lib/pvp/icon-match";
+import {
+  PVP_ICON_CATALOG_FORMAT,
+  type PvpIconCatalog,
+  matchPvpIcon,
+} from "@/lib/pvp/icon-match";
 
 // 12x12 RGBA samples from the question-mark representative in the supplied
 // anonymous report. This is a UI template, independent of student artwork.
 const templates = Uint8Array.from(descriptor);
 
 const catalog: PvpIconCatalog = {
-  format: 1,
+  format: PVP_ICON_CATALOG_FORMAT,
   asset: "anonymous",
   students: [{ id: "anonymous", name: "Anonymous" }],
 };

@@ -3,11 +3,14 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { db } from "@/lib/db";
 import {
+  PVP_ICON_CATALOG_FORMAT,
   PVP_ICON_TEMPLATE_BYTES,
   PVP_ICON_TEMPLATE_HEIGHT,
   PVP_ICON_TEMPLATE_WIDTH,
+  type PvpIconCatalog,
   describePvpIcon,
 } from "@/lib/pvp/icon-match";
+import { buildStudentIconUrlFromId } from "@/lib/url";
 import { Transformer } from "@napi-rs/image";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -47,7 +50,7 @@ try {
           return;
         }
 
-        const url = `${base}/v2/images/students/icons/${encodeURIComponent(student.id)}.png`;
+        const url = buildStudentIconUrlFromId(encodeURIComponent(student.id));
         const key = createHash("sha256").update(url).digest("hex");
         const path = `${cache}/${key}.json`;
 
@@ -114,10 +117,12 @@ try {
   await writeFile(temporaryAsset, descriptors);
   await rename(temporaryAsset, `${target}/${asset}`);
 
-  await writeFile(
-    temporaryManifest,
-    `${JSON.stringify({ format: 1, asset, students })}\n`,
-  );
+  const manifest: PvpIconCatalog = {
+    format: PVP_ICON_CATALOG_FORMAT,
+    asset,
+    students,
+  };
+  await writeFile(temporaryManifest, `${JSON.stringify(manifest)}\n`);
   await rename(temporaryManifest, `${target}/manifest.json`);
 
   console.log(

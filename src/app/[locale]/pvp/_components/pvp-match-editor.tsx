@@ -58,7 +58,10 @@ import {
 } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { getScreenshotROIs } from "@/lib/pvp/screenshot";
-import { PVP_SCREENSHOT_MAX_INPUT_SIZE } from "@/lib/pvp/screenshot-types";
+import {
+  PVP_SCREENSHOT_INPUT_TYPES,
+  PVP_SCREENSHOT_MAX_INPUT_SIZE,
+} from "@/lib/pvp/screenshot-types";
 import { Storage } from "@/lib/storage";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { format, isValid, parseISO } from "date-fns";
@@ -576,7 +579,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       setReportStatus("reading");
 
       if (
-        !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+        !PVP_SCREENSHOT_INPUT_TYPES.some((type) => type === file.type) ||
         file.size === 0 ||
         file.size > PVP_SCREENSHOT_MAX_INPUT_SIZE
       ) {
@@ -906,7 +909,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
           <input
             ref={reportInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={PVP_SCREENSHOT_INPUT_TYPES.join(",")}
             className="hidden"
             onChange={(event) => {
               const file = event.target.files?.[0];

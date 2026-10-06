@@ -1,7 +1,9 @@
+import { drawPvpPixels } from "@/lib/pvp/canvas";
 import {
+  type PVPScreenshotROIImages,
+  type PVPScreenshotROIs,
   PVP_SCREENSHOT_REGIONS,
   PVP_SCREENSHOT_ROI_BOUNDS,
-  type PvpScreenshotROIMap,
 } from "@/lib/pvp/screenshot-types";
 
 type DetectedRegion = {
@@ -21,9 +23,10 @@ const OUTPUT_WIDTH = 1920;
 
 export { PVP_SCREENSHOT_ROI_BOUNDS } from "@/lib/pvp/screenshot-types";
 
-export type PVPScreenshotROIs = PvpScreenshotROIMap<Uint8ClampedArray>;
-
-export type PVPScreenshotROIImages = PvpScreenshotROIMap<Blob>;
+export type {
+  PVPScreenshotROIs,
+  PVPScreenshotROIImages,
+} from "@/lib/pvp/screenshot-types";
 
 function createLuminanceMap(image: HTMLImageElement): LuminanceMap {
   const scale = Math.min(
@@ -383,12 +386,15 @@ async function getCroppedScreenshot(
   });
 }
 
-function encodeCanvas(canvas: HTMLCanvasElement): Promise<Blob> {
+function encodeCanvas(
+  canvas: HTMLCanvasElement,
+  errorMessage = "Failed to encode screenshot modal",
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          reject(new Error("Failed to encode screenshot modal"));
+          reject(new Error(errorMessage));
           return;
         }
 
@@ -433,34 +439,11 @@ function encodeROI(
   const [, , width, height] = area;
 
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-
-  if (!context) {
+  if (!drawPvpPixels(canvas, { width, height, pixels })) {
     return Promise.reject(new Error("Failed to get canvas context"));
   }
 
-  canvas.width = width;
-  canvas.height = height;
-
-  const imageData = context.createImageData(width, height);
-  imageData.data.set(pixels);
-
-  context.putImageData(imageData, 0, 0);
-
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          reject(new Error("Failed to encode screenshot region"));
-          return;
-        }
-
-        resolve(blob);
-      },
-      "image/jpeg",
-      0.95,
-    );
-  });
+  return encodeCanvas(canvas, "Failed to encode screenshot region");
 }
 
 export async function getScreenshotROIs(
@@ -471,19 +454,12 @@ export async function getScreenshotROIs(
   try {
     const screenshot = await getCroppedScreenshot(sourceUrl);
 
-    return {
-      enemyStudentRep: getROI(
-        screenshot,
-        PVP_SCREENSHOT_ROI_BOUNDS.enemyStudentRep,
-      ),
-      battleTypeAndResult: getROI(
-        screenshot,
-        PVP_SCREENSHOT_ROI_BOUNDS.battleTypeAndResult,
-      ),
-      enemyName: getROI(screenshot, PVP_SCREENSHOT_ROI_BOUNDS.enemyName),
-      myUnits: getROI(screenshot, PVP_SCREENSHOT_ROI_BOUNDS.myUnits),
-      enemyUnits: getROI(screenshot, PVP_SCREENSHOT_ROI_BOUNDS.enemyUnits),
-    };
+    return Object.fromEntries(
+      PVP_SCREENSHOT_REGIONS.map((region) => [
+        region,
+        getROI(screenshot, PVP_SCREENSHOT_ROI_BOUNDS[region]),
+      ]),
+    ) as PVPScreenshotROIs;
   } finally {
     URL.revokeObjectURL(sourceUrl);
   }

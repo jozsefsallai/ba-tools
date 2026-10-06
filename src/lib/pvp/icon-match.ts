@@ -1,14 +1,16 @@
-import type { PvpPixelImage } from "@/lib/pvp";
+import type { PvpPixelImage, PvpStudentIdentity } from "@/lib/pvp";
 
 export const PVP_ICON_TEMPLATE_WIDTH = 48;
 export const PVP_ICON_TEMPLATE_HEIGHT = 40;
-export const PVP_ICON_SAMPLE_COUNT = 144;
+export const PVP_ICON_SAMPLE_GRID_SIZE = 12;
+export const PVP_ICON_SAMPLE_COUNT = PVP_ICON_SAMPLE_GRID_SIZE ** 2;
+export const PVP_ICON_CATALOG_FORMAT = 1;
 export const PVP_ICON_TEMPLATE_BYTES = PVP_ICON_SAMPLE_COUNT * 4;
 
 export type PvpIconCatalog = {
-  format: 1;
+  format: typeof PVP_ICON_CATALOG_FORMAT;
   asset: string;
-  students: { id: string; name: string }[];
+  students: PvpStudentIdentity[];
 };
 
 export type PvpIconMatch = {
@@ -21,8 +23,14 @@ export type PvpIconMatch = {
 
 export function pvpIconSamplePoints() {
   return Array.from({ length: PVP_ICON_SAMPLE_COUNT }, (_, index) => ({
-    u: 0.2 + ((index % 12) * 0.6) / 11,
-    v: 0.12 + (Math.floor(index / 12) * 0.76) / 11,
+    u:
+      0.2 +
+      ((index % PVP_ICON_SAMPLE_GRID_SIZE) * 0.6) /
+        (PVP_ICON_SAMPLE_GRID_SIZE - 1),
+    v:
+      0.12 +
+      (Math.floor(index / PVP_ICON_SAMPLE_GRID_SIZE) * 0.76) /
+        (PVP_ICON_SAMPLE_GRID_SIZE - 1),
   }));
 }
 
@@ -37,7 +45,11 @@ export function describePvpIcon(pixels: Uint8Array | Uint8ClampedArray) {
   const descriptor = new Uint8Array(PVP_ICON_TEMPLATE_BYTES);
 
   for (const [index, { u, v }] of pvpIconSamplePoints().entries()) {
-    const offset = (Math.round(v * 39) * 48 + Math.round(u * 47)) * 4;
+    const offset =
+      (Math.round(v * (PVP_ICON_TEMPLATE_HEIGHT - 1)) *
+        PVP_ICON_TEMPLATE_WIDTH +
+        Math.round(u * (PVP_ICON_TEMPLATE_WIDTH - 1))) *
+      4;
     descriptor.set(pixels.subarray(offset, offset + 4), index * 4);
   }
 

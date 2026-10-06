@@ -1,4 +1,13 @@
 import type { PvpIconMatch } from "@/lib/pvp/icon-match";
+import type { Student } from "@/lib/types";
+
+export const PVP_OCR_CONFIDENCE_THRESHOLD = 75;
+export type PvpOcrMode = "text" | "digits" | "result";
+export type PvpStudentIdentity = Pick<Student, "id" | "name">;
+export type PvpUnitPosition = {
+  sourceIndex: number;
+  combatClass: Student["combatClass"] | null;
+};
 
 export type PvpPixelImage = {
   width: number;
@@ -36,27 +45,30 @@ export function parsePvpOpponentName(text: string): string | null {
 export function selectPvpOpponentReading(fields: PvpOcrField<string>[]) {
   const readings = fields.flatMap((field) => field.alternatives ?? []);
 
+  const recognizedReadings = readings.map((reading) => ({
+    ...reading,
+    value: parsePvpOpponentName(reading.rawText),
+  }));
+
+  const readingsForName = (
+    text: string | null,
+    confidence = PVP_OCR_CONFIDENCE_THRESHOLD,
+  ) => {
+    return recognizedReadings.filter(
+      (reading) => reading.value === text && reading.confidence >= confidence,
+    );
+  };
+
   const support = (text: string) => {
-    return new Set(
-      readings
-        .filter(
-          (reading) =>
-            parsePvpOpponentName(reading.rawText) === text &&
-            reading.confidence >= 75,
-        )
-        .map((reading) => reading.language),
-    ).size;
+    return new Set(readingsForName(text).map((reading) => reading.language))
+      .size;
   };
 
   const stability = (text: string) => {
     return new Set(
-      readings
-        .filter(
-          (reading) =>
-            parsePvpOpponentName(reading.rawText) === text &&
-            reading.confidence >= 45,
-        )
-        .map((reading) => `${reading.language}:${reading.preprocessing}`),
+      readingsForName(text, 45).map(
+        (reading) => `${reading.language}:${reading.preprocessing}`,
+      ),
     ).size;
   };
 
@@ -76,12 +88,7 @@ export function selectPvpOpponentReading(fields: PvpOcrField<string>[]) {
 
   const conflicting = sorted.find((field) => field.value !== best.value);
 
-  const consistent =
-    readings.filter(
-      (reading) =>
-        parsePvpOpponentName(reading.rawText) === best.value &&
-        reading.confidence >= 75,
-    ).length >= 2;
+  const consistent = readingsForName(best.value).length >= 2;
 
   return {
     ...best,
@@ -97,9 +104,7 @@ export type PvpStudentField = PvpOcrField<string> & {
   iconMatch: PvpIconMatch;
 };
 
-export type PvpExtractedUnit = {
-  sourceIndex: number;
-  combatClass: "Main" | "Support" | null;
+export type PvpExtractedUnit = PvpUnitPosition & {
   student: PvpStudentField;
   damage: PvpOcrField<number>;
 };
@@ -126,9 +131,7 @@ export type PvpOcrProgress = {
 };
 
 // Transient editor metadata. It is deliberately not part of saved records.
-export type PvpUnitImport = {
-  student: PvpStudentField;
-  damage: PvpOcrField<number>;
+export type PvpUnitImport = Pick<PvpExtractedUnit, "student" | "damage"> & {
   candidateIds: string[];
 };
 
@@ -143,7 +146,7 @@ export function parsePvpDamage(text: string): number | null {
   return Number.isSafeInteger(damage) && damage >= 0 ? damage : null;
 }
 
-export function parsePvpResult(text: string): "WIN" | "LOSE" | null {
+export function parsePvpResult(text: string): PvpBattleInfo["result"]["value"] {
   const normalized = text.replace(/\s/g, "").toLowerCase();
 
   if (normalized === "win") {
@@ -160,7 +163,7 @@ export function parsePvpResult(text: string): "WIN" | "LOSE" | null {
 export function getPvpEnemyNameStatus(
   field: PvpOcrField<string>,
   anonymousIcon = false,
-) {
+): PvpBattleInfo["enemyNameStatus"] {
   if (anonymousIcon) {
     return "anonymous" as const;
   }
@@ -173,11 +176,7 @@ export function getPvpEnemyNameStatus(
 }
 
 export function resolvePvpReportTeam<
-  T extends {
-    id: string;
-    name: string;
-    combatClass: "Main" | "Support";
-  },
+  T extends PvpStudentIdentity & Pick<Student, "combatClass">,
 >(units: PvpExtractedUnit[], students: T[]) {
   const team: { student?: T; damage?: number; report?: PvpUnitImport }[] =
     Array.from({ length: 6 }, () => ({}));

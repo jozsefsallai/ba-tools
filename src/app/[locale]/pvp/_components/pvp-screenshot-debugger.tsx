@@ -21,6 +21,7 @@ import {
   getScreenshotROIs,
 } from "@/lib/pvp/screenshot";
 import {
+  PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_REGIONS,
   type PvpScreenshotRegion,
 } from "@/lib/pvp/screenshot-types";
@@ -231,7 +232,7 @@ export function PvpScreenshotDebugger() {
         <CardContent className="flex flex-col gap-4">
           <Input
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept={PVP_SCREENSHOT_INPUT_TYPES.join(",")}
             onChange={(event) => void handleFile(event.target.files?.[0])}
           />
 

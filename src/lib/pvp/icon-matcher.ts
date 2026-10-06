@@ -1,9 +1,15 @@
 import type { PvpOcrProgress, PvpPixelImage } from "@/lib/pvp";
 import {
+  PVP_ICON_CATALOG_FORMAT,
   PVP_ICON_TEMPLATE_BYTES,
   type PvpIconCatalog,
   type PvpIconMatch,
 } from "@/lib/pvp/icon-match";
+
+import type {
+  PvpIconWorkerRequest,
+  PvpWorkerResponse,
+} from "@/lib/pvp/worker-types";
 
 export class PvpIconMatcher {
   private worker: Worker | null = null;
@@ -36,7 +42,7 @@ export class PvpIconMatcher {
       const catalog: PvpIconCatalog = await manifest.json();
 
       if (
-        catalog.format !== 1 ||
+        catalog.format !== PVP_ICON_CATALOG_FORMAT ||
         !Array.isArray(catalog.students) ||
         !/^[a-f0-9]{16}\.bin$/.test(catalog.asset)
       ) {
@@ -69,15 +75,15 @@ export class PvpIconMatcher {
       );
 
       this.worker.onmessage = (
-        event: MessageEvent<{ result?: PvpIconMatch[]; error?: string }>,
+        event: MessageEvent<PvpWorkerResponse<PvpIconMatch[]>>,
       ) => {
         const pending = this.pending;
         this.pending = undefined;
 
-        if (event.data.error) {
+        if (event.data.error !== undefined) {
           pending?.reject(new Error(event.data.error));
         } else {
-          pending?.resolve(event.data.result ?? []);
+          pending?.resolve(event.data.result);
         }
       };
 
@@ -102,7 +108,10 @@ export class PvpIconMatcher {
     return this.loading;
   }
 
-  private request(message: unknown, transfer: Transferable[] = []) {
+  private request(
+    message: PvpIconWorkerRequest,
+    transfer: Transferable[] = [],
+  ) {
     return new Promise<PvpIconMatch[]>((resolve, reject) => {
       if (!this.worker || this.pending) {
         reject(new Error("Icon worker is unavailable"));
