@@ -797,6 +797,8 @@
     "advancedMode": "Advanced Mode",
     "reportImport": {
       "loadingAssets": "Loading assets...",
+      "engineReady": "Extraction engine ready.",
+      "engineFailed": "Could not load the extraction engine.",
       "unreadable": "Could not read this field",
       "otherReadings": "Other OCR readings",
       "title": "Import Combat Report",
@@ -806,6 +808,7 @@
       "pasteHint": "Paste an image with",
       "reading": "Reading screenshot...",
       "extracting": "Extracting battle details...",
+      "extractionInProgress": "Extraction in progress...",
       "applying": "Matching students and applying results...",
       "invalid": "This is not a valid PVP combat report.",
       "failed": "Failed to import combat report.",

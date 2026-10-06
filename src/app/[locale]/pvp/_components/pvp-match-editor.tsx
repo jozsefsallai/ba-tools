@@ -30,7 +30,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -51,11 +50,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
-import {
-  type PvpOcrProgress,
-  correctPvpImportedItem,
-  resolvePvpReportTeam,
-} from "@/lib/pvp";
+import { correctPvpImportedItem, resolvePvpReportTeam } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { getScreenshotROIs } from "@/lib/pvp/screenshot";
 import {
@@ -66,9 +61,12 @@ import { Storage } from "@/lib/storage";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import { format, isValid, parseISO } from "date-fns";
 import {
+  CheckIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
+  LoaderCircleIcon,
   SaveIcon,
+  TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -148,7 +146,12 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const reportClientRef = useRef<Promise<PvpOcrClient> | null>(null);
   const reportAbortRef = useRef<AbortController | null>(null);
   const reportJobRef = useRef(0);
-  const [reportProgress, setReportProgress] = useState<PvpOcrProgress>();
+  const reportWarmupGenerationRef = useRef(0);
+  const [reportEngineStatus, setReportEngineStatus] = useState<
+    "loading" | "ready" | "failed"
+  >("loading");
+  const reportImportState =
+    reportStatus === "idle" ? reportEngineStatus : "extracting";
 
   const getReportClient = useCallback(() => {
     reportClientRef.current ??= import("@/lib/pvp/ocr").then(
@@ -160,6 +163,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   useEffect(
     () => () => {
       reportJobRef.current++;
+      reportWarmupGenerationRef.current++;
       reportAbortRef.current?.abort();
       void reportClientRef.current?.then((client) => client.dispose());
       reportClientRef.current = null;
@@ -171,29 +175,32 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     setReportDialogOpen(open);
 
     if (open) {
-      const job = reportJobRef.current;
+      const generation = ++reportWarmupGenerationRef.current;
+      setReportEngineStatus((status) =>
+        status === "failed" ? "loading" : status,
+      );
 
       void getReportClient()
-        .then((client) =>
-          client.warmup((progress) => {
-            if (job === reportJobRef.current) {
-              setReportProgress(
-                progress.stage === "loading" ? progress : undefined,
-              );
-            }
-          }),
-        )
+        .then((client) => client.warmup())
+        .then(() => {
+          if (generation === reportWarmupGenerationRef.current) {
+            setReportEngineStatus("ready");
+          }
+        })
         .catch(() => {
-          if (job === reportJobRef.current) {
-            setReportProgress(undefined);
+          if (generation === reportWarmupGenerationRef.current) {
+            setReportEngineStatus("failed");
           }
         });
     } else {
       reportJobRef.current++;
+      if (reportAbortRef.current && reportStatus !== "reading") {
+        reportWarmupGenerationRef.current++;
+        setReportEngineStatus("loading");
+      }
       reportAbortRef.current?.abort();
       reportAbortRef.current = null;
       setReportStatus("idle");
-      setReportProgress(undefined);
     }
   }
 
@@ -602,17 +609,14 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       const parsed = await client.extract(rois, {
         signal: controller.signal,
         students: Object.values(studentMap),
-        onProgress: (progress) => {
-          if (active()) {
-            setReportProgress(
-              progress.stage === "loading" ? progress : undefined,
-            );
-          }
-        },
       });
 
       if (!active()) {
         return;
+      }
+
+      if (parsed.valid) {
+        setReportEngineStatus("ready");
       }
 
       if (!parsed.valid || !parsed.battle) {
@@ -672,7 +676,6 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       if (job === reportJobRef.current) {
         reportAbortRef.current = null;
         setReportStatus("idle");
-        setReportProgress(undefined);
       }
     }
   }
@@ -918,14 +921,43 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
             }}
           />
 
-          {reportProgress && (
-            <div className="flex flex-col gap-2" aria-live="polite">
-              <p className="text-sm text-muted-foreground">
-                {t("tools.pvp.reportImport.loadingAssets")}
-              </p>
-              <Progress value={reportProgress.progress * 100} />
-            </div>
-          )}
+          <output
+            aria-atomic="true"
+            className={`flex min-h-5 items-center gap-2 text-sm font-bold ${
+              reportImportState === "ready"
+                ? "text-green-600 dark:text-green-400"
+                : reportImportState === "failed"
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+            }`}
+          >
+            {reportImportState === "ready" ? (
+              <CheckIcon
+                className="size-4 shrink-0"
+                strokeWidth={3}
+                aria-hidden
+              />
+            ) : reportImportState === "failed" ? (
+              <TriangleAlertIcon
+                className="size-4 shrink-0 text-destructive"
+                aria-hidden
+              />
+            ) : (
+              <LoaderCircleIcon
+                className="size-4 shrink-0 animate-spin"
+                aria-hidden
+              />
+            )}
+            <span>
+              {reportImportState === "ready"
+                ? t("tools.pvp.reportImport.engineReady")
+                : reportImportState === "failed"
+                  ? t("tools.pvp.reportImport.engineFailed")
+                  : reportImportState === "extracting"
+                    ? t("tools.pvp.reportImport.extractionInProgress")
+                    : t("tools.pvp.reportImport.loadingAssets")}
+            </span>
+          </output>
 
           <DialogFooter>
             <Button

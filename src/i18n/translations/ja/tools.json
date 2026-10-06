@@ -681,6 +681,8 @@
     "advancedMode": "詳細モード",
     "reportImport": {
       "loadingAssets": "アセットを読み込み中...",
+      "engineReady": "抽出エンジンの準備ができました。",
+      "engineFailed": "抽出エンジンを読み込めませんでした。",
       "unreadable": "この項目を読み取れませんでした",
       "otherReadings": "別のOCR結果",
       "title": "対戦レポートを読み込む",
@@ -690,6 +692,7 @@
       "pasteHint": "画像を貼り付けるショートカット：",
       "reading": "スクリーンショットを読み込み中...",
       "extracting": "対戦情報を抽出中...",
+      "extractionInProgress": "抽出処理中...",
       "applying": "生徒を照合して結果を反映中...",
       "invalid": "有効な戦術対抗戦の対戦レポートではありません。",
       "failed": "対戦レポートの読み込みに失敗しました。",
