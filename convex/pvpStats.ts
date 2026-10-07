@@ -744,9 +744,6 @@ export const processStatsBatch = internalMutation({
       .withIndex("by_key", (q) => q.eq("key", "global"))
       .unique();
 
-    let nextAggregateCursor = aggregateCursor;
-    let aggregateHasMore = false;
-
     if (students.length > 0 && !status?.traitsReady) {
       const page = await ctx.db
         .query("pvpStatsAggregate")
@@ -763,15 +760,19 @@ export const processStatsBatch = internalMutation({
         );
       }
 
-      aggregateHasMore = !page.isDone;
-      nextAggregateCursor = page.isDone ? undefined : page.continueCursor;
-
       if (page.isDone && status) {
         await ctx.db.patch(status._id, {
           traitsReady: true,
           traitsUpdatedAt: Date.now(),
         });
       }
+
+      // Convex allows only one paginated query per mutation. Even the final
+      // trait page must defer season rebuild pagination to the next batch.
+      return {
+        hasMore: true,
+        aggregateCursor: page.isDone ? undefined : page.continueCursor,
+      };
     }
 
     const rebuild = await ctx.db.query("pvpStatsRebuild").first();
@@ -795,10 +796,7 @@ export const processStatsBatch = internalMutation({
     const anotherRebuild = await ctx.db.query("pvpStatsRebuild").first();
 
     const hasMore =
-      pending.length === 100 ||
-      rebuildHasMore ||
-      Boolean(anotherRebuild) ||
-      aggregateHasMore;
+      pending.length === 100 || rebuildHasMore || Boolean(anotherRebuild);
 
     if (hasMore) {
       console.info("[pvpStats] batch has more work", {
@@ -808,7 +806,7 @@ export const processStatsBatch = internalMutation({
         anotherRebuild: Boolean(anotherRebuild),
       });
 
-      return { hasMore: true, aggregateCursor: nextAggregateCursor };
+      return { hasMore: true, aggregateCursor: undefined };
     }
 
     if (status) {
