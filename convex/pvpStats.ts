@@ -118,20 +118,6 @@ function isExactDefenseSearch(team: SearchSlot[]) {
   return team.every(isExactSearchSlot);
 }
 
-function matchesSearchTeam(
-  team: SearchSlot[],
-  item: any,
-  matcher: (slot: SearchSlot, index: number, item: any) => boolean,
-) {
-  return team.every((slot, index) => matcher(slot, index, item));
-}
-
-function hasNoExcludedStudents(team: Team, excluded: Set<string>) {
-  return team.every(
-    (student) => !student.studentId || !excluded.has(student.studentId),
-  );
-}
-
 function isStudentApiRecord(value: unknown): value is StudentApiRecord {
   if (!value || typeof value !== "object") {
     return false;
@@ -238,24 +224,6 @@ const defenseTraitFields = [
   { studentId: "d4StudentId", range: "d4Range", tank: "d4Tank" },
 ] as const;
 
-function getStoredDefenseTraits(item: any, index: number) {
-  const fields = defenseTraitFields[index];
-
-  return {
-    studentId: fields ? item[fields.studentId] : undefined,
-    range: fields ? item[fields.range] : undefined,
-    tank: fields ? item[fields.tank] : undefined,
-  };
-}
-
-function getStoredDefenseStudentId(item: any, index: number) {
-  if (index < 4) {
-    return getStoredDefenseTraits(item, index).studentId;
-  }
-
-  return item[index === 4 ? "defenseS1StudentId" : "defenseS2StudentId"];
-}
-
 function validSearchTeam(team: SearchSlot[]) {
   const strikerSlots = team.slice(0, 4);
   const specialSlots = team.slice(4);
@@ -282,43 +250,35 @@ function validSearchTeam(team: SearchSlot[]) {
   return specialSlots.every(isValidSpecialSearchSlot);
 }
 
-function matchesSlot(slot: SearchSlot, index: number, item: any) {
-  if (index >= 4) {
-    return (
-      ("studentId" in slot ? slot.studentId : undefined) ===
-      getStoredDefenseStudentId(item, index)
-    );
-  }
+function getSearchTeamFilter(q: any, team: SearchSlot[], similar = false) {
+  return q.and(
+    ...team.map((slot, index) => {
+      if (index >= 4) {
+        const field = index === 4 ? "defenseS1StudentId" : "defenseS2StudentId";
+        return q.eq(q.field(field), slot.studentId);
+      }
 
-  const stored = getStoredDefenseTraits(item, index);
-  const studentId = stored.studentId;
+      const fields = defenseTraitFields[index];
+      if (similar && slot.studentId) {
+        return q.and(
+          q.eq(q.field(fields.range), slot.range),
+          q.eq(q.field(fields.tank), slot.tank),
+        );
+      }
 
-  if (slot.studentId) {
-    return slot.studentId === studentId;
-  }
+      if (slot.studentId) {
+        return q.eq(q.field(fields.studentId), slot.studentId);
+      }
+      if (slot.range !== undefined) {
+        return q.eq(q.field(fields.range), slot.range);
+      }
+      if (slot.tank === true) {
+        return q.eq(q.field(fields.tank), true);
+      }
 
-  if (slot.range !== undefined) {
-    return stored.range === slot.range;
-  }
-
-  if (slot.tank === true) {
-    return stored.tank === true;
-  }
-
-  return !studentId;
-}
-
-function matchesSimilarSlot(slot: SearchSlot, index: number, item: any) {
-  if (index < 4 && slot.studentId) {
-    if (!slot.range || typeof slot.tank !== "boolean") {
-      return false;
-    }
-
-    const stored = getStoredDefenseTraits(item, index);
-    return stored.range === slot.range && stored.tank === slot.tank;
-  }
-
-  return matchesSlot(slot, index, item);
+      return q.eq(q.field(fields.studentId), undefined);
+    }),
+  );
 }
 
 function getSearchAnchor(team: SearchSlot[]) {
@@ -925,7 +885,7 @@ export const search = query({
       );
     }
 
-    const excluded = new Set(excludedStudentIds);
+    const excluded = [...new Set(excludedStudentIds.filter(Boolean))];
     const similarMetadataComplete = hasCompleteSimilarityMetadata(defenseTeam);
 
     const concreteTeam = defenseTeam.map((slot) =>
@@ -1003,59 +963,53 @@ export const search = query({
       }
     }
 
-    const rowsReadLimit =
-      exact || (matchMode === "similar" && similarityIndexable)
-        ? paginationOpts.maximumRowsRead
-        : Math.min(paginationOpts.maximumRowsRead ?? 500, 500);
+    // Exclusions can reject most of an indexed range. Bound the scan even
+    // for exact searches so filtering cannot exceed transaction read limits.
+    const rowsReadLimit = Math.min(paginationOpts.maximumRowsRead ?? 500, 500);
 
-    // Query objects are consumed by paginate, and Convex permits only one
-    // paginated query per invocation. The client loads subsequent pages.
+    // Filter before pagination so page size counts matching defenses, rather
+    // than candidates that the client would have to discard and page past.
+    aggregateQuery = aggregateQuery.filter((q: any) =>
+      q.and(
+        exact
+          ? q.eq(q.field("defenseTeamKey"), defenseTeamKey)
+          : q.and(
+              q.eq(matchMode !== "similar" || similarMetadataComplete, true),
+              getSearchTeamFilter(q, defenseTeam, matchMode === "similar"),
+            ),
+        matchMode === "similar" && excludeDefenseTeam
+          ? q.not(getSearchTeamFilter(q, excludeDefenseTeam))
+          : q.eq(true, true),
+        ...excluded.flatMap((studentId) =>
+          [
+            "a1StudentId",
+            "a2StudentId",
+            "a3StudentId",
+            "a4StudentId",
+            "attackS1StudentId",
+            "attackS2StudentId",
+          ].map((field) => q.neq(q.field(field), studentId)),
+        ),
+      ),
+    );
+
     const page = await aggregateQuery.paginate({
       ...paginationOpts,
-      ...(rowsReadLimit !== undefined
-        ? { maximumRowsRead: rowsReadLimit }
-        : {}),
+      maximumRowsRead: rowsReadLimit,
     });
-    const filteredPage = [];
-
-    for (const item of page.page) {
-      const criteriaMatch = exact
-        ? item.defenseTeamKey === defenseTeamKey
-        : (matchMode === "similar" ? similarMetadataComplete : true) &&
-          matchesSearchTeam(
-            defenseTeam,
-            item,
-            matchMode === "similar" ? matchesSimilarSlot : matchesSlot,
-          );
-
-      const primaryMatch =
-        matchMode === "similar" && excludeDefenseTeam
-          ? matchesSearchTeam(excludeDefenseTeam, item, matchesSlot)
-          : false;
-
-      if (!criteriaMatch || primaryMatch) {
-        continue;
-      }
-
-      const attackTeam = getStoredTeam(item, "attack");
-      if (hasNoExcludedStudents(attackTeam, excluded)) {
-        const storedDefenseTeam = getStoredTeam(item, "defense");
-        filteredPage.push({
-          attackTeam,
-          defenseTeam: storedDefenseTeam,
-          matchupId: `${item.defenseTeamKey}:${item.attackTeamKey}`,
-          wins: item.wins,
-          losses: item.total - item.wins,
-          total: item.total,
-          successRate: item.wins / item.total,
-          confidenceScore: item.confidenceScore,
-        });
-      }
-    }
 
     return {
       ...page,
-      page: filteredPage,
+      page: page.page.map((item: Doc<"pvpStatsAggregate">) => ({
+        attackTeam: getStoredTeam(item, "attack"),
+        defenseTeam: getStoredTeam(item, "defense"),
+        matchupId: `${item.defenseTeamKey}:${item.attackTeamKey}`,
+        wins: item.wins,
+        losses: item.total - item.wins,
+        total: item.total,
+        successRate: item.wins / item.total,
+        confidenceScore: item.confidenceScore,
+      })),
     };
   },
 });

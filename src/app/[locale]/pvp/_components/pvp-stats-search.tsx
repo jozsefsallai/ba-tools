@@ -376,6 +376,42 @@ export function PVPStatsSearch() {
     [similarResults, minimumWins],
   );
 
+  const primaryResultTarget = useRef(1);
+  const similarResultTarget = useRef(1);
+  const similarStatus = similarQuery.status;
+  const loadMoreSimilar = similarQuery.loadMore;
+
+  useEffect(() => {
+    primaryResultTarget.current = 1;
+    similarResultTarget.current = 1;
+  }, [submittedSearch, minimumWins]);
+
+  useEffect(() => {
+    if (
+      submittedSearch &&
+      status === "CanLoadMore" &&
+      filteredResults.length < primaryResultTarget.current
+    ) {
+      loadMore(20);
+    }
+  }, [submittedSearch, status, filteredResults.length, loadMore, minimumWins]);
+
+  useEffect(() => {
+    if (
+      similarArgs !== "skip" &&
+      similarStatus === "CanLoadMore" &&
+      filteredSimilarResults.length < similarResultTarget.current
+    ) {
+      loadMoreSimilar(20);
+    }
+  }, [
+    similarArgs,
+    similarStatus,
+    filteredSimilarResults.length,
+    loadMoreSimilar,
+    minimumWins,
+  ]);
+
   useEffect(() => {
     if (
       !scrollToResultsRef.current ||
@@ -707,27 +743,17 @@ export function PVPStatsSearch() {
       </Card>
 
       <div ref={resultsRef} className="scroll-mt-6 flex flex-col gap-4">
-        {submittedSearch && results.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold">
-              {t("tools.pvp.stats.exactResults")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t("tools.pvp.stats.exactResultsDescription")}
-            </p>
-          </div>
-        )}
-
-        {submittedSearch && status === "LoadingFirstPage" && (
-          <MessageBox>{t("common.loading")}</MessageBox>
-        )}
-
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">
+            {t("tools.pvp.stats.exactResults")}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t("tools.pvp.stats.exactResultsDescription")}
+          </p>
+        </div>
         {submittedSearch &&
-          traitsStatus !== undefined &&
-          traitsStatus.traitsReady !== true && (
-            <MessageBox>
-              {t("tools.pvp.stats.status.traitsUpdating")}
-            </MessageBox>
+          (status === "LoadingFirstPage" || status === "LoadingMore") && (
+            <MessageBox>{t("common.loading")}</MessageBox>
           )}
 
         {submittedSearch && status === "Exhausted" && results.length === 0 && (
@@ -750,7 +776,7 @@ export function PVPStatsSearch() {
         )}
 
         {submittedSearch &&
-          status !== "LoadingFirstPage" &&
+          status === "Exhausted" &&
           results.length > 0 &&
           filteredResults.length === 0 && (
             <MessageBox>
@@ -857,108 +883,128 @@ export function PVPStatsSearch() {
           </Card>
         ))}
 
-        {submittedSearch && filteredSimilarResults.length > 0 && (
-          <>
-            <div className="mt-6 flex flex-col gap-1">
-              <h2 className="text-lg font-semibold">
-                {t("tools.pvp.stats.similarResults")}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {t("tools.pvp.stats.similarResultsDescription")}
-              </p>
-            </div>
+        {submittedSearch &&
+          status === "CanLoadMore" &&
+          filteredResults.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                primaryResultTarget.current = filteredResults.length + 1;
+                loadMore(20);
+              }}
+            >
+              {t("tools.pvp.stats.loadMoreExact")}
+            </Button>
+          )}
 
-            {filteredSimilarResults.map((result, index) => (
-              <Card
-                key={`similar-${result.matchupId}-${index}`}
-                className={cn(
-                  "gap-0 border-l-2 py-3",
-                  getSuccessRateClasses(result.successRate),
-                )}
-              >
-                <CardContent className="flex flex-wrap items-center justify-between gap-4 px-4 py-0 sm:px-5">
-                  <div className="flex flex-wrap items-start gap-8">
-                    <div className="flex flex-col items-center gap-1">
-                      <div
-                        className={cn(
-                          "text-xs font-semibold uppercase tracking-wide",
-                          getSuccessRateClasses(result.successRate, "accent"),
-                        )}
-                      >
-                        {t("tools.pvp.stats.attackTeam")}
-                      </div>
+        <div className="mt-6 flex flex-col gap-1 border-t pt-6">
+          <h2 className="text-lg font-semibold">
+            {t("tools.pvp.stats.similarResults")}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t("tools.pvp.stats.similarResultsDescription")}
+          </p>
+        </div>
 
-                      <PVPFormation
-                        name={t("tools.pvp.stats.attackTeam")}
-                        kind="attack"
-                        result="win"
-                        formation={
-                          result.attackTeam as Doc<"pvpMatchRecord">["ownTeam"]
-                        }
-                        damageChartOpen={false}
-                        highestDamage={0}
-                        showHeader={false}
-                      />
-                    </div>
-
-                    <div className="flex flex-col items-center gap-1">
-                      <div
-                        className={cn(
-                          "text-xs font-semibold uppercase tracking-wide",
-                          getSuccessRateClasses(result.successRate, "accent"),
-                        )}
-                      >
-                        {t("tools.pvp.stats.observedDefense")}
-                      </div>
-
-                      <PVPFormation
-                        name={t("tools.pvp.stats.observedDefense")}
-                        kind="defense"
-                        result="loss"
-                        formation={
-                          result.defenseTeam as Doc<"pvpMatchRecord">["ownTeam"]
-                        }
-                        slotTooltips={getDefenseChangeTooltips(
-                          submittedSearch?.defenseTeam ?? [],
-                          result.defenseTeam,
-                        )}
-                        damageChartOpen={false}
-                        highestDamage={0}
-                        showHeader={false}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">
-                      {(result.successRate * 100).toFixed(1)}%
-                    </div>
-
-                    <div className="text-sm text-muted-foreground">
-                      {t("tools.pvp.stats.record", {
-                        wins: result.wins,
-                        losses: result.losses,
-                        total: result.total,
-                      })}
-                    </div>
-                  </div>
-
-                  <PVPCounterVideos
-                    seasonNumber={submittedSearch.seasonNumber}
-                    attackTeam={result.attackTeam}
-                    defenseTeam={result.defenseTeam}
-                    dividerClassName={getSuccessRateClasses(
-                      result.successRate,
-                      "divider",
-                    )}
-                  />
-                </CardContent>
-              </Card>
-            ))}
-          </>
+        {submittedSearch && similarArgs === "skip" && (
+          <MessageBox>
+            {traitsStatus !== undefined && traitsStatus.traitsReady !== true
+              ? t("tools.pvp.stats.status.traitsUpdating")
+              : t("tools.pvp.stats.similarRequiresStudent")}
+          </MessageBox>
         )}
 
         {submittedSearch &&
+          filteredSimilarResults.map((result, index) => (
+            <Card
+              key={`similar-${result.matchupId}-${index}`}
+              className={cn(
+                "gap-0 border-l-2 py-3",
+                getSuccessRateClasses(result.successRate),
+              )}
+            >
+              <CardContent className="flex flex-wrap items-center justify-between gap-4 px-4 py-0 sm:px-5">
+                <div className="flex flex-wrap items-start gap-8">
+                  <div className="flex flex-col items-center gap-1">
+                    <div
+                      className={cn(
+                        "text-xs font-semibold uppercase tracking-wide",
+                        getSuccessRateClasses(result.successRate, "accent"),
+                      )}
+                    >
+                      {t("tools.pvp.stats.attackTeam")}
+                    </div>
+
+                    <PVPFormation
+                      name={t("tools.pvp.stats.attackTeam")}
+                      kind="attack"
+                      result="win"
+                      formation={
+                        result.attackTeam as Doc<"pvpMatchRecord">["ownTeam"]
+                      }
+                      damageChartOpen={false}
+                      highestDamage={0}
+                      showHeader={false}
+                    />
+                  </div>
+
+                  <div className="flex flex-col items-center gap-1">
+                    <div
+                      className={cn(
+                        "text-xs font-semibold uppercase tracking-wide",
+                        getSuccessRateClasses(result.successRate, "accent"),
+                      )}
+                    >
+                      {t("tools.pvp.stats.observedDefense")}
+                    </div>
+
+                    <PVPFormation
+                      name={t("tools.pvp.stats.observedDefense")}
+                      kind="defense"
+                      result="loss"
+                      formation={
+                        result.defenseTeam as Doc<"pvpMatchRecord">["ownTeam"]
+                      }
+                      slotTooltips={getDefenseChangeTooltips(
+                        submittedSearch?.defenseTeam ?? [],
+                        result.defenseTeam,
+                      )}
+                      damageChartOpen={false}
+                      highestDamage={0}
+                      showHeader={false}
+                    />
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="text-2xl font-bold">
+                    {(result.successRate * 100).toFixed(1)}%
+                  </div>
+
+                  <div className="text-sm text-muted-foreground">
+                    {t("tools.pvp.stats.record", {
+                      wins: result.wins,
+                      losses: result.losses,
+                      total: result.total,
+                    })}
+                  </div>
+                </div>
+
+                <PVPCounterVideos
+                  seasonNumber={submittedSearch.seasonNumber}
+                  attackTeam={result.attackTeam}
+                  defenseTeam={result.defenseTeam}
+                  dividerClassName={getSuccessRateClasses(
+                    result.successRate,
+                    "divider",
+                  )}
+                />
+              </CardContent>
+            </Card>
+          ))}
+
+        {submittedSearch &&
+          similarStatus === "Exhausted" &&
           similarResults.length > 0 &&
           filteredSimilarResults.length === 0 && (
             <MessageBox>
@@ -969,13 +1015,14 @@ export function PVPStatsSearch() {
           )}
 
         {submittedSearch &&
-          similarQuery.status === "LoadingFirstPage" &&
+          (similarStatus === "LoadingFirstPage" ||
+            similarStatus === "LoadingMore") &&
           similarArgs !== "skip" && (
             <MessageBox>{t("common.loading")}</MessageBox>
           )}
 
         {submittedSearch &&
-          similarQuery.status === "Exhausted" &&
+          similarStatus === "Exhausted" &&
           similarResults.length === 0 &&
           similarArgs !== "skip" && (
             <MessageBox>{t("tools.pvp.stats.noSimilarResults")}</MessageBox>
@@ -983,17 +1030,18 @@ export function PVPStatsSearch() {
 
         {submittedSearch &&
           similarArgs !== "skip" &&
-          similarQuery.status === "CanLoadMore" && (
-            <Button variant="outline" onClick={() => similarQuery.loadMore(20)}>
-              {t("common.loadMore")}
+          similarStatus === "CanLoadMore" &&
+          filteredSimilarResults.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                similarResultTarget.current = filteredSimilarResults.length + 1;
+                loadMoreSimilar(20);
+              }}
+            >
+              {t("tools.pvp.stats.loadMoreSimilar")}
             </Button>
           )}
-
-        {submittedSearch && status === "CanLoadMore" && (
-          <Button variant="outline" onClick={() => loadMore(20)}>
-            {t("common.loadMore")}
-          </Button>
-        )}
       </div>
     </div>
   );
