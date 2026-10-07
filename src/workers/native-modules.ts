@@ -31,7 +31,7 @@ async function loadNativeModules(baseUrl: string) {
     const wasm = obj.instance;
     go.run(wasm);
 
-    nativeModules = (global as any).NativeModules;
+    nativeModules = (globalThis as any).NativeModules;
     nativeModulesInitialized = true;
   } catch (err: any) {
     error = err;

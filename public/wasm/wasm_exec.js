@@ -5,24 +5,9 @@
 // This file has been modified for use by the TinyGo compiler.
 
 (() => {
-	// Map multiple JavaScript environments to a single common API,
-	// preferring web standards over Node.js API.
-	//
-	// Environments considered:
-	// - Browsers
-	// - Node.js
-	// - Electron
-	// - Parcel
-
-	if (typeof global !== "undefined") {
-		// global already exists
-	} else if (typeof window !== "undefined") {
-		window.global = window;
-	} else if (typeof self !== "undefined") {
-		self.global = self;
-	} else {
-		throw new Error("cannot export Go (neither global, window nor self is defined)");
-	}
+	// Next.js folds `typeof window` checks for browser bundles, including workers.
+	// Use a local binding so the runtime always accesses its own global scope.
+	const global = globalThis;
 
 	const enosys = () => {
 		const err = new Error("not implemented");
