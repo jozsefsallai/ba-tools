@@ -13,7 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
@@ -110,6 +112,10 @@ export function PvpScreenshotImport({
   const [completed, setCompleted] = useState(false);
   const [batchDate, setBatchDate] = useState<Date>();
   const [dragging, setDragging] = useState(false);
+  const [includeInStatistics, setIncludeInStatistics] = useState(
+    preferences.pvp.includeMatchesInStatisticsByDefault,
+  );
+  const statisticsPreferenceTouched = useRef(false);
 
   const input = useRef<HTMLInputElement>(null);
   const urls = useRef(new Set<string>());
@@ -159,6 +165,14 @@ export function PvpScreenshotImport({
   });
 
   const locked = running || completed;
+
+  useEffect(() => {
+    if (statisticsPreferenceTouched.current || locked) {
+      return;
+    }
+
+    setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
+  }, [locked, preferences.pvp.includeMatchesInStatisticsByDefault]);
 
   const imported = screenshots.filter(
     (item) => item.stage === "imported",
@@ -305,8 +319,7 @@ export function PvpScreenshotImport({
     const { signal } = controller;
     const selectedDate = new Date(matchDate.date);
 
-    const includeInStatistics =
-      preferences.pvp.includeMatchesInStatisticsByDefault;
+    const batchIncludeInStatistics = includeInStatistics;
 
     const batch = selection.current.map((item) => ({
       ...item,
@@ -451,7 +464,7 @@ export function PvpScreenshotImport({
           const matchId = await recordMatch({
             seasonId,
             date: selectedDate.getTime(),
-            includeInStatistics,
+            includeInStatistics: batchIncludeInStatistics,
             matchType:
               battle.battleType.value === "ATTACK" ? "attack" : "defense",
             result: battle.result.value === "WIN" ? "win" : "loss",
@@ -572,6 +585,32 @@ export function PvpScreenshotImport({
 
       <div className="max-w-md">
         <PvpMatchDatePicker value={matchDate} disabled={locked} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Switch
+            id="pvp-import-include-statistics"
+            checked={includeInStatistics}
+            disabled={locked || !season.data?.seasonNumber}
+            onCheckedChange={(checked) => {
+              statisticsPreferenceTouched.current = true;
+              setIncludeInStatistics(checked);
+            }}
+          />
+
+          <Label htmlFor="pvp-import-include-statistics">
+            {t("tools.pvp.screenshotImport.includeInStatistics")}
+          </Label>
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          {t("tools.pvp.match.includeInStatisticsHint")}
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          {t("tools.pvp.match.includeInStatisticsPreferenceHint")}
+        </p>
       </div>
 
       <button

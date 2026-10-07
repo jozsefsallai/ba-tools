@@ -797,6 +797,7 @@
     "advancedMode": "Advanced Mode",
     "screenshotImport": {
       "title": "Import screenshots",
+      "includeInStatistics": "Include these matches in public statistics",
       "description": "Automatically extract and save matches from screenshots. Detected details are accepted as-is; you can edit each match afterward.",
       "sameDayTitle": "One day per batch",
       "sameDay": "All screenshots in this batch must contain matches from the same day. Every imported match will use the selected date.",
