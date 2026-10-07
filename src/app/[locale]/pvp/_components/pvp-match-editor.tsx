@@ -12,6 +12,7 @@ import type {
 } from "@/app/[locale]/pvp/_lib/types";
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -851,6 +852,13 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
               })}
             </DialogDescription>
           </DialogHeader>
+
+          <Alert>
+            <TriangleAlertIcon aria-hidden="true" />
+            <AlertDescription>
+              {t("tools.pvp.screenshotImport.extractionNotice")}
+            </AlertDescription>
+          </Alert>
 
           <button
             type="button"

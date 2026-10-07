@@ -796,6 +796,7 @@
     },
     "advancedMode": "Advanced Mode",
     "screenshotImport": {
+      "extractionNotice": "The new PVP screenshot data extraction engine is a work-in-progress and may yield inaccurate results. Make sure to always double-check the output.",
       "alignmentFailed": "Could not align this PVP report. Keep both player headers, both charts, and all occupied unit portraits visible. The title and surrounding background are optional.",
       "title": "Import screenshots",
       "includeInStatistics": "Include these matches in public statistics",
@@ -855,7 +856,7 @@
       "unreadable": "Could not read this field",
       "otherReadings": "Other OCR readings",
       "title": "Import Combat Report",
-      "disclaimer": "Drop a screenshot here, choose one from your device, or paste one with <shortcut>Ctrl/Cmd + V</shortcut>. Battle details are processed on your device. Only the opponent-name crop is uploaded for shared-cache lookup and AI recognition on a cache miss. The final name is shared in the cache when you save. Double-check every field before saving the match.",
+      "disclaimer": "Drop, choose, or paste a screenshot with <shortcut>Ctrl/Cmd + V</shortcut>. Check the results before saving.",
       "drop": "Drop screenshot here",
       "browse": "or click to browse",
       "pasteHint": "Paste an image with",

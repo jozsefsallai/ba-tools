@@ -605,6 +605,13 @@ export function PvpScreenshotImport({
       </div>
 
       <Alert>
+        <TriangleAlertIcon aria-hidden="true" />
+        <AlertDescription>
+          {t("tools.pvp.screenshotImport.extractionNotice")}
+        </AlertDescription>
+      </Alert>
+
+      <Alert>
         <InfoIcon aria-hidden="true" />
 
         <AlertTitle>{t("tools.pvp.screenshotImport.sameDayTitle")}</AlertTitle>
