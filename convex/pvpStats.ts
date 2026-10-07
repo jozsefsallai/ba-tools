@@ -1003,81 +1003,59 @@ export const search = query({
       }
     }
 
-    const filteredPage = [];
-    let cursor = paginationOpts.cursor;
-    let isDone = false;
-    let continueCursor = cursor ?? "";
     const rowsReadLimit =
       exact || (matchMode === "similar" && similarityIndexable)
-        ? undefined
-        : 500;
+        ? paginationOpts.maximumRowsRead
+        : Math.min(paginationOpts.maximumRowsRead ?? 500, 500);
 
-    let rowsRead = 0;
+    // Query objects are consumed by paginate, and Convex permits only one
+    // paginated query per invocation. The client loads subsequent pages.
+    const page = await aggregateQuery.paginate({
+      ...paginationOpts,
+      ...(rowsReadLimit !== undefined
+        ? { maximumRowsRead: rowsReadLimit }
+        : {}),
+    });
+    const filteredPage = [];
 
-    while (filteredPage.length === 0 && !isDone) {
-      const remainingRows = rowsReadLimit
-        ? rowsReadLimit - rowsRead
-        : undefined;
+    for (const item of page.page) {
+      const criteriaMatch = exact
+        ? item.defenseTeamKey === defenseTeamKey
+        : (matchMode === "similar" ? similarMetadataComplete : true) &&
+          matchesSearchTeam(
+            defenseTeam,
+            item,
+            matchMode === "similar" ? matchesSimilarSlot : matchesSlot,
+          );
 
-      if (remainingRows !== undefined && remainingRows <= 0) {
-        break;
+      const primaryMatch =
+        matchMode === "similar" && excludeDefenseTeam
+          ? matchesSearchTeam(excludeDefenseTeam, item, matchesSlot)
+          : false;
+
+      if (!criteriaMatch || primaryMatch) {
+        continue;
       }
 
-      const page = await aggregateQuery.paginate({
-        numItems: paginationOpts.numItems,
-        cursor,
-        ...(remainingRows !== undefined
-          ? { maximumRowsRead: remainingRows }
-          : {}),
-      });
-
-      continueCursor = page.continueCursor;
-      isDone = page.isDone;
-      rowsRead += page.page.length;
-
-      for (const item of page.page) {
-        const criteriaMatch = exact
-          ? item.defenseTeamKey === defenseTeamKey
-          : (matchMode === "similar" ? similarMetadataComplete : true) &&
-            matchesSearchTeam(
-              defenseTeam,
-              item,
-              matchMode === "similar" ? matchesSimilarSlot : matchesSlot,
-            );
-
-        const primaryMatch =
-          matchMode === "similar" && excludeDefenseTeam
-            ? matchesSearchTeam(excludeDefenseTeam, item, matchesSlot)
-            : false;
-
-        if (!criteriaMatch || primaryMatch) {
-          continue;
-        }
-
-        const attackTeam = getStoredTeam(item, "attack");
-        if (hasNoExcludedStudents(attackTeam, excluded)) {
-          const storedDefenseTeam = getStoredTeam(item, "defense");
-          filteredPage.push({
-            attackTeam,
-            defenseTeam: storedDefenseTeam,
-            matchupId: `${item.defenseTeamKey}:${item.attackTeamKey}`,
-            wins: item.wins,
-            losses: item.total - item.wins,
-            total: item.total,
-            successRate: item.wins / item.total,
-            confidenceScore: item.confidenceScore,
-          });
-        }
+      const attackTeam = getStoredTeam(item, "attack");
+      if (hasNoExcludedStudents(attackTeam, excluded)) {
+        const storedDefenseTeam = getStoredTeam(item, "defense");
+        filteredPage.push({
+          attackTeam,
+          defenseTeam: storedDefenseTeam,
+          matchupId: `${item.defenseTeamKey}:${item.attackTeamKey}`,
+          wins: item.wins,
+          losses: item.total - item.wins,
+          total: item.total,
+          successRate: item.wins / item.total,
+          confidenceScore: item.confidenceScore,
+        });
       }
-
-      cursor = page.continueCursor;
-      if (rowsReadLimit && rowsRead >= rowsReadLimit) break;
     }
 
     return {
+      ...page,
       page: filteredPage,
-      isDone,
-      continueCursor,
     };
   },
 });
