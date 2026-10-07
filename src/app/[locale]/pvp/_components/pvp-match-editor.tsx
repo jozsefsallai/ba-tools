@@ -1,5 +1,6 @@
 "use client";
 
+import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import { PVPPresetPicker } from "@/app/[locale]/pvp/_components/pvp-preset-picker";
 import type {
@@ -12,7 +13,6 @@ import type {
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -26,11 +26,6 @@ import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -39,7 +34,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
@@ -48,6 +42,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useUserPreferences } from "@/hooks/use-preferences";
+import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
 import { correctPvpImportedItem, resolvePvpReportTeam } from "@/lib/pvp";
@@ -58,9 +53,7 @@ import {
   PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
 } from "@/lib/pvp/screenshot-types";
-import { Storage } from "@/lib/storage";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
-import { format, isValid, parseISO } from "date-fns";
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -88,9 +81,6 @@ export type PVPMatchEditor = {
   current?: Doc<"pvpMatchRecord">;
 };
 
-const lastPvpMatchDateStorage = new Storage<string>("pvp_last_match_date");
-const pvpDateModeStorage = new Storage<"today" | "last">("pvp_date_mode");
-
 export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const t = useTranslations();
   const { studentMap } = useStudents();
@@ -98,11 +88,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
   const router = useRouter();
 
-  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
-  const [lastDate, setLastDate] = useState<Date>();
-  const [dateMode, setDateMode] = useState<"today" | "last">("today");
-
-  const [date, setDate] = useState<Date>(new Date());
+  const matchDate = usePvpMatchDate(!!current);
+  const { date, setDate, rememberDate } = matchDate;
   const [ownRank, setOwnRank] = useState<number | undefined>();
   const [ownRankStr, setOwnRankStr] = useState<string>("");
   const [opponentName, setOpponentName] = useState<string>("");
@@ -277,57 +264,6 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
     setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
   }, [current, preferences.pvp.includeMatchesInStatisticsByDefault]);
-
-  useEffect(() => {
-    try {
-      const saved = lastPvpMatchDateStorage.get();
-      const savedMode = pvpDateModeStorage.get();
-
-      if (saved) {
-        const parsed = parseISO(saved);
-
-        if (isValid(parsed)) {
-          setLastDate(parsed);
-
-          if (!current && savedMode === "last") {
-            setDateMode("last");
-            setDate(parsed);
-          }
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, [current]);
-
-  function setDateModeAndDefault(mode: "today" | "last") {
-    if (mode === "last" && !lastDate) {
-      return;
-    }
-
-    setDateMode(mode);
-    setDate(mode === "last" ? (lastDate ?? new Date()) : new Date());
-
-    try {
-      pvpDateModeStorage.set(mode);
-    } catch {
-      // ignore
-    }
-  }
-
-  function handleDateSelection(nextDate: Date | undefined) {
-    const selectedDate = nextDate ?? new Date();
-    setDate(selectedDate);
-
-    if (dateMode === "last") {
-      setLastDate(selectedDate);
-      try {
-        lastPvpMatchDateStorage.set(format(selectedDate, "yyyy-MM-dd"));
-      } catch {
-        // ignore
-      }
-    }
-  }
 
   const handleItemUpdate = useCallback(
     (
@@ -782,12 +718,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
         await cacheSavedName(savedMatchId);
 
-        try {
-          lastPvpMatchDateStorage.set(format(date, "yyyy-MM-dd"));
-          setLastDate(date);
-        } catch {
-          // ignore
-        }
+        rememberDate(date);
 
         toast.success(t("tools.pvp.toasts.matchRecorded"), {
           position: "top-right",
@@ -1149,70 +1080,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       </Dialog>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="flex flex-col gap-1">
-          <Label htmlFor="match-date" className="text-xs">
-            {t("tools.pvp.match.date")}
-          </Label>
-
-          <div className="flex items-center gap-2">
-            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  id="match-date"
-                  className="min-w-0 flex-1 justify-between"
-                >
-                  {date.toLocaleDateString()} <ChevronDownIcon />
-                </Button>
-              </PopoverTrigger>
-
-              <PopoverContent
-                className="w-auto overflow-hidden p-0"
-                align="start"
-              >
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  captionLayout="dropdown"
-                  onSelect={(date) => {
-                    handleDateSelection(date);
-                    setDatePopoverOpen(false);
-                  }}
-                />
-              </PopoverContent>
-            </Popover>
-
-            {!current && (
-              <ToggleGroup
-                type="single"
-                value={dateMode}
-                variant="default"
-                size="sm"
-                className="gap-1 rounded-lg border bg-muted/40 p-1 shadow-sm"
-                onValueChange={(value) => {
-                  if (value === "today" || value === "last") {
-                    setDateModeAndDefault(value);
-                  }
-                }}
-              >
-                <ToggleGroupItem
-                  value="last"
-                  disabled={!lastDate}
-                  className="rounded-md px-3 text-xs font-semibold hover:text-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground data-[state=on]:shadow-sm"
-                >
-                  {t("tools.pvp.match.last")}
-                </ToggleGroupItem>
-
-                <ToggleGroupItem
-                  value="today"
-                  className="rounded-md px-3 text-xs font-semibold hover:text-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:text-primary-foreground data-[state=on]:shadow-sm"
-                >
-                  {t("tools.pvp.match.today")}
-                </ToggleGroupItem>
-              </ToggleGroup>
-            )}
-          </div>
-        </div>
+        <PvpMatchDatePicker value={matchDate} editing={!!current} />
 
         <div className="flex flex-col gap-1">
           <Label className="text-xs">{t("tools.pvp.match.videoUrl")}</Label>

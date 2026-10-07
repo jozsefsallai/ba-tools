@@ -46,12 +46,21 @@ export type ChangelogItemData = {
 export const CHANGELOG: ChangelogItemData[] = [
   {
     date: "October 7, 2026",
-    features: [],
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added bulk screenshot import feature.",
+      },
+    ],
     changes: [
       {
         scope: CHANGELOG_SCOPES.pvp,
         description:
           "PVP screenshots are processed mostly on-device now and they should be a lot more reliable.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Updated student icon of Hoshino (Armed) / Dealer.",
       },
     ],
     fixes: [
@@ -59,6 +68,24 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.pvp,
         description:
           "The PVP screenshot extraction engine can now properly differentiate the Dealer and Tank forms of Hoshino (Armed).",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Fixed counter search aggregation job not completing.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Fixed a pagination bug in the PVP counter search feature.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.inventoryManagement,
+        description: "(UPDATE) Fixed native modules not loading.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "(UPDATE) Fixed a bug where Eimi was wrongly identified as Niko by the screenshot processing service.",
       },
     ],
   },

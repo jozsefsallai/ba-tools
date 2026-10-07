@@ -132,6 +132,12 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
               </Link>
             </Button>
 
+            <Button variant="outline" asChild>
+              <Link href={`/pvp/${seasonId}/match/import`}>
+                {t("tools.pvp.screenshotImport.title")}
+              </Link>
+            </Button>
+
             <Button asChild>
               <Link href={`/pvp/${seasonId}/match/new`}>
                 <PlusIcon />
