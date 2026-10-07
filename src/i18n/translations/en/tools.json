@@ -800,6 +800,8 @@
       "description": "Automatically extract and save matches from screenshots. Detected details are accepted as-is; you can edit each match afterward.",
       "sameDayTitle": "One day per batch",
       "sameDay": "All screenshots in this batch must contain matches from the same day. Every imported match will use the selected date.",
+      "ordering": "Arrange screenshots from oldest to newest: the first is the oldest, and the last is the newest. Drag screenshots to reorder before importing.",
+      "reorder": "Drag to reorder {name}",
       "formats": "Select up to {limit} screenshots (PNG, JPEG, or WebP), up to 10 MB each. Battle details are processed on your device; only the opponent-name crop is uploaded for recognition and shared-cache lookup.",
       "drop": "Drop screenshots here",
       "dropActive": "Release to add screenshots",

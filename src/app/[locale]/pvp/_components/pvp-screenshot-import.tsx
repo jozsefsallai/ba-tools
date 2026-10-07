@@ -1,6 +1,7 @@
 "use client";
 
 import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
+import { PvpScreenshotImportItem } from "@/app/[locale]/pvp/_components/pvp-screenshot-import-item";
 import { MessageBox } from "@/components/common/message-box";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -28,15 +29,31 @@ import {
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
 } from "@/lib/pvp/screenshot-types";
 import { cn } from "@/lib/utils";
+import {
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
 import { useConvex, useMutation } from "convex/react";
 import { format } from "date-fns";
 import {
+  ChevronLeftIcon,
   ImagePlusIcon,
   InfoIcon,
   LoaderCircleIcon,
   TriangleAlertIcon,
   UploadIcon,
-  XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
@@ -100,6 +117,16 @@ export function PvpScreenshotImport({
   const clients = useRef<PvpOcrClient[]>([]);
   const mounted = useRef(true);
   const selection = useRef<Screenshot[]>([]);
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   function stopExtraction() {
     abort.current?.abort();
@@ -215,6 +242,35 @@ export function PvpScreenshotImport({
     if (previewId === id) {
       setPreviewId(null);
     }
+  }
+
+  function reorderScreenshot(id: string, newIndex: number) {
+    if (abort.current || completed) {
+      return;
+    }
+
+    const oldIndex = selection.current.findIndex((item) => item.id === id);
+
+    if (
+      oldIndex < 0 ||
+      newIndex < 0 ||
+      newIndex >= selection.current.length ||
+      oldIndex === newIndex
+    ) {
+      return;
+    }
+
+    selection.current = arrayMove(selection.current, oldIndex, newIndex);
+    setScreenshots(selection.current);
+  }
+
+  function handleScreenshotDragEnd({ active, over }: DragEndEvent) {
+    if (!over) {
+      return;
+    }
+
+    const newIndex = selection.current.findIndex((item) => item.id === over.id);
+    reorderScreenshot(String(active.id), newIndex);
   }
 
   function startNewBatch() {
@@ -482,9 +538,22 @@ export function PvpScreenshotImport({
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-xl font-bold">
-          {t("tools.pvp.screenshotImport.title")}
-        </h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={agenda}
+              aria-label={t("common.backTo", {
+                destination: t("tools.pvp.title"),
+              })}
+            >
+              <ChevronLeftIcon />
+            </Link>
+          </Button>
+
+          <h1 className="text-xl font-bold">
+            {t("tools.pvp.screenshotImport.title")}
+          </h1>
+        </div>
 
         <p className="text-muted-foreground">
           {t("tools.pvp.screenshotImport.description")}
@@ -497,7 +566,7 @@ export function PvpScreenshotImport({
         <AlertTitle>{t("tools.pvp.screenshotImport.sameDayTitle")}</AlertTitle>
 
         <AlertDescription>
-          {t("tools.pvp.screenshotImport.sameDay")}
+          <p>{t("tools.pvp.screenshotImport.sameDay")}</p>
         </AlertDescription>
       </Alert>
 
@@ -589,63 +658,46 @@ export function PvpScreenshotImport({
         </Alert>
       )}
 
-      <p className="text-sm" aria-live="polite">
-        {t("tools.pvp.screenshotImport.selected", {
-          count: screenshots.length,
-          limit: MAX_SCREENSHOTS,
-        })}
-      </p>
+      <div className="flex flex-col gap-2">
+        <p className="text-sm" aria-live="polite">
+          {t("tools.pvp.screenshotImport.selected", {
+            count: screenshots.length,
+            limit: MAX_SCREENSHOTS,
+          })}
+        </p>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {screenshots.map((item) => (
-          <div
-            key={item.id}
-            className="group relative flex min-w-0 flex-col gap-2 rounded-lg border p-2"
-          >
-            <button
-              type="button"
-              className="rounded focus-visible:outline focus-visible:outline-ring"
-              onClick={() => setPreviewId(item.id)}
-              aria-label={t("tools.pvp.screenshotImport.preview", {
-                name: item.file.name,
-              })}
-            >
-              <img
-                src={item.url}
-                alt={item.file.name}
-                className="aspect-video w-full rounded object-contain"
-              />
-            </button>
-
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="default"
-              className="absolute right-1 top-1 opacity-0 shadow-sm group-hover:opacity-100 group-focus-within:opacity-100 disabled:hidden motion-reduce:transition-none [@media(hover:none)]:opacity-100"
-              disabled={locked}
-              aria-label={t("tools.pvp.screenshotImport.remove", {
-                name: item.file.name,
-              })}
-              title={t("tools.pvp.screenshotImport.remove", {
-                name: item.file.name,
-              })}
-              onClick={() => removeScreenshot(item.id)}
-            >
-              <XIcon />
-            </Button>
-
-            <span className="truncate text-sm" title={item.file.name}>
-              {item.file.name}
-            </span>
-
-            {(running || completed) && (
-              <span className="text-xs text-muted-foreground">
-                {t(`tools.pvp.screenshotImport.stages.${item.stage}`)}
-              </span>
-            )}
-          </div>
-        ))}
+        <p className="text-sm text-muted-foreground">
+          {t("tools.pvp.screenshotImport.ordering")}
+        </p>
       </div>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleScreenshotDragEnd}
+      >
+        <SortableContext
+          items={screenshots.map((item) => item.id)}
+          strategy={rectSortingStrategy}
+        >
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {screenshots.map((item) => (
+              <PvpScreenshotImportItem
+                key={item.id}
+                item={item}
+                locked={locked}
+                status={
+                  running || completed
+                    ? t(`tools.pvp.screenshotImport.stages.${item.stage}`)
+                    : undefined
+                }
+                onPreview={setPreviewId}
+                onRemove={removeScreenshot}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {(running || completed) && (
         <div className="flex flex-col gap-2" aria-live="polite">
@@ -766,12 +818,6 @@ export function PvpScreenshotImport({
             {t("tools.pvp.screenshotImport.startNewBatch")}
           </Button>
         )}
-
-        <Button variant="outline" asChild>
-          <Link href={agenda}>
-            {t("tools.pvp.screenshotImport.viewAgenda")}
-          </Link>
-        </Button>
       </div>
 
       <Dialog
