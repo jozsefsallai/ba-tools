@@ -806,6 +806,7 @@
       "formats": "Select up to {limit} screenshots (PNG, JPEG, or WebP), up to 10 MB each. Battle details are processed on your device; only the opponent-name crop is uploaded for recognition and shared-cache lookup.",
       "drop": "Drop screenshots here",
       "dropActive": "Release to add screenshots",
+      "pasteHint": "You can also paste screenshots with Ctrl+V or ⌘V.",
       "dropHint": "PNG, JPEG or WebP. Up to {limit} images, 10 MB each.",
       "browse": "Choose images",
       "selected": "{count} / {limit} screenshots selected",

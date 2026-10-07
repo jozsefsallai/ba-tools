@@ -59,7 +59,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -237,6 +237,33 @@ export function PvpScreenshotImport({
     setScreenshots(selection.current);
     setSelectionErrors(rejected);
   }
+
+  const handlePaste = useEffectEvent((event: ClipboardEvent) => {
+    if (locked || !event.clipboardData) {
+      return;
+    }
+
+    const files = Array.from(event.clipboardData.items)
+      .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+      .map((item) => item.getAsFile())
+      .filter((file): file is File => file !== null);
+
+    if (!files.length) {
+      return;
+    }
+
+    event.preventDefault();
+    selectFiles(files);
+  });
+
+  useEffect(() => {
+    function onPaste(event: ClipboardEvent) {
+      handlePaste(event);
+    }
+
+    document.addEventListener("paste", onPaste);
+    return () => document.removeEventListener("paste", onPaste);
+  }, []);
 
   function removeScreenshot(id: string) {
     if (abort.current || completed) {
@@ -654,6 +681,10 @@ export function PvpScreenshotImport({
             {t("tools.pvp.screenshotImport.dropHint", {
               limit: MAX_SCREENSHOTS,
             })}
+          </span>
+
+          <span className="text-sm text-muted-foreground">
+            {t("tools.pvp.screenshotImport.pasteHint")}
           </span>
         </span>
 
