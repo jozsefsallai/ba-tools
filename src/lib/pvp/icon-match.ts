@@ -56,6 +56,36 @@ export function describePvpIcon(pixels: Uint8Array | Uint8ClampedArray) {
   return descriptor;
 }
 
+// Catalog pixels are downsampled during preparation. Smooth screenshot pixels
+// slightly too, so a single sharp eye/hair edge cannot dominate sparse samples.
+function smoothPvpIcon(image: PvpPixelImage) {
+  const pixels = new Uint8ClampedArray(image.pixels.length);
+
+  for (let y = 0; y < image.height; y++) {
+    for (let x = 0; x < image.width; x++) {
+      for (let channel = 0; channel < 3; channel++) {
+        let total = 0;
+
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const sx = Math.max(0, Math.min(image.width - 1, x + dx));
+            const sy = Math.max(0, Math.min(image.height - 1, y + dy));
+
+            total +=
+              image.pixels[(sy * image.width + sx) * 4 + channel] *
+              (dx === 0 ? 2 : 1) *
+              (dy === 0 ? 2 : 1);
+          }
+        }
+
+        pixels[(y * image.width + x) * 4 + channel] = total / 16;
+      }
+    }
+  }
+
+  return pixels;
+}
+
 export function matchPvpIcon(
   image: PvpPixelImage,
   catalog: PvpIconCatalog,
@@ -70,7 +100,19 @@ export function matchPvpIcon(
     throw new Error("Invalid screenshot icon dimensions");
   }
 
-  const points = pvpIconSamplePoints();
+  const sampledPixels = smoothPvpIcon(image);
+
+  // Use the exact rounded coordinates stored by describePvpIcon, rather than
+  // the ideal grid positions (which can differ by over a screenshot pixel).
+  const points = pvpIconSamplePoints().map(({ u, v }) => ({
+    u:
+      Math.round(u * (PVP_ICON_TEMPLATE_WIDTH - 1)) /
+      (PVP_ICON_TEMPLATE_WIDTH - 1),
+    v:
+      Math.round(v * (PVP_ICON_TEMPLATE_HEIGHT - 1)) /
+      (PVP_ICON_TEMPLATE_HEIGHT - 1),
+  }));
+
   const queries: Uint8Array[] = [];
 
   for (const sx of [0.75, 0.85, 0.95]) {
@@ -101,7 +143,7 @@ export function matchPvpIcon(
               );
 
               const offset = (y * image.width + x) * 4;
-              query.set(image.pixels.subarray(offset, offset + 3), index * 3);
+              query.set(sampledPixels.subarray(offset, offset + 3), index * 3);
             }
 
             queries.push(query);
