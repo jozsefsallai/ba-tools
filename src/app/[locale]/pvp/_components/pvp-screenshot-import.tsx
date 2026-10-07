@@ -26,6 +26,7 @@ import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
 import { runOrderedScreenshotImport } from "@/lib/pvp/ordered-import";
 import { getScreenshotROIs } from "@/lib/pvp/screenshot";
+import { PvpScreenshotAlignmentError } from "@/lib/pvp/screenshot-layout";
 import {
   PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
@@ -381,10 +382,13 @@ export function PvpScreenshotImport({
           ...batch[index].errors,
           {
             stage,
-            message: errorMessage(
-              error,
-              t("tools.pvp.screenshotImport.unknownError"),
-            ),
+            message:
+              error instanceof PvpScreenshotAlignmentError
+                ? t("tools.pvp.screenshotImport.alignmentFailed")
+                : errorMessage(
+                    error,
+                    t("tools.pvp.screenshotImport.unknownError"),
+                  ),
           },
         ],
       });

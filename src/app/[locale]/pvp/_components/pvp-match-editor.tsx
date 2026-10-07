@@ -49,6 +49,7 @@ import { correctPvpImportedItem, resolvePvpReportTeam } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
 import { getScreenshotROIs } from "@/lib/pvp/screenshot";
+import { PvpScreenshotAlignmentError } from "@/lib/pvp/screenshot-layout";
 import {
   PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
@@ -619,9 +620,17 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       }
 
       console.error(error);
-      toast.error(t("tools.pvp.reportImport.failed"), {
-        position: "top-right",
-      });
+
+      toast.error(
+        t(
+          error instanceof PvpScreenshotAlignmentError
+            ? "tools.pvp.reportImport.alignmentFailed"
+            : "tools.pvp.reportImport.failed",
+        ),
+        {
+          position: "top-right",
+        },
+      );
     } finally {
       if (job === reportJobRef.current) {
         reportAbortRef.current = null;

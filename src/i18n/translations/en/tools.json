@@ -796,6 +796,7 @@
     },
     "advancedMode": "Advanced Mode",
     "screenshotImport": {
+      "alignmentFailed": "Could not align this PVP report. Keep both player headers, both charts, and all occupied unit portraits visible. The title and surrounding background are optional.",
       "title": "Import screenshots",
       "includeInStatistics": "Include these matches in public statistics",
       "description": "Automatically extract and save matches from screenshots. Detected details are accepted as-is; you can edit each match afterward.",
@@ -820,7 +821,7 @@
       "importing": "Importing…",
       "progress": "Processed {processed} of {total} screenshots.",
       "counts": "{imported} imported · {failed} failed",
-      "invalidReport": "This image does not contain a recognizable PvP combat report.",
+      "invalidReport": "This image does not contain a recognizable PVP combat report.",
       "missingRequired": "The match type or result could not be detected. Both are required to save a match.",
       "unknownError": "An unexpected error occurred.",
       "seasonUnavailable": "This season could not be loaded.",
@@ -847,6 +848,7 @@
       }
     },
     "reportImport": {
+      "alignmentFailed": "Could not align this PVP report. Keep both player headers, both charts, and all occupied unit portraits visible. The title and surrounding background are optional.",
       "loadingAssets": "Loading assets...",
       "engineReady": "Extraction engine ready.",
       "engineFailed": "Could not load the extraction engine.",

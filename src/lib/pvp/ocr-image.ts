@@ -4,6 +4,7 @@ import type {
   PvpPixelImage,
   PvpUnitPosition,
 } from "@/lib/pvp";
+import { findPvpReportRules } from "@/lib/pvp/screenshot-layout";
 import {
   type PVPScreenshotROIs,
   PVP_SCREENSHOT_ROI_BOUNDS,
@@ -141,24 +142,21 @@ const isBadge = (r: number, g: number, b: number) => {
 function segmentTeam(image: PvpPixelImage): PvpUnitCrops[] {
   // The horizontal chart rule remains fixed while numeric badges move with bars
   let baseline = Math.round(image.height * 0.73);
-  let longest = image.width * 0.45;
+  const bandTop = Math.floor(image.height * 0.6);
 
-  for (let y = Math.floor(image.height * 0.6); y < image.height * 0.82; y++) {
-    let count = 0;
+  const baselineBand = cropPvpImage(image, {
+    x: 0,
+    y: bandTop,
+    width: image.width,
+    height: Math.ceil(image.height * 0.22),
+  });
 
-    for (let x = 0; x < image.width; x++) {
-      const i = (y * image.width + x) * 4;
-      const [r, g, b] = image.pixels.subarray(i, i + 3);
+  const rule = findPvpReportRules(baselineBand)
+    .filter((line) => line.right - line.left >= image.width * 0.7)
+    .sort((a, b) => b.right - b.left - (a.right - a.left))[0];
 
-      if (r > 135 && r < 225 && Math.max(r, g, b) - Math.min(r, g, b) < 20) {
-        count++;
-      }
-    }
-
-    if (count > longest) {
-      longest = count;
-      baseline = y;
-    }
+  if (rule) {
+    baseline = bandTop + rule.y;
   }
 
   const chart = cropPvpImage(image, {

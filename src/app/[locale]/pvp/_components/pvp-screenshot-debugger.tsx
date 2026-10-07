@@ -15,11 +15,11 @@ import {
   resolvePvpReportTeam,
 } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
+import { getScreenshotPreview, getScreenshotROIs } from "@/lib/pvp/screenshot";
 import {
-  getScreenshotModal,
-  getScreenshotROIImages,
-  getScreenshotROIs,
-} from "@/lib/pvp/screenshot";
+  type PvpAlignmentDiagnostics,
+  PvpScreenshotAlignmentError,
+} from "@/lib/pvp/screenshot-layout";
 import {
   PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_REGIONS,
@@ -44,6 +44,8 @@ const REGION_LABELS: Record<PvpScreenshotRegion, string> = {
 export function PvpScreenshotDebugger() {
   const [sourceUrl, setSourceUrl] = useState<string>();
   const [modalUrl, setModalUrl] = useState<string>();
+  const [overlayUrl, setOverlayUrl] = useState<string>();
+  const [diagnostics, setDiagnostics] = useState<PvpAlignmentDiagnostics>();
   const [previews, setPreviews] = useState<Preview[]>([]);
   const [dimensions, setDimensions] = useState<string>();
   const [error, setError] = useState<string>();
@@ -147,6 +149,14 @@ export function PvpScreenshotDebugger() {
     };
   }, [previews]);
 
+  useEffect(() => {
+    return () => {
+      if (overlayUrl) {
+        URL.revokeObjectURL(overlayUrl);
+      }
+    };
+  }, [overlayUrl]);
+
   async function handleFile(file: File | undefined) {
     if (!file) {
       return;
@@ -163,6 +173,8 @@ export function PvpScreenshotDebugger() {
     setError(undefined);
     setPreviews([]);
     setModalUrl(undefined);
+    setOverlayUrl(undefined);
+    setDiagnostics(undefined);
 
     const nextSourceUrl = URL.createObjectURL(file);
     setSourceUrl(nextSourceUrl);
@@ -176,19 +188,23 @@ export function PvpScreenshotDebugger() {
 
       setDimensions(`${image.width} × ${image.height}`);
 
-      const regions = await getScreenshotROIImages(file);
-      const modal = await getScreenshotModal(file);
+      const preview = await getScreenshotPreview(file);
 
       if (selection !== selectionRef.current) {
         return;
       }
 
-      setModalUrl(URL.createObjectURL(modal));
+      setModalUrl(URL.createObjectURL(preview.report));
+      setOverlayUrl(URL.createObjectURL(preview.overlay));
+      setDiagnostics({
+        ...preview.diagnostics,
+        candidates: [preview.alignment, ...preview.diagnostics.candidates],
+      });
       setPreviews(
         PVP_SCREENSHOT_REGIONS.map((name) => ({
           name,
-          size: regions[name].size,
-          url: URL.createObjectURL(regions[name]),
+          size: preview.regions[name].size,
+          url: URL.createObjectURL(preview.regions[name]),
         })),
       );
     } catch (cause) {
@@ -200,9 +216,10 @@ export function PvpScreenshotDebugger() {
         cause instanceof Error ? cause.message : "Failed to extract ROIs",
       );
 
-      URL.revokeObjectURL(nextSourceUrl);
+      if (cause instanceof PvpScreenshotAlignmentError) {
+        setDiagnostics(cause.diagnostics);
+      }
 
-      setSourceUrl(undefined);
       setDimensions(undefined);
     } finally {
       if (selection === selectionRef.current) {
@@ -219,8 +236,8 @@ export function PvpScreenshotDebugger() {
           PVP screenshot ROIs
         </h1>
         <p className="max-w-2xl text-muted-foreground">
-          Choose a combat report to inspect the modal crop, resize, and four
-          image regions, then run local OCR to inspect its readings.
+          Choose a combat report to inspect alignment and the five image
+          regions, then run local OCR to inspect its readings.
         </p>
       </div>
 
@@ -254,13 +271,29 @@ export function PvpScreenshotDebugger() {
             />
           )}
 
+          {overlayUrl && (
+            <img
+              src={overlayUrl}
+              alt="Detected source chart rules"
+              className="max-h-[55vh] w-full rounded-md border object-contain"
+            />
+          )}
+
+          {diagnostics && (
+            <details>
+              <summary>Alignment diagnostics</summary>
+              <pre className="overflow-auto text-xs">
+                {JSON.stringify(diagnostics, null, 2)}
+              </pre>
+            </details>
+          )}
           {modalUrl && (
             <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium">Cropped and resized modal</p>
+              <p className="text-sm font-medium">Normalized report</p>
 
               <img
                 src={modalUrl}
-                alt="Cropped and resized PvP combat report modal"
+                alt="Normalized PvP combat report"
                 className="max-h-[55vh] w-full rounded-md border object-contain"
               />
             </div>

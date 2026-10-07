@@ -1,394 +1,168 @@
 import { drawPvpPixels } from "@/lib/pvp/canvas";
 import {
+  PVP_REPORT_SIZE,
+  type PvpAlignmentDiagnostics,
+  detectPvpReportAlignment,
+  refinePvpReportAlignment,
+} from "@/lib/pvp/screenshot-layout";
+import {
   type PVPScreenshotROIImages,
   type PVPScreenshotROIs,
   PVP_SCREENSHOT_REGIONS,
   PVP_SCREENSHOT_ROI_BOUNDS,
 } from "@/lib/pvp/screenshot-types";
 
-type DetectedRegion = {
-  end: number;
-  start: number;
-};
-
-type LuminanceMap = {
-  height: number;
-  scale: number;
-  values: Float32Array;
-  width: number;
-};
-
-const MAX_ANALYSIS_SIZE = 900;
-const OUTPUT_WIDTH = 1920;
-
 export { PVP_SCREENSHOT_ROI_BOUNDS } from "@/lib/pvp/screenshot-types";
-
 export type {
   PVPScreenshotROIs,
   PVPScreenshotROIImages,
 } from "@/lib/pvp/screenshot-types";
 
-function createLuminanceMap(image: HTMLImageElement): LuminanceMap {
-  const scale = Math.min(
-    1,
-    MAX_ANALYSIS_SIZE / Math.max(image.naturalWidth, image.naturalHeight),
-  );
+async function alignScreenshot(sourceUrl: string) {
+  const image = new Image();
 
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error("Failed to decode screenshot"));
+    image.src = sourceUrl;
+  });
 
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+  const source = document.createElement("canvas");
+  source.width = image.naturalWidth;
+  source.height = image.naturalHeight;
+
+  const context = source.getContext("2d");
 
   if (!context) {
     throw new Error("Canvas rendering is unavailable.");
   }
 
-  canvas.width = width;
-  canvas.height = height;
-  context.drawImage(image, 0, 0, width, height);
+  context.drawImage(image, 0, 0);
 
-  const pixels = context.getImageData(0, 0, width, height).data;
-  const values = new Float32Array(width * height);
+  const analysis = document.createElement("canvas");
 
-  for (let index = 0; index < values.length; index += 1) {
-    const pixel = index * 4;
+  const ratio = Math.min(1, 900 / Math.max(source.width, source.height));
 
-    values[index] =
-      pixels[pixel] * 0.2126 +
-      pixels[pixel + 1] * 0.7152 +
-      pixels[pixel + 2] * 0.0722;
+  analysis.width = Math.max(1, Math.round(source.width * ratio));
+  analysis.height = Math.max(1, Math.round(source.height * ratio));
+
+  const analysisContext = analysis.getContext("2d");
+
+  if (!analysisContext) {
+    throw new Error("Canvas rendering is unavailable.");
   }
 
-  return {
-    height,
-    scale,
-    values,
-    width,
-  };
-}
+  analysisContext.drawImage(source, 0, 0, analysis.width, analysis.height);
 
-function getAxisAverages(
-  map: LuminanceMap,
-  axis: "column" | "row",
-  start: number,
-  end: number,
-) {
-  const length = axis === "row" ? map.height : map.width;
-  const averages = new Float32Array(length);
+  const detected = detectPvpReportAlignment({
+    width: analysis.width,
+    height: analysis.height,
+    pixels: analysisContext.getImageData(0, 0, analysis.width, analysis.height)
+      .data,
+  });
 
-  for (let index = 0; index < length; index += 1) {
-    let total = 0;
+  const ratioX = analysis.width / source.width;
+  const ratioY = analysis.height / source.height;
 
-    if (axis === "row") {
-      for (let x = start; x < end; x += 1) {
-        total += map.values[index * map.width + x];
-      }
-    } else {
-      for (let y = start; y < end; y += 1) {
-        total += map.values[y * map.width + index];
-      }
-    }
+  const toSource = (candidate: typeof detected.alignment) => ({
+    ...candidate,
+    scale: candidate.scale / ratioX,
+    offsetX: candidate.offsetX / ratioX,
+    offsetY: candidate.offsetY / ratioY,
+    rules: candidate.rules.map((rule) => ({
+      left: rule.left / ratioX,
+      right: rule.right / ratioX,
+      y: rule.y / ratioY,
+    })),
+  });
 
-    averages[index] = total / Math.max(1, end - start);
-  }
-
-  return averages;
-}
-
-function getPercentile(values: Float32Array, percentile: number) {
-  const sorted = Array.from(values).sort((a, b) => a - b);
-
-  const index = Math.min(
-    sorted.length - 1,
-    Math.max(0, Math.round((sorted.length - 1) * percentile)),
+  const alignment = refinePvpReportAlignment(
+    {
+      width: source.width,
+      height: source.height,
+      pixels: context.getImageData(0, 0, source.width, source.height).data,
+    },
+    toSource(detected.alignment),
   );
 
-  return sorted[index];
-}
-
-function getAverage(values: Float32Array, start: number, end: number) {
-  let total = 0;
-
-  for (let index = start; index < end; index += 1) {
-    total += values[index];
-  }
-
-  return total / Math.max(1, end - start);
-}
-
-function findTransition(
-  values: Float32Array,
-  center: number,
-  direction: "brighten" | "darken",
-) {
-  const window = Math.max(2, Math.min(24, Math.round(values.length * 0.01)));
-
-  const searchRadius = window * 3;
-  const searchStart = Math.max(window, center - searchRadius);
-  const searchEnd = Math.min(values.length - window, center + searchRadius);
-
-  let bestIndex = center;
-  let bestScore = Number.NEGATIVE_INFINITY;
-
-  for (let index = searchStart; index <= searchEnd; index += 1) {
-    const change =
-      getAverage(values, index, index + window) -
-      getAverage(values, index - window, index);
-
-    const score = direction === "brighten" ? change : -change;
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestIndex = index;
-    }
-  }
-
-  return bestIndex;
-}
-
-function findContrastRegion(
-  values: Float32Array,
-  minimumSpan: number,
-): DetectedRegion {
-  const window = Math.max(2, Math.min(24, Math.round(values.length * 0.01)));
-
-  const prefix = new Float64Array(values.length + 1);
-
-  for (let index = 0; index < values.length; index += 1) {
-    prefix[index + 1] = prefix[index] + values[index];
-  }
-
-  const average = (start: number, end: number) =>
-    (prefix[end] - prefix[start]) / Math.max(1, end - start);
-
-  let bestRegion: DetectedRegion | null = null;
-  let bestScore = Number.NEGATIVE_INFINITY;
-
-  for (
-    let start = window;
-    start < values.length - minimumSpan - window;
-    start += 1
-  ) {
-    const brighten =
-      average(start, start + window) - average(start - window, start);
-
-    if (brighten <= 0) {
-      continue;
-    }
-
-    for (
-      let end = start + minimumSpan;
-      end < values.length - window;
-      end += 1
-    ) {
-      const darken = average(end - window, end) - average(end, end + window);
-
-      if (darken <= 0) {
-        continue;
-      }
-
-      const inside = average(start + window, end - window);
-      const outside = (average(0, start) + average(end, values.length)) / 2;
-      const score = brighten + darken + Math.max(0, inside - outside) * 0.5;
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestRegion = { end, start };
-      }
-    }
-  }
-
-  if (!bestRegion) {
-    throw new Error("No modal contrast region was detected.");
-  }
-
-  const refinedRegion = {
-    end: findTransition(values, bestRegion.end, "darken"),
-    start: findTransition(values, bestRegion.start, "brighten"),
+  const diagnostics: PvpAlignmentDiagnostics = {
+    imageSize: { width: source.width, height: source.height },
+    rules: detected.diagnostics.rules.map((rule) => ({
+      left: rule.left / ratioX,
+      right: rule.right / ratioX,
+      y: rule.y / ratioY,
+    })),
+    candidates: detected.diagnostics.candidates.map(toSource),
   };
 
-  return refinedRegion.end > refinedRegion.start ? refinedRegion : bestRegion;
-}
+  const normalized = document.createElement("canvas");
+  normalized.width = PVP_REPORT_SIZE.width;
+  normalized.height = PVP_REPORT_SIZE.height;
 
-function getBrightRegion(
-  values: Float32Array,
-  minimumSpan: number,
-): DetectedRegion {
-  const low = getPercentile(values, 0.1);
-  const high = getPercentile(values, 0.9);
+  const output = normalized.getContext("2d");
 
-  const threshold = low + (high - low) * 0.42;
-
-  let bestRegion: DetectedRegion | null = null;
-  let currentStart = -1;
-
-  for (let index = 0; index <= values.length; index += 1) {
-    const isBright = index < values.length && values[index] >= threshold;
-
-    if (isBright && currentStart === -1) {
-      currentStart = index;
-    }
-
-    if ((!isBright || index === values.length) && currentStart !== -1) {
-      const region = { end: index, start: currentStart };
-
-      if (
-        region.end - region.start >= minimumSpan &&
-        (!bestRegion ||
-          region.end - region.start > bestRegion.end - bestRegion.start)
-      ) {
-        bestRegion = region;
-      }
-
-      currentStart = -1;
-    }
+  if (!output) {
+    throw new Error("Canvas rendering is unavailable.");
   }
 
-  if (!bestRegion || high - low < 12) {
-    return findContrastRegion(values, minimumSpan);
-  }
-
-  const refinedRegion = {
-    end: findTransition(values, bestRegion.end, "darken"),
-    start: findTransition(values, bestRegion.start, "brighten"),
-  };
-
-  return refinedRegion.end > refinedRegion.start
-    ? refinedRegion
-    : findContrastRegion(values, minimumSpan);
-}
-
-function detectModalBounds(image: HTMLImageElement) {
-  const map = createLuminanceMap(image);
-
-  const rowAverages = getAxisAverages(map, "row", 0, map.width);
-
-  const detectedVerticalRegion = getBrightRegion(
-    rowAverages,
-    Math.round(map.height * 0.2),
+  output.fillStyle = "#f7f7f5";
+  output.fillRect(0, 0, normalized.width, normalized.height);
+  output.imageSmoothingQuality = "high";
+  output.drawImage(
+    source,
+    -alignment.offsetX / alignment.scale,
+    -alignment.offsetY / alignment.scale,
+    source.width / alignment.scale,
+    source.height / alignment.scale,
   );
 
-  const verticalRegion =
-    detectedVerticalRegion.end - detectedVerticalRegion.start >=
-    map.height * 0.5
-      ? detectedVerticalRegion
-      : findContrastRegion(rowAverages, Math.round(map.height * 0.5));
-
-  const columnAverages = getAxisAverages(
-    map,
-    "column",
-    verticalRegion.start,
-    verticalRegion.end,
-  );
-
-  const detectedHorizontalRegion = getBrightRegion(
-    columnAverages,
-    Math.round(map.width * 0.2),
-  );
-
-  const horizontalRegion =
-    detectedHorizontalRegion.end - detectedHorizontalRegion.start >=
-    map.width * 0.7
-      ? detectedHorizontalRegion
-      : findContrastRegion(columnAverages, Math.round(map.width * 0.7));
-
-  return {
-    bottom: Math.round(verticalRegion.end / map.scale),
-    left: Math.round(horizontalRegion.start / map.scale),
-    right: Math.round(horizontalRegion.end / map.scale),
-    top: Math.round(verticalRegion.start / map.scale),
-  };
+  return { source, normalized, alignment, diagnostics };
 }
 
 async function getCroppedScreenshot(
   sourceUrl: string,
 ): Promise<HTMLCanvasElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
+  return (await alignScreenshot(sourceUrl)).normalized;
+}
 
-    image.onload = () => {
-      try {
-        const bounds = detectModalBounds(image);
+export async function getScreenshotPreview(input: File) {
+  const sourceUrl = URL.createObjectURL(input);
 
-        const left = Math.max(0, Math.min(image.naturalWidth - 1, bounds.left));
-        const top = Math.max(0, Math.min(image.naturalHeight - 1, bounds.top));
-        const right = Math.max(
-          left + 1,
-          Math.min(image.naturalWidth, bounds.right),
-        );
-        const bottom = Math.max(
-          top + 1,
-          Math.min(image.naturalHeight, bounds.bottom),
-        );
+  try {
+    const { source, normalized, alignment, diagnostics } =
+      await alignScreenshot(sourceUrl);
 
-        const cropWidth = Math.max(1, right - left);
-        const cropHeight = Math.max(1, bottom - top);
-        const cropCanvas = document.createElement("canvas");
-        const cropContext = cropCanvas.getContext("2d");
+    const context = source.getContext("2d");
 
-        if (!cropContext) {
-          throw new Error("Canvas rendering is unavailable.");
-        }
+    if (!context) {
+      throw new Error("Canvas rendering is unavailable.");
+    }
 
-        cropCanvas.width = cropWidth;
-        cropCanvas.height = cropHeight;
-        cropContext.drawImage(
-          image,
-          left,
-          top,
-          cropWidth,
-          cropHeight,
-          0,
-          0,
-          cropWidth,
-          cropHeight,
-        );
+    context.strokeStyle = "#00a040";
+    context.lineWidth = Math.max(2, alignment.scale * 3);
 
-        const outputHeight = Math.max(
-          1,
-          Math.round((cropHeight / cropWidth) * OUTPUT_WIDTH),
-        );
-        const resizedCanvas = document.createElement("canvas");
-        const resizedContext = resizedCanvas.getContext("2d");
+    for (const rule of alignment.rules) {
+      context.beginPath();
+      context.moveTo(rule.left, rule.y);
+      context.lineTo(rule.right, rule.y);
+      context.stroke();
+    }
 
-        if (!resizedContext) {
-          throw new Error("Canvas rendering is unavailable.");
-        }
+    const [overlay, report, regions] = await Promise.all([
+      encodeCanvas(source),
+      encodeCanvas(normalized),
+      encodeRegions(extractRegions(normalized)),
+    ]);
 
-        resizedCanvas.width = OUTPUT_WIDTH;
-        resizedCanvas.height = outputHeight;
-        resizedContext.imageSmoothingEnabled = true;
-        resizedContext.imageSmoothingQuality = "high";
-        resizedContext.drawImage(
-          cropCanvas,
-          0,
-          0,
-          cropWidth,
-          cropHeight,
-          0,
-          0,
-          OUTPUT_WIDTH,
-          outputHeight,
-        );
-
-        resolve(resizedCanvas);
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    image.onerror = (err) => {
-      reject(err);
-    };
-
-    image.src = sourceUrl;
-  });
+    return { overlay, report, regions, alignment, diagnostics };
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
 }
 
 function encodeCanvas(
   canvas: HTMLCanvasElement,
-  errorMessage = "Failed to encode screenshot modal",
+  errorMessage = "Failed to encode normalized screenshot",
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -453,23 +227,24 @@ export async function getScreenshotROIs(
 
   try {
     const screenshot = await getCroppedScreenshot(sourceUrl);
-
-    return Object.fromEntries(
-      PVP_SCREENSHOT_REGIONS.map((region) => [
-        region,
-        getROI(screenshot, PVP_SCREENSHOT_ROI_BOUNDS[region]),
-      ]),
-    ) as PVPScreenshotROIs;
+    return extractRegions(screenshot);
   } finally {
     URL.revokeObjectURL(sourceUrl);
   }
 }
 
-export async function getScreenshotROIImages(
-  input: File,
-): Promise<PVPScreenshotROIImages> {
-  const rois = await getScreenshotROIs(input);
+function extractRegions(screenshot: HTMLCanvasElement): PVPScreenshotROIs {
+  return Object.fromEntries(
+    PVP_SCREENSHOT_REGIONS.map((region) => [
+      region,
+      getROI(screenshot, PVP_SCREENSHOT_ROI_BOUNDS[region]),
+    ]),
+  ) as PVPScreenshotROIs;
+}
 
+async function encodeRegions(
+  rois: PVPScreenshotROIs,
+): Promise<PVPScreenshotROIImages> {
   const entries = await Promise.all(
     PVP_SCREENSHOT_REGIONS.map(
       async (region) =>
@@ -481,4 +256,10 @@ export async function getScreenshotROIImages(
   );
 
   return Object.fromEntries(entries) as PVPScreenshotROIImages;
+}
+
+export async function getScreenshotROIImages(
+  input: File,
+): Promise<PVPScreenshotROIImages> {
+  return encodeRegions(await getScreenshotROIs(input));
 }
