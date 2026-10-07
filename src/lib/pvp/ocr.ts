@@ -216,7 +216,30 @@ export class PvpOcrClient {
         };
       }
 
+      const unitCrops = [...prepared.myUnits, ...prepared.enemyUnits];
+
+      const anonymousRep = recognizePvpAnonymousOpponent(
+        prepared.enemyStudentRep,
+      );
+
+      const iconCrops = [
+        ...unitCrops.map((unit) => unit.icon),
+        ...(anonymousRep ? [] : [prepared.enemyStudentRep]),
+      ];
+
       await withAbort(this.warmup(onProgress), signal);
+
+      // We need to run icon matching first to determine wheter or not we need
+      // to do the name extraction request in parallel
+      const iconMatching = withAbort(
+        this.icons.match(
+          iconCrops,
+          options.students?.map((student) => student.id),
+        ),
+        signal,
+      );
+
+      void iconMatching.catch(() => {});
 
       const worker = this.worker;
       if (!worker) {
@@ -386,12 +409,6 @@ export class PvpOcrClient {
         } as PvpOcrField<T>;
       };
 
-      const result = await recognize(prepared.result, "result", parsePvpResult);
-      const unitCrops = [...prepared.myUnits, ...prepared.enemyUnits];
-      const anonymousRep = recognizePvpAnonymousOpponent(
-        prepared.enemyStudentRep,
-      );
-
       let levelEnd: number | undefined;
 
       if (!anonymousRep) {
@@ -424,18 +441,14 @@ export class PvpOcrClient {
 
       void nameRecognition?.catch(() => {});
 
-      const iconCrops = [
-        ...unitCrops.map((unit) => unit.icon),
-        ...(anonymousRep ? [] : [prepared.enemyStudentRep]),
-      ];
+      const result = await recognize(prepared.result, "result", parsePvpResult);
+      const damages: PvpOcrField<number>[] = [];
 
-      const matches = await withAbort(
-        this.icons.match(
-          iconCrops,
-          options.students?.map((student) => student.id),
-        ),
-        signal,
-      );
+      for (const unit of unitCrops) {
+        damages.push(await recognize(unit.damage, "digits", parsePvpDamage));
+      }
+
+      const matches = await iconMatching;
 
       const catalog = new Map(
         options.students?.map((student) => [student.id, student.name]),
@@ -472,7 +485,7 @@ export class PvpOcrClient {
           sourceIndex: unit.sourceIndex,
           combatClass: unit.combatClass,
           student: studentField(index),
-          damage: await recognize(unit.damage, "digits", parsePvpDamage),
+          damage: damages[index],
         });
       }
 
