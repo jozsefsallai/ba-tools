@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
 import {
   type PvpExtractionResult,
   type PvpOcrProgress,
@@ -235,10 +236,15 @@ export function PvpScreenshotDebugger() {
         <h1 className="text-3xl font-semibold tracking-tight">
           PVP screenshot ROIs
         </h1>
+
         <p className="max-w-2xl text-muted-foreground">
           Choose a combat report to inspect alignment and the five image
           regions, then run local OCR to inspect its readings.
         </p>
+
+        <Link href="/pvp/icon-debug" className="underline">
+          Test every student icon on synthetic screenshots
+        </Link>
       </div>
 
       <Card>
