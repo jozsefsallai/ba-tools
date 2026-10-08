@@ -31,6 +31,7 @@ import {
 } from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
+import { arrayMove } from "@dnd-kit/sortable";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import {
   CheckIcon,
@@ -532,9 +533,17 @@ export function PVPStatsSearch() {
 
   function moveDefense(from: number, to: number) {
     setDefenseTeam((current) => {
-      const next = [...current];
-      [next[from], next[to]] = [next[to], next[from]];
-      return next;
+      if (
+        from < 0 ||
+        to < 0 ||
+        from >= current.length ||
+        to >= current.length ||
+        from < 4 !== to < 4
+      ) {
+        return current;
+      }
+
+      return arrayMove(current, from, to);
     });
   }
 

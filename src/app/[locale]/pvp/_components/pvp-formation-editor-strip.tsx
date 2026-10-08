@@ -13,7 +13,6 @@ import {
 } from "@dnd-kit/core";
 import {
   SortableContext,
-  type SortingStrategy,
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
@@ -23,7 +22,6 @@ import { Fragment, type ReactNode, useId, useRef } from "react";
 type PVPFormationEditorStripProps = {
   formation: PVPFormationStudentItem[];
   onMove(from: number, to: number): void;
-  strategy?: SortingStrategy;
   renderItem(
     item: PVPFormationStudentItem,
     index: number,
@@ -36,7 +34,6 @@ export function PVPFormationEditorStrip({
   formation,
   onMove,
   renderItem,
-  strategy = horizontalListSortingStrategy,
 }: PVPFormationEditorStripProps) {
   const t = useTranslations();
 
@@ -147,7 +144,7 @@ export function PVPFormationEditorStrip({
               items={formation
                 .slice(start, end)
                 .map((_, offset) => itemId(start + offset))}
-              strategy={strategy}
+              strategy={horizontalListSortingStrategy}
             >
               <div
                 className={cn(

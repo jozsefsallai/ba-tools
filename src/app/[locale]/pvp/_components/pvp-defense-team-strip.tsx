@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { PVP_COUNTER_RANGES } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { rectSwappingStrategy, useSortable } from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -42,7 +42,6 @@ export function PVPDefenseTeamStrip({
     <PVPFormationEditorStrip
       formation={formation}
       onMove={onMove}
-      strategy={rectSwappingStrategy}
       renderItem={(item, index, id, triggerId) => (
         <PVPDefenseTeamStripItem
           id={id}
