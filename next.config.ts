@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { PVP_ICON_CATALOG_FORMAT } from "@/lib/pvp/icon-catalog-format";
 import createMDX from "@next/mdx";
 import withSerwistInit from "@serwist/next";
 import type { NextConfig } from "next";
@@ -104,7 +105,10 @@ export default function configuration(phase: string) {
       readFileSync(".cache/pvp-ocr/v2/ocr/pvp-icons/manifest.json", "utf8"),
     );
 
-    if (!/^[a-f0-9]{16}\.bin$/.test(iconCatalog.asset)) {
+    if (
+      iconCatalog.format !== PVP_ICON_CATALOG_FORMAT ||
+      !/^[a-f0-9]{16}\.bin$/.test(iconCatalog.asset)
+    ) {
       throw new Error("Invalid PvP icon catalog; run pnpm run ocr:assets");
     }
 

@@ -2,6 +2,7 @@ import { drawPvpPixels } from "@/lib/pvp/canvas";
 import {
   PVP_REPORT_SIZE,
   type PvpAlignmentDiagnostics,
+  PvpScreenshotAlignmentError,
   detectPvpReportAlignment,
   refinePvpReportAlignment,
 } from "@/lib/pvp/screenshot-layout";
@@ -54,15 +55,36 @@ async function alignScreenshot(sourceUrl: string) {
 
   analysisContext.drawImage(source, 0, 0, analysis.width, analysis.height);
 
-  const detected = detectPvpReportAlignment({
-    width: analysis.width,
-    height: analysis.height,
-    pixels: analysisContext.getImageData(0, 0, analysis.width, analysis.height)
-      .data,
-  });
+  const sourceImage = {
+    width: source.width,
+    height: source.height,
+    pixels: context.getImageData(0, 0, source.width, source.height).data,
+  };
 
-  const ratioX = analysis.width / source.width;
-  const ratioY = analysis.height / source.height;
+  let ratioX = analysis.width / source.width;
+  let ratioY = analysis.height / source.height;
+  let detected: ReturnType<typeof detectPvpReportAlignment>;
+
+  try {
+    detected = detectPvpReportAlignment({
+      width: analysis.width,
+      height: analysis.height,
+      pixels: analysisContext.getImageData(
+        0,
+        0,
+        analysis.width,
+        analysis.height,
+      ).data,
+    });
+  } catch (error) {
+    if (!(error instanceof PvpScreenshotAlignmentError)) {
+      throw error;
+    }
+
+    detected = detectPvpReportAlignment(sourceImage);
+    ratioX = 1;
+    ratioY = 1;
+  }
 
   const toSource = (candidate: typeof detected.alignment) => ({
     ...candidate,
@@ -77,11 +99,7 @@ async function alignScreenshot(sourceUrl: string) {
   });
 
   const alignment = refinePvpReportAlignment(
-    {
-      width: source.width,
-      height: source.height,
-      pixels: context.getImageData(0, 0, source.width, source.height).data,
-    },
+    sourceImage,
     toSource(detected.alignment),
   );
 

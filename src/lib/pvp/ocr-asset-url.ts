@@ -36,6 +36,10 @@ export function getPvpOcrAssetBaseUrl() {
 }
 
 export function getPvpIconAssetBaseUrl() {
+  if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+    return new URL("/api/pvp/icon-assets/", window.location.origin);
+  }
+
   return new URL("pvp-icons/", getPvpRecognitionAssetBaseUrl());
 }
 

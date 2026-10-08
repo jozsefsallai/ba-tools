@@ -1,3 +1,4 @@
+import type { PvpIconCardKind } from "@/lib/pvp/icon-card";
 import type { PvpIconMatch } from "@/lib/pvp/icon-match";
 import type { PvpOpponentNameRecognition } from "@/lib/pvp/opponent-name-types";
 import type { Student } from "@/lib/types";
@@ -14,6 +15,7 @@ export type PvpPixelImage = {
   width: number;
   height: number;
   pixels: Uint8ClampedArray;
+  iconCard?: PvpIconCardKind;
 };
 
 export type PvpOcrField<T> = {

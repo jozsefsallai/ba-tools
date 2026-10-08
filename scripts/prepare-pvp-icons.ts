@@ -5,18 +5,20 @@ import { db } from "@/lib/db";
 import {
   PVP_ICON_CATALOG_FORMAT,
   PVP_ICON_TEMPLATE_BYTES,
-  PVP_ICON_TEMPLATE_HEIGHT,
-  PVP_ICON_TEMPLATE_WIDTH,
   type PvpIconCatalog,
-  describePvpIcon,
 } from "@/lib/pvp/icon-match";
+import {
+  describePvpIconReference,
+  pvpIconDescriptorCacheKey,
+} from "@/lib/pvp/server/icon-reference";
 import { buildStudentIconUrlFromId } from "@/lib/url";
-import { Transformer } from "@napi-rs/image";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 
 const target = `${root}.cache/pvp-ocr/v2/ocr/pvp-icons`;
-const cache = `${root}.cache/pvp-icons-v1`;
+const cache = `${root}.cache/pvp-icons-v2`;
+
+const background = await readFile(`${root}src/assets/images/char-bg.png`);
 
 const refresh = Date.now().toString();
 const base = process.env.NEXT_PUBLIC_IMAGE_CDN_URL;
@@ -51,13 +53,18 @@ try {
         }
 
         const url = buildStudentIconUrlFromId(encodeURIComponent(student.id));
-        const key = createHash("sha256").update(url).digest("hex");
+        const key = pvpIconDescriptorCacheKey(url, background);
         const path = `${cache}/${key}.json`;
 
-        const cached: { etag?: string; descriptor: number[] } | null =
+        const cachedValue: { etag?: string; descriptor: number[] } | null =
           await readFile(path, "utf8")
             .then(JSON.parse)
             .catch(() => null);
+
+        const cached =
+          cachedValue?.descriptor?.length === PVP_ICON_TEMPLATE_BYTES
+            ? cachedValue
+            : null;
 
         const freshUrl = new URL(url);
         freshUrl.searchParams.set("pvp-icon-refresh", refresh);
@@ -82,13 +89,10 @@ try {
             );
           }
 
-          const pixels = new Transformer(
+          descriptor = describePvpIconReference(
             Buffer.from(await response.arrayBuffer()),
-          )
-            .resize(PVP_ICON_TEMPLATE_WIDTH, PVP_ICON_TEMPLATE_HEIGHT)
-            .rawPixelsSync();
-
-          descriptor = describePvpIcon(pixels);
+            background,
+          );
 
           await writeFile(
             path,

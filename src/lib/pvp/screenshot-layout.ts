@@ -101,7 +101,7 @@ export function findPvpReportRules(image: PvpPixelImage): PvpReportRule[] {
 
         last = x;
         count++;
-      } else if (start >= 0 && x - last > Math.max(3, image.width * 0.023)) {
+      } else if (start >= 0 && x - last > Math.max(3, image.width * 0.035)) {
         flush();
       }
     }
@@ -151,20 +151,22 @@ function fit(rules: PvpReportRule[]): PvpReportAlignment {
   const offsetX = mx - scale * cx;
   const offsetY = my - scale * cy;
 
-  const error = Math.max(
-    ...points.map(
-      (p) =>
+  const error = Math.sqrt(
+    points.reduce((sum, p) => {
+      const distance =
         Math.hypot(
           p.x - (p.cx * scale + offsetX),
           p.y - (p.cy * scale + offsetY),
-        ) / scale,
-    ),
+        ) / scale;
+
+      return sum + distance ** 2;
+    }, 0) / points.length,
   );
 
   return { scale, offsetX, offsetY, rules, score: Math.max(0, 1 - error / 18) };
 }
 
-function coloredArea(
+function foregroundArea(
   image: PvpPixelImage,
   alignment: PvpReportAlignment,
   box: readonly [number, number, number, number],
@@ -182,7 +184,7 @@ function coloredArea(
     return -1;
   }
 
-  let colored = 0;
+  let foreground = 0;
   let total = 0;
 
   for (let row = top; row < bottom; row++) {
@@ -193,17 +195,15 @@ function coloredArea(
       const g = image.pixels[i + 1];
       const b = image.pixels[i + 2];
 
-      colored += Number(
-        image.pixels[i + 3] > 220 &&
-          Math.max(r, g, b) - Math.min(r, g, b) > 35 &&
-          Math.min(r, g, b) < 210,
+      foreground += Number(
+        image.pixels[i + 3] > 220 && Math.min(r, g, b) < 210,
       );
 
       total++;
     }
   }
 
-  return colored / Math.max(1, total);
+  return foreground / Math.max(1, total);
 }
 
 function completeContent(image: PvpPixelImage, alignment: PvpReportAlignment) {
@@ -212,7 +212,7 @@ function completeContent(image: PvpPixelImage, alignment: PvpReportAlignment) {
     [45, 116, 830, 125],
     [1044, 116, 830, 125],
   ] as const) {
-    if (coloredArea(image, alignment, box) < 0.015) {
+    if (foregroundArea(image, alignment, box) < 0.015) {
       return false;
     }
   }
@@ -220,7 +220,7 @@ function completeContent(image: PvpPixelImage, alignment: PvpReportAlignment) {
   for (const left of [46, 1044]) {
     // Check every slot's complete portrait band is visible, but allow empty
     // slots. No dependency on damage bars, their heights, or team size.
-    if (coloredArea(image, alignment, [left, 681, 830, 76]) < 0.025) {
+    if (foregroundArea(image, alignment, [left, 681, 830, 76]) < 0.025) {
       return false;
     }
   }
@@ -259,7 +259,7 @@ export function detectPvpReportAlignment(image: PvpPixelImage): {
       if (
         right.left > left.right &&
         Math.abs(right.y - left.y) <= 3 &&
-        Math.abs((right.right - right.left) / width - 1) < 0.035 &&
+        Math.abs((right.right - right.left) / width - 1) < 0.06 &&
         Math.abs((right.left - left.left) / width - teamSpacing / ruleWidth) <
           0.045
       ) {

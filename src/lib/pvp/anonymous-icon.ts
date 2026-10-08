@@ -19,7 +19,11 @@ const catalog: PvpIconCatalog = {
 export function recognizePvpAnonymousOpponent(
   image: PvpPixelImage,
 ): PvpStudentField | null {
-  const match = matchPvpIcon(image, catalog, templates);
+  const match = matchPvpIcon(
+    { ...image, iconCard: undefined },
+    catalog,
+    templates,
+  );
   const distance = match.candidates[0]?.distance;
 
   // Require a close UI-template match, rather than the more permissive student

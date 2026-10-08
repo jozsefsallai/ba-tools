@@ -4,6 +4,7 @@ import type {
   PvpPixelImage,
   PvpUnitPosition,
 } from "@/lib/pvp";
+import { maskPvpIconCard } from "@/lib/pvp/icon-card";
 import { findPvpReportRules } from "@/lib/pvp/screenshot-layout";
 import {
   type PVPScreenshotROIs,
@@ -236,12 +237,15 @@ function segmentTeam(image: PvpPixelImage): PvpUnitCrops[] {
     return {
       sourceIndex,
       combatClass: center.combatClass,
-      icon: cropPvpImage(image, {
-        x: center.x - 46,
-        y: baseline + 7,
-        width: 92,
-        height: 76,
-      }),
+      icon: maskPvpIconCard(
+        cropPvpImage(image, {
+          x: center.x - 46,
+          y: baseline + 7,
+          width: 92,
+          height: 76,
+        }),
+        "team",
+      ),
       damage: badge
         ? cropPvpImage(image, {
             x: badge.x + 3,
@@ -438,7 +442,10 @@ export function preparePvpReport(rois: PVPScreenshotROIs): PvpPreparedReport {
       width: 213,
       height: status.height,
     }),
-    enemyStudentRep: image("enemyStudentRep"),
+    enemyStudentRep: maskPvpIconCard(
+      image("enemyStudentRep"),
+      "representative",
+    ),
     enemyName: image("enemyName"),
     myUnits,
     enemyUnits,
