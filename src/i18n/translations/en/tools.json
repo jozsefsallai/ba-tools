@@ -1069,6 +1069,14 @@
     },
 
     "formationEditorItem": {
+      "slotDamage": "Damage for slot {slot}",
+      "dragInstructions": "Press Enter to open student settings or the student picker. Press Space to pick up a card, use the arrow keys to move it, then press Space to drop or Escape to cancel.",
+      "editStudent": "Edit {name} in slot {slot}",
+      "selectSlot": "Select student for slot {slot}",
+      "replaceStudent": "Replace Student",
+      "removeStudent": "Remove {name}",
+      "moveStudent": "Move {name} in slot {slot}",
+      "studentDamage": "Damage for {name} in slot {slot}",
       "selectStudent": "Select Student",
       "level": "Level",
       "starLevel": "Star Level",

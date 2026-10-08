@@ -948,6 +948,14 @@
       }
     },
     "formationEditorItem": {
+      "slotDamage": "{slot}のダメージ",
+      "dragInstructions": "Enterキーで生徒の設定または生徒選択を開きます。Spaceキーでカードを持ち上げ、矢印キーで移動し、Spaceキーで配置、Escapeキーでキャンセルします。",
+      "editStudent": "{slot}の{name}を編集",
+      "selectSlot": "{slot}の生徒を選択",
+      "replaceStudent": "生徒を変更",
+      "removeStudent": "{name}を削除",
+      "moveStudent": "{slot}の{name}を移動",
+      "studentDamage": "{slot}の{name}のダメージ",
       "selectStudent": "生徒を選択",
       "level": "Lv",
       "starLevel": "★数",

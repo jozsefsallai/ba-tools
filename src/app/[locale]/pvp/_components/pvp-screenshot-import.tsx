@@ -1096,7 +1096,7 @@ export function PvpScreenshotImport({
         }}
       >
         <DialogContent
-          className="max-h-[90dvh] overflow-y-auto sm:max-w-6xl"
+          className="max-h-[90dvh] overflow-y-auto sm:max-w-[min(90rem,calc(100vw-2rem))]"
           onInteractOutside={(event) => event.preventDefault()}
           onEscapeKeyDown={(event) => {
             event.preventDefault();

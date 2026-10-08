@@ -141,8 +141,6 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
   const [includeInStatistics, setIncludeInStatistics] = useState(false);
   const statisticsPreferenceTouched = useRef(false);
   const [videoUrl, setVideoUrl] = useState<string>("");
-  const [ownAdvanced, setOwnAdvanced] = useState(false);
-  const [opponentAdvanced, setOpponentAdvanced] = useState(false);
   const [enemyPresetId, setEnemyPresetId] = useState<Id<"pvpEnemyPreset">>();
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportStatus, setReportStatus] = useState<
@@ -296,6 +294,10 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
       const targetTeam = kind === "own" ? ownTeam : opponentTeam;
       const updatedItem = correctPvpImportedItem(targetTeam[idx], params);
 
+      if ("report" in params) {
+        updatedItem.report = params.report;
+      }
+
       const updatedTeam = [...targetTeam];
       updatedTeam[idx] = updatedItem;
 
@@ -322,74 +324,27 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     [handleItemUpdate],
   );
 
-  const handleItemMoveUp = useCallback(
-    (kind: "own" | "enemy", idx: number) => {
-      const targetTeam = kind === "own" ? ownTeam : opponentTeam;
-      if (idx <= 0 || idx >= targetTeam.length) {
+  const handleItemMove = useCallback(
+    (kind: "own" | "enemy", from: number, to: number) => {
+      if (from === to || from < 4 !== to < 4) {
         return;
       }
 
-      const updatedTeam = [...targetTeam];
-      const temp = updatedTeam[idx - 1];
-      updatedTeam[idx - 1] = updatedTeam[idx];
-      updatedTeam[idx] = temp;
+      const setTeam = kind === "own" ? setOwnTeam : setOpponentTeam;
 
-      if (kind === "own") {
-        setOwnTeam(updatedTeam);
-      } else {
-        setOpponentTeam(updatedTeam);
-      }
+      setTeam((team) => {
+        if (from < 0 || to < 0 || from >= team.length || to >= team.length) {
+          return team;
+        }
+
+        const updated = [...team];
+        const [item] = updated.splice(from, 1);
+        updated.splice(to, 0, item);
+
+        return updated;
+      });
     },
-    [ownTeam, opponentTeam],
-  );
-
-  const handleItemMoveDown = useCallback(
-    (kind: "own" | "enemy", idx: number) => {
-      const targetTeam = kind === "own" ? ownTeam : opponentTeam;
-      if (idx < 0 || idx >= targetTeam.length - 1) {
-        return;
-      }
-
-      const updatedTeam = [...targetTeam];
-      const temp = updatedTeam[idx + 1];
-      updatedTeam[idx + 1] = updatedTeam[idx];
-      updatedTeam[idx] = temp;
-
-      if (kind === "own") {
-        setOwnTeam(updatedTeam);
-      } else {
-        setOpponentTeam(updatedTeam);
-      }
-    },
-    [ownTeam, opponentTeam],
-  );
-
-  const handleOwnItemMoveUp = useCallback(
-    (idx: number) => {
-      handleItemMoveUp("own", idx);
-    },
-    [handleItemMoveUp],
-  );
-
-  const handleOwnItemMoveDown = useCallback(
-    (idx: number) => {
-      handleItemMoveDown("own", idx);
-    },
-    [handleItemMoveDown],
-  );
-
-  const handleOpponentItemMoveUp = useCallback(
-    (idx: number) => {
-      handleItemMoveUp("enemy", idx);
-    },
-    [handleItemMoveUp],
-  );
-
-  const handleOpponentItemMoveDown = useCallback(
-    (idx: number) => {
-      handleItemMoveDown("enemy", idx);
-    },
-    [handleItemMoveDown],
+    [],
   );
 
   useEffect(() => {
@@ -1295,13 +1250,8 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
             <PVPMatchFormationEditor
               formation={ownTeam}
               onUpdate={handleOwnItemUpdate}
-              onMoveUp={handleOwnItemMoveUp}
-              onMoveDown={handleOwnItemMoveDown}
+              onMove={(from, to) => handleItemMove("own", from, to)}
               strikerPrefix={matchType === "attack" ? "A" : "D"}
-              studentTabIndexStart={1}
-              propertyTabIndexStart={13}
-              advanced={ownAdvanced}
-              onAdvancedChange={setOwnAdvanced}
             />
 
             <Button
@@ -1440,11 +1390,6 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
                     <Button
                       variant="outline"
                       className="min-w-0 flex-1 justify-between"
-                      tabIndex={
-                        13 +
-                        ownTeam.length * (ownAdvanced ? 11 : 1) +
-                        opponentTeam.length * (opponentAdvanced ? 11 : 1)
-                      }
                     >
                       <span className="truncate">
                         {opponentStudentRep
@@ -1567,15 +1512,8 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
             <PVPMatchFormationEditor
               formation={opponentTeam}
               onUpdate={handleOpponentItemUpdate}
-              onMoveUp={handleOpponentItemMoveUp}
-              onMoveDown={handleOpponentItemMoveDown}
+              onMove={(from, to) => handleItemMove("enemy", from, to)}
               strikerPrefix={matchType === "defense" ? "A" : "D"}
-              studentTabIndexStart={7}
-              propertyTabIndexStart={
-                13 + ownTeam.length * (ownAdvanced ? 11 : 1)
-              }
-              advanced={opponentAdvanced}
-              onAdvancedChange={setOpponentAdvanced}
             />
 
             <Button

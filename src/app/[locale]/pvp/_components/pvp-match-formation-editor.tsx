@@ -1,91 +1,50 @@
 "use client";
 
+import { PVPFormationEditorStrip } from "@/app/[locale]/pvp/_components/pvp-formation-editor-strip";
 import { PVPMatchFormationEditorItem } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor-item";
 import type { PVPFormationStudentItem } from "@/app/[locale]/pvp/_lib/types";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { useStudents } from "@/hooks/use-students";
-import { useTranslations } from "next-intl";
 
 export type PVPMatchFormationEditorProps = {
   formation: PVPFormationStudentItem[];
   onUpdate(idx: number, item: Partial<PVPFormationStudentItem>): void;
-  onMoveUp?(idx: number): void;
-  onMoveDown?(idx: number): void;
+  onMove(from: number, to: number): void;
   strikerPrefix?: "A" | "D";
-  advanced?: boolean;
   showDamage?: boolean;
-  showAdvancedToggle?: boolean;
-  compactAdvanced?: boolean;
-  onAdvancedChange?(advanced: boolean): void;
-  studentTabIndexStart?: number;
-  propertyTabIndexStart?: number;
 };
 
 export function PVPMatchFormationEditor({
   formation,
   onUpdate,
-  onMoveUp,
-  onMoveDown,
+  onMove,
   strikerPrefix,
-  advanced = false,
-  onAdvancedChange,
   showDamage = true,
-  showAdvancedToggle = true,
-  compactAdvanced = false,
-  studentTabIndexStart = 1,
-  propertyTabIndexStart = 7,
 }: PVPMatchFormationEditorProps) {
-  const t = useTranslations();
-  const { students: allStudents } = useStudents();
-
+  const { students } = useStudents();
   return (
-    <div className="flex flex-col gap-6">
-      {showAdvancedToggle && (
-        <div className="flex items-center gap-2">
-          <Switch
-            id={`pvp-advanced-${strikerPrefix ?? "formation"}`}
-            checked={advanced}
-            onCheckedChange={onAdvancedChange}
-          />
-
-          <Label htmlFor={`pvp-advanced-${strikerPrefix ?? "formation"}`}>
-            {t("tools.pvp.advancedMode")}
-          </Label>
-        </div>
-      )}
-      {formation.map((item, idx) => (
+    <PVPFormationEditorStrip
+      formation={formation}
+      onMove={onMove}
+      renderItem={(item, index, id, triggerId) => (
         <PVPMatchFormationEditorItem
-          key={idx}
+          id={id}
+          triggerId={triggerId}
           item={item}
-          index={idx}
+          index={index}
           strikerPrefix={strikerPrefix}
           onUpdate={onUpdate}
-          onMoveUp={onMoveUp}
-          onMoveDown={onMoveDown}
-          advanced={advanced}
           showDamage={showDamage}
-          compactAdvanced={compactAdvanced}
-          studentTabIndex={studentTabIndexStart + idx}
-          propertyTabIndexStart={
-            propertyTabIndexStart +
-            idx * (advanced ? (showDamage ? 11 : 10) : showDamage ? 1 : 0)
-          }
-          students={allStudents.filter((student) => {
-            const isCurrentStudent = student.id === item.student?.id;
-            const isCorrectClass =
-              idx < 4
-                ? student.combatClass === "Main"
-                : student.combatClass === "Support";
-            const isUsedElsewhere = formation.some(
-              (otherItem, otherIdx) =>
-                otherIdx !== idx && otherItem.student?.id === student.id,
-            );
-
-            return isCurrentStudent || (isCorrectClass && !isUsedElsewhere);
-          })}
+          students={students.filter(
+            (student) =>
+              student.id === item.student?.id ||
+              (student.combatClass === (index < 4 ? "Main" : "Support") &&
+                !formation.some(
+                  (other, otherIndex) =>
+                    otherIndex !== index && other.student?.id === student.id,
+                )),
+          )}
         />
-      ))}
-    </div>
+      )}
+    />
   );
 }

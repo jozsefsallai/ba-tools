@@ -59,6 +59,14 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Improved reliability of the PVP screenshot data extraction engine.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Revamped UI of the formation editor in various places.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Improved appearance of counter search team input.",
+      },
     ],
     fixes: [],
   },

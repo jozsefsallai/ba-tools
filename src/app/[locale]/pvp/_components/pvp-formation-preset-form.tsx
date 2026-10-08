@@ -17,13 +17,13 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useStudents } from "@/hooks/use-students";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useMutation } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
-import { Link, useRouter } from "@/i18n/navigation";
 
 const blankTeam = (): PVPFormationStudentItem[] => [{}, {}, {}, {}, {}, {}];
 
@@ -46,7 +46,6 @@ export function PVPFormationPresetForm({
   const [matchType, setMatchType] = useState<PVPFormationPresetType>(
     preset?.matchType ?? "both",
   );
-  const [advanced, setAdvanced] = useState(true);
   const [team, setTeam] = useState<PVPFormationStudentItem[]>(blankTeam);
   const [saving, setSaving] = useState(false);
 
@@ -181,9 +180,27 @@ export function PVPFormationPresetForm({
       <div className="rounded-lg border p-4">
         <PVPMatchFormationEditor
           formation={team}
+          onMove={(from, to) =>
+            setTeam((current) => {
+              if (
+                from === to ||
+                from < 4 !== to < 4 ||
+                from < 0 ||
+                to < 0 ||
+                from >= current.length ||
+                to >= current.length
+              ) {
+                return current;
+              }
+
+              const updated = [...current];
+              const [item] = updated.splice(from, 1);
+              updated.splice(to, 0, item);
+
+              return updated;
+            })
+          }
           onUpdate={updateSlot}
-          advanced={advanced}
-          onAdvancedChange={setAdvanced}
           showDamage={false}
         />
       </div>

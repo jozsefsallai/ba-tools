@@ -41,6 +41,9 @@ export type StudentPickerProps = PropsWithChildren<{
   placeholder?: string;
   noStudentText?: string;
   ref?: React.Ref<StudentPickerHandle>;
+  onCloseAutoFocus?: React.ComponentProps<
+    typeof PopoverContent
+  >["onCloseAutoFocus"];
 }>;
 
 function StudentItem({
@@ -77,6 +80,7 @@ export const StudentPicker = React.memo(
     noStudentText,
     children,
     ref,
+    onCloseAutoFocus,
   }: StudentPickerProps) => {
     const t = useTranslations();
 
@@ -151,7 +155,10 @@ export const StudentPicker = React.memo(
           {children}
         </PopoverTrigger>
 
-        <PopoverContent className={cn("p-0 border rounded-md mt-1", className)}>
+        <PopoverContent
+          className={cn("p-0 border rounded-md mt-1", className)}
+          onCloseAutoFocus={onCloseAutoFocus}
+        >
           <Command shouldFilter={false}>
             <CommandInput
               placeholder={placeholder}

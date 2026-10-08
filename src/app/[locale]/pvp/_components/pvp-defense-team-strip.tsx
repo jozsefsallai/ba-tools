@@ -1,5 +1,6 @@
 "use client";
 
+import { PVPFormationEditorStrip } from "@/app/[locale]/pvp/_components/pvp-formation-editor-strip";
 import type { PVPFormationStudentItem } from "@/app/[locale]/pvp/_lib/types";
 import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
@@ -8,15 +9,18 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { PVP_COUNTER_RANGES } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { GripVerticalIcon, XIcon } from "lucide-react";
+import { rectSwappingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import type { Student } from "~prisma";
 
 type PVPDefenseTeamStripProps = {
@@ -34,213 +38,224 @@ export function PVPDefenseTeamStrip({
   onMove,
   searchMode = false,
 }: PVPDefenseTeamStripProps) {
+  return (
+    <PVPFormationEditorStrip
+      formation={formation}
+      onMove={onMove}
+      strategy={rectSwappingStrategy}
+      renderItem={(item, index, id, triggerId) => (
+        <PVPDefenseTeamStripItem
+          id={id}
+          triggerId={triggerId}
+          item={item}
+          index={index}
+          onUpdate={onUpdate}
+          searchMode={searchMode}
+          students={students.filter(
+            (student) =>
+              student.id === item.student?.id ||
+              (student.combatClass === (index < 4 ? "Main" : "Support") &&
+                !formation.some(
+                  (other, otherIndex) =>
+                    otherIndex !== index && other.student?.id === student.id,
+                )),
+          )}
+        />
+      )}
+    />
+  );
+}
+
+type PVPDefenseTeamStripItemProps = {
+  id: string;
+  triggerId: string;
+  item: PVPFormationStudentItem;
+  index: number;
+  onUpdate: PVPDefenseTeamStripProps["onUpdate"];
+  searchMode: boolean;
+  students: Student[];
+};
+
+function PVPDefenseTeamStripItem({
+  id,
+  triggerId,
+  item,
+  index,
+  onUpdate,
+  searchMode,
+  students,
+}: PVPDefenseTeamStripItemProps) {
   const t = useTranslations();
+  const criterionTrigger = useRef<HTMLButtonElement>(null);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    animateLayoutChanges: () => false,
+  });
 
-  const draggingIndex = useRef<number | null>(null);
-  const [draggingSlot, setDraggingSlot] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const slot = index < 4 ? `D${index + 1}` : `S${index + 1}`;
 
-  function getCandidates(index: number) {
-    const combatClass = index < 4 ? "Main" : "Support";
+  const criterion = searchMode && index < 4 ? item.counter : undefined;
+  const criterionValue = !criterion
+    ? "student"
+    : criterion.kind === "tank"
+      ? "tank"
+      : `range:${criterion.value}`;
 
-    return students.filter((student) => {
-      const isCurrent = student.id === formation[index].student?.id;
+  const criterionLabel =
+    criterion &&
+    (criterion.kind === "tank"
+      ? t("tools.pvp.stats.counterCardTank")
+      : t("tools.pvp.stats.counterCardRange", { range: criterion.value }));
 
-      const isUsedElsewhere = formation.some(
-        (item, itemIndex) =>
-          itemIndex !== index && item.student?.id === student.id,
-      );
-
-      return (
-        (student.combatClass === combatClass && !isUsedElsewhere) || isCurrent
-      );
-    });
+  function focusIcon() {
+    requestAnimationFrame(() => document.getElementById(triggerId)?.focus());
   }
 
-  function criterionValue(index: number) {
-    const criterion = formation[index].counter;
-
-    if (!criterion) {
-      return "student";
-    }
-
-    if (criterion.kind === "tank") {
-      return "tank";
-    }
-
-    return `range:${criterion.value}`;
-  }
-
-  function updateCriterion(index: number, value: string) {
-    if (value === "student") {
-      onUpdate(index, { counter: undefined });
-    } else if (value === "tank") {
-      onUpdate(index, { student: undefined, counter: { kind: "tank" } });
-    } else {
-      onUpdate(index, {
-        student: undefined,
-        counter: {
-          kind: "range",
-          value: Number(value.slice(6)) as (typeof PVP_COUNTER_RANGES)[number],
-        },
-      });
-    }
-  }
-
-  function handleDrop(index: number) {
-    const from = draggingIndex.current;
-    draggingIndex.current = null;
-
-    setDraggingSlot(null);
-    setDragOverIndex(null);
-
-    if (from === null || from === index || from < 4 !== index < 4) {
-      return;
-    }
-
-    onMove(from, index);
-  }
+  const card = (
+    <Button
+      id={triggerId}
+      ref={setActivatorNodeRef}
+      type="button"
+      variant="ghost"
+      className="h-auto touch-none cursor-grab rounded-lg p-0 active:cursor-grabbing [&_img]:pointer-events-none [&_img]:select-none"
+      {...attributes}
+      {...listeners}
+      aria-label={t("tools.pvp.stats.selectDefenseSlot", { slot })}
+      onClick={criterion ? () => criterionTrigger.current?.click() : undefined}
+    >
+      {criterion ? (
+        <EmptyCard
+          className="w-[95px] border-primary/60 bg-primary/20 opacity-80"
+          label={criterionLabel || undefined}
+        />
+      ) : item.student ? (
+        <StudentCard student={item.student} />
+      ) : (
+        <EmptyCard className="w-[95px]" />
+      )}
+    </Button>
+  );
 
   return (
-    <div className="-mx-2 overflow-x-auto px-2 pb-2">
-      <div className="flex min-w-max items-end justify-center gap-2 sm:gap-3">
-        {formation.map((item, index) => (
-          <div
-            key={index}
-            className={cn(
-              "group relative rounded-xl p-1 transition-colors",
-              dragOverIndex === index && "bg-primary/15 ring-2 ring-primary/60",
-              draggingSlot === index && "opacity-45",
-            )}
-            draggable={Boolean(item.student || item.counter)}
-            onDragStart={(event) => {
-              draggingIndex.current = index;
-              setDraggingSlot(index);
-              event.dataTransfer.effectAllowed = "move";
-              event.dataTransfer.setData("text/plain", String(index));
-            }}
-            onDragEnd={() => {
-              draggingIndex.current = null;
-              setDraggingSlot(null);
-              setDragOverIndex(null);
-            }}
-            onDragOver={(event) => {
-              if (
-                draggingIndex.current !== null &&
-                draggingIndex.current < 4 === index < 4
-              ) {
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "move";
-                setDragOverIndex(index);
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(
+        "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1",
+        isDragging && "opacity-45",
+      )}
+    >
+      {searchMode && index < 4 && (
+        <Select
+          value={criterionValue}
+          onValueChange={(value) => {
+            if (value === "student") {
+              onUpdate(index, { counter: undefined });
+            } else if (value === "tank") {
+              onUpdate(index, {
+                student: undefined,
+                counter: { kind: "tank" },
+              });
+            } else {
+              onUpdate(index, {
+                student: undefined,
+                counter: {
+                  kind: "range",
+                  value: Number(
+                    value.slice(6),
+                  ) as (typeof PVP_COUNTER_RANGES)[number],
+                },
+              });
+            }
+
+            requestAnimationFrame(() =>
+              document.getElementById(`${triggerId}-criterion`)?.focus(),
+            );
+          }}
+        >
+          <SelectTrigger
+            ref={criterionTrigger}
+            id={`${triggerId}-criterion`}
+            className="h-8 w-full gap-1 border-type-red/40 bg-background! bg-linear-to-b from-type-red/10 to-type-red/10 px-1 text-[10px]"
+            aria-label={t("tools.pvp.stats.selectDefenseSlot", { slot })}
+          >
+            <SelectValue className="min-w-0" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="student">
+                {t("tools.pvp.stats.counterSlotStudent")}
+              </SelectItem>
+              {PVP_COUNTER_RANGES.map((range) => (
+                <SelectItem key={range} value={`range:${range}`}>
+                  {t("tools.pvp.stats.counterSlotRange", { range })}
+                </SelectItem>
+              ))}
+              <SelectItem value="tank">
+                {t("tools.pvp.stats.counterSlotTank")}
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      )}
+
+      {searchMode && index >= 4 && (
+        <div className="hidden h-8 @min-[600px]/formation:block" />
+      )}
+
+      <div className="relative h-[73px] w-[78px]">
+        <div style={{ zoom: 0.82 }}>
+          {criterion ? (
+            card
+          ) : (
+            <StudentPicker
+              students={students}
+              onStudentSelected={(student) =>
+                onUpdate(index, { student, counter: undefined })
               }
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
-              handleDrop(index);
+              onCloseAutoFocus={(event) => {
+                event.preventDefault();
+                focusIcon();
+              }}
+            >
+              {card}
+            </StudentPicker>
+          )}
+        </div>
+
+        {(item.student || criterion) && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon-xs"
+            className="absolute -right-2 -top-2 rounded-full border-2 border-background opacity-0 shadow-md group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+            aria-label={t("tools.pvp.stats.removeDefenseStudent", {
+              name: item.student?.name ?? criterionLabel ?? "criterion",
+            })}
+            onClick={() => {
+              onUpdate(index, { student: undefined, counter: undefined });
+              focusIcon();
             }}
           >
-            <div
-              className="relative rounded-lg focus-within:ring-2 focus-within:ring-primary"
-              style={{ zoom: 0.72 }}
-            >
-              {searchMode && index < 4 && (
-                <Select
-                  value={criterionValue(index)}
-                  onValueChange={(value) => updateCriterion(index, value)}
-                >
-                  <SelectTrigger className="mb-1 h-7 w-24 gap-1 px-2 text-[10px]">
-                    <SelectValue className="min-w-0" />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    <SelectItem value="student">
-                      {t("tools.pvp.stats.counterSlotStudent")}
-                    </SelectItem>
-
-                    {PVP_COUNTER_RANGES.map((range) => (
-                      <SelectItem key={range} value={`range:${range}`}>
-                        {t("tools.pvp.stats.counterSlotRange", { range })}
-                      </SelectItem>
-                    ))}
-
-                    <SelectItem value="tank">
-                      {t("tools.pvp.stats.counterSlotTank")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-
-              <div className="relative h-[88px] w-[95px]">
-                {(!searchMode || index >= 4 || !item.counter) && (
-                  <StudentPicker
-                    students={getCandidates(index)}
-                    onStudentSelected={(student) =>
-                      onUpdate(index, { student, counter: undefined })
-                    }
-                  >
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="h-auto rounded-lg p-0 hover:bg-transparent"
-                      aria-label={t("tools.pvp.stats.selectDefenseSlot", {
-                        slot: index < 4 ? `D${index + 1}` : `S${index + 1}`,
-                      })}
-                    >
-                      {item.student ? (
-                        <StudentCard student={item.student} />
-                      ) : (
-                        <EmptyCard className="w-[95px]" />
-                      )}
-                    </Button>
-                  </StudentPicker>
-                )}
-
-                {searchMode && index < 4 && item.counter && (
-                  <EmptyCard
-                    className="w-[95px] border-primary/60 bg-primary/20 opacity-80"
-                    label={
-                      item.counter.kind === "tank"
-                        ? t("tools.pvp.stats.counterCardTank")
-                        : t("tools.pvp.stats.counterCardRange", {
-                            range: item.counter.value,
-                          })
-                    }
-                  />
-                )}
-
-                {(item.student || item.counter) && (
-                  <button
-                    type="button"
-                    className="absolute -right-2 -top-2 z-10 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-background bg-foreground text-background opacity-0 shadow-md transition-opacity hover:border-destructive hover:bg-destructive hover:text-white group-hover:opacity-100 focus:opacity-100"
-                    aria-label={t("tools.pvp.stats.removeDefenseStudent", {
-                      name: item.student?.name ?? "criterion",
-                    })}
-                    onClick={() =>
-                      onUpdate(index, {
-                        student: undefined,
-                        counter: undefined,
-                      })
-                    }
-                  >
-                    <XIcon className="size-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div
-              className={cn(
-                "mx-auto mt-1 flex w-fit items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none text-white",
-                index < 4 ? "bg-type-red" : "bg-type-blue",
-              )}
-            >
-              {(item.student || item.counter) && (
-                <GripVerticalIcon className="size-3" />
-              )}
-              {index < 4 ? `D${index + 1}` : `S${index + 1}`}
-            </div>
-          </div>
-        ))}
+            <XIcon />
+          </Button>
+        )}
+      </div>
+      <div
+        className={cn(
+          "flex items-center rounded-md px-2 py-1 text-xs font-bold leading-none text-white",
+          index < 4 ? "bg-type-red" : "bg-type-blue",
+        )}
+      >
+        {slot}
       </div>
     </div>
   );

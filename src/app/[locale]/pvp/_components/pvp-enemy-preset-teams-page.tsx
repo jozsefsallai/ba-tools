@@ -66,7 +66,6 @@ export function PVPEnemyPresetTeamsPage({
     {},
   ]);
   const [matchType, setMatchType] = useState<PVPFormationPresetType>("both");
-  const [advanced, setAdvanced] = useState(false);
   const [teamFilter, setTeamFilter] = useState<PVPFormationPresetType>("both");
 
   useEffect(() => {
@@ -353,6 +352,26 @@ export function PVPEnemyPresetTeamsPage({
             </div>
             <PVPMatchFormationEditor
               formation={team}
+              onMove={(from, to) =>
+                setTeam((current) => {
+                  if (
+                    from === to ||
+                    from < 4 !== to < 4 ||
+                    from < 0 ||
+                    to < 0 ||
+                    from >= current.length ||
+                    to >= current.length
+                  ) {
+                    return current;
+                  }
+
+                  const updated = [...current];
+                  const [item] = updated.splice(from, 1);
+                  updated.splice(to, 0, item);
+
+                  return updated;
+                })
+              }
               onUpdate={(index, value) =>
                 setTeam((current) =>
                   current.map((slot, slotIndex) =>
@@ -360,8 +379,6 @@ export function PVPEnemyPresetTeamsPage({
                   ),
                 )
               }
-              advanced={advanced}
-              onAdvancedChange={setAdvanced}
               showDamage={false}
             />
           </div>
