@@ -1,6 +1,10 @@
 "use client";
 
 import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
+import type {
+  PvpMatchReview,
+  PvpMatchValues,
+} from "@/app/[locale]/pvp/_components/pvp-match-editor";
 import { PvpScreenshotImportItem } from "@/app/[locale]/pvp/_components/pvp-screenshot-import-item";
 import { MessageBox } from "@/components/common/message-box";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -31,6 +35,7 @@ import {
   PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
 } from "@/lib/pvp/screenshot-types";
+import { Storage } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import {
   DndContext,
@@ -60,16 +65,27 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useNavigationGuard } from "next-navigation-guard";
+import dynamic from "next/dynamic";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
+const PVPMatchEditor = dynamic(() =>
+  import("@/app/[locale]/pvp/_components/pvp-match-editor").then(
+    (module) => module.PVPMatchEditor,
+  ),
+);
+
 const MAX_SCREENSHOTS = 30;
+const assistedModeStorage = new Storage<boolean>("pvp_assisted_import_mode");
 
 type Stage =
   | "queued"
   | "reading"
   | "extracting"
+  | "reviewing"
+  | "skipped"
+  | "stopped"
   | "ready"
   | "saving"
   | "imported"
@@ -111,6 +127,26 @@ export function PvpScreenshotImport({
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [assistedMode, setAssistedMode] = useState(false);
+  const [preferenceLoaded, setPreferenceLoaded] = useState(false);
+  const [review, setReview] = useState<
+    (PvpMatchReview & { index: number }) | null
+  >(null);
+  const [stopConfirm, setStopConfirm] = useState(false);
+  const [stopped, setStopped] = useState(false);
+  const reviewSaving = useRef(false);
+  const cancelReview = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    try {
+      setAssistedMode(assistedModeStorage.get() === true);
+    } catch {
+      // ignore
+    } finally {
+      setPreferenceLoaded(true);
+    }
+  }, []);
+
   const [batchDate, setBatchDate] = useState<Date>();
   const [dragging, setDragging] = useState(false);
   const [includeInStatistics, setIncludeInStatistics] = useState(
@@ -137,6 +173,12 @@ export function PvpScreenshotImport({
 
   function stopExtraction() {
     abort.current?.abort();
+    cancelReview.current?.();
+    cancelReview.current = null;
+
+    if (mounted.current) {
+      setReview(null);
+    }
 
     for (const client of clients.current) {
       client?.dispose();
@@ -179,7 +221,8 @@ export function PvpScreenshotImport({
     (item) => item.stage === "imported",
   ).length;
   const failed = screenshots.filter((item) => item.stage === "failed").length;
-  const processed = imported + failed;
+  const skipped = screenshots.filter((item) => item.stage === "skipped").length;
+  const processed = imported + failed + skipped;
   const errors = screenshots.filter((item) => item.errors.length > 0);
   const preview = screenshots.find((item) => item.id === previewId);
 
@@ -327,6 +370,7 @@ export function PvpScreenshotImport({
     setSelectionErrors([]);
     setPreviewId(null);
     setCompleted(false);
+    setStopped(false);
     setBatchDate(undefined);
   }
 
@@ -334,6 +378,7 @@ export function PvpScreenshotImport({
     if (
       abort.current ||
       completed ||
+      !preferenceLoaded ||
       !selection.current.length ||
       !season.data ||
       !students.length
@@ -348,6 +393,7 @@ export function PvpScreenshotImport({
     const selectedDate = new Date(matchDate.date);
 
     const batchIncludeInStatistics = includeInStatistics;
+    const batchAssistedMode = assistedMode;
 
     const batch = selection.current.map((item) => ({
       ...item,
@@ -437,8 +483,6 @@ export function PvpScreenshotImport({
         save: async (index, battle) => {
           signal.throwIfAborted();
 
-          update(index, { stage: "saving" });
-
           const ownTeam = resolvePvpReportTeam(battle.myUnits, batchStudents);
           const opponentTeam = resolvePvpReportTeam(
             battle.enemyUnits,
@@ -464,36 +508,7 @@ export function PvpScreenshotImport({
               ? representative
               : undefined;
 
-          const presetKey = JSON.stringify([
-            opponentName,
-            opponentStudentRepId,
-          ]);
-
-          if (opponentName && !presetIds.has(presetKey)) {
-            const preset = await convex.query(api.pvp.getEnemyPresetByName, {
-              seasonId,
-              name: opponentName,
-              opponentStudentRepId,
-            });
-
-            signal.throwIfAborted();
-
-            const presetId =
-              preset?._id ??
-              (await createEnemyPreset({
-                seasonId,
-                name: opponentName,
-                opponentName,
-                opponentStudentRepId,
-              }));
-
-            presetIds.set(presetKey, presetId);
-          }
-
-          signal.throwIfAborted();
-
-          const matchId = await recordMatch({
-            seasonId,
+          const initial: PvpMatchValues = {
             date: selectedDate.getTime(),
             includeInStatistics: batchIncludeInStatistics,
             matchType:
@@ -503,26 +518,145 @@ export function PvpScreenshotImport({
             opponentTeam: toSavedTeam(opponentTeam),
             opponentName,
             opponentStudentRepId,
-            enemyPresetId: opponentName ? presetIds.get(presetKey) : undefined,
-          });
+          };
 
-          update(index, { matchId });
+          async function persist(values: PvpMatchValues) {
+            signal.throwIfAborted();
 
-          if (!signal.aborted && mounted.current) {
-            matchDate.rememberDate(selectedDate);
-          }
+            update(index, { stage: "saving" });
 
-          const receipt = battle.enemyNameRecognition?.receipt;
+            const name = batchAssistedMode
+              ? values.opponentName?.trim() || undefined
+              : values.opponentName;
 
-          if (!signal.aborted && opponentName && receipt) {
-            try {
-              await saveOpponentNameCache(receipt, matchId, seasonId);
-            } catch (error) {
-              addError(index, "cache", error);
+            const presetKey = JSON.stringify([
+              name,
+              values.opponentStudentRepId,
+            ]);
+
+            let enemyPresetId = values.enemyPresetId;
+
+            if (name && !enemyPresetId) {
+              if (!presetIds.has(presetKey)) {
+                const preset = await convex.query(
+                  api.pvp.getEnemyPresetByName,
+                  {
+                    seasonId,
+                    name,
+                    opponentStudentRepId: values.opponentStudentRepId,
+                  },
+                );
+
+                signal.throwIfAborted();
+                const presetId =
+                  preset?._id ??
+                  (await createEnemyPreset({
+                    seasonId,
+                    name,
+                    opponentName: name,
+                    opponentStudentRepId: values.opponentStudentRepId,
+                  }));
+                presetIds.set(presetKey, presetId);
+              }
+
+              enemyPresetId = presetIds.get(presetKey);
             }
+
+            signal.throwIfAborted();
+
+            const matchId = await recordMatch({
+              ...values,
+              seasonId,
+              date: selectedDate.getTime(),
+              includeInStatistics: batchIncludeInStatistics,
+              opponentName: name,
+              enemyPresetId,
+            });
+
+            update(index, { matchId });
+            if (!signal.aborted && mounted.current) {
+              matchDate.rememberDate(selectedDate);
+            }
+
+            const receipt = battle.enemyNameRecognition?.receipt;
+
+            if (!signal.aborted && name && receipt) {
+              try {
+                await saveOpponentNameCache(receipt, matchId, seasonId);
+              } catch (error) {
+                addError(index, "cache", error);
+              }
+            }
+
+            update(index, { stage: "imported" });
           }
 
-          update(index, { stage: "imported" });
+          if (!batchAssistedMode) {
+            await persist(initial);
+            return;
+          }
+
+          update(index, { stage: "reviewing" });
+
+          await new Promise<void>((resolve) => {
+            let settled = false;
+
+            const finish = () => {
+              if (settled) {
+                return;
+              }
+
+              settled = true;
+              cancelReview.current = null;
+
+              if (mounted.current) {
+                setReview((current) =>
+                  current ? { ...current, pending: true } : current,
+                );
+              }
+
+              resolve();
+            };
+
+            cancelReview.current = finish;
+
+            setReview({
+              index,
+              initial,
+              nameUncertain: battle.enemyName.uncertain,
+              final: index === batch.length - 1,
+              onSubmit: async (values) => {
+                if (settled || reviewSaving.current || signal.aborted) {
+                  return;
+                }
+
+                reviewSaving.current = true;
+
+                try {
+                  await persist(values);
+                  finish();
+                } catch (error) {
+                  update(index, { stage: "reviewing" });
+                  throw error;
+                } finally {
+                  reviewSaving.current = false;
+                }
+              },
+              onSkip: () => {
+                if (settled || reviewSaving.current || signal.aborted) {
+                  return;
+                }
+
+                update(index, { stage: "skipped" });
+                finish();
+              },
+              onStop: () => {
+                if (!reviewSaving.current) {
+                  setStopConfirm(true);
+                }
+              },
+            });
+          });
         },
         onError: (index, phase, error) => {
           addError(
@@ -562,6 +696,7 @@ export function PvpScreenshotImport({
       }
 
       if (mounted.current) {
+        setReview(null);
         setRunning(false);
       }
     }
@@ -620,6 +755,32 @@ export function PvpScreenshotImport({
           <p>{t("tools.pvp.screenshotImport.sameDay")}</p>
         </AlertDescription>
       </Alert>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Switch
+            id="pvp-assisted-import"
+            checked={assistedMode}
+            disabled={locked || !preferenceLoaded}
+            onCheckedChange={(checked) => {
+              setAssistedMode(checked);
+              try {
+                assistedModeStorage.set(checked);
+              } catch {
+                //ignore
+              }
+            }}
+          />
+
+          <Label htmlFor="pvp-assisted-import">
+            {t("tools.pvp.screenshotImport.assistedMode")}
+          </Label>
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          {t("tools.pvp.screenshotImport.assistedModeHint")}
+        </p>
+      </div>
 
       <div className="max-w-md">
         <PvpMatchDatePicker value={matchDate} disabled={locked} />
@@ -803,12 +964,18 @@ export function PvpScreenshotImport({
           </p>
 
           <p className="text-sm text-muted-foreground">
-            {t("tools.pvp.screenshotImport.counts", { imported, failed })}
+            {t("tools.pvp.screenshotImport.counts", {
+              imported,
+              failed,
+              skipped,
+            })}
           </p>
 
           {screenshots
             .filter((item) =>
-              ["reading", "extracting", "saving"].includes(item.stage),
+              ["reading", "extracting", "reviewing", "saving"].includes(
+                item.stage,
+              ),
             )
             .map((item) => (
               <p className="truncate text-sm" key={item.id}>
@@ -817,6 +984,22 @@ export function PvpScreenshotImport({
               </p>
             ))}
         </div>
+      )}
+
+      {completed && stopped && (
+        <Alert>
+          <AlertDescription>
+            {t("tools.pvp.screenshotImport.stopped")}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {completed && (
+        <Button variant="outline" asChild>
+          <Link href={agenda}>
+            {t("tools.pvp.screenshotImport.viewAgenda")}
+          </Link>
+        </Button>
       )}
 
       {completed && errors.length > 0 && (
@@ -882,7 +1065,12 @@ export function PvpScreenshotImport({
       <div className="flex flex-wrap gap-2">
         {!completed ? (
           <Button
-            disabled={running || !screenshots.length || !students.length}
+            disabled={
+              running ||
+              !preferenceLoaded ||
+              !screenshots.length ||
+              !students.length
+            }
             onClick={() => void handleImport()}
           >
             {running ? (
@@ -900,6 +1088,100 @@ export function PvpScreenshotImport({
           </Button>
         )}
       </div>
+
+      <Dialog
+        open={!!review}
+        onOpenChange={(open) => {
+          if (!open && !reviewSaving.current) setStopConfirm(true);
+        }}
+      >
+        <DialogContent
+          className="max-h-[90dvh] overflow-y-auto sm:max-w-6xl"
+          onInteractOutside={(event) => event.preventDefault()}
+          onEscapeKeyDown={(event) => {
+            event.preventDefault();
+            if (!reviewSaving.current) setStopConfirm(true);
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {t("tools.pvp.screenshotImport.reviewTitle", {
+                current: (review?.index ?? 0) + 1,
+                total: screenshots.length,
+              })}
+            </DialogTitle>
+
+            <DialogDescription className="break-all">
+              {review && screenshots[review.index]?.file.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          {review && (
+            <>
+              <button
+                type="button"
+                className="cursor-zoom-in rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={t("tools.pvp.screenshotImport.preview", {
+                  name: screenshots[review.index].file.name,
+                })}
+                onClick={() => setPreviewId(screenshots[review.index].id)}
+              >
+                <img
+                  src={screenshots[review.index].url}
+                  alt={screenshots[review.index].file.name}
+                  className="max-h-72 w-full object-contain"
+                />
+              </button>
+
+              <PVPMatchEditor
+                key={screenshots[review.index].id}
+                seasonId={seasonId}
+                review={review}
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={stopConfirm} onOpenChange={setStopConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("tools.pvp.screenshotImport.stopTitle")}
+            </DialogTitle>
+
+            <DialogDescription>
+              {t("tools.pvp.screenshotImport.stopDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStopConfirm(false)}>
+              {t("tools.pvp.screenshotImport.keepImporting")}
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (reviewSaving.current) return;
+                stopExtraction();
+                setStopConfirm(false);
+                setStopped(true);
+                setScreenshots((items) =>
+                  items.map((item) =>
+                    ["imported", "failed", "skipped"].includes(item.stage)
+                      ? item
+                      : { ...item, stage: "stopped" },
+                  ),
+                );
+                setCompleted(true);
+              }}
+            >
+              {t("tools.pvp.screenshotImport.stop")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog
         open={!!preview}

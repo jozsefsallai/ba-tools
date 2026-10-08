@@ -56,6 +56,7 @@ import {
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
 } from "@/lib/pvp/screenshot-types";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
+import type { FunctionArgs } from "convex/server";
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -78,19 +79,35 @@ import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
 
+export type PvpMatchValues = Omit<
+  FunctionArgs<typeof api.pvp.recordMatch>,
+  "seasonId"
+>;
+
+export type PvpMatchReview = {
+  initial: PvpMatchValues;
+  nameUncertain: boolean;
+  final: boolean;
+  pending?: boolean;
+  onSubmit: (values: PvpMatchValues) => Promise<void>;
+  onSkip: () => void;
+  onStop: () => void;
+};
+
 export type PVPMatchEditor = {
   seasonId: Id<"pvpSeason">;
   current?: Doc<"pvpMatchRecord">;
+  review?: PvpMatchReview;
 };
 
-export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
+export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
   const t = useTranslations();
   const { studentMap } = useStudents();
   const { preferences } = useUserPreferences();
 
   const router = useRouter();
 
-  const matchDate = usePvpMatchDate(!!current);
+  const matchDate = usePvpMatchDate(!!current || !!review);
   const { date, setDate, rememberDate } = matchDate;
   const [ownRank, setOwnRank] = useState<number | undefined>();
   const [ownRankStr, setOwnRankStr] = useState<string>("");
@@ -254,18 +271,21 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   const updateEnemyPreset = useMutation(api.pvp.updateEnemyPreset);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const saveInFlight = useRef(false);
+  const reviewInitialized = useRef(false);
 
   const hasValidStatisticsTeams =
     ownTeam.slice(0, 4).some((item) => item.student) &&
     opponentTeam.slice(0, 4).some((item) => item.student);
 
   useEffect(() => {
-    if (current || statisticsPreferenceTouched.current) {
+    if (current || review || statisticsPreferenceTouched.current) {
       return;
     }
 
     setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
-  }, [current, preferences.pvp.includeMatchesInStatisticsByDefault]);
+  }, [current, review, preferences.pvp.includeMatchesInStatisticsByDefault]);
 
   const handleItemUpdate = useCallback(
     (
@@ -373,7 +393,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   );
 
   useEffect(() => {
-    if (current || !defaults) {
+    if (current || review || !defaults) {
       return;
     }
 
@@ -394,7 +414,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         };
       }),
     );
-  }, [current, defaults, studentMap]);
+  }, [current, review, defaults, studentMap]);
 
   function applyFormationPreset(kind: "own" | "enemy", presetId: string) {
     const preset = (
@@ -660,10 +680,16 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
   }
 
   async function handleWantsToUpdate() {
+    if (saveInFlight.current) {
+      return;
+    }
+
+    saveInFlight.current = true;
     setIsSaving(true);
+    setSaveError(false);
 
     const matchData = {
-      date: date.getTime(),
+      date: review?.initial.date ?? date.getTime(),
       ownRank,
       opponentName,
       opponentRank,
@@ -688,7 +714,8 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       })),
       result,
       videoUrl: videoUrl.trim() === "" ? undefined : videoUrl.trim(),
-      includeInStatistics,
+      includeInStatistics:
+        review?.initial.includeInStatistics ?? includeInStatistics,
     };
 
     const cacheReceipt = nameCacheEligibleRef.current
@@ -709,7 +736,9 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       }
     };
     try {
-      if (current) {
+      if (review) {
+        await review.onSubmit(matchData);
+      } else if (current) {
         await updateMatchMutation({
           matchId: current._id,
           ...matchData,
@@ -736,43 +765,55 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         router.push(`/pvp/${seasonId}`);
       }
     } catch (err) {
+      setSaveError(true);
       console.error(err);
       toast.error(t("tools.pvp.toasts.matchSaveFail"), {
         position: "top-right",
       });
     } finally {
+      saveInFlight.current = false;
       setIsSaving(false);
     }
   }
 
   useEffect(() => {
+    if (review && reviewInitialized.current) {
+      return;
+    }
+
+    if (review) {
+      reviewInitialized.current = true;
+    }
+
     nameReceiptRef.current = undefined;
     nameCacheEligibleRef.current = false;
     setNameUncertain(false);
 
-    if (!current) {
+    const initial = review?.initial ?? current;
+    if (!initial) {
       return;
     }
 
-    setDate(new Date(current.date));
-    setOwnRank(current.ownRank);
-    setOwnRankStr(current.ownRank?.toString() ?? "");
-    setOpponentName(current.opponentName ?? "");
-    setEnemyPresetId(current.enemyPresetId);
-    setOpponentRank(current.opponentRank);
-    setOpponentRankStr(current.opponentRank?.toString() ?? "");
+    setNameUncertain(review?.nameUncertain ?? false);
+    setDate(new Date(initial.date));
+    setOwnRank(initial.ownRank);
+    setOwnRankStr(initial.ownRank?.toString() ?? "");
+    setOpponentName(initial.opponentName ?? "");
+    setEnemyPresetId(initial.enemyPresetId);
+    setOpponentRank(initial.opponentRank);
+    setOpponentRankStr(initial.opponentRank?.toString() ?? "");
 
-    if (current.opponentStudentRepId) {
-      const student = studentMap[current.opponentStudentRepId];
+    if (initial.opponentStudentRepId) {
+      const student = studentMap[initial.opponentStudentRepId];
       if (student) {
         setOpponentStudentRep(student);
       }
     }
 
-    setMatchType(current.matchType);
+    setMatchType(initial.matchType);
 
     setOwnTeam(
-      current.ownTeam.map((item) => ({
+      initial.ownTeam.map((item) => ({
         student: item.studentId ? studentMap[item.studentId] : undefined,
         level: item.level,
         starLevel: item.starLevel,
@@ -782,7 +823,7 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
     );
 
     setOpponentTeam(
-      current.opponentTeam.map((item) => ({
+      initial.opponentTeam.map((item) => ({
         student: item.studentId ? studentMap[item.studentId] : undefined,
         level: item.level,
         starLevel: item.starLevel,
@@ -791,16 +832,16 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       })),
     );
 
-    setResult(current.result);
-    setVideoUrl(current.videoUrl ?? "");
-    setIncludeInStatistics(current.includeInStatistics ?? false);
-  }, [current, studentMap]);
+    setResult(initial.result);
+    setVideoUrl(initial.videoUrl ?? "");
+    setIncludeInStatistics(initial.includeInStatistics ?? false);
+  }, [current, review, studentMap]);
 
   if (!defaults) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
-  if (!defaults.season?.seasonNumber) {
+  if (!review && !defaults.season?.seasonNumber) {
     return (
       <MessageBox className="flex flex-col items-start gap-4">
         <p>{t("tools.pvp.season.assignSeasonNumber")}</p>
@@ -816,31 +857,33 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-4 items-center">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/pvp/${seasonId}`}>
-              <ChevronLeftIcon />
-            </Link>
-          </Button>
-
-          <h1 className="text-xl font-bold">
-            {current
-              ? t("tools.pvp.match.editMatch")
-              : t("tools.pvp.match.recordNewMatch")}
-          </h1>
-
-          {!current && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => changeReportDialog(true)}
-            >
-              {t("tools.pvp.reportImport.title")}
+      {!review && (
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4 items-center">
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/pvp/${seasonId}`}>
+                <ChevronLeftIcon />
+              </Link>
             </Button>
-          )}
+
+            <h1 className="text-xl font-bold">
+              {current
+                ? t("tools.pvp.match.editMatch")
+                : t("tools.pvp.match.recordNewMatch")}
+            </h1>
+
+            {!current && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => changeReportDialog(true)}
+              >
+                {t("tools.pvp.reportImport.title")}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <Dialog open={reportDialogOpen} onOpenChange={changeReportDialog}>
         <DialogContent onPaste={handleCombatReportPaste}>
@@ -1097,7 +1140,11 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
       </Dialog>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <PvpMatchDatePicker value={matchDate} editing={!!current} />
+        <PvpMatchDatePicker
+          value={matchDate}
+          editing={!!current || !!review}
+          disabled={!!review}
+        />
 
         <div className="flex flex-col gap-1">
           <Label className="text-xs">{t("tools.pvp.match.videoUrl")}</Label>
@@ -1156,33 +1203,35 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 -mt-4">
-        <div className="flex items-center gap-2">
-          <Switch
-            id="pvp-include-statistics"
-            checked={includeInStatistics}
-            disabled={
-              !hasValidStatisticsTeams || !defaults?.season?.seasonNumber
-            }
-            onCheckedChange={(checked) => {
-              statisticsPreferenceTouched.current = true;
-              setIncludeInStatistics(checked);
-            }}
-          />
+      {!review && (
+        <div className="flex flex-col gap-2 -mt-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="pvp-include-statistics"
+              checked={includeInStatistics}
+              disabled={
+                !hasValidStatisticsTeams || !defaults?.season?.seasonNumber
+              }
+              onCheckedChange={(checked) => {
+                statisticsPreferenceTouched.current = true;
+                setIncludeInStatistics(checked);
+              }}
+            />
 
-          <Label htmlFor="pvp-include-statistics">
-            {t("tools.pvp.match.includeInStatistics")}
-          </Label>
+            <Label htmlFor="pvp-include-statistics">
+              {t("tools.pvp.match.includeInStatistics")}
+            </Label>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            {t("tools.pvp.match.includeInStatisticsHint")}
+          </p>
+
+          <p className="text-xs text-muted-foreground">
+            {t("tools.pvp.match.includeInStatisticsPreferenceHint")}
+          </p>
         </div>
-
-        <p className="text-sm text-muted-foreground">
-          {t("tools.pvp.match.includeInStatisticsHint")}
-        </p>
-
-        <p className="text-xs text-muted-foreground">
-          {t("tools.pvp.match.includeInStatisticsPreferenceHint")}
-        </p>
-      </div>
+      )}
 
       <Separator />
 
@@ -1540,14 +1589,55 @@ export function PVPMatchEditor({ seasonId, current }: PVPMatchEditor) {
         </Card>
       </div>
 
-      <Button
-        className="fixed bottom-4 right-4 z-50"
-        onClick={handleWantsToUpdate}
-        disabled={isSaving}
-      >
-        <SaveIcon />
-        {isSaving ? t("common.saving") : t("common.saveChanges")}
-      </Button>
+      {saveError && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {t("tools.pvp.toasts.matchSaveFail")}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {review && (
+        <div className="sticky -bottom-6 -mx-6 -mb-6 flex flex-wrap justify-end gap-2 border-t bg-background px-6 py-4">
+          <Button variant="outline" disabled={isSaving} onClick={review.onStop}>
+            {t("tools.pvp.screenshotImport.stop")}
+          </Button>
+
+          <Button
+            variant="outline"
+            disabled={isSaving || review.pending}
+            onClick={review.onSkip}
+          >
+            {t("tools.pvp.screenshotImport.skip")}
+          </Button>
+
+          <Button
+            disabled={isSaving || review.pending}
+            onClick={handleWantsToUpdate}
+          >
+            {isSaving
+              ? t("common.saving")
+              : review.pending
+                ? t("common.loading")
+                : t(
+                    review.final
+                      ? "tools.pvp.screenshotImport.saveAndFinish"
+                      : "tools.pvp.screenshotImport.saveAndNext",
+                  )}
+          </Button>
+        </div>
+      )}
+
+      {!review && (
+        <Button
+          className="fixed bottom-4 right-4 z-50"
+          onClick={handleWantsToUpdate}
+          disabled={isSaving}
+        >
+          <SaveIcon />
+          {isSaving ? t("common.saving") : t("common.saveChanges")}
+        </Button>
+      )}
     </div>
   );
 }

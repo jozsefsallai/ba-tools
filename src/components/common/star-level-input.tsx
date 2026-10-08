@@ -63,7 +63,7 @@ export function StarLevelInput({
 
   return (
     <div
-      className={cn("flex items-center gap-1", className)}
+      className={cn("flex flex-wrap items-center gap-1", className)}
       onPointerLeave={() => setHoverIndex(null)}
     >
       {Array.from({ length: TOTAL_STARS }, (_, i) => {
@@ -85,7 +85,7 @@ export function StarLevelInput({
               isBlue ? `UE ${index - TOTAL_YELLOW_STARS}` : `${index} stars`
             }
             className={cn(
-              "relative transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-sm disabled:cursor-not-allowed",
+              "relative shrink-0 transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-sm disabled:cursor-not-allowed",
               isSelected ? "opacity-100" : "opacity-30",
             )}
             onPointerEnter={() => setHoverIndex(index)}
@@ -98,7 +98,10 @@ export function StarLevelInput({
             <img
               src={(isBlue ? blueStar : yellowStar).src}
               alt=""
-              className={cn("size-7 select-none", imageClassName)}
+              className={cn(
+                "size-7 object-contain select-none",
+                imageClassName,
+              )}
             />
           </button>
         );

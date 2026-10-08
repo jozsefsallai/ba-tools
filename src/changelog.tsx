@@ -45,6 +45,24 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 8, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added Assisted mode to bulk screenshot import. This allows you to review and adjust each match before saving.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Improved reliability of the PVP screenshot data extraction engine.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "October 7, 2026",
     features: [
       {
