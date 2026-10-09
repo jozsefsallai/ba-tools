@@ -58,7 +58,7 @@
         "railroadPuzzleSolver": "鉄道パズル解答器",
         "raidScore": "総力戦スコア計算機",
         "studentExp": "生徒EXP計算機",
-        "pvp": "戦術対抗戦トラッカー",
+        "pvp": "戦術対抗戦ツール",
         "pvpSearch": "戦術対抗戦カウンター検索"
       },
       "misc": {
@@ -371,6 +371,10 @@
     "dark": "ダーク",
     "system": "システム"
   },
+  "breadcrumbs": {
+    "ancestorMenu": "親ページを表示"
+  },
+
   "import": "インポート",
 
   "searchPlaceholder": "検索...",

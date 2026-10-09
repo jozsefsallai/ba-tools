@@ -6,6 +6,7 @@ import type {
   PvpMatchValues,
 } from "@/app/[locale]/pvp/_components/pvp-match-editor";
 import { PvpScreenshotImportItem } from "@/app/[locale]/pvp/_components/pvp-screenshot-import-item";
+import { usePVPSeasonQuery } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import { MessageBox } from "@/components/common/message-box";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,6 @@ import { useUserPreferences } from "@/hooks/use-preferences";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useQueryWithStatus } from "@/lib/convex";
 import { type PvpBattleInfo, resolvePvpReportTeam } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
@@ -117,7 +117,7 @@ export function PvpScreenshotImport({
   const { students, studentMap } = useStudents();
   const { preferences } = useUserPreferences();
 
-  const season = useQueryWithStatus(api.pvp.getSeason, { seasonId });
+  const season = usePVPSeasonQuery();
   const recordMatch = useMutation(api.pvp.recordMatch);
 
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);

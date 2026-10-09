@@ -3,6 +3,7 @@
 import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import { PVPPresetPicker } from "@/app/[locale]/pvp/_components/pvp-preset-picker";
+import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import type {
   PVPEnemyTeam,
   PVPFormationPresetType,
@@ -266,7 +267,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     api.pvp.getEnemyPresetTeams,
     resolvedEnemyPresetId ? { presetId: resolvedEnemyPresetId } : "skip",
   );
-  const defaults = useQuery(api.pvp.getSeasonDefaults, { seasonId });
+  const defaults = usePVPSeasonDefaults();
   const createFormationPreset = useMutation(api.pvp.createFormationPreset);
   const createEnemyPreset = useMutation(api.pvp.createEnemyPreset);
   const updateEnemyPreset = useMutation(api.pvp.updateEnemyPreset);

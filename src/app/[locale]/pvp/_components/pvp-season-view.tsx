@@ -6,6 +6,7 @@ import {
   parsePvpAgendaDate,
 } from "@/app/[locale]/pvp/_components/pvp-matches-list";
 import { PVPSeasonEditDialog } from "@/app/[locale]/pvp/_components/pvp-season-edit-dialog";
+import { usePVPSeasonQuery } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,14 +14,12 @@ import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { Link } from "@/i18n/navigation";
 import { isSuperUser } from "@/lib/auth/super-user";
-import { useQueryWithStatus } from "@/lib/convex";
 import { useUser } from "@clerk/nextjs";
 import { format, subDays } from "date-fns";
 import { CalendarDaysIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
 export type PVPSeasonViewProps = {
@@ -35,7 +34,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
 
   const end = parsePvpAgendaDate(searchParams.get("end"));
 
-  const query = useQueryWithStatus(api.pvp.getSeason, { seasonId });
+  const query = usePVPSeasonQuery();
 
   async function setHideEmptyDays(checked: boolean) {
     try {

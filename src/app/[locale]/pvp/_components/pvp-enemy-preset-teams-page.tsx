@@ -1,6 +1,8 @@
 "use client";
 
+import { PVPBreadcrumbs } from "@/app/[locale]/pvp/_components/pvp-breadcrumbs";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
+import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import type {
   PVPEnemyTeam,
   PVPFormationPresetType,
@@ -50,7 +52,7 @@ export function PVPEnemyPresetTeamsPage({
 }) {
   const t = useTranslations();
   const teamsResult = useQuery(api.pvp.getEnemyPresetTeams, { presetId });
-  const seasonResult = useQuery(api.pvp.getSeasonDefaults, { seasonId });
+  const seasonResult = usePVPSeasonDefaults();
   const createTeam = useMutation(api.pvp.createEnemyTeam);
   const updateTeam = useMutation(api.pvp.updateEnemyTeam);
   const deleteTeam = useMutation(api.pvp.deleteEnemyTeam);
@@ -148,253 +150,265 @@ export function PVPEnemyPresetTeamsPage({
   );
 
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/pvp/${seasonId}/presets/opponents`}>
-            <ChevronLeftIcon />
-          </Link>
-        </Button>
-
-        <h1 className="text-xl font-bold">
-          {t("tools.pvp.presets.teamsUsedBy", {
-            name: teamsResult?.preset.name ?? "",
-          })}
-        </h1>
-        <div className="ml-auto flex gap-2">
-          <Button variant="outline" asChild>
-            <Link
-              href={`/pvp/${seasonId}/presets/opponents/${presetId}/history`}
-            >
-              {t("tools.pvp.presets.battleHistory")}
+    <PVPBreadcrumbs
+      seasonName={seasonResult?.season?.name}
+      opponentName={teamsResult.preset.opponentName || teamsResult.preset.name}
+    >
+      <div className="flex min-w-0 flex-col gap-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/pvp/${seasonId}/presets/opponents`}>
+              <ChevronLeftIcon />
             </Link>
           </Button>
-          <Button onClick={() => openTeamDialog()}>
-            {t("tools.pvp.presets.addTeam")}
-          </Button>
+
+          <h1 className="text-xl font-bold">
+            {t("tools.pvp.presets.teamsUsedBy", {
+              name: teamsResult?.preset.name ?? "",
+            })}
+          </h1>
+          <div className="ml-auto flex gap-2">
+            <Button variant="outline" asChild>
+              <Link
+                href={`/pvp/${seasonId}/presets/opponents/${presetId}/history`}
+              >
+                {t("tools.pvp.presets.battleHistory")}
+              </Link>
+            </Button>
+            <Button onClick={() => openTeamDialog()}>
+              {t("tools.pvp.presets.addTeam")}
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="flex w-full max-w-sm items-center gap-3">
-        <Label htmlFor="enemy-formation-type-filter">
-          {t("tools.pvp.presets.filterFormationType")}
-        </Label>
+        <div className="flex w-full max-w-sm items-center gap-3">
+          <Label htmlFor="enemy-formation-type-filter">
+            {t("tools.pvp.presets.filterFormationType")}
+          </Label>
 
-        <Select value={teamFilter} onValueChange={handleTeamFilterChange}>
-          <SelectTrigger id="enemy-formation-type-filter" className="flex-1">
-            <SelectValue />
-          </SelectTrigger>
+          <Select value={teamFilter} onValueChange={handleTeamFilterChange}>
+            <SelectTrigger id="enemy-formation-type-filter" className="flex-1">
+              <SelectValue />
+            </SelectTrigger>
 
-          <SelectContent>
-            <SelectItem value="both">{t("tools.pvp.presets.both")}</SelectItem>
+            <SelectContent>
+              <SelectItem value="both">
+                {t("tools.pvp.presets.both")}
+              </SelectItem>
 
-            <SelectItem value="attack">
-              {t("tools.pvp.presets.attack")}
-            </SelectItem>
+              <SelectItem value="attack">
+                {t("tools.pvp.presets.attack")}
+              </SelectItem>
 
-            <SelectItem value="defense">
-              {t("tools.pvp.presets.defense")}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {teamsResult.teams.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("tools.pvp.presets.noTeams")}
+              <SelectItem value="defense">
+                {t("tools.pvp.presets.defense")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      ) : filteredTeams.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          {t("tools.pvp.presets.noTeamsForFilter")}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {filteredTeams.map((knownTeam) => (
-            <article
-              className="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border p-4"
-              key={knownTeam.teamKey}
-            >
-              <div className="flex w-28 flex-col gap-1 text-sm text-muted-foreground">
-                <span>
-                  {new Date(knownTeam.updatedAt).toLocaleDateString()}
-                </span>
-                <span className="flex flex-wrap gap-1">
-                  {(knownTeam.roles === "attack" ||
-                    knownTeam.roles === "both") && (
-                    <Badge variant="outline">
-                      {t("tools.pvp.presets.attack")}
-                    </Badge>
-                  )}
-                  {(knownTeam.roles === "defense" ||
-                    knownTeam.roles === "both") && (
-                    <Badge variant="outline">
-                      {t("tools.pvp.presets.defense")}
-                    </Badge>
-                  )}
-                </span>
-              </div>
 
-              {knownTeam.team.map(
-                (item: PVPEnemyTeam["team"][number], index: number) => {
-                  const student = item.studentId
-                    ? studentMap[item.studentId]
-                    : undefined;
+        {teamsResult.teams.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+            {t("tools.pvp.presets.noTeams")}
+          </div>
+        ) : filteredTeams.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+            {t("tools.pvp.presets.noTeamsForFilter")}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filteredTeams.map((knownTeam) => (
+              <article
+                className="flex min-w-0 flex-wrap items-center gap-3 rounded-lg border p-4"
+                key={knownTeam.teamKey}
+              >
+                <div className="flex w-28 flex-col gap-1 text-sm text-muted-foreground">
+                  <span>
+                    {new Date(knownTeam.updatedAt).toLocaleDateString()}
+                  </span>
+                  <span className="flex flex-wrap gap-1">
+                    {(knownTeam.roles === "attack" ||
+                      knownTeam.roles === "both") && (
+                      <Badge variant="outline">
+                        {t("tools.pvp.presets.attack")}
+                      </Badge>
+                    )}
+                    {(knownTeam.roles === "defense" ||
+                      knownTeam.roles === "both") && (
+                      <Badge variant="outline">
+                        {t("tools.pvp.presets.defense")}
+                      </Badge>
+                    )}
+                  </span>
+                </div>
 
-                  return student ? (
-                    <img
-                      key={`${knownTeam.teamKey}-${index}`}
-                      src={buildStudentPortraitUrl(student)}
-                      alt={student.name}
-                      title={student.name}
-                      className="size-14 rounded object-cover"
-                    />
-                  ) : (
-                    <div
-                      key={`${knownTeam.teamKey}-${index}`}
-                      className="size-14 rounded border border-dashed"
-                    />
-                  );
-                },
-              )}
-              <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
-                <Badge variant="secondary" className="gap-3">
-                  {t.rich("tools.pvp.presets.encounters", {
-                    ...knownTeam.encounterCounts,
-                    stat: (children) => <span>{children}</span>,
-                    muted: (children) => (
-                      <span className="text-muted-foreground mx-0.5">
-                        {children}
-                      </span>
-                    ),
-                  })}
-                </Badge>
+                {knownTeam.team.map(
+                  (item: PVPEnemyTeam["team"][number], index: number) => {
+                    const student = item.studentId
+                      ? studentMap[item.studentId]
+                      : undefined;
 
-                <div className="flex flex-wrap justify-end gap-2">
-                  {(knownTeam.roles === "defense" ||
-                    knownTeam.roles === "both") &&
-                    seasonResult?.season?.seasonNumber && (
-                      <Button size="sm" variant="outline" asChild>
-                        <Link
-                          href={buildPvpCounterSearchHref({
-                            seasonNumber: seasonResult.season.seasonNumber,
-                            defenseTeam: knownTeam.team,
-                          })}
-                        >
-                          {t("tools.pvp.presets.findCounters")}
-                        </Link>
+                    return student ? (
+                      <img
+                        key={`${knownTeam.teamKey}-${index}`}
+                        src={buildStudentPortraitUrl(student)}
+                        alt={student.name}
+                        title={student.name}
+                        className="size-14 rounded object-cover"
+                      />
+                    ) : (
+                      <div
+                        key={`${knownTeam.teamKey}-${index}`}
+                        className="size-14 rounded border border-dashed"
+                      />
+                    );
+                  },
+                )}
+                <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+                  <Badge variant="secondary" className="gap-3">
+                    {t.rich("tools.pvp.presets.encounters", {
+                      ...knownTeam.encounterCounts,
+                      stat: (children) => <span>{children}</span>,
+                      muted: (children) => (
+                        <span className="text-muted-foreground mx-0.5">
+                          {children}
+                        </span>
+                      ),
+                    })}
+                  </Badge>
+
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {(knownTeam.roles === "defense" ||
+                      knownTeam.roles === "both") &&
+                      seasonResult?.season?.seasonNumber && (
+                        <Button size="sm" variant="outline" asChild>
+                          <Link
+                            href={buildPvpCounterSearchHref({
+                              seasonNumber: seasonResult.season.seasonNumber,
+                              defenseTeam: knownTeam.team,
+                            })}
+                          >
+                            {t("tools.pvp.presets.findCounters")}
+                          </Link>
+                        </Button>
+                      )}
+                    {knownTeam.manualTeamId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          openTeamDialog(knownTeam as PVPEnemyTeam)
+                        }
+                      >
+                        {t("tools.pvp.presets.edit")}
                       </Button>
                     )}
-                  {knownTeam.manualTeamId && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => openTeamDialog(knownTeam as PVPEnemyTeam)}
-                    >
-                      {t("tools.pvp.presets.edit")}
-                    </Button>
-                  )}
-                  {knownTeam.manualTeamId && (
-                    <ConfirmDialog
-                      title={t("tools.pvp.presets.deleteTeamTitle")}
-                      description={t("tools.pvp.presets.deleteTeamDescription")}
-                      confirmVariant="destructive"
-                      onConfirm={() =>
-                        deleteTeam({
-                          teamId: knownTeam.manualTeamId as Id<"pvpEnemyTeam">,
-                        })
-                      }
-                    >
-                      <Button size="sm" variant="destructive">
-                        {t("tools.pvp.presets.delete")}
-                      </Button>
-                    </ConfirmDialog>
-                  )}
+                    {knownTeam.manualTeamId && (
+                      <ConfirmDialog
+                        title={t("tools.pvp.presets.deleteTeamTitle")}
+                        description={t(
+                          "tools.pvp.presets.deleteTeamDescription",
+                        )}
+                        confirmVariant="destructive"
+                        onConfirm={() =>
+                          deleteTeam({
+                            teamId:
+                              knownTeam.manualTeamId as Id<"pvpEnemyTeam">,
+                          })
+                        }
+                      >
+                        <Button size="sm" variant="destructive">
+                          {t("tools.pvp.presets.delete")}
+                        </Button>
+                      </ConfirmDialog>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingTeamId
-                ? t("tools.pvp.presets.editTeam")
-                : t("tools.pvp.presets.addTeam")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <Label>{t("tools.pvp.presets.formationType")}</Label>
-              <Select
-                value={matchType}
-                onValueChange={(value) =>
-                  setMatchType(value as PVPFormationPresetType)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="attack">
-                    {t("tools.pvp.presets.attack")}
-                  </SelectItem>
-                  <SelectItem value="defense">
-                    {t("tools.pvp.presets.defense")}
-                  </SelectItem>
-                  <SelectItem value="both">
-                    {t("tools.pvp.presets.both")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <PVPMatchFormationEditor
-              formation={team}
-              onMove={(from, to) =>
-                setTeam((current) => {
-                  if (
-                    from === to ||
-                    from < 4 !== to < 4 ||
-                    from < 0 ||
-                    to < 0 ||
-                    from >= current.length ||
-                    to >= current.length
-                  ) {
-                    return current;
-                  }
-
-                  const updated = [...current];
-                  const [item] = updated.splice(from, 1);
-                  updated.splice(to, 0, item);
-
-                  return updated;
-                })
-              }
-              onUpdate={(index, value) =>
-                setTeam((current) =>
-                  current.map((slot, slotIndex) =>
-                    slotIndex === index ? { ...slot, ...value } : slot,
-                  ),
-                )
-              }
-              showDamage={false}
-            />
+              </article>
+            ))}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              {t("tools.pvp.presets.cancel")}
-            </Button>
-            <Button
-              disabled={!team.some((slot) => slot.student)}
-              onClick={() => void saveTeam()}
-            >
-              {t("tools.pvp.presets.saveChanges")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+        )}
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingTeamId
+                  ? t("tools.pvp.presets.editTeam")
+                  : t("tools.pvp.presets.addTeam")}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <Label>{t("tools.pvp.presets.formationType")}</Label>
+                <Select
+                  value={matchType}
+                  onValueChange={(value) =>
+                    setMatchType(value as PVPFormationPresetType)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="attack">
+                      {t("tools.pvp.presets.attack")}
+                    </SelectItem>
+                    <SelectItem value="defense">
+                      {t("tools.pvp.presets.defense")}
+                    </SelectItem>
+                    <SelectItem value="both">
+                      {t("tools.pvp.presets.both")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <PVPMatchFormationEditor
+                formation={team}
+                onMove={(from, to) =>
+                  setTeam((current) => {
+                    if (
+                      from === to ||
+                      from < 4 !== to < 4 ||
+                      from < 0 ||
+                      to < 0 ||
+                      from >= current.length ||
+                      to >= current.length
+                    ) {
+                      return current;
+                    }
+
+                    const updated = [...current];
+                    const [item] = updated.splice(from, 1);
+                    updated.splice(to, 0, item);
+
+                    return updated;
+                  })
+                }
+                onUpdate={(index, value) =>
+                  setTeam((current) =>
+                    current.map((slot, slotIndex) =>
+                      slotIndex === index ? { ...slot, ...value } : slot,
+                    ),
+                  )
+                }
+                showDamage={false}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                {t("tools.pvp.presets.cancel")}
+              </Button>
+              <Button
+                disabled={!team.some((slot) => slot.student)}
+                onClick={() => void saveTeam()}
+              >
+                {t("tools.pvp.presets.saveChanges")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </PVPBreadcrumbs>
   );
 }

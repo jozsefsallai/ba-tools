@@ -80,13 +80,6 @@ export async function ToolsAndResources() {
       isNew: true,
     },
     {
-      name: t("static.home.toollist.pvpSearch.title"),
-      path: "/pvp/search",
-      icon: <SwordsIcon className="size-10 text-indigo-300 shrink-0" />,
-      description: t("static.home.toollist.pvpSearch.description"),
-      isNew: true,
-    },
-    {
       name: t("static.home.toollist.formationDisplay.title"),
       path: "/formation-display",
       icon: <UsersIcon className="size-10 text-orange-500 shrink-0" />,

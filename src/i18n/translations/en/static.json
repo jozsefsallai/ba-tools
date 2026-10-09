@@ -31,8 +31,8 @@
         "description": "Calculate how many students you can level up across a level range with the Activity Reports you have, and see how many reports you'll have left over."
       },
       "pvp": {
-        "title": "PVP Tracker",
-        "description": "Track your PVP battles, formations, and opponents across each season."
+        "title": "PVP Tools",
+        "description": "Search PVP counters, explore effective teams, and track your battles."
       },
       "pvpSearch": {
         "title": "PVP Counter Search",

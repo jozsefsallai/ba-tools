@@ -226,11 +226,6 @@ export function AppSidebar() {
       text: t("common.header.nav.gameplay.pvp"),
       icon: SwordsIcon,
     },
-    {
-      href: "/pvp/search",
-      text: t("common.header.nav.gameplay.pvpSearch"),
-      icon: SwordsIcon,
-    },
   ];
 
   const MISC_TOOLS: NavLink[] = [

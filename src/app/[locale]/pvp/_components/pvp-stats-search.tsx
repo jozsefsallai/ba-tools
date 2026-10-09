@@ -17,12 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { usePvpStatsFilters } from "@/hooks/use-pvp-stats-filters";
 import { useStudents } from "@/hooks/use-students";
 import {
   buildPvpCounterSearchHref,
   parsePvpCounterSearchParams,
 } from "@/lib/pvp/counter-link";
-import { Storage } from "@/lib/storage";
 import {
   type PVPCounterDefenseSlot,
   type PVPCounterRange,
@@ -47,11 +47,6 @@ import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 import type { PVPFormationStudentItem } from "../_lib/types";
-
-const seasonStorage = new Storage<number>("pvp_stats_season");
-const excludedStudentsStorage = new Storage<string[]>(
-  "pvp_stats_excluded_students",
-);
 
 const blankTeam = (): PVPFormationStudentItem[] => [{}, {}, {}, {}, {}, {}];
 
@@ -189,10 +184,15 @@ export function PVPStatsSearch() {
     });
   }, [searchParamsKey]);
 
-  const [seasonNumber, setSeasonNumber] = useState<PVPSeasonNumber>(11);
+  const {
+    seasonNumber,
+    setSeasonNumber,
+    excludedStudentIds,
+    setExcludedStudentIds,
+    loaded: excludedStudentsLoaded,
+  } = usePvpStatsFilters();
+
   const [defenseTeam, setDefenseTeam] = useState(blankTeam);
-  const [excludedStudentIds, setExcludedStudentIds] = useState<string[]>([]);
-  const [excludedStudentsLoaded, setExcludedStudentsLoaded] = useState(false);
   const [minimumWins, setMinimumWins] = useState(0);
   const [shareFeedback, setShareFeedback] = useState<"idle" | "copied">("idle");
   const [submittedSearch, setSubmittedSearch] =
@@ -210,23 +210,6 @@ export function PVPStatsSearch() {
         clearTimeout(shareFeedbackTimerRef.current);
       }
     };
-  }, []);
-
-  useEffect(() => {
-    const saved = seasonStorage.get();
-
-    if (saved && PVP_SEASONS.includes(saved as PVPSeasonNumber)) {
-      setSeasonNumber(saved as PVPSeasonNumber);
-    }
-  }, []);
-
-  useEffect(() => {
-    const saved = excludedStudentsStorage.get();
-
-    if (saved) {
-      setExcludedStudentIds(saved);
-    }
-    setExcludedStudentsLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -318,20 +301,16 @@ export function PVPStatsSearch() {
     students.length,
   ]);
 
-  useEffect(() => {
-    seasonStorage.set(seasonNumber);
-  }, [seasonNumber]);
-
-  useEffect(() => {
-    excludedStudentsStorage.set(excludedStudentIds);
-  }, [excludedStudentIds]);
-
   const canSearch = defenseTeam
     .slice(0, 4)
     .some((item) => item.student || item.counter);
   const queryArgs = useMemo(() => submittedSearch ?? "skip", [submittedSearch]);
 
-  const summary = useQuery(api.pvpStats.getSummary, { seasonNumber });
+  const summary = useQuery(
+    api.pvpStats.getSummary,
+    excludedStudentsLoaded ? { seasonNumber } : "skip",
+  );
+
   const traitsStatus = useQuery(api.pvpStats.getStatus);
 
   const primaryQuery = usePaginatedQuery(api.pvpStats.search, queryArgs, {

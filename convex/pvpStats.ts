@@ -7,6 +7,7 @@ import { type Infer, v } from "convex/values";
 import { internal } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 import { internalAction, internalMutation, query } from "~convex/server";
+import { rankingIdentity, wilsonInterval } from "./lib/pvpRankings";
 import { getPvpVideoUrl } from "./lib/pvpVideo";
 import { getTeamKey } from "./lib/teamKey";
 
@@ -207,7 +208,7 @@ function getStoredTeam(item: any, side: "attack" | "defense"): Team {
   const prefix = side === "attack" ? "a" : "d";
   const specialPrefix = side === "attack" ? "attack" : "defense";
 
-  return [
+  const projected = [
     { studentId: item[`${prefix}1StudentId`] },
     { studentId: item[`${prefix}2StudentId`] },
     { studentId: item[`${prefix}3StudentId`] },
@@ -215,6 +216,12 @@ function getStoredTeam(item: any, side: "attack" | "defense"): Team {
     { studentId: item[`${specialPrefix}S1StudentId`] },
     { studentId: item[`${specialPrefix}S2StudentId`] },
   ];
+
+  const legacy: Team | undefined = item[`${side}Team`];
+
+  return projected.map((slot, index) => ({
+    studentId: slot.studentId ?? legacy?.[index]?.studentId,
+  }));
 }
 
 const defenseTraitFields = [
@@ -334,19 +341,7 @@ export function validatePvpTeam(team: Team, label = "Team") {
 }
 
 function confidenceScore(wins: number, total: number) {
-  if (total === 0) {
-    return 0;
-  }
-
-  const z = 1.96;
-  const proportion = wins / total;
-  const denominator = 1 + (z * z) / total;
-  const center = proportion + (z * z) / (2 * total);
-  const spread =
-    z *
-    Math.sqrt((proportion * (1 - proportion) + (z * z) / (4 * total)) / total);
-
-  return (center - spread) / denominator;
+  return wilsonInterval(wins, total).lower;
 }
 
 export function normalizeMatchForStats(
@@ -672,8 +667,27 @@ export const start = internalMutation({
       .query("pvpStatsStatus")
       .withIndex("by_key", (q) => q.eq("key", "global"))
       .unique();
+
+    if (
+      existing?.isUpdating &&
+      existing.refreshRunId &&
+      now - (existing.refreshHeartbeatAt ?? 0) < 20 * 60_000
+    ) {
+      return;
+    }
+
+    const previousRunAt = Number.parseInt(existing?.refreshRunId ?? "0", 10);
+    const refreshRunId = String(Math.max(now, previousRunAt + 1)).padStart(
+      16,
+      "0",
+    );
+
     const value = {
       key: "global" as const,
+      refreshRunId,
+      refreshHeartbeatAt: now,
+      refreshPhase: "stats" as const,
+      rankingCursor: undefined,
       isUpdating: true,
       nextExpectedAt: now + 6 * 60 * 60 * 1000,
       traitsReady: false,
@@ -685,16 +699,19 @@ export const start = internalMutation({
       await ctx.db.insert("pvpStatsStatus", value);
     }
 
-    await ctx.scheduler.runAfter(0, internal.pvpStats.processStats, {});
+    await ctx.scheduler.runAfter(0, internal.pvpStats.processStats, {
+      refreshRunId,
+    });
   },
 });
 
 export const processStatsBatch = internalMutation({
   args: {
     students: v.array(studentMetadataValidator),
+    refreshRunId: v.optional(v.string()),
     aggregateCursor: v.optional(v.string()),
   },
-  handler: async (ctx, { students, aggregateCursor }) => {
+  handler: async (ctx, { students, aggregateCursor, refreshRunId }) => {
     const metadata = new Map(
       students.map((student) => [student.studentId, student]),
     );
@@ -703,6 +720,16 @@ export const processStatsBatch = internalMutation({
       .query("pvpStatsStatus")
       .withIndex("by_key", (q) => q.eq("key", "global"))
       .unique();
+
+    if (
+      !refreshRunId ||
+      status?.refreshRunId !== refreshRunId ||
+      status.refreshPhase !== "stats"
+    ) {
+      return { hasMore: false, aggregateCursor: undefined };
+    }
+
+    await ctx.db.patch(status._id, { refreshHeartbeatAt: Date.now() });
 
     if (students.length > 0 && !status?.traitsReady) {
       const page = await ctx.db
@@ -769,23 +796,17 @@ export const processStatsBatch = internalMutation({
       return { hasMore: true, aggregateCursor: undefined };
     }
 
-    if (status) {
-      const update: Record<string, unknown> = {
-        isUpdating: false,
-        lastCompletedAt: Date.now(),
-      };
+    await ctx.db.patch(status._id, {
+      refreshPhase: "rankings",
+      rankingCursor: undefined,
+      ...(students.length > 0
+        ? { traitsReady: true, traitsUpdatedAt: Date.now() }
+        : {}),
+    });
 
-      if (students.length > 0) {
-        update.traitsReady = true;
-        update.traitsUpdatedAt = Date.now();
-      }
-
-      await ctx.db.patch(status._id, update);
-
-      console.info("[pvpStats] refresh completed", {
-        remainingBacklog: 0,
-      });
-    }
+    await ctx.scheduler.runAfter(0, internal.pvpStats.processRankingBatch, {
+      refreshRunId,
+    });
 
     return { hasMore: false, aggregateCursor: undefined };
   },
@@ -794,9 +815,13 @@ export const processStatsBatch = internalMutation({
 export const processStats = internalAction({
   args: {
     students: v.optional(v.array(studentMetadataValidator)),
+    refreshRunId: v.optional(v.string()),
     aggregateCursor: v.optional(v.string()),
   },
-  handler: async (ctx, { students: providedStudents, aggregateCursor }) => {
+  handler: async (
+    ctx,
+    { students: providedStudents, aggregateCursor, refreshRunId },
+  ) => {
     let students = providedStudents;
 
     if (!students) {
@@ -848,12 +873,14 @@ export const processStats = internalAction({
     const result = await ctx.runMutation(internal.pvpStats.processStatsBatch, {
       students,
       aggregateCursor,
+      refreshRunId,
     });
 
     if (result.hasMore) {
       await ctx.scheduler.runAfter(0, internal.pvpStats.processStats, {
         students,
         aggregateCursor: result.aggregateCursor,
+        refreshRunId,
       });
     }
   },
@@ -1106,5 +1133,272 @@ export const getSummary = query({
       .unique();
 
     return summary ?? (await getAggregateSummary(ctx, seasonNumber));
+  },
+});
+
+export const processRankingBatch = internalMutation({
+  args: { refreshRunId: v.string(), cursor: v.optional(v.string()) },
+  handler: async (ctx, { refreshRunId, cursor }) => {
+    const status = await ctx.db
+      .query("pvpStatsStatus")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .unique();
+
+    if (
+      !status ||
+      status.refreshRunId !== refreshRunId ||
+      status.refreshPhase !== "rankings" ||
+      status.rankingCursor !== cursor
+    ) {
+      return;
+    }
+
+    const page = await ctx.db
+      .query("pvpStatsAggregate")
+      .paginate({ numItems: 50, cursor: cursor ?? null });
+
+    const totals = new Map<
+      string,
+      {
+        seasonNumber: Doc<"pvpStatsAggregate">["seasonNumber"];
+        role: "attack" | "defense";
+        formationKey: string;
+        team: Array<{ studentId?: string }>;
+        wins: number;
+        total: number;
+      }
+    >();
+
+    for (const aggregate of page.page) {
+      for (const role of ["attack", "defense"] as const) {
+        const identity = rankingIdentity(getStoredTeam(aggregate, role));
+        const key = `${aggregate.seasonNumber}:${role}:${identity.formationKey}`;
+
+        const wins =
+          role === "attack" ? aggregate.wins : aggregate.total - aggregate.wins;
+        const previous = totals.get(key);
+
+        totals.set(key, {
+          ...identity,
+          seasonNumber: aggregate.seasonNumber,
+          role,
+          wins: (previous?.wins ?? 0) + wins,
+          total: (previous?.total ?? 0) + aggregate.total,
+        });
+      }
+    }
+
+    for (const value of totals.values()) {
+      const existing = await ctx.db
+        .query("pvpStatsFormation")
+        .withIndex("by_identity", (q) =>
+          q
+            .eq("snapshot", refreshRunId)
+            .eq("seasonNumber", value.seasonNumber)
+            .eq("role", value.role)
+            .eq("formationKey", value.formationKey),
+        )
+        .unique();
+
+      const wins = (existing?.wins ?? 0) + value.wins;
+      const total = (existing?.total ?? 0) + value.total;
+      const interval = wilsonInterval(wins, total);
+
+      const next = {
+        ...value,
+        snapshot: refreshRunId,
+        wins,
+        total,
+        s1StudentId: value.team[0]?.studentId,
+        s2StudentId: value.team[1]?.studentId,
+        s3StudentId: value.team[2]?.studentId,
+        s4StudentId: value.team[3]?.studentId,
+        s5StudentId: value.team[4]?.studentId,
+        s6StudentId: value.team[5]?.studentId,
+        successRate: total > 0 ? wins / total : 0,
+        confidenceScore: interval.lower,
+        confidenceUpper: interval.upper,
+      };
+
+      if (existing) {
+        await ctx.db.patch(existing._id, next);
+      } else {
+        await ctx.db.insert("pvpStatsFormation", next);
+      }
+    }
+
+    if (!page.isDone) {
+      await ctx.db.patch(status._id, {
+        rankingCursor: page.continueCursor,
+        refreshHeartbeatAt: Date.now(),
+      });
+
+      await ctx.scheduler.runAfter(0, internal.pvpStats.processRankingBatch, {
+        refreshRunId,
+        cursor: page.continueCursor,
+      });
+
+      return;
+    }
+
+    await ctx.db.patch(status._id, {
+      rankingsSnapshot: refreshRunId,
+      rankingCursor: undefined,
+      refreshPhase: undefined,
+      isUpdating: false,
+      lastCompletedAt: Date.now(),
+      refreshHeartbeatAt: Date.now(),
+    });
+
+    await ctx.scheduler.runAfter(
+      0,
+      internal.pvpStats.cleanupRankingSnapshots,
+      {},
+    );
+  },
+});
+
+export const cleanupRankingSnapshots = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const status = await ctx.db
+      .query("pvpStatsStatus")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .unique();
+
+    const publishedSnapshot = status?.rankingsSnapshot;
+    if (!publishedSnapshot) {
+      return;
+    }
+
+    const oldest = await ctx.db
+      .query("pvpStatsFormation")
+      .withIndex("by_snapshot", (q) => q.lt("snapshot", publishedSnapshot))
+      .first();
+
+    if (!oldest || oldest.snapshot === status.refreshRunId) {
+      return;
+    }
+
+    const rows = await ctx.db
+      .query("pvpStatsFormation")
+      .withIndex("by_snapshot", (q) => q.eq("snapshot", oldest.snapshot))
+      .take(100);
+
+    for (const row of rows) {
+      await ctx.db.delete(row._id);
+    }
+
+    await ctx.scheduler.runAfter(
+      0,
+      internal.pvpStats.cleanupRankingSnapshots,
+      {},
+    );
+  },
+});
+
+export const getRankingsSnapshot = query({
+  args: {},
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx) => {
+    const status = await ctx.db
+      .query("pvpStatsStatus")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .unique();
+
+    return status?.rankingsSnapshot ?? null;
+  },
+});
+
+export const listEffectiveTeams = query({
+  args: {
+    snapshot: v.string(),
+    seasonNumber: seasonNumberValidator,
+    role: v.union(v.literal("attack"), v.literal("defense")),
+    excludedStudentIds: v.array(v.string()),
+    minimumBattles: v.number(),
+    sort: v.union(
+      v.literal("confidence"),
+      v.literal("winRateDesc"),
+      v.literal("winRateAsc"),
+      v.literal("battles"),
+    ),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    if (!Number.isSafeInteger(args.minimumBattles) || args.minimumBattles < 1) {
+      throw new Error("Minimum battles must be a positive integer.");
+    }
+
+    const status = await ctx.db
+      .query("pvpStatsStatus")
+      .withIndex("by_key", (q) => q.eq("key", "global"))
+      .unique();
+
+    if (args.snapshot !== status?.rankingsSnapshot) {
+      return { page: [], isDone: true, continueCursor: "" };
+    }
+
+    const index =
+      args.sort === "confidence"
+        ? "by_confidence"
+        : args.sort === "battles"
+          ? "by_total"
+          : "by_rate";
+
+    const excluded = [...new Set(args.excludedStudentIds.filter(Boolean))];
+
+    const page = await ctx.db
+      .query("pvpStatsFormation")
+      .withIndex(index, (q) =>
+        q
+          .eq("snapshot", args.snapshot)
+          .eq("seasonNumber", args.seasonNumber)
+          .eq("role", args.role),
+      )
+      .order(args.sort === "winRateAsc" ? "asc" : "desc")
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("total"), args.minimumBattles),
+          ...excluded.map((id) =>
+            q.not(
+              q.or(
+                ...(
+                  [
+                    "s1StudentId",
+                    "s2StudentId",
+                    "s3StudentId",
+                    "s4StudentId",
+                    "s5StudentId",
+                    "s6StudentId",
+                  ] as const
+                ).map((field) => q.eq(q.field(field), id)),
+              ),
+            ),
+          ),
+        ),
+      )
+      .paginate({
+        ...args.paginationOpts,
+        numItems: Math.min(args.paginationOpts.numItems, 20),
+        maximumRowsRead: Math.min(
+          args.paginationOpts.maximumRowsRead ?? 500,
+          500,
+        ),
+      });
+
+    return {
+      ...page,
+      page: page.page.map((team) => ({
+        formationKey: team.formationKey,
+        team: team.team,
+        wins: team.wins,
+        losses: team.total - team.wins,
+        total: team.total,
+        successRate: team.successRate,
+        confidenceScore: team.confidenceScore,
+        confidenceUpper: team.confidenceUpper,
+      })),
+    };
   },
 });

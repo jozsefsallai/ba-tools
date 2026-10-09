@@ -1,5 +1,6 @@
 "use client";
 
+import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,7 @@ export function PVPFormationPresetsPage({
   const { studentMap } = useStudents();
 
   const presets = useQuery(api.pvp.listFormationPresets, { seasonId });
-  const seasonResult = useQuery(api.pvp.getSeasonDefaults, { seasonId });
+  const seasonResult = usePVPSeasonDefaults();
   const remove = useMutation(api.pvp.deleteFormationPreset);
 
   const [filter, setFilter] = useState<PVPFormationPresetType>("both");

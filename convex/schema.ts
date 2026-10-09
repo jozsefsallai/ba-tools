@@ -620,6 +620,48 @@ export default defineSchema({
       "total",
     ]),
 
+  pvpStatsFormation: defineTable({
+    snapshot: v.string(),
+    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
+    role: v.union(v.literal("attack"), v.literal("defense")),
+    formationKey: v.string(),
+    team: v.array(v.object({ studentId: v.optional(v.string()) })),
+    s1StudentId: v.optional(v.string()),
+    s2StudentId: v.optional(v.string()),
+    s3StudentId: v.optional(v.string()),
+    s4StudentId: v.optional(v.string()),
+    s5StudentId: v.optional(v.string()),
+    s6StudentId: v.optional(v.string()),
+    wins: v.number(),
+    total: v.number(),
+    successRate: v.number(),
+    confidenceScore: v.number(),
+    confidenceUpper: v.number(),
+  })
+    .index("by_snapshot", ["snapshot"])
+    .index("by_identity", ["snapshot", "seasonNumber", "role", "formationKey"])
+    .index("by_confidence", [
+      "snapshot",
+      "seasonNumber",
+      "role",
+      "confidenceScore",
+      "formationKey",
+    ])
+    .index("by_rate", [
+      "snapshot",
+      "seasonNumber",
+      "role",
+      "successRate",
+      "formationKey",
+    ])
+    .index("by_total", [
+      "snapshot",
+      "seasonNumber",
+      "role",
+      "total",
+      "formationKey",
+    ]),
+
   pvpStatsSummary: defineTable({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
     totalMatches: v.number(),
@@ -633,6 +675,13 @@ export default defineSchema({
     isUpdating: v.boolean(),
     traitsReady: v.optional(v.boolean()),
     traitsUpdatedAt: v.optional(v.number()),
+    refreshRunId: v.optional(v.string()),
+    refreshHeartbeatAt: v.optional(v.number()),
+    refreshPhase: v.optional(
+      v.union(v.literal("stats"), v.literal("rankings")),
+    ),
+    rankingCursor: v.optional(v.string()),
+    rankingsSnapshot: v.optional(v.string()),
   }).index("by_key", ["key"]),
 
   pvpStatsRebuild: defineTable({

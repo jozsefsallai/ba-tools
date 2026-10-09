@@ -57,7 +57,7 @@
         "railroadPuzzleSolver": "Railroad Puzzle Solver",
         "raidScore": "Raid Score Calculator",
         "studentExp": "Student EXP Calculator",
-        "pvp": "PVP Tracker",
+        "pvp": "PVP Tools",
         "pvpSearch": "PVP Counter Search"
       },
       "misc": {
@@ -397,6 +397,10 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+
+  "breadcrumbs": {
+    "ancestorMenu": "Show parent pages"
   },
 
   "import": "Import",

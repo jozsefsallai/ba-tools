@@ -1,11 +1,12 @@
 "use client";
 
 import { PVPView } from "@/app/[locale]/pvp/_components/pvp-view";
+import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 import { Link } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { ArchiveIcon, SwordsIcon } from "lucide-react";
+import { ArchiveIcon, ChartNoAxesCombinedIcon, SwordsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { api } from "~convex/api";
@@ -26,8 +27,55 @@ export function PVPPageClient() {
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-xl font-bold">{t("tools.pvp.title")}</h1>
+        <h1 className="text-xl font-bold">{t("tools.pvp.title")}</h1>
+
+        <p>{t("tools.pvp.description")}</p>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Link className="block" href="/pvp/search">
+            <div className="relative flex h-full items-start space-x-4 rounded-md border p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <SwordsIcon className="size-10 shrink-0 text-indigo-300" />
+
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {t("tools.pvp.stats.openSearch")}
+                </h3>
+
+                <p className="text-sm text-muted-foreground">
+                  {t("tools.pvp.stats.description")}
+                </p>
+              </div>
+            </div>
+          </Link>
+
+          <Link className="block" href="/pvp/most-effective-teams">
+            <div className="relative flex h-full items-start gap-4 rounded-md border p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <ChartNoAxesCombinedIcon className="size-10 shrink-0 text-primary" />
+
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {t("tools.pvp.rankings.title")}
+                </h3>
+
+                <p className="text-sm text-muted-foreground">
+                  {t("tools.pvp.rankings.description")}
+                </p>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </div>
+
+      <Separator />
+
+      <section
+        className="flex flex-col gap-4"
+        aria-labelledby="pvp-tracker-heading"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 id="pvp-tracker-heading" className="text-lg font-semibold">
+            {t("tools.pvp.trackerTitle")}
+          </h2>
 
           {isLoaded && isSignedIn && (
             <Toggle
@@ -45,30 +93,15 @@ export function PVPPageClient() {
           )}
         </div>
 
-        <p>{t("tools.pvp.description")}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("tools.pvp.trackerDescription")}
+        </p>
 
-        <div>
-          <Link className="block max-w-2xl" href="/pvp/search">
-            <div className="relative flex h-full items-start space-x-4 rounded-md border p-4 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              <SwordsIcon className="size-10 shrink-0 text-indigo-300" />
-              <div>
-                <h3 className="text-lg font-semibold">
-                  {t("tools.pvp.stats.openSearch")}
-                </h3>
-
-                <p className="text-sm text-muted-foreground">
-                  {t("tools.pvp.stats.description")}
-                </p>
-              </div>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      <PVPView
-        onShowArchivedChange={setShowArchived}
-        showArchived={showArchived}
-      />
+        <PVPView
+          onShowArchivedChange={setShowArchived}
+          showArchived={showArchived}
+        />
+      </section>
     </div>
   );
 }
