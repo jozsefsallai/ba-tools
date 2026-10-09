@@ -77,6 +77,8 @@ export function PVPMatchFormationEditorItem({
   const icon = (
     <Button
       id={triggerId}
+      data-pvp-formation-card=""
+      data-pvp-formation-index={index}
       ref={setActivatorNodeRef}
       {...attributes}
       {...listeners}

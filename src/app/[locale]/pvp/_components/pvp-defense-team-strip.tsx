@@ -42,6 +42,9 @@ export function PVPDefenseTeamStrip({
     <PVPFormationEditorStrip
       formation={formation}
       onMove={onMove}
+      onClear={(index) =>
+        onUpdate(index, { student: undefined, counter: undefined })
+      }
       renderItem={(item, index, id, triggerId) => (
         <PVPDefenseTeamStripItem
           id={id}
@@ -121,6 +124,8 @@ function PVPDefenseTeamStripItem({
   const card = (
     <Button
       id={triggerId}
+      data-pvp-formation-card=""
+      data-pvp-formation-index={index}
       ref={setActivatorNodeRef}
       type="button"
       variant="ghost"

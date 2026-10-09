@@ -25,6 +25,17 @@ export function PVPMatchFormationEditor({
     <PVPFormationEditorStrip
       formation={formation}
       onMove={onMove}
+      onClear={(index) =>
+        onUpdate(index, {
+          student: undefined,
+          level: undefined,
+          starLevel: undefined,
+          ueLevel: undefined,
+          damage: undefined,
+          report: undefined,
+          counter: undefined,
+        })
+      }
       renderItem={(item, index, id, triggerId) => (
         <PVPMatchFormationEditorItem
           id={id}
