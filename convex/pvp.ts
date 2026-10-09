@@ -9,6 +9,8 @@ import {
 import { stream } from "convex-helpers/server/stream";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import type { Id } from "~convex/dataModel";
+import type { QueryCtx } from "~convex/server";
 import {
   authenticatedMutation,
   authenticatedQuery,
@@ -25,6 +27,29 @@ import {
 import schema, { pvpFormationStudentItem } from "./schema";
 
 const emptyTeam = () => [{}, {}, {}, {}, {}, {}];
+
+async function findEnemyPresetByName(
+  ctx: QueryCtx,
+  seasonId: Id<"pvpSeason">,
+  name: string,
+  opponentStudentRepId?: string,
+) {
+  const presets = await ctx.db
+    .query("pvpEnemyPreset")
+    .withIndex("by_seasonId_opponentName", (q) =>
+      q.eq("seasonId", seasonId).eq("opponentName", name.trim()),
+    )
+    .order("asc")
+    .collect();
+
+  return (
+    presets.find(
+      (preset) =>
+        opponentStudentRepId === undefined ||
+        preset.opponentStudentRepId === opponentStudentRepId,
+    ) ?? null
+  );
+}
 
 async function updateEnemyPresetRecency(ctx: any, presetId: any) {
   const preset = await ctx.db.get(presetId);
@@ -608,20 +633,11 @@ export const getEnemyPresetByName = authenticatedQuery({
   handler: async (ctx, { seasonId, name, opponentStudentRepId }) => {
     await getSeasonForUser(ctx, seasonId);
 
-    const presets = await ctx.db
-      .query("pvpEnemyPreset")
-      .withIndex("by_seasonId_opponentName", (q) =>
-        q.eq("seasonId", seasonId).eq("opponentName", name),
-      )
-      .order("asc")
-      .collect();
-
-    return (
-      presets.find(
-        (preset) =>
-          opponentStudentRepId === undefined ||
-          preset.opponentStudentRepId === opponentStudentRepId,
-      ) ?? null
+    return await findEnemyPresetByName(
+      ctx,
+      seasonId,
+      name,
+      opponentStudentRepId,
     );
   },
 });
@@ -675,6 +691,7 @@ export const recordMatch = authenticatedMutation({
     opponentName: v.optional(v.string()),
     opponentStudentRepId: v.optional(v.string()),
     enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
+    autoCreateEnemyPreset: v.optional(v.boolean()),
     opponentRank: v.optional(v.number()),
     matchType: v.union(v.literal("attack"), v.literal("defense")),
     ownTeam: v.array(pvpFormationStudentItem),
@@ -692,6 +709,7 @@ export const recordMatch = authenticatedMutation({
       opponentName,
       opponentStudentRepId,
       enemyPresetId,
+      autoCreateEnemyPreset,
       opponentRank,
       matchType,
       ownTeam,
@@ -711,14 +729,39 @@ export const recordMatch = authenticatedMutation({
 
     await validateEnemyPresetForMatch(ctx, enemyPresetId, seasonId);
 
+    const savedOpponentName = autoCreateEnemyPreset
+      ? opponentName?.trim() || undefined
+      : opponentName;
+
+    let savedEnemyPresetId = enemyPresetId;
+
+    if (autoCreateEnemyPreset && savedOpponentName && !savedEnemyPresetId) {
+      const preset = await findEnemyPresetByName(
+        ctx,
+        seasonId,
+        savedOpponentName,
+        opponentStudentRepId,
+      );
+
+      savedEnemyPresetId =
+        preset?._id ??
+        (await ctx.db.insert("pvpEnemyPreset", {
+          userId: ctx.user._id,
+          seasonId,
+          name: savedOpponentName,
+          opponentName: savedOpponentName,
+          opponentStudentRepId,
+        }));
+    }
+
     const matchId = await ctx.db.insert("pvpMatchRecord", {
       userId: ctx.user._id,
       seasonId,
       date,
       ownRank,
-      opponentName,
+      opponentName: savedOpponentName,
       opponentStudentRepId,
-      enemyPresetId,
+      enemyPresetId: savedEnemyPresetId,
       opponentRank,
       matchType,
       ownTeam,
@@ -732,8 +775,8 @@ export const recordMatch = authenticatedMutation({
 
     await queueMatchStats(ctx, await ctx.db.get(matchId));
 
-    if (enemyPresetId) {
-      await updateEnemyPresetRecency(ctx, enemyPresetId);
+    if (savedEnemyPresetId) {
+      await updateEnemyPresetRecency(ctx, savedEnemyPresetId);
     }
 
     return matchId;

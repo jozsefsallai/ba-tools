@@ -81,7 +81,7 @@ import type { Student } from "~prisma";
 
 export type PvpMatchValues = Omit<
   FunctionArgs<typeof api.pvp.recordMatch>,
-  "seasonId"
+  "seasonId" | "autoCreateEnemyPreset"
 >;
 
 export type PvpMatchReview = {
@@ -259,9 +259,12 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
         }
       : "skip",
   );
+  const resolvedEnemyPresetId =
+    enemyPresetId ?? (review ? matchingEnemyPreset?._id : undefined);
+
   const enemyTeams = useQuery(
     api.pvp.getEnemyPresetTeams,
-    enemyPresetId ? { presetId: enemyPresetId } : "skip",
+    resolvedEnemyPresetId ? { presetId: resolvedEnemyPresetId } : "skip",
   );
   const defaults = useQuery(api.pvp.getSeasonDefaults, { seasonId });
   const createFormationPreset = useMutation(api.pvp.createFormationPreset);
@@ -469,7 +472,8 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
   const attachedOpponentPreset =
     selectedEnemyPreset ??
-    enemyPresets.find((preset) => preset._id === enemyPresetId);
+    enemyPresets.find((preset) => preset._id === enemyPresetId) ??
+    (review ? matchingEnemyPreset : undefined);
 
   const normalizedOpponentName = opponentName.trim().toLocaleLowerCase();
 
@@ -651,7 +655,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
       opponentStudentRepId: opponentStudentRep
         ? opponentStudentRep.id
         : undefined,
-      enemyPresetId,
+      enemyPresetId: resolvedEnemyPresetId,
       matchType,
       ownTeam: ownTeam.map((item) => ({
         studentId: item.student ? item.student.id : undefined,
@@ -1272,6 +1276,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
               presets={enemyPresets}
               placeholder={
                 selectedEnemyPreset?.name ??
+                (review ? matchingEnemyPreset?.name : undefined) ??
                 t("tools.pvp.presetPicker.attachEnemy")
               }
               className="w-1/2 min-w-44"
@@ -1443,7 +1448,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
             </div>
             <Separator />
 
-            {enemyPresetId && enemyTeams && enemyTeams.teams.length > 0 && (
+            {enemyTeams && enemyTeams.teams.length > 0 && (
               <Select
                 onValueChange={(value) => {
                   const selected = (enemyTeams.teams as PVPEnemyTeam[]).find(

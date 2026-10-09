@@ -53,7 +53,7 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { useConvex, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { format } from "date-fns";
 import {
   ChevronLeftIcon,
@@ -118,9 +118,7 @@ export function PvpScreenshotImport({
   const { preferences } = useUserPreferences();
 
   const season = useQueryWithStatus(api.pvp.getSeason, { seasonId });
-  const convex = useConvex();
   const recordMatch = useMutation(api.pvp.recordMatch);
-  const createEnemyPreset = useMutation(api.pvp.createEnemyPreset);
 
   const [screenshots, setScreenshots] = useState<Screenshot[]>([]);
   const [selectionErrors, setSelectionErrors] = useState<string[]>([]);
@@ -402,7 +400,6 @@ export function PvpScreenshotImport({
 
     const batchStudents = students;
     const batchStudentMap = studentMap;
-    const presetIds = new Map<string, Id<"pvpEnemyPreset">>();
 
     setBatchDate(selectedDate);
     setRunning(true);
@@ -525,44 +522,7 @@ export function PvpScreenshotImport({
 
             update(index, { stage: "saving" });
 
-            const name = batchAssistedMode
-              ? values.opponentName?.trim() || undefined
-              : values.opponentName;
-
-            const presetKey = JSON.stringify([
-              name,
-              values.opponentStudentRepId,
-            ]);
-
-            let enemyPresetId = values.enemyPresetId;
-
-            if (name && !enemyPresetId) {
-              if (!presetIds.has(presetKey)) {
-                const preset = await convex.query(
-                  api.pvp.getEnemyPresetByName,
-                  {
-                    seasonId,
-                    name,
-                    opponentStudentRepId: values.opponentStudentRepId,
-                  },
-                );
-
-                signal.throwIfAborted();
-                const presetId =
-                  preset?._id ??
-                  (await createEnemyPreset({
-                    seasonId,
-                    name,
-                    opponentName: name,
-                    opponentStudentRepId: values.opponentStudentRepId,
-                  }));
-                presetIds.set(presetKey, presetId);
-              }
-
-              enemyPresetId = presetIds.get(presetKey);
-            }
-
-            signal.throwIfAborted();
+            const name = values.opponentName?.trim() || undefined;
 
             const matchId = await recordMatch({
               ...values,
@@ -570,7 +530,7 @@ export function PvpScreenshotImport({
               date: selectedDate.getTime(),
               includeInStatistics: batchIncludeInStatistics,
               opponentName: name,
-              enemyPresetId,
+              autoCreateEnemyPreset: true,
             });
 
             update(index, { matchId });
