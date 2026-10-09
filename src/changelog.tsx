@@ -45,6 +45,28 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 9, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added Most Effective Teams to PVP tools.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Consolidated all PVP tools into one page.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Fixed opponents not getting selected in bulk screenshot import.",
+      },
+    ],
+  },
+  {
     date: "October 8, 2026",
     features: [
       {
