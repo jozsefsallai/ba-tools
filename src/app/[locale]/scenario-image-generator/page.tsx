@@ -1,19 +1,12 @@
 import { ScenarioEditorView } from "@/app/[locale]/scenario-image-generator/_components/scenario-editor-view";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { HelpCircleIcon } from "lucide-react";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.scenarioImageGenerator.title")} - ${t("common.appName")}`,
-    description: t("tools.scenarioImageGenerator.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("scenario-image-generator", await getLocale());
 }
 
 export default async function ScenarioImageGeneratorPage() {

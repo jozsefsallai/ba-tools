@@ -1,16 +1,9 @@
 import FlappyPeroroGameContainer from "@/app/[locale]/games/flappy-peroro/_components/game-container";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("static.flappyPeroro.title")} - ${t("common.appName")}`,
-    description: t("static.flappyPeroro.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("games-flappy-peroro", await getLocale());
 }
 
 export default async function FlappyPeroroPage() {

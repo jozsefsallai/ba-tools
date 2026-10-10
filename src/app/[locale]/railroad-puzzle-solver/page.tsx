@@ -1,19 +1,12 @@
 import { RailroadPuzzleView } from "@/app/[locale]/railroad-puzzle-solver/_components/railroad-puzzle-view";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { HelpCircleIcon } from "lucide-react";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.railroad.title")} - ${t("common.appName")}`,
-    description: t("tools.railroad.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("railroad-puzzle-solver", await getLocale());
 }
 
 export default async function RailroadPuzzleSolverPage() {

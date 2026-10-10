@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 
 const CONTENT = `The sound of the clock counting down grows even louder.
 Hearing its powerful ticking makes my body ache.
@@ -26,10 +27,9 @@ Deneb.
 Altair.
 Vega.`;
 
-export const metadata: Metadata = {
-  title: "1  3  7",
-  description: "/ / /",
-};
+export async function generateMetadata() {
+  return getCardMetadata("home", await getLocale());
+}
 
 export default function Page() {
   return (

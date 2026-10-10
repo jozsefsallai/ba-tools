@@ -1,14 +1,10 @@
 import { RaidScoreCalculator } from "@/app/[locale]/raid-score-calculator/_components/calculator";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Raid Score Calculator - Joe's Blue Archive Tools",
-  description: "Convert between clear time and raid score.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("raid-score-calculator", await getLocale());
+}
 
 export default async function RaidScoreCalculatorPage() {
   const t = await getTranslations();

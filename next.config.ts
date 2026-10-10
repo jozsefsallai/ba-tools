@@ -26,6 +26,22 @@ if (!IMAGE_CDN_URL) {
 const url = new URL(IMAGE_CDN_URL);
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/api/og/**/*": [
+      "./public/assets/fonts/**/*",
+      "./src/app/_fonts/**/*",
+      "./src/assets/plana-icon.png",
+      "./src/assets/images/plana.png",
+      "./src/assets/og-icons/*.svg",
+    ],
+
+    "/*/rosters/*/*/opengraph-image": [
+      "./public/assets/fonts/**/*",
+      "./src/app/_fonts/**/*",
+      "./src/assets/**/*",
+    ],
+  },
+
   experimental: {
     serverActions: {
       bodySizeLimit: "4mb",

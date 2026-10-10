@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { headers } from "next/headers";
 
 import { Plana } from "@/components/plana";
@@ -11,17 +11,13 @@ import { CHANGELOG } from "@/changelog";
 import { ChangelogItem } from "@/components/common/changelog-item";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import checkMobile from "ismobilejs";
-import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import checkMobile from "ismobilejs";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Joe's Blue Archive Tools",
-  description: "Various tools and utilities for Blue Archive",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("home", await getLocale());
+}
 
 export default async function Home() {
   const headerStore = await headers();

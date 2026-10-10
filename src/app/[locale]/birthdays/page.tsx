@@ -1,20 +1,13 @@
 import {
-  BirthdaysView,
   type BirthdayGiftPreference,
+  BirthdaysView,
 } from "@/app/[locale]/birthdays/_components/birthdays-view";
 import { db } from "@/lib/db";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.birthdays.title")} - ${t("common.appName")}`,
-    description: t("tools.birthdays.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("birthdays", await getLocale());
 }
 
 export default async function BirthdaysPage() {
@@ -35,13 +28,31 @@ export default async function BirthdaysPage() {
     select: {
       id: true,
       giftsAdored: {
-        select: { id: true, iconName: true, name: true, nameJP: true, rarity: true },
+        select: {
+          id: true,
+          iconName: true,
+          name: true,
+          nameJP: true,
+          rarity: true,
+        },
       },
       giftsLoved: {
-        select: { id: true, iconName: true, name: true, nameJP: true, rarity: true },
+        select: {
+          id: true,
+          iconName: true,
+          name: true,
+          nameJP: true,
+          rarity: true,
+        },
       },
       giftsLiked: {
-        select: { id: true, iconName: true, name: true, nameJP: true, rarity: true },
+        select: {
+          id: true,
+          iconName: true,
+          name: true,
+          nameJP: true,
+          rarity: true,
+        },
       },
     },
   });

@@ -1,10 +1,11 @@
+import { SITE_ORIGIN, getCardMetadata } from "@/lib/og-metadata.server";
 import type { Metadata } from "next";
-import { Outfit, Sono, Noto_Sans, Noto_Sans_JP } from "next/font/google";
-import localFont from "next/font/local";
-import { notFound } from "next/navigation";
-import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { NavigationGuardProvider } from "next-navigation-guard";
+import { Noto_Sans, Noto_Sans_JP, Outfit, Sono } from "next/font/google";
+import localFont from "next/font/local";
+import { notFound } from "next/navigation";
 import NextTopLoader from "nextjs-toploader";
 
 import { AppShell } from "@/components/common/app-shell";
@@ -59,16 +60,20 @@ const nexonFootballGothic = localFont({
   variable: "--font-nexon-football-gothic",
 });
 
-export const metadata: Metadata = {
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "BA Tools",
-  },
-  icons: {
-    apple: "/apple-touch-icon.png",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    ...(await getCardMetadata("home", await getLocale())),
+    metadataBase: new URL(SITE_ORIGIN),
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "BA Tools",
+    },
+    icons: {
+      apple: "/apple-touch-icon.png",
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

@@ -2,19 +2,11 @@ import { AdminBannersView } from "@/app/[locale]/admin/banners/_components/admin
 import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { db } from "@/lib/db";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.admin.banners.title")} - ${t("common.appName")}`,
-    description: t("tools.admin.banners.description"),
-    robots: {
-      index: false,
-      follow: false,
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("admin-banners", await getLocale());
 }
 
 export const dynamic = "force-dynamic";

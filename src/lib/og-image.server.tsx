@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { buildCDNAbsoluteUrl } from "@/lib/url";
 import { Resvg } from "@resvg/resvg-js";
 import type { ReactNode } from "react";
 import type { Font } from "satori";
@@ -14,18 +13,19 @@ let notoSansFontsPromise: Promise<Font[]> | undefined;
 export function loadNotoSansFonts(): Promise<Font[]> {
   if (!notoSansFontsPromise) {
     notoSansFontsPromise = (async () => {
-      const notoSansPath = buildCDNAbsoluteUrl(
-        "v2/fonts/noto-sans/NotoSans-Regular.ttf",
+      const notoSans = fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "public/assets/fonts/noto-sans/NotoSans-Regular.ttf",
+        ),
       );
 
-      const notoSansSemiboldPath = buildCDNAbsoluteUrl(
-        "v2/fonts/noto-sans/NotoSans-SemiBold.ttf",
+      const notoSansSemibold = fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "public/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
+        ),
       );
-
-      const [notoSans, notoSansSemibold] = await Promise.all([
-        fetch(notoSansPath).then((res) => res.arrayBuffer()),
-        fetch(notoSansSemiboldPath).then((res) => res.arrayBuffer()),
-      ]);
 
       return [
         {
@@ -50,7 +50,9 @@ export function loadNotoSansFonts(): Promise<Font[]> {
   });
 }
 
-export async function loadOgImageFonts(): Promise<Font[]> {
+let ogFontsPromise: Promise<Font[]> | undefined;
+
+async function readOgImageFonts(): Promise<Font[]> {
   const fonts = [...(await loadNotoSansFonts())];
 
   const nexonPath = path.join(
@@ -73,7 +75,30 @@ export async function loadOgImageFonts(): Promise<Font[]> {
     style: "italic",
   });
 
+  fonts.push({
+    name: "Japanese",
+    data: fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "public/assets/fonts/shinmgoupr/U-OTF-ShinMGoUpr-Medium.otf",
+      ),
+    ),
+    weight: 400,
+    style: "normal",
+  });
+
+  fonts.push({ ...fonts[fonts.length - 1], weight: 700 });
+
   return fonts;
+}
+
+export function loadOgImageFonts(): Promise<Font[]> {
+  ogFontsPromise ??= readOgImageFonts();
+
+  return ogFontsPromise.catch((error) => {
+    ogFontsPromise = undefined;
+    throw error;
+  });
 }
 
 function generatePng(svgData: string, width: number) {

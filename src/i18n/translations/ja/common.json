@@ -380,5 +380,89 @@
   "searchPlaceholder": "検索...",
   "loadMore": "もっと見る",
   "loadingMore": "読み込み中...",
-  "noResults": "結果が見つかりませんでした。"
+  "noResults": "結果が見つかりませんでした。",
+  "sharing": {
+    "cards": {
+      "home": {
+        "title": "ブルーアーカイブ ツール",
+        "description": "ブルーアーカイブの計算、編成、タイムライン作成に役立つツール。"
+      },
+      "bond": {
+        "title": "絆ランク計算機",
+        "description": "贈り物による生徒の絆ランク上昇を計算。"
+      },
+      "changelog": {
+        "title": "更新履歴",
+        "description": "新機能、改善、修正の履歴。"
+      },
+      "credits": {
+        "description": "ブルーアーカイブの便利なツール。"
+      },
+      "gacha-rate-stats": {
+        "title": "ガチャ確率統計",
+        "description": "ブルーアーカイブの募集結果を集計。"
+      },
+      "global-banners": {
+        "description": "日本版のスケジュールをもとに、グローバル版の今後の募集と開催予想日を確認。"
+      },
+      "plana": {
+        "title": "プラナのお部屋",
+        "description": "プラナを眺めて、なでなで。"
+      },
+      "plana-ai-chatId": {
+        "title": "プラナ AI",
+        "description": "プラナとチャット。"
+      },
+      "pvp-seasonId-presets-opponents-presetId-history": {
+        "description": "ブルーアーカイブの便利なツール。"
+      },
+      "pvp-icon-debug": {
+        "title": "PvP 生徒アイコン確認",
+        "description": "生徒アイコンを確認。"
+      },
+      "pvp-screenshot-debug": {
+        "title": "PvP スクリーンショット確認",
+        "description": "スクリーンショット認識を確認。"
+      },
+      "raid-score-calculator": {
+        "title": "レイドスコア計算機",
+        "description": "クリア時間とレイドスコアを相互に計算。"
+      },
+      "railroad-puzzle-solver": {
+        "description": "ハイランダーイベントのミニゲームで、最適な鉄道ルートを探して線路の配置を確認。"
+      },
+      "student-exp-calculator": {
+        "title": "生徒経験値計算機",
+        "description": "レベルアップに必要なレポートと経験値を計算。"
+      },
+      "timeline-visualizer": {
+        "description": "EXスキルのローテーションを作成。"
+      },
+      "title-generator": {
+        "title": "称号ジェネレーター",
+        "description": "ゲーム風の称号画像を作成。"
+      },
+      "user-timelines": {
+        "title": "マイタイムライン",
+        "description": "保存したスキルローテーションを確認。"
+      },
+      "admin": {
+        "title": "管理",
+        "description": "ブルーアーカイブ ツールの管理。"
+      },
+      "user": {
+        "title": "マイツール",
+        "description": "保存した生徒一覧、編成、タイムライン、募集履歴。"
+      }
+    },
+    "title": "{title} - {appName}",
+    "roster": {
+      "namedTitle": "{name}の生徒一覧 / {friendCode} ({server})",
+      "unnamedTitle": "{friendCode} ({server})の生徒一覧",
+      "description": "{name}のブルーアーカイブの生徒一覧。",
+      "imageAlt": "助っ人生徒のプレビュー"
+    },
+    "timelineDescription": "共有されたEXスキルのローテーションを確認。",
+    "timelineGroupDescription": "共有されたEXスキルのタイムライン一覧を確認。"
+  }
 }

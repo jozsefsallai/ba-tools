@@ -1,17 +1,14 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-import { MainContent } from "./_components/main-content";
-import { Separator } from "@/components/ui/separator";
 import { StackContainer } from "@/app/[locale]/credits/_components/stack-container";
+import { Separator } from "@/components/ui/separator";
+import { MainContent } from "./_components/main-content";
 
 import { LicensesContent } from "@/app/[locale]/credits/_components/licenses-content";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("static.credits.title")} - ${t("common.appName")}`,
-  };
+export async function generateMetadata() {
+  return getCardMetadata("credits", await getLocale());
 }
 
 export default async function CreditsPage() {

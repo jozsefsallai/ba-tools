@@ -1,7 +1,10 @@
 import { PvpIconDebugger } from "@/app/[locale]/pvp/_components/pvp-icon-debugger";
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 
-export const metadata: Metadata = { title: "PVP student icon test runner" };
+export async function generateMetadata() {
+  return getCardMetadata("pvp-icon-debug", await getLocale());
+}
 
 export default function PvpIconDebugPage() {
   return <PvpIconDebugger />;

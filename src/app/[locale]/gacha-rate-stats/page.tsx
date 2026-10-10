@@ -1,14 +1,10 @@
 import { GachaRateStatsView } from "@/app/[locale]/gacha-rate-stats/_components/gacha-rate-stats-view";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Gacha Rate Stats - Joe's Blue Archive Tools",
-  description: "Display basic stats about a Blue Archive pulling session.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("gacha-rate-stats", await getLocale());
+}
 
 export default async function GachaRateStatsPage() {
   const t = await getTranslations();

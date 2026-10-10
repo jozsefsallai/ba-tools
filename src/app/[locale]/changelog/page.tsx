@@ -1,16 +1,13 @@
 import { CHANGELOG } from "@/changelog";
 import { ChangelogItem } from "@/components/common/changelog-item";
 import { Separator } from "@/components/ui/separator";
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 import { Fragment } from "react";
 
-export const metadata: Metadata = {
-  title: "Changelog - Joe's Blue Archive Tools",
-  description: "See the latest changes, features, and fixes for this website.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("changelog", await getLocale());
+}
 
 export default function ChangelogPage() {
   return (

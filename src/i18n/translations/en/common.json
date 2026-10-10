@@ -409,5 +409,89 @@
   "searchPlaceholder": "Search...",
   "loadMore": "Load More",
   "loadingMore": "Loading...",
-  "noResults": "No results found."
+  "noResults": "No results found.",
+  "sharing": {
+    "cards": {
+      "home": {
+        "title": "Joe's Blue Archive Tools",
+        "description": "Various tools and utilities for Blue Archive"
+      },
+      "bond": {
+        "title": "Relationship Rank Calculator",
+        "description": "Calculate the relationship rank of a student based on what gifts you give to them."
+      },
+      "changelog": {
+        "title": "Changelog",
+        "description": "See the latest changes, features, and fixes for this website."
+      },
+      "credits": {
+        "description": "Tools and utilities for Blue Archive."
+      },
+      "gacha-rate-stats": {
+        "title": "Gacha Rate Stats",
+        "description": "Display basic stats about a Blue Archive pulling session."
+      },
+      "global-banners": {
+        "description": "View upcoming Global banners and predicted dates based on the Japanese schedule."
+      },
+      "plana": {
+        "title": "Plana Headpat Room",
+        "description": "Stare at Plana and headpat her."
+      },
+      "plana-ai-chatId": {
+        "title": "Plana AI",
+        "description": "Chat with Plana."
+      },
+      "pvp-seasonId-presets-opponents-presetId-history": {
+        "description": "Tools and utilities for Blue Archive."
+      },
+      "pvp-icon-debug": {
+        "title": "PVP student icon test runner",
+        "description": "Tools and utilities for Blue Archive."
+      },
+      "pvp-screenshot-debug": {
+        "title": "PVP screenshot ROI debugger",
+        "description": "Tools and utilities for Blue Archive."
+      },
+      "raid-score-calculator": {
+        "title": "Raid Score Calculator",
+        "description": "Convert between clear time and raid score."
+      },
+      "railroad-puzzle-solver": {
+        "description": "Find the best railroad routes and visualize track placement for the Highlander event minigame."
+      },
+      "student-exp-calculator": {
+        "title": "Student EXP Calculator",
+        "description": "Calculate how many students you can level up with your Activity Reports."
+      },
+      "timeline-visualizer": {
+        "description": "Create a visual EX skill rotation timeline."
+      },
+      "title-generator": {
+        "title": "Title Generator",
+        "description": "Generate rendered user titles."
+      },
+      "user-timelines": {
+        "title": "My Timelines",
+        "description": "View your timelines saved in the cloud."
+      },
+      "admin": {
+        "title": "Administration",
+        "description": "Manage Blue Archive Tools."
+      },
+      "user": {
+        "title": "My tools",
+        "description": "Your saved rosters, formations, timelines, and recruitment history."
+      }
+    },
+    "title": "{title} - {appName}",
+    "roster": {
+      "namedTitle": "{name}'s Roster / {friendCode} ({server})",
+      "unnamedTitle": "{friendCode} ({server}) Roster",
+      "description": "View {name}'s Blue Archive roster.",
+      "imageAlt": "Featured roster borrowers"
+    },
+    "timelineDescription": "View this shared EX skill rotation timeline.",
+    "timelineGroupDescription": "View this shared collection of EX skill rotation timelines."
+  }
 }

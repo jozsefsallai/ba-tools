@@ -1,12 +1,13 @@
 import { PVPEnemyPresetHistoryPage } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-history-page";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
 
 export async function generateMetadata() {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.pvp.presets.battleHistory")} - ${t("common.appName")}`,
-  };
+  return getCardMetadata(
+    "pvp-seasonId-presets-opponents-presetId-history",
+    await getLocale(),
+  );
 }
 
 export default async function PVPEnemyPresetHistoryRoute({

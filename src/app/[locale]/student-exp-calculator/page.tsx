@@ -1,15 +1,10 @@
 import { StudentExpCalculator } from "@/app/[locale]/student-exp-calculator/_components/calculator";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Student EXP Calculator - Joe's Blue Archive Tools",
-  description:
-    "Calculate how many students you can level up with your Activity Reports.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("student-exp-calculator", await getLocale());
+}
 
 export default async function StudentExpCalculatorPage() {
   const t = await getTranslations();

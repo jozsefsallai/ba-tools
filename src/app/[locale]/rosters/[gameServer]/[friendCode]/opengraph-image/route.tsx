@@ -2,7 +2,8 @@ import { RosterOgImage } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/
 import { db } from "@/lib/db";
 import { isValidFriendCode } from "@/lib/friend-code";
 import { getOgAssetUrls } from "@/lib/og-assets.server";
-import { OG_HEIGHT, OG_WIDTH, makeOgImage } from "@/lib/og-image.server";
+import { makeOgImage } from "@/lib/og-image.server";
+import { fetchOgArtwork } from "@/lib/og/artwork.server";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import {
   BORROW_SLOT_GAMEMODES,
@@ -15,34 +16,34 @@ import {
 } from "@/lib/types";
 import { buildCDNAbsoluteUrl } from "@/lib/url";
 import { notFound } from "next/navigation";
+import removeMd from "remove-markdown";
 
 export const runtime = "nodejs";
 export const revalidate = 86_400;
 
-export const alt = "Roster preview";
-export const size = { width: OG_WIDTH, height: OG_HEIGHT };
-export const contentType = "image/png";
-
 type PageParams = {
-  gameServer: GameServer;
+  locale: string;
+  gameServer: string;
   friendCode: string;
 };
 
-export default async function Image({
-  params,
-}: {
-  params: Promise<PageParams>;
-}) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<PageParams> },
+) {
   const { gameServer, friendCode } = await params;
 
-  if (!GAME_SERVERS.includes(gameServer) || !isValidFriendCode(friendCode)) {
+  if (
+    !GAME_SERVERS.includes(gameServer as GameServer) ||
+    !isValidFriendCode(friendCode)
+  ) {
     notFound();
   }
 
   let roster: Awaited<ReturnType<typeof getCachedPublicRoster>>;
 
   try {
-    roster = await getCachedPublicRoster(gameServer, friendCode);
+    roster = await getCachedPublicRoster(gameServer as GameServer, friendCode);
   } catch {
     notFound();
   }
@@ -100,20 +101,39 @@ export default async function Image({
       )
     : undefined;
 
+  const [portrait, ...icons] = await Promise.all([
+    repPortraitUrl
+      ? fetchOgArtwork(repPortraitUrl)
+      : Promise.resolve(undefined),
+    ...featuredBorrowCategories.flatMap((category) =>
+      category.students.map((student) => fetchOgArtwork(student.iconUrl)),
+    ),
+  ]);
+
+  let iconIndex = 0;
+
+  for (const category of featuredBorrowCategories) {
+    for (const student of category.students) {
+      student.iconUrl = icons[iconIndex++] ?? getOgAssetUrls().charBg;
+    }
+  }
+
   const png = await makeOgImage(
     <RosterOgImage
       name={roster.name ?? roster.friendCode}
-      introduction={roster.introduction}
+      introduction={
+        roster.introduction ? removeMd(roster.introduction) : undefined
+      }
       friendCode={roster.friendCode}
       serverName={GAME_SERVER_NAMES[roster.gameServer]}
       accountLevel={roster.accountLevel}
-      repPortraitUrl={repPortraitUrl}
+      repPortraitUrl={portrait}
       featuredBorrowCategories={featuredBorrowCategories}
       assets={getOgAssetUrls()}
     />,
   );
 
-  return new Response(png.buffer as ArrayBuffer, {
+  return new Response(new Uint8Array(png), {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",

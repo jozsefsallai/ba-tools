@@ -1,12 +1,13 @@
 import { RosterView } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-view";
+import { redirect } from "@/i18n/navigation";
 import { isValidFriendCode } from "@/lib/friend-code";
-import { OG_HEIGHT, OG_WIDTH } from "@/lib/og-image.server";
+import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
+import { OG_DESIGN_VERSION } from "@/lib/og/registry";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import { truncateText } from "@/lib/text-utils";
 import { GAME_SERVERS, type GameServer } from "@/lib/types";
+import { getLocale, getTranslations } from "next-intl/server";
 import removeMd from "remove-markdown";
-import { redirect } from "@/i18n/navigation";
-import { getLocale } from "next-intl/server";
 
 export const revalidate = 86_400;
 
@@ -29,43 +30,53 @@ export async function generateMetadata({
   try {
     const roster = await getCachedPublicRoster(gameServer, friendCode);
 
-    const title = roster.name
-      ? `${roster.name}'s Roster / ${roster.friendCode} (${roster.gameServer}) - Joe's Blue Archive Tools`
-      : `${roster.friendCode} (${roster.gameServer}) Roster - Joe's Blue Archive Tools`;
+    if (roster.visibility !== "public") {
+      throw new Error("Roster not found");
+    }
 
-    const description = roster.introduction
-      ? truncateText(
-          removeMd(roster.introduction)
-            .split("\n")
-            .map((l) => l.trim())
-            .filter((l) => l.length > 0)
-            .join(" "),
-          160,
-        )
-      : `View ${roster.name ?? roster.friendCode}'s Blue Archive roster.`;
+    const locale = await getLocale();
+    const t = await getTranslations({ locale });
 
-    const ogImagePath = `/rosters/${gameServer}/${friendCode}/opengraph-image?v=${roster.lastUpdated}`;
+    const name = roster.name?.trim();
 
-    return {
+    const rosterTitle = name
+      ? t("common.sharing.roster.namedTitle", {
+          name,
+          friendCode: roster.friendCode,
+          server: roster.gameServer,
+        })
+      : t("common.sharing.roster.unnamedTitle", {
+          friendCode: roster.friendCode,
+          server: roster.gameServer,
+        });
+
+    const title = t("common.sharing.title", {
+      title: rosterTitle,
+      appName: t("common.appName"),
+    });
+
+    const description =
+      truncateText(
+        removeMd(roster.introduction ?? "")
+          .split("\n")
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0)
+          .join(" "),
+        160,
+      ) ||
+      t("common.sharing.roster.description", {
+        name: name || roster.friendCode,
+      });
+
+    const ogImagePath = `${localizedPath(`/rosters/${gameServer}/${friendCode}/opengraph-image`, locale)}?v=${roster.lastUpdated}&design=${OG_DESIGN_VERSION}`;
+
+    return sharingMetadata({
       title,
       description,
-      twitter: {
-        card: "summary_large_image",
-        images: [ogImagePath],
-      },
-      openGraph: {
-        title,
-        description,
-        images: [
-          {
-            url: ogImagePath,
-            width: OG_WIDTH,
-            height: OG_HEIGHT,
-            alt: "Roster preview",
-          },
-        ],
-      },
-    };
+      image: ogImagePath,
+      locale,
+      alt: t("common.sharing.roster.imageAlt"),
+    });
   } catch {
     return redirect({ href: "/404", locale: await getLocale() });
   }

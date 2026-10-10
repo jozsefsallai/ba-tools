@@ -9,19 +9,14 @@ import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import type { Gift, Student } from "@/lib/db/client";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { HelpCircleIcon } from "lucide-react";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-export const metadata: Metadata = {
-  title: "Relationship Rank Calculator - Joe's Blue Archive Tools",
-  description:
-    "Calculate the relationship rank of a student based on what gifts you give to them.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("bond", await getLocale());
+}
 
 export default async function BondPage() {
   const t = await getTranslations();

@@ -2,38 +2,28 @@ import { FormationEditor } from "@/app/[locale]/formation-display/_components/fo
 import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 import { HelpCircleIcon } from "lucide-react";
-
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
-type PageSearchParams = {
-  id?: string;
-};
-
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<PageSearchParams>;
+  searchParams: Promise<{ id?: string | string[] }>;
 }): Promise<Metadata> {
-  const t = await getTranslations();
+  const locale = await getLocale();
 
-  const fallback: Metadata = {
-    title: `${t("tools.formationDisplay.title")} - ${t("common.appName")}`,
-    description: t("tools.formationDisplay.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+  const fallback = await getCardMetadata("formation-display", locale);
 
-  const params = await searchParams;
+  const { id } = await searchParams;
 
-  if (!params.id) {
+  if (typeof id !== "string" || !id) {
     return fallback;
   }
 
@@ -43,23 +33,20 @@ export async function generateMetadata({
     if (!token) {
       return fallback;
     }
-
     const formation = await fetchQuery(
       api.formation.getById,
-      {
-        id: params.id as Id<"formation">,
-      },
-      {
-        token,
-      },
+      { id: id as Id<"formation"> },
+      { token },
     );
 
+    const t = await getTranslations({ locale });
+
     return {
-      title: `${formation.name ?? t("common.untitledFormation")} - ${t("common.appName")}`,
-      description: t("tools.formationDisplay.description"),
-      twitter: {
-        card: "summary",
-      },
+      ...fallback,
+      title: t("common.sharing.title", {
+        title: formation.name?.trim() || t("common.untitledFormation"),
+        appName: t("common.appName"),
+      }),
     };
   } catch {
     return fallback;

@@ -1,14 +1,10 @@
 import { TitleGeneratorView } from "@/app/[locale]/title-generator/_components/title-generator-view";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Title Generator - Joe's Blue Archive Tools",
-  description: "Generate rendered user titles.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("title-generator", await getLocale());
+}
 
 export default async function EmblemPage() {
   const t = await getTranslations();

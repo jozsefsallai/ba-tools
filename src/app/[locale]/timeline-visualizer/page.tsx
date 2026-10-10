@@ -1,67 +1,14 @@
-import { Suspense } from "react";
 import { TimelineEditor } from "@/app/[locale]/timeline-visualizer/_components/timeline-editor";
+import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { HelpCircleIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
-import type { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
-import { api } from "~convex/api";
-import type { Id } from "~convex/dataModel";
-import { auth } from "@clerk/nextjs/server";
-import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
-import { getTranslations } from "next-intl/server";
-
-type PageSearchParams = {
-  id?: string;
-};
-
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<PageSearchParams>;
-}): Promise<Metadata> {
-  const fallback: Metadata = {
-    title: "Timeline Visualizer - Joe's Blue Archive Tools",
-    description: "Create a visual rotation timeline.",
-    twitter: {
-      card: "summary",
-    },
-  };
-
-  const params = await searchParams;
-
-  if (!params.id) {
-    return fallback;
-  }
-
-  try {
-    const token = await (await auth()).getToken({ template: "convex" });
-
-    if (!token) {
-      return fallback;
-    }
-
-    const timeline = await fetchQuery(
-      api.timeline.getOwnById,
-      {
-        id: params.id as Id<"timeline">,
-      },
-      {
-        token,
-      },
-    );
-
-    return {
-      title: `${timeline.name ?? "Untitled Timeline"} - Joe's Blue Archive Tools`,
-      description: "Create a visual rotation timeline.",
-      twitter: {
-        card: "summary",
-      },
-    };
-  } catch {
-    return fallback;
-  }
+export async function generateMetadata() {
+  return getCardMetadata("timeline-visualizer", await getLocale());
 }
 
 export default async function TimelineVisualizerPage() {

@@ -1,11 +1,7 @@
-import type { Metadata } from "next";
-import { fetchQuery } from "convex/nextjs";
-import { api } from "~convex/api";
-import type { Id } from "~convex/dataModel";
 import { TimelineView } from "@/app/[locale]/timelines/[id]/_components/timeline-view";
-import removeMD from "remove-markdown";
-import { truncateText } from "@/lib/text-utils";
 import { redirect } from "@/i18n/navigation";
+import { getPublicTimelineMetadata } from "@/lib/og/public-timeline.server";
+import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 
 type PageParams = {
@@ -20,28 +16,7 @@ export async function generateMetadata({
   try {
     const { id } = await params;
 
-    const timeline = await fetchQuery(api.timeline.getById, {
-      id: id as Id<"timeline">,
-    });
-
-    const description = timeline.description
-      ? truncateText(
-          removeMD(timeline.description)
-            .split("\n")
-            .map((l) => l.trim())
-            .filter((l) => l.length > 0)
-            .join(" "),
-          160,
-        )
-      : "A visual EX skill rotation timeline.";
-
-    return {
-      title: `${timeline.name ?? "Untitled Timeline"} - Joe's Blue Archive Tools`,
-      description,
-      twitter: {
-        card: "summary",
-      },
-    };
+    return await getPublicTimelineMetadata("timeline", id, await getLocale());
   } catch (err) {
     return redirect({ href: "/404", locale: await getLocale() });
   }

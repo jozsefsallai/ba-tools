@@ -1,9 +1,10 @@
 import { PvpScreenshotDebugger } from "@/app/[locale]/pvp/_components/pvp-screenshot-debugger";
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "PVP screenshot ROI debugger",
-};
+export async function generateMetadata() {
+  return getCardMetadata("pvp-screenshot-debug", await getLocale());
+}
 
 export default function PvpScreenshotDebugPage() {
   return <PvpScreenshotDebugger />;

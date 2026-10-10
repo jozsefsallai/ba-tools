@@ -1,19 +1,15 @@
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 
-import { headers } from "next/headers";
 import checkMobile from "ismobilejs";
+import { headers } from "next/headers";
 
 import { Plana } from "@/components/plana";
 import { redirect } from "@/i18n/navigation";
 import { getLocale } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Plana Headpat Room - Joe's Blue Archive Tools",
-  description: "Stare at Plana and headpat her.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("plana", await getLocale());
+}
 
 export default async function PlanaPage() {
   const headerStore = await headers();

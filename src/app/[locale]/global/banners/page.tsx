@@ -3,18 +3,11 @@ import type { BannerGroups } from "@/app/[locale]/global/banners/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { getCachedGameBanners } from "@/lib/game-banners.server";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale, getTranslations } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("static.banners.title")} - ${t("common.appName")}`,
-    description: t("static.banners.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("global-banners", await getLocale());
 }
 
 async function getBannerGroups(): Promise<BannerGroups> {

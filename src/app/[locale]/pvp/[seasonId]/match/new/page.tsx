@@ -1,15 +1,11 @@
 import { PVPMatchEditor } from "@/app/[locale]/pvp/_components/pvp-match-editor";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.pvp.match.recordNewMatch")} - ${t("common.appName")}`,
-    description: t("tools.pvp.description"),
-  };
+export async function generateMetadata() {
+  return getCardMetadata("pvp-seasonId-match-new", await getLocale());
 }
 
 export default async function NewPVPMatchPage({

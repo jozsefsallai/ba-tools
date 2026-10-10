@@ -1,22 +1,18 @@
 import { PlanaAiView } from "@/app/[locale]/plana-ai/_components/plana-ai-view";
-import { canAccessPlanaAi } from "@/lib/ai/plana-access";
-import { currentUser } from "@clerk/nextjs/server";
-import type { Metadata } from "next";
-import type { Id } from "~convex/dataModel";
 import { redirect } from "@/i18n/navigation";
+import { canAccessPlanaAi } from "@/lib/ai/plana-access";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { currentUser } from "@clerk/nextjs/server";
 import { getLocale } from "next-intl/server";
+import type { Id } from "~convex/dataModel";
 
 type PageParams = {
   chatId?: string[];
 };
 
-export const metadata: Metadata = {
-  title: "Plana AI - Joe's Blue Archive Tools",
-  description: "Chat with Plana.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("plana-ai-chatId", await getLocale());
+}
 
 export default async function PlanaAIPage({
   params,

@@ -1,20 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { auth } from "@clerk/nextjs/server";
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import type { PropsWithChildren } from "react";
 import { Link } from "@/i18n/navigation";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { PropsWithChildren } from "react";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.myTimelines.title")} - ${t("common.appName")}`,
-    description: t("tools.myTimelines.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("user-timelines", await getLocale());
 }
 
 export default async function MyTimelinesHomeLayout({

@@ -8,10 +8,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useQueryWithStatus } from "@/lib/convex";
+import { OG_DESIGN_VERSION } from "@/lib/og/registry";
 import type { GameServer } from "@/lib/types";
 import { useAuth } from "@clerk/nextjs";
 import { CheckIcon, ImageIcon, LinkIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -30,6 +31,7 @@ export function RosterOwnerActions({
   visibility,
 }: RosterOwnerActionsProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const { isSignedIn } = useAuth();
 
   const ownRostersQuery = useQueryWithStatus(
@@ -82,7 +84,7 @@ export function RosterOwnerActions({
     setCopiedImage(true);
 
     try {
-      const ogImageUrl = `${publicRosterPath}/opengraph-image?v=${lastUpdated}`;
+      const ogImageUrl = `${locale === "ja" ? "/ja" : ""}${publicRosterPath}/opengraph-image?v=${lastUpdated}&design=${OG_DESIGN_VERSION}`;
       const response = await fetch(ogImageUrl);
 
       if (!response.ok) {
@@ -102,7 +104,7 @@ export function RosterOwnerActions({
         setCopiedImage(false);
       }, 3000);
     }
-  }, [canCopyImage, copiedImage, lastUpdated, publicRosterPath, t]);
+  }, [canCopyImage, copiedImage, lastUpdated, locale, publicRosterPath, t]);
 
   if (!isOwnRoster) {
     return null;

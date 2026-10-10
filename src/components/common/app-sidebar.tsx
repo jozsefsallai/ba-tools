@@ -1,6 +1,6 @@
 "use client";
 
-import plana from "@/app/opengraph-image.png";
+import plana from "@/assets/plana-logo.png";
 import { UserPreferences } from "@/components/common/user-preferences";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";

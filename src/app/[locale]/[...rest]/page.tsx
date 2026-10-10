@@ -1,14 +1,9 @@
-import type { Metadata } from "next";
+import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-
-  return {
-    title: `${t("common.notFound.code")} - ${t("common.notFound.title")} - ${t("common.appName")}`,
-    description: t("common.notFound.description"),
-  };
+export async function generateMetadata() {
+  return getCardMetadata("rest", await getLocale());
 }
 
 export default function CatchAllPage() {

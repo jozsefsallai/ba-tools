@@ -1,14 +1,11 @@
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
-import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import type { PropsWithChildren } from "react";
 
-export const metadata: Metadata = {
-  title: "My Timelines - Joe's Blue Archive Tools",
-  description: "View your timelines saved in the cloud.",
-  twitter: {
-    card: "summary",
-  },
-};
+export async function generateMetadata() {
+  return getCardMetadata("user-timelines", await getLocale());
+}
 
 export default async function MyTimelinesLayout({
   children,

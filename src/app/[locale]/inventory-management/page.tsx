@@ -2,21 +2,13 @@ import { InventoryManagementSimulatorView } from "@/app/[locale]/inventory-manag
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { HelpCircleIcon } from "lucide-react";
-
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations();
-  return {
-    title: `${t("tools.inventoryManagement.title")} - ${t("common.appName")}`,
-    description: t("tools.inventoryManagement.description"),
-    twitter: {
-      card: "summary",
-    },
-  };
+export async function generateMetadata() {
+  return getCardMetadata("inventory-management", await getLocale());
 }
 
 export default async function InventoryManagementPage() {
