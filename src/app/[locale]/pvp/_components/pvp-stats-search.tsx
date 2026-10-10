@@ -134,6 +134,11 @@ export function PVPStatsSearch() {
     observed: Array<{ studentId?: string }>,
   ) {
     return criteria.map((slot, index) => {
+      // Special positions are interchangeable and cannot change a defense
+      if (index >= 4) {
+        return undefined;
+      }
+
       const observedStudentId = observed[index]?.studentId;
 
       const requestedStudentId =

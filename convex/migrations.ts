@@ -3,6 +3,7 @@ import { components, internal } from "~convex/api";
 import type { DataModel } from "~convex/dataModel";
 import { getPvpVideoUrl } from "./lib/pvpVideo";
 import { getTeamKey } from "./lib/teamKey";
+import { queueMatchStatsForSeason } from "./pvpStats";
 import schema from "./schema";
 
 export const migrations = new Migrations<DataModel, typeof schema>(
@@ -165,4 +166,17 @@ export const compactPvpStatsAggregateTraits = migrations.define({
 
 export const runPvpStatsAggregateTraitCompaction = migrations.runner([
   internal.migrations.compactPvpStatsAggregateTraits,
+]);
+
+export const requeuePvpStatsSpecialOrder = migrations.define({
+  table: "pvpMatchRecord",
+  batchSize: 25,
+  migrateOne: async (ctx, match) => {
+    const season = await ctx.db.get(match.seasonId);
+    await queueMatchStatsForSeason(ctx, match, season);
+  },
+});
+
+export const runPvpStatsSpecialOrderBackfill = migrations.runner([
+  internal.migrations.requeuePvpStatsSpecialOrder,
 ]);

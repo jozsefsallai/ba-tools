@@ -45,6 +45,22 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 10, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Updated OG images.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "The order of special students no longer matter in counter team searches.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "October 9, 2026",
     features: [
       {

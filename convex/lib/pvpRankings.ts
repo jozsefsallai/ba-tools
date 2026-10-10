@@ -1,16 +1,9 @@
-import { getTeamKey } from "./teamKey";
+import { canonicalPvpStatsTeam, getTeamKey } from "./teamKey";
 
 export type RankingTeam = Array<{ studentId?: string }>;
 
 export function canonicalRankingTeam(team: RankingTeam): RankingTeam {
-  return [
-    ...team.slice(0, 4),
-    ...team.slice(4, 6).sort((a, b) => {
-      const left = a.studentId ?? "";
-      const right = b.studentId ?? "";
-      return left < right ? -1 : left > right ? 1 : 0;
-    }),
-  ];
+  return canonicalPvpStatsTeam(team);
 }
 
 export function rankingIdentity(team: RankingTeam) {

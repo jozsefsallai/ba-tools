@@ -9,7 +9,11 @@ import type { Doc } from "~convex/dataModel";
 import { internalAction, internalMutation, query } from "~convex/server";
 import { rankingIdentity, wilsonInterval } from "./lib/pvpRankings";
 import { getPvpVideoUrl } from "./lib/pvpVideo";
-import { getTeamKey } from "./lib/teamKey";
+import {
+  canonicalPvpStatsTeam,
+  getPvpStatsTeamKey,
+  getTeamKey,
+} from "./lib/teamKey";
 
 type Team = Array<{ studentId?: string }>;
 
@@ -148,7 +152,7 @@ function toStudentIdTeam<T extends { studentId?: string }>(team: T[]): Team {
 }
 
 function getSpecialTeamKey(team: Team) {
-  return getTeamKey(team.slice(4));
+  return getTeamKey(canonicalPvpStatsTeam(team).slice(4));
 }
 
 function getTeamProjection(
@@ -156,11 +160,13 @@ function getTeamProjection(
   metadata: Map<string, StudentMetadata>,
   side: "attack" | "defense",
 ) {
-  const traits = team
+  const canonical = canonicalPvpStatsTeam(team);
+
+  const traits = canonical
     .slice(0, 4)
     .map(({ studentId }) => (studentId ? metadata.get(studentId) : undefined));
 
-  const ids = team.slice(0, 4).map(({ studentId }) => studentId);
+  const ids = canonical.slice(0, 4).map(({ studentId }) => studentId);
   const ranges = traits.map((item) => item?.range);
   const tanks = traits.map((item) => item?.isTank);
   const prefix = side === "attack" ? "a" : "d";
@@ -171,8 +177,8 @@ function getTeamProjection(
     [`${prefix}2StudentId`]: ids[1],
     [`${prefix}3StudentId`]: ids[2],
     [`${prefix}4StudentId`]: ids[3],
-    [`${specialPrefix}S1StudentId`]: team[4]?.studentId,
-    [`${specialPrefix}S2StudentId`]: team[5]?.studentId,
+    [`${specialPrefix}S1StudentId`]: canonical[4]?.studentId,
+    [`${specialPrefix}S2StudentId`]: canonical[5]?.studentId,
     [`${specialPrefix}SpecialTeamKey`]: getSpecialTeamKey(team),
   };
 
@@ -258,8 +264,10 @@ function validSearchTeam(team: SearchSlot[]) {
 }
 
 function getSearchTeamFilter(q: any, team: SearchSlot[], similar = false) {
+  const canonical = canonicalPvpStatsTeam(team);
+
   return q.and(
-    ...team.map((slot, index) => {
+    ...canonical.map((slot, index) => {
       if (index >= 4) {
         const field = index === 4 ? "defenseS1StudentId" : "defenseS2StudentId";
         return q.eq(q.field(field), slot.studentId);
@@ -358,10 +366,13 @@ export function normalizeMatchForStats(
     return null;
   }
 
-  const attackTeam =
-    match.matchType === "attack" ? match.ownTeam : match.opponentTeam;
-  const defenseTeam =
-    match.matchType === "attack" ? match.opponentTeam : match.ownTeam;
+  const attackTeam = canonicalPvpStatsTeam(
+    match.matchType === "attack" ? match.ownTeam : match.opponentTeam,
+  );
+
+  const defenseTeam = canonicalPvpStatsTeam(
+    match.matchType === "attack" ? match.opponentTeam : match.ownTeam,
+  );
   const attackWon =
     match.matchType === "attack"
       ? match.result === "win"
@@ -616,15 +627,26 @@ async function processPending(
   }
 
   if (!pending.remove) {
-    await addContribution(ctx, pending, metadata);
+    const attackTeam = canonicalPvpStatsTeam(pending.attackTeam);
+    const defenseTeam = canonicalPvpStatsTeam(pending.defenseTeam);
+
+    const value = {
+      ...pending,
+      attackTeam,
+      defenseTeam,
+      attackTeamKey: getTeamKey(attackTeam),
+      defenseTeamKey: getTeamKey(defenseTeam),
+    };
+
+    await addContribution(ctx, value, metadata);
 
     const match = await ctx.db.get(pending.matchId);
 
     await ctx.db.insert("pvpStatsContribution", {
       matchId: pending.matchId,
       seasonNumber: pending.seasonNumber,
-      attackTeamKey: pending.attackTeamKey,
-      defenseTeamKey: pending.defenseTeamKey,
+      attackTeamKey: value.attackTeamKey,
+      defenseTeamKey: value.defenseTeamKey,
       attackWon: pending.attackWon,
       videoUrl: getPvpVideoUrl(match?.videoUrl),
     });
@@ -922,7 +944,7 @@ export const search = query({
     const exact = matchMode === "primary" && isExactDefenseSearch(defenseTeam);
     const similarityIndexable = isSimilarityIndexableSearch(defenseTeam);
 
-    const defenseTeamKey = exact ? getTeamKey(concreteTeam) : undefined;
+    const defenseTeamKey = exact ? getPvpStatsTeamKey(concreteTeam) : undefined;
     const defenseSpecialKey = getSpecialTeamKey(concreteTeam);
     const anchor = getSearchAnchor(defenseTeam);
 
@@ -1056,8 +1078,8 @@ export const getMatchVideos = query({
     validatePvpTeam(attackTeam);
     validatePvpTeam(defenseTeam);
 
-    const attackTeamKey = getTeamKey(attackTeam);
-    const defenseTeamKey = getTeamKey(defenseTeam);
+    const attackTeamKey = getPvpStatsTeamKey(attackTeam);
+    const defenseTeamKey = getPvpStatsTeamKey(defenseTeam);
 
     const page = await ctx.db
       .query("pvpStatsContribution")
