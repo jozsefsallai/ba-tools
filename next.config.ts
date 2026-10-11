@@ -76,6 +76,22 @@ const nextConfig: NextConfig = {
 
   serverExternalPackages: ["@resvg/resvg-js", "@napi-rs/image", "chromadb"],
 
+  // next-navigation-guard requires shared-runtime contexts. Next's require hook
+  // redirects these to the Pages runtime, which route tracing does not detect.
+  outputFileTracingIncludes: {
+    "/*": [
+      "node_modules/next/dist/server/route-modules/pages/vendored/contexts/{router-context,app-router-context}.js",
+      "node_modules/next/dist/server/route-modules/pages/module.compiled.js",
+      "node_modules/next/dist/compiled/next-server/pages.runtime.prod.js",
+      "node_modules/react/jsx-runtime.js",
+      "node_modules/react/cjs/react-jsx-runtime.production.js",
+      "node_modules/react-dom/{index,server.edge}.js",
+      "node_modules/react-dom/cjs/{react-dom,react-dom-server.edge,react-dom-server-legacy.browser}.production.js",
+      "node_modules/.pnpm/styled-jsx@*/node_modules/styled-jsx/{index,dist/index/index}.js",
+      "node_modules/.pnpm/client-only@*/node_modules/client-only/index.js",
+    ],
+  },
+
   async redirects() {
     return [
       {
