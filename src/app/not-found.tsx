@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+
+import outfit from "@/app/_fonts/outfit";
 import localFont from "next/font/local";
 
 import { NotFoundView } from "@/components/common/not-found-view";
@@ -10,13 +11,6 @@ export const metadata: Metadata = {
   title: "404 - Record not found - Joe's Blue Archive Tools",
   description: "The path you requested is not in my database.",
 };
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  display: "swap",
-});
 
 const nexonFootballGothic = localFont({
   src: [

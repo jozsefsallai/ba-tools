@@ -3,8 +3,12 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { NavigationGuardProvider } from "next-navigation-guard";
-import { Noto_Sans, Noto_Sans_JP, Outfit, Sono } from "next/font/google";
 import localFont from "next/font/local";
+import notoSans from "@/app/_fonts/noto-sans";
+import notoSansJP from "@/app/_fonts/noto-sans-jp";
+import outfit from "@/app/_fonts/outfit";
+import sono from "@/app/_fonts/sono";
+
 import { notFound } from "next/navigation";
 import NextTopLoader from "nextjs-toploader";
 
@@ -19,32 +23,6 @@ import { routing } from "@/i18n/routing";
 import { db } from "@/lib/db";
 
 import "../globals.css";
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  display: "swap",
-});
-
-const notoSansJP = Noto_Sans_JP({
-  variable: "--font-noto-sans-jp",
-  preload: false,
-  weight: ["400", "500", "600", "700", "800", "900"],
-  display: "swap",
-});
-
-const sono = Sono({
-  variable: "--font-sono",
-  subsets: ["latin"],
-});
-
-const notoSans = Noto_Sans({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
 
 const nexonFootballGothic = localFont({
   src: [
