@@ -32,6 +32,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
@@ -61,7 +62,6 @@ import {
   ShareIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useNavigationGuard } from "next-navigation-guard";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import slugify from "slugify";
@@ -1229,6 +1229,7 @@ export function TimelineEditor() {
 
       <SaveDialog
         open={navigationGuard.active}
+        closeOnSave={false}
         title={t("tools.timeline.confirmExit.title")}
         description={t(
           `tools.timeline.confirmExit.description.${isSignedIn ? "signedIn" : "signedOut"}`,

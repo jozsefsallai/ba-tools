@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useStudents } from "@/hooks/use-students";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
@@ -54,7 +55,6 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useNavigationGuard } from "next-navigation-guard";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -821,6 +821,7 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
 
       <SaveDialog
         open={navigationGuard.active}
+        closeOnSave={false}
         title={t("tools.roster.editor.saveDialog.title")}
         description={t("tools.roster.editor.saveDialog.description")}
         onYes={handleWantsToUpdate}

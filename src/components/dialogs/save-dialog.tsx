@@ -21,6 +21,7 @@ export type SaveDialogProps = {
   yesText?: string;
   noText?: string;
   cancelText?: string;
+  closeOnSave?: boolean;
   onYes: () => any;
   onNo?: () => any;
   onCancel: () => any;
@@ -34,6 +35,7 @@ export function SaveDialog({
   yesText,
   noText,
   cancelText,
+  closeOnSave = true,
   onYes,
   onNo,
   onCancel,
@@ -43,6 +45,17 @@ export function SaveDialog({
   const [inProgress, setInProgress] = useState(false);
 
   const closeRef = useRef<HTMLButtonElement>(null);
+  const closing = useRef(false);
+
+  function closeDialog() {
+    closing.current = true;
+
+    try {
+      closeRef.current?.click();
+    } finally {
+      closing.current = false;
+    }
+  }
 
   const finalYesText = yesText ?? t("common.dialogs.save.yes");
   const finalNoText = noText ?? t("common.dialogs.save.no");
@@ -54,10 +67,15 @@ export function SaveDialog({
     }
 
     setInProgress(true);
-    await onYes();
-    setInProgress(false);
+    try {
+      await onYes();
 
-    closeRef.current?.click();
+      if (closeOnSave) {
+        closeDialog();
+      }
+    } finally {
+      setInProgress(false);
+    }
   }
 
   async function handleNo() {
@@ -66,10 +84,13 @@ export function SaveDialog({
     }
 
     setInProgress(true);
-    await onNo?.();
-    setInProgress(false);
 
-    closeRef.current?.click();
+    try {
+      await onNo?.();
+      closeDialog();
+    } finally {
+      setInProgress(false);
+    }
   }
 
   async function handleCancel() {
@@ -78,15 +99,22 @@ export function SaveDialog({
     }
 
     setInProgress(true);
-    await onCancel();
-    setInProgress(false);
 
-    closeRef.current?.click();
+    try {
+      await onCancel();
+      closeDialog();
+    } finally {
+      setInProgress(false);
+    }
   }
 
   async function handleOpenChange(open: boolean) {
-    if (!open) {
-      await handleCancel();
+    if (inProgress && !closing.current) {
+      return;
+    }
+
+    if (!open && !closing.current) {
+      await onCancel();
     }
 
     setOpen?.(open);

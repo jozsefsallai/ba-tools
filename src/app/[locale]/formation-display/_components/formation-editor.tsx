@@ -44,6 +44,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
@@ -66,7 +67,6 @@ import {
 } from "@/lib/formation-type";
 import { cn } from "@/lib/utils";
 import { Authenticated, useMutation } from "convex/react";
-import { useNavigationGuard } from "next-navigation-guard";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
@@ -1484,6 +1484,7 @@ export function FormationEditor() {
       <Authenticated>
         <SaveDialog
           open={navigationGuard.active}
+          closeOnSave={false}
           title={t("tools.formationDisplay.saveDialog.title")}
           description={t("tools.formationDisplay.saveDialog.description")}
           onYes={createOrUpdateCloudFormation}

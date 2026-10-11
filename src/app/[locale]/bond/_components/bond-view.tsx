@@ -21,7 +21,10 @@ import {
   sortGiftsByStudentPreference,
   targetAllocationsEqual,
 } from "@/app/[locale]/bond/_lib/gift-utils";
-import type { BondViewProps, StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
+import type {
+  BondViewProps,
+  StudentWithGifts,
+} from "@/app/[locale]/bond/_lib/types";
 import { SaveStatus } from "@/components/common/save-status";
 import { StudentPicker } from "@/components/common/student-picker";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
@@ -47,6 +50,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useQueryWithStatus } from "@/lib/convex";
@@ -69,7 +73,6 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useNavigationGuard } from "next-navigation-guard";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
@@ -1563,6 +1566,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       <Authenticated>
         <SaveDialog
           open={navigationGuard.active}
+          closeOnSave={false}
           title={t("tools.bond.dialogs.save.title")}
           description={t("tools.bond.dialogs.save.description")}
           onYes={handleSave}

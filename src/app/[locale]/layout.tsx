@@ -2,7 +2,8 @@ import { SITE_ORIGIN, getCardMetadata } from "@/lib/og-metadata.server";
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getLocale } from "next-intl/server";
-import { NavigationGuardProvider } from "next-navigation-guard";
+import { NavigationGuardProvider } from "@/components/providers/navigation-guard-provider";
+
 import localFont from "next/font/local";
 import notoSans from "@/app/_fonts/noto-sans";
 import notoSansJP from "@/app/_fonts/noto-sans-jp";

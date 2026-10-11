@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
@@ -64,7 +65,6 @@ import {
   UploadIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useNavigationGuard } from "next-navigation-guard";
 import dynamic from "next/dynamic";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { api } from "~convex/api";
