@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
+import { relative } from "node:path";
 import { PVP_ICON_CATALOG_FORMAT } from "@/lib/pvp/icon-catalog-format";
 import createMDX from "@next/mdx";
 import withSerwistInit from "@serwist/next";
@@ -24,6 +25,17 @@ if (!IMAGE_CDN_URL) {
 }
 
 const url = new URL(IMAGE_CDN_URL);
+
+function runtimePackagePath(packageName: string) {
+  return relative(
+    process.cwd(),
+    realpathSync(`node_modules/${packageName}`),
+  ).replaceAll("\\", "/");
+}
+
+const nextRuntimePath = runtimePackagePath("next");
+const reactRuntimePath = runtimePackagePath("react");
+const reactDomRuntimePath = runtimePackagePath("react-dom");
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -80,13 +92,13 @@ const nextConfig: NextConfig = {
   // redirects these to the Pages runtime, which route tracing does not detect.
   outputFileTracingIncludes: {
     "/*": [
-      "node_modules/next/dist/server/route-modules/pages/vendored/contexts/{router-context,app-router-context}.js",
-      "node_modules/next/dist/server/route-modules/pages/module.compiled.js",
-      "node_modules/next/dist/compiled/next-server/pages.runtime.prod.js",
-      "node_modules/react/jsx-runtime.js",
-      "node_modules/react/cjs/react-jsx-runtime.production.js",
-      "node_modules/react-dom/{index,server.edge}.js",
-      "node_modules/react-dom/cjs/{react-dom,react-dom-server.edge,react-dom-server-legacy.browser}.production.js",
+      `${nextRuntimePath}/dist/server/route-modules/pages/vendored/contexts/{router-context,app-router-context}.js`,
+      `${nextRuntimePath}/dist/server/route-modules/pages/module.compiled.js`,
+      `${nextRuntimePath}/dist/compiled/next-server/pages.runtime.prod.js`,
+      `${reactRuntimePath}/jsx-runtime.js`,
+      `${reactRuntimePath}/cjs/react-jsx-runtime.production.js`,
+      `${reactDomRuntimePath}/{index,server.edge}.js`,
+      `${reactDomRuntimePath}/cjs/{react-dom,react-dom-server.edge,react-dom-server-legacy.browser}.production.js`,
       "node_modules/.pnpm/styled-jsx@*/node_modules/styled-jsx/{index,dist/index/index}.js",
       "node_modules/.pnpm/client-only@*/node_modules/client-only/index.js",
     ],
