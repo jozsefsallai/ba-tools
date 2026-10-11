@@ -1,25 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
+import "server-only";
 
-const cache = new Map<string, string>();
-
-function getOgAssetDataUrl(filename: string): string {
-  const cached = cache.get(filename);
-
-  if (cached) {
-    return cached;
-  }
-
-  const filePath = path.join(process.cwd(), "src/assets/images", filename);
-  const buffer = fs.readFileSync(filePath);
-  const ext = path.extname(filename).slice(1);
-  const mime = ext === "png" ? "image/png" : "image/webp";
-  const dataUrl = `data:${mime};base64,${buffer.toString("base64")}`;
-
-  cache.set(filename, dataUrl);
-
-  return dataUrl;
-}
+import blueStar from "@/assets/images/blue_star.png?og-asset";
+import charBg from "@/assets/images/char-bg.png?og-asset";
+import roleAttacker from "@/assets/images/role_attacker.png?og-asset";
+import roleHealer from "@/assets/images/role_healer.png?og-asset";
+import roleSupport from "@/assets/images/role_support.png?og-asset";
+import roleTacticalSupport from "@/assets/images/role_tactical_support.png?og-asset";
+import roleTank from "@/assets/images/role_tank.png?og-asset";
+import yellowStar from "@/assets/images/yellow_star.png?og-asset";
 
 export type OgAssetUrls = {
   charBg: string;
@@ -32,15 +20,17 @@ export type OgAssetUrls = {
   roleTacticalSupport: string;
 };
 
+const assets: OgAssetUrls = {
+  charBg,
+  yellowStar,
+  blueStar,
+  roleAttacker,
+  roleHealer,
+  roleSupport,
+  roleTank,
+  roleTacticalSupport,
+};
+
 export function getOgAssetUrls(): OgAssetUrls {
-  return {
-    charBg: getOgAssetDataUrl("char-bg.png"),
-    yellowStar: getOgAssetDataUrl("yellow_star.png"),
-    blueStar: getOgAssetDataUrl("blue_star.png"),
-    roleAttacker: getOgAssetDataUrl("role_attacker.png"),
-    roleHealer: getOgAssetDataUrl("role_healer.png"),
-    roleSupport: getOgAssetDataUrl("role_support.png"),
-    roleTank: getOgAssetDataUrl("role_tank.png"),
-    roleTacticalSupport: getOgAssetDataUrl("role_tactical_support.png"),
-  };
+  return assets;
 }

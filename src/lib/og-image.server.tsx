@@ -1,104 +1,67 @@
-import fs from "node:fs";
-import path from "node:path";
+import "server-only";
+
 import { Resvg } from "@resvg/resvg-js";
 import type { ReactNode } from "react";
 import type { Font } from "satori";
 import satori from "satori";
 
+import nexonData from "@/app/_fonts/nexon-football-gothic/NEXON-Football-Gothic-B.otf?og-asset";
+import notoSansData from "~fonts/noto-sans/NotoSans-Regular.ttf?og-asset";
+import notoSansSemiboldData from "~fonts/noto-sans/NotoSans-SemiBold.ttf?og-asset";
+import japaneseData from "~fonts/shinmgoupr/U-OTF-ShinMGoUpr-Medium.otf?og-asset";
+
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
 
-let notoSansFontsPromise: Promise<Font[]> | undefined;
-
-export function loadNotoSansFonts(): Promise<Font[]> {
-  if (!notoSansFontsPromise) {
-    notoSansFontsPromise = (async () => {
-      const notoSans = fs.readFileSync(
-        path.join(
-          process.cwd(),
-          "public/assets/fonts/noto-sans/NotoSans-Regular.ttf",
-        ),
-      );
-
-      const notoSansSemibold = fs.readFileSync(
-        path.join(
-          process.cwd(),
-          "public/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
-        ),
-      );
-
-      return [
-        {
-          name: "Noto Sans",
-          data: notoSans,
-          weight: 400,
-          style: "normal",
-        },
-        {
-          name: "Noto Sans",
-          data: notoSansSemibold,
-          weight: 600,
-          style: "normal",
-        },
-      ];
-    })();
-  }
-
-  return notoSansFontsPromise.catch((error) => {
-    notoSansFontsPromise = undefined;
-    throw error;
-  });
+function fontBytes(dataUrl: string) {
+  return Buffer.from(dataUrl.slice(dataUrl.indexOf(",") + 1), "base64");
 }
 
-let ogFontsPromise: Promise<Font[]> | undefined;
-
-async function readOgImageFonts(): Promise<Font[]> {
-  const fonts = [...(await loadNotoSansFonts())];
-
-  const nexonPath = path.join(
-    process.cwd(),
-    "src/app/_fonts/nexon-football-gothic/NEXON-Football-Gothic-B.otf",
-  );
-  const nexon = fs.readFileSync(nexonPath);
-
-  fonts.push({
-    name: "Nexon Football Gothic",
-    data: nexon,
-    weight: 700,
-    style: "normal",
-  });
-
-  fonts.push({
-    name: "Nexon Football Gothic",
-    data: nexon,
-    weight: 700,
-    style: "italic",
-  });
-
-  fonts.push({
-    name: "Japanese",
-    data: fs.readFileSync(
-      path.join(
-        process.cwd(),
-        "public/assets/fonts/shinmgoupr/U-OTF-ShinMGoUpr-Medium.otf",
-      ),
-    ),
+const notoSansFonts: Font[] = [
+  {
+    name: "Noto Sans",
+    data: fontBytes(notoSansData),
     weight: 400,
     style: "normal",
-  });
+  },
+  {
+    name: "Noto Sans",
+    data: fontBytes(notoSansSemiboldData),
+    weight: 600,
+    style: "normal",
+  },
+];
 
-  fonts.push({ ...fonts[fonts.length - 1], weight: 700 });
-
-  return fonts;
+export async function loadNotoSansFonts(): Promise<Font[]> {
+  return notoSansFonts;
 }
 
-export function loadOgImageFonts(): Promise<Font[]> {
-  ogFontsPromise ??= readOgImageFonts();
+let ogFonts: Font[] | undefined;
+export async function loadOgImageFonts(): Promise<Font[]> {
+  if (!ogFonts) {
+    const nexon = fontBytes(nexonData);
 
-  return ogFontsPromise.catch((error) => {
-    ogFontsPromise = undefined;
-    throw error;
-  });
+    const japanese = fontBytes(japaneseData);
+    ogFonts = [
+      ...notoSansFonts,
+      {
+        name: "Nexon Football Gothic",
+        data: nexon,
+        weight: 700,
+        style: "normal",
+      },
+      {
+        name: "Nexon Football Gothic",
+        data: nexon,
+        weight: 700,
+        style: "italic",
+      },
+      { name: "Japanese", data: japanese, weight: 400, style: "normal" },
+      { name: "Japanese", data: japanese, weight: 700, style: "normal" },
+    ];
+  }
+
+  return ogFonts;
 }
 
 function generatePng(svgData: string, width: number) {

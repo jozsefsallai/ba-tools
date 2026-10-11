@@ -26,20 +26,32 @@ if (!IMAGE_CDN_URL) {
 const url = new URL(IMAGE_CDN_URL);
 
 const nextConfig: NextConfig = {
-  outputFileTracingIncludes: {
-    "/api/og/**/*": [
-      "./public/assets/fonts/**/*",
-      "./src/app/_fonts/**/*",
-      "./src/assets/plana-icon.png",
-      "./src/assets/images/plana.png",
-      "./src/assets/og-icons/*.svg",
-    ],
+  turbopack: {
+    rules: {
+      "*": {
+        condition: { query: /[?&]og-asset(?:&|$)/ },
+        loaders: ["./scripts/loaders/og-asset.cjs"],
+        as: "*.js",
+      },
+    },
+  },
 
-    "/*/rosters/*/*/opengraph-image": [
-      "./public/assets/fonts/**/*",
-      "./src/app/_fonts/**/*",
-      "./src/assets/**/*",
-    ],
+  webpack(config) {
+    const assetQuery = /[?&]og-asset(?:&|$)/;
+
+    for (const rule of config.module.rules) {
+      if (rule?.loader === "next-image-loader") {
+        rule.resourceQuery.not.push(assetQuery);
+      }
+    }
+
+    config.module.rules.push({
+      resourceQuery: assetQuery,
+      type: "javascript/auto",
+      use: ["./scripts/loaders/og-asset.cjs"],
+    });
+
+    return config;
   },
 
   experimental: {
