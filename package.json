@@ -22,7 +22,10 @@
     "db:studio": "prisma studio",
     "jobs:dev": "trigger dev",
     "jobs:deploy": "trigger deploy",
-    "pvp:icon-assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts"
+    "pvp:icon-assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts",
+    "private:init": "git submodule update --init --checkout private/mx-data-sync && pnpm --dir private/mx-data-sync install",
+    "game-data:new-students": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/list-new-students.ts",
+    "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",

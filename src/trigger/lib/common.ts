@@ -125,6 +125,22 @@ export type RawStudentData = {
   RegenCost?: number;
 };
 
+export type StudentLocale = "en" | "jp" | "kr" | "tw" | "th";
+
+export type NameOverride = {
+  name: string;
+  firstName: string;
+  lastName: string;
+};
+
+export type NameOverrides = Partial<Record<StudentLocale, NameOverride>>;
+
+export type SeedStudentInput = Omit<RawStudentData, "Skills"> & {
+  Skills?: RawStudentSkillsData;
+  baseVariantId?: string | null;
+  __nameOverrides?: NameOverrides;
+};
+
 export async function fetchStudentsData(): Promise<
   Record<string, RawStudentData>
 > {

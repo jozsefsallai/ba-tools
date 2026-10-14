@@ -1,0 +1,4 @@
+[submodule "mx-data-sync"]
+	path = private/mx-data-sync
+	url = git@github.com:jozsefsallai/mx-data-sync.git
+	update = none

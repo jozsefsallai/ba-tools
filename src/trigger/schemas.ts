@@ -49,3 +49,55 @@ export const setBannersPayload = z.object({
 });
 
 export type SetBannersPayload = z.infer<typeof setBannersPayload>;
+
+const sqlcipherKey = z
+  .string()
+  .regex(/^[0-9a-fA-F]{64}$/, "Expected 64 hex characters");
+
+export const listNewStudentsPayload = z.object({ sqlcipherKey });
+
+export type ListNewStudentsPayload = z.input<typeof listNewStudentsPayload>;
+
+export const syncImageAssetsPayload = z.object({
+  sqlcipherKey,
+  devNames: z.array(z.string().min(1)).min(1),
+  dryRun: z.boolean().default(false),
+  overwrite: z.boolean().default(true),
+});
+
+export type SyncImageAssetsPayload = z.input<typeof syncImageAssetsPayload>;
+
+const perServerTuple = <T extends z.ZodType>(item: T) =>
+  z.tuple([item, item, item]);
+
+const nameOverride = z.object({
+  name: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+});
+
+export const seedStudentInput = z.looseObject({
+  Id: z.number().int(),
+  PathName: z.string().min(1),
+  DevName: z.string().min(1),
+  Name: z.string().min(1),
+  IsReleased: perServerTuple(z.boolean()),
+  IsLimited: perServerTuple(z.number().int()),
+  SearchTags: z.array(z.string()),
+  baseVariantId: z.string().min(1).nullable().optional(),
+  __nameOverrides: z
+    .object({
+      en: nameOverride.optional(),
+      jp: nameOverride.optional(),
+      kr: nameOverride.optional(),
+      tw: nameOverride.optional(),
+      th: nameOverride.optional(),
+    })
+    .optional(),
+});
+
+export const seedStudentsPayload = z.object({
+  students: z.array(seedStudentInput).optional(),
+});
+
+export type SeedStudentsPayload = z.input<typeof seedStudentsPayload>;
