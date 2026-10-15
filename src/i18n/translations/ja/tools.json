@@ -649,6 +649,7 @@
       "screenshotDebugBreadcrumb": "スクリーンショットデバッガー"
     },
     "presets": {
+      "actions": "その他の操作...",
       "anonymous": "匿名",
       "mergeWith": "他のプリセットと統合...",
       "mergeTitle": "{name}を統合",

@@ -15,6 +15,8 @@ import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useRef, useState } from "react";
 
 export type ConfirmDialogProps = PropsWithChildren<{
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   title: string;
   description: string;
   confirmText?: string;
@@ -25,6 +27,8 @@ export type ConfirmDialogProps = PropsWithChildren<{
 }>;
 
 export function ConfirmDialog({
+  open,
+  onOpenChange,
   title,
   description,
   confirmText,
@@ -68,8 +72,8 @@ export function ConfirmDialog({
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
 
       <DialogContent>
         <DialogHeader>

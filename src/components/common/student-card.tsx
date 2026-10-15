@@ -27,6 +27,7 @@ export type StudentCardProps = {
   variantId?: string;
   style?: React.CSSProperties;
   isSkillCard?: boolean;
+  noAttackTypeStyling?: boolean;
 };
 
 export function StudentCard({
@@ -42,6 +43,7 @@ export function StudentCard({
   variantId,
   style,
   isSkillCard,
+  noAttackTypeStyling,
 }: StudentCardProps) {
   const fallback = isSkillCard
     ? buildSkillPortraitUrl(student)
@@ -70,11 +72,16 @@ export function StudentCard({
           className={cn("flex relative h-[86px] w-[93px] p-[2px]", {
             "rounded-[11%] pb-[10px]": !isSkillCard,
             "rounded-[2px]": isSkillCard,
-            "bg-type-red": student.attackType === "Explosion",
-            "bg-type-yellow": student.attackType === "Pierce",
-            "bg-type-blue": student.attackType === "Mystic",
-            "bg-type-purple": student.attackType === "Sonic",
-            "bg-type-green": student.attackType === "Chemical",
+            "bg-type-red":
+              !noAttackTypeStyling && student.attackType === "Explosion",
+            "bg-type-yellow":
+              !noAttackTypeStyling && student.attackType === "Pierce",
+            "bg-type-blue":
+              !noAttackTypeStyling && student.attackType === "Mystic",
+            "bg-type-purple":
+              !noAttackTypeStyling && student.attackType === "Sonic",
+            "bg-type-green":
+              !noAttackTypeStyling && student.attackType === "Chemical",
           })}
         >
           {!isSkillCard && (
@@ -86,9 +93,12 @@ export function StudentCard({
 
           <div
             className={cn("absolute  overflow-hidden", {
-              "top-[2px] left-[2px] right-[2px] bottom-[10px] rounded-[11%]":
-                !isSkillCard,
-              "top-0 left-0 right-0 bottom-0 rounded-[2px]": isSkillCard,
+              "rounded-[11%]": !isSkillCard,
+              "rounded-[2px]": isSkillCard,
+              "top-0.5 left-0.5 right-0.5 bottom-2.5":
+                !isSkillCard && !noAttackTypeStyling,
+              "top-0 left-0 right-0 bottom-0":
+                noAttackTypeStyling || isSkillCard,
             })}
           >
             <img

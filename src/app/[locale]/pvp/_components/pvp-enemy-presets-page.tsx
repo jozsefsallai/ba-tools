@@ -1,15 +1,30 @@
 "use client";
 
 import { PVPEnemyPresetMergeDialog } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-merge-dialog";
+import pvpAnon from "@/assets/images/pvp-anon.png";
+import { EmptyCard } from "@/components/common/empty-card";
+import { StudentCard } from "@/components/common/student-card";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, usePaginatedQuery } from "convex/react";
-import { ChevronLeftIcon, LoaderCircleIcon, SearchIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  LoaderCircleIcon,
+  MoreHorizontalIcon,
+  SearchIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { api } from "~convex/api";
@@ -22,6 +37,7 @@ export function PVPEnemyPresetsPage({
   const { studentMap } = useStudents();
   const [search, setSearch] = useState("");
   const [mergeSource, setMergeSource] = useState<Doc<"pvpEnemyPreset">>();
+  const [deleteSource, setDeleteSource] = useState<Doc<"pvpEnemyPreset">>();
   const debouncedSearch = useDebounce(search, 250);
   const {
     results: presets,
@@ -67,7 +83,19 @@ export function PVPEnemyPresetsPage({
       </div>
 
       <article className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
-        <h2 className="font-semibold">{t("tools.pvp.presets.anonymous")}</h2>
+        <div className="flex min-w-0 items-center gap-3">
+          <img
+            src={pvpAnon.src}
+            alt=""
+            width={pvpAnon.width}
+            height={pvpAnon.height}
+            className="h-14 w-auto shrink-0 object-contain"
+          />
+
+          <h2 className="truncate font-semibold">
+            {t("tools.pvp.presets.anonymous")}
+          </h2>
+        </div>
 
         <div className="flex gap-2">
           <Button size="sm" variant="outline" asChild>
@@ -105,21 +133,19 @@ export function PVPEnemyPresetsPage({
                 key={preset._id}
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  {rep ? (
-                    <img
-                      src={buildStudentPortraitUrl(rep)}
-                      alt={rep.name}
-                      className="size-14 rounded-md object-cover"
-                    />
-                  ) : (
-                    <div className="size-14 rounded-md border border-dashed" />
-                  )}
-                  <div className="min-w-0">
-                    <h2 className="truncate font-semibold">{preset.name}</h2>
-                    <p className="text-xs text-muted-foreground">
-                      {t("tools.pvp.presets.enemyPreset")}
-                    </p>
+                  <div className="shrink-0 px-2" style={{ zoom: 0.65 }}>
+                    {rep ? (
+                      <StudentCard
+                        student={rep}
+                        noDisplayRole
+                        noAttackTypeStyling
+                      />
+                    ) : (
+                      <EmptyCard label="" />
+                    )}
                   </div>
+
+                  <h2 className="truncate font-semibold">{preset.name}</h2>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -131,37 +157,62 @@ export function PVPEnemyPresetsPage({
                     </Link>
                   </Button>
 
-                  <Button size="sm" variant="outline" asChild>
-                    <Link
-                      href={`/pvp/${seasonId}/presets/opponents/${preset._id}`}
-                    >
-                      {t("tools.pvp.presets.edit")}
-                    </Link>
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        aria-label={t("tools.pvp.presets.actions")}
+                      >
+                        <MoreHorizontalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
 
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setMergeSource(preset)}
-                  >
-                    {t("tools.pvp.presets.mergeWith")}
-                  </Button>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/pvp/${seasonId}/presets/opponents/${preset._id}`}
+                          >
+                            {t("tools.pvp.presets.edit")}
+                          </Link>
+                        </DropdownMenuItem>
 
-                  <ConfirmDialog
-                    title={t("tools.pvp.presets.deleteEnemyTitle")}
-                    description={t("tools.pvp.presets.deleteEnemyDescription")}
-                    confirmVariant="destructive"
-                    onConfirm={() => remove({ presetId: preset._id })}
-                  >
-                    <Button size="sm" variant="destructive">
-                      {t("tools.pvp.presets.delete")}
-                    </Button>
-                  </ConfirmDialog>
+                        <DropdownMenuItem
+                          onSelect={() => setMergeSource(preset)}
+                        >
+                          {t("tools.pvp.presets.mergeWith")}
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => setDeleteSource(preset)}
+                        >
+                          {t("tools.pvp.presets.delete")}
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </article>
             );
           })}
         </div>
+      )}
+
+      {deleteSource && (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => !open && setDeleteSource(undefined)}
+          title={t("tools.pvp.presets.deleteEnemyTitle")}
+          description={t("tools.pvp.presets.deleteEnemyDescription")}
+          confirmVariant="destructive"
+          onConfirm={() => remove({ presetId: deleteSource._id })}
+        />
       )}
 
       {mergeSource && (

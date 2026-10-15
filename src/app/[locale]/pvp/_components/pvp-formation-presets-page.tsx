@@ -1,6 +1,8 @@
 "use client";
 
 import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
+import { EmptyCard } from "@/components/common/empty-card";
+import { StudentCard } from "@/components/common/student-card";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,7 +17,6 @@ import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import type { PVPFormationPresetType } from "@/lib/types";
-import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
@@ -167,25 +168,23 @@ export function PVPFormationPresetsPage({
                 </div>
               </div>
 
-              <div className="flex gap-2 overflow-x-auto">
+              <div
+                className="flex gap-4 overflow-x-auto px-3 py-1"
+                style={{ zoom: 0.65 }}
+              >
                 {preset.team.map((item, index) => {
                   const student = item.studentId
                     ? studentMap[item.studentId]
                     : undefined;
 
-                  return student ? (
-                    <img
-                      key={`${preset._id}-${index}`}
-                      src={buildStudentPortraitUrl(student)}
-                      alt={student.name}
-                      title={student.name}
-                      className="size-14 shrink-0 rounded-md object-cover"
-                    />
-                  ) : (
-                    <div
-                      key={`${preset._id}-${index}`}
-                      className="size-14 shrink-0 rounded-md border border-dashed"
-                    />
+                  return (
+                    <div key={`${preset._id}-${index}`} className="shrink-0">
+                      {student ? (
+                        <StudentCard student={student} />
+                      ) : (
+                        <EmptyCard label="" />
+                      )}
+                    </div>
                   );
                 })}
               </div>

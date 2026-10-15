@@ -765,6 +765,7 @@
       "screenshotDebugBreadcrumb": "Screenshot Debugger"
     },
     "presets": {
+      "actions": "More actions...",
       "anonymous": "Anonymous",
       "mergeWith": "Merge with...",
       "mergeTitle": "Merge {name}",

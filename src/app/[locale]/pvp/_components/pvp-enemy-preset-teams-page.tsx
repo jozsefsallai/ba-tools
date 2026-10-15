@@ -8,7 +8,9 @@ import type {
   PVPFormationPresetType,
   PVPFormationStudentItem,
 } from "@/app/[locale]/pvp/_lib/types";
+import { EmptyCard } from "@/components/common/empty-card";
 import { MessageBox } from "@/components/common/message-box";
+import { StudentCard } from "@/components/common/student-card";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +33,6 @@ import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { Storage } from "@/lib/storage";
-import { buildStudentPortraitUrl } from "@/lib/url";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -250,28 +251,31 @@ export function PVPEnemyPresetTeamsPage({
                   </span>
                 </div>
 
-                {knownTeam.team.map(
-                  (item: PVPEnemyTeam["team"][number], index: number) => {
-                    const student = item.studentId
-                      ? studentMap[item.studentId]
-                      : undefined;
+                <div
+                  className="flex min-w-0 gap-4 overflow-x-auto px-3 py-1"
+                  style={{ zoom: 0.65 }}
+                >
+                  {knownTeam.team.map(
+                    (item: PVPEnemyTeam["team"][number], index: number) => {
+                      const student = item.studentId
+                        ? studentMap[item.studentId]
+                        : undefined;
 
-                    return student ? (
-                      <img
-                        key={`${knownTeam.teamKey}-${index}`}
-                        src={buildStudentPortraitUrl(student)}
-                        alt={student.name}
-                        title={student.name}
-                        className="size-14 rounded object-cover"
-                      />
-                    ) : (
-                      <div
-                        key={`${knownTeam.teamKey}-${index}`}
-                        className="size-14 rounded border border-dashed"
-                      />
-                    );
-                  },
-                )}
+                      return (
+                        <div
+                          key={`${knownTeam.teamKey}-${index}`}
+                          className="shrink-0"
+                        >
+                          {student ? (
+                            <StudentCard student={student} />
+                          ) : (
+                            <EmptyCard label="" />
+                          )}
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
                 <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
                   <Badge variant="secondary" className="gap-3">
                     {t.rich("tools.pvp.presets.encounters", {
