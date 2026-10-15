@@ -52,7 +52,8 @@ export type SetBannersPayload = z.infer<typeof setBannersPayload>;
 
 const sqlcipherKey = z
   .string()
-  .regex(/^[0-9a-fA-F]{64}$/, "Expected 64 hex characters");
+  .regex(/^[0-9a-fA-F]{64}$/, "Expected 64 hex characters")
+  .optional();
 
 export const listNewStudentsPayload = z.object({ sqlcipherKey });
 

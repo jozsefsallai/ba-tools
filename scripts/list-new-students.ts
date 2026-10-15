@@ -7,7 +7,7 @@ import {
   cacheDir,
   loadMxDataSync,
   logger,
-  requireSqlcipherKey,
+  parseSqlcipherKey,
 } from "./lib/mx-data-sync";
 
 const { values } = parseArgs({
@@ -17,7 +17,7 @@ const { values } = parseArgs({
   },
 });
 
-const sqlcipherKey = requireSqlcipherKey(values["sqlcipher-key"]);
+const sqlcipherKey = parseSqlcipherKey(values["sqlcipher-key"]);
 const { listNewStudents } = await loadMxDataSync();
 
 const result = await listNewStudents({

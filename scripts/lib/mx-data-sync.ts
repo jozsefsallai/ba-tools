@@ -25,9 +25,9 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
   return (await import(pathToFileURL(entry).href)) as DataSyncModule;
 }
 
-export function requireSqlcipherKey(value: string | undefined): string {
-  if (!value || !/^[0-9a-fA-F]{64}$/.test(value)) {
-    console.error("--sqlcipher-key <64 hex characters> is required.");
+export function parseSqlcipherKey(value: string | undefined) {
+  if (value !== undefined && !/^[0-9a-fA-F]{64}$/.test(value)) {
+    console.error("--sqlcipher-key must be 64 hex characters.");
     process.exit(1);
   }
 

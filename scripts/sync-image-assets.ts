@@ -6,7 +6,7 @@ import {
   cacheDir,
   loadMxDataSync,
   logger,
-  requireSqlcipherKey,
+  parseSqlcipherKey,
 } from "./lib/mx-data-sync";
 
 const root = new URL("../", import.meta.url).pathname;
@@ -21,7 +21,7 @@ const { values } = parseArgs({
   },
 });
 
-const sqlcipherKey = requireSqlcipherKey(values["sqlcipher-key"]);
+const sqlcipherKey = parseSqlcipherKey(values["sqlcipher-key"]);
 
 const devNames = (values["dev-names"] ?? "")
   .split(",")

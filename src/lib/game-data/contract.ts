@@ -27,7 +27,7 @@ export interface ExistingStudents {
 }
 
 export interface ListNewStudentsOptions {
-  sqlcipherKey: string;
+  sqlcipherKey?: string;
   existing: ExistingStudents;
   cacheDir: string;
   logger?: SyncLogger;
@@ -45,7 +45,7 @@ export interface ImageStudent {
 }
 
 export interface ExtractImageAssetsOptions {
-  sqlcipherKey: string;
+  sqlcipherKey?: string;
   students: ImageStudent[];
   outDir: string;
   cacheDir: string;
