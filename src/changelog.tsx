@@ -63,6 +63,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Improved detection of 0 damage counts in the screenshot importer.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Bulk screenshot importer will no longer match opponents by name AND student rep. Only the name matters.",
+      },
     ],
   },
   {
