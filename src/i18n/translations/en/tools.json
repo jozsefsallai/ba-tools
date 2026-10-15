@@ -765,6 +765,11 @@
       "screenshotDebugBreadcrumb": "Screenshot Debugger"
     },
     "presets": {
+      "anonymize": "Anonymize",
+      "anonymizeTitle": "Anonymize {name}?",
+      "anonymizeDescription": "Clear the opponent name and student representative from all linked matches, move those matches and all manually added formations to Anonymous, then permanently delete this opponent preset. Match results, ranks, teams, dates, and statistics will be kept. This cannot be undone.",
+      "anonymizing": "Anonymizing...",
+      "anonymizeFailed": "Could not anonymize this opponent. Please try again.",
       "actions": "More actions...",
       "anonymous": "Anonymous",
       "mergeWith": "Merge with...",

@@ -7,6 +7,14 @@ import { StudentCard } from "@/components/common/student-card";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -35,9 +43,15 @@ export function PVPEnemyPresetsPage({
 }: { seasonId: Id<"pvpSeason"> }) {
   const t = useTranslations();
   const { studentMap } = useStudents();
+
   const [search, setSearch] = useState("");
   const [mergeSource, setMergeSource] = useState<Doc<"pvpEnemyPreset">>();
   const [deleteSource, setDeleteSource] = useState<Doc<"pvpEnemyPreset">>();
+  const [anonymizeSource, setAnonymizeSource] =
+    useState<Doc<"pvpEnemyPreset">>();
+  const [isAnonymizing, setIsAnonymizing] = useState(false);
+  const [anonymizeFailed, setAnonymizeFailed] = useState(false);
+
   const debouncedSearch = useDebounce(search, 250);
   const {
     results: presets,
@@ -49,6 +63,25 @@ export function PVPEnemyPresetsPage({
     { initialNumItems: 30 },
   );
   const remove = useMutation(api.pvp.deleteEnemyPreset);
+  const anonymize = useMutation(api.pvp.anonymizeEnemyPreset);
+
+  async function handleAnonymize() {
+    if (!anonymizeSource || isAnonymizing) {
+      return;
+    }
+
+    setIsAnonymizing(true);
+    setAnonymizeFailed(false);
+
+    try {
+      await anonymize({ presetId: anonymizeSource._id });
+      setAnonymizeSource(undefined);
+    } catch {
+      setAnonymizeFailed(true);
+    } finally {
+      setIsAnonymizing(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -190,6 +223,16 @@ export function PVPEnemyPresetsPage({
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           variant="destructive"
+                          onSelect={() => {
+                            setAnonymizeSource(preset);
+                            setAnonymizeFailed(false);
+                          }}
+                        >
+                          {t("tools.pvp.presets.anonymize")}
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          variant="destructive"
                           onSelect={() => setDeleteSource(preset)}
                         >
                           {t("tools.pvp.presets.delete")}
@@ -203,6 +246,53 @@ export function PVPEnemyPresetsPage({
           })}
         </div>
       )}
+
+      <Dialog
+        open={!!anonymizeSource}
+        onOpenChange={(open) => {
+          if (!open && !isAnonymizing) setAnonymizeSource(undefined);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t("tools.pvp.presets.anonymizeTitle", {
+                name: anonymizeSource?.name ?? "",
+              })}
+            </DialogTitle>
+
+            <DialogDescription>
+              {t("tools.pvp.presets.anonymizeDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          {anonymizeFailed && (
+            <p role="alert" className="text-sm text-destructive">
+              {t("tools.pvp.presets.anonymizeFailed")}
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={isAnonymizing}
+              onClick={() => setAnonymizeSource(undefined)}
+            >
+              {t("tools.pvp.presets.cancel")}
+            </Button>
+
+            <Button
+              variant="destructive"
+              disabled={isAnonymizing}
+              onClick={() => void handleAnonymize()}
+            >
+              {isAnonymizing
+                ? t("tools.pvp.presets.anonymizing")
+                : t("tools.pvp.presets.anonymize")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {deleteSource && (
         <ConfirmDialog

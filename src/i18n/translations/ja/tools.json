@@ -649,6 +649,11 @@
       "screenshotDebugBreadcrumb": "スクリーンショットデバッガー"
     },
     "presets": {
+      "anonymize": "匿名化",
+      "anonymizeTitle": "{name}を匿名化しますか？",
+      "anonymizeDescription": "紐づくすべての対戦記録から相手の名前と代表生徒を削除し、対戦記録と手動で追加した編成を「匿名」に移した後、この相手プリセットを完全に削除します。対戦結果、順位、編成、日時、統計は保持されます。この操作は取り消せません。",
+      "anonymizing": "匿名化中...",
+      "anonymizeFailed": "相手を匿名化できませんでした。もう一度お試しください。",
       "actions": "その他の操作...",
       "anonymous": "匿名",
       "mergeWith": "他のプリセットと統合...",

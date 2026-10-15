@@ -55,6 +55,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.pvp,
         description: "Added ability to view anonymous opponents.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added ability to anonymize opponent presets.",
+      },
     ],
     changes: [
       {

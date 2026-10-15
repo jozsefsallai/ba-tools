@@ -10,7 +10,7 @@ import { stream } from "convex-helpers/server/stream";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import type { Id } from "~convex/dataModel";
-import type { QueryCtx } from "~convex/server";
+import type { MutationCtx, QueryCtx } from "~convex/server";
 import {
   authenticatedMutation,
   authenticatedQuery,
@@ -1174,6 +1174,60 @@ export const updateEnemyPreset = authenticatedMutation({
   },
 });
 
+async function mergeManualEnemyTeams(
+  ctx: MutationCtx,
+  seasonId: Id<"pvpSeason">,
+  sourcePresetId: Id<"pvpEnemyPreset">,
+  targetPresetId?: Id<"pvpEnemyPreset">,
+) {
+  const teams = [
+    ...(await getManualEnemyTeams(ctx, seasonId, targetPresetId)),
+    ...(await getManualEnemyTeams(ctx, seasonId, sourcePresetId)),
+  ];
+
+  const byKey = new Map<string, (typeof teams)[number]>();
+
+  for (const team of teams) {
+    const teamKey = getTeamKey(team.team);
+    const existing = byKey.get(teamKey);
+
+    if (!existing) {
+      await ctx.db.patch(team._id, {
+        enemyPresetId: targetPresetId,
+        teamKey,
+      });
+
+      byKey.set(teamKey, team);
+      continue;
+    }
+
+    const roles = new Set<"attack" | "defense">();
+    mergeEnemyRoles(roles, existing.matchType);
+    mergeEnemyRoles(roles, team.matchType);
+
+    const newest = team.updatedAt > existing.updatedAt ? team : existing;
+
+    const merged = {
+      ...existing,
+      teamKey,
+      team: newest.team,
+      updatedAt: newest.updatedAt,
+      matchType: roleFromSet(roles),
+    };
+
+    await ctx.db.patch(existing._id, {
+      teamKey,
+      team: merged.team,
+      updatedAt: merged.updatedAt,
+      matchType: merged.matchType,
+    });
+
+    await ctx.db.delete(team._id);
+
+    byKey.set(teamKey, merged);
+  }
+}
+
 export const mergeEnemyPresets = authenticatedMutation({
   args: {
     sourcePresetId: v.id("pvpEnemyPreset"),
@@ -1202,57 +1256,42 @@ export const mergeEnemyPresets = authenticatedMutation({
       await ctx.db.patch(match._id, { enemyPresetId: targetPresetId });
     }
 
-    const teams = [
-      ...(await getManualEnemyTeams(ctx, source.seasonId, targetPresetId)),
-      ...(await getManualEnemyTeams(ctx, source.seasonId, sourcePresetId)),
-    ];
-
-    const byKey = new Map<string, (typeof teams)[number]>();
-
-    for (const team of teams) {
-      const teamKey = getTeamKey(team.team);
-      const existing = byKey.get(teamKey);
-
-      if (!existing) {
-        await ctx.db.patch(team._id, {
-          enemyPresetId: targetPresetId,
-          teamKey,
-        });
-
-        byKey.set(teamKey, team);
-        continue;
-      }
-
-      const roles = new Set<"attack" | "defense">();
-      mergeEnemyRoles(roles, existing.matchType);
-      mergeEnemyRoles(roles, team.matchType);
-
-      const newest = team.updatedAt > existing.updatedAt ? team : existing;
-
-      const merged = {
-        ...existing,
-        teamKey,
-        team: newest.team,
-        updatedAt: newest.updatedAt,
-        matchType: roleFromSet(roles),
-      };
-
-      await ctx.db.patch(existing._id, {
-        teamKey,
-        team: merged.team,
-        updatedAt: merged.updatedAt,
-        matchType: merged.matchType,
-      });
-
-      await ctx.db.delete(team._id);
-
-      byKey.set(teamKey, merged);
-    }
+    await mergeManualEnemyTeams(
+      ctx,
+      source.seasonId,
+      sourcePresetId,
+      targetPresetId,
+    );
 
     await ctx.db.delete(sourcePresetId);
     await updateEnemyPresetRecency(ctx, targetPresetId);
 
     return targetPresetId;
+  },
+});
+
+export const anonymizeEnemyPreset = authenticatedMutation({
+  args: { presetId: v.id("pvpEnemyPreset") },
+  handler: async (ctx, { presetId }) => {
+    const preset = await ctx.db.get(presetId);
+    if (!preset || preset.userId !== ctx.user._id) {
+      throw new Error("Preset not found");
+    }
+
+    await getSeasonForUser(ctx, preset.seasonId);
+
+    const matches = await getOpponentMatches(ctx, preset.seasonId, presetId);
+
+    for (const match of matches) {
+      await ctx.db.patch(match._id, {
+        enemyPresetId: undefined,
+        opponentName: undefined,
+        opponentStudentRepId: undefined,
+      });
+    }
+
+    await mergeManualEnemyTeams(ctx, preset.seasonId, presetId);
+    await ctx.db.delete(presetId);
   },
 });
 
