@@ -21,7 +21,11 @@ export default async function OpponentPresetTeamsRoute({
   return (
     <PVPEnemyPresetTeamsPage
       seasonId={resolved.seasonId as Id<"pvpSeason">}
-      presetId={resolved.presetId as Id<"pvpEnemyPreset">}
+      presetId={
+        resolved.presetId === "anonymous"
+          ? undefined
+          : (resolved.presetId as Id<"pvpEnemyPreset">)
+      }
     />
   );
 }

@@ -383,7 +383,7 @@ export default defineSchema({
   pvpEnemyTeam: defineTable({
     userId: v.id("users"),
     seasonId: v.id("pvpSeason"),
-    enemyPresetId: v.id("pvpEnemyPreset"),
+    enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
     teamKey: v.optional(v.string()),
     team: v.array(pvpFormationStudentItem),
     matchType: v.union(
@@ -395,6 +395,7 @@ export default defineSchema({
   })
     .index("by_enemyPresetId", ["enemyPresetId"])
     .index("by_enemyPresetId_teamKey", ["enemyPresetId", "teamKey"])
+    .index("by_seasonId_enemyPresetId", ["seasonId", "enemyPresetId"])
     .index("by_seasonId", ["seasonId"]),
 
   pvpMatchRecord: defineTable({
@@ -420,7 +421,12 @@ export default defineSchema({
     .index("by_seasonId_date", ["seasonId", "date"])
     .index("by_seasonId_ownTeamKey", ["seasonId", "ownTeamKey"])
     .index("by_seasonId_opponentTeamKey", ["seasonId", "opponentTeamKey"])
-    .index("by_enemyPresetId_date", ["enemyPresetId", "date"]),
+    .index("by_enemyPresetId_date", ["enemyPresetId", "date"])
+    .index("by_seasonId_enemyPresetId_date", [
+      "seasonId",
+      "enemyPresetId",
+      "date",
+    ]),
 
   pvpStatsPending: defineTable({
     matchId: v.id("pvpMatchRecord"),

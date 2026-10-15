@@ -48,10 +48,13 @@ export function PVPEnemyPresetTeamsPage({
   presetId,
 }: {
   seasonId: Id<"pvpSeason">;
-  presetId: Id<"pvpEnemyPreset">;
+  presetId?: Id<"pvpEnemyPreset">;
 }) {
   const t = useTranslations();
-  const teamsResult = useQuery(api.pvp.getEnemyPresetTeams, { presetId });
+  const teamsResult = useQuery(api.pvp.getEnemyPresetTeams, {
+    seasonId,
+    presetId,
+  });
   const seasonResult = usePVPSeasonDefaults();
   const createTeam = useMutation(api.pvp.createEnemyTeam);
   const updateTeam = useMutation(api.pvp.updateEnemyTeam);
@@ -152,7 +155,11 @@ export function PVPEnemyPresetTeamsPage({
   return (
     <PVPBreadcrumbs
       seasonName={seasonResult?.season?.name}
-      opponentName={teamsResult.preset.opponentName || teamsResult.preset.name}
+      opponentName={
+        teamsResult.preset?.opponentName ||
+        teamsResult.preset?.name ||
+        t("tools.pvp.presets.anonymous")
+      }
     >
       <div className="flex min-w-0 flex-col gap-6">
         <div className="flex flex-wrap items-center gap-4">
@@ -164,13 +171,14 @@ export function PVPEnemyPresetTeamsPage({
 
           <h1 className="text-xl font-bold">
             {t("tools.pvp.presets.teamsUsedBy", {
-              name: teamsResult?.preset.name ?? "",
+              name:
+                teamsResult.preset?.name ?? t("tools.pvp.presets.anonymous"),
             })}
           </h1>
           <div className="ml-auto flex gap-2">
             <Button variant="outline" asChild>
               <Link
-                href={`/pvp/${seasonId}/presets/opponents/${presetId}/history`}
+                href={`/pvp/${seasonId}/presets/opponents/${presetId ?? "anonymous"}/history`}
               >
                 {t("tools.pvp.presets.battleHistory")}
               </Link>

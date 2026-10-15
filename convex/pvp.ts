@@ -113,15 +113,47 @@ const enemyTeamRole = (matchType: PVPMatchType): PVPMatchType => {
   return matchType === "attack" ? "defense" : "attack";
 };
 
-async function findManualEnemyTeam(ctx: any, presetId: any, teamKey: string) {
-  const teams = await ctx.db
-    .query("pvpEnemyTeam")
-    .withIndex("by_enemyPresetId", (q: any) => q.eq("enemyPresetId", presetId))
+async function getOpponentMatches(
+  ctx: QueryCtx,
+  seasonId: Id<"pvpSeason">,
+  presetId?: Id<"pvpEnemyPreset">,
+) {
+  const matches = await ctx.db
+    .query("pvpMatchRecord")
+    .withIndex("by_seasonId_enemyPresetId_date", (q) =>
+      q.eq("seasonId", seasonId).eq("enemyPresetId", presetId),
+    )
+    .order("desc")
     .collect();
 
+  return presetId
+    ? matches
+    : matches.filter((match) => !match.opponentName?.trim());
+}
+
+async function getManualEnemyTeams(
+  ctx: QueryCtx,
+  seasonId: Id<"pvpSeason">,
+  presetId?: Id<"pvpEnemyPreset">,
+) {
+  return await ctx.db
+    .query("pvpEnemyTeam")
+    .withIndex("by_seasonId_enemyPresetId", (q) =>
+      q.eq("seasonId", seasonId).eq("enemyPresetId", presetId),
+    )
+    .collect();
+}
+
+async function findManualEnemyTeam(
+  ctx: QueryCtx,
+  seasonId: Id<"pvpSeason">,
+  presetId: Id<"pvpEnemyPreset"> | undefined,
+  teamKey: string,
+) {
+  const teams = await getManualEnemyTeams(ctx, seasonId, presetId);
+
   return teams.find(
-    (team: any) =>
-      team.teamKey === teamKey || getTeamKey(team.team) === teamKey,
+    (team) => team.teamKey === teamKey || getTeamKey(team.team) === teamKey,
   );
 }
 
@@ -142,21 +174,14 @@ function roleFromSet(roles: Set<"attack" | "defense">): PVPFormationPresetType {
   return roles.size === 2 ? "both" : roles.has("attack") ? "attack" : "defense";
 }
 
-async function getUniqueEnemyTeamsForPreset(ctx: any, preset: any) {
-  const matches = await ctx.db
-    .query("pvpMatchRecord")
-    .withIndex("by_enemyPresetId_date", (q: any) =>
-      q.eq("enemyPresetId", preset._id),
-    )
-    .order("desc")
-    .collect();
-
-  const manualTeams = await ctx.db
-    .query("pvpEnemyTeam")
-    .withIndex("by_enemyPresetId", (q: any) =>
-      q.eq("enemyPresetId", preset._id),
-    )
-    .collect();
+async function getUniqueEnemyTeamsForPreset(
+  ctx: QueryCtx,
+  preset: { seasonId: Id<"pvpSeason">; _id?: Id<"pvpEnemyPreset"> },
+) {
+  const [matches, manualTeams] = await Promise.all([
+    getOpponentMatches(ctx, preset.seasonId, preset._id),
+    getManualEnemyTeams(ctx, preset.seasonId, preset._id),
+  ]);
 
   const byKey = new Map<string, any>();
 
@@ -613,14 +638,23 @@ export const getEnemyPreset = authenticatedQuery({
 });
 
 export const getEnemyPresetTeams = authenticatedQuery({
-  args: { presetId: v.id("pvpEnemyPreset") },
-  handler: async (ctx, { presetId }) => {
-    const preset = await ctx.db.get(presetId);
-    if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
-    }
+  args: {
+    seasonId: v.id("pvpSeason"),
+    presetId: v.optional(v.id("pvpEnemyPreset")),
+  },
+  handler: async (ctx, { seasonId, presetId }) => {
+    await getSeasonForUser(ctx, seasonId);
+    await validateEnemyPresetForMatch(ctx, presetId, seasonId);
 
-    return { preset, teams: await getUniqueEnemyTeamsForPreset(ctx, preset) };
+    const preset = presetId ? await ctx.db.get(presetId) : null;
+
+    return {
+      preset,
+      teams: await getUniqueEnemyTeamsForPreset(ctx, {
+        seasonId,
+        _id: presetId,
+      }),
+    };
   },
 });
 
@@ -643,23 +677,17 @@ export const getEnemyPresetByName = authenticatedQuery({
 });
 
 export const getEnemyPresetHistory = authenticatedQuery({
-  args: { presetId: v.id("pvpEnemyPreset") },
-  handler: async (ctx, { presetId }) => {
-    const preset = await ctx.db.get(presetId);
-
-    if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
-    }
+  args: {
+    seasonId: v.id("pvpSeason"),
+    presetId: v.optional(v.id("pvpEnemyPreset")),
+  },
+  handler: async (ctx, { seasonId, presetId }) => {
+    await getSeasonForUser(ctx, seasonId);
+    await validateEnemyPresetForMatch(ctx, presetId, seasonId);
 
     return {
-      preset,
-      matches: await ctx.db
-        .query("pvpMatchRecord")
-        .withIndex("by_enemyPresetId_date", (q) =>
-          q.eq("enemyPresetId", presetId),
-        )
-        .order("desc")
-        .collect(),
+      preset: presetId ? await ctx.db.get(presetId) : null,
+      matches: await getOpponentMatches(ctx, seasonId, presetId),
     };
   },
 });
@@ -740,7 +768,6 @@ export const recordMatch = authenticatedMutation({
         ctx,
         seasonId,
         savedOpponentName,
-        opponentStudentRepId,
       );
 
       savedEnemyPresetId =
@@ -1147,6 +1174,88 @@ export const updateEnemyPreset = authenticatedMutation({
   },
 });
 
+export const mergeEnemyPresets = authenticatedMutation({
+  args: {
+    sourcePresetId: v.id("pvpEnemyPreset"),
+    targetPresetId: v.id("pvpEnemyPreset"),
+  },
+  handler: async (ctx, { sourcePresetId, targetPresetId }) => {
+    if (sourcePresetId === targetPresetId) {
+      throw new Error("Choose a different opponent preset");
+    }
+
+    const source = await ctx.db.get(sourcePresetId);
+    if (!source || source.userId !== ctx.user._id) {
+      throw new Error("Preset not found");
+    }
+
+    await getSeasonForUser(ctx, source.seasonId);
+    await validateEnemyPresetForMatch(ctx, targetPresetId, source.seasonId);
+
+    const matches = await getOpponentMatches(
+      ctx,
+      source.seasonId,
+      sourcePresetId,
+    );
+
+    for (const match of matches) {
+      await ctx.db.patch(match._id, { enemyPresetId: targetPresetId });
+    }
+
+    const teams = [
+      ...(await getManualEnemyTeams(ctx, source.seasonId, targetPresetId)),
+      ...(await getManualEnemyTeams(ctx, source.seasonId, sourcePresetId)),
+    ];
+
+    const byKey = new Map<string, (typeof teams)[number]>();
+
+    for (const team of teams) {
+      const teamKey = getTeamKey(team.team);
+      const existing = byKey.get(teamKey);
+
+      if (!existing) {
+        await ctx.db.patch(team._id, {
+          enemyPresetId: targetPresetId,
+          teamKey,
+        });
+
+        byKey.set(teamKey, team);
+        continue;
+      }
+
+      const roles = new Set<"attack" | "defense">();
+      mergeEnemyRoles(roles, existing.matchType);
+      mergeEnemyRoles(roles, team.matchType);
+
+      const newest = team.updatedAt > existing.updatedAt ? team : existing;
+
+      const merged = {
+        ...existing,
+        teamKey,
+        team: newest.team,
+        updatedAt: newest.updatedAt,
+        matchType: roleFromSet(roles),
+      };
+
+      await ctx.db.patch(existing._id, {
+        teamKey,
+        team: merged.team,
+        updatedAt: merged.updatedAt,
+        matchType: merged.matchType,
+      });
+
+      await ctx.db.delete(team._id);
+
+      byKey.set(teamKey, merged);
+    }
+
+    await ctx.db.delete(sourcePresetId);
+    await updateEnemyPresetRecency(ctx, targetPresetId);
+
+    return targetPresetId;
+  },
+});
+
 export const deleteEnemyPreset = authenticatedMutation({
   args: { presetId: v.id("pvpEnemyPreset") },
   handler: async (ctx, { presetId }) => {
@@ -1183,7 +1292,7 @@ export const deleteEnemyPreset = authenticatedMutation({
 export const createEnemyTeam = authenticatedMutation({
   args: {
     seasonId: v.id("pvpSeason"),
-    enemyPresetId: v.id("pvpEnemyPreset"),
+    enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
     matchType: v.union(
       v.literal("attack"),
       v.literal("defense"),
@@ -1193,15 +1302,7 @@ export const createEnemyTeam = authenticatedMutation({
   },
   handler: async (ctx, args) => {
     await getSeasonForUser(ctx, args.seasonId);
-    const preset = await ctx.db.get(args.enemyPresetId);
-
-    if (
-      !preset ||
-      preset.userId !== ctx.user._id ||
-      preset.seasonId !== args.seasonId
-    ) {
-      throw new Error("Preset not found");
-    }
+    await validateEnemyPresetForMatch(ctx, args.enemyPresetId, args.seasonId);
 
     if (!args.team.some((item) => item.studentId)) {
       throw new Error("Team must contain at least one student");
@@ -1211,6 +1312,7 @@ export const createEnemyTeam = authenticatedMutation({
     const teamKey = getTeamKey(team);
     const existing = await findManualEnemyTeam(
       ctx,
+      args.seasonId,
       args.enemyPresetId,
       teamKey,
     );
@@ -1267,7 +1369,12 @@ export const updateEnemyTeam = authenticatedMutation({
     const collision =
       teamKey === current.teamKey || getTeamKey(current.team) === teamKey
         ? null
-        : await findManualEnemyTeam(ctx, current.enemyPresetId, teamKey);
+        : await findManualEnemyTeam(
+            ctx,
+            current.seasonId,
+            current.enemyPresetId,
+            teamKey,
+          );
 
     if (collision) {
       await ctx.db.patch(collision._id, {

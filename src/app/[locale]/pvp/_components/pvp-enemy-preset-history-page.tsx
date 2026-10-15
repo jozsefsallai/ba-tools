@@ -17,10 +17,13 @@ export function PVPEnemyPresetHistoryPage({
   presetId,
 }: {
   seasonId: Id<"pvpSeason">;
-  presetId: Id<"pvpEnemyPreset">;
+  presetId?: Id<"pvpEnemyPreset">;
 }) {
   const t = useTranslations();
-  const history = useQuery(api.pvp.getEnemyPresetHistory, { presetId });
+  const history = useQuery(api.pvp.getEnemyPresetHistory, {
+    seasonId,
+    presetId,
+  });
   const season = usePVPSeasonDefaults();
 
   if (!history) {
@@ -30,19 +33,25 @@ export function PVPEnemyPresetHistoryPage({
   return (
     <PVPBreadcrumbs
       seasonName={season?.season?.name}
-      opponentName={history.preset.opponentName || history.preset.name}
+      opponentName={
+        history.preset?.opponentName ||
+        history.preset?.name ||
+        t("tools.pvp.presets.anonymous")
+      }
     >
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/pvp/${seasonId}/presets/opponents/${presetId}/teams`}>
+            <Link
+              href={`/pvp/${seasonId}/presets/opponents/${presetId ?? "anonymous"}/teams`}
+            >
               <ChevronLeftIcon />
             </Link>
           </Button>
 
           <h1 className="text-xl font-bold">
             {t("tools.pvp.presets.battleHistoryFor", {
-              name: history.preset.name,
+              name: history.preset?.name ?? t("tools.pvp.presets.anonymous"),
             })}
           </h1>
         </div>

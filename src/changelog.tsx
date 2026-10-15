@@ -45,6 +45,27 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 15, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added ability to merge opponent presets.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Added ability to view anonymous opponents.",
+      },
+    ],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Improved detection of 0 damage counts in the screenshot importer.",
+      },
+    ],
+  },
+  {
     date: "October 10, 2026",
     features: [],
     changes: [

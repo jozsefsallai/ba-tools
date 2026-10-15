@@ -256,7 +256,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
       ? {
           seasonId,
           name: opponentName.trim(),
-          opponentStudentRepId: opponentStudentRep?.id,
+          opponentStudentRepId: review ? undefined : opponentStudentRep?.id,
         }
       : "skip",
   );
@@ -265,7 +265,9 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
   const enemyTeams = useQuery(
     api.pvp.getEnemyPresetTeams,
-    resolvedEnemyPresetId ? { presetId: resolvedEnemyPresetId } : "skip",
+    resolvedEnemyPresetId
+      ? { seasonId, presetId: resolvedEnemyPresetId }
+      : "skip",
   );
   const defaults = usePVPSeasonDefaults();
   const createFormationPreset = useMutation(api.pvp.createFormationPreset);
@@ -480,7 +482,8 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
   const matchingOpponentPreset = Boolean(
     matchingEnemyPreset &&
-      matchingEnemyPreset.opponentStudentRepId === opponentStudentRep?.id,
+      (review ||
+        matchingEnemyPreset.opponentStudentRepId === opponentStudentRep?.id),
   );
 
   const canSaveOpponent =

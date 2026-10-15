@@ -1,5 +1,6 @@
 "use client";
 
+import { PVPEnemyPresetMergeDialog } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-merge-dialog";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import { ChevronLeftIcon, LoaderCircleIcon, SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { api } from "~convex/api";
-import type { Id } from "~convex/dataModel";
+import type { Doc, Id } from "~convex/dataModel";
 
 export function PVPEnemyPresetsPage({
   seasonId,
@@ -20,6 +21,7 @@ export function PVPEnemyPresetsPage({
   const t = useTranslations();
   const { studentMap } = useStudents();
   const [search, setSearch] = useState("");
+  const [mergeSource, setMergeSource] = useState<Doc<"pvpEnemyPreset">>();
   const debouncedSearch = useDebounce(search, 250);
   const {
     results: presets,
@@ -64,6 +66,24 @@ export function PVPEnemyPresetsPage({
         />
       </div>
 
+      <article className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4">
+        <h2 className="font-semibold">{t("tools.pvp.presets.anonymous")}</h2>
+
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" asChild>
+            <Link href={`/pvp/${seasonId}/presets/opponents/anonymous/teams`}>
+              {t("tools.pvp.presets.teams")}
+            </Link>
+          </Button>
+
+          <Button size="sm" variant="outline" asChild>
+            <Link href={`/pvp/${seasonId}/presets/opponents/anonymous/history`}>
+              {t("tools.pvp.presets.battleHistory")}
+            </Link>
+          </Button>
+        </div>
+      </article>
+
       {status === "LoadingFirstPage" ? (
         <div className="rounded-lg border p-6 text-sm text-muted-foreground">
           {t("tools.pvp.presets.loadingEnemies")}
@@ -81,7 +101,7 @@ export function PVPEnemyPresetsPage({
 
             return (
               <article
-                className="flex items-center justify-between gap-4 rounded-lg border p-4"
+                className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4"
                 key={preset._id}
               >
                 <div className="flex min-w-0 items-center gap-3">
@@ -102,7 +122,7 @@ export function PVPEnemyPresetsPage({
                   </div>
                 </div>
 
-                <div className="flex shrink-0 gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button size="sm" variant="outline" asChild>
                     <Link
                       href={`/pvp/${seasonId}/presets/opponents/${preset._id}/teams`}
@@ -117,6 +137,14 @@ export function PVPEnemyPresetsPage({
                     >
                       {t("tools.pvp.presets.edit")}
                     </Link>
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setMergeSource(preset)}
+                  >
+                    {t("tools.pvp.presets.mergeWith")}
                   </Button>
 
                   <ConfirmDialog
@@ -134,6 +162,13 @@ export function PVPEnemyPresetsPage({
             );
           })}
         </div>
+      )}
+
+      {mergeSource && (
+        <PVPEnemyPresetMergeDialog
+          source={mergeSource}
+          onClose={() => setMergeSource(undefined)}
+        />
       )}
 
       {status === "CanLoadMore" && (
