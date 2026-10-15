@@ -300,7 +300,12 @@ export class PvpOcrClient {
 
         const readings: PvpOcrReading[] = [];
 
-        const attempts =
+        const attempts: {
+          threshold: boolean;
+          scale: number;
+          deslant: number;
+          pageSegMode?: PSM;
+        }[] =
           mode === "text"
             ? [
                 { threshold: false, scale: 3, deslant: 0 },
@@ -326,16 +331,27 @@ export class PvpOcrClient {
         }
 
         if (mode === "digits" && crop.width < crop.height * 1.5) {
-          attempts.push({ threshold: false, scale: 4, deslant: 0 });
+          // Tesseract can discard an isolated zero as a non-text blob even in
+          // SINGLE_CHAR mode. RAW_LINE bypasses those segmentation heuristics.
+          for (const pageSegMode of [PSM.SINGLE_CHAR, PSM.RAW_LINE]) {
+            for (const threshold of [false, true]) {
+              attempts.push({
+                threshold,
+                scale: 4,
+                deslant: 0,
+                pageSegMode,
+              });
+            }
+          }
         }
 
         for (const [
           attempt,
-          { threshold, scale, deslant },
+          { threshold, scale, deslant, pageSegMode },
         ] of attempts.entries()) {
-          if (mode === "digits" && attempt === 2) {
+          if (pageSegMode) {
             await withAbort(
-              worker.setParameters({ tessedit_pageseg_mode: PSM.SINGLE_CHAR }),
+              worker.setParameters({ tessedit_pageseg_mode: pageSegMode }),
               signal,
             );
           }
