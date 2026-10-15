@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import type { DataSyncModule, SyncLogger } from "@/lib/game-data/contract";
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const entry = `${root}private/mx-data-sync/src/index.ts`;
+const entry = `${root}vendor/mx-data-sync/src/index.ts`;
 
 export const cacheDir = `${root}.cache/game-data/downloads`;
 

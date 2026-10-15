@@ -3,7 +3,7 @@
 set -eu
 
 SUBMODULE_NAME="mx-data-sync"
-SUBMODULE_PATH="private/mx-data-sync"
+SUBMODULE_PATH="vendor/mx-data-sync"
 ENTRY="$SUBMODULE_PATH/src/index.ts"
 
 TOKEN="${MX_DATA_SYNC_TOKEN:-${TRIGGER_BUILD_MX_DATA_SYNC_TOKEN:-}}"

@@ -37,7 +37,7 @@
       ".next",
       "node_modules/*",
       "convex/_generated/*",
-      "private/*"
+      "vendor/*"
     ]
   }
 }

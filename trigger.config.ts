@@ -8,7 +8,7 @@ import { defineConfig } from "@trigger.dev/sdk/v3";
 
 // The mx-data-sync submodule is optional. Without it, certain tasks get a stub
 // and abort
-const mxDataSyncEntry = resolve("private/mx-data-sync/src/index.ts");
+const mxDataSyncEntry = resolve("vendor/mx-data-sync/src/index.ts");
 const mxDataSyncStub = resolve("src/trigger/lib/mx-data-sync-stub.ts");
 
 // Some of mx-asset-sync's runtime dependencies ship WASM, which can't be
@@ -18,7 +18,7 @@ const mxDataSyncPackages = existsSync(mxDataSyncEntry)
   ? Object.entries(
       (
         JSON.parse(
-          readFileSync(resolve("private/mx-data-sync/package.json"), "utf8"),
+          readFileSync(resolve("vendor/mx-data-sync/package.json"), "utf8"),
         ) as { dependencies?: Record<string, string> }
       ).dependencies ?? {},
     ).map(([name, version]) => `${name}@${version}`)
