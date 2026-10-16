@@ -45,6 +45,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 16, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Added a button that lets you import a defense team from a combat report in the PVP Counter Search tool.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
+  {
     date: "October 15, 2026",
     features: [
       {

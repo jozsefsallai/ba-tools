@@ -185,6 +185,7 @@ export class PvpOcrClient {
       signal: AbortSignal;
       onProgress?: (progress: PvpOcrProgress) => void;
       students?: readonly PvpStudentIdentity[];
+      recognizeOpponentName?: boolean;
     },
   ): Promise<PvpExtractionResult> {
     if (this.busy) {
@@ -425,9 +426,11 @@ export class PvpOcrClient {
         } as PvpOcrField<T>;
       };
 
+      const readName = !anonymousRep && options.recognizeOpponentName !== false;
+
       let levelEnd: number | undefined;
 
-      if (!anonymousRep) {
+      if (readName) {
         await withAbort(
           worker.setParameters({
             tessedit_pageseg_mode: PSM.SINGLE_LINE,
@@ -451,7 +454,7 @@ export class PvpOcrClient {
 
         levelEnd = getPvpLevelEnd(words);
       }
-      const nameRecognition = anonymousRep
+      const nameRecognition = !readName
         ? undefined
         : recognizeRemoteOpponentName(prepared.enemyName, signal, levelEnd);
 

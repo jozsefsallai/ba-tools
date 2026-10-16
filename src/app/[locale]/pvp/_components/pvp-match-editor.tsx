@@ -1,5 +1,6 @@
 "use client";
 
+import { PvpCombatReportImportDialog } from "@/app/[locale]/pvp/_components/pvp-combat-report-import-dialog";
 import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import { PVPPresetPicker } from "@/app/[locale]/pvp/_components/pvp-preset-picker";
@@ -25,7 +26,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -47,34 +47,22 @@ import { useUserPreferences } from "@/hooks/use-preferences";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
-import { correctPvpImportedItem, resolvePvpReportTeam } from "@/lib/pvp";
-import type { PvpOcrClient } from "@/lib/pvp/ocr";
-import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
-import { getScreenshotROIs } from "@/lib/pvp/screenshot";
-import { PvpScreenshotAlignmentError } from "@/lib/pvp/screenshot-layout";
 import {
-  PVP_SCREENSHOT_INPUT_TYPES,
-  PVP_SCREENSHOT_MAX_INPUT_SIZE,
-} from "@/lib/pvp/screenshot-types";
+  type PvpBattleInfo,
+  correctPvpImportedItem,
+  resolvePvpReportTeam,
+} from "@/lib/pvp";
+import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
 import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
 import type { FunctionArgs } from "convex/server";
 import {
-  CheckIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
-  LoaderCircleIcon,
   SaveIcon,
-  TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  type ClipboardEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
@@ -143,76 +131,9 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
   const statisticsPreferenceTouched = useRef(false);
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [enemyPresetId, setEnemyPresetId] = useState<Id<"pvpEnemyPreset">>();
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
-  const [reportStatus, setReportStatus] = useState<
-    "idle" | "reading" | "extracting" | "applying"
-  >("idle");
-
-  const reportInputRef = useRef<HTMLInputElement>(null);
-  const reportClientRef = useRef<Promise<PvpOcrClient> | null>(null);
-  const reportAbortRef = useRef<AbortController | null>(null);
-  const reportJobRef = useRef(0);
   const nameReceiptRef = useRef<string | undefined>(undefined);
   const nameCacheEligibleRef = useRef(false);
   const [nameUncertain, setNameUncertain] = useState(false);
-  const reportWarmupGenerationRef = useRef(0);
-  const [reportEngineStatus, setReportEngineStatus] = useState<
-    "loading" | "ready" | "failed"
-  >("loading");
-  const reportImportState =
-    reportStatus === "idle" ? reportEngineStatus : "extracting";
-
-  const getReportClient = useCallback(() => {
-    reportClientRef.current ??= import("@/lib/pvp/ocr").then(
-      ({ PvpOcrClient }) => new PvpOcrClient(),
-    );
-    return reportClientRef.current;
-  }, []);
-
-  useEffect(
-    () => () => {
-      reportJobRef.current++;
-      reportWarmupGenerationRef.current++;
-      reportAbortRef.current?.abort();
-      void reportClientRef.current?.then((client) => client.dispose());
-      reportClientRef.current = null;
-    },
-    [],
-  );
-
-  function changeReportDialog(open: boolean) {
-    setReportDialogOpen(open);
-
-    if (open) {
-      const generation = ++reportWarmupGenerationRef.current;
-      setReportEngineStatus((status) =>
-        status === "failed" ? "loading" : status,
-      );
-
-      void getReportClient()
-        .then((client) => client.warmup())
-        .then(() => {
-          if (generation === reportWarmupGenerationRef.current) {
-            setReportEngineStatus("ready");
-          }
-        })
-        .catch(() => {
-          if (generation === reportWarmupGenerationRef.current) {
-            setReportEngineStatus("failed");
-          }
-        });
-    } else {
-      reportJobRef.current++;
-      if (reportAbortRef.current && reportStatus !== "reading") {
-        reportWarmupGenerationRef.current++;
-        setReportEngineStatus("loading");
-      }
-      reportAbortRef.current?.abort();
-      reportAbortRef.current = null;
-      setReportStatus("idle");
-    }
-  }
-
   const [savePresetKind, setSavePresetKind] = useState<"own" | "enemy">("own");
   const [savePresetName, setSavePresetName] = useState("");
   const [savePresetUsedByMe, setSavePresetUsedByMe] = useState(true);
@@ -495,151 +416,49 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
       attachedOpponentPreset.opponentStudentRepId !== opponentStudentRep?.id) &&
     !matchingOpponentPreset;
 
-  async function handleCombatReport(file: File) {
-    if (reportAbortRef.current) {
-      return;
+  function handleReportImported(battle: PvpBattleInfo) {
+    const students = Object.values(studentMap);
+
+    setOwnTeam(resolvePvpReportTeam(battle.myUnits, students));
+    setOpponentTeam(resolvePvpReportTeam(battle.enemyUnits, students));
+
+    if (battle.battleType.value) {
+      setMatchType(battle.battleType.value === "ATTACK" ? "attack" : "defense");
     }
 
-    const controller = new AbortController();
-    reportAbortRef.current = controller;
-
-    const job = ++reportJobRef.current;
-    const active = () =>
-      !controller.signal.aborted && job === reportJobRef.current;
-
-    try {
-      setReportStatus("reading");
-
-      if (
-        !PVP_SCREENSHOT_INPUT_TYPES.some((type) => type === file.type) ||
-        file.size === 0 ||
-        file.size > PVP_SCREENSHOT_MAX_INPUT_SIZE
-      ) {
-        throw new Error(
-          "Screenshot must be a supported image between 1 byte and 10 MB",
-        );
-      }
-
-      const [rois, client] = await Promise.all([
-        getScreenshotROIs(file),
-        getReportClient(),
-      ]);
-
-      if (!active()) {
-        return;
-      }
-
-      setReportStatus("extracting");
-
-      const parsed = await client.extract(rois, {
-        signal: controller.signal,
-        students: Object.values(studentMap),
-      });
-
-      if (!active()) {
-        return;
-      }
-
-      if (parsed.valid) {
-        setReportEngineStatus("ready");
-      }
-
-      if (!parsed.valid || !parsed.battle) {
-        toast.error(t("tools.pvp.reportImport.invalid"), {
-          position: "top-right",
-        });
-
-        return;
-      }
-      setReportStatus("applying");
-      const battle = parsed.battle;
-      const students = Object.values(studentMap);
-
-      setOwnTeam(resolvePvpReportTeam(battle.myUnits, students));
-      setOpponentTeam(resolvePvpReportTeam(battle.enemyUnits, students));
-
-      if (battle.battleType.value) {
-        setMatchType(
-          battle.battleType.value === "ATTACK" ? "attack" : "defense",
-        );
-      }
-
-      if (battle.result.value) {
-        setResult(battle.result.value === "WIN" ? "win" : "loss");
-      }
-
-      nameReceiptRef.current = battle.enemyNameRecognition?.receipt;
-      nameCacheEligibleRef.current = battle.enemyName.value != null;
-
-      setNameUncertain(battle.enemyName.uncertain);
-
-      if (battle.enemyNameStatus === "anonymous") {
-        setOpponentName("");
-      } else if (battle.enemyName.value != null) {
-        setOpponentName(battle.enemyName.value);
-      }
-
-      setEnemyPresetId(undefined);
-
-      const recognizedRep = battle.enemyStudentRep.iconMatch.studentId;
-      setOpponentStudentRep(
-        recognizedRep ? studentMap[recognizedRep] : undefined,
-      );
-
-      if (battle.enemyName.value) {
-        const preset = enemyPresets.find(
-          (candidate) => candidate.opponentName === battle.enemyName.value,
-        );
-        if (preset) {
-          setEnemyPresetId(preset._id);
-        }
-      }
-      toast.success(t("tools.pvp.reportImport.success"), {
-        position: "top-right",
-      });
-      setReportDialogOpen(false);
-    } catch (error) {
-      if (!active()) {
-        return;
-      }
-
-      console.error(error);
-
-      toast.error(
-        t(
-          error instanceof PvpScreenshotAlignmentError
-            ? "tools.pvp.reportImport.alignmentFailed"
-            : "tools.pvp.reportImport.failed",
-        ),
-        {
-          position: "top-right",
-        },
-      );
-    } finally {
-      if (job === reportJobRef.current) {
-        reportAbortRef.current = null;
-        setReportStatus("idle");
-      }
-    }
-  }
-
-  function handleCombatReportPaste(event: ClipboardEvent<HTMLDivElement>) {
-    if (reportStatus !== "idle") {
-      return;
+    if (battle.result.value) {
+      setResult(battle.result.value === "WIN" ? "win" : "loss");
     }
 
-    const imageItem = Array.from(event.clipboardData.items).find(
-      (item) => item.kind === "file" && item.type.startsWith("image/"),
+    nameReceiptRef.current = battle.enemyNameRecognition?.receipt;
+    nameCacheEligibleRef.current = battle.enemyName.value != null;
+
+    setNameUncertain(battle.enemyName.uncertain);
+
+    if (battle.enemyNameStatus === "anonymous") {
+      setOpponentName("");
+    } else if (battle.enemyName.value != null) {
+      setOpponentName(battle.enemyName.value);
+    }
+
+    setEnemyPresetId(undefined);
+
+    const recognizedRep = battle.enemyStudentRep.iconMatch.studentId;
+    setOpponentStudentRep(
+      recognizedRep ? studentMap[recognizedRep] : undefined,
     );
 
-    const file = imageItem?.getAsFile();
-
-    if (!file) {
-      return;
+    if (battle.enemyName.value) {
+      const preset = enemyPresets.find(
+        (candidate) => candidate.opponentName === battle.enemyName.value,
+      );
+      if (preset) {
+        setEnemyPresetId(preset._id);
+      }
     }
-
-    event.preventDefault();
-    void handleCombatReport(file);
+    toast.success(t("tools.pvp.reportImport.success"), {
+      position: "top-right",
+    });
   }
 
   async function handleWantsToUpdate() {
@@ -836,133 +655,17 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
             </h1>
 
             {!current && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => changeReportDialog(true)}
-              >
-                {t("tools.pvp.reportImport.title")}
-              </Button>
+              <PvpCombatReportImportDialog onImported={handleReportImported}>
+                {(open) => (
+                  <Button type="button" variant="outline" onClick={open}>
+                    {t("tools.pvp.reportImport.title")}
+                  </Button>
+                )}
+              </PvpCombatReportImportDialog>
             )}
           </div>
         </div>
       )}
-
-      <Dialog open={reportDialogOpen} onOpenChange={changeReportDialog}>
-        <DialogContent onPaste={handleCombatReportPaste}>
-          <DialogHeader>
-            <DialogTitle>{t("tools.pvp.reportImport.title")}</DialogTitle>
-            <DialogDescription>
-              {t.rich("tools.pvp.reportImport.disclaimer", {
-                shortcut: (children) => <Kbd>{children}</Kbd>,
-              })}
-            </DialogDescription>
-          </DialogHeader>
-
-          <Alert>
-            <TriangleAlertIcon aria-hidden="true" />
-            <AlertDescription>
-              {t("tools.pvp.screenshotImport.extractionNotice")}
-            </AlertDescription>
-          </Alert>
-
-          <button
-            type="button"
-            className="flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center text-sm text-muted-foreground hover:bg-muted/50"
-            onClick={() => reportInputRef.current?.click()}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={(event) => {
-              event.preventDefault();
-              const file = event.dataTransfer.files[0];
-              if (file) void handleCombatReport(file);
-            }}
-            disabled={reportStatus !== "idle"}
-          >
-            {reportStatus === "idle" && (
-              <>
-                <span className="font-medium text-foreground">
-                  {t("tools.pvp.reportImport.drop")}
-                </span>
-
-                <span>{t("tools.pvp.reportImport.browse")}</span>
-
-                <span className="mt-2 flex items-center gap-1.5 text-xs">
-                  {t("tools.pvp.reportImport.pasteHint")}
-                  <Kbd>Ctrl/Cmd + V</Kbd>
-                </span>
-              </>
-            )}
-
-            {reportStatus === "reading" && t("tools.pvp.reportImport.reading")}
-
-            {reportStatus === "extracting" &&
-              t("tools.pvp.reportImport.extracting")}
-
-            {reportStatus === "applying" &&
-              t("tools.pvp.reportImport.applying")}
-          </button>
-
-          <input
-            ref={reportInputRef}
-            type="file"
-            accept={PVP_SCREENSHOT_INPUT_TYPES.join(",")}
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void handleCombatReport(file);
-              event.target.value = "";
-            }}
-          />
-
-          <output
-            aria-atomic="true"
-            className={`flex min-h-5 items-center gap-2 text-sm font-bold ${
-              reportImportState === "ready"
-                ? "text-green-600 dark:text-green-400"
-                : reportImportState === "failed"
-                  ? "text-destructive"
-                  : "text-muted-foreground"
-            }`}
-          >
-            {reportImportState === "ready" ? (
-              <CheckIcon
-                className="size-4 shrink-0"
-                strokeWidth={3}
-                aria-hidden
-              />
-            ) : reportImportState === "failed" ? (
-              <TriangleAlertIcon
-                className="size-4 shrink-0 text-destructive"
-                aria-hidden
-              />
-            ) : (
-              <LoaderCircleIcon
-                className="size-4 shrink-0 animate-spin"
-                aria-hidden
-              />
-            )}
-            <span>
-              {reportImportState === "ready"
-                ? t("tools.pvp.reportImport.engineReady")
-                : reportImportState === "failed"
-                  ? t("tools.pvp.reportImport.engineFailed")
-                  : reportImportState === "extracting"
-                    ? t("tools.pvp.reportImport.extractionInProgress")
-                    : t("tools.pvp.reportImport.loadingAssets")}
-            </span>
-          </output>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => changeReportDialog(false)}
-            >
-              {t("tools.pvp.reportImport.cancel")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog
         open={savePresetDialogOpen}

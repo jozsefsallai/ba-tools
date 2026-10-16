@@ -1,5 +1,6 @@
 "use client";
 
+import { PvpCombatReportImportDialog } from "@/app/[locale]/pvp/_components/pvp-combat-report-import-dialog";
 import { PVPCounterVideos } from "@/app/[locale]/pvp/_components/pvp-counter-videos";
 import { PVPDefenseTeamStrip } from "@/app/[locale]/pvp/_components/pvp-defense-team-strip";
 import { PVPFormation } from "@/app/[locale]/pvp/_components/pvp-formation";
@@ -8,7 +9,13 @@ import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -19,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { usePvpStatsFilters } from "@/hooks/use-pvp-stats-filters";
 import { useStudents } from "@/hooks/use-students";
+import { type PvpBattleInfo, resolvePvpReportTeam } from "@/lib/pvp";
 import {
   buildPvpCounterSearchHref,
   parsePvpCounterSearchParams,
@@ -35,6 +43,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import {
   CheckIcon,
+  ImagePlusIcon,
   PlusIcon,
   SearchIcon,
   Share2Icon,
@@ -427,6 +436,28 @@ export function PVPStatsSearch() {
     });
   }
 
+  function handleReportImported(battle: PvpBattleInfo) {
+    const team = resolvePvpReportTeam(battle.enemyUnits, students);
+
+    setDefenseTeam(team.map(({ student }) => (student ? { student } : {})));
+
+    toast.success(t("tools.pvp.stats.reportImported"), {
+      position: "top-right",
+    });
+
+    if (battle.battleType.value === "DEFENSE") {
+      toast.warning(t("tools.pvp.stats.reportWasDefense"), {
+        position: "top-right",
+      });
+    }
+
+    if (team.some((item) => item.report && !item.student)) {
+      toast.warning(t("tools.pvp.stats.reportUnresolvedStudents"), {
+        position: "top-right",
+      });
+    }
+  }
+
   function addExcludedStudent(student: { id: string }) {
     setExcludedStudentIds((current) =>
       current.includes(student.id) ? current : [...current, student.id],
@@ -624,6 +655,25 @@ export function PVPStatsSearch() {
           <p className="text-sm text-muted-foreground">
             {t("tools.pvp.stats.exactDefenseHint")}
           </p>
+
+          <CardAction>
+            <PvpCombatReportImportDialog
+              recognizeOpponentName={false}
+              onImported={handleReportImported}
+            >
+              {(open) => (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={open}
+                >
+                  <ImagePlusIcon />
+                  {t("tools.pvp.reportImport.title")}
+                </Button>
+              )}
+            </PvpCombatReportImportDialog>
+          </CardAction>
         </CardHeader>
 
         <CardContent>
