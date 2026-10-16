@@ -52,9 +52,27 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Added a button that lets you import a defense team from a combat report in the PVP Counter Search tool.",
       },
+      {
+        scope: CHANGELOG_SCOPES.scenarioImageGenerator,
+        description: (
+          <>
+            Added support for ruby texts. The format is{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs text-foreground">
+              [ruby=Akira]Miria[/ruby]
+            </code>
+            , where Akira is the ruby text and Miria is the text above which it
+            appears.
+          </>
+        ),
+      },
     ],
     changes: [],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.scenarioImageGenerator,
+        description: "Fixed font weight issues in name and affiliation.",
+      },
+    ],
   },
   {
     date: "October 15, 2026",

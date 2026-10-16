@@ -5,6 +5,10 @@ import {
   SCENARIO_VIEW_WIDTH,
 } from "@/app/[locale]/scenario-image-generator/_lib/constants";
 import {
+  layoutRuby,
+  parseRubyMarkup,
+} from "@/app/[locale]/scenario-image-generator/_lib/renderer/ruby";
+import {
   type ScenarioState,
   selectBackground,
 } from "@/app/[locale]/scenario-image-generator/_lib/store";
@@ -46,6 +50,22 @@ function loadScenarioFonts(): Promise<void> {
           src: "/assets/fonts/noto-sans/NotoSans-Regular.ttf",
           data: {
             family: "Noto Sans",
+          },
+        },
+        {
+          alias: "Noto Sans SemiBold",
+          src: "/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
+          data: {
+            family: "Noto Sans",
+            weights: ["600"],
+          },
+        },
+        {
+          alias: "Noto Sans Bold",
+          src: "/assets/fonts/noto-sans/NotoSans-Bold.ttf",
+          data: {
+            family: "Noto Sans",
+            weights: ["700", "bold"],
           },
         },
         {
@@ -129,36 +149,17 @@ function buildCharacterFilters(character: ScenarioCharacterData): Filter[] {
   return filters;
 }
 
-function revealText(lines: string[], charsToShow: number): string {
-  let shown = 0;
-  let result = "";
-
-  for (const line of lines) {
-    if (shown >= charsToShow) {
-      break;
-    }
-
-    const remaining = charsToShow - shown;
-
-    if (line.length <= remaining) {
-      result += `${line}\n`;
-      shown += line.length;
-    } else {
-      result += line.slice(0, remaining);
-      shown += remaining;
-      break;
-    }
-  }
-
-  return result;
-}
-
 type CharacterSlot = {
   sprite: Sprite;
   character: ScenarioCharacterData | null;
   spriteUrl: string | null;
   filterKey: string;
   loadToken: number;
+};
+
+type RubySlot = {
+  text: Text;
+  revealAt: number;
 };
 
 type ActiveTween = {
@@ -188,6 +189,8 @@ export class ScenarioRenderer {
   private nameText: Text;
   private affiliationText: Text;
   private dialogueText: Text;
+  private rubyLayer: Container;
+  private rubySlots: RubySlot[] = [];
   private fadeOverlay: Graphics;
 
   private readonly triangleTexture: Texture;
@@ -346,6 +349,11 @@ export class ScenarioRenderer {
       }),
     });
 
+    this.rubyLayer = new Container({
+      x: this.dialogueText.x,
+      y: this.dialogueText.y,
+    });
+
     this.fadeOverlay = new Graphics();
     this.fadeOverlay
       .rect(0, 0, SCENARIO_VIEW_WIDTH, SCENARIO_VIEW_HEIGHT)
@@ -363,6 +371,7 @@ export class ScenarioRenderer {
       this.nameText,
       this.affiliationText,
       this.dialogueText,
+      this.rubyLayer,
       this.fadeOverlay,
     );
 
@@ -428,6 +437,7 @@ export class ScenarioRenderer {
     this.dialogueText.style.fontFamily = state.font.family;
     this.dialogueText.style.fontSize = state.fontSize;
     this.dialogueText.style.lineHeight = 1.4 * state.fontSize;
+    this.rubyLayer.visible = hasContent;
     this.syncTypewriter(state);
 
     if (!state.animate) {
@@ -614,41 +624,97 @@ export class ScenarioRenderer {
 
     this.typewriterKey = key;
 
+    const { text, annotations } = parseRubyMarkup(state.content);
+    const { lines } = CanvasTextMetrics.measureText(
+      text,
+      this.dialogueText.style,
+    );
+    this.syncRuby(state, text, annotations);
+
+    this.typewriter = {
+      active: state.animate,
+      progress: 0,
+      lines,
+      length: text.length,
+      complete: !state.animate || text.length === 0,
+    };
+    this.revealDialogue();
+
     if (!state.animate) {
-      this.typewriter = {
-        active: false,
-        progress: 0,
-        lines: [],
-        length: state.content.length,
-        complete: true,
-      };
-      this.dialogueText.text = state.content;
       this.notifyDialogueComplete();
       return;
     }
 
-    const style = new TextStyle({
-      fontFamily: state.font.family,
-      fontSize: state.fontSize,
-      wordWrap: true,
-      wordWrapWidth: SCENARIO_LINE_WIDTH,
-      letterSpacing: 0.4,
-      lineHeight: 1.4 * state.fontSize,
-    });
-
-    const metrics = CanvasTextMetrics.measureText(state.content, style);
-
-    this.typewriter = {
-      active: true,
-      progress: 0,
-      lines: metrics.lines,
-      length: state.content.length,
-      complete: state.content.length === 0,
-    };
-    this.dialogueText.text = "";
-
     if (this.typewriter.complete) {
       this.notifyDialogueComplete();
+    }
+  }
+
+  private syncRuby(
+    state: ScenarioState,
+    text: string,
+    annotations: ReturnType<typeof parseRubyMarkup>["annotations"],
+  ): void {
+    for (const slot of this.rubySlots) {
+      slot.text.destroy();
+    }
+    this.rubySlots = [];
+
+    const placements = layoutRuby(text, annotations, this.dialogueText.style);
+    if (placements.length === 0) {
+      return;
+    }
+
+    const lineHeight = this.dialogueText.style.lineHeight;
+    const rubyStyle = new TextStyle({
+      fontFamily: state.font.family,
+      fontSize: Math.round(state.fontSize * 0.5),
+      fill: "#ffffff",
+      letterSpacing: 0.2,
+      stroke: {
+        width: 3,
+        color: "#2b435b",
+      },
+    });
+
+    for (const placement of placements) {
+      const rubyText = new Text({
+        text: placement.ruby,
+        style: rubyStyle,
+        x: placement.x,
+        y: placement.lineIndex * lineHeight + placement.y,
+      });
+      rubyText.anchor.set(0.5, 1);
+      this.rubyLayer.addChild(rubyText);
+      this.rubySlots.push({ text: rubyText, revealAt: placement.revealAt });
+    }
+  }
+
+  private revealDialogue(): void {
+    const typewriter = this.typewriter;
+    const revealed =
+      !typewriter.active || typewriter.complete
+        ? Number.POSITIVE_INFINITY
+        : Math.floor(typewriter.progress);
+
+    let remaining = revealed;
+    const shown: string[] = [];
+    for (const line of typewriter.lines) {
+      if (remaining <= 0 && shown.length > 0) {
+        break;
+      }
+
+      shown.push(line.slice(0, Math.max(0, remaining)));
+      remaining -= line.length;
+    }
+
+    const content = shown.join("\n");
+    if (this.dialogueText.text !== content) {
+      this.dialogueText.text = content;
+    }
+
+    for (const slot of this.rubySlots) {
+      slot.text.visible = revealed > slot.revealAt;
     }
   }
 
@@ -677,13 +743,13 @@ export class ScenarioRenderer {
         typewriter.progress + ticker.deltaTime * state.scrollSpeed,
         typewriter.length,
       );
-      this.dialogueText.text = revealText(
-        typewriter.lines,
-        Math.floor(typewriter.progress),
-      );
-
       if (typewriter.progress >= typewriter.length) {
         typewriter.complete = true;
+      }
+
+      this.revealDialogue();
+
+      if (typewriter.complete) {
         this.notifyDialogueComplete();
       }
 
@@ -804,8 +870,8 @@ export class ScenarioRenderer {
     }
 
     typewriter.progress = typewriter.length;
-    this.dialogueText.text = revealText(typewriter.lines, typewriter.length);
     typewriter.complete = true;
+    this.revealDialogue();
     this.notifyDialogueComplete();
     this.updateTriangleVisibility();
   }
