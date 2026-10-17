@@ -187,6 +187,89 @@ enum BannerChargeCategory {
   Anniversary
 }
 
+enum RaidType {
+  Raid // Total Assault
+  EliminateRaid // Grand Assault
+  MultiFloorRaid // Final Restriction Release
+  TimeAttackDungeon // Joint Firing Drill
+  WorldRaid // Allied Operation
+}
+
+enum RaidBoss {
+  Binah
+  Chesed
+  ShiroKuro
+  Hieronymus
+  KAITEN
+  Perorodzilla
+  Hod
+  Goz
+  Gregorius
+  Hovercraft
+  Kurokage
+  Geburah
+  Yesod
+  Drumbarka
+}
+
+enum TimeAttackDungeonType {
+  Defense // Defense Drill
+  Shooting // Shooting Drill
+  Destruction // Breakthrough Drill
+  Escort // Escort Drill
+}
+
+enum MultiFloorRaidBoss {
+  TheFuryOfSet
+  Chokmah
+  Tiphareth
+}
+
+enum WorldRaidBoss {
+  WakamoSwimsuit
+  WakamoHovercraft
+  BinahColor
+  ChesedColor
+  ShiroKuroColor
+  HieronymusColor
+  HodColor
+  PerorodzillaColor
+  ShirokoTerror
+  Binah
+  Chesed
+  Hod
+  Kether
+  Tiphareth
+  Geburah
+  Chokmah
+  Yesod
+  Malkuth
+  Decagrammaton
+}
+
+enum BonusCampaignType {
+  NormalMission
+  HardMission
+  WeekDungeon // Commissions
+  WeekDungeonChaser // Bounty
+  SchoolDungeon // Scrimmage
+  Schedule // Lessons
+  AccountExperience
+}
+
+enum ScenarioType {
+  Main // Main Story
+  Sub // Group Story
+  Mini // Mini Story
+  SpecialOperation // Volume EX
+}
+
+enum EventRunType {
+  Initial // first ever run of an event
+  Reprint // rerun of an older event
+  Permanent // immortalization of an older event
+}
+
 model Student {
   id           String @id
   devName      String
@@ -298,6 +381,8 @@ model Student {
   bannersAdditionalThreeStar Banner[] @relation("AdditionalThreeStarStudents")
 
   gameBanners GameBanner[] @relation("GameBannerPickup")
+
+  events Event[]
 }
 
 model Skill {
@@ -379,4 +464,135 @@ model GameBanner {
   isSelectablePickup Boolean @default(false)
 
   pickupStudents Student[] @relation("GameBannerPickup")
+}
+
+model Raid {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime
+
+  type RaidType
+
+  raidBoss              RaidBoss? // only if type is Raid or EliminateRaid
+  multiFloorRaidBoss    MultiFloorRaidBoss? // only if type is MultiFloorRaid
+  worldRaidBoss         WorldRaidBoss? // only if type is WorldRaid
+  timeAttackDungeonType TimeAttackDungeonType? // only if type is TimeAttackDungeon
+
+  // base attack types, can be overridden by an EliminateRaidRoom
+  attackTypes AttackType[]
+
+  // base defense types, can be overridden by an EliminateRaidRoom
+  defenseTypes DefenseType[]
+
+  // base terrains, can be overridden by an EliminateRaidRoom
+  terrains Terrain[]
+
+  // each Grand Assault has 3 rooms, usually with 3 different defense types
+  eliminateRaidRooms EliminateRaidRoom[]
+}
+
+model EliminateRaidRoom {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  eliminateRaidId String
+  eliminateRaid   Raid   @relation(fields: [eliminateRaidId], references: [id])
+
+  attackTypes  AttackType[]
+  defenseTypes DefenseType[]
+  terrains     Terrain[]
+
+  hasTorment Boolean @default(false)
+  hasLunatic Boolean @default(false)
+}
+
+model Event {
+  id String @id @default(cuid())
+
+  internalId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime @default("2099-12-31T23:59:59Z")
+
+  name String
+  type EventRunType @default(Initial)
+
+  eventStudentId String? // welfare student, if applicable
+  eventStudent   Student? @relation(fields: [eventStudentId], references: [id])
+}
+
+// 2x/3x campaigns
+model BonusCampaign {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime @default("2099-12-31T23:59:59Z")
+
+  type          BonusCampaignType
+  bonusMultiply Int               @default(2)
+}
+
+model Scenario {
+  id String @id @default(cuid())
+
+  internalId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime @default("2099-12-31T23:59:59Z")
+
+  type         ScenarioType
+  episodeCount Int          @default(0)
+}
+
+model WorkLogCampaign {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime @default("2099-12-31T23:59:59Z")
+
+  name String
+}
+
+model BattlePassCampaign {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime @default("2099-12-31T23:59:59Z")
+
+  name String
+}
+
+// other stuff that can be added to the roadmap
+model RoadmapETC {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  startDate DateTime
+  endDate   DateTime @default("2099-12-31T23:59:59Z")
+
+  label       String
+  description String?
 }
