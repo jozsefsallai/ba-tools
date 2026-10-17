@@ -19,11 +19,17 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Link, getPathname, usePathname } from "@/i18n/navigation";
 import { canAccessPlanaAi } from "@/lib/ai/plana-access";
 import { isSuperUser } from "@/lib/auth/super-user";
-import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  UNSAFE_PortalProvider,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 import {
   BookOpenTextIcon,
@@ -54,7 +60,18 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { useCallback, useEffect, useRef } from "react";
 import { api } from "~convex/api";
+
+function useCloseMobileSidebar() {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  return useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, setOpenMobile]);
+}
 
 type NavLink = {
   href: string;
@@ -74,6 +91,7 @@ type NavigationGroup = {
 
 function RecentTimelines() {
   const t = useTranslations();
+  const closeMobileSidebar = useCloseMobileSidebar();
   const timelines = useQuery(api.timeline.getOwn);
   const recent = timelines?.slice(0, 5);
 
@@ -84,7 +102,10 @@ function RecentTimelines() {
       {recent.map((tl) => (
         <SidebarMenuSubItem key={tl._id}>
           <SidebarMenuSubButton asChild size="sm">
-            <Link href={`/timeline-visualizer?id=${tl._id}`}>
+            <Link
+              href={`/timeline-visualizer?id=${tl._id}`}
+              onClick={closeMobileSidebar}
+            >
               <span
                 className={
                   tl.name ? "truncate" : "truncate italic text-muted-foreground"
@@ -98,7 +119,11 @@ function RecentTimelines() {
       ))}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton asChild size="sm">
-          <Link href="/user/timelines" className="text-muted-foreground">
+          <Link
+            href="/user/timelines"
+            onClick={closeMobileSidebar}
+            className="text-muted-foreground"
+          >
             <EllipsisIcon className="size-3" />
             <span>{t("common.viewAll")}</span>
           </Link>
@@ -110,6 +135,7 @@ function RecentTimelines() {
 
 function RecentFormations() {
   const t = useTranslations();
+  const closeMobileSidebar = useCloseMobileSidebar();
   const formations = useQuery(api.formation.getOwn);
   const recent = formations?.slice(0, 5);
 
@@ -120,7 +146,10 @@ function RecentFormations() {
       {recent.map((f) => (
         <SidebarMenuSubItem key={f._id}>
           <SidebarMenuSubButton asChild size="sm">
-            <Link href={`/formation-display?id=${f._id}`}>
+            <Link
+              href={`/formation-display?id=${f._id}`}
+              onClick={closeMobileSidebar}
+            >
               <span
                 className={
                   f.name ? "truncate" : "truncate italic text-muted-foreground"
@@ -134,7 +163,11 @@ function RecentFormations() {
       ))}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton asChild size="sm">
-          <Link href="/user/formations" className="text-muted-foreground">
+          <Link
+            href="/user/formations"
+            onClick={closeMobileSidebar}
+            className="text-muted-foreground"
+          >
             <EllipsisIcon className="size-3" />
             <span>{t("common.viewAll")}</span>
           </Link>
@@ -156,6 +189,7 @@ function NavItem({
   link: NavLink;
   isActive: boolean;
 }) {
+  const closeMobileSidebar = useCloseMobileSidebar();
   const RecentItemsComponent =
     isActive && link.recentItems
       ? RECENT_ITEMS_COMPONENTS[link.recentItems.type]
@@ -164,7 +198,7 @@ function NavItem({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} tooltip={link.text}>
-        <Link href={link.href}>
+        <Link href={link.href} onClick={closeMobileSidebar}>
           <link.icon />
           <span>{link.text}</span>
         </Link>
@@ -187,6 +221,32 @@ export function AppSidebar() {
   const { user } = useUser();
   const canShowPlanaAi = canAccessPlanaAi(user);
   const canShowAdmin = isSuperUser(user);
+  const { isMobile, setOpenMobile } = useSidebar();
+  const closeMobileSidebar = useCloseMobileSidebar();
+  const userButtonContainerRef = useRef<HTMLDivElement>(null);
+
+  // Links in the user menu are rendered by Clerk, so we can't attach click
+  // handlers to them. Close the mobile sidebar whenever the route changes.
+  const previousPathnameRef = useRef(pathname);
+  useEffect(() => {
+    if (previousPathnameRef.current !== pathname) {
+      previousPathnameRef.current = pathname;
+      setOpenMobile(false);
+    }
+  }, [pathname, setOpenMobile]);
+
+  // On mobile, the sidebar is a modal sheet that blocks pointer events outside
+  // of itself, so Clerk's popovers must be portaled into the sheet in order to
+  // be interactive.
+  const getUserButtonPortalContainer = useCallback(
+    () =>
+      isMobile
+        ? (userButtonContainerRef.current?.closest<HTMLElement>(
+            '[data-mobile="true"]',
+          ) ?? null)
+        : null,
+    [isMobile],
+  );
 
   const GAMEPLAY_TOOLS: NavLink[] = [
     {
@@ -361,7 +421,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/" onClick={closeMobileSidebar}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Image src={plana} alt="Plana" width={32} height={32} />
                 </div>
@@ -401,27 +461,33 @@ export function AppSidebar() {
           <ThemeToggle />
 
           <Authenticated>
-            <UserButton>
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  href={getPathname({ href: "/user/formations", locale })}
-                  label="My formations"
-                  labelIcon={<UsersIcon className="size-4" />}
-                />
-                <UserButton.Link
-                  href={getPathname({ href: "/user/timelines", locale })}
-                  label="My timelines"
-                  labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
-                />
-              </UserButton.MenuItems>
-              <UserButton.UserProfilePage
-                label="Preferences"
-                url="preferences"
-                labelIcon={<CogIcon className="size-4" />}
+            <div ref={userButtonContainerRef} className="contents">
+              <UNSAFE_PortalProvider
+                getContainer={getUserButtonPortalContainer}
               >
-                <UserPreferences />
-              </UserButton.UserProfilePage>
-            </UserButton>
+                <UserButton>
+                  <UserButton.MenuItems>
+                    <UserButton.Link
+                      href={getPathname({ href: "/user/formations", locale })}
+                      label="My formations"
+                      labelIcon={<UsersIcon className="size-4" />}
+                    />
+                    <UserButton.Link
+                      href={getPathname({ href: "/user/timelines", locale })}
+                      label="My timelines"
+                      labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
+                    />
+                  </UserButton.MenuItems>
+                  <UserButton.UserProfilePage
+                    label="Preferences"
+                    url="preferences"
+                    labelIcon={<CogIcon className="size-4" />}
+                  >
+                    <UserPreferences />
+                  </UserButton.UserProfilePage>
+                </UserButton>
+              </UNSAFE_PortalProvider>
+            </div>
           </Authenticated>
         </div>
 
