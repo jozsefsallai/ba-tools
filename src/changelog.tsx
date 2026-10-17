@@ -52,8 +52,23 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.roadmap,
         description: "Added Global Roadmap resource.",
       },
+      {
+        scope: CHANGELOG_SCOPES.userCorner,
+        description:
+          "Users can now add a passkey to their account via User Menu > Manage Account > Security.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.userCorner,
+        description:
+          "Users can add two-step verification using an authenticator app to their account via User Menu > Manage Account > Security.",
+      },
     ],
-    changes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.userCorner,
+        description: "Session duration increased from 7 days to 30 days.",
+      },
+    ],
     fixes: [
       {
         scope: CHANGELOG_SCOPES.pvp,
