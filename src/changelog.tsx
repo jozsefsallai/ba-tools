@@ -54,7 +54,13 @@ export const CHANGELOG: ChangelogItemData[] = [
       },
     ],
     changes: [],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Fixed text being unreadable in certain opponent preset options when using light theme.",
+      },
+    ],
   },
   {
     date: "October 16, 2026",
