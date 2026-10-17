@@ -74,6 +74,7 @@
       "resouces": {
         "title": "リソース",
         "glBanners": "今後のグローバル版ガチャ",
+        "glRoadmap": "グローバル版ロードマップ",
         "birthdays": "生徒の誕生日"
       },
       "games": {
@@ -82,7 +83,8 @@
       },
       "admin": {
         "title": "管理",
-        "banners": "ガチャ管理"
+        "banners": "ガチャ管理",
+        "roadmap": "ロードマップ管理"
       }
     }
   },
@@ -404,6 +406,9 @@
       },
       "global-banners": {
         "description": "日本版のスケジュールをもとに、グローバル版の今後の募集と開催予想日を確認。"
+      },
+      "global-roadmap": {
+        "description": "グローバル版のレイド、イベント、ストーリー、キャンペーン、ガチャの予想スケジュールを確認。"
       },
       "plana": {
         "title": "プラナのお部屋",

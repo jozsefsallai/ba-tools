@@ -69,6 +69,10 @@
       "glBanners": {
         "title": "Upcoming Global Banners",
         "description": "Track the upcoming pick-up banners that are going to be available in the Global version. Data is based on JP banners and may change."
+      },
+      "glRoadmap": {
+        "title": "Global Roadmap",
+        "description": "See the predicted Global schedule of raids, events, stories, bonus campaigns and banners on an interactive timeline."
       }
     },
 
@@ -154,5 +158,110 @@
   "flappyPeroro": {
     "title": "Flappy Peroro",
     "description": "Flappy Bird game featuring Peroro from Momo Friends."
+  },
+
+  "roadmap": {
+    "title": "Global Roadmap",
+    "description": "A predicted schedule of upcoming banners, raids, events, stories and campaigns for the Global version of Blue Archive. Predictions are based on the Japanese release schedule and may change. All times are in UTC.",
+    "view": {
+      "label": "View",
+      "timeline": "Timeline",
+      "text": "Text"
+    },
+    "timeZone": { "label": "Time zone", "utc": "UTC", "local": "Local time" },
+    "localTime": "Local time",
+    "zoom": "Zoom",
+    "utc": "UTC",
+    "today": "Today",
+    "permanent": "Permanent",
+    "from": "From {date}",
+    "empty": "Nothing is scheduled yet.",
+    "categoryFilter": "Categories",
+    "categories": {
+      "banner": "Banners",
+      "raid": "Raids",
+      "frr": "Final Restriction Release",
+      "event": "Events",
+      "story": "Story",
+      "bonus": "Bonus Campaigns",
+      "birthday": "Birthdays",
+      "shopReset": "Shop Resets",
+      "workLog": "Work Logs",
+      "battlePass": "Battle Pass",
+      "etc": "Others"
+    },
+    "raidTypes": {
+      "Raid": "Total Assault",
+      "EliminateRaid": "Grand Assault",
+      "MultiFloorRaid": "Final Restriction Release",
+      "TimeAttackDungeon": "Joint Firing Drill",
+      "WorldRaid": "Allied Operation"
+    },
+    "timeAttackDungeonTypes": {
+      "Defense": "Defense Drill",
+      "Shooting": "Shooting Drill",
+      "Destruction": "Breakthrough Drill",
+      "Escort": "Escort Drill"
+    },
+    "multiFloorRaidBosses": {
+      "TheFuryOfSet": "The Fury of Set",
+      "Chokmah": "Chokmah",
+      "Tiphareth": "Tiphareth"
+    },
+    "worldRaidBosses": {
+      "WakamoSwimsuit": "Wakamo (Swimsuit)",
+      "WakamoHovercraft": "Wakamo (Hovercraft)",
+      "BinahColor": "Binah (Color)",
+      "ChesedColor": "Chesed (Color)",
+      "ShiroKuroColor": "Shiro & Kuro (Color)",
+      "HieronymusColor": "Hieronymus (Color)",
+      "HodColor": "Hod (Color)",
+      "PerorodzillaColor": "Perorodzilla (Color)",
+      "ShirokoTerror": "Shiroko*Terror",
+      "Binah": "Binah",
+      "Chesed": "Chesed",
+      "Hod": "Hod",
+      "Kether": "Kether",
+      "Tiphareth": "Tiphareth",
+      "Geburah": "Geburah",
+      "Chokmah": "Chokmah",
+      "Yesod": "Yesod",
+      "Malkuth": "Malkuth",
+      "Decagrammaton": "Decagrammaton"
+    },
+    "eventTypes": {
+      "Initial": "New",
+      "Reprint": "Rerun",
+      "Permanent": "Permanent"
+    },
+    "scenarioTypes": {
+      "Main": "Main Story",
+      "Sub": "Group Story",
+      "Mini": "Mini Story",
+      "SpecialOperation": "Volume EX"
+    },
+    "bonusTypes": {
+      "NormalMission": "Normal Mission",
+      "HardMission": "Hard Mission",
+      "WeekDungeon": "Commission",
+      "WeekDungeonChaser": "Bounty",
+      "SchoolDungeon": "Scrimmage",
+      "Schedule": "Lesson",
+      "AccountExperience": "Account EXP"
+    },
+    "bonusTitle": "{multiplier}x {type} Rewards",
+    "shopReset": "Monthly Shop Reset",
+    "unknownBoss": "TBA",
+    "room": "Room {index}",
+    "attack": "Attack",
+    "defense": "Defense",
+    "terrain": "Terrain",
+    "eventStudent": "Event student",
+    "attackTypeChip": "{type} Attack",
+    "insanePlus": "Insane+:",
+    "episodes": "{count, plural, one {# episode} other {# episodes}}",
+    "freePulls": "{count} free pulls",
+    "selectablePickup": "Selectable pickup",
+    "duration": "{count, plural, one {# day} other {# days}}"
   }
 }

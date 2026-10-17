@@ -91,6 +91,17 @@ export const OG_CARDS = {
     icon: "shield",
   },
 
+  "admin-roadmap": {
+    title: {
+      message: "tools.admin.roadmap.title",
+    },
+    description: {
+      message: "tools.admin.roadmap.description",
+    },
+    variant: "banner",
+    icon: "shield",
+  },
+
   birthdays: {
     title: {
       message: "tools.birthdays.title",
@@ -167,6 +178,16 @@ export const OG_CARDS = {
     },
     description: {
       message: "common.sharing.cards.global-banners.description",
+    },
+    variant: "banner",
+  },
+
+  "global-roadmap": {
+    title: {
+      message: "static.roadmap.title",
+    },
+    description: {
+      message: "common.sharing.cards.global-roadmap.description",
     },
     variant: "banner",
   },

@@ -1861,6 +1861,83 @@
         "offsetFail": "Failed to offset banners.",
         "offsetZero": "Offset days must not be zero."
       }
+    },
+    "roadmap": {
+      "title": "Manage Roadmap",
+      "description": "Drag items to move them, drag their edges to resize them, and right-click for more options. All times are in UTC. Banners are edited on the Manage Banners page.",
+      "manageBanners": "Manage Banners",
+      "revalidate": "Refresh public roadmap",
+      "add": "Add item",
+      "addCategory": "Add {category}",
+      "addCategoryHere": "Add {category} here",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "shift": "Shift by days…",
+      "makePermanent": "Make permanent",
+      "delete": "Delete",
+      "bannersReadOnly": "Banners are edited on the Manage Banners page.",
+      "form": {
+        "createTitle": "Add {category}",
+        "editTitle": "Edit {category}",
+        "startDate": "Start (UTC)",
+        "endDate": "End (UTC)",
+        "duration": "Duration (days)",
+        "permanent": "Permanent (no end date)",
+        "type": "Type",
+        "boss": "Boss",
+        "drillType": "Drill type",
+        "attackTypes": "Attack types",
+        "defenseTypes": "Defense types",
+        "terrains": "Terrains",
+        "rooms": "Rooms",
+        "addRoom": "Add room",
+        "removeRoom": "Remove room",
+        "torment": "Torment",
+        "lunatic": "Lunatic",
+        "name": "Name",
+        "internalId": "Internal ID",
+        "eventStudent": "Event student",
+        "selectStudent": "Select student",
+        "clearStudent": "Clear",
+        "episodeCount": "Episode count",
+        "multiplier": "Multiplier",
+        "label": "Title",
+        "description": "Description",
+        "none": "None",
+        "save": "Save",
+        "create": "Create"
+      },
+      "shiftDialog": {
+        "title": "Shift item",
+        "description": "Move this item by a number of days. Use a negative number to move it earlier.",
+        "days": "Days",
+        "apply": "Shift"
+      },
+      "push": {
+        "titleLater": "Push later items too?",
+        "titleEarlier": "Pull later items earlier too?",
+        "description": "<strong>{name}</strong> was moved by <strong>{offset}</strong>. Do you want to move the items that come after it as well?",
+        "onlyThis": "Only this item",
+        "subtype": "Also move {count} later {subtype} item(s)",
+        "category": "Also move all {count} later {category} item(s)"
+      },
+      "deleteDialog": {
+        "title": "Delete item",
+        "description": "Are you sure you want to delete \"{name}\"? This cannot be undone.",
+        "confirm": "Delete"
+      },
+      "toasts": {
+        "saveSuccess": "Saved.",
+        "saveFail": "Failed to save: {error}",
+        "createSuccess": "Item created.",
+        "createFail": "Failed to create item: {error}",
+        "deleteSuccess": "Item deleted.",
+        "deleteFail": "Failed to delete item: {error}",
+        "offsetSuccess": "Moved {count} more item(s).",
+        "offsetFail": "Failed to move items: {error}",
+        "revalidateSuccess": "Public roadmap cache cleared.",
+        "revalidateFail": "Failed to clear the public roadmap cache: {error}"
+      }
     }
   }
 }

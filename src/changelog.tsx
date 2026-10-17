@@ -27,6 +27,7 @@ export const CHANGELOG_SCOPES = {
   birthdays: "Student Birthdays",
   roster: "My Roster",
   recruitment: "Recruitment Tracker",
+  roadmap: "Global Roadmap",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -44,6 +45,17 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "October 17, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.roadmap,
+        description: "Added Global Roadmap resource.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
   {
     date: "October 16, 2026",
     features: [

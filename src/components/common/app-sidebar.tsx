@@ -29,6 +29,8 @@ import {
   BookOpenTextIcon,
   CakeIcon,
   CalculatorIcon,
+  CalendarCogIcon,
+  CalendarRangeIcon,
   ChartNoAxesGanttIcon,
   ClipboardMinusIcon,
   CogIcon,
@@ -281,6 +283,11 @@ export function AppSidebar() {
       icon: GemIcon,
     },
     {
+      href: "/global/roadmap",
+      text: t("common.header.nav.resouces.glRoadmap"),
+      icon: CalendarRangeIcon,
+    },
+    {
       href: "/birthdays",
       text: t("common.header.nav.resouces.birthdays"),
       icon: CakeIcon,
@@ -301,6 +308,11 @@ export function AppSidebar() {
           href: "/admin/banners",
           text: t("common.header.nav.admin.banners"),
           icon: ShieldIcon,
+        },
+        {
+          href: "/admin/roadmap",
+          text: t("common.header.nav.admin.roadmap"),
+          icon: CalendarCogIcon,
         },
       ]
     : [];

@@ -73,6 +73,7 @@
       "resouces": {
         "title": "Resources",
         "glBanners": "Upcoming Global Banners",
+        "glRoadmap": "Global Roadmap",
         "birthdays": "Student Birthdays"
       },
       "games": {
@@ -81,7 +82,8 @@
       },
       "admin": {
         "title": "Admin",
-        "banners": "Manage Banners"
+        "banners": "Manage Banners",
+        "roadmap": "Manage Roadmap"
       }
     }
   },
@@ -433,6 +435,9 @@
       },
       "global-banners": {
         "description": "View upcoming Global banners and predicted dates based on the Japanese schedule."
+      },
+      "global-roadmap": {
+        "description": "See the predicted Global schedule of raids, events, stories, campaigns and banners."
       },
       "plana": {
         "title": "Plana Headpat Room",

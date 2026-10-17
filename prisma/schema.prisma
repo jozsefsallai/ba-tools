@@ -555,6 +555,7 @@ model Scenario {
   startDate DateTime
   endDate   DateTime @default("2099-12-31T23:59:59Z")
 
+  name         String
   type         ScenarioType
   episodeCount Int          @default(0)
 }

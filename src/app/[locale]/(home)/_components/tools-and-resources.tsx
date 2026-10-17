@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   BookOpenTextIcon,
   CakeIcon,
+  CalendarRangeIcon,
   CalculatorIcon,
   ClipboardMinusIcon,
   DicesIcon,
@@ -123,6 +124,13 @@ export async function ToolsAndResources() {
       path: "/global/banners",
       icon: <GemIcon className="size-10 text-blue-300 shrink-0" />,
       description: t("static.home.toollist.glBanners.description"),
+    },
+    {
+      name: t("static.home.toollist.glRoadmap.title"),
+      path: "/global/roadmap",
+      icon: <CalendarRangeIcon className="size-10 text-emerald-400 shrink-0" />,
+      description: t("static.home.toollist.glRoadmap.description"),
+      isNew: true,
     },
     {
       name: t("static.home.toollist.birthdays.title"),

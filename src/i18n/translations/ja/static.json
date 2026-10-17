@@ -68,6 +68,10 @@
       "glBanners": {
         "title": "今後のグローバル版ガチャ",
         "description": "グローバル版で今後開催予定のピックアップガチャをチェックできるよ。データは日本版に基づいてるから、変更される可能性もあるよ。"
+      },
+      "glRoadmap": {
+        "title": "グローバル版ロードマップ",
+        "description": "グローバル版のレイド、イベント、ストーリー、ボーナスキャンペーン、ガチャの予想スケジュールをタイムラインでチェックできるよ。"
       }
     },
     "userCorner": {
@@ -144,5 +148,92 @@
   "flappyPeroro": {
     "title": "フラップ・ペロロ",
     "description": "モモフレンズのペロロが登場する「Flappy Bird」風ゲームだよ。"
+  },
+
+  "roadmap": {
+    "title": "グローバル版ロードマップ",
+    "description": "ブルーアーカイブ グローバル版で今後開催予定のガチャ、レイド、イベント、ストーリー、キャンペーンの予想スケジュールだよ。日本版の開催スケジュールをもとにしてるから、変更される可能性もあるよ。時間はすべてUTCで表示してるよ。",
+    "view": {
+      "label": "表示",
+      "timeline": "タイムライン",
+      "text": "テキスト"
+    },
+    "timeZone": {
+      "label": "タイムゾーン",
+      "utc": "UTC",
+      "local": "ローカル時間"
+    },
+    "localTime": "ローカル時間",
+    "zoom": "ズーム",
+    "today": "今日",
+    "permanent": "常設",
+    "from": "{date}から",
+    "empty": "まだ予定はないよ。",
+    "categoryFilter": "カテゴリ",
+    "categories": {
+      "banner": "ガチャ",
+      "raid": "レイド",
+      "frr": "制約解除決戦",
+      "event": "イベント",
+      "story": "ストーリー",
+      "bonus": "ボーナスキャンペーン",
+      "birthday": "誕生日",
+      "shopReset": "ショップ更新",
+      "workLog": "業務日誌",
+      "battlePass": "バトルパス",
+      "etc": "その他"
+    },
+    "raidTypes": {
+      "Raid": "総力戦",
+      "EliminateRaid": "大決戦",
+      "MultiFloorRaid": "制約解除決戦",
+      "TimeAttackDungeon": "合同火力演習",
+      "WorldRaid": "連合作戦"
+    },
+    "timeAttackDungeonTypes": {
+      "Defense": "防御演習",
+      "Shooting": "射撃演習",
+      "Destruction": "突破演習",
+      "Escort": "護衛演習"
+    },
+    "multiFloorRaidBosses": {
+      "TheFuryOfSet": "セトの憤怒",
+      "Chokmah": "コクマー",
+      "Tiphareth": "ティファレト"
+    },
+    "eventTypes": {
+      "Initial": "新規",
+      "Reprint": "復刻",
+      "Permanent": "常設化"
+    },
+    "scenarioTypes": {
+      "Main": "メインストーリー",
+      "Sub": "グループストーリー",
+      "Mini": "ミニストーリー",
+      "SpecialOperation": "Vol.EX"
+    },
+    "bonusTypes": {
+      "NormalMission": "ノーマルミッション",
+      "HardMission": "ハードミッション",
+      "WeekDungeon": "特別依頼",
+      "WeekDungeonChaser": "指名手配",
+      "SchoolDungeon": "学園交流会",
+      "Schedule": "スケジュール",
+      "AccountExperience": "アカウント経験値"
+    },
+    "bonusTitle": "{type} 報酬{multiplier}倍",
+    "shopReset": "月間ショップ更新",
+    "unknownBoss": "未定",
+    "room": "ルーム{index}",
+    "attack": "攻撃",
+    "defense": "防御",
+    "terrain": "地形",
+    "eventStudent": "イベント生徒",
+    "attackTypeChip": "{type}攻撃",
+    "insanePlus": "INSANE以上：",
+    "episodes": "{count}話",
+    "freePulls": "無料{count}回",
+    "selectablePickup": "選択ピックアップ",
+    "duration": "{count}日間"
   }
 }
