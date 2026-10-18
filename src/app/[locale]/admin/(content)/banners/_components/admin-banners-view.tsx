@@ -1,14 +1,17 @@
 "use client";
 
-import { AdminBannerGroup } from "@/app/[locale]/admin/banners/_components/admin-banner-group";
+import { AdminBannerGroup } from "@/app/[locale]/admin/(content)/banners/_components/admin-banner-group";
 import {
   NewBannerDialog,
   groupOptionsFromEntries,
-} from "@/app/[locale]/admin/banners/_components/new-banner-dialog";
-import { NewDateRangeDialog } from "@/app/[locale]/admin/banners/_components/new-date-range-dialog";
-import { OffsetBannersDialog } from "@/app/[locale]/admin/banners/_components/offset-banners-dialog";
-import { updateAdminBanner } from "@/app/[locale]/admin/banners/_lib/api";
-import type { AdminBanner, EmptyBannerGroup } from "@/app/[locale]/admin/banners/types";
+} from "@/app/[locale]/admin/(content)/banners/_components/new-banner-dialog";
+import { NewDateRangeDialog } from "@/app/[locale]/admin/(content)/banners/_components/new-date-range-dialog";
+import { OffsetBannersDialog } from "@/app/[locale]/admin/(content)/banners/_components/offset-banners-dialog";
+import { updateAdminBanner } from "@/app/[locale]/admin/(content)/banners/_lib/api";
+import type {
+  AdminBanner,
+  EmptyBannerGroup,
+} from "@/app/[locale]/admin/(content)/banners/types";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {

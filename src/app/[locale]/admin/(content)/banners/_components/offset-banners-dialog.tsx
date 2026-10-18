@@ -1,8 +1,8 @@
 "use client";
 
-import { DatePickerButton } from "@/app/[locale]/admin/banners/_components/date-picker-button";
-import { offsetAdminBanners } from "@/app/[locale]/admin/banners/_lib/api";
-import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
+import { DatePickerButton } from "@/app/[locale]/admin/(content)/banners/_components/date-picker-button";
+import { offsetAdminBanners } from "@/app/[locale]/admin/(content)/banners/_lib/api";
+import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

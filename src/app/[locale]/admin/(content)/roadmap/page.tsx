@@ -1,4 +1,4 @@
-import { AdminRoadmapView } from "@/app/[locale]/admin/roadmap/_components/admin-roadmap-view";
+import { AdminRoadmapView } from "@/app/[locale]/admin/(content)/roadmap/_components/admin-roadmap-view";
 import { getCardMetadata } from "@/lib/og-metadata.server";
 import { fetchRoadmapItems } from "@/lib/roadmap/roadmap.server";
 import { getLocale } from "next-intl/server";

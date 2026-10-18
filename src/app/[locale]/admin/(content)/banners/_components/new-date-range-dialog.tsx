@@ -1,6 +1,6 @@
 "use client";
 
-import { DatePickerButton } from "@/app/[locale]/admin/banners/_components/date-picker-button";
+import { DatePickerButton } from "@/app/[locale]/admin/(content)/banners/_components/date-picker-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

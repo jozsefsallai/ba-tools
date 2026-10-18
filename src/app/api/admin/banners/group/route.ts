@@ -1,5 +1,5 @@
 import { updateGameBannerGroupSchema } from "@/lib/admin/game-banner-schemas";
-import { requireSuperUser } from "@/lib/auth/require-super-user";
+import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import { invalidateGameBannersCache } from "@/lib/game-banners.server";
 import { NextResponse } from "next/server";
@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 export async function PATCH(req: Request) {
-  const { error } = await requireSuperUser();
+  const { error } = await requireContentManager();
   if (error) {
     return error;
   }

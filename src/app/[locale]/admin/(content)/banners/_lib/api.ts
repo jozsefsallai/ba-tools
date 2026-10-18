@@ -1,4 +1,4 @@
-import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
+import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import type {
   CreateGameBannerInput,
   OffsetGameBannersInput,

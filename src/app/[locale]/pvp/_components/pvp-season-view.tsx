@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { Link } from "@/i18n/navigation";
-import { isSuperUser } from "@/lib/auth/super-user";
+import { isSuperUser } from "@/lib/auth/roles";
 import { useUser } from "@clerk/nextjs";
 import { format, subDays } from "date-fns";
 import { CalendarDaysIcon, PlusIcon } from "lucide-react";

@@ -1,9 +1,9 @@
 "use client";
 
-import { AdminBannerItem } from "@/app/[locale]/admin/banners/_components/admin-banner-item";
-import { DatePickerButton } from "@/app/[locale]/admin/banners/_components/date-picker-button";
-import { updateAdminBannerGroup } from "@/app/[locale]/admin/banners/_lib/api";
-import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
+import { AdminBannerItem } from "@/app/[locale]/admin/(content)/banners/_components/admin-banner-item";
+import { DatePickerButton } from "@/app/[locale]/admin/(content)/banners/_components/date-picker-button";
+import { updateAdminBannerGroup } from "@/app/[locale]/admin/(content)/banners/_lib/api";
+import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,

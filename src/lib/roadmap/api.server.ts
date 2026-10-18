@@ -1,6 +1,6 @@
 import "server-only";
 
-import { requireSuperUser } from "@/lib/auth/require-super-user";
+import { requireContentManager } from "@/lib/auth/require-role";
 import { isEditableKind } from "@/lib/roadmap/constants";
 import { RoadmapError } from "@/lib/roadmap/roadmap.server";
 import type { EditableRoadmapKind } from "@/lib/roadmap/types";
@@ -17,7 +17,7 @@ export async function handleRoadmapRequest(
   kindParam: string | null,
   handler: Handler,
 ): Promise<Response> {
-  const { error } = await requireSuperUser();
+  const { error } = await requireContentManager();
   if (error) {
     return error;
   }

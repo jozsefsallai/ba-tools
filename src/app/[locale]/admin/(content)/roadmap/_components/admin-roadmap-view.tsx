@@ -3,23 +3,23 @@
 import {
   ItemFormDialog,
   type ItemFormState,
-} from "@/app/[locale]/admin/roadmap/_components/item-form-dialog";
+} from "@/app/[locale]/admin/(content)/roadmap/_components/item-form-dialog";
 import {
   PushLaterDialog,
   type PushPrompt,
-} from "@/app/[locale]/admin/roadmap/_components/push-later-dialog";
-import { ShiftDialog } from "@/app/[locale]/admin/roadmap/_components/shift-dialog";
+} from "@/app/[locale]/admin/(content)/roadmap/_components/push-later-dialog";
+import { ShiftDialog } from "@/app/[locale]/admin/(content)/roadmap/_components/shift-dialog";
 import {
   createRoadmapItem,
   deleteRoadmapItem,
   offsetRoadmapItems,
   revalidatePublicRoadmap,
   updateRoadmapItem,
-} from "@/app/[locale]/admin/roadmap/_lib/api";
+} from "@/app/[locale]/admin/(content)/roadmap/_lib/api";
 import {
   defaultInput,
   itemToInput,
-} from "@/app/[locale]/admin/roadmap/_lib/inputs";
+} from "@/app/[locale]/admin/(content)/roadmap/_lib/inputs";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { RoadmapTimeZoneProvider } from "@/components/roadmap/roadmap-time-zone";
 import {

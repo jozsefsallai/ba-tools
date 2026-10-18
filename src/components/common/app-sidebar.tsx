@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, getPathname, usePathname } from "@/i18n/navigation";
 import { canAccessPlanaAi } from "@/lib/ai/plana-access";
-import { isSuperUser } from "@/lib/auth/super-user";
+import { canManageContent } from "@/lib/auth/roles";
 import {
   SignInButton,
   UNSAFE_PortalProvider,
@@ -220,7 +220,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { user } = useUser();
   const canShowPlanaAi = canAccessPlanaAi(user);
-  const canShowAdmin = isSuperUser(user);
+  const canShowContentManagementItems = canManageContent(user);
   const { isMobile, setOpenMobile } = useSidebar();
   const closeMobileSidebar = useCloseMobileSidebar();
   const userButtonContainerRef = useRef<HTMLDivElement>(null);
@@ -362,7 +362,7 @@ export function AppSidebar() {
     },
   ];
 
-  const ADMIN: NavLink[] = canShowAdmin
+  const CONTENT_MANAGEMENT: NavLink[] = canShowContentManagementItems
     ? [
         {
           href: "/admin/banners",
@@ -398,12 +398,12 @@ export function AppSidebar() {
       name: t("common.header.nav.games.title"),
       links: GAMES,
     },
-    ...(canShowAdmin
+    ...(canShowContentManagementItems
       ? [
           {
             id: "admin",
             name: t("common.header.nav.admin.title"),
-            links: ADMIN,
+            links: CONTENT_MANAGEMENT,
           },
         ]
       : []),

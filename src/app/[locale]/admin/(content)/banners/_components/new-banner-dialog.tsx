@@ -1,7 +1,7 @@
 "use client";
 
-import { createAdminBanner } from "@/app/[locale]/admin/banners/_lib/api";
-import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
+import { createAdminBanner } from "@/app/[locale]/admin/(content)/banners/_lib/api";
+import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import {

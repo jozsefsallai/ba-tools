@@ -1,5 +1,5 @@
-import { AdminBannersView } from "@/app/[locale]/admin/banners/_components/admin-banners-view";
-import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
+import { AdminBannersView } from "@/app/[locale]/admin/(content)/banners/_components/admin-banners-view";
+import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { db } from "@/lib/db";
 import { getCardMetadata } from "@/lib/og-metadata.server";

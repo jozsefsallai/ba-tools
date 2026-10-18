@@ -1,6 +1,6 @@
 import { updateGameBannerSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
-import { requireSuperUser } from "@/lib/auth/require-super-user";
+import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import { invalidateGameBannersCache } from "@/lib/game-banners.server";
 import { NextResponse } from "next/server";
@@ -12,7 +12,7 @@ type RouteContext = {
 };
 
 export async function PATCH(req: Request, context: RouteContext) {
-  const { error } = await requireSuperUser();
+  const { error } = await requireContentManager();
   if (error) {
     return error;
   }
@@ -93,7 +93,7 @@ export async function PATCH(req: Request, context: RouteContext) {
 }
 
 export async function DELETE(_req: Request, context: RouteContext) {
-  const { error } = await requireSuperUser();
+  const { error } = await requireContentManager();
   if (error) {
     return error;
   }

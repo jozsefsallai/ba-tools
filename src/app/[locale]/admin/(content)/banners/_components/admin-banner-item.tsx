@@ -3,8 +3,8 @@
 import {
   deleteAdminBanner,
   updateAdminBanner,
-} from "@/app/[locale]/admin/banners/_lib/api";
-import type { AdminBanner } from "@/app/[locale]/admin/banners/types";
+} from "@/app/[locale]/admin/(content)/banners/_lib/api";
+import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import { StudentPicker } from "@/components/common/student-picker";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
