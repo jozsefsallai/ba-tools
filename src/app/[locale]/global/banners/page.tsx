@@ -68,12 +68,10 @@ export default async function BannersPage() {
               , the new recruitment system is scheduled to be implemented in the
               Global version of Blue Archive on <strong>November 10</strong>.
               This suggests that they will very likely cut a week between now
-              and the Swimsuit Makoto + Swimsuit Satsuki banners. The upcoming
-              banner list will be updated when an official patch note is
-              released.{" "}
+              and the Swimsuit Makoto + Swimsuit Satsuki banners.{" "}
               <strong>
-                For now, assume that the data you see on this page is shifted by
-                one week.
+                The banner list assumes the Hikari and Nozomi banner set will be
+                cut in half to make room for the next banner set.
               </strong>
             </div>
           </AlertDescription>
