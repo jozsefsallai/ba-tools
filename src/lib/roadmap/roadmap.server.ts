@@ -149,6 +149,12 @@ const FOUR_YEARS_FROM = (date: Date) => {
   return d;
 };
 
+const GA_TICKET_LOOKBACK = () => {
+  const d = new Date();
+  d.setUTCMonth(d.getUTCMonth() - 2, 1);
+  return d;
+};
+
 function upcomingWhere() {
   const now = new Date();
   const today = startOfUTCDay(now);
@@ -203,7 +209,17 @@ export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
   const [banners, raids, events, scenarios, bonuses, workLogs, passes, etcs] =
     await Promise.all([
       fetchBanners(),
-      db.raid.findMany({ where, orderBy, include: RAID_INCLUDE }),
+      db.raid.findMany({
+        // recently ended Grand Assaults are kept for their GA tickets
+        where: {
+          OR: [
+            where,
+            { type: "EliminateRaid", endDate: { gt: GA_TICKET_LOOKBACK() } },
+          ],
+        },
+        orderBy,
+        include: RAID_INCLUDE,
+      }),
       db.event.findMany({ where, orderBy, include: EVENT_INCLUDE }),
       db.scenario.findMany({ where, orderBy }),
       db.bonusCampaign.findMany({ where, orderBy }),

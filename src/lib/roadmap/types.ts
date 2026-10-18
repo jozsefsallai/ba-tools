@@ -15,6 +15,7 @@ import type {
 export type RoadmapCategory =
   | "banner"
   | "raid"
+  | "gaTicket"
   | "frr"
   | "event"
   | "story"
@@ -27,7 +28,7 @@ export type RoadmapCategory =
 
 export type EditableRoadmapKind = Exclude<
   RoadmapCategory,
-  "banner" | "birthday" | "shopReset"
+  "banner" | "gaTicket" | "birthday" | "shopReset"
 >;
 
 type RoadmapItemBase = {
@@ -101,6 +102,11 @@ export type RoadmapBirthdayItem = RoadmapItemBase & {
   students: RoadmapBannerStudent[];
 };
 
+export type RoadmapGaTicketItem = RoadmapItemBase & {
+  kind: "gaTicket";
+  raidBoss: RaidBoss | null;
+};
+
 export type RoadmapShopResetItem = RoadmapItemBase & {
   kind: "shopReset";
 };
@@ -127,6 +133,7 @@ export type RoadmapItem =
   | RoadmapEventItem
   | RoadmapStoryItem
   | RoadmapBonusItem
+  | RoadmapGaTicketItem
   | RoadmapBirthdayItem
   | RoadmapShopResetItem
   | RoadmapWorkLogItem
@@ -135,5 +142,8 @@ export type RoadmapItem =
 
 export type EditableRoadmapItem = Exclude<
   RoadmapItem,
-  RoadmapBannerItem | RoadmapBirthdayItem | RoadmapShopResetItem
+  | RoadmapBannerItem
+  | RoadmapGaTicketItem
+  | RoadmapBirthdayItem
+  | RoadmapShopResetItem
 >;

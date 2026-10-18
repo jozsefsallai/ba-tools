@@ -180,6 +180,7 @@
     "categories": {
       "banner": "Banners",
       "raid": "Raids",
+      "gaTicket": "GA Tickets",
       "frr": "Final Restriction Release",
       "event": "Events",
       "story": "Story",
@@ -251,6 +252,7 @@
     },
     "bonusTitle": "{multiplier}x {type} Rewards",
     "shopReset": "Monthly Shop Reset",
+    "gaTicket": "{boss} Ticket",
     "unknownBoss": "TBA",
     "room": "Room {index}",
     "attack": "Attack",

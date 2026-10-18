@@ -46,6 +46,28 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 19, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.roadmap,
+        description: "Added Grand Assault tickets.",
+      },
+    ],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "Fixed user menu items not being accessible on mobile devices.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "Fixed mobile navigation menu not closing after navigating to a different page.",
+      },
+    ],
+  },
+  {
     date: "October 17, 2026",
     features: [
       {

@@ -6,6 +6,7 @@ import { useRoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { getCategorySwatch, getItemSwatch } from "@/lib/roadmap/constants";
 import {
   generateBirthdays,
+  generateGaTickets,
   generateShopResets,
   isDotItem,
 } from "@/lib/roadmap/layout";
@@ -36,6 +37,7 @@ export function RoadmapList({
 
     const visible = [
       ...items,
+      ...(categories.includes("gaTicket") ? generateGaTickets(items) : []),
       ...(categories.includes("birthday")
         ? generateBirthdays(rangeStart, shopResetsEnd, birthdaySources, tz)
         : []),

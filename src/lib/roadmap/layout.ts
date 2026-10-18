@@ -1,6 +1,7 @@
 import { parseBirthday } from "@/lib/birthdays";
 import {
   DAY_MS,
+  GA_TICKET_HOUR_UTC,
   SHOP_RESET_HOUR_UTC,
   isPermanent,
 } from "@/lib/roadmap/constants";
@@ -12,7 +13,9 @@ import {
 import type {
   RoadmapBannerStudent,
   RoadmapBirthdayItem,
+  RoadmapGaTicketItem,
   RoadmapItem,
+  RoadmapRaidItem,
   RoadmapShopResetItem,
 } from "@/lib/roadmap/types";
 
@@ -72,6 +75,46 @@ export function generateShopResets(
   }
 
   return items;
+}
+
+/**
+ * A Grand Assault ticket is handed out at the first 15:00 UTC after a Grand
+ * Assault ends, and expires at the end of the following month (UTC).
+ */
+export function generateGaTickets(items: RoadmapItem[]): RoadmapGaTicketItem[] {
+  return items
+    .filter(
+      (item): item is RoadmapRaidItem =>
+        item.kind === "raid" && item.type === "EliminateRaid",
+    )
+    .map((raid) => {
+      const end = new Date(raid.endDate);
+      const issued = new Date(
+        Date.UTC(
+          end.getUTCFullYear(),
+          end.getUTCMonth(),
+          end.getUTCDate(),
+          GA_TICKET_HOUR_UTC,
+        ),
+      );
+
+      if (issued <= end) {
+        issued.setUTCDate(issued.getUTCDate() + 1);
+      }
+
+      const expires = new Date(
+        Date.UTC(issued.getUTCFullYear(), issued.getUTCMonth() + 2, 1) - 1000,
+      );
+
+      return {
+        kind: "gaTicket" as const,
+        id: `ga-ticket-${raid.id}`,
+        startDate: issued.toISOString(),
+        endDate: expires.toISOString(),
+        raidBoss: raid.raidBoss,
+      };
+    })
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
 }
 
 export type BirthdaySource = RoadmapBannerStudent & { birthday: string };

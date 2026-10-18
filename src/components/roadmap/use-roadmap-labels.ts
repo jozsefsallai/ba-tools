@@ -115,6 +115,14 @@ export function useRoadmapLabels() {
           });
         case "birthday":
           return item.students.map((student) => student.name).join(", ");
+        case "gaTicket":
+          return t("static.roadmap.gaTicket", {
+            boss: item.raidBoss
+              ? t(
+                  `common.raids.${item.raidBoss.toLowerCase() as Lowercase<RaidBoss>}`,
+                )
+              : t("static.roadmap.unknownBoss"),
+          });
         case "shopReset":
           return t("static.roadmap.shopReset");
         case "etc":

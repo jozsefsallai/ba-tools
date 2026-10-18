@@ -134,6 +134,8 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const SHOP_RESET_HOUR_UTC = 4;
 
+export const GA_TICKET_HOUR_UTC = 15;
+
 export function isPermanent(
   startDate: string | Date,
   endDate: string | Date,
@@ -149,6 +151,7 @@ export function isPermanent(
 export const ROADMAP_CATEGORIES: RoadmapCategory[] = [
   "banner",
   "raid",
+  "gaTicket",
   "frr",
   "event",
   "story",
@@ -179,6 +182,7 @@ export function isEditableKind(kind: string): kind is EditableRoadmapKind {
 export const LANE_HEIGHTS: Record<RoadmapCategory, number> = {
   banner: 72,
   raid: 72,
+  gaTicket: 48,
   frr: 60,
   event: 60,
   story: 60,
@@ -307,6 +311,7 @@ const SWATCHES: Record<string, RoadmapSwatch> = {
 const CATEGORY_COLORS: Record<RoadmapCategory, string> = {
   banner: "sky",
   raid: "rose",
+  gaTicket: "blue",
   frr: "violet",
   event: "emerald",
   story: "indigo",

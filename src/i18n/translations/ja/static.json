@@ -173,6 +173,7 @@
     "categories": {
       "banner": "ガチャ",
       "raid": "レイド",
+      "gaTicket": "大決戦チケット",
       "frr": "制約解除決戦",
       "event": "イベント",
       "story": "ストーリー",
@@ -223,6 +224,7 @@
     },
     "bonusTitle": "{type} 報酬{multiplier}倍",
     "shopReset": "月間ショップ更新",
+    "gaTicket": "{boss}チケット",
     "unknownBoss": "未定",
     "room": "ルーム{index}",
     "attack": "攻撃",

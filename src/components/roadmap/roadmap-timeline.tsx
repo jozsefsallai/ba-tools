@@ -35,6 +35,7 @@ import {
   assignLanes,
   dateToX,
   generateBirthdays,
+  generateGaTickets,
   generateShopResets,
   isDotItem,
   xToDate,
@@ -221,6 +222,7 @@ export function RoadmapTimeline({
   const allItems = useMemo(
     () => [
       ...items,
+      ...(categories.includes("gaTicket") ? generateGaTickets(items) : []),
       ...(categories.includes("birthday")
         ? generateBirthdays(rangeStart, rangeEnd, birthdaySources, tz)
         : []),
