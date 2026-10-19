@@ -127,6 +127,10 @@
     "title": "Upcoming Global Banners",
     "description": "On this page you may view the upcoming global banners in Blue Archive. Please keep in mind that the schedule predictions are based on the JP server's banner release schedule and are subject to change on global.",
     "notice": "<strong>Important:</strong> Blue Archive global is currently on an accelerated schedule in order to reduce the gap between the JP and the global servers. As a result, some of these banners could be merged, shortened, or skipped entirely.",
+    "roadmapNotice": {
+      "title": "Looking for more than banners?",
+      "description": "Check out the <link>Global Roadmap</link> for a predicted timeline of upcoming banners, raids, events, stories and campaigns, all in one place."
+    },
 
     "group": {
       "inDays": "in {count} days",

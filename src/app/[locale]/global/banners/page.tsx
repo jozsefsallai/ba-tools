@@ -2,8 +2,10 @@ import { BannerList } from "@/app/[locale]/global/banners/_components/banner-lis
 import type { BannerGroups } from "@/app/[locale]/global/banners/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "@/i18n/navigation";
 import { getCachedGameBanners } from "@/lib/game-banners.server";
 import { getCardMetadata } from "@/lib/og-metadata.server";
+import { CalendarRangeIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
@@ -48,6 +50,27 @@ export default async function BannersPage() {
             strong: (children) => <strong>{children}</strong>,
           })}
         </p>
+
+        <Alert className="max-w-6xl">
+          <CalendarRangeIcon />
+          <AlertTitle className="font-bold">
+            {t("static.banners.roadmapNotice.title")}
+          </AlertTitle>
+          <AlertDescription>
+            <p>
+              {t.rich("static.banners.roadmapNotice.description", {
+                link: (children) => (
+                  <Link
+                    href="/global/roadmap"
+                    className="underline font-medium text-foreground"
+                  >
+                    {children}
+                  </Link>
+                ),
+              })}
+            </p>
+          </AlertDescription>
+        </Alert>
 
         <Alert className="border-amber-400/70 bg-amber-50/40 text-foreground dark:border-amber-500/50 dark:bg-amber-950/30 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-400 *:data-[slot=alert-description]:text-foreground max-w-6xl">
           <AlertTitle className="font-bold text-base">
