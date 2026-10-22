@@ -12,6 +12,8 @@ import {
 const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
+  globPublicPatterns: ["icons/*", "apple-touch-icon.png"],
+  exclude: [/./],
   disable: process.env.NODE_ENV === "development",
 });
 
