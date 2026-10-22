@@ -2,6 +2,13 @@ import { commandScore } from "@/lib/text-score";
 
 export const STUDENT_FUZZY_SCORE_THRESHOLD = 0.15;
 
+export function normalizeStudentSearchQuery(query: string): string {
+  return query
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function swapStudentSearchQueryOnFirstSpace(
   query: string,
 ): string | null {
@@ -38,7 +45,7 @@ export function orderStudentsByFuzzyNameQuery<
   primaryScores: Map<string, number>;
   secondaryScores: Map<string, number>;
 } {
-  const trimmed = searchInput.trim();
+  const trimmed = normalizeStudentSearchQuery(searchInput);
   const scoreQuery = (s: T, q: string) => commandScore(s.name, q, s.searchTags);
 
   const primaryScores = new Map<string, number>();
