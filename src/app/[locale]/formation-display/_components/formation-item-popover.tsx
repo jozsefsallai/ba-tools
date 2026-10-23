@@ -119,6 +119,7 @@ export function FormationItemPopover({
 
             <StarLevelInput
               className="flex-1 items-center"
+              imageClassName="size-6"
               value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
               onValueChanged={handleStarsUpdate}
             />
