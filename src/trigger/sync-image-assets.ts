@@ -23,9 +23,15 @@ export const syncImageAssetsTask: Task<
   SyncImageAssetsResult
 > = task({
   id: "sync-image-assets",
-  run: async (payload: SyncImageAssetsPayload) => {
-    const { sqlcipherKey, devNames, dryRun, overwrite } =
-      syncImageAssetsPayload.parse(payload);
+  run: async (payload: SyncImageAssetsPayload, { ctx }) => {
+    const {
+      sqlcipherKey,
+      devNames,
+      dryRun,
+      overwrite,
+      spineSprites,
+      memorialLobbies,
+    } = syncImageAssetsPayload.parse(payload);
 
     const { extractImageAssets } = await loadMxDataSync();
 
@@ -36,6 +42,9 @@ export const syncImageAssetsTask: Task<
       outDir: join(workDir, "images"),
       cacheDir: join(workDir, "cache"),
       logger,
+      spineSprites,
+      memorialLobbies,
+      renderThreads: Math.floor(ctx.machine?.cpu ?? 1) - 1,
     });
 
     const upload = dryRun

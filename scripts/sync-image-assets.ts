@@ -17,6 +17,9 @@ const { values } = parseArgs({
     "dev-names": { type: "string" },
     "dry-run": { type: "boolean", default: false },
     "no-overwrite": { type: "boolean", default: false },
+    "no-spine-sprites": { type: "boolean", default: false },
+    "no-memorial-lobbies": { type: "boolean", default: false },
+    "render-threads": { type: "string" },
     out: { type: "string", default: `${root}.cache/game-data/images` },
   },
 });
@@ -41,6 +44,12 @@ const result = await extractImageAssets({
   outDir: values.out,
   cacheDir,
   logger,
+  spineSprites: !values["no-spine-sprites"],
+  memorialLobbies: !values["no-memorial-lobbies"],
+  renderThreads:
+    values["render-threads"] === undefined
+      ? undefined
+      : Number(values["render-threads"]),
 });
 
 const upload = values["dry-run"]

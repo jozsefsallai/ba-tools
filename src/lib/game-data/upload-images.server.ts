@@ -11,8 +11,30 @@ import {
 import type { ExtractedImage, SyncLogger } from "./contract";
 
 const CONCURRENCY = 8;
+
 // Not `immutable` - existing paths may be overwritten when an asset changes
 const CACHE_CONTROL = "public, max-age=86400";
+
+// Manifests list the files next to them, so they should pick up changes quickly
+const MANIFEST_CACHE_CONTROL = "public, max-age=300";
+
+const CONTENT_TYPES: Record<string, string> = {
+  png: "image/png",
+  webp: "image/webp",
+  json: "application/json",
+  atlas: "text/plain; charset=utf-8",
+  skel: "application/octet-stream",
+};
+
+function contentType(key: string) {
+  const type = CONTENT_TYPES[key.split(".").pop()?.toLowerCase() ?? ""];
+
+  if (!type) {
+    throw new Error(`No content type for ${key}`);
+  }
+
+  return type;
+}
 
 function required(name: string) {
   const value = process.env[name];
@@ -78,8 +100,10 @@ export async function uploadImages(
         Bucket: bucket,
         Key: file.key,
         Body: body,
-        ContentType: "image/png",
-        CacheControl: CACHE_CONTROL,
+        ContentType: contentType(file.key),
+        CacheControl: file.key.endsWith("/manifest.json")
+          ? MANIFEST_CACHE_CONTROL
+          : CACHE_CONTROL,
       }),
     );
 

@@ -50,6 +50,39 @@ export interface ExtractImageAssetsOptions {
   outDir: string;
   cacheDir: string;
   logger?: SyncLogger;
+  spineSprites?: boolean;
+  memorialLobbies?: boolean;
+  renderThreads?: number;
+}
+
+export interface StudentSpriteManifest {
+  version: 1;
+  gameVersion: string;
+  skeleton: string;
+  width: number;
+  height: number;
+  sprites: string[];
+}
+
+export interface MemorialLobbySkeleton {
+  name: string;
+  role: "main" | "background";
+  skel: string;
+  atlas: string;
+  textures: string[];
+  animations: string[];
+}
+
+export interface MemorialLobby {
+  id: number;
+  prefab: string;
+  skeletons: MemorialLobbySkeleton[];
+}
+
+export interface MemorialLobbyManifest {
+  version: 1;
+  gameVersion: string;
+  lobbies: MemorialLobby[];
 }
 
 export interface ExtractedImage {

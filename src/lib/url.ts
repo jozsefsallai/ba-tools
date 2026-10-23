@@ -38,3 +38,21 @@ export function buildSkillPortraitUrl(student: Pick<Student, "devName">) {
 export function buildAlternativeSkillPortraitUrl(key: string) {
   return buildCDNUrl(`v2/images/skill-portraits/${key}.png`);
 }
+
+export function buildStudentSpriteUrl(studentId: string, sprite: string) {
+  return buildCDNUrl(`v2/images/students/spine/${studentId}/${sprite}.webp`);
+}
+
+export function buildStudentSpriteManifestUrl(studentId: string) {
+  return buildCDNUrl(`v2/images/students/spine/${studentId}/manifest.json`);
+}
+
+export function buildMemorialLobbyFileUrl(studentId: string, file: string) {
+  return buildCDNUrl(
+    `v2/images/students/memorial-lobby/${studentId}/${encodeURIComponent(file)}`,
+  );
+}
+
+export function buildMemorialLobbyManifestUrl(studentId: string) {
+  return buildMemorialLobbyFileUrl(studentId, "manifest.json");
+}

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 import { esbuildPlugin } from "@trigger.dev/build/extensions";
 import { additionalPackages } from "@trigger.dev/build/extensions/core";
@@ -10,6 +10,9 @@ import { defineConfig } from "@trigger.dev/sdk/v3";
 // and abort
 const mxDataSyncEntry = resolve("vendor/mx-data-sync/src/index.ts");
 const mxDataSyncStub = resolve("src/trigger/lib/mx-data-sync-stub.ts");
+
+const mxSpineWorker = resolve("vendor/mx-data-sync/src/assets/spine-worker.ts");
+const mxSpineWorkerBundle = "mx-spine-worker.mjs";
 
 // Some of mx-asset-sync's runtime dependencies ship WASM, which can't be
 // bundled, so they are installed in the deployed image at the versions the
@@ -41,6 +44,7 @@ export default defineConfig({
   },
   dirs: ["./src/trigger"],
   build: {
+    external: ["sharp"],
     extensions: [
       prismaExtension({
         mode: "modern",
@@ -56,6 +60,28 @@ export default defineConfig({
               ? mxDataSyncEntry
               : mxDataSyncStub,
           }));
+
+          const outdir = build.initialOptions.outdir;
+          if (!existsSync(mxSpineWorker) || !outdir) {
+            return;
+          }
+
+          build.onEnd(async (result) => {
+            if (result.errors.length > 0) {
+              return;
+            }
+
+            await build.esbuild.build({
+              entryPoints: [mxSpineWorker],
+              outfile: join(outdir, mxSpineWorkerBundle),
+              bundle: true,
+              platform: "node",
+              format: "esm",
+              external: ["sharp"],
+              target: "node22",
+              logLevel: "warning",
+            });
+          });
         },
       }),
     ],
