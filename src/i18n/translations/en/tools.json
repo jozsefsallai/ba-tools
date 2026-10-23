@@ -902,7 +902,6 @@
       "notSaved": "This screenshot was not saved as a match.",
       "viewScreenshot": "View screenshot",
       "editMatch": "Edit saved match",
-      "viewAgenda": "View agenda",
       "startNewBatch": "Start new batch",
       "leaveTitle": "Leave this import?",
       "leaveDescription": "Leaving stops the remaining screenshot extraction. Matches already saved will remain in your agenda. A save already in progress may still finish.",

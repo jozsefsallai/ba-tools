@@ -954,14 +954,6 @@ export function PvpScreenshotImport({
         </Alert>
       )}
 
-      {completed && (
-        <Button variant="outline" asChild>
-          <Link href={agenda}>
-            {t("tools.pvp.screenshotImport.viewAgenda")}
-          </Link>
-        </Button>
-      )}
-
       {completed && errors.length > 0 && (
         <section
           className="flex flex-col gap-3"

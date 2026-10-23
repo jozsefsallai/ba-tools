@@ -4,6 +4,7 @@ import {
   PvpCropPreview,
   PvpOcrReadings,
 } from "@/app/[locale]/pvp/_components/pvp-screenshot-preview";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,9 +13,18 @@ import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
 import {
   type PvpExtractionResult,
+  type PvpOcrField,
   type PvpOcrProgress,
   resolvePvpReportTeam,
 } from "@/lib/pvp";
+import {
+  type PvpDebugFieldStatus,
+  type PvpDebugIssue,
+  collectPvpDebugIssues,
+  getPvpDebugFieldStatus,
+  getPvpDebugStudentReasons,
+  getPvpDebugUnitId,
+} from "@/lib/pvp/debug-issues";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { getScreenshotPreview, getScreenshotROIs } from "@/lib/pvp/screenshot";
 import {
@@ -26,7 +36,9 @@ import {
   PVP_SCREENSHOT_REGIONS,
   type PvpScreenshotRegion,
 } from "@/lib/pvp/screenshot-types";
-import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Preview = {
   name: PvpScreenshotRegion;
@@ -60,6 +72,14 @@ export function PvpScreenshotDebugger() {
   const selectionRef = useRef(0);
 
   const { students } = useStudents();
+
+  const studentName = (id: string) =>
+    students.find((student) => student.id === id)?.name ?? id;
+
+  const issues = useMemo(
+    () => extraction && collectPvpDebugIssues(extraction, students),
+    [extraction, students],
+  );
 
   useEffect(
     () => () => {
@@ -285,6 +305,8 @@ export function PvpScreenshotDebugger() {
             />
           )}
 
+          {diagnostics && <AlignmentSummary diagnostics={diagnostics} />}
+
           {diagnostics && (
             <details>
               <summary>Alignment diagnostics</summary>
@@ -308,7 +330,10 @@ export function PvpScreenshotDebugger() {
       </Card>
 
       {previews.length > 0 && (
-        <section className="grid gap-5 md:grid-cols-2">
+        <section
+          id="debug-regions"
+          className="grid scroll-mt-4 gap-5 md:grid-cols-2"
+        >
           {previews.map((preview) => (
             <Card key={preview.name}>
               <CardHeader className="pb-3">
@@ -377,172 +402,206 @@ export function PvpScreenshotDebugger() {
               </div>
             )}
 
-            {extraction && (
-              <p>
-                Valid: {String(extraction.valid)} ·{" "}
-                {(extraction.elapsedMs / 1000).toFixed(2)} s
-              </p>
+            {extraction && issues && (
+              <IssueSummary issues={issues} elapsedMs={extraction.elapsedMs} />
             )}
 
             {extraction?.battle && (
               <>
-                {extraction.battle.enemyNameRecognition && (
-                  <pre className="whitespace-pre-wrap break-all text-xs">
-                    {JSON.stringify(
-                      {
-                        ...extraction.battle.enemyNameRecognition,
-                        receipt: undefined,
-                      },
-                      null,
-                      2,
-                    )}
-                  </pre>
-                )}
-                {[
-                  extraction.battle.battleType,
-                  extraction.battle.result,
-                  extraction.battle.enemyName,
-                  extraction.battle.enemyStudentRep,
-                ].map((field, index) => (
-                  <div key={index} className="flex flex-col gap-2">
-                    <p>
-                      {
-                        [
-                          "Battle type",
-                          "Result",
-                          "Opponent name",
-                          "Opponent representative",
-                        ][index]
-                      }
-                      :{" "}
-                      {field.value ??
-                        (index >= 2 &&
-                        extraction.battle?.enemyNameStatus === "anonymous"
-                          ? "anonymous"
-                          : "unreadable")}{" "}
-                      · {field.confidence.toFixed(1)} · uncertain:{" "}
-                      {String(field.uncertain)}
-                    </p>
-
-                    {field.crop && <PvpCropPreview image={field.crop} />}
-
+                {(
+                  [
+                    [
+                      "debug-battle-type",
+                      "Battle type",
+                      extraction.battle.battleType,
+                    ],
+                    ["debug-result", "Result", extraction.battle.result],
+                  ] as const
+                ).map(([id, label, field]) => (
+                  <FieldPanel key={id} id={id} label={label} field={field}>
                     <pre className="whitespace-pre-wrap break-words text-xs">
                       {field.rawText}
                     </pre>
-
-                    <PvpOcrReadings readings={field.alternatives} />
-
-                    {index === 3 &&
-                      extraction.battle?.enemyStudentRep.iconMatch.candidates.map(
-                        (candidate) => (
-                          <p key={candidate.studentId} className="text-xs">
-                            {students.find(
-                              (student) => student.id === candidate.studentId,
-                            )?.name ?? candidate.studentId}
-                            {" · distance: "}
-                            {candidate.distance.toFixed(2)}
-                          </p>
-                        ),
-                      )}
-                  </div>
+                  </FieldPanel>
                 ))}
+
+                <FieldPanel
+                  id="debug-opponent-name"
+                  label="Opponent name"
+                  field={extraction.battle.enemyName}
+                  status={
+                    extraction.battle.enemyNameStatus === "anonymous"
+                      ? "ok"
+                      : undefined
+                  }
+                  value={
+                    extraction.battle.enemyNameStatus === "anonymous"
+                      ? "anonymous"
+                      : undefined
+                  }
+                >
+                  <pre className="whitespace-pre-wrap break-words text-xs">
+                    {extraction.battle.enemyName.rawText}
+                  </pre>
+
+                  <PvpOcrReadings
+                    readings={extraction.battle.enemyName.alternatives}
+                  />
+
+                  {extraction.battle.enemyNameRecognition && (
+                    <details className="text-xs">
+                      <summary className="cursor-pointer">
+                        Name recognition details
+                      </summary>
+                      <pre className="whitespace-pre-wrap break-all">
+                        {JSON.stringify(
+                          {
+                            ...extraction.battle.enemyNameRecognition,
+                            receipt: undefined,
+                          },
+                          null,
+                          2,
+                        )}
+                      </pre>
+                    </details>
+                  )}
+                </FieldPanel>
+
+                <FieldPanel
+                  id="debug-opponent-representative"
+                  label="Opponent representative"
+                  field={extraction.battle.enemyStudentRep}
+                  status={
+                    extraction.battle.enemyNameStatus === "anonymous"
+                      ? "ok"
+                      : undefined
+                  }
+                  value={
+                    extraction.battle.enemyNameStatus === "anonymous"
+                      ? "anonymous"
+                      : undefined
+                  }
+                >
+                  <CandidateList
+                    candidates={
+                      extraction.battle.enemyStudentRep.iconMatch.candidates
+                    }
+                    studentName={studentName}
+                  />
+                </FieldPanel>
 
                 {(["myUnits", "enemyUnits"] as const).map((side) => {
                   const units = extraction.battle?.[side] ?? [];
                   const resolved = resolvePvpReportTeam(units, students);
 
                   return (
-                    <div key={side} className="flex flex-col gap-4">
-                      <h2>{REGION_LABELS[side]}</h2>
+                    <section
+                      key={side}
+                      id={`debug-${side}`}
+                      className="flex scroll-mt-4 flex-col gap-3"
+                    >
+                      <h2 className="text-lg font-semibold">
+                        {REGION_LABELS[side]}
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
+                          {units.length} column(s) detected
+                        </span>
+                      </h2>
 
-                      {units.map((unit) => (
-                        <div
-                          key={unit.sourceIndex}
-                          className="flex flex-col gap-2 rounded-md border p-3"
-                        >
-                          <p>
-                            Column {unit.sourceIndex + 1} ·{" "}
-                            {unit.combatClass ?? "unknown class"}
-                          </p>
+                      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        {units.map((unit) => {
+                          const report = resolved.find(
+                            (item) =>
+                              item.report?.student.crop === unit.student.crop,
+                          )?.report;
+                          const student = report?.student ?? unit.student;
+                          const reasons = getPvpDebugStudentReasons(
+                            unit,
+                            students,
+                          );
+                          const status = worstStatus([
+                            getPvpDebugFieldStatus(student),
+                            getPvpDebugFieldStatus(unit.damage),
+                          ]);
 
-                          {(["student", "damage"] as const).map((key) => {
-                            const field =
-                              key === "student"
-                                ? (resolved.find(
-                                    (item) =>
-                                      item.report?.student.crop ===
-                                      unit.student.crop,
-                                  )?.report?.student ?? unit.student)
-                                : unit.damage;
-
-                            return (
-                              <div key={key} className="flex flex-col gap-1">
-                                {field.crop && (
-                                  <PvpCropPreview image={field.crop} />
-                                )}
-
-                                <p className="text-sm">
-                                  {key}: {field.value ?? "unreadable"} ·{" "}
-                                  {field.confidence.toFixed(1)}
+                          return (
+                            <div
+                              key={unit.sourceIndex}
+                              id={getPvpDebugUnitId(side, unit)}
+                              className={cn(
+                                "flex scroll-mt-4 flex-col gap-2 rounded-md border p-3",
+                                STATUS_BORDERS[status],
+                              )}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="font-medium">
+                                  Column {unit.sourceIndex + 1}
+                                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                    {unit.combatClass ?? "unknown class"}
+                                  </span>
                                 </p>
 
-                                <pre className="whitespace-pre-wrap break-words text-xs">
-                                  {field.rawText}
-                                </pre>
-
-                                <PvpOcrReadings readings={field.alternatives} />
+                                <StatusBadge status={status} />
                               </div>
-                            );
-                          })}
 
-                          {unit.student.iconMatch && (
-                            <div className="text-xs">
-                              <p>
-                                Icon similarity:{" "}
-                                {unit.student.iconMatch.confidence.toFixed(1)} ·
-                                separation:{" "}
-                                {(unit.student.iconMatch.margin * 100).toFixed(
-                                  1,
+                              <div className="flex flex-wrap items-start gap-3">
+                                {student.crop && (
+                                  <PvpCropPreview image={student.crop} />
                                 )}
-                                % · uncertain:{" "}
-                                {String(unit.student.iconMatch.uncertain)}
-                              </p>
+                                {unit.damage.crop && (
+                                  <PvpCropPreview image={unit.damage.crop} />
+                                )}
+                              </div>
 
-                              <ul>
-                                {unit.student.iconMatch.candidates.map(
-                                  (candidate) => (
-                                    <li key={candidate.studentId}>
-                                      {students.find(
-                                        (student) =>
-                                          student.id === candidate.studentId,
-                                      )?.name ?? candidate.studentId}{" "}
-                                      · distance:{" "}
-                                      {candidate.distance.toFixed(2)}
-                                    </li>
-                                  ),
-                                )}
-                              </ul>
+                              <FieldLine
+                                label="Student"
+                                field={student}
+                                detail={`similarity ${unit.student.iconMatch.confidence.toFixed(1)} · separation ${(unit.student.iconMatch.margin * 100).toFixed(1)}%`}
+                              />
+
+                              {reasons.length > 0 && (
+                                <ul className="list-disc pl-5 text-xs text-muted-foreground">
+                                  {reasons.map((reason) => (
+                                    <li key={reason}>{reason}</li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              <FieldLine
+                                label="Damage"
+                                field={unit.damage}
+                                detail={
+                                  unit.damage.crop
+                                    ? `OCR "${unit.damage.rawText}" · ${unit.damage.confidence.toFixed(1)}`
+                                    : "no badge found"
+                                }
+                              />
+
+                              <PvpOcrReadings
+                                readings={unit.damage.alternatives}
+                              />
+
+                              <details className="text-xs">
+                                <summary className="cursor-pointer">
+                                  Icon candidates
+                                </summary>
+
+                                <CandidateList
+                                  candidates={unit.student.iconMatch.candidates}
+                                  studentName={studentName}
+                                />
+
+                                <p className="mt-1 text-muted-foreground">
+                                  Suggested:{" "}
+                                  {report?.candidateIds
+                                    .map(studentName)
+                                    .join(" · ") || "none"}
+                                </p>
+                              </details>
                             </div>
-                          )}
-
-                          <p className="text-xs">
-                            Student candidates:{" "}
-                            {resolved
-                              .find(
-                                (item) =>
-                                  item.report?.student.crop ===
-                                  unit.student.crop,
-                              )
-                              ?.report?.candidateIds.map(
-                                (id) =>
-                                  students.find((student) => student.id === id)
-                                    ?.name ?? id,
-                              )
-                              .join(" · ") || "none"}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                          );
+                        })}
+                      </div>
+                    </section>
                   );
                 })}
               </>
@@ -551,6 +610,250 @@ export function PvpScreenshotDebugger() {
         </Card>
       )}
     </main>
+  );
+}
+
+const STATUS_BORDERS: Record<PvpDebugFieldStatus, string> = {
+  ok: "",
+  uncertain: "border-amber-500/70 bg-amber-500/5",
+  missing: "border-destructive/70 bg-destructive/5",
+};
+
+function worstStatus(statuses: PvpDebugFieldStatus[]): PvpDebugFieldStatus {
+  if (statuses.includes("missing")) {
+    return "missing";
+  }
+
+  return statuses.includes("uncertain") ? "uncertain" : "ok";
+}
+
+function StatusBadge({ status }: { status: PvpDebugFieldStatus }) {
+  if (status === "missing") {
+    return <Badge variant="destructive">Missing</Badge>;
+  }
+
+  if (status === "uncertain") {
+    return (
+      <Badge
+        variant="outline"
+        className="border-amber-500/70 text-amber-600 dark:text-amber-400"
+      >
+        Uncertain
+      </Badge>
+    );
+  }
+
+  return <Badge variant="secondary">OK</Badge>;
+}
+
+function FieldLine({
+  label,
+  field,
+  detail,
+}: {
+  label: string;
+  field: PvpOcrField<unknown>;
+  detail?: string;
+}) {
+  return (
+    <p className="text-sm">
+      <span className="text-muted-foreground">{label}:</span>{" "}
+      <span className="font-medium">
+        {field.value == null ? "—" : String(field.value)}
+      </span>
+      {detail && (
+        <span className="text-xs text-muted-foreground"> · {detail}</span>
+      )}
+    </p>
+  );
+}
+
+function FieldPanel({
+  id,
+  label,
+  field,
+  status = getPvpDebugFieldStatus(field),
+  value,
+  children,
+}: {
+  id: string;
+  label: string;
+  field: PvpOcrField<unknown>;
+  status?: PvpDebugFieldStatus;
+  value?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div
+      id={id}
+      className={cn(
+        "flex scroll-mt-4 flex-col gap-2 rounded-md border p-3",
+        STATUS_BORDERS[status],
+      )}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p>
+          <span className="text-muted-foreground">{label}:</span>{" "}
+          <span className="font-medium">
+            {value ?? (field.value == null ? "—" : String(field.value))}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {" "}
+            · confidence {field.confidence.toFixed(1)}
+          </span>
+        </p>
+
+        <StatusBadge status={status} />
+      </div>
+
+      {field.crop && <PvpCropPreview image={field.crop} />}
+
+      {children}
+    </div>
+  );
+}
+
+function CandidateList({
+  candidates,
+  studentName,
+}: {
+  candidates: { studentId: string; distance: number }[];
+  studentName: (id: string) => string;
+}) {
+  if (!candidates.length) {
+    return <p className="text-xs text-muted-foreground">No candidates</p>;
+  }
+
+  return (
+    <ol className="list-decimal pl-5 text-xs">
+      {candidates.map((candidate) => (
+        <li key={candidate.studentId}>
+          {studentName(candidate.studentId)}
+          <span className="text-muted-foreground">
+            {" "}
+            · distance {candidate.distance.toFixed(2)}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function IssueSummary({
+  issues,
+  elapsedMs,
+}: {
+  issues: PvpDebugIssue[];
+  elapsedMs: number;
+}) {
+  const errors = issues.filter((issue) => issue.severity === "error").length;
+  const warnings = issues.length - errors;
+  const blocking = issues.some((issue) => issue.blocking);
+
+  const [verdict, tone] = blocking
+    ? ["Bulk import would reject this screenshot", "missing" as const]
+    : errors
+      ? ["Imports, but with missing data", "missing" as const]
+      : warnings
+        ? ["Imports, but review the uncertain fields", "uncertain" as const]
+        : ["No issues detected", "ok" as const];
+
+  return (
+    <section
+      aria-labelledby="debug-issues-heading"
+      className={cn(
+        "flex flex-col gap-3 rounded-md border p-4",
+        STATUS_BORDERS[tone],
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 id="debug-issues-heading" className="font-semibold">
+          {verdict}
+        </h2>
+
+        {errors > 0 && (
+          <Badge variant="destructive">
+            {errors} error{errors === 1 ? "" : "s"}
+          </Badge>
+        )}
+
+        {warnings > 0 && <WarningCountBadge count={warnings} />}
+
+        <span className="ml-auto text-xs text-muted-foreground">
+          {(elapsedMs / 1000).toFixed(2)} s
+        </span>
+      </div>
+
+      {issues.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {issues.map((issue, index) => (
+            <li key={index} className="flex items-start gap-2 text-sm">
+              <StatusBadge
+                status={issue.severity === "error" ? "missing" : "uncertain"}
+              />
+
+              <div className="min-w-0">
+                <a href={`#${issue.target}`} className="hover:underline">
+                  {issue.title}
+                  {issue.blocking && (
+                    <span className="font-semibold"> (blocks import)</span>
+                  )}
+                </a>
+
+                {issue.detail && (
+                  <p className="break-words text-xs text-muted-foreground">
+                    {issue.detail}
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function WarningCountBadge({ count }: { count: number }) {
+  return (
+    <Badge
+      variant="outline"
+      className="border-amber-500/70 text-amber-600 dark:text-amber-400"
+    >
+      {count} warning{count === 1 ? "" : "s"}
+    </Badge>
+  );
+}
+
+function AlignmentSummary({
+  diagnostics,
+}: {
+  diagnostics: PvpAlignmentDiagnostics;
+}) {
+  if (diagnostics.rejection) {
+    return (
+      <p className="rounded-md border border-destructive/70 bg-destructive/5 p-3 text-sm">
+        <span className="font-semibold">Alignment failed:</span>{" "}
+        {diagnostics.rejection}
+        <span className="block text-xs text-muted-foreground">
+          {diagnostics.rules.length} horizontal rule(s) found,{" "}
+          {diagnostics.candidates.length} layout candidate(s)
+        </span>
+      </p>
+    );
+  }
+
+  const [chosen] = diagnostics.candidates;
+
+  if (!chosen) {
+    return null;
+  }
+
+  return (
+    <p className="text-sm text-muted-foreground">
+      Aligned · {chosen.scale.toFixed(3)} source px per report px · score{" "}
+      {chosen.score.toFixed(2)} · {diagnostics.rules.length} rule(s) found
+    </p>
   );
 }
 

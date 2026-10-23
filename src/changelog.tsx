@@ -46,6 +46,33 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 23, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Removed View Agenda button from bulk screenshot import.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Improved detection of battle type and result in the screenshot importer.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Fixed a bug where the text to visual timeline would randomly add Swimsuit Irohas everywhere.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description:
+          "Student picker will now work when searching for a student variant with dot in the name (e.g. S.Nagisa).",
+      },
+    ],
+  },
+  {
     date: "October 19, 2026",
     features: [
       {
