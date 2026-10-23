@@ -13,6 +13,19 @@ export async function getExistingStudents(): Promise<ExistingStudents> {
   };
 }
 
+export async function resolveAllImageStudents(): Promise<ImageStudent[]> {
+  const rows = await db.student.findMany({
+    select: { id: true, devName: true, schaleDbId: true },
+    orderBy: { defaultOrder: "asc" },
+  });
+
+  return rows.map((row) => ({
+    devName: row.devName,
+    characterId: row.schaleDbId,
+    pathName: row.id,
+  }));
+}
+
 export async function resolveImageStudents(
   devNames: string[],
 ): Promise<ImageStudent[]> {

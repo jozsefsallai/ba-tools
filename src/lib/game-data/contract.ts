@@ -53,6 +53,7 @@ export interface ExtractImageAssetsOptions {
   spineSprites?: boolean;
   memorialLobbies?: boolean;
   renderThreads?: number;
+  reuseExisting?: boolean;
 }
 
 export interface StudentSpriteManifest {

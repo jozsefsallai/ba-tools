@@ -1,6 +1,9 @@
 import { parseArgs } from "node:util";
 
-import { resolveImageStudents } from "@/lib/game-data/existing-students.server";
+import {
+  resolveAllImageStudents,
+  resolveImageStudents,
+} from "@/lib/game-data/existing-students.server";
 import { uploadImages } from "@/lib/game-data/upload-images.server";
 import {
   cacheDir,
@@ -15,11 +18,13 @@ const { values } = parseArgs({
   options: {
     "sqlcipher-key": { type: "string" },
     "dev-names": { type: "string" },
+    all: { type: "boolean", default: false },
     "dry-run": { type: "boolean", default: false },
     "no-overwrite": { type: "boolean", default: false },
     "no-spine-sprites": { type: "boolean", default: false },
     "no-memorial-lobbies": { type: "boolean", default: false },
     "render-threads": { type: "string" },
+    fresh: { type: "boolean", default: false },
     out: { type: "string", default: `${root}.cache/game-data/images` },
   },
 });
@@ -31,8 +36,8 @@ const devNames = (values["dev-names"] ?? "")
   .map((n) => n.trim())
   .filter(Boolean);
 
-if (devNames.length === 0) {
-  console.error("--dev-names <devName,devName,...> is required.");
+if (values.all === devNames.length > 0) {
+  console.error("Pass either --dev-names <devName,devName,...> or --all.");
   process.exit(1);
 }
 
@@ -40,12 +45,15 @@ const { extractImageAssets } = await loadMxDataSync();
 
 const result = await extractImageAssets({
   sqlcipherKey,
-  students: await resolveImageStudents(devNames),
+  students: values.all
+    ? await resolveAllImageStudents()
+    : await resolveImageStudents(devNames),
   outDir: values.out,
   cacheDir,
   logger,
   spineSprites: !values["no-spine-sprites"],
   memorialLobbies: !values["no-memorial-lobbies"],
+  reuseExisting: !values.fresh,
   renderThreads:
     values["render-threads"] === undefined
       ? undefined

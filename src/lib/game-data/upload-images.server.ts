@@ -11,6 +11,7 @@ import {
 import type { ExtractedImage, SyncLogger } from "./contract";
 
 const CONCURRENCY = 8;
+const PROGRESS_EVERY = 100;
 
 // Not `immutable` - existing paths may be overwritten when an asset changes
 const CACHE_CONTROL = "public, max-age=86400";
@@ -108,18 +109,29 @@ export async function uploadImages(
     );
 
     result.uploaded.push(file.key);
-    logger?.info(`Uploaded ${file.key}`);
   }
 
   const queue = [...files];
+  let done = 0;
+
+  const logProgress = () =>
+    logger?.info(
+      `Upload: ${done}/${files.length} files (${result.uploaded.length} uploaded, ${result.unchanged.length} unchanged)`,
+    );
 
   await Promise.all(
     Array.from({ length: CONCURRENCY }, async () => {
       for (let file = queue.shift(); file; file = queue.shift()) {
         await uploadOne(file);
+
+        if (++done % PROGRESS_EVERY === 0 && done < files.length) {
+          logProgress();
+        }
       }
     }),
   );
+
+  logProgress();
 
   result.uploaded.sort();
   result.unchanged.sort();

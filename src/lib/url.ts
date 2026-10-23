@@ -43,6 +43,10 @@ export function buildStudentSpriteUrl(studentId: string, sprite: string) {
   return buildCDNUrl(`v2/images/students/spine/${studentId}/${sprite}.webp`);
 }
 
+export function buildStudentDefaultSpriteUrl(studentId: string) {
+  return buildStudentSpriteUrl(studentId, "00");
+}
+
 export function buildStudentSpriteManifestUrl(studentId: string) {
   return buildCDNUrl(`v2/images/students/spine/${studentId}/manifest.json`);
 }
