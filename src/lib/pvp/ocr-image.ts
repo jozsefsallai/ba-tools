@@ -10,6 +10,10 @@ import {
   type PVPScreenshotROIs,
   PVP_SCREENSHOT_ROI_BOUNDS,
 } from "@/lib/pvp/screenshot-types";
+import {
+  type PvpStatusTemplates,
+  matchPvpStatusTemplate,
+} from "@/lib/pvp/status-match";
 
 type Box = { x: number; y: number; width: number; height: number };
 
@@ -23,7 +27,7 @@ export type PvpUnitCrops = PvpUnitPosition & {
 export type PvpPreparedReport = {
   valid: boolean;
   battleType: PvpBattleInfo["battleType"];
-  result: PvpPixelImage;
+  result: PvpBattleInfo["result"];
   enemyStudentRep: PvpPixelImage;
   enemyName: PvpPixelImage;
   myUnits: PvpUnitCrops[];
@@ -258,167 +262,10 @@ function segmentTeam(image: PvpPixelImage): PvpUnitCrops[] {
   });
 }
 
-type Point = readonly [number, number];
-
-const SHIELD: Point[] = [
-  [0.5, 0],
-  [0.72, 0.12],
-  [1, 0.17],
-  [1, 0.66],
-  [0.88, 0.81],
-  [0.5, 1],
-  [0.12, 0.81],
-  [0, 0.66],
-  [0, 0.17],
-  [0.28, 0.12],
-];
-
-const SWORD: Point[] = [
-  [0.97, 0],
-  [1, 0.19],
-  [0.56, 0.64],
-  [0.7, 0.79],
-  [0.61, 0.9],
-  [0.45, 0.74],
-  [0.18, 1],
-  [0, 0.84],
-  [0.27, 0.58],
-  [0.11, 0.41],
-  [0.2, 0.31],
-  [0.37, 0.47],
-  [0.82, 0.03],
-];
-
-function insidePolygon(x: number, y: number, polygon: Point[]) {
-  let inside = false;
-
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [xi, yi] = polygon[i];
-    const [xj, yj] = polygon[j];
-
-    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-}
-
-export function classifyPvpBattleType(
-  image: PvpPixelImage,
-): PvpBattleInfo["battleType"] {
-  const iconArea = cropPvpImage(image, {
-    x: 0,
-    y: 0,
-    width: 135,
-    height: image.height,
-  });
-
-  const blue = (r: number, g: number, b: number) => {
-    return b > r + 20 && g > r + 12 && b > 100;
-  };
-
-  const component = components(iconArea, blue)
-    .filter((box) => box.width > 20 && box.height > 25)
-    .sort((a, b) => b.count - a.count)[0];
-
-  if (!component) {
-    return {
-      value: null,
-      rawText: "",
-      confidence: 0,
-      uncertain: true,
-      crop: iconArea,
-    };
-  }
-
-  const crop = cropPvpImage(iconArea, component);
-
-  // Fill holes (white blade/interior highlights), preserving the outer
-  // silhouette
-  const mask = new Uint8Array(crop.width * crop.height);
-  for (let i = 0; i < mask.length; i++) {
-    mask[i] = Number(
-      blue(crop.pixels[i * 4], crop.pixels[i * 4 + 1], crop.pixels[i * 4 + 2]),
-    );
-  }
-
-  const outside = new Uint8Array(mask.length);
-  const queue: number[] = [];
-
-  for (let y = 0; y < crop.height; y++) {
-    for (let x = 0; x < crop.width; x++) {
-      if (x && y && x < crop.width - 1 && y < crop.height - 1) {
-        continue;
-      }
-
-      const i = y * crop.width + x;
-
-      if (!mask[i] && !outside[i]) {
-        outside[i] = 1;
-        queue.push(i);
-      }
-    }
-  }
-
-  for (let i = 0; i < queue.length; i++) {
-    const index = queue[i];
-    const x = index % crop.width;
-
-    for (const next of [
-      x > 0 ? index - 1 : -1,
-      x + 1 < crop.width ? index + 1 : -1,
-      index - crop.width,
-      index + crop.width,
-    ]) {
-      if (next >= 0 && next < mask.length && !mask[next] && !outside[next]) {
-        outside[next] = 1;
-        queue.push(next);
-      }
-    }
-  }
-
-  const score = (polygon: Point[]) => {
-    let union = 0;
-    let intersection = 0;
-
-    for (let y = 0; y < 32; y++)
-      for (let x = 0; x < 32; x++) {
-        const actual =
-          !outside[
-            Math.min(
-              crop.height - 1,
-              Math.floor(((y + 0.5) / 32) * crop.height),
-            ) *
-              crop.width +
-              Math.min(
-                crop.width - 1,
-                Math.floor(((x + 0.5) / 32) * crop.width),
-              )
-          ];
-
-        const template = insidePolygon((x + 0.5) / 32, (y + 0.5) / 32, polygon);
-        union += Number(actual || template);
-        intersection += Number(actual && template);
-      }
-
-    return intersection / Math.max(1, union);
-  };
-
-  const shield = score(SHIELD);
-  const sword = score(SWORD);
-  const best = Math.max(shield, sword);
-
-  return {
-    value: best >= 0.45 ? (shield > sword ? "DEFENSE" : "ATTACK") : null,
-    rawText: `shield=${shield.toFixed(3)} sword=${sword.toFixed(3)}`,
-    confidence: best * 100,
-    uncertain: best < 0.65 || Math.abs(shield - sword) < 0.15,
-    crop,
-  };
-}
-
-export function preparePvpReport(rois: PVPScreenshotROIs): PvpPreparedReport {
+export function preparePvpReport(
+  rois: PVPScreenshotROIs,
+  templates: PvpStatusTemplates,
+): PvpPreparedReport {
   const image = (region: keyof typeof rois): PvpPixelImage => {
     const [, , width, height] = PVP_SCREENSHOT_ROI_BOUNDS[region];
 
@@ -435,13 +282,19 @@ export function preparePvpReport(rois: PVPScreenshotROIs): PvpPreparedReport {
 
   return {
     valid: myUnits.length > 0 && enemyUnits.length > 0,
-    battleType: classifyPvpBattleType(status),
-    result: cropPvpImage(status, {
-      x: 137,
-      y: 0,
-      width: 213,
-      height: status.height,
-    }),
+    battleType: matchPvpStatusTemplate(
+      cropPvpImage(status, { x: 0, y: 0, width: 135, height: status.height }),
+      { ATTACK: templates.attack, DEFENSE: templates.defense },
+    ),
+    result: matchPvpStatusTemplate(
+      cropPvpImage(status, {
+        x: 137,
+        y: 0,
+        width: 213,
+        height: status.height,
+      }),
+      { WIN: templates.win, LOSE: templates.lose },
+    ),
     enemyStudentRep: maskPvpIconCard(
       image("enemyStudentRep"),
       "representative",
@@ -459,36 +312,12 @@ export function preprocessPvpText(
 ): PvpPixelImage {
   const pixels = new Uint8ClampedArray(image.pixels.length);
 
-  const isYellow = (r: number, g: number, b: number) => {
-    return r > 150 && g > 130 && b < r - 70 && b < g - 40;
-  };
-
-  let yellowPixels = 0;
-
-  if (mode === "result") {
-    for (let i = 0; i < pixels.length; i += 4) {
-      yellowPixels += Number(
-        isYellow(image.pixels[i], image.pixels[i + 1], image.pixels[i + 2]),
-      );
-    }
-  }
-
   for (let i = 0; i < pixels.length; i += 4) {
     const [r, g, b] = image.pixels.subarray(i, i + 3);
     let grey = r * 0.2126 + g * 0.7152 + b * 0.0722;
 
     if (mode === "digits") {
       grey = 255 - grey;
-    }
-
-    // Read Win's solid yellow lettering
-    if (mode === "result") {
-      grey =
-        yellowPixels > image.width * image.height * 0.005
-          ? isYellow(r, g, b)
-            ? 0
-            : 255
-          : Math.min(r, g, b);
     }
 
     if (threshold) {
@@ -503,7 +332,7 @@ export function preprocessPvpText(
 
   const processed = { width: image.width, height: image.height, pixels };
 
-  if (mode === "result" || mode === "text") {
+  if (mode === "text") {
     let left = image.width;
     let right = -1;
     let top = image.height;

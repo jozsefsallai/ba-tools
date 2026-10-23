@@ -4,7 +4,7 @@ import type { PvpOpponentNameRecognition } from "@/lib/pvp/opponent-name-types";
 import type { Student } from "@/lib/types";
 
 export const PVP_OCR_CONFIDENCE_THRESHOLD = 75;
-export type PvpOcrMode = "text" | "digits" | "result";
+export type PvpOcrMode = "text" | "digits";
 export type PvpStudentIdentity = Pick<Student, "id" | "name">;
 export type PvpUnitPosition = {
   sourceIndex: number;
@@ -105,20 +105,6 @@ export function parsePvpDamage(text: string): number | null {
 
   const damage = Number(trimmed);
   return Number.isSafeInteger(damage) && damage >= 0 ? damage : null;
-}
-
-export function parsePvpResult(text: string): PvpBattleInfo["result"]["value"] {
-  const normalized = text.replace(/\s/g, "").toLowerCase();
-
-  if (normalized === "win") {
-    return "WIN";
-  }
-
-  if (normalized === "lose") {
-    return "LOSE";
-  }
-
-  return null;
 }
 
 export function getPvpEnemyNameStatus(

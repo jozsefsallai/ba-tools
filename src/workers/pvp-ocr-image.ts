@@ -1,12 +1,14 @@
 import type { PvpPreparedReport } from "@/lib/pvp/ocr-image";
 import { preparePvpReport } from "@/lib/pvp/ocr-image";
-import type { PVPScreenshotROIs } from "@/lib/pvp/screenshot-types";
-import type { PvpWorkerResponse } from "@/lib/pvp/worker-types";
+import type {
+  PvpPrepareRequest,
+  PvpWorkerResponse,
+} from "@/lib/pvp/worker-types";
 
-self.addEventListener("message", (event: MessageEvent<PVPScreenshotROIs>) => {
+self.addEventListener("message", (event: MessageEvent<PvpPrepareRequest>) => {
   try {
     self.postMessage({
-      result: preparePvpReport(event.data),
+      result: preparePvpReport(event.data.rois, event.data.templates),
     } satisfies PvpWorkerResponse<PvpPreparedReport>);
   } catch (error) {
     self.postMessage({

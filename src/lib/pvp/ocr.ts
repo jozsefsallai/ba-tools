@@ -12,7 +12,6 @@ import {
   getPvpEnemyNameStatus,
   getPvpLevelEnd,
   parsePvpDamage,
-  parsePvpResult,
 } from "@/lib/pvp";
 import { recognizePvpAnonymousOpponent } from "@/lib/pvp/anonymous-icon";
 import { drawPvpCrop, drawPvpPixels } from "@/lib/pvp/canvas";
@@ -22,7 +21,11 @@ import assets from "@/lib/pvp/ocr-assets.json";
 import { type PvpPreparedReport, preprocessPvpText } from "@/lib/pvp/ocr-image";
 import { recognizeRemoteOpponentName } from "@/lib/pvp/opponent-name-client";
 import type { PVPScreenshotROIs } from "@/lib/pvp/screenshot-types";
-import type { PvpWorkerResponse } from "@/lib/pvp/worker-types";
+import { loadPvpStatusTemplates } from "@/lib/pvp/status-templates";
+import type {
+  PvpPrepareRequest,
+  PvpWorkerResponse,
+} from "@/lib/pvp/worker-types";
 import { OEM, type Worker as OcrWorker, PSM, createWorker } from "tesseract.js";
 
 const CONFIG = {
@@ -54,10 +57,12 @@ function withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   });
 }
 
-function prepare(
+async function prepare(
   rois: PVPScreenshotROIs,
   signal: AbortSignal,
 ): Promise<PvpPreparedReport> {
+  const templates = await withAbort(loadPvpStatusTemplates(), signal);
+
   return new Promise((resolve, reject) => {
     const worker = new Worker(
       new URL("../../workers/pvp-ocr-image.ts", import.meta.url),
@@ -97,8 +102,9 @@ function prepare(
       return;
     }
 
+    // Templates are cached for later imports, so only the ROIs are transferred
     worker.postMessage(
-      rois,
+      { rois, templates } satisfies PvpPrepareRequest,
       Object.values(rois).map((pixels) => pixels.buffer as ArrayBuffer),
     );
   });
@@ -256,7 +262,7 @@ export class PvpOcrClient {
       let completed = 0;
 
       const total =
-        3 + (prepared.myUnits.length + prepared.enemyUnits.length) * 2;
+        2 + (prepared.myUnits.length + prepared.enemyUnits.length) * 2;
 
       const progress = () =>
         onProgress?.({ stage: "recognizing", progress: ++completed / total });
@@ -284,12 +290,7 @@ export class PvpOcrClient {
         await withAbort(
           worker.setParameters({
             tessedit_pageseg_mode: PSM.SINGLE_LINE,
-            tessedit_char_whitelist:
-              mode === "digits"
-                ? "0123456789"
-                : mode === "result"
-                  ? "WINLOSEwinlose"
-                  : "",
+            tessedit_char_whitelist: mode === "digits" ? "0123456789" : "",
             tessedit_char_blacklist: "",
             preserve_interword_spaces: "1",
             user_defined_dpi: "300",
@@ -304,32 +305,18 @@ export class PvpOcrClient {
         const attempts: {
           threshold: boolean;
           scale: number;
-          deslant: number;
           pageSegMode?: PSM;
         }[] =
           mode === "text"
             ? [
-                { threshold: false, scale: 3, deslant: 0 },
-                { threshold: false, scale: 4, deslant: 0 },
-                { threshold: true, scale: 3, deslant: 0 },
+                { threshold: false, scale: 3 },
+                { threshold: false, scale: 4 },
+                { threshold: true, scale: 3 },
               ]
             : [
-                {
-                  threshold: false,
-                  scale: mode === "result" ? 2 : 3,
-                  deslant: 0,
-                },
-                {
-                  threshold: true,
-                  scale: mode === "result" ? 2 : 3,
-                  deslant: 0,
-                },
+                { threshold: false, scale: 3 },
+                { threshold: true, scale: 3 },
               ];
-
-        if (mode === "result") {
-          attempts.push({ threshold: false, scale: 3, deslant: 0.22 });
-          attempts.push({ threshold: true, scale: 3, deslant: 0.22 });
-        }
 
         if (mode === "digits" && crop.width < crop.height * 1.5) {
           // Tesseract can discard an isolated zero as a non-text blob even in
@@ -339,7 +326,6 @@ export class PvpOcrClient {
               attempts.push({
                 threshold,
                 scale: 4,
-                deslant: 0,
                 pageSegMode,
               });
             }
@@ -348,18 +334,11 @@ export class PvpOcrClient {
 
         for (const [
           attempt,
-          { threshold, scale, deslant, pageSegMode },
+          { threshold, scale, pageSegMode },
         ] of attempts.entries()) {
           if (pageSegMode) {
             await withAbort(
               worker.setParameters({ tessedit_pageseg_mode: pageSegMode }),
-              signal,
-            );
-          }
-
-          if (mode === "result" && attempt >= 2) {
-            await withAbort(
-              worker.setParameters({ tessedit_pageseg_mode: PSM.RAW_LINE }),
               signal,
             );
           }
@@ -371,7 +350,6 @@ export class PvpOcrClient {
             preprocessPvpText(crop, mode, threshold),
             scale,
             12,
-            deslant,
           );
 
           const { data } = await withAbort(worker.recognize(canvas), signal);
@@ -382,7 +360,7 @@ export class PvpOcrClient {
             rawText: data.text.trim(),
             confidence: data.confidence,
             language,
-            preprocessing: `${threshold ? "threshold" : "grayscale"} ${scale}x${deslant ? " upright" : ""}`,
+            preprocessing: `${threshold ? "threshold" : "grayscale"} ${scale}x`,
           });
 
           const field = {
@@ -390,10 +368,7 @@ export class PvpOcrClient {
             rawText: data.text.trim(),
             confidence: data.confidence,
             uncertain:
-              value == null ||
-              data.confidence < PVP_OCR_CONFIDENCE_THRESHOLD ||
-              (mode === "result" &&
-                !/^(win|lose)$/i.test(data.text.replace(/\s/g, ""))),
+              value == null || data.confidence < PVP_OCR_CONFIDENCE_THRESHOLD,
             crop,
           };
 
@@ -421,8 +396,7 @@ export class PvpOcrClient {
 
         return {
           ...best,
-          alternatives:
-            mode === "text" || mode === "result" ? readings : undefined,
+          alternatives: mode === "text" ? readings : undefined,
         } as PvpOcrField<T>;
       };
 
@@ -460,7 +434,6 @@ export class PvpOcrClient {
 
       void nameRecognition?.catch(() => {});
 
-      const result = await recognize(prepared.result, "result", parsePvpResult);
       const damages: PvpOcrField<number>[] = [];
 
       for (const unit of unitCrops) {
@@ -542,7 +515,7 @@ export class PvpOcrClient {
         valid: true,
         battle: {
           battleType: prepared.battleType,
-          result,
+          result: prepared.result,
           enemyName,
           enemyNameRecognition,
           enemyNameStatus,

@@ -23,7 +23,6 @@ export function drawPvpCrop(
   image: PvpPixelImage,
   scale = 1,
   padding = 0,
-  deslant = 0,
 ) {
   const source = document.createElement("canvas");
   const sourceContext = drawPvpPixels(source, image);
@@ -33,19 +32,16 @@ export function drawPvpCrop(
     throw new Error("Canvas rendering unavailable");
   }
 
-  canvas.width =
-    (image.width + Math.abs(deslant) * image.height) * scale + padding * 2;
+  canvas.width = image.width * scale + padding * 2;
   canvas.height = image.height * scale + padding * 2;
 
   context.fillStyle = "white";
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.setTransform(
-    1,
-    0,
-    deslant,
-    1,
-    padding + (deslant < 0 ? -deslant * image.height * scale : 0),
+  context.drawImage(
+    source,
     padding,
+    padding,
+    image.width * scale,
+    image.height * scale,
   );
-  context.drawImage(source, 0, 0, image.width * scale, image.height * scale);
 }
