@@ -18,6 +18,10 @@ export function AppShell({ children, commitHash }: AppShellProps) {
   const pathname = usePathname();
   const isPlanaAi = pathname.startsWith("/plana-ai");
 
+  // Student profiles pin their hero below the header, so the header has to
+  // stay put as well.
+  const isStudentProfile = /^\/students\/[^/]+$/.test(pathname);
+
   return (
     <AppBreadcrumbsProvider>
       <SidebarProvider className={cn(isPlanaAi && "h-svh overflow-hidden")}>
@@ -27,7 +31,7 @@ export function AppShell({ children, commitHash }: AppShellProps) {
             isPlanaAi && "flex min-h-0 flex-1 flex-col overflow-hidden",
           )}
         >
-          <InsetHeader />
+          <InsetHeader sticky={isStudentProfile} />
 
           <AppMain>{children}</AppMain>
 

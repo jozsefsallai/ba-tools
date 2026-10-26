@@ -112,6 +112,17 @@ export const OG_CARDS = {
     variant: "birthday",
   },
 
+  students: {
+    title: {
+      message: "tools.students.title",
+    },
+    description: {
+      message: "tools.students.description",
+    },
+    variant: "home",
+    icon: "users",
+  },
+
   bond: {
     title: {
       message: "common.sharing.cards.bond.title",

@@ -1,20 +1,20 @@
-import type { SkillType } from "../lib/db/client";
+import { type Task, logger, task } from "@trigger.dev/sdk";
 import { db } from "../lib/db";
+import type { SkillType } from "../lib/db/client";
 import {
-  fetchStudentsData,
-  fetchStudentsDataJP,
-  fetchStudentsDataKR,
-  fetchStudentsDataTH,
-  fetchStudentsDataTW,
-  StudentLimitedType,
   type NameOverride,
   type RawEffect,
   type RawStudentData,
   type RawStudentSkillsData,
   type SeedStudentInput,
+  StudentLimitedType,
+  fetchStudentsData,
+  fetchStudentsDataJP,
+  fetchStudentsDataKR,
+  fetchStudentsDataTH,
+  fetchStudentsDataTW,
 } from "./lib/common";
-import { seedStudentsPayload, type SeedStudentsPayload } from "./schemas";
-import { logger, task, type Task } from "@trigger.dev/sdk";
+import { type SeedStudentsPayload, seedStudentsPayload } from "./schemas";
 
 const KNOCKBACK_RE = /<kb:(\d+)>/g;
 const BUFFNAME_RE = /<([bcds])*:([a-zA-Z0-9_]+)>/g;
@@ -194,6 +194,35 @@ async function seedSkills(studentId: string, skillData: RawStudentSkillsData) {
 function sortAltsLast(isAlt: (student: SeedStudentInput) => boolean) {
   return (a: SeedStudentInput, b: SeedStudentInput) =>
     Number(isAlt(a)) - Number(isAlt(b));
+}
+
+const BASE_VARIANT_OVERRIDES: Record<string, string> = {
+  shunling_swimsuit: "shun",
+};
+
+function findBaseVariantId(
+  alt: SeedStudentInput,
+  students: SeedStudentInput[],
+  isAlt: (student: SeedStudentInput) => boolean,
+): string | null {
+  const override = BASE_VARIANT_OVERRIDES[alt.PathName];
+  if (override) {
+    return override;
+  }
+
+  let base: string | null = null;
+
+  for (const student of students) {
+    if (
+      !isAlt(student) &&
+      alt.PathName.startsWith(`${student.PathName}_`) &&
+      student.PathName.length > (base?.length ?? 0)
+    ) {
+      base = student.PathName;
+    }
+  }
+
+  return base;
 }
 
 type StudentNameSource = Pick<RawStudentData, "PathName" | "Name">;
@@ -440,11 +469,7 @@ async function seedStudents(provided?: SeedStudentInput[]) {
     const baseVariantId = provided
       ? (data.baseVariantId ?? null)
       : isAlt(data)
-        ? rawStudents.find(
-            (s) =>
-              data.PathName.startsWith(s.PathName) &&
-              s.PathName !== data.PathName,
-          )?.PathName
+        ? findBaseVariantId(data, rawStudents, isAlt)
         : null;
 
     const names = locales

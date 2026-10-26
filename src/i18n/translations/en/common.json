@@ -74,7 +74,8 @@
         "title": "Resources",
         "glBanners": "Upcoming Global Banners",
         "glRoadmap": "Global Roadmap",
-        "birthdays": "Student Birthdays"
+        "birthdays": "Student Birthdays",
+        "students": "Students"
       },
       "games": {
         "title": "Games",
@@ -331,6 +332,30 @@
     "Front": "Front",
     "Middle": "Middle"
   },
+  "weaponType": {
+    "SR": "Sniper Rifle",
+    "SG": "Shotgun",
+    "AR": "Assault Rifle",
+    "MG": "Machine Gun",
+    "SMG": "Submachine Gun",
+    "RG": "Railgun",
+    "HG": "Handgun",
+    "GL": "Grenade Launcher",
+    "RL": "Rocket Launcher",
+    "FT": "Flamethrower",
+    "MT": "Mortar"
+  },
+  "equipment": {
+    "Hat": "Hat",
+    "Hairpin": "Hairpin",
+    "Watch": "Watch",
+    "Shoes": "Shoes",
+    "Bag": "Bag",
+    "Charm": "Charm",
+    "Necklace": "Necklace",
+    "Gloves": "Gloves",
+    "Badge": "Badge"
+  },
 
   "notFound": {
     "code": "404",
@@ -409,6 +434,10 @@
 
   "viewAll": "View All",
   "searchPlaceholder": "Search...",
+  "filters": {
+    "selected": "{count} selected",
+    "clear": "Clear filters"
+  },
   "loadMore": "Load More",
   "loadingMore": "Loading...",
   "noResults": "No results found.",

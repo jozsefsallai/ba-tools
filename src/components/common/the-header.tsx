@@ -25,13 +25,22 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { Fragment } from "react";
 
-export function InsetHeader() {
+export type InsetHeaderProps = {
+  sticky?: boolean;
+};
+
+export function InsetHeader({ sticky = false }: InsetHeaderProps) {
   const t = useTranslations();
   const breadcrumbs = useBreadcrumbs();
   const collapsed = breadcrumbs.slice(0, -2);
 
   return (
-    <header className="flex min-h-12 shrink-0 items-center gap-2 border-b px-4 py-2">
+    <header
+      className={cn(
+        "flex min-h-12 shrink-0 items-center gap-2 border-b px-4 py-2",
+        sticky && "bg-background sticky top-0 z-30",
+      )}
+    >
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 !h-4" />
       <Breadcrumb className="min-w-0">
@@ -98,10 +107,19 @@ export function InsetHeader() {
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage
-                      className="max-w-64 truncate"
+                      className="flex max-w-64 items-center gap-1.5"
                       title={crumb.label}
                     >
-                      {crumb.label}
+                      {crumb.icon && (
+                        <img
+                          src={crumb.icon}
+                          alt=""
+                          aria-hidden
+                          className="bg-muted size-5 shrink-0 rounded-full object-cover object-top"
+                        />
+                      )}
+
+                      <span className="truncate">{crumb.label}</span>
                     </BreadcrumbPage>
                   )}
                 </BreadcrumbItem>

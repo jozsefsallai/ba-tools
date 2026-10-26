@@ -1,8 +1,5 @@
 "use client";
 
-import terrainIndoor from "@/assets/images/terrain_indoor.png";
-import terrainOutdoor from "@/assets/images/terrain_outdoor.png";
-import terrainStreet from "@/assets/images/terrain_street.png";
 import type { RoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { DAY_MS } from "@/lib/roadmap/constants";
 import { isDotItem, isInstantItem } from "@/lib/roadmap/layout";
@@ -13,10 +10,10 @@ import type {
   RoadmapRaidItem,
   RoadmapRaidRoom,
 } from "@/lib/roadmap/types";
+import { TERRAIN_ICONS } from "@/lib/terrain";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { EllipsisIcon } from "lucide-react";
-import type { StaticImageData } from "next/image";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { AttackType, DefenseType, Terrain } from "~prisma";
 
@@ -93,12 +90,6 @@ function DefenseChip({
     </Chip>
   );
 }
-
-const TERRAIN_ICONS: Record<Terrain, StaticImageData> = {
-  Indoor: terrainIndoor,
-  Outdoor: terrainOutdoor,
-  Street: terrainStreet,
-};
 
 function TerrainMarker({
   terrain,

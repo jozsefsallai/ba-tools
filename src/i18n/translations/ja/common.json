@@ -75,7 +75,8 @@
         "title": "リソース",
         "glBanners": "今後のグローバル版ガチャ",
         "glRoadmap": "グローバル版ロードマップ",
-        "birthdays": "生徒の誕生日"
+        "birthdays": "生徒の誕生日",
+        "students": "生徒名簿"
       },
       "games": {
         "title": "ゲーム",
@@ -308,6 +309,30 @@
     "Front": "FRONT",
     "Middle": "MIDDLE"
   },
+  "weaponType": {
+    "SR": "スナイパーライフル",
+    "SG": "ショットガン",
+    "AR": "アサルトライフル",
+    "MG": "マシンガン",
+    "SMG": "サブマシンガン",
+    "RG": "レールガン",
+    "HG": "ハンドガン",
+    "GL": "グレネードランチャー",
+    "RL": "ロケットランチャー",
+    "FT": "火炎放射器",
+    "MT": "迫撃砲"
+  },
+  "equipment": {
+    "Hat": "帽子",
+    "Hairpin": "ヘアピン",
+    "Watch": "時計",
+    "Shoes": "シューズ",
+    "Bag": "バッグ",
+    "Charm": "お守り",
+    "Necklace": "ネックレス",
+    "Gloves": "手袋",
+    "Badge": "バッジ"
+  },
   "notFound": {
     "code": "404",
     "title": "レコードが見つかりません",
@@ -380,6 +405,10 @@
   "import": "インポート",
 
   "searchPlaceholder": "検索...",
+  "filters": {
+    "selected": "{count}件選択",
+    "clear": "フィルターをクリア"
+  },
   "loadMore": "もっと見る",
   "loadingMore": "読み込み中...",
   "noResults": "結果が見つかりませんでした。",

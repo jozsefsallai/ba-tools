@@ -53,7 +53,7 @@ export function buildStudentSpriteManifestUrl(studentId: string) {
 
 export function buildMemorialLobbyFileUrl(studentId: string, file: string) {
   return buildCDNUrl(
-    `v2/images/students/memorial-lobby/${studentId}/${encodeURIComponent(file)}`,
+    `v2/images/students/memorial-lobby/${studentId}/${file.split("/").map(encodeURIComponent).join("/")}`,
   );
 }
 

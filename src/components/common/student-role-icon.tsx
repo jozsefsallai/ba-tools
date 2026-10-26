@@ -1,32 +1,57 @@
 import type { Student } from "@/lib/types";
 
-import attacker from "@/assets/images/role_attacker.png";
-import healer from "@/assets/images/role_healer.png";
-import support from "@/assets/images/role_support.png";
-import ts from "@/assets/images/role_tactical_support.png";
-import tank from "@/assets/images/role_tank.png";
+import damageDealer from "@/assets/images/role/DamageDealer.png";
+import healer from "@/assets/images/role/Healer.png";
+import supporter from "@/assets/images/role/Supporter.png";
+import tanker from "@/assets/images/role/Tanker.png";
+import vehicle from "@/assets/images/role/Vehicle.png";
+import { MaskIcon } from "@/components/common/mask-icon";
+import { TintedImage } from "@/components/common/tinted-image";
 
 export type StudentRoleIconProps = {
   student: Pick<Student, "combatRole">;
-} & React.HTMLAttributes<HTMLImageElement>;
+  /**
+   * A fixed color baked into an `<img>`, for places that get exported with
+   * html2canvas. Without it the icon follows the text color.
+   */
+  tint?: string;
+} & React.HTMLAttributes<HTMLSpanElement>;
 
 function getRoleIcon(combatRole: Student["combatRole"]) {
   switch (combatRole) {
     case "DamageDealer":
-      return attacker;
+      return damageDealer;
     case "Healer":
       return healer;
     case "Supporter":
-      return support;
+      return supporter;
     case "Tanker":
-      return tank;
+      return tanker;
     case "Vehicle":
-      return ts;
+      return vehicle;
   }
 }
 
-export function StudentRoleIcon({ student, ...props }: StudentRoleIconProps) {
+export function StudentRoleIcon({
+  student,
+  tint,
+  ...props
+}: StudentRoleIconProps) {
   const roleIcon = getRoleIcon(student.combatRole);
 
-  return <img {...props} src={roleIcon.src} alt={student.combatRole ?? ""} />;
+  if (tint) {
+    return (
+      <TintedImage
+        src={roleIcon.src}
+        tint={tint}
+        alt={student.combatRole ?? ""}
+        className={props.className}
+        style={props.style}
+      />
+    );
+  }
+
+  return (
+    <MaskIcon {...props} src={roleIcon.src} label={student.combatRole ?? ""} />
+  );
 }

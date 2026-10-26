@@ -44,6 +44,7 @@ import {
   EllipsisIcon,
   GamepadIcon,
   GemIcon,
+  GraduationCapIcon,
   Grid2x2Icon,
   HeartIcon,
   IdCardIcon,
@@ -337,6 +338,11 @@ export function AppSidebar() {
   ];
 
   const RESOURCES: NavLink[] = [
+    {
+      href: "/students",
+      text: t("common.header.nav.resouces.students"),
+      icon: GraduationCapIcon,
+    },
     {
       href: "/global/banners",
       text: t("common.header.nav.resouces.glBanners"),

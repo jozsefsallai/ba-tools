@@ -21,7 +21,10 @@ export function ItemCard({
 }: ItemCardProps) {
   return (
     <article
-      className={cn("flex flex-col items-center gap-1 w-20 shrink-0", className)}
+      className={cn(
+        "flex flex-col items-center gap-1 w-20 shrink-0",
+        className,
+      )}
       title={description ? `${name}\n${description}` : name}
     >
       <div

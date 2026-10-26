@@ -1423,6 +1423,162 @@
       "december": "12月"
     }
   },
+  "students": {
+    "title": "生徒名簿",
+    "description": "ゲーム内のすべての生徒を閲覧できます。名前で検索し、学園・戦闘タイプ・役割・実装状況などで絞り込めます。",
+    "filters": {
+      "searchPlaceholder": "生徒名で検索...",
+      "school": "学園",
+      "attackType": "攻撃タイプ",
+      "defenseType": "防御タイプ",
+      "role": "役割",
+      "class": "クラス",
+      "position": "ポジション",
+      "weapon": "武器",
+      "rarity": "レアリティ",
+      "server": "サーバー",
+      "acquisition": "入手方法",
+      "terrain": "地形適性",
+      "equipment": "装備",
+      "equipmentSlot": "スロット{slot}",
+      "bondGear": "絆装備",
+      "range": "射程",
+      "any": "すべて",
+      "anyServer": "すべてのサーバー",
+      "clear": "フィルターをクリア",
+      "sort": "並び替え",
+      "sortOptions": {
+        "default": "デフォルト",
+        "name": "名前",
+        "rarity": "レアリティ",
+        "urban": "市街地適性",
+        "outdoor": "屋外適性",
+        "indoor": "屋内適性",
+        "atk": "攻撃力",
+        "maxHP": "最大HP",
+        "def": "防御力",
+        "heal": "治癒力",
+        "stability": "安定値",
+        "evasion": "回避値",
+        "accuracy": "命中値",
+        "crit": "会心値",
+        "critDamage": "会心ダメージ",
+        "range": "射程"
+      },
+      "sortDirection": {
+        "asc": "昇順",
+        "desc": "降順"
+      },
+      "results": "{count, plural, =0 {該当なし} other {#人}}",
+      "noResults": "検索条件に一致する生徒がいません。"
+    },
+    "servers": {
+      "jp": "日本版",
+      "global": "グローバル版",
+      "cn": "中国版"
+    },
+    "acquisition": {
+      "permanent": "恒常",
+      "limited": "限定",
+      "fest": "フェス",
+      "welfare": "イベント配布",
+      "archive": "アーカイブ",
+      "unreleased": "未実装"
+    },
+    "detail": {
+      "availability": "実装状況",
+      "sections": {
+        "profile": "プロフィール",
+        "combat": "戦闘",
+        "stats": "ステータス",
+        "gifts": "好きな贈り物",
+        "media": "メディア",
+        "variants": "他のバリエーション",
+        "memorialLobby": "メモリアルロビー"
+      },
+      "fields": {
+        "fullName": "フルネーム",
+        "school": "学園",
+        "club": "部活",
+        "age": "年齢",
+        "birthday": "誕生日",
+        "height": "身長",
+        "hobbies": "趣味",
+        "voiceActor": "声優",
+        "illustrator": "イラストレーター",
+        "designer": "デザイナー",
+        "weapon": "武器",
+        "usesCover": "遮蔽物",
+        "equipment": "装備",
+        "terrain": "地形適性",
+        "bondGear": "愛用品",
+        "memorobiValue": "絆ランク{level}で解放"
+      },
+      "stats": {
+        "level": "Lv. {level}",
+        "levelLabel": "レベル",
+        "maxHP": "最大HP",
+        "atk": "攻撃力",
+        "def": "防御力",
+        "heal": "治癒力",
+        "accuracy": "命中値",
+        "evasion": "回避値",
+        "crit": "会心値",
+        "critDamage": "会心ダメージ",
+        "stability": "安定値",
+        "range": "通常攻撃の射程",
+        "ammoCount": "装弾数",
+        "ammoCost": "通常攻撃コスト",
+        "regenCost": "コスト回復力",
+        "sightRange": "索敵範囲"
+      },
+      "gifts": {
+        "adored": "大好き",
+        "loved": "とても好き",
+        "liked": "好き",
+        "none": "好きな贈り物の情報がありません。"
+      },
+      "media": {
+        "icons": "アイコン",
+        "portraits": "ポートレート",
+        "bondTitles": "絆称号",
+        "icon": "アイコン",
+        "skillPortrait": "スキルカード",
+        "portrait": "ポートレート",
+        "sprite": "全身立ち絵",
+        "bondRank": "絆ランク{rank}",
+        "open": "画像を開く"
+      },
+      "memorialLobby": {
+        "load": "メモリアルロビーを読み込む",
+        "loading": "メモリアルロビーを読み込み中...",
+        "error": "メモリアルロビーを読み込めませんでした。",
+        "lobby": "ロビー{index}",
+        "talk": "会話{index}",
+        "hint": "ヒント：生徒の頭を押すとなでなでできます。それ以外の場所を押すと、カーソルを目で追ってくれます。ほっぺや手に反応する生徒もいます。"
+      },
+      "pills": {
+        "attackType": "攻撃タイプ",
+        "defenseType": "防御タイプ",
+        "combatRole": "役割",
+        "combatClass": "クラス",
+        "combatPosition": "ポジション"
+      },
+      "sprite": {
+        "open": "立ち絵を新しいタブで開く",
+        "previous": "前の立ち絵",
+        "next": "次の立ち絵",
+        "copy": "立ち絵をクリップボードにコピー",
+        "copied": "立ち絵をクリップボードにコピーしました",
+        "copyFailed": "立ち絵をコピーできませんでした",
+        "gallery": "すべての立ち絵を表示",
+        "closeGallery": "立ち絵ギャラリーを閉じる"
+      },
+      "variants": {
+        "original": "オリジナル"
+      }
+    }
+  },
   "plana": {
     "title": "Plana AI",
     "subtitle": "プラナとチャット",

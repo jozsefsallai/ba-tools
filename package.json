@@ -39,7 +39,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@esotericsoftware/spine-pixi-v7": "^4.3.13",
+    "@esotericsoftware/spine-pixi-v7": "~4.2.120",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@modelcontextprotocol/sdk": "1.25.3",

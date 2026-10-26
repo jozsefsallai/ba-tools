@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
         loaders: ["./scripts/loaders/og-asset.cjs"],
         as: "*.js",
       },
+      "*.glsl": {
+        loaders: ["./scripts/loaders/glsl.cjs"],
+        as: "*.js",
+      },
     },
   },
 
@@ -51,6 +55,12 @@ const nextConfig: NextConfig = {
       resourceQuery: assetQuery,
       type: "javascript/auto",
       use: ["./scripts/loaders/og-asset.cjs"],
+    });
+
+    config.module.rules.push({
+      test: /\.glsl$/,
+      type: "javascript/auto",
+      use: ["./scripts/loaders/glsl.cjs"],
     });
 
     return config;

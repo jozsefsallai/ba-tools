@@ -28,6 +28,8 @@ export const CHANGELOG_SCOPES = {
   roster: "My Roster",
   recruitment: "Recruitment Tracker",
   roadmap: "Global Roadmap",
+  students: "Students",
+  memorialLobby: "Memorial Lobby",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -45,6 +47,18 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "October 27, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.students,
+        description:
+          "Added Students page and individual student pages. The Students page allows you to search, filter, and sort students based on various criteria. It also allows hot-linking your search configuration. The students page offers basic details about the student, as well as a sprite gallery and a recollection lobby viewer.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
   {
     date: "October 23, 2026",
     features: [],

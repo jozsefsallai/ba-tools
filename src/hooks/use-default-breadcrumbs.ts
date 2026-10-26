@@ -89,6 +89,10 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
         label: t("common.header.nav.resouces.glRoadmap"),
         group: t("common.header.nav.resouces.title"),
       },
+      "/students": {
+        label: t("common.header.nav.resouces.students"),
+        group: t("common.header.nav.resouces.title"),
+      },
       "/games/flappy-peroro": {
         label: t("common.header.nav.games.flappyPeroro"),
         group: t("common.header.nav.games.title"),

@@ -1579,6 +1579,162 @@
       "december": "December"
     }
   },
+  "students": {
+    "title": "Students",
+    "description": "Browse every student in the game. Search by name and filter by school, combat type, role, availability and more.",
+    "filters": {
+      "searchPlaceholder": "Search by student name...",
+      "school": "School",
+      "attackType": "Attack Type",
+      "defenseType": "Defense Type",
+      "role": "Role",
+      "class": "Class",
+      "position": "Position",
+      "weapon": "Weapon",
+      "rarity": "Rarity",
+      "server": "Server",
+      "acquisition": "Acquisition",
+      "terrain": "Terrain",
+      "equipment": "Equipment",
+      "equipmentSlot": "Slot {slot}",
+      "bondGear": "Bond Gear",
+      "range": "Range",
+      "any": "Any",
+      "anyServer": "Any server",
+      "clear": "Clear filters",
+      "sort": "Sort",
+      "sortOptions": {
+        "default": "Default",
+        "name": "Name",
+        "rarity": "Rarity",
+        "urban": "Urban Affinity",
+        "outdoor": "Outdoor Affinity",
+        "indoor": "Indoor Affinity",
+        "atk": "Attack",
+        "maxHP": "Max HP",
+        "def": "DEF",
+        "heal": "Healing",
+        "stability": "Stability",
+        "evasion": "Evasion",
+        "accuracy": "Accuracy",
+        "crit": "Crit",
+        "critDamage": "Crit DMG",
+        "range": "Range"
+      },
+      "sortDirection": {
+        "asc": "Ascending",
+        "desc": "Descending"
+      },
+      "results": "{count, plural, =0 {No students} one {# student} other {# students}}",
+      "noResults": "No students match your search and filters."
+    },
+    "servers": {
+      "jp": "JP",
+      "global": "Global",
+      "cn": "CN"
+    },
+    "acquisition": {
+      "permanent": "Permanent",
+      "limited": "Limited",
+      "fest": "Fest",
+      "welfare": "Event",
+      "archive": "Archive",
+      "unreleased": "Not released"
+    },
+    "detail": {
+      "availability": "Availability",
+      "sections": {
+        "profile": "Profile",
+        "combat": "Combat",
+        "stats": "Stats",
+        "gifts": "Favorite Gifts",
+        "media": "Media",
+        "variants": "Other Variants",
+        "memorialLobby": "Recollection Lobby"
+      },
+      "fields": {
+        "fullName": "Full Name",
+        "school": "School",
+        "club": "Club",
+        "age": "Age",
+        "birthday": "Birthday",
+        "height": "Height",
+        "hobbies": "Hobbies",
+        "voiceActor": "Voice Actor",
+        "illustrator": "Illustrator",
+        "designer": "Designer",
+        "weapon": "Weapon",
+        "usesCover": "Uses Cover",
+        "equipment": "Equipment",
+        "terrain": "Terrain Adaptation",
+        "bondGear": "Bond Gear",
+        "memorobiValue": "Unlocks at bond rank {level}"
+      },
+      "stats": {
+        "level": "Lv. {level}",
+        "levelLabel": "Level",
+        "maxHP": "Max HP",
+        "atk": "ATK",
+        "def": "DEF",
+        "heal": "Healing",
+        "accuracy": "Accuracy",
+        "evasion": "Evasion",
+        "crit": "Crit",
+        "critDamage": "Crit DMG",
+        "stability": "Stability",
+        "range": "Normal Attack Range",
+        "ammoCount": "Mag Count",
+        "ammoCost": "Normal Attack Cost",
+        "regenCost": "Cost Recovery",
+        "sightRange": "Sighting Range"
+      },
+      "gifts": {
+        "adored": "Adored",
+        "loved": "Loved",
+        "liked": "Liked",
+        "none": "No favorite gifts recorded."
+      },
+      "media": {
+        "icons": "Icons",
+        "portraits": "Portraits",
+        "bondTitles": "Bond Titles",
+        "icon": "Icon",
+        "skillPortrait": "Skill Card",
+        "portrait": "Portrait",
+        "sprite": "Full Sprite",
+        "bondRank": "Bond Rank {rank}",
+        "open": "Open image"
+      },
+      "memorialLobby": {
+        "load": "Load recollection lobby",
+        "loading": "Loading recollection lobby...",
+        "error": "Couldn't load the recollection lobby.",
+        "lobby": "Lobby {index}",
+        "talk": "Talk {index}",
+        "hint": "Tip: You can press on the student's head to give headpats, or anywhere else to have her follow your cursor. Some students also react to their cheeks or hands."
+      },
+      "pills": {
+        "attackType": "Attack Type",
+        "defenseType": "Defense Type",
+        "combatRole": "Combat Role",
+        "combatClass": "Combat Class",
+        "combatPosition": "Combat Position"
+      },
+      "sprite": {
+        "open": "Open sprite in new tab",
+        "previous": "Previous sprite",
+        "next": "Next sprite",
+        "copy": "Copy sprite to clipboard",
+        "copied": "Sprite copied to clipboard",
+        "copyFailed": "Couldn't copy the sprite",
+        "gallery": "Show all sprites",
+        "closeGallery": "Close sprite gallery"
+      },
+      "variants": {
+        "original": "Original"
+      }
+    }
+  },
 
   "plana": {
     "title": "Plana AI",

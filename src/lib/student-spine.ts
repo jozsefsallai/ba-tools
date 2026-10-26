@@ -64,6 +64,8 @@ export type ResolvedMemorialLobbyManifest = Omit<
 > & {
   lobbies: (MemorialLobbyManifest["lobbies"][number] & {
     skeletons: MemorialLobbySkeletonUrls[];
+    effectsUrl: string | null;
+    fileBaseUrl: string;
   })[];
 };
 
@@ -92,6 +94,8 @@ export async function fetchMemorialLobby(
           skeleton.textures.map((t) => [t, url(t)]),
         ),
       })),
+      effectsUrl: lobby.scene?.effects ? url(lobby.scene.effects) : null,
+      fileBaseUrl: url(""),
     })),
   };
 }

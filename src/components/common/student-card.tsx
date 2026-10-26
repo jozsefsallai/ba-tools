@@ -116,6 +116,7 @@ export function StudentCard({
             <div className="absolute bottom-[2px] right-[2px] bg-white rounded-tl-[8px] rounded-br-[8px] flex items-center justify-center w-6 h-6">
               <StudentRoleIcon
                 student={student}
+                tint="#3b4a60"
                 className="w-4 h-4 skew-x-[11deg]"
               />
             </div>
