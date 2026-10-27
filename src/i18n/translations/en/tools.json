@@ -1705,6 +1705,7 @@
         "bondRank": "Bond Rank {rank}",
         "open": "Open image"
       },
+      "metaDescription": "{name} from Blue Archive. View the student's basic details, stats, gifts, sprites, and recollection/memorial lobby (L2D).",
       "memorialLobby": {
         "load": "Load recollection lobby",
         "loading": "Loading recollection lobby...",

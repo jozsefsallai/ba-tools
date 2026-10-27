@@ -18,9 +18,8 @@ import {
 import { getLocalizedStudentNames } from "@/app/[locale]/students/_lib/student-display";
 import { permanentRedirect } from "@/i18n/navigation";
 import { db } from "@/lib/db";
-import { ogLocale, sharingMetadata } from "@/lib/og-metadata.server";
+import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
 import { OG_DESIGN_VERSION } from "@/lib/og/registry";
-import { truncateText } from "@/lib/text-utils";
 import { buildStudentIconUrl, buildStudentPortraitUrl } from "@/lib/url";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -61,12 +60,8 @@ export async function generateMetadata({
       title: name,
       appName: t("common.appName"),
     }),
-    description: truncateText(
-      (student.introduction ?? "").replace(/\s+/g, " ").trim() ||
-        t("tools.students.description"),
-      160,
-    ),
-    image: `/api/og/${ogLocale(locale)}/students?v=${OG_DESIGN_VERSION}`,
+    description: t("tools.students.detail.metaDescription", { name }),
+    image: `${localizedPath(`/students/${student.id}/opengraph-image`, locale)}?v=${OG_DESIGN_VERSION}`,
     locale,
     alt: name,
   });
