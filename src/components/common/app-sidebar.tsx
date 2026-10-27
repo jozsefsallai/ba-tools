@@ -199,7 +199,7 @@ function NavItem({
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} tooltip={link.text}>
-        <Link href={link.href} onClick={closeMobileSidebar}>
+        <Link href={link.href} onClick={closeMobileSidebar} prefetch={false}>
           <link.icon />
           <span>{link.text}</span>
         </Link>
