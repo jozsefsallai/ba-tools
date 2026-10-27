@@ -23,6 +23,13 @@ import {
   S3ServiceException,
 } from "@aws-sdk/client-s3";
 
+// Only production deployments publish to the bucket; previews have no R2
+// credentials and reuse the assets production already uploaded
+if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
+  console.log(`Skipping OCR asset upload for ${process.env.VERCEL_ENV} build`);
+  process.exit(0);
+}
+
 function required(name: string) {
   const value = process.env[name];
 
