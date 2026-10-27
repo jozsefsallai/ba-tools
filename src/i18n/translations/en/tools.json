@@ -1711,7 +1711,12 @@
         "error": "Couldn't load the recollection lobby.",
         "lobby": "Lobby {index}",
         "talk": "Talk {index}",
-        "hint": "Tip: You can press on the student's head to give headpats, or anywhere else to have her follow your cursor. Some students also react to their cheeks or hands."
+        "hint": "Tip: You can press on the student's head to give headpats, or anywhere else to have her follow your cursor. Some students also react to their cheeks or hands. Options to take a screenshot of the current frame or to toggle fullscreen mode are available in the top right corner of the lobby. While interacting with a student (e.g. headpats, cheek pinch/poke, cursor follow, etc.), you can press the S key to take a screenshot. Screenshots will be copied to your clipboard.",
+        "fullscreen": "Fullscreen",
+        "exitFullscreen": "Exit fullscreen",
+        "screenshot": "Copy screenshot",
+        "screenshotCopied": "Screenshot copied to clipboard.",
+        "screenshotFailed": "Couldn't copy the screenshot."
       },
       "pills": {
         "attackType": "Attack Type",

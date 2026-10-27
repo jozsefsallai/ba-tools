@@ -8,7 +8,7 @@
     "dev:backend": "convex dev",
     "dev:frontend": "next dev",
     "predev:frontend": "pnpm run db:generate && pnpm run pvp:icon-assets",
-    "predev": "convex dev --until-success && convex dashboard",
+    "predev": "convex dev --until-success",
     "build": "pnpm run db:generate && pnpm run ocr:assets && pnpm run ocr:upload && next build --webpack",
     "ocr:assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-ocr.ts && pnpm run pvp:icon-assets",
     "ocr:upload": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/upload-pvp-ocr.ts",

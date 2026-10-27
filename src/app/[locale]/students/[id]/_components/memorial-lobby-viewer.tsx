@@ -16,17 +16,25 @@ import type {
 } from "@/lib/memorial-lobby/renderer";
 import { cn } from "@/lib/utils";
 import {
+  CameraIcon,
+  CheckIcon,
   LoaderCircleIcon,
-  MessageCircleIcon,
+  MaximizeIcon,
+  // MessageCircleIcon,
+  MinimizeIcon,
   PlayIcon,
   TriangleAlertIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type PointerEvent, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 type Status = "idle" | "loading" | "ready" | "error";
 
 const SHOW_DEBUG_TOOLS = process.env.NODE_ENV !== "production";
+
+const SCREENSHOT_KEY = "s";
+const OVERLAY_BUTTON_CLASS = "bg-background/80 rounded-full backdrop-blur";
 
 export const ZONE_LEGEND = [
   { label: "Headpat", color: "#ff0080" },
@@ -67,7 +75,40 @@ export function MemorialLobbyViewer({
     "default",
   );
 
+  const [canFullscreen, setCanFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const scrollBeforeFullscreenRef = useRef<number | null>(null);
+
   const lobby = lobbies[lobbyIndex] ?? lobbies[0];
+
+  useEffect(() => {
+    setCanFullscreen(document.fullscreenEnabled);
+
+    function handleFullscreenChange() {
+      const fullscreen =
+        !!containerRef.current &&
+        document.fullscreenElement === containerRef.current;
+
+      setIsFullscreen(fullscreen);
+
+      const scrollY = scrollBeforeFullscreenRef.current;
+      if (!fullscreen && scrollY !== null) {
+        scrollBeforeFullscreenRef.current = null;
+
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: scrollY, behavior: "instant" });
+        });
+      }
+    }
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (status === "idle") {
@@ -140,6 +181,74 @@ export function MemorialLobbyViewer({
       rendererRef.current?.setShowZones(showZones);
     }
   }, [showZones, status]);
+
+  // Screenshot key is used while interacting with the student in the memorial
+  // lobby because you can't click the screenshot button.
+  const copyScreenshotRef = useRef(copyScreenshot);
+  copyScreenshotRef.current = copyScreenshot;
+
+  useEffect(() => {
+    if (status !== "ready") {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (
+        !touchModeRef.current ||
+        event.repeat ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.key.toLowerCase() !== SCREENSHOT_KEY
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      copyScreenshotRef.current();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [status]);
+
+  function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      scrollBeforeFullscreenRef.current = window.scrollY;
+      containerRef.current?.requestFullscreen().catch((err) => {
+        scrollBeforeFullscreenRef.current = null;
+        console.error("Failed to enter fullscreen", err);
+      });
+    }
+  }
+
+  async function copyScreenshot() {
+    const renderer = rendererRef.current;
+    if (!renderer) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": renderer.screenshot({ native: !isFullscreen }),
+        }),
+      ]);
+    } catch (err) {
+      console.error("Failed to copy lobby screenshot", err);
+      toast.error(t("tools.students.detail.memorialLobby.screenshotFailed"));
+      return;
+    }
+
+    toast.success(t("tools.students.detail.memorialLobby.screenshotCopied"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   function pointerPosition(event: PointerEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -214,7 +323,8 @@ export function MemorialLobbyViewer({
         onLostPointerCapture={handlePointerUp}
         style={{ cursor: cursor === "default" ? undefined : cursor }}
         className={cn(
-          "bg-muted relative aspect-[4/3] w-full overflow-hidden rounded-lg border",
+          "bg-muted group relative aspect-[4/3] w-full overflow-hidden rounded-lg border",
+          "[&:fullscreen]:rounded-none [&:fullscreen]:border-0 [&:fullscreen]:bg-black",
           // Pressing and dragging steers the student's gaze, so it shouldn't
           // scroll the page on touch screens.
           status === "ready" && "touch-none select-none",
@@ -262,6 +372,49 @@ export function MemorialLobbyViewer({
           <div className="text-muted-foreground absolute inset-0 flex items-center justify-center gap-2 text-sm">
             <TriangleAlertIcon className="size-4" />
             {t("tools.students.detail.memorialLobby.error")}
+          </div>
+        )}
+
+        {status === "ready" && (
+          <div
+            // Presses on the controls shouldn't touch the student.
+            onPointerDown={(event) => event.stopPropagation()}
+            className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"
+          >
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className={OVERLAY_BUTTON_CLASS}
+              onClick={copyScreenshot}
+              disabled={copied}
+              title={t("tools.students.detail.memorialLobby.screenshot")}
+            >
+              {copied ? <CheckIcon /> : <CameraIcon />}
+              <span className="sr-only">
+                {t("tools.students.detail.memorialLobby.screenshot")}
+              </span>
+            </Button>
+
+            {canFullscreen && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className={OVERLAY_BUTTON_CLASS}
+                onClick={toggleFullscreen}
+                title={
+                  isFullscreen
+                    ? t("tools.students.detail.memorialLobby.exitFullscreen")
+                    : t("tools.students.detail.memorialLobby.fullscreen")
+                }
+              >
+                {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
+                <span className="sr-only">
+                  {isFullscreen
+                    ? t("tools.students.detail.memorialLobby.exitFullscreen")
+                    : t("tools.students.detail.memorialLobby.fullscreen")}
+                </span>
+              </Button>
+            )}
           </div>
         )}
       </div>

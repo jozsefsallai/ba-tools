@@ -1031,6 +1031,16 @@ type DraggedBone = {
   saved: { x: number; y: number } | null;
 };
 
+function maxRenderSize(gl: WebGLRenderingContext) {
+  const viewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array;
+
+  return Math.min(
+    gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) as number,
+    viewport[0],
+    viewport[1],
+  );
+}
+
 export class MemorialLobbyRenderer {
   private app: PIXI.Application;
 
@@ -2407,6 +2417,56 @@ export class MemorialLobbyRenderer {
       this.zoneOverlay.destroy();
       this.zoneOverlay = null;
     }
+  }
+
+  /**
+   * Renders the current frame and encodes it as a PNG. With `native`, the
+   * frame is rendered at the lobby's native resolution, as far as the GPU
+   * allows, instead of the canvas's resoultion.
+   */
+  screenshot({ native = false }: { native?: boolean } = {}): Promise<Blob> {
+    const renderer = this.app.renderer as PIXI.Renderer;
+    const { width, height } = this.app.screen;
+    const resolution = renderer.resolution;
+
+    // Raising the resolution keeps the layout (in CSS pixels) the same, so the
+    // scene doesn't need refitting, only the backing buffer grows.
+    const nativeResolution = native
+      ? Math.min(
+          1 / (this.scene.scale.x || 1),
+          maxRenderSize(renderer.gl) / Math.max(width, height),
+        )
+      : resolution;
+    const upscaled = nativeResolution > resolution;
+
+    if (upscaled) {
+      renderer.resolution = nativeResolution;
+      renderer.resize(width, height);
+    }
+
+    // The drawing buffer isn't preserved between frames, so the canvas has to
+    // be copied in the same task it's rendered in (`toBlob` copies it
+    // synchronously). That also means the upscaled frame is never painted.
+    this.app.renderer.render(this.app.stage);
+
+    const canvas = this.app.view as HTMLCanvasElement;
+    const blob = new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Failed to encode the lobby screenshot"));
+        }
+      }, "image/png");
+    });
+
+    if (upscaled) {
+      renderer.resolution = resolution;
+      renderer.resize(width, height);
+      this.app.renderer.render(this.app.stage);
+    }
+
+    return blob;
   }
 
   resize(width: number, height: number) {
