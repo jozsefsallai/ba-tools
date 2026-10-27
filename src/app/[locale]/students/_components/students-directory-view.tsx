@@ -23,6 +23,10 @@ import {
   isReleasedOn,
 } from "@/app/[locale]/students/_lib/student-display";
 import {
+  STUDENT_LIST_RESTORE_KEY,
+  saveStudentListQuery,
+} from "@/app/[locale]/students/_lib/student-list-state";
+import {
   SORT_KEYS,
   type SortDirection,
   type SortDisplayValue,
@@ -279,6 +283,7 @@ export function StudentsDirectoryView() {
     const query = params.toString();
     const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
     window.history.replaceState(null, "", url);
+    saveStudentListQuery(query);
   }, [debouncedSearch, filters, server, sort, sortDirection]);
 
   function changeSort(next: SortKey) {
@@ -703,6 +708,7 @@ export function StudentsDirectoryView() {
         <VirtualGrid
           items={results}
           getKey={(student) => student.id}
+          restoreKey={STUDENT_LIST_RESTORE_KEY}
           renderItem={(student) => {
             const sortValue = isSearching
               ? null

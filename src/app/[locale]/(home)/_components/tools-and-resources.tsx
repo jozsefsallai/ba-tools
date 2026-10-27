@@ -51,13 +51,13 @@ export async function ToolsAndResources() {
       path: "/inventory-management",
       icon: <Grid2X2Icon className="size-10 text-purple-400 shrink-0" />,
       description: t("static.home.toollist.inventoryManagement.description"),
-      isHot: true,
     },
     {
       name: t("static.home.toollist.railroadPuzzleSolver.title"),
       path: "/railroad-puzzle-solver",
       icon: <TrainTrackIcon className="size-10 text-green-500 shrink-0" />,
       description: t("static.home.toollist.railroadPuzzleSolver.description"),
+      isHot: true,
     },
     {
       name: t("static.home.toollist.raidScore.title"),

@@ -66,7 +66,13 @@ export function InsetHeader({ sticky = false }: InsetHeaderProps) {
                           key={crumb.href ?? crumb.label}
                           asChild
                         >
-                          <Link href={crumb.href ?? "/"}>{crumb.label}</Link>
+                          <Link
+                            href={crumb.href ?? "/"}
+                            scroll={crumb.scroll}
+                            onClick={crumb.onClick}
+                          >
+                            {crumb.label}
+                          </Link>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuGroup>
@@ -101,6 +107,8 @@ export function InsetHeader({ sticky = false }: InsetHeaderProps) {
                         className="max-w-40 truncate"
                         title={crumb.label}
                         href={crumb.href}
+                        scroll={crumb.scroll}
+                        onClick={crumb.onClick}
                       >
                         {crumb.label}
                       </Link>

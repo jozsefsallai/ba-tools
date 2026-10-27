@@ -60,8 +60,24 @@ export const CHANGELOG: ChangelogItemData[] = [
         description: "(UPDATE) Added screenshot and fullscreen functionality.",
       },
     ],
-    changes: [],
-    fixes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Marked Railroad Puzzle Solver as HOT tool.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.students,
+        description:
+          "(UPDATE) Clicking on the Students link in the breadcrumbs of an individual student page will restore the original filters, sort options, and scroll position.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.students,
+        description:
+          "(UPDATE) Navigating from an individual student page to the list of students will restore the original scroll position.",
+      },
+    ],
   },
   {
     date: "October 23, 2026",

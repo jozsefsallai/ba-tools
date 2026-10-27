@@ -74,10 +74,9 @@ export function BreadcrumbScope({
 
   const serialized = JSON.stringify(items);
 
-  const stableItems = useMemo(
-    () => JSON.parse(serialized) as PageBreadcrumb[],
-    [serialized],
-  );
+  // Only re-register when the items change in content. The items themselves
+  // are kept (rather than the parsed JSON) so callbacks like `onClick` survive.
+  const stableItems = useMemo(() => items, [serialized]);
 
   const depth = parentDepth + 1;
 

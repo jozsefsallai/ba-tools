@@ -2,6 +2,9 @@ export type PageBreadcrumb = {
   label: string;
   href?: string;
   icon?: string;
+  /** Passed to the link; `false` leaves scrolling to the destination page. */
+  scroll?: boolean;
+  onClick?: () => void;
 };
 
 export type BreadcrumbRegistration = {
