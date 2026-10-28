@@ -104,3 +104,15 @@ export const seedStudentsPayload = z.object({
 });
 
 export type SeedStudentsPayload = z.input<typeof seedStudentsPayload>;
+
+export const seedGiftsStudentInput = z.looseObject({
+  PathName: z.string().min(1),
+  FavorItemTags: z.array(z.string()),
+  FavorItemUniqueTags: z.array(z.string()),
+});
+
+export const seedGiftsPayload = z.object({
+  students: z.array(seedGiftsStudentInput).optional(),
+});
+
+export type SeedGiftsPayload = z.input<typeof seedGiftsPayload>;

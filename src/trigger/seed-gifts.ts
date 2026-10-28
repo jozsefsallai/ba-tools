@@ -1,10 +1,11 @@
-import { logger, task, type Task } from "@trigger.dev/sdk";
+import { type Task, logger, task } from "@trigger.dev/sdk";
 
 import axios from "axios";
 
-import type { ItemRarity } from "../lib/db/client";
 import { db } from "../lib/db";
+import type { ItemRarity } from "../lib/db/client";
 import { fetchStudentsData } from "./lib/common";
+import { type SeedGiftsPayload, seedGiftsPayload } from "./schemas";
 
 const ITEMS_TABLE = "https://schaledb.com/data/en/items.min.json";
 const ITEMS_TABLE_JP = "https://schaledb.com/data/jp/items.min.json";
@@ -50,20 +51,44 @@ async function fetchGiftsJP() {
   return data as Record<string, RawGiftItemData>;
 }
 
-async function setFavorGifts(allGifts: RawGiftItemData[]) {
+type StudentFavorTags = {
+  PathName: string;
+  FavorItemTags: string[];
+  FavorItemUniqueTags: string[];
+};
+
+async function setFavorGifts(
+  allGifts: RawGiftItemData[],
+  providedStudents: StudentFavorTags[] = [],
+) {
   const studentsData = await fetchStudentsData();
-  const allStudents = Object.values(studentsData);
+
+  const tagsByStudentId = new Map<string, StudentFavorTags>();
+
+  for (const item of Object.values(studentsData)) {
+    tagsByStudentId.set(item.PathName, item);
+  }
+
+  for (const item of providedStudents) {
+    tagsByStudentId.set(item.PathName, item);
+  }
+
+  const students = await db.student.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+  });
 
   const sortedGifts = allGifts.sort((a, b) => b.ExpValue - a.ExpValue);
 
-  for await (const item of allStudents) {
-    const student = await db.student.findUnique({
-      where: {
-        id: item.PathName,
-      },
-    });
+  for await (const student of students) {
+    const item = tagsByStudentId.get(student.id);
 
-    if (!student) {
+    if (!item) {
+      logger.warn(
+        `No favor tags for student ${student.id}. Pass them in the payload to set their gifts.`,
+      );
       continue;
     }
 
@@ -71,13 +96,13 @@ async function setFavorGifts(allGifts: RawGiftItemData[]) {
     const lovedGiftIds: number[] = [];
     const likedGiftIds: number[] = [];
 
-    for (const gift of sortedGifts) {
-      const allTags = [
-        ...item.FavorItemTags,
-        ...item.FavorItemUniqueTags,
-        ...commonFavorItemTags,
-      ];
+    const allTags = [
+      ...item.FavorItemTags,
+      ...item.FavorItemUniqueTags,
+      ...commonFavorItemTags,
+    ];
 
+    for (const gift of sortedGifts) {
       const commonTagCount = gift.Tags.filter((tag) =>
         commonFavorItemTags.includes(tag),
       ).length;
@@ -102,7 +127,7 @@ async function setFavorGifts(allGifts: RawGiftItemData[]) {
 
     await db.student.update({
       where: {
-        id: item.PathName,
+        id: student.id,
       },
       data: {
         giftsAdored: {
@@ -125,11 +150,11 @@ async function setFavorGifts(allGifts: RawGiftItemData[]) {
       },
     });
 
-    logger.info(`Set favor gifts for student: ${item.Name}`);
+    logger.info(`Set favor gifts for student: ${student.name}`);
   }
 }
 
-async function seedGifts() {
+async function seedGifts(providedStudents?: StudentFavorTags[]) {
   const gifts = await fetchGifts();
   const giftsJP = await fetchGiftsJP();
 
@@ -179,13 +204,18 @@ async function seedGifts() {
     }
   }
 
-  await setFavorGifts(allGifts);
+  await setFavorGifts(allGifts, providedStudents);
 }
 
-export const seedGiftsTask: Task<"seed-gifts", void, void> = task({
+export const seedGiftsTask: Task<
+  "seed-gifts",
+  SeedGiftsPayload | undefined,
+  void
+> = task({
   id: "seed-gifts",
-  run: async () => {
-    await seedGifts();
+  run: async (payload) => {
+    const { students } = seedGiftsPayload.parse(payload ?? {});
+    await seedGifts(students);
     logger.info("Gifts seeded successfully");
   },
 });
