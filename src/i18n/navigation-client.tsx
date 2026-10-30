@@ -59,7 +59,16 @@ function localizeLinkPathname(
 }
 
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
-  { onNavigate, locale, href, replace, scroll, transitionTypes, ...props },
+  {
+    onNavigate,
+    locale,
+    href,
+    replace,
+    scroll,
+    transitionTypes,
+    prefetch = false,
+    ...props
+  },
   ref,
 ) {
   const controller = useNavigationGuardController();
@@ -135,6 +144,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   const common = {
     ...props,
     ref: setRef,
+    prefetch,
     replace,
     scroll,
     transitionTypes,
@@ -155,14 +165,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
             : href.pathname,
         };
 
-  return (
-    <NextLink
-      {...common}
-      href={localizedHref}
-      hrefLang={locale}
-      prefetch={false}
-    />
-  );
+  return <NextLink {...common} href={localizedHref} hrefLang={locale} />;
 });
 
 export function useRouter(): ReturnType<typeof useLocaleRouter> {

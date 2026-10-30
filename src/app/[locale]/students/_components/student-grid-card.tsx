@@ -45,7 +45,6 @@ export function StudentGridCard({
   return (
     <Link
       href={`/students/${student.id}`}
-      prefetch={false}
       title={title ?? student.name}
       className="group bg-muted flex h-full flex-col overflow-hidden rounded-lg shadow-sm ring-1 ring-black/5 outline-none transition duration-200 hover:shadow-lg hover:ring-2 hover:ring-sky-400/70 focus-visible:ring-[3px] focus-visible:ring-sky-400 dark:ring-white/10"
     >
