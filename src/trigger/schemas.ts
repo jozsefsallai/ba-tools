@@ -70,6 +70,16 @@ export const syncImageAssetsPayload = z.object({
 
 export type SyncImageAssetsPayload = z.input<typeof syncImageAssetsPayload>;
 
+export const syncStudentSkillsPayload = z.object({
+  sqlcipherKey,
+  globalSqlcipherKey: sqlcipherKey,
+  // All students when omitted
+  devNames: z.array(z.string().min(1)).optional(),
+  dryRun: z.boolean().default(false),
+});
+
+export type SyncStudentSkillsPayload = z.input<typeof syncStudentSkillsPayload>;
+
 const perServerTuple = <T extends z.ZodType>(item: T) =>
   z.tuple([item, item, item]);
 

@@ -31,7 +31,8 @@ Always use these aliases. Never import from the raw generated paths.
 
 ## Architecture
 
-- **Prisma / Neon PostgreSQL** — static game data, **read-only**. Schema pulled from AronaBot's DB via `prisma db pull`. No migrations. All table models: `Student`, `Skill`, `Gift`, `Mission`, `Banner`, `GameBanner`.
+- **Prisma / Neon PostgreSQL** — static game data, **read-only**. Schema pulled from AronaBot's DB via `prisma db pull`. No migrations. All table models: `Student`, `Skill`, `StudentSkill`, `StudentSkillText`, `SkillEffect`, `SkillEffectText`, `Gift`, `Mission`, `Banner`, `GameBanner`.
+- **Skills** — `Skill` is the legacy SchaleDB-seeded model, kept until AronaBot moves off it. `StudentSkill` (+ texts and effects) comes from the game data via `pnpm game-data:skills` / the `sync-student-skills` Trigger task; description markup is documented on `SkillTextData` in `src/lib/game-data/contract.ts`.
 - **Convex** — all authenticated user data (formations, timelines, rosters, PvP, gifts, preferences). Separate deployment. Real-time.
 - **Clerk** — auth. Integrated with Convex via JWT bridge. User sync via Svix webhook at `POST /webhooks/clerk` on the Convex HTTP router.
 - Students are fetched server-side in the root layout and provided via `StudentsProvider` — don't re-fetch per page.

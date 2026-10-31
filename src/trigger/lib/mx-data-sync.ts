@@ -4,15 +4,14 @@ import type { DataSyncModule } from "../../lib/game-data/contract";
 // Loads the mx-data-sync module, ending the run with an error when it isn't
 // bundled.
 export async function loadMxDataSync(): Promise<DataSyncModule> {
-  const { listNewStudents, extractImageAssets } = await import(
-    "mx-data-sync:entry"
-  );
+  const { listNewStudents, extractImageAssets, extractStudentSkills } =
+    await import("mx-data-sync:entry");
 
-  if (!listNewStudents || !extractImageAssets) {
+  if (!listNewStudents || !extractImageAssets || !extractStudentSkills) {
     throw new AbortTaskRunError(
       "mx-data-sync is not bundled with this deployment (private submodule missing).",
     );
   }
 
-  return { listNewStudents, extractImageAssets };
+  return { listNewStudents, extractImageAssets, extractStudentSkills };
 }

@@ -537,6 +537,127 @@ export interface ExtractImageAssetsResult {
   warnings: string[];
 }
 
+export type SkillLocale = "en" | "jp" | "kr" | "tw" | "th";
+
+/** The skill slot the game shows a skill in (Prisma's `SkillType`). */
+export type SkillSlotType = "EX" | "Basic" | "Enhanced" | "Sub";
+
+/** `Special` is the game's `Dummy` (student-specific states), `Glossary` its `None`. */
+export type SkillEffectCategory =
+  | "Buff"
+  | "Debuff"
+  | "CrowdControl"
+  | "Heal"
+  | "Special"
+  | "Glossary";
+
+/**
+ * `Default`: in the student's skill list. `Form`: only in a stance other than the
+ * first. `SelectEx`: one of the EX skills a select card offers. `Additional`: shown
+ * by another skill's tooltip (riding, summons).
+ */
+export type StudentSkillSource = "Default" | "Form" | "SelectEx" | "Additional";
+
+/**
+ * A skill's name and description in one locale. Templates use this markup:
+ * `{p:N}` parameter N (`params[level - 1][N]`), `{e:EFFECT}…{/e}` an effect,
+ * `{s:STAT}…{/s}` a stat, `{d:EFFECT:N}` an effect's suffix (its `suffix` with
+ * parameter N); `{{` is a literal `{`.
+ */
+export interface SkillTextData {
+  name: string;
+  /** Distinct description templates; empty when the skill has no description. */
+  templates: string[];
+  /** Per internal level, the index into `templates`. */
+  levelTemplates: number[];
+  /** Per internal level, the parameter values as the game shows them ("29.1%", "30 sec"). */
+  params: string[][];
+  /** For `SelectEx` skills, when the card offers it ("When used on an enemy"). */
+  useCondition: string | null;
+}
+
+export interface StudentSkillData {
+  /** `${studentId}:${groupId}` */
+  id: string;
+  /** `Student.id` */
+  studentId: string;
+  groupId: string;
+  type: SkillSlotType;
+  source: StudentSkillSource;
+  sortOrder: number;
+  /** Stances the skill is available in. */
+  formIndices: number[];
+  /** 2: needs the Exclusive Weapon at 2★ (Enhanced+). */
+  requiredWeaponGrade: number;
+  /** 2: needs the bond gear at T2 (Basic+/Sub+). */
+  requiredGearTier: number;
+  /** The skill this one replaces once unlocked. */
+  upgradeOfId: string | null;
+  /** The select card (`SelectEx`) or the skill whose tooltip shows it (`Additional`). */
+  parentId: string | null;
+  iconName: string;
+  /** Highest level in the game: 5 for EX skills, 10 for the others. */
+  maxLevel: number;
+  /** Levels in the data, which can be more than `maxLevel`. */
+  levelCount: number;
+  /** Cost per internal level. */
+  costs: number[];
+  stats: string[];
+  effectIds: string[];
+  texts: Partial<Record<SkillLocale, SkillTextData>>;
+}
+
+export interface SkillEffectTextData {
+  name: string;
+  description: string | null;
+  /** E.g. `[0]秒間持続`, where `[0]` is the `{d:…}` parameter. */
+  suffix: string | null;
+  /** `false` for names that come from `effectNames` rather than the game. */
+  isOfficial: boolean;
+}
+
+export interface SkillEffectData {
+  /** The effect key (`Buff_StatChange_AttackPower`) when known, else `0x` + its hash. */
+  id: string;
+  /** xxHash32 of the effect key. */
+  hash: number;
+  category: SkillEffectCategory;
+  /** E.g. `Buff_ATK` (the `Combat_Icon_` sprite). */
+  iconName: string | null;
+  filterable: boolean;
+  texts: Partial<Record<SkillLocale, SkillEffectTextData>>;
+}
+
+export interface SkillStudent {
+  /** `Student.id` */
+  pathName: string;
+  characterId: number;
+  devName: string;
+}
+
+export interface ExtractStudentSkillsOptions {
+  students: SkillStudent[];
+  sqlcipherKey?: string;
+  globalSqlcipherKey?: string;
+  /** Nexon gateway region used to fetch the Global key (`na` by default). */
+  globalRegion?: string;
+  cacheDir: string;
+  logger?: SyncLogger;
+  /**
+   * Effect names for locales the game has no glossary for yet, by icon name
+   * (`Buff_ATK`). They are used to mark effects in those descriptions.
+   */
+  effectNames?: Partial<Record<SkillLocale, Record<string, string>>>;
+}
+
+export interface ExtractStudentSkillsResult {
+  gameVersion: { jp: string; global: string | null };
+  effects: SkillEffectData[];
+  skills: StudentSkillData[];
+  missing: string[];
+  warnings: string[];
+}
+
 export interface DataSyncModule {
   listNewStudents(
     options: ListNewStudentsOptions,
@@ -545,4 +666,8 @@ export interface DataSyncModule {
   extractImageAssets(
     options: ExtractImageAssetsOptions,
   ): Promise<ExtractImageAssetsResult>;
+
+  extractStudentSkills(
+    options: ExtractStudentSkillsOptions,
+  ): Promise<ExtractStudentSkillsResult>;
 }

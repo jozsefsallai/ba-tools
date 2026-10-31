@@ -25,7 +25,8 @@
     "pvp:icon-assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts",
     "vendor:init": "git submodule update --init --checkout vendor/mx-data-sync && pnpm --dir vendor/mx-data-sync install",
     "game-data:new-students": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/list-new-students.ts",
-    "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts"
+    "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts",
+    "game-data:skills": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-student-skills.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",

@@ -7,4 +7,8 @@ declare module "mx-data-sync:entry" {
   export const extractImageAssets:
     | import("@/lib/game-data/contract").DataSyncModule["extractImageAssets"]
     | undefined;
+
+  export const extractStudentSkills:
+    | import("@/lib/game-data/contract").DataSyncModule["extractStudentSkills"]
+    | undefined;
 }

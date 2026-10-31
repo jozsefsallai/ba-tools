@@ -159,6 +159,30 @@ enum SkillType {
   Sub
 }
 
+enum SkillEffectCategory {
+  Buff
+  Debuff
+  CrowdControl
+  Heal
+  Special // student-specific states (Dummy)
+  Glossary // terms explained in tooltips (None)
+}
+
+enum StudentSkillSource {
+  Default // in the student's skill list
+  Form // only in a stance other than the first
+  SelectEx // offered by a select EX card
+  Additional // shown by another skill's tooltip (riding, summons)
+}
+
+enum SkillLocale {
+  en
+  jp
+  kr
+  tw
+  th
+}
+
 enum ItemRarity {
   N
   R
@@ -371,7 +395,8 @@ model Student {
   baseVariant   Student?  @relation("BaseVariant", fields: [baseVariantId], references: [id])
   variants      Student[] @relation("BaseVariant")
 
-  skills Skill[]
+  skills        Skill[] // legacy model, to be deleted later
+  studentSkills StudentSkill[]
 
   giftsAdored Gift[] @relation("GiftAdoredBy")
   giftsLoved  Gift[] @relation("GiftLovedBy")
@@ -396,6 +421,87 @@ model Skill {
 
   studentId String
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model StudentSkill {
+  id        String             @id // `${studentId}:${groupId}`
+  studentId String
+  student   Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  groupId   String // game skill group, e.g. CH0294Ex02
+  type      SkillType
+  source    StudentSkillSource @default(Default)
+  sortOrder Int                @default(0)
+
+  formIndices         Int[] // stances the skill is available in
+  requiredWeaponGrade Int   @default(0)
+  requiredGearTier    Int   @default(0)
+
+  upgradeOfId String? // the skill this one replaces once unlocked
+  upgradeOf   StudentSkill?  @relation("StudentSkillUpgrade", fields: [upgradeOfId], references: [id])
+  upgrades    StudentSkill[] @relation("StudentSkillUpgrade")
+
+  parentId String? // the select card, or the skill whose tooltip shows this one
+  parent   StudentSkill?  @relation("StudentSkillChildren", fields: [parentId], references: [id])
+  children StudentSkill[] @relation("StudentSkillChildren")
+
+  iconName   String
+  maxLevel   Int
+  levelCount Int
+  costs      Int[]
+  stats      String[]
+
+  texts   StudentSkillText[]
+  effects StudentSkillEffect[]
+
+  @@index([studentId])
+}
+
+model StudentSkillText {
+  skillId String
+  skill   StudentSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  locale  SkillLocale
+
+  name           String
+  templates      String[]
+  levelTemplates Int[]
+  params         Json
+  useCondition   String? // for SelectEx skills
+
+  @@id([skillId, locale])
+}
+
+model SkillEffect {
+  id         String              @id // effect key (Buff_StatChange_AttackPower), or 0x + its hash
+  hash       String              @unique // xxHash32 of the key, as a decimal string
+  category   SkillEffectCategory
+  iconName   String? // Combat_Icon_ sprite without the prefix, e.g. Buff_ATK
+  filterable Boolean             @default(false)
+
+  texts  SkillEffectText[]
+  skills StudentSkillEffect[]
+}
+
+model StudentSkillEffect {
+  skillId  String
+  skill    StudentSkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  effectId String
+  effect   SkillEffect  @relation(fields: [effectId], references: [id], onDelete: Cascade)
+
+  @@id([skillId, effectId])
+  @@index([effectId])
+}
+
+model SkillEffectText {
+  effectId String
+  effect   SkillEffect @relation(fields: [effectId], references: [id], onDelete: Cascade)
+  locale   SkillLocale
+
+  name        String
+  description String?
+  suffix      String? // e.g. [0]秒間持続, where [0] is the {d:…} parameter
+  isOfficial  Boolean @default(true) // false for curated names
+
+  @@id([effectId, locale])
 }
 
 model Gift {
