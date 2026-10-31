@@ -737,7 +737,9 @@
       "search": "プリセットを検索...",
       "empty": "一致するプリセットがありません。",
       "autofill": "プリセットから自動入力",
-      "attachEnemy": "相手プリセットを紐付け"
+      "attachEnemy": "相手プリセットを紐付け",
+      "nameMatches": "名前が一致",
+      "studentRepMatches": "代表生徒が一致"
     },
     "advancedMode": "詳細モード",
     "screenshotImport": {

@@ -23,10 +23,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/use-debounce";
+import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import { useMutation, usePaginatedQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import {
   ChevronLeftIcon,
   LoaderCircleIcon,
@@ -52,16 +52,12 @@ export function PVPEnemyPresetsPage({
   const [isAnonymizing, setIsAnonymizing] = useState(false);
   const [anonymizeFailed, setAnonymizeFailed] = useState(false);
 
-  const debouncedSearch = useDebounce(search, 250);
   const {
     results: presets,
+    repResults: repPresets,
     status,
     loadMore,
-  } = usePaginatedQuery(
-    api.pvp.listEnemyPresets,
-    { seasonId, search: debouncedSearch },
-    { initialNumItems: 30 },
-  );
+  } = usePVPEnemyPresetSearch(seasonId, search);
   const remove = useMutation(api.pvp.deleteEnemyPreset);
   const anonymize = useMutation(api.pvp.anonymizeEnemyPreset);
 
@@ -82,6 +78,90 @@ export function PVPEnemyPresetsPage({
       setIsAnonymizing(false);
     }
   }
+
+  const renderPreset = (preset: (typeof presets)[number]) => {
+    const rep = preset.opponentStudentRepId
+      ? studentMap[preset.opponentStudentRepId]
+      : undefined;
+
+    return (
+      <article
+        className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4"
+        key={preset._id}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="shrink-0 px-2" style={{ zoom: 0.65 }}>
+            {rep ? (
+              <StudentCard student={rep} noDisplayRole noAttackTypeStyling />
+            ) : (
+              <EmptyCard label="" />
+            )}
+          </div>
+
+          <h2 className="truncate font-semibold">{preset.name}</h2>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" asChild>
+            <Link
+              href={`/pvp/${seasonId}/presets/opponents/${preset._id}/teams`}
+            >
+              {t("tools.pvp.presets.teams")}
+            </Link>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label={t("tools.pvp.presets.actions")}
+              >
+                <MoreHorizontalIcon />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`/pvp/${seasonId}/presets/opponents/${preset._id}`}
+                  >
+                    {t("tools.pvp.presets.edit")}
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onSelect={() => setMergeSource(preset)}>
+                  {t("tools.pvp.presets.mergeWith")}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    setAnonymizeSource(preset);
+                    setAnonymizeFailed(false);
+                  }}
+                >
+                  {t("tools.pvp.presets.anonymize")}
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => setDeleteSource(preset)}
+                >
+                  {t("tools.pvp.presets.delete")}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </article>
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -149,102 +229,32 @@ export function PVPEnemyPresetsPage({
         <div className="rounded-lg border p-6 text-sm text-muted-foreground">
           {t("tools.pvp.presets.loadingEnemies")}
         </div>
-      ) : presets.length === 0 && status === "Exhausted" ? (
+      ) : presets.length === 0 &&
+        repPresets.length === 0 &&
+        status === "Exhausted" ? (
         <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
           {t("tools.pvp.presets.noEnemies")}
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {presets.map((preset) => {
-            const rep = preset.opponentStudentRepId
-              ? studentMap[preset.opponentStudentRepId]
-              : undefined;
+        <>
+          {presets.length > 0 && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {presets.map(renderPreset)}
+            </div>
+          )}
 
-            return (
-              <article
-                className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4"
-                key={preset._id}
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="shrink-0 px-2" style={{ zoom: 0.65 }}>
-                    {rep ? (
-                      <StudentCard
-                        student={rep}
-                        noDisplayRole
-                        noAttackTypeStyling
-                      />
-                    ) : (
-                      <EmptyCard label="" />
-                    )}
-                  </div>
+          {repPresets.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h2 className="text-sm font-medium text-muted-foreground">
+                {t("tools.pvp.presetPicker.studentRepMatches")}
+              </h2>
 
-                  <h2 className="truncate font-semibold">{preset.name}</h2>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link
-                      href={`/pvp/${seasonId}/presets/opponents/${preset._id}/teams`}
-                    >
-                      {t("tools.pvp.presets.teams")}
-                    </Link>
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size="icon-sm"
-                        variant="ghost"
-                        aria-label={t("tools.pvp.presets.actions")}
-                      >
-                        <MoreHorizontalIcon />
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={`/pvp/${seasonId}/presets/opponents/${preset._id}`}
-                          >
-                            {t("tools.pvp.presets.edit")}
-                          </Link>
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onSelect={() => setMergeSource(preset)}
-                        >
-                          {t("tools.pvp.presets.mergeWith")}
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-
-                      <DropdownMenuSeparator />
-
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onSelect={() => {
-                            setAnonymizeSource(preset);
-                            setAnonymizeFailed(false);
-                          }}
-                        >
-                          {t("tools.pvp.presets.anonymize")}
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onSelect={() => setDeleteSource(preset)}
-                        >
-                          {t("tools.pvp.presets.delete")}
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {repPresets.map(renderPreset)}
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       <Dialog

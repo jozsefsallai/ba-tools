@@ -853,7 +853,9 @@
       "search": "Search presets...",
       "empty": "No matching presets.",
       "autofill": "Autofill from preset",
-      "attachEnemy": "Attach opponent preset"
+      "attachEnemy": "Attach opponent preset",
+      "nameMatches": "Matching names",
+      "studentRepMatches": "Matching student representative"
     },
     "advancedMode": "Advanced Mode",
     "screenshotImport": {

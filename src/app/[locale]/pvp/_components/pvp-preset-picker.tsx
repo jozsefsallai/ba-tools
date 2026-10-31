@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
@@ -29,6 +30,7 @@ type PresetOption = {
 
 export function PVPPresetPicker({
   presets,
+  repPresets,
   placeholder,
   onSelect,
   className,
@@ -39,6 +41,8 @@ export function PVPPresetPicker({
   loadMore,
 }: {
   presets: PresetOption[] | undefined;
+  /** Fallback matches by student rep, rendered as a separate group. */
+  repPresets?: PresetOption[];
   placeholder: string;
   onSelect: (id: string) => void;
   className?: string;
@@ -95,6 +99,59 @@ export function PVPPresetPicker({
     }
   }, [loadMore, open, paginationStatus, presets?.length]);
 
+  const renderItem = (preset: PresetOption) => (
+    <CommandItem
+      key={preset._id}
+      value={preset._id}
+      className="min-h-12 gap-2 px-3 py-2"
+      onSelect={() => {
+        onSelect(preset._id);
+        setOpen(false);
+      }}
+    >
+      {preset.opponentStudentRepId &&
+        studentMap?.[preset.opponentStudentRepId] && (
+          <img
+            src={buildStudentPortraitUrl(
+              studentMap[preset.opponentStudentRepId],
+            )}
+            alt=""
+            title={studentMap[preset.opponentStudentRepId].name}
+            className="size-8 rounded-sm object-cover"
+          />
+        )}
+
+      <span className="w-40 truncate max-md:w-auto max-md:min-w-0 max-md:flex-1">
+        {preset.name}
+      </span>
+
+      {studentMap && (
+        <span className="ml-auto flex shrink-0 gap-0.5">
+          {(preset.team ?? []).map((item, index) => {
+            const student = item.studentId
+              ? studentMap[item.studentId]
+              : undefined;
+
+            return student ? (
+              <img
+                key={`${preset._id}-${index}`}
+                src={buildStudentPortraitUrl(student)}
+                alt=""
+                title={student.name}
+                className="size-7 rounded-sm object-cover max-md:size-6"
+              />
+            ) : (
+              <span
+                key={`${preset._id}-${index}`}
+                className="size-7 rounded-sm border border-dashed max-md:size-6"
+              />
+            );
+          })}
+        </span>
+      )}
+    </CommandItem>
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -112,7 +169,7 @@ export function PVPPresetPicker({
       </PopoverTrigger>
 
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 max-md:w-[calc(100vw-2rem)]">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder={t("tools.pvp.presetPicker.search")}
             value={search}
@@ -137,58 +194,25 @@ export function PVPPresetPicker({
           >
             <CommandEmpty>{t("tools.pvp.presetPicker.empty")}</CommandEmpty>
 
-            {(presets ?? []).map((preset) => (
-              <CommandItem
-                key={preset._id}
-                value={preset.name}
-                className="min-h-12 gap-2 px-3 py-2"
-                onSelect={() => {
-                  onSelect(preset._id);
-                  setOpen(false);
-                }}
-              >
-                {preset.opponentStudentRepId &&
-                  studentMap?.[preset.opponentStudentRepId] && (
-                    <img
-                      src={buildStudentPortraitUrl(
-                        studentMap[preset.opponentStudentRepId],
-                      )}
-                      alt=""
-                      title={studentMap[preset.opponentStudentRepId].name}
-                      className="size-8 rounded-sm object-cover"
-                    />
-                  )}
-
-                <span className="w-40 truncate max-md:w-auto max-md:min-w-0 max-md:flex-1">
-                  {preset.name}
-                </span>
-
-                {studentMap && (
-                  <span className="ml-auto flex shrink-0 gap-0.5">
-                    {(preset.team ?? []).map((item, index) => {
-                      const student = item.studentId
-                        ? studentMap[item.studentId]
-                        : undefined;
-
-                      return student ? (
-                        <img
-                          key={`${preset._id}-${index}`}
-                          src={buildStudentPortraitUrl(student)}
-                          alt=""
-                          title={student.name}
-                          className="size-7 rounded-sm object-cover max-md:size-6"
-                        />
-                      ) : (
-                        <span
-                          key={`${preset._id}-${index}`}
-                          className="size-7 rounded-sm border border-dashed max-md:size-6"
-                        />
-                      );
-                    })}
-                  </span>
+            {repPresets && repPresets.length > 0 ? (
+              <>
+                {(presets ?? []).length > 0 && (
+                  <CommandGroup
+                    heading={t("tools.pvp.presetPicker.nameMatches")}
+                  >
+                    {(presets ?? []).map(renderItem)}
+                  </CommandGroup>
                 )}
-              </CommandItem>
-            ))}
+
+                <CommandGroup
+                  heading={t("tools.pvp.presetPicker.studentRepMatches")}
+                >
+                  {repPresets.map(renderItem)}
+                </CommandGroup>
+              </>
+            ) : (
+              (presets ?? []).map(renderItem)
+            )}
 
             {paginationStatus === "LoadingMore" && (
               <div className="px-3 py-2 text-center text-xs text-muted-foreground">

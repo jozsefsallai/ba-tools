@@ -10,10 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/hooks/use-debounce";
+import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { useMutation, usePaginatedQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { api } from "~convex/api";
@@ -39,13 +39,15 @@ export function PVPEnemyPresetMergeDialog({
 
   const merge = useMutation(api.pvp.mergeEnemyPresets);
 
-  const { results, status, loadMore } = usePaginatedQuery(
-    api.pvp.listEnemyPresets,
-    { seasonId: source.seasonId, search: useDebounce(search, 250) },
-    { initialNumItems: 30 },
+  const { results, repResults, status, loadMore } = usePVPEnemyPresetSearch(
+    source.seasonId,
+    search,
   );
 
   const candidates = results.filter((preset) => preset._id !== source._id);
+  const repCandidates = repResults.filter(
+    (preset) => preset._id !== source._id,
+  );
 
   async function submit() {
     if (!target || isSaving) {
@@ -63,6 +65,38 @@ export function PVPEnemyPresetMergeDialog({
       setIsSaving(false);
     }
   }
+
+  const renderCandidate = (preset: (typeof results)[number]) => {
+    const rep = preset.opponentStudentRepId
+      ? studentMap[preset.opponentStudentRepId]
+      : undefined;
+
+    return (
+      <Button
+        key={preset._id}
+        variant={target?.id === preset._id ? "secondary" : "outline"}
+        className="h-auto shrink-0 justify-start gap-3 py-2"
+        aria-pressed={target?.id === preset._id}
+        disabled={isSaving}
+        onClick={() => {
+          setTarget({ id: preset._id, name: preset.name });
+          setFailed(false);
+        }}
+      >
+        {rep ? (
+          <img
+            src={buildStudentPortraitUrl(rep)}
+            alt={rep.name}
+            className="size-8 shrink-0 rounded-md object-cover"
+          />
+        ) : (
+          <span className="size-8 shrink-0 rounded-md border border-dashed" />
+        )}
+
+        <span className="truncate">{preset.name}</span>
+      </Button>
+    );
+  };
 
   return (
     <Dialog open onOpenChange={(open) => !open && !isSaving && onClose()}>
@@ -93,42 +127,24 @@ export function PVPEnemyPresetMergeDialog({
             <p className="text-sm text-muted-foreground">
               {t("tools.pvp.presets.loadingEnemies")}
             </p>
-          ) : candidates.length === 0 ? (
+          ) : candidates.length === 0 && repCandidates.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t("tools.pvp.presets.noMergeTargets")}
             </p>
           ) : (
-            candidates.map((preset) => {
-              const rep = preset.opponentStudentRepId
-                ? studentMap[preset.opponentStudentRepId]
-                : undefined;
+            <>
+              {candidates.map(renderCandidate)}
 
-              return (
-                <Button
-                  key={preset._id}
-                  variant={target?.id === preset._id ? "secondary" : "outline"}
-                  className="h-auto shrink-0 justify-start gap-3 py-2"
-                  aria-pressed={target?.id === preset._id}
-                  disabled={isSaving}
-                  onClick={() => {
-                    setTarget({ id: preset._id, name: preset.name });
-                    setFailed(false);
-                  }}
-                >
-                  {rep ? (
-                    <img
-                      src={buildStudentPortraitUrl(rep)}
-                      alt={rep.name}
-                      className="size-8 shrink-0 rounded-md object-cover"
-                    />
-                  ) : (
-                    <span className="size-8 shrink-0 rounded-md border border-dashed" />
-                  )}
+              {repCandidates.length > 0 && (
+                <>
+                  <p className="pt-1 text-xs font-medium text-muted-foreground">
+                    {t("tools.pvp.presetPicker.studentRepMatches")}
+                  </p>
 
-                  <span className="truncate">{preset.name}</span>
-                </Button>
-              );
-            })
+                  {repCandidates.map(renderCandidate)}
+                </>
+              )}
+            </>
           )}
 
           {(status === "CanLoadMore" || status === "LoadingMore") && (

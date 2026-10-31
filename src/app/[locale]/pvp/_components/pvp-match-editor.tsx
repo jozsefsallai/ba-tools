@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useUserPreferences } from "@/hooks/use-preferences";
+import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -53,7 +54,7 @@ import {
   resolvePvpReportTeam,
 } from "@/lib/pvp";
 import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
-import { useMutation, usePaginatedQuery, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import type { FunctionArgs } from "convex/server";
 import {
   ChevronDownIcon,
@@ -157,16 +158,12 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     seasonId,
     search: useDebounce(enemyFormationSearch, 250),
   });
-  const debouncedEnemyPresetSearch = useDebounce(enemyPresetSearch, 250);
   const {
     results: enemyPresets,
+    repResults: enemyRepPresets,
     status: enemyPresetStatus,
     loadMore: loadMoreEnemyPresets,
-  } = usePaginatedQuery(
-    api.pvp.listEnemyPresets,
-    { seasonId, search: debouncedEnemyPresetSearch },
-    { initialNumItems: 30 },
-  );
+  } = usePVPEnemyPresetSearch(seasonId, enemyPresetSearch);
   const selectedEnemyPreset = useQuery(
     api.pvp.getEnemyPreset,
     enemyPresetId ? { seasonId, presetId: enemyPresetId } : "skip",
@@ -986,6 +983,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
             <PVPPresetPicker
               presets={enemyPresets}
+              repPresets={enemyRepPresets}
               placeholder={
                 selectedEnemyPreset?.name ??
                 (review ? matchingEnemyPreset?.name : undefined) ??
@@ -1003,7 +1001,9 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
                 const preset =
                   value === selectedEnemyPreset?._id
                     ? selectedEnemyPreset
-                    : enemyPresets.find((item) => item._id === value);
+                    : [...enemyPresets, ...enemyRepPresets].find(
+                        (item) => item._id === value,
+                      );
 
                 if (!preset) {
                   return;

@@ -9,7 +9,7 @@ import {
 import { stream } from "convex-helpers/server/stream";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import type { Id } from "~convex/dataModel";
+import type { Doc, Id } from "~convex/dataModel";
 import type { MutationCtx, QueryCtx } from "~convex/server";
 import {
   authenticatedMutation,
@@ -48,6 +48,19 @@ async function findEnemyPresetByName(
         opponentStudentRepId === undefined ||
         preset.opponentStudentRepId === opponentStudentRepId,
     ) ?? null
+  );
+}
+
+const ENEMY_REP_SEARCH_MAX_STUDENTS = 10;
+const ENEMY_REP_SEARCH_MAX_RESULTS = 30;
+
+function enemyPresetMatchesName(
+  preset: Pick<Doc<"pvpEnemyPreset">, "name" | "opponentName">,
+  query: string,
+) {
+  return (
+    preset.name.toLowerCase().includes(query) ||
+    !!preset.opponentName?.toLowerCase().includes(query)
   );
 }
 
@@ -597,10 +610,7 @@ export const listEnemyPresets = authenticatedQuery({
       )
       .order("desc")
       .filterWith(async (preset: any) =>
-        query
-          ? preset.name.toLowerCase().includes(query) ||
-            preset.opponentName?.toLowerCase().includes(query)
-          : true,
+        query ? enemyPresetMatchesName(preset, query) : true,
       )
       .paginate(boundedPaginationOpts);
 
@@ -614,6 +624,57 @@ export const listEnemyPresets = authenticatedQuery({
         })),
       ),
     };
+  },
+});
+
+export const listEnemyPresetsByStudentRep = authenticatedQuery({
+  args: {
+    seasonId: v.id("pvpSeason"),
+    search: v.string(),
+    studentIds: v.array(v.string()),
+  },
+  handler: async (ctx, { seasonId, search, studentIds }) => {
+    await getSeasonForUser(ctx, seasonId);
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+      return [];
+    }
+
+    const presets: Doc<"pvpEnemyPreset">[] = [];
+
+    // studentIds arrive ordered by fuzzy score, so earlier students rank first.
+    for (const studentId of studentIds.slice(
+      0,
+      ENEMY_REP_SEARCH_MAX_STUDENTS,
+    )) {
+      const matches = await ctx.db
+        .query("pvpEnemyPreset")
+        .withIndex("by_userId_seasonId_opponentStudentRepId", (q) =>
+          q
+            .eq("userId", ctx.user._id)
+            .eq("seasonId", seasonId)
+            .eq("opponentStudentRepId", studentId),
+        )
+        .collect();
+
+      presets.push(
+        ...matches
+          .filter((preset) => !enemyPresetMatchesName(preset, query))
+          .sort((a, b) => (b.lastRecordedAt ?? 0) - (a.lastRecordedAt ?? 0)),
+      );
+
+      if (presets.length >= ENEMY_REP_SEARCH_MAX_RESULTS) {
+        break;
+      }
+    }
+
+    return Promise.all(
+      presets.slice(0, ENEMY_REP_SEARCH_MAX_RESULTS).map(async (preset) => ({
+        ...preset,
+        latestTeam: (await getUniqueEnemyTeamsForPreset(ctx, preset))[0]?.team,
+      })),
+    );
   },
 });
 

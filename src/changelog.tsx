@@ -49,7 +49,13 @@ export type ChangelogItemData = {
 export const CHANGELOG: ChangelogItemData[] = [
   {
     date: "October 31, 2026",
-    features: [],
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Opponent presets can now be searched by student representative as well.",
+      },
+    ],
     changes: [
       {
         scope: CHANGELOG_SCOPES.website,
