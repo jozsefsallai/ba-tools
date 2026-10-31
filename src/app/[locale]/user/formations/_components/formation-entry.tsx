@@ -56,6 +56,10 @@ export function FormationEntry({ entry }: FormationEntryProps) {
       return {
         strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
         specials: persistedSlotsToStudentItems(row.specials, allStudents),
+        tcs: persistedSlotsToStudentItems(
+          "tcs" in row ? (row.tcs ?? []) : [],
+          allStudents,
+        ),
         label,
       };
     });
@@ -116,6 +120,7 @@ export function FormationEntry({ entry }: FormationEntryProps) {
                 <FormationPreview
                   strikers={row.strikers}
                   specials={row.specials}
+                  tcs={row.tcs}
                   displayOverline={entry.displayOverline}
                   noDisplayRole={entry.noDisplayRole}
                   groupsVertical={entry.groupsVertical}

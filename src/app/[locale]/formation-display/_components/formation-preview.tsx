@@ -52,6 +52,7 @@ export type EditableConfig = {
   onItemSelected: (itemId: string | null) => void;
   setStrikers: React.Dispatch<SetStateAction<StudentItem[]>>;
   setSpecials: React.Dispatch<SetStateAction<StudentItem[]>>;
+  setTcs: React.Dispatch<SetStateAction<StudentItem[]>>;
   onWantsToRemove: (itemId: string) => void;
   onWantsToUpdate: (
     itemId: string,
@@ -62,6 +63,7 @@ export type EditableConfig = {
 export type FormationPreviewProps = {
   strikers: StudentItem[];
   specials: StudentItem[];
+  tcs?: StudentItem[];
   displayOverline?: boolean;
   noDisplayRole?: boolean;
   groupsVertical?: boolean;
@@ -158,6 +160,7 @@ type SortableGroupProps = {
   noDisplayRole?: boolean;
   resolvedStarterOrders: Map<string, number>;
   starterThreshold: number;
+  disableStarter?: boolean;
   editableConfig: EditableConfig;
 };
 
@@ -167,6 +170,7 @@ function SortableGroup({
   noDisplayRole,
   resolvedStarterOrders,
   starterThreshold,
+  disableStarter,
   editableConfig,
 }: SortableGroupProps) {
   const [, setActiveDragId] = useState<string | null>(null);
@@ -234,6 +238,7 @@ function SortableGroup({
                   item={entry}
                   onWantsToRemove={onWantsToRemove}
                   onWantsToUpdate={onWantsToUpdate}
+                  disableStarter={disableStarter}
                 />
               }
             >
@@ -262,13 +267,21 @@ function SortableGroup({
 export function FormationPreview({
   strikers,
   specials,
+  tcs = [],
   displayOverline,
   noDisplayRole,
   groupsVertical = false,
   formationType = "normal",
   editableConfig,
 }: FormationPreviewProps) {
-  if (strikers.length === 0 && specials.length === 0 && !editableConfig) {
+  const showTcs = formationType === "tacticalRelay";
+
+  if (
+    strikers.length === 0 &&
+    specials.length === 0 &&
+    (!showTcs || tcs.length === 0) &&
+    !editableConfig
+  ) {
     return null;
   }
 
@@ -360,6 +373,42 @@ export function FormationPreview({
     </div>
   );
 
+  const tcsContent = (
+    <div className="flex flex-col gap-1">
+      {displayOverline && tcs.length > 0 && (
+        <Overline color="#18bd1c" hasStarter={false} />
+      )}
+
+      {editableConfig ? (
+        <SortableGroup
+          items={tcs}
+          setItems={editableConfig.setTcs}
+          noDisplayRole={noDisplayRole}
+          resolvedStarterOrders={resolvedStarterOrders}
+          starterThreshold={starterThreshold}
+          disableStarter
+          editableConfig={editableConfig}
+        />
+      ) : (
+        <div className="flex items-center gap-[2px]">
+          {tcs.map((entry) =>
+            entry.student ? (
+              <StudentCard
+                key={entry.id}
+                {...entry}
+                starter={false}
+                noDisplayRole={noDisplayRole}
+                student={entry.student}
+              />
+            ) : (
+              <EmptyCard key={entry.id} />
+            ),
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="mx-auto flex w-fit max-w-full flex-col items-center gap-4">
       <div
@@ -369,6 +418,7 @@ export function FormationPreview({
       >
         {strikersContent}
         {specialsContent}
+        {showTcs && tcs.length > 0 && tcsContent}
       </div>
     </div>
   );

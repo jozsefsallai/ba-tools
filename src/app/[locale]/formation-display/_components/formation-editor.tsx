@@ -63,6 +63,7 @@ import {
 } from "@/lib/formation-display-utils";
 import {
   type FormationType,
+  TACTICAL_RELAY_STRIKER_MAX,
   inferFormationType,
   resolveStarterOrders,
 } from "@/lib/formation-type";
@@ -78,6 +79,7 @@ type FormationEditorRow = {
   id: string;
   strikers: StudentItem[];
   specials: StudentItem[];
+  tcs: StudentItem[];
   label?: FormationRowLabel;
 };
 
@@ -162,6 +164,7 @@ function compareFormationRows(
     if (
       !compareStudentItems(a[i].strikers, b[i].strikers) ||
       !compareStudentItems(a[i].specials, b[i].specials) ||
+      !compareStudentItems(a[i].tcs, b[i].tcs) ||
       !compareFormationRowLabels(a[i].label, b[i].label)
     ) {
       return false;
@@ -193,7 +196,10 @@ export function FormationEditor() {
 
   const [rows, setRows, setRowsUnchecked] = useSaveableState<
     FormationEditorRow[]
-  >(() => [{ id: uuid(), strikers: [], specials: [] }], compareFormationRows);
+  >(
+    () => [{ id: uuid(), strikers: [], specials: [], tcs: [] }],
+    compareFormationRows,
+  );
 
   const [rowGap, setRowGap, setRowGapUnchecked] = useSaveableState(
     preferences.formationDisplay.defaultRowGap ?? 8,
@@ -233,6 +239,14 @@ export function FormationEditor() {
   const createMutation = useMutation(api.formation.create);
   const updateMutation = useMutation(api.formation.update);
 
+  // TCS is only ever chosen manually, so the explicit type is enough here.
+  function strikersOverflowToTcs(row: FormationEditorRow) {
+    return (
+      formationType === "tacticalRelay" &&
+      row.strikers.length >= TACTICAL_RELAY_STRIKER_MAX
+    );
+  }
+
   function addStudent(student: Student) {
     const item: StudentItem = {
       id: uuid(),
@@ -252,8 +266,17 @@ export function FormationEditor() {
       }
 
       if (student.combatClass === "Main") {
-        if (row.strikers.find((i) => i.student?.id === student.id)) {
+        if (
+          row.strikers.find((i) => i.student?.id === student.id) ||
+          row.tcs.find((i) => i.student?.id === student.id)
+        ) {
           return prev;
+        }
+
+        if (strikersOverflowToTcs(row)) {
+          return prev.map((r, i) =>
+            i === activeRowIndex ? { ...r, tcs: [...r.tcs, item] } : r,
+          );
         }
 
         return prev.map((r, i) =>
@@ -283,6 +306,7 @@ export function FormationEditor() {
           ...row,
           strikers: row.strikers.filter((item) => item.id !== itemId),
           specials: row.specials.filter((item) => item.id !== itemId),
+          tcs: row.tcs.filter((item) => item.id !== itemId),
         })),
       );
     },
@@ -293,6 +317,23 @@ export function FormationEditor() {
     (itemId: string, newData: Partial<Omit<StudentItem, "student" | "id">>) => {
       setRows((prev) =>
         prev.map((row) => {
+          if (row.tcs.some((candidate) => candidate.id === itemId)) {
+            const {
+              starter: _starter,
+              starterOrder: _order,
+              ...tcsData
+            } = newData;
+
+            return {
+              ...row,
+              tcs: row.tcs.map((candidate) =>
+                candidate.id === itemId
+                  ? { ...candidate, ...tcsData }
+                  : candidate,
+              ),
+            };
+          }
+
           const rowItems = [...row.strikers, ...row.specials];
           const item = rowItems.find((candidate) => candidate.id === itemId);
 
@@ -375,6 +416,10 @@ export function FormationEditor() {
         }
 
         if (combatClass === "striker") {
+          if (strikersOverflowToTcs(row)) {
+            return { ...row, tcs: [...row.tcs, item] };
+          }
+
           return { ...row, strikers: [...row.strikers, item] };
         }
 
@@ -385,7 +430,10 @@ export function FormationEditor() {
 
   function addFormationRow() {
     const newIndex = rows.length;
-    setRows((prev) => [...prev, { id: uuid(), strikers: [], specials: [] }]);
+    setRows((prev) => [
+      ...prev,
+      { id: uuid(), strikers: [], specials: [], tcs: [] },
+    ]);
     setActiveRowIndex(newIndex);
   }
 
@@ -454,7 +502,10 @@ export function FormationEditor() {
 
   async function createOrUpdateCloudFormation() {
     const hasAnyStudent = rows.some(
-      (row) => row.strikers.length > 0 || row.specials.length > 0,
+      (row) =>
+        row.strikers.length > 0 ||
+        row.specials.length > 0 ||
+        (formationType === "tacticalRelay" && row.tcs.length > 0),
     );
 
     if (!hasAnyStudent) {
@@ -471,6 +522,9 @@ export function FormationEditor() {
     const rowsPayload = rows.map((row) => ({
       strikers: studentItemsToPersistedSlots(row.strikers),
       specials: studentItemsToPersistedSlots(row.specials),
+      ...(formationType === "tacticalRelay" && row.tcs.length > 0
+        ? { tcs: studentItemsToPersistedSlots(row.tcs) }
+        : {}),
       ...(row.label?.text
         ? {
             label: {
@@ -606,7 +660,7 @@ export function FormationEditor() {
     if (!formationId) {
       // reset
       setNameUnchecked("");
-      setRowsUnchecked([{ id: uuid(), strikers: [], specials: [] }]);
+      setRowsUnchecked([{ id: uuid(), strikers: [], specials: [], tcs: [] }]);
       setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
       setFormationTypeUnchecked(undefined);
       setActiveRowIndex(0);
@@ -650,6 +704,10 @@ export function FormationEditor() {
           id: uuid(),
           strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
           specials: persistedSlotsToStudentItems(row.specials, allStudents),
+          tcs: persistedSlotsToStudentItems(
+            "tcs" in row ? (row.tcs ?? []) : [],
+            allStudents,
+          ),
           ...(label ? { label } : {}),
         };
       });
@@ -733,6 +791,21 @@ export function FormationEditor() {
           );
         });
       },
+      setTcs: (action: SetStateAction<StudentItem[]>) => {
+        setRows((prev) => {
+          const row = prev[rowIndex];
+          if (!row) {
+            return prev;
+          }
+
+          const nextTcs =
+            typeof action === "function" ? action(row.tcs) : action;
+
+          return prev.map((r, i) =>
+            i === rowIndex ? { ...r, tcs: nextTcs } : r,
+          );
+        });
+      },
       onWantsToRemove: removeItem,
       onWantsToUpdate: updateItem,
     }));
@@ -741,10 +814,14 @@ export function FormationEditor() {
   const totalSlotCount = useMemo(
     () =>
       rows.reduce(
-        (acc, row) => acc + row.strikers.length + row.specials.length,
+        (acc, row) =>
+          acc +
+          row.strikers.length +
+          row.specials.length +
+          (formationType === "tacticalRelay" ? row.tcs.length : 0),
         0,
       ),
-    [rows],
+    [rows, formationType],
   );
 
   const hasAnyCard = totalSlotCount > 0;
@@ -814,6 +891,9 @@ export function FormationEditor() {
                 "tools.formationDisplay.formationType_finalRestrictionRelease",
               )}
             </SelectItem>
+            <SelectItem value="tacticalRelay">
+              {t("tools.formationDisplay.formationType_tacticalRelay")}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -843,6 +923,7 @@ export function FormationEditor() {
                     <FormationPreview
                       strikers={row.strikers}
                       specials={row.specials}
+                      tcs={row.tcs}
                       displayOverline={displayOverline}
                       noDisplayRole={!displayRoleIcon}
                       groupsVertical={groupsVertical}

@@ -12,8 +12,8 @@ import { PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Trash2Icon } from "lucide-react";
-import { useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useCallback } from "react";
 
 function isFormationPreviewAnchorTarget(target: EventTarget | null) {
   return (
@@ -29,12 +29,14 @@ export type FormationItemPopoverProps = {
     itemId: string,
     data: Partial<Omit<StudentItem, "student" | "id">>,
   ) => void;
+  disableStarter?: boolean;
 };
 
 export function FormationItemPopover({
   item,
   onWantsToRemove,
   onWantsToUpdate,
+  disableStarter,
 }: FormationItemPopoverProps) {
   const t = useTranslations();
 
@@ -134,16 +136,18 @@ export function FormationItemPopover({
             <Label htmlFor={`pop-borrowed-${item.id}`}>Borrowed</Label>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Switch
-              id={`pop-starter-${item.id}`}
-              checked={!!item.starter}
-              onCheckedChange={handleStarterUpdate}
-            />
-            <Label htmlFor={`pop-starter-${item.id}`}>
-              {t("tools.formationDisplay.starter")}
-            </Label>
-          </div>
+          {!disableStarter && (
+            <div className="flex items-center gap-2">
+              <Switch
+                id={`pop-starter-${item.id}`}
+                checked={!!item.starter}
+                onCheckedChange={handleStarterUpdate}
+              />
+              <Label htmlFor={`pop-starter-${item.id}`}>
+                {t("tools.formationDisplay.starter")}
+              </Label>
+            </div>
+          )}
         </>
       )}
 

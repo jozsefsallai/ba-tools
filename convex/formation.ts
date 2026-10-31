@@ -33,9 +33,7 @@ export const searchOwn = authenticatedQuery({
       .order("desc")
       .collect();
     const term = args.search.toLowerCase();
-    return all.filter((item) =>
-      (item.name ?? "").toLowerCase().includes(term),
-    );
+    return all.filter((item) => (item.name ?? "").toLowerCase().includes(term));
   },
 });
 
@@ -43,7 +41,11 @@ export const create = authenticatedMutation({
   args: {
     name: v.optional(v.string()),
     type: v.optional(
-      v.union(v.literal("normal"), v.literal("finalRestrictionRelease")),
+      v.union(
+        v.literal("normal"),
+        v.literal("finalRestrictionRelease"),
+        v.literal("tacticalRelay"),
+      ),
     ),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),
@@ -81,7 +83,11 @@ export const update = authenticatedMutation({
     id: v.id("formation"),
     name: v.optional(v.string()),
     type: v.optional(
-      v.union(v.literal("normal"), v.literal("finalRestrictionRelease")),
+      v.union(
+        v.literal("normal"),
+        v.literal("finalRestrictionRelease"),
+        v.literal("tacticalRelay"),
+      ),
     ),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),

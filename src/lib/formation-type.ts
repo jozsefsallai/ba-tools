@@ -1,9 +1,13 @@
-export type FormationType = "normal" | "finalRestrictionRelease";
+export type FormationType =
+  | "normal"
+  | "finalRestrictionRelease"
+  | "tacticalRelay";
 
 export const NORMAL_STARTER_THRESHOLD = 3;
 export const FRR_STARTER_THRESHOLD = 5;
 export const NORMAL_STARTER_MAX = 5;
 export const FRR_STARTER_MAX = 9;
+export const TACTICAL_RELAY_STRIKER_MAX = 4;
 
 type FormationTypeRowItem = {
   studentId?: string;
@@ -28,7 +32,9 @@ export function starterThresholdFor(type: FormationType): number {
 }
 
 export function starterMaxFor(type: FormationType): number {
-  return type === "finalRestrictionRelease" ? FRR_STARTER_MAX : NORMAL_STARTER_MAX;
+  return type === "finalRestrictionRelease"
+    ? FRR_STARTER_MAX
+    : NORMAL_STARTER_MAX;
 }
 
 function hasStudent(item: FormationTypeRowItem): boolean {
@@ -48,7 +54,9 @@ export function inferFormationType(rows: FormationTypeRow[]): FormationType {
   return "normal";
 }
 
-export function resolveStarterOrders(items: StarterOrderItem[]): Map<string, number> {
+export function resolveStarterOrders(
+  items: StarterOrderItem[],
+): Map<string, number> {
   const starters = items
     .map((item, displayIndex) => ({
       item,

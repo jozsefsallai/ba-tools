@@ -38,6 +38,7 @@ export const formationRowLabel = v.object({
 export const formationRow = v.object({
   strikers: v.array(formationStudentItem),
   specials: v.array(formationStudentItem),
+  tcs: v.optional(v.array(formationStudentItem)),
   label: v.optional(formationRowLabel),
 });
 
@@ -244,7 +245,11 @@ export default defineSchema({
     userId: v.id("users"),
     name: v.optional(v.string()),
     type: v.optional(
-      v.union(v.literal("normal"), v.literal("finalRestrictionRelease")),
+      v.union(
+        v.literal("normal"),
+        v.literal("finalRestrictionRelease"),
+        v.literal("tacticalRelay"),
+      ),
     ),
     strikers: v.array(formationStudentItem),
     specials: v.array(formationStudentItem),

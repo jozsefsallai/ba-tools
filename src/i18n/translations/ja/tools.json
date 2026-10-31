@@ -463,6 +463,7 @@
     "formationTypeAuto": "自動 ({detected})",
     "formationType_normal": "通常",
     "formationType_finalRestrictionRelease": "制約解除決戦",
+    "formationType_tacticalRelay": "仮想適性試験",
     "starterOrder": {
       "title": "スタートスキル順",
       "count": "{count} / {max}",

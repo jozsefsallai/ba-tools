@@ -546,6 +546,7 @@
     "formationTypeAuto": "Auto ({detected})",
     "formationType_normal": "Normal",
     "formationType_finalRestrictionRelease": "Final Restriction Release",
+    "formationType_tacticalRelay": "Simulated Aptitude Test",
     "starterOrder": {
       "title": "Starter skill order",
       "count": "{count} / {max}",

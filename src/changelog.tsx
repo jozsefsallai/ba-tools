@@ -59,6 +59,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.website,
         description: "Add raid boss Nightmare Train.",
       },
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description: "Add support for Simulated Aptitude Test formations.",
+      },
     ],
     changes: [
       {
