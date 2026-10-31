@@ -55,6 +55,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Opponent presets can now be searched by student representative as well.",
       },
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Add raid boss Nightmare Train.",
+      },
     ],
     changes: [
       {

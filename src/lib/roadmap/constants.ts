@@ -40,6 +40,7 @@ export const RAID_BOSSES = [
   "Geburah",
   "Yesod",
   "Drumbarka",
+  "NightmareTrain",
 ] as const satisfies readonly RaidBoss[];
 
 export const MULTI_FLOOR_RAID_BOSSES = [

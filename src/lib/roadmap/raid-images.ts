@@ -10,6 +10,7 @@ import hodImage from "@/assets/images/raid/hod.png";
 import hovercraftImage from "@/assets/images/raid/hovercraft.png";
 import kaitenImage from "@/assets/images/raid/kaiten.png";
 import kurokageImage from "@/assets/images/raid/kurokage.png";
+import nightmareTrainImage from "@/assets/images/raid/nightmare_train.png";
 import perorodzillaImage from "@/assets/images/raid/perorodzilla.png";
 import shirokuroImage from "@/assets/images/raid/shirokuro.png";
 import theFuryOfSetImage from "@/assets/images/raid/the_fury_of_set.png";
@@ -19,6 +20,7 @@ import timeAttackEscortImage from "@/assets/images/raid/timeattack_escort.webp";
 import timeAttackShootingImage from "@/assets/images/raid/timeattack_shooting.webp";
 import tipharethImage from "@/assets/images/raid/tiphareth.png";
 import yesodImage from "@/assets/images/raid/yesod.png";
+
 import type { RoadmapRaidItem } from "@/lib/roadmap/types";
 import type { StaticImageData } from "next/image";
 import type {
@@ -42,6 +44,7 @@ const RAID_BOSS_IMAGES: Record<RaidBoss, StaticImageData> = {
   Geburah: geburahImage,
   Yesod: yesodImage,
   Drumbarka: drumbarkaImage,
+  NightmareTrain: nightmareTrainImage,
 };
 
 const MULTI_FLOOR_RAID_BOSS_IMAGES: Record<
