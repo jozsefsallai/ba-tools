@@ -24,7 +24,7 @@ export const RAID_DURATIONS: {
       "hovercraft",
       "kurokage",
       "geburah",
-      "nightmareTrain",
+      "nightmaretrain",
     ],
   },
   {
