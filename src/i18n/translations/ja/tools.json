@@ -1497,7 +1497,8 @@
         "gifts": "好きな贈り物",
         "media": "メディア",
         "variants": "他のバリエーション",
-        "memorialLobby": "メモリアルロビー"
+        "memorialLobby": "メモリアルロビー",
+        "skills": "スキル"
       },
       "fields": {
         "fullName": "フルネーム",
@@ -1534,6 +1535,33 @@
         "ammoCost": "通常攻撃コスト",
         "regenCost": "コスト回復力",
         "sightRange": "索敵範囲"
+      },
+      "skills": {
+        "exLevel": "EX Lv.{level}",
+        "exLevelLabel": "EXスキルレベル",
+        "skillLevel": "スキル Lv.{level}",
+        "skillLevelLabel": "スキルレベル",
+        "stance": "形態",
+        "stanceOption": "形態{index}",
+        "exclusiveWeapon": "固有武器 ★2",
+        "bondGear": "愛用品 T2",
+        "types": {
+          "EX": "EXスキル",
+          "Basic": "ノーマルスキル",
+          "Enhanced": "パッシブスキル",
+          "Sub": "サブスキル"
+        },
+        "cost": "コスト {cost}",
+        "additional": "関連スキル",
+        "categories": {
+          "Buff": "強化効果",
+          "Debuff": "弱体効果",
+          "CrowdControl": "状態異常",
+          "Heal": "回復",
+          "Special": "特殊効果",
+          "Glossary": "用語"
+        },
+        "fallback": "一部のスキルは日本語のテキストがないため、英語で表示されます。"
       },
       "gifts": {
         "adored": "大好き",

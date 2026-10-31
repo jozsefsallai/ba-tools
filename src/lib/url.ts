@@ -39,6 +39,14 @@ export function buildAlternativeSkillPortraitUrl(key: string) {
   return buildCDNUrl(`v2/images/skill-portraits/${key}.png`);
 }
 
+export function buildSkillIconUrl(iconName: string) {
+  return buildCDNUrl(`v2/images/skill-icons/${iconName}.png`);
+}
+
+export function buildEffectIconUrl(iconName: string) {
+  return buildCDNUrl(`v2/images/effect-icons/${iconName}.png`);
+}
+
 export function buildStudentSpriteUrl(studentId: string, sprite: string) {
   return buildCDNUrl(`v2/images/students/spine/${studentId}/${sprite}.webp`);
 }

@@ -10,6 +10,7 @@ import {
   StudentProfileSection,
   StudentStatsSection,
 } from "@/app/[locale]/students/[id]/_components/student-info-sections";
+import { StudentSkillsSection } from "@/app/[locale]/students/[id]/_components/student-skills-section";
 import { StudentVariantsSection } from "@/app/[locale]/students/[id]/_components/student-variants-section";
 import {
   getStudentDetail,
@@ -108,6 +109,11 @@ export default async function StudentPage({
           </div>
 
           <StudentStatsSection student={student} />
+
+          <StudentSkillsSection
+            studentId={student.id}
+            attackType={student.attackType}
+          />
 
           <MemorialLobbySection
             studentId={student.id}

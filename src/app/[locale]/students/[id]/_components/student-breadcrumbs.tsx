@@ -1,7 +1,7 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
 import { useTranslations } from "next-intl";
+import type { PropsWithChildren } from "react";
 
 import { useStudentListLink } from "@/app/[locale]/students/_lib/student-list-state";
 import { BreadcrumbScope } from "@/components/providers/breadcrumbs-provider";

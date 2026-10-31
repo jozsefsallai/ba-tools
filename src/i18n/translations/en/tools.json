@@ -1653,7 +1653,8 @@
         "gifts": "Favorite Gifts",
         "media": "Media",
         "variants": "Other Variants",
-        "memorialLobby": "Recollection Lobby"
+        "memorialLobby": "Recollection Lobby",
+        "skills": "Skills"
       },
       "fields": {
         "fullName": "Full Name",
@@ -1690,6 +1691,33 @@
         "ammoCost": "Normal Attack Cost",
         "regenCost": "Cost Recovery",
         "sightRange": "Sighting Range"
+      },
+      "skills": {
+        "exLevel": "EX Lv. {level}",
+        "exLevelLabel": "EX skill level",
+        "skillLevel": "Skill Lv. {level}",
+        "skillLevelLabel": "Skill level",
+        "stance": "Stance",
+        "stanceOption": "Stance {index}",
+        "exclusiveWeapon": "Exclusive Weapon ★2",
+        "bondGear": "Bond Gear T2",
+        "types": {
+          "EX": "EX Skill",
+          "Basic": "Basic Skill",
+          "Enhanced": "Enhanced Skill",
+          "Sub": "Sub Skill"
+        },
+        "cost": "Cost {cost}",
+        "additional": "Also shown",
+        "categories": {
+          "Buff": "Buffs",
+          "Debuff": "Debuffs",
+          "CrowdControl": "Crowd Control",
+          "Heal": "Healing",
+          "Special": "Special",
+          "Glossary": "Terms"
+        },
+        "fallback": "Some skills aren't on the Global server yet, so they are shown in Japanese."
       },
       "gifts": {
         "adored": "Adored",
