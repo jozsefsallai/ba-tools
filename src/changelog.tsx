@@ -70,7 +70,12 @@ export const CHANGELOG: ChangelogItemData[] = [
         description: "Improved mobile optimization across the entire site.",
       },
     ],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.railroadPuzzleSolver,
+        description: "Fix linebreak display bug in tile tooltips.",
+      },
+    ],
   },
   {
     date: "October 27, 2026",

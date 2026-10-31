@@ -1082,9 +1082,9 @@
       "entranceDirection": "進入方向：",
       "stationTile": "駅タイル",
       "stationTileDesc": "このマスは <strong>{railType}</strong> の線路を使って通過する必要があるよ。",
-      "stationTileWithDirections": "このマスは <strong>{railType}</strong> の線路を使って、<br /><strong>{entrance}</strong> から <strong>{exit}</strong> へ通過する必要があるよ。",
+      "stationTileWithDirections": "このマスは <strong>{railType}</strong> の線路を使って、<br></br><strong>{entrance}</strong> から <strong>{exit}</strong> へ通過する必要があるよ。",
       "railPiece": "線路パーツ",
-      "railPieceDesc": "<strong>{railType}</strong> の線路を使って、<br /><strong>{entrance}</strong> から <strong>{exit}</strong> へ接続するよ。"
+      "railPieceDesc": "<strong>{railType}</strong> の線路を使って、<br></br><strong>{entrance}</strong> から <strong>{exit}</strong> へ接続するよ。"
     },
     "toasts": {
       "noSolution": "指定された線路の数では解決策が見つからなかったよ。",

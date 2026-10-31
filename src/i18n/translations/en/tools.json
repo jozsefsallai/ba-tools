@@ -1211,9 +1211,9 @@
       "entranceDirection": "Entrance direction:",
       "stationTile": "Station Tile",
       "stationTileDesc": "The train must pass through this tile using a <strong>{railType}</strong> piece.",
-      "stationTileWithDirections": "The train must pass through this tile<br />from <strong>{entrance}</strong> to <strong>{exit}</strong><br />using a <strong>{railType}</strong> piece.",
+      "stationTileWithDirections": "The train must pass through this tile<br></br>from <strong>{entrance}</strong> to <strong>{exit}</strong><br></br>using a <strong>{railType}</strong> piece.",
       "railPiece": "Rail Piece",
-      "railPieceDesc": "Connects a tile from <strong>{entrance}</strong> to <strong>{exit}</strong><br />using a <strong>{railType}</strong> piece."
+      "railPieceDesc": "Connects a tile from <strong>{entrance}</strong> to <strong>{exit}</strong><br></br>using a <strong>{railType}</strong> piece."
     },
 
     "toasts": {
