@@ -263,7 +263,7 @@ export function TimelineView({ id }: TimelineViewProps) {
       />
 
       <div className="flex flex-col gap-4 items-center">
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           <div className="flex items-center gap-2">
             <Label className="shrink-0">{t("common.scale")}</Label>
 

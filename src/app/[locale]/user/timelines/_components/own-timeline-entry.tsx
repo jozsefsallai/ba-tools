@@ -3,6 +3,7 @@
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMutation } from "convex/react";
@@ -13,7 +14,6 @@ import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
-import { Link } from "@/i18n/navigation";
 
 export type OwnTimelineEntryProps = {
   entry: FunctionReturnType<typeof api.timeline.getOwn>[number];
@@ -76,7 +76,7 @@ export function OwnTimelineEntry({
   return (
     <article
       ref={setNodeRef}
-      className="border bg-background rounded-md py-4 px-8 flex items-center justify-between gap-4"
+      className="border bg-background rounded-md py-4 px-8 flex items-center justify-between gap-4 max-md:flex-col max-md:items-stretch max-md:px-4"
       style={style}
       id={entry._id}
       {...attributes}
@@ -108,7 +108,7 @@ export function OwnTimelineEntry({
             )}
           </div>
 
-          <div className="flex gap-1 items-center">
+          <div className="flex gap-1 items-center max-md:flex-wrap">
             {uniqueStudents.map((student) => (
               <div style={{ zoom: 0.55 }} key={student.id}>
                 <StudentCard student={student} />
@@ -118,7 +118,7 @@ export function OwnTimelineEntry({
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 max-md:flex-wrap max-md:gap-2">
         {entry.visibility === "public" && (
           <Button variant="outline" asChild>
             <Link href={`/timelines/${entry._id}`}>

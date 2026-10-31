@@ -99,7 +99,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
     <div className="flex min-w-0 flex-col gap-10">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 max-md:w-full max-md:flex-col max-md:items-start">
             <div>
               <h1 className="text-xl font-bold">
                 {t("tools.pvp.season.title", { name: season.name })}
@@ -116,7 +116,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
             <PVPSeasonEditDialog season={season} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 max-md:mt-2 max-md:grid max-md:w-full max-md:grid-cols-2">
             {isSuperUser(user) && <PVPBulkImportDialog seasonId={seasonId} />}
 
             <Button variant="outline" asChild>
@@ -137,7 +137,7 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
               </Link>
             </Button>
 
-            <Button asChild>
+            <Button asChild className="max-md:col-span-2">
               <Link href={`/pvp/${seasonId}/match/new`}>
                 <PlusIcon />
                 {t("tools.pvp.season.recordNewMatch")}

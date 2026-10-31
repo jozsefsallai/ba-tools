@@ -64,7 +64,7 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
           })}
         </Link>
       </Button>
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 max-md:flex-col max-md:items-stretch max-md:gap-4">
         <div>
           <h1 className="text-xl font-bold">{result.account.name}</h1>
           <p className="text-sm text-muted-foreground">
@@ -74,7 +74,7 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
             })}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-md:[&>*]:flex-1">
           <Button variant="outline" asChild>
             <Link href={`/user/recruitment/${accountId}/analytics`}>
               {t("tools.recruitment.viewAnalytics")}
@@ -88,8 +88,8 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
           </Button>
         </div>
       </div>
-      <div className="flex flex-wrap items-end gap-2 rounded-md border p-4">
-        <div className="flex min-w-48 flex-1 flex-col gap-2">
+      <div className="flex flex-wrap items-end gap-2 rounded-md border p-4 max-md:grid max-md:grid-cols-2 max-md:gap-3">
+        <div className="flex min-w-48 flex-1 flex-col gap-2 max-md:col-span-2 max-md:min-w-0">
           <Label htmlFor="edit-account-name">
             {t("tools.recruitment.accountName")}
           </Label>
@@ -99,13 +99,13 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
             onChange={(event) => setName(event.target.value)}
           />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 max-md:col-span-2">
           <Label>{t("common.gameServer")}</Label>
           <Select
             value={gameServer}
             onValueChange={(value) => setGameServer(value as GameServer)}
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 max-md:w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -121,7 +121,7 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-24 flex-col gap-2">
+        <div className="flex w-24 flex-col gap-2 max-md:w-auto">
           <Label htmlFor="edit-permanent-charge">
             {t("tools.recruitment.permanent")}
           </Label>
@@ -133,7 +133,7 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
             onValueChange={setPermanentCharge}
           />
         </div>
-        <div className="flex w-24 flex-col gap-2">
+        <div className="flex w-24 flex-col gap-2 max-md:w-auto">
           <Label htmlFor="edit-limited-charge">
             {t("tools.recruitment.limited")}
           </Label>
@@ -164,6 +164,7 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
           disabled={
             !name.trim() || permanentCharge === "" || limitedCharge === ""
           }
+          className="max-md:col-span-2"
         >
           <SaveIcon />
           {t("common.saveChanges")}

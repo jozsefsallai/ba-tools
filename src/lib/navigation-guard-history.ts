@@ -2,6 +2,7 @@ import {
   type NavigationGuardController,
   isHashOnlyNavigation,
 } from "@/lib/navigation-guard";
+import { v4 as uuid } from "uuid";
 
 const STATE_KEY = "__baNavigationGuard";
 
@@ -38,7 +39,7 @@ export function installNavigationGuardHistory(
   let installed = true;
 
   let position = readPosition(history.state) ?? {
-    session: crypto.randomUUID(),
+    session: uuid(),
     index: 0,
   };
 
@@ -147,7 +148,7 @@ export function installNavigationGuardHistory(
       if (next) {
         position = next;
       } else if (!isHashOnlyNavigation(currentUrl)) {
-        position = { session: crypto.randomUUID(), index: 0 };
+        position = { session: uuid(), index: 0 };
         originalReplace.call(history, stamp(history.state, position), "");
       }
 

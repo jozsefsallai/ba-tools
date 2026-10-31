@@ -51,7 +51,10 @@ export function PVPFormationDamageChart({
   );
 
   return (
-    <ChartContainer config={chartConfig} className="w-[450px] h-[300px]">
+    <ChartContainer
+      config={chartConfig}
+      className="w-[450px] h-[300px] max-md:w-full max-md:[&_.recharts-label]:text-[10px]"
+    >
       <BarChart accessibilityLayer data={chartData} margin={{ top: 20 }}>
         <CartesianGrid vertical={false} />
 

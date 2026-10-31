@@ -768,10 +768,29 @@ function ItemTooltip({
   disabled: boolean;
   children: ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  const pointerType = useRef("");
+
   return (
-    <Tooltip open={disabled ? false : undefined}>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent className="max-w-96">
+    <Tooltip open={!disabled && open} onOpenChange={setOpen}>
+      <TooltipTrigger
+        asChild
+        onPointerDown={(event) => {
+          pointerType.current = event.pointerType;
+        }}
+        onClick={(event) => {
+          if (pointerType.current !== "touch") {
+            return;
+          }
+
+          event.preventDefault();
+          setOpen(true);
+        }}
+      >
+        {children}
+      </TooltipTrigger>
+
+      <TooltipContent className="max-w-[min(24rem,calc(100vw-2rem))]">
         <RoadmapItemDetails item={item} labels={labels} />
       </TooltipContent>
     </Tooltip>

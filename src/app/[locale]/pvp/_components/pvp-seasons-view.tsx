@@ -16,7 +16,8 @@ import {
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -72,9 +73,11 @@ function SeasonCard({ season, archived, onArchiveChange }: SeasonCardProps) {
     >
       <Link
         href={`/pvp/${season._id}`}
-        className="flex h-full flex-col items-center justify-center gap-2 rounded-md p-4 pr-12 pl-12 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        className="flex h-full flex-col items-center justify-center gap-2 rounded-md p-4 pr-12 pl-12 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring max-md:gap-1"
       >
-        <h2 className="text-center text-2xl font-bold">{season.name}</h2>
+        <h2 className="text-center text-2xl font-bold max-md:text-lg max-md:leading-snug">
+          {season.name}
+        </h2>
 
         <p className="text-sm font-medium">
           {t("tools.pvp.seasons.number", {
@@ -90,7 +93,7 @@ function SeasonCard({ season, archived, onArchiveChange }: SeasonCardProps) {
       {!archived && (
         <Button
           aria-label={t("tools.pvp.seasons.reorder", { name: season.name })}
-          className="absolute top-2 left-2 z-10 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          className="absolute top-2 left-2 z-10 cursor-grab touch-manipulation text-muted-foreground hover:text-foreground active:cursor-grabbing"
           type="button"
           variant="ghost"
           {...sortable.attributes}
@@ -181,8 +184,9 @@ export function PVPSeasonsView({
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -279,9 +283,9 @@ export function PVPSeasonsView({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {!showArchived && (
               <NewPVPSeasonDialog onCreate={() => onShowArchivedChange(false)}>
-                <div className="flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed p-4 hover:bg-accent">
-                  <PlusIcon className="size-8" />
-                  <div className="text-xl font-medium">
+                <div className="flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed p-4 hover:bg-accent max-md:flex-row max-md:py-3">
+                  <PlusIcon className="size-8 max-md:size-5" />
+                  <div className="text-xl font-medium max-md:text-base">
                     {t("tools.pvp.seasons.createNew")}
                   </div>
                 </div>

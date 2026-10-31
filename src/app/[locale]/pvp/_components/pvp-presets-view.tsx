@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { ChevronLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
   const t = useTranslations();
@@ -22,7 +22,7 @@ export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Button
-          className="h-auto justify-start p-6 text-left"
+          className="h-auto justify-start p-6 text-left whitespace-normal"
           variant="outline"
           asChild
         >
@@ -40,7 +40,7 @@ export function PVPPresetsView({ seasonId }: { seasonId: Id<"pvpSeason"> }) {
         </Button>
 
         <Button
-          className="h-auto justify-start p-6 text-left"
+          className="h-auto justify-start p-6 text-left whitespace-normal"
           variant="outline"
           asChild
         >

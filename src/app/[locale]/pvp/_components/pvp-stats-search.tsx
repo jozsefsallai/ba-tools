@@ -650,13 +650,13 @@ export function PVPStatsSearch() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="max-md:grid-cols-1!">
           <CardTitle>{t("tools.pvp.stats.defenseTeam")}</CardTitle>
           <p className="text-sm text-muted-foreground">
             {t("tools.pvp.stats.exactDefenseHint")}
           </p>
 
-          <CardAction>
+          <CardAction className="max-md:col-start-1 max-md:row-span-1 max-md:row-start-3 max-md:mt-2 max-md:justify-self-start">
             <PvpCombatReportImportDialog
               recognizeOpponentName={false}
               onImported={handleReportImported}

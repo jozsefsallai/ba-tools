@@ -147,7 +147,7 @@ export function ChatMessage({
         )}
       </div>
       {canShowAssistantActions && (onRegenerate || onRewind) && (
-        <div className="mt-1 flex shrink-0 items-start gap-1 opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100">
+        <div className="mt-1 flex shrink-0 items-start gap-1 opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100">
           {onRegenerate && (
             <Tooltip>
               <TooltipTrigger asChild>

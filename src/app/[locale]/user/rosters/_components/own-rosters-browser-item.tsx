@@ -24,9 +24,9 @@ export function OwnRostersBrowserItem({ roster }: OwnRostersBrowserItemProps) {
   }, [students, roster.studentRepId]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between border rounded-md py-4 px-8 hover:bg-accent">
+    <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between border rounded-md py-4 px-8 hover:bg-accent max-md:p-4">
       <div className="flex-1 flex items-center gap-4 md:gap-6">
-        <div>
+        <div className="max-md:shrink-0 max-md:[zoom:0.75]">
           {studentRep && (
             <StudentCard student={studentRep} level={roster.accountLevel} />
           )}
@@ -34,12 +34,12 @@ export function OwnRostersBrowserItem({ roster }: OwnRostersBrowserItemProps) {
           {!studentRep && <EmptyCard />}
         </div>
 
-        <div className="flex-1 flex flex-col gap-2">
-          <div className="md:text-2xl font-bold">
+        <div className="flex-1 flex flex-col gap-2 max-md:min-w-0 max-md:gap-1">
+          <div className="md:text-2xl font-bold max-md:text-lg max-md:leading-tight">
             {roster.name ?? "Unnamed"}
           </div>
 
-          <div className="text-lg">
+          <div className="text-lg max-md:text-base">
             {GAME_SERVER_NAMES[roster.gameServer]} /{" "}
             <strong>{roster.friendCode}</strong>
           </div>
@@ -49,7 +49,7 @@ export function OwnRostersBrowserItem({ roster }: OwnRostersBrowserItemProps) {
           </div>
         </div>
 
-        <div className="text-lg text-muted-foreground">
+        <div className="text-lg text-muted-foreground max-md:self-start">
           {roster.visibility === "public" && <GlobeIcon />}
           {roster.visibility === "private" && <LockIcon />}
         </div>

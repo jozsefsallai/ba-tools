@@ -149,7 +149,7 @@ export function PVPFormation({
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex min-w-0 flex-col items-center gap-2">
+      <div className="flex min-w-0 flex-col items-center gap-2 max-md:w-full">
         {showHeader && (
           <div className="flex max-w-full flex-wrap items-center justify-center gap-2 text-center">
             {kind === "attack" && <SwordIcon />}
@@ -187,21 +187,18 @@ export function PVPFormation({
           </div>
         )}
 
-        <div
-          className="flex max-w-full flex-wrap items-center justify-center gap-3"
-          style={{ zoom: 0.8 }}
-        >
-          <div className="flex flex-wrap items-center justify-center gap-[2px]">
+        <div className="flex max-w-full flex-wrap items-center justify-center gap-3 [zoom:0.8] max-md:[zoom:0.68]">
+          <div className="flex items-center justify-center gap-[2px]">
             {strikers.map((item, idx) => renderStudentCard(item, idx))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-[2px]">
+          <div className="flex items-center justify-center gap-[2px]">
             {specials.map((item, idx) => renderStudentCard(item, idx + 4))}
           </div>
         </div>
 
         {damageChartOpen && (
-          <div className="max-w-full overflow-x-auto">
+          <div className="max-w-full overflow-x-auto max-md:w-full">
             <PVPFormationDamageChart
               formation={formation}
               highestDamage={highestDamage}

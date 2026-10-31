@@ -48,6 +48,17 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "October 31, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.website,
+        description: "Improved mobile optimization across the entire site.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "October 27, 2026",
     features: [
       {

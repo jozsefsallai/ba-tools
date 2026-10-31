@@ -109,10 +109,10 @@ export function GiftAllocationCard({
   );
 
   return (
-    <div className="rounded-lg border bg-card p-4 flex flex-col gap-4">
-      <div className="flex gap-4 items-center">
+    <div className="rounded-lg border bg-card p-4 flex flex-col gap-4 max-md:p-3 max-md:gap-3">
+      <div className="flex gap-4 items-center max-md:gap-3">
         <Popover>
-          <PopoverTrigger className="shrink-0 relative">
+          <PopoverTrigger className="shrink-0 relative max-md:[zoom:0.7]">
             {selectedStudent && targets.length === 0 && (
               <div className="absolute -top-3 -right-3 z-10 pointer-events-none">
                 <GiftAffinityIcon
@@ -130,7 +130,7 @@ export function GiftAllocationCard({
           </PopoverContent>
         </Popover>
 
-        <div className="flex-1 min-w-0 font-bold text-lg truncate">
+        <div className="flex-1 min-w-0 font-bold text-lg truncate max-md:text-base">
           {giftName}
         </div>
 

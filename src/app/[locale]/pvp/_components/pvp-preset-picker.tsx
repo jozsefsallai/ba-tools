@@ -104,12 +104,14 @@ export function PVPPresetPicker({
           className={cn("w-full justify-between", className)}
           disabled={loading}
         >
-          {loading ? t("tools.pvp.presetPicker.loading") : placeholder}
+          <span className="truncate">
+            {loading ? t("tools.pvp.presetPicker.loading") : placeholder}
+          </span>
           <ChevronsUpDownIcon />
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 max-md:w-[calc(100vw-2rem)]">
         <Command>
           <CommandInput
             placeholder={t("tools.pvp.presetPicker.search")}
@@ -157,7 +159,9 @@ export function PVPPresetPicker({
                     />
                   )}
 
-                <span className="w-40 truncate">{preset.name}</span>
+                <span className="w-40 truncate max-md:w-auto max-md:min-w-0 max-md:flex-1">
+                  {preset.name}
+                </span>
 
                 {studentMap && (
                   <span className="ml-auto flex shrink-0 gap-0.5">
@@ -172,12 +176,12 @@ export function PVPPresetPicker({
                           src={buildStudentPortraitUrl(student)}
                           alt=""
                           title={student.name}
-                          className="size-7 rounded-sm object-cover"
+                          className="size-7 rounded-sm object-cover max-md:size-6"
                         />
                       ) : (
                         <span
                           key={`${preset._id}-${index}`}
-                          className="size-7 rounded-sm border border-dashed"
+                          className="size-7 rounded-sm border border-dashed max-md:size-6"
                         />
                       );
                     })}

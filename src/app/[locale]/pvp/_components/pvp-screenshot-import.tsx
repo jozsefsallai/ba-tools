@@ -67,6 +67,7 @@ import {
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -266,7 +267,7 @@ export function PvpScreenshotImport({
       urls.current.add(url);
 
       return {
-        id: crypto.randomUUID(),
+        id: uuid(),
         file,
         url,
         stage: "queued",
@@ -1048,7 +1049,7 @@ export function PvpScreenshotImport({
         }}
       >
         <DialogContent
-          className="max-h-[90dvh] overflow-y-auto sm:max-w-[min(90rem,calc(100vw-2rem))]"
+          className="max-h-[90dvh] overflow-y-auto max-sm:max-w-[calc(100%-1rem)] max-sm:p-3 sm:max-w-[min(90rem,calc(100vw-2rem))]"
           onInteractOutside={(event) => event.preventDefault()}
           onEscapeKeyDown={(event) => {
             event.preventDefault();

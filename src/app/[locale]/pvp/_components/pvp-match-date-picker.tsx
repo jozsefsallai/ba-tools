@@ -31,7 +31,7 @@ export function PvpMatchDatePicker({
     <div className="flex flex-col gap-1">
       <Label htmlFor={id}>{t("date")}</Label>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 max-md:flex-col max-md:items-stretch">
         <Popover open={open && !disabled} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button

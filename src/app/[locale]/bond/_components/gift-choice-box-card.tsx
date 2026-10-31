@@ -78,18 +78,18 @@ export function GiftChoiceBoxCard({
   );
 
   return (
-    <div className="rounded-lg border bg-card p-4 flex flex-col gap-4">
-      <div className="flex gap-4 items-center">
+    <div className="rounded-lg border bg-card p-4 flex flex-col gap-4 max-md:p-3 max-md:gap-3">
+      <div className="flex gap-4 items-center max-md:gap-3">
         <ItemCard
           name={t("tools.bond.choiceBox.name")}
           iconName="item_icon_favor_selection"
           description={t("tools.bond.choiceBox.description")}
           rarity="SR"
           displayName={false}
-          className="shrink-0"
+          className="shrink-0 max-md:[zoom:0.7]"
         />
 
-        <div className="flex-1 min-w-0 font-bold text-lg truncate">
+        <div className="flex-1 min-w-0 font-bold text-lg truncate max-md:text-base">
           {t("tools.bond.choiceBox.name")}
         </div>
 

@@ -873,7 +873,7 @@ export function TimelineEditor() {
       <Card>
         <CardContent>
           <Tabs defaultValue="items" className="gap-4">
-            <TabsList className="place-self-center">
+            <TabsList className="place-self-center max-md:max-w-full max-md:justify-start max-md:overflow-x-auto">
               <TabsTrigger value="items">
                 {t("tools.timeline.tabs.items.title")}
               </TabsTrigger>
@@ -900,7 +900,7 @@ export function TimelineEditor() {
               />
 
               <div className="flex flex-col gap-4">
-                <div className="flex gap-4 justify-center items-center">
+                <div className="flex gap-4 justify-center items-center max-md:flex-col">
                   <StudentPicker
                     ref={studentPickerRef}
                     onStudentSelected={addStudent}
@@ -915,7 +915,7 @@ export function TimelineEditor() {
                     </Button>
                   </StudentPicker>
 
-                  <div className="flex gap-4 items-center justify-center">
+                  <div className="flex gap-4 items-center justify-center max-md:flex-wrap max-md:gap-2">
                     <Button
                       variant="outline"
                       onClick={() => addSeparator("horizontal")}
@@ -940,7 +940,7 @@ export function TimelineEditor() {
 
             <Authenticated>
               <TabsContent value="settings" className="flex flex-col gap-4">
-                <div className="flex gap-4">
+                <div className="flex gap-4 max-md:flex-col">
                   <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
                     <Label className="shrink-0">
                       {t("tools.timeline.tabs.settings.name")}
@@ -1127,7 +1127,7 @@ export function TimelineEditor() {
             </TabsContent>
 
             <TabsContent value="save">
-              <div className="flex gap-4 items-center justify-center">
+              <div className="flex gap-4 items-center justify-center max-md:flex-wrap max-md:gap-2">
                 <Button variant="outline" onClick={loadTimelineFromStorage}>
                   {t("tools.timeline.tabs.save.loadLocal")}
                 </Button>
@@ -1185,7 +1185,7 @@ export function TimelineEditor() {
         </div>
       </Card>
 
-      <div className="flex gap-4 items-center justify-center">
+      <div className="flex flex-wrap gap-4 items-center justify-center max-md:gap-2">
         {query.data?.visibility === "public" && (
           <Button variant="outline" onClick={copyLink}>
             <ShareIcon />

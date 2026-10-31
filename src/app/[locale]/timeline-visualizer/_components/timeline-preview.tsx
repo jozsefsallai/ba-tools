@@ -6,6 +6,8 @@ import {
   type RefObject,
   type SetStateAction,
   useCallback,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import type { Student } from "~prisma";
@@ -14,6 +16,12 @@ import { TimelineItemPopover } from "@/app/[locale]/timeline-visualizer/_compone
 import { TimelinePreviewTrigger } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview-trigger";
 import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
+import {
+  DndZoomContext,
+  TOUCH_DRAG_CLASS,
+  preventTouchContextMenu,
+  useZoomCorrectedTransform,
+} from "@/lib/dnd-mobile";
 import { buildSkillPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import {
@@ -22,7 +30,8 @@ import {
   DragOverlay,
   type DragStartEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -173,6 +182,45 @@ type SeparatorHandleProps = React.ComponentProps<"div"> & {
   size?: SeparatorItem["size"];
 };
 
+function useHorizontalOverflow(el: HTMLDivElement | null) {
+  const [overflow, setOverflow] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    if (!el) {
+      return;
+    }
+
+    const update = () => {
+      const left = el.scrollLeft > 1;
+      const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+
+      setOverflow((prev) =>
+        prev.left === left && prev.right === right ? prev : { left, right },
+      );
+    };
+
+    update();
+
+    el.addEventListener("scroll", update, { passive: true });
+
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+
+    if (el.firstElementChild) {
+      observer.observe(el.firstElementChild);
+    }
+
+    return () => {
+      el.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, [el]);
+
+  return overflow;
+}
+
+const PREVIEW_ZOOM_CLASS = "max-md:[zoom:0.75]";
+
 function SeparatorHandle({
   size = 16,
   className,
@@ -208,13 +256,15 @@ function SortablePreviewItem({
     listeners,
     setNodeRef,
     setActivatorNodeRef,
-    transform,
+    transform: rawTransform,
     transition,
     isDragging,
   } = useSortable({
     id,
     animateLayoutChanges: () => false,
   });
+
+  const transform = useZoomCorrectedTransform(rawTransform);
 
   const style: React.CSSProperties = {
     ...extraStyle,
@@ -276,9 +326,11 @@ function SortablePreviewItem({
               opacity: isDragging ? 0 : 1,
             }}
             className={cn(
-              "relative z-10 inline-flex shrink-0 flex-col self-start",
+              "relative z-10 inline-flex shrink-0 flex-col self-start max-md:align-top",
+              TOUCH_DRAG_CLASS,
               className,
             )}
+            onContextMenu={preventTouchContextMenu}
             onClick={(e) => {
               e.stopPropagation();
               onSelect();
@@ -314,9 +366,10 @@ function SortablePreviewItem({
           ref={setNodeRef}
           data-timeline-preview-anchor=""
           style={style}
-          className={cn("shrink-0", className)}
+          className={cn("shrink-0", TOUCH_DRAG_CLASS, className)}
           {...attributes}
           {...listeners}
+          onContextMenu={preventTouchContextMenu}
           onClick={(e) => {
             e.stopPropagation();
             onSelect();
@@ -350,11 +403,48 @@ export function TimelinePreview({
 
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
 
+  const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
+  const zoomRef = useRef<HTMLDivElement>(null);
+  const overflow = useHorizontalOverflow(scroller);
+
+  const previousItemCount = useRef(items.length);
+
+  useEffect(() => {
+    const added = items.length === previousItemCount.current + 1;
+    previousItemCount.current = items.length;
+
+    const last = Array.from(
+      scroller?.querySelectorAll("[data-timeline-preview-anchor]") ?? [],
+    ).at(-1);
+
+    if (!added || !scroller || !last) {
+      return;
+    }
+
+    if (scroller.scrollWidth <= scroller.clientWidth) {
+      return;
+    }
+
+    const itemRect = last.getBoundingClientRect();
+    const scrollerRect = scroller.getBoundingClientRect();
+
+    if (itemRect.right > scrollerRect.right) {
+      scroller.scrollBy({
+        left: itemRect.right - scrollerRect.right + 16,
+        behavior: "smooth",
+      });
+    } else if (itemRect.left < scrollerRect.left) {
+      scroller.scrollBy({
+        left: itemRect.left - scrollerRect.left - 16,
+        behavior: "smooth",
+      });
+    }
+  }, [items.length, scroller]);
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -599,15 +689,17 @@ export function TimelinePreview({
 
   function getItemClassName(item: TimelineItem): string {
     if (item.type === "student") {
-      return "cursor-pointer flex flex-col items-center";
+      return "cursor-pointer flex flex-col items-center max-md:inline-flex max-md:align-top";
     }
 
     if (item.type === "separator") {
-      return "cursor-pointer";
+      return item.orientation === "horizontal"
+        ? "cursor-pointer max-md:inline-block max-md:align-top"
+        : "cursor-pointer";
     }
 
     if (item.type === "text") {
-      return "text-center whitespace-pre-wrap h-[88px] flex items-center font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer";
+      return "text-center whitespace-pre-wrap h-[88px] flex items-center font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer max-md:inline-flex max-md:align-top";
     }
 
     return "";
@@ -722,14 +814,31 @@ export function TimelinePreview({
   });
 
   const previewContent = (
-    <div className="flex flex-col gap-4 items-start justify-center">
-      <div className="flex items-center gap-3 px-4 py-18" ref={containerRef}>
-        <div className="flex flex-col gap-1">
-          <div className="relative flex flex-wrap items-start">
-            {itemElements}
+    <div className="relative">
+      <div
+        ref={setScroller}
+        className="flex flex-col gap-4 items-start justify-center max-md:overflow-x-auto"
+      >
+        <div ref={zoomRef} className={cn(!busy && PREVIEW_ZOOM_CLASS)}>
+          <div
+            className="flex items-center gap-3 px-4 py-18"
+            ref={containerRef}
+          >
+            <div className="flex flex-col gap-1">
+              <div className="relative flex flex-wrap items-start max-md:block max-md:w-max max-md:whitespace-nowrap">
+                {itemElements}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {overflow.left && (
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-background to-transparent" />
+      )}
+      {overflow.right && (
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-background to-transparent" />
+      )}
     </div>
   );
 
@@ -742,13 +851,16 @@ export function TimelinePreview({
         onDragStart={handleDragStart}
       >
         <SortableContext items={items} strategy={rectSortingStrategy}>
-          {previewContent}
+          <DndZoomContext value={zoomRef}>{previewContent}</DndZoomContext>
         </SortableContext>
 
         <DragOverlay dropAnimation={null}>
           {separatorDragOverlayOrientation && (
             <SeparatorHandle
-              className={cn("cursor-grabbing bg-background/95 shadow-md")}
+              className={cn(
+                "cursor-grabbing bg-background/95 shadow-md",
+                PREVIEW_ZOOM_CLASS,
+              )}
               size={horizontalSeparatorSize}
             >
               <span className="skew-x-[11deg] select-none text-[10px]">

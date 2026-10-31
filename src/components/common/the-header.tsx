@@ -115,7 +115,7 @@ export function InsetHeader({ sticky = false }: InsetHeaderProps) {
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage
-                      className="flex max-w-64 items-center gap-1.5"
+                      className="flex max-w-64 min-w-0 items-center gap-1.5"
                       title={crumb.label}
                     >
                       {crumb.icon && (

@@ -13,6 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { TOUCH_DRAG_CLASS, preventTouchContextMenu } from "@/lib/dnd-mobile";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -84,7 +85,11 @@ export function PVPMatchFormationEditorItem({
       {...listeners}
       type="button"
       variant="ghost"
-      className="h-auto touch-none cursor-grab rounded-lg p-0 active:cursor-grabbing [&_img]:pointer-events-none [&_img]:select-none"
+      className={cn(
+        "h-auto touch-manipulation cursor-grab rounded-lg p-0 active:cursor-grabbing [&_img]:pointer-events-none [&_img]:select-none",
+        TOUCH_DRAG_CLASS,
+      )}
+      onContextMenu={preventTouchContextMenu}
       aria-label={
         item.student
           ? t("tools.pvp.formationEditorItem.editStudent", {
@@ -112,12 +117,12 @@ export function PVPMatchFormationEditorItem({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1",
+        "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1 max-md:@max-[420px]/formation:w-[80px] max-md:@max-[380px]/formation:w-[68px]",
         isDragging && "opacity-45",
       )}
     >
-      <div className="relative h-[73px] w-[78px]">
-        <div style={{ zoom: 0.82 }}>
+      <div className="relative h-[73px] w-[78px] max-md:@max-[420px]/formation:h-[66px] max-md:@max-[420px]/formation:w-[71px] max-md:@max-[380px]/formation:h-[56px] max-md:@max-[380px]/formation:w-[60px]">
+        <div className="[zoom:0.82] max-md:@max-[420px]/formation:[zoom:0.745] max-md:@max-[380px]/formation:[zoom:0.634]">
           {item.student ? (
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>{icon}</PopoverTrigger>

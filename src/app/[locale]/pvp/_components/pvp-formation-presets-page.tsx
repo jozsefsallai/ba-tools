@@ -111,14 +111,14 @@ export function PVPFormationPresetsPage({
           {visiblePresets?.map((preset) => (
             <article
               className={cn(
-                "flex flex-col gap-4 rounded-lg border p-4",
+                "flex flex-col gap-4 rounded-lg border p-4 max-md:min-w-0",
                 preset.usedByMe &&
                   "border-amber-400/60 shadow-[0_0_18px_rgba(251,191,36,0.18)]",
               )}
               key={preset._id}
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <h2 className="font-semibold">{preset.name}</h2>
                   <span className="text-xs uppercase text-muted-foreground">
                     {preset.matchType === "attack"

@@ -50,6 +50,7 @@ import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
 import { clearCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
+import { DndZoomContext } from "@/lib/dnd-mobile";
 import type { EchelonData } from "@/lib/echelon-parser";
 import {
   DEFAULT_FORMATIONATION_ROW_LABEL,
@@ -184,6 +185,7 @@ export function FormationEditor() {
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const previewZoomRef = useRef<HTMLDivElement>(null);
 
   const { preferences } = useUserPreferences();
 
@@ -783,7 +785,7 @@ export function FormationEditor() {
         </p>
       )}
 
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-2 max-md:flex-col max-md:items-stretch">
         <Label>{t("tools.formationDisplay.formationType")}</Label>
         <Select
           value={formationType ?? "auto"}
@@ -793,7 +795,7 @@ export function FormationEditor() {
             )
           }
         >
-          <SelectTrigger className="w-[280px]">
+          <SelectTrigger className="w-[280px] max-md:w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -821,26 +823,37 @@ export function FormationEditor() {
           {t("tools.formationDisplay.noStudentsInFormation")}
         </div>
       ) : (
-        <div className="flex w-full justify-center">
-          <FormationRowsStack
-            ref={containerRef}
-            rowGap={rowGap ?? 8}
-            items={rows.map((row, rowIndex) => ({
-              key: row.id,
-              label: row.label,
-              children: (
-                <FormationPreview
-                  strikers={row.strikers}
-                  specials={row.specials}
-                  displayOverline={displayOverline}
-                  noDisplayRole={!displayRoleIcon}
-                  groupsVertical={groupsVertical}
-                  formationType={effectiveType}
-                  editableConfig={editableConfigByRow[rowIndex]}
-                />
-              ),
-            }))}
-          />
+        <div className="flex w-full justify-center max-md:justify-center-safe max-md:overflow-x-auto">
+          <div
+            ref={previewZoomRef}
+            className={cn(
+              "max-md:shrink-0",
+              !generationInProgress && "max-md:[zoom:0.75]",
+            )}
+          >
+            <DndZoomContext value={previewZoomRef}>
+              <FormationRowsStack
+                ref={containerRef}
+                className="max-md:w-max max-md:max-w-none max-md:shrink-0"
+                rowGap={rowGap ?? 8}
+                items={rows.map((row, rowIndex) => ({
+                  key: row.id,
+                  label: row.label,
+                  children: (
+                    <FormationPreview
+                      strikers={row.strikers}
+                      specials={row.specials}
+                      displayOverline={displayOverline}
+                      noDisplayRole={!displayRoleIcon}
+                      groupsVertical={groupsVertical}
+                      formationType={effectiveType}
+                      editableConfig={editableConfigByRow[rowIndex]}
+                    />
+                  ),
+                }))}
+              />
+            </DndZoomContext>
+          </div>
         </div>
       )}
 
@@ -908,7 +921,7 @@ export function FormationEditor() {
                   </div>
                 </div>
 
-                <div className="flex gap-4 items-center justify-center">
+                <div className="flex gap-4 items-center justify-center max-md:flex-wrap max-md:gap-2">
                   <StudentPicker
                     onStudentSelected={addStudent}
                     className="w-[200px] md:w-[250px]"
@@ -1195,7 +1208,7 @@ export function FormationEditor() {
                           </span>
                         </div>
 
-                        <div className="flex gap-4 items-center shrink-0">
+                        <div className="flex gap-4 items-center shrink-0 max-md:flex-wrap max-md:justify-center max-md:shrink">
                           <div className="flex gap-2 items-center">
                             <Label
                               className="shrink-0"
@@ -1436,7 +1449,7 @@ export function FormationEditor() {
 
             <Authenticated>
               <TabsContent value="cloud">
-                <div className="flex gap-6 items-center justify-center">
+                <div className="flex gap-6 items-center justify-center max-md:flex-col max-md:gap-4">
                   <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
                     <Label className="shrink-0">
                       {t("tools.formationDisplay.formationName")}

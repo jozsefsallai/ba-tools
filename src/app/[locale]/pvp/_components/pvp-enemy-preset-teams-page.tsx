@@ -252,7 +252,7 @@ export function PVPEnemyPresetTeamsPage({
                 </div>
 
                 <div
-                  className="flex min-w-0 gap-4 overflow-x-auto px-3 py-1"
+                  className="flex min-w-0 gap-4 overflow-x-auto px-3 py-1 max-md:basis-full"
                   style={{ zoom: 0.65 }}
                 >
                   {knownTeam.team.map(

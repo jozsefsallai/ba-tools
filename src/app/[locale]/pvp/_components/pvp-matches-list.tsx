@@ -160,15 +160,16 @@ export function PVPMatchesList({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 max-md:grid max-md:grid-cols-2">
         <Button
           variant="outline"
           onClick={() => setEnd(subDays(selectedEnd, 7))}
+          className="max-md:order-1"
         >
           <ChevronLeftIcon /> Previous 7 days
         </Button>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 max-md:order-3 max-md:col-span-2 max-md:grid max-md:grid-cols-2">
           <Button variant="outline" onClick={() => setEnd(new Date())}>
             Today
           </Button>
@@ -200,6 +201,7 @@ export function PVPMatchesList({
         <Button
           variant="outline"
           onClick={() => setEnd(addDays(selectedEnd, 7))}
+          className="max-md:order-2"
         >
           Next 7 days <ChevronRightIcon />
         </Button>

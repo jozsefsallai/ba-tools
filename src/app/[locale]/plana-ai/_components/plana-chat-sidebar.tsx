@@ -1,7 +1,7 @@
 "use client";
 
-import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
 import { ChatSidebarSkeleton } from "@/app/[locale]/plana-ai/_components/chat-messages-skeleton";
+import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +21,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "convex/react";
-import { LoaderCircleIcon, MoreHorizontalIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import {
+  LoaderCircleIcon,
+  MoreHorizontalIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "~convex/api";
@@ -286,7 +294,7 @@ function PlanaChatSidebarItem({
           <DropdownMenuTrigger asChild>
             <Button
               aria-label={t("tools.plana.sidebar.chatActions")}
-              className="absolute top-1/2 right-1 size-7 -translate-y-1/2 opacity-0 transition-opacity group-hover/item:opacity-100 data-[state=open]:opacity-100"
+              className="absolute top-1/2 right-1 size-7 -translate-y-1/2 opacity-0 transition-opacity group-hover/item:opacity-100 data-[state=open]:opacity-100 [@media(hover:none)]:opacity-100"
               onClick={(event) => event.stopPropagation()}
               onPointerDown={(event) => event.stopPropagation()}
               size="icon-sm"

@@ -17,13 +17,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TOUCH_DRAG_CLASS, preventTouchContextMenu } from "@/lib/dnd-mobile";
 import { buildStudentIconUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 import {
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   type Modifier,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -125,10 +128,14 @@ const SortableRosterRow = memo(function SortableRosterRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex cursor-grab touch-none items-center gap-2 rounded-md border bg-background px-2 py-1.5 active:cursor-grabbing"
+      className={cn(
+        "flex cursor-grab touch-manipulation items-center gap-2 rounded-md border bg-background px-2 py-1.5 active:cursor-grabbing",
+        TOUCH_DRAG_CLASS,
+      )}
       aria-label={t("tools.roster.editor.reorderStudent")}
       {...attributes}
       {...listeners}
+      onContextMenu={preventTouchContextMenu}
     >
       <GripVerticalIcon className="size-4 shrink-0 text-muted-foreground" />
 
@@ -161,10 +168,9 @@ export function ReorderRosterDialog({
   }, [open, rosterItems]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,

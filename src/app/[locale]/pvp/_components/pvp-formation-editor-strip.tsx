@@ -6,7 +6,8 @@ import {
   DndContext,
   KeyboardCode,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -218,7 +219,10 @@ export function PVPFormationEditorStrip({
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    }),
 
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,

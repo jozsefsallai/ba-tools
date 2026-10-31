@@ -308,7 +308,7 @@ export function ScenarioEditorView() {
 
           <CardContent>
             <Tabs defaultValue="content" className="gap-4">
-              <TabsList className="place-self-center">
+              <TabsList className="place-self-center max-md:max-w-full max-md:justify-start max-md:overflow-x-auto">
                 <TabsTrigger value="content">
                   {t("tools.scenarioImageGenerator.tabs.content")}
                 </TabsTrigger>
@@ -345,7 +345,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.content.characterNamePlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="affiliation">
@@ -360,7 +360,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.content.affiliationPlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="content">
@@ -375,7 +375,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.content.dialoguePlaceholder",
                     )}
-                    className="h-24 col-span-2"
+                    className="h-24 md:col-span-2"
                   />
                 </div>
               </TabsContent>
@@ -393,7 +393,7 @@ export function ScenarioEditorView() {
                       "tools.scenarioImageGenerator.background.backgroundImage",
                     )}
                   </Label>
-                  <div className="flex gap-2 col-span-2">
+                  <div className="flex gap-2 md:col-span-2">
                     {backgroundMode === "image" && (
                       <Button
                         variant="outline"
@@ -468,7 +468,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.background.backgroundScalePlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="backgroundXOffset">
@@ -484,7 +484,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.background.backgroundXOffsetPlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="backgroundYOffset">
@@ -500,7 +500,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.background.backgroundYOffsetPlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
                 </div>
               </TabsContent>
@@ -510,7 +510,7 @@ export function ScenarioEditorView() {
                   <Label>
                     {t("tools.scenarioImageGenerator.fontSettings.font")}
                   </Label>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <Select
                       value={font.family}
                       onValueChange={(value) =>
@@ -550,7 +550,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.fontSettings.fontSizePlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
                 </div>
               </TabsContent>
@@ -566,7 +566,7 @@ export function ScenarioEditorView() {
                     onCheckedChange={(checked) =>
                       scenarioStore.set({ displayButtons: checked })
                     }
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="autoEnabled">
@@ -578,7 +578,7 @@ export function ScenarioEditorView() {
                     onCheckedChange={(checked) =>
                       scenarioStore.set({ autoEnabled: checked })
                     }
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="displayLine">
@@ -592,7 +592,7 @@ export function ScenarioEditorView() {
                     onCheckedChange={(checked) =>
                       scenarioStore.set({ displayLine: checked })
                     }
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="displayGradient">
@@ -604,7 +604,7 @@ export function ScenarioEditorView() {
                     onCheckedChange={(checked) =>
                       scenarioStore.set({ displayGradient: checked })
                     }
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="displayTriangle">
@@ -616,7 +616,7 @@ export function ScenarioEditorView() {
                     onCheckedChange={(checked) =>
                       scenarioStore.set({ displayTriangle: checked })
                     }
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
                 </div>
               </TabsContent>
@@ -642,7 +642,7 @@ export function ScenarioEditorView() {
                     placeholder={t(
                       "tools.scenarioImageGenerator.behaviorSettings.scrollSpeedPlaceholder",
                     )}
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
 
                   <Label htmlFor="transparentBackground">
@@ -656,7 +656,7 @@ export function ScenarioEditorView() {
                     onCheckedChange={(checked) =>
                       scenarioStore.set({ transparentBackground: checked })
                     }
-                    className="col-span-2"
+                    className="md:col-span-2"
                   />
                 </div>
               </TabsContent>
@@ -823,7 +823,7 @@ export function ScenarioEditorView() {
 
       {recordingMode && !animate && (
         <div className="fixed top-0 left-0 right-0 bottom-0 bg-amber-800/60 text-white z-50 flex items-center justify-center">
-          <div className="flex flex-col items-center justify-center text-center gap-4 w-lg">
+          <div className="flex flex-col items-center justify-center text-center gap-4 w-lg max-w-[calc(100%-2rem)]">
             <h2 className="text-3xl font-semibold">
               {t("tools.scenarioImageGenerator.recording.title")}
             </h2>
@@ -848,6 +848,14 @@ export function ScenarioEditorView() {
                   {t("tools.scenarioImageGenerator.recording.startScript")}
                 </Button>
               )}
+
+              <Button
+                variant="outline"
+                onClick={() => scenarioStore.set({ recordingMode: false })}
+                className="text-foreground [@media(hover:hover)]:hidden"
+              >
+                {t("common.cancel")}
+              </Button>
             </div>
           </div>
         </div>

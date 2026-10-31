@@ -5,6 +5,11 @@ import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
 import { Popover, PopoverAnchor } from "@/components/ui/popover";
 import {
+  TOUCH_DRAG_CLASS,
+  preventTouchContextMenu,
+  useZoomCorrectedTransform,
+} from "@/lib/dnd-mobile";
+import {
   type FormationType,
   resolveStarterOrders,
   starterThresholdFor,
@@ -16,7 +21,8 @@ import {
   type DragEndEvent,
   type DragStartEvent,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -101,13 +107,14 @@ function SortablePreviewItem({
     attributes,
     listeners,
     setNodeRef,
-    transform,
+    transform: rawTransform,
     transition,
     isDragging,
   } = useSortable({
     id,
     animateLayoutChanges: () => false,
   });
+  const transform = useZoomCorrectedTransform(rawTransform);
 
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
@@ -122,9 +129,10 @@ function SortablePreviewItem({
           ref={setNodeRef}
           data-formation-preview-anchor=""
           style={style}
-          className="shrink-0 cursor-pointer"
+          className={cn("shrink-0 cursor-pointer", TOUCH_DRAG_CLASS)}
           {...attributes}
           {...listeners}
+          onContextMenu={preventTouchContextMenu}
           onClick={(e) => {
             e.stopPropagation();
             onSelect();
@@ -164,8 +172,9 @@ function SortableGroup({
   const [, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,

@@ -641,7 +641,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     <div className="flex flex-col gap-10">
       {!review && (
         <div className="flex flex-col gap-4">
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-4 items-center max-md:flex-wrap">
             <Button variant="outline" size="sm" asChild>
               <Link href={`/pvp/${seasonId}`}>
                 <ChevronLeftIcon />
@@ -657,7 +657,12 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
             {!current && (
               <PvpCombatReportImportDialog onImported={handleReportImported}>
                 {(open) => (
-                  <Button type="button" variant="outline" onClick={open}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={open}
+                    className="max-md:w-full"
+                  >
                     {t("tools.pvp.reportImport.title")}
                   </Button>
                 )}
@@ -976,7 +981,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
         </Card>
 
         <Card>
-          <CardHeader className="flex min-h-14 flex-row items-center justify-between">
+          <CardHeader className="flex min-h-14 flex-row items-center justify-between max-md:flex-col max-md:items-stretch">
             <CardTitle>{t("tools.pvp.match.opponent")}</CardTitle>
 
             <PVPPresetPicker
@@ -986,7 +991,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
                 (review ? matchingEnemyPreset?.name : undefined) ??
                 t("tools.pvp.presetPicker.attachEnemy")
               }
-              className="w-1/2 min-w-44"
+              className="w-1/2 min-w-44 max-md:w-full"
               studentMap={studentMap}
               search={enemyPresetSearch}
               onSearchChange={setEnemyPresetSearch}
@@ -1248,7 +1253,7 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
       )}
 
       {review && (
-        <div className="sticky -bottom-6 -mx-6 -mb-6 flex flex-wrap justify-end gap-2 border-t bg-background px-6 py-4">
+        <div className="sticky -bottom-6 -mx-6 -mb-6 flex flex-wrap justify-end gap-2 border-t bg-background px-6 py-4 max-sm:-bottom-3 max-sm:-mx-3 max-sm:-mb-3 max-sm:px-3">
           <Button variant="outline" disabled={isSaving} onClick={review.onStop}>
             {t("tools.pvp.screenshotImport.stop")}
           </Button>

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TOUCH_DRAG_CLASS, preventTouchContextMenu } from "@/lib/dnd-mobile";
 import { PVP_COUNTER_RANGES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
@@ -129,7 +130,11 @@ function PVPDefenseTeamStripItem({
       ref={setActivatorNodeRef}
       type="button"
       variant="ghost"
-      className="h-auto touch-none cursor-grab rounded-lg p-0 active:cursor-grabbing [&_img]:pointer-events-none [&_img]:select-none"
+      className={cn(
+        "h-auto touch-manipulation cursor-grab rounded-lg p-0 active:cursor-grabbing [&_img]:pointer-events-none [&_img]:select-none",
+        TOUCH_DRAG_CLASS,
+      )}
+      onContextMenu={preventTouchContextMenu}
       {...attributes}
       {...listeners}
       aria-label={t("tools.pvp.stats.selectDefenseSlot", { slot })}
@@ -153,7 +158,7 @@ function PVPDefenseTeamStripItem({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1",
+        "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1 max-md:@max-[420px]/formation:w-[80px] max-md:@max-[380px]/formation:w-[68px]",
         isDragging && "opacity-45",
       )}
     >
@@ -215,8 +220,8 @@ function PVPDefenseTeamStripItem({
         <div className="hidden h-8 @min-[600px]/formation:block" />
       )}
 
-      <div className="relative h-[73px] w-[78px]">
-        <div style={{ zoom: 0.82 }}>
+      <div className="relative h-[73px] w-[78px] max-md:@max-[420px]/formation:h-[66px] max-md:@max-[420px]/formation:w-[71px] max-md:@max-[380px]/formation:h-[56px] max-md:@max-[380px]/formation:w-[60px]">
+        <div className="[zoom:0.82] max-md:@max-[420px]/formation:[zoom:0.745] max-md:@max-[380px]/formation:[zoom:0.634]">
           {criterion ? (
             card
           ) : (

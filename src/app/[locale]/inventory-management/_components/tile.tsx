@@ -34,7 +34,7 @@ export function Tile({
       onMouseLeave={onUnhover}
       variant={resolvedTheme === "dark" ? "secondary" : "default"}
       className={cn(
-        "size-8 text-[10px] md:size-16 md:text-base flex items-center justify-center hover:opacity-90",
+        "size-8 text-[10px] md:size-16 md:text-base flex items-center justify-center hover:opacity-90 max-md:size-[min(calc((100vw_-_20px)/9),4rem)] max-md:rounded-[3px] max-md:p-0 max-md:tabular-nums",
         {
           "ring-2": highlight,
           "ring-black": resolvedTheme === "light" && highlight,
