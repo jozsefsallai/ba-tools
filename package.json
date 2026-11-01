@@ -73,7 +73,7 @@
     "@trigger.dev/sdk": "^4.6.3",
     "@upstash/ratelimit": "2.2.0",
     "@upstash/redis": "1.39.0",
-    "@yaakdoc/next": "0.5.2",
+    "@yaakdoc/next": "0.6.0",
     "ai": "^6.0.286",
     "axios": "^1.20.0",
     "bufferutil": "^4.1.0",
@@ -148,8 +148,7 @@
     "npm-run-all": "^4.1.5",
     "tailwindcss": "^4.3.3",
     "tsx": "4.21.0",
-    "typescript": "^5.9.3",
-    "yaakdoc": "^0.5.2"
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677"
 }
