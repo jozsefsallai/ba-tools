@@ -1,0 +1,55 @@
+{
+  "$schema": "../../node_modules/yaakdoc/config.schema.json",
+  "pages": "per-request",
+  "pagesDir": "./pages",
+  "environment": "Production",
+  "environments": "public",
+  "branding": {
+    "title": "Joe's Blue Archive Tools API",
+    "description": "Programmatic access to Blue Archive game data and your user data on Joe's Blue Archive Tools.",
+    "url": "https://ba.joexyz.online/developers",
+    "favicon": "../../public/icons/icon-192.png",
+    "colors": {
+      "primary": "#6e318c"
+    },
+    "links": [
+      {
+        "label": "Back to website",
+        "href": "https://ba.joexyz.online"
+      }
+    ]
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "icon": "book-open",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["index"]
+          },
+          {
+            "group": "Guides",
+            "pages": ["authentication", "errors"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "icon": "square-terminal",
+        "api": true
+      },
+      {
+        "tab": "Changelog",
+        "icon": "history",
+        "pages": ["changelog"]
+      }
+    ]
+  },
+  "llms": {
+    "enabled": true,
+    "full": true
+  },
+  "runInYaak": true
+}

@@ -3,75 +3,98 @@ import {
   customMutation,
   customQuery,
 } from "convex-helpers/server/customFunctions";
+import { v } from "convex/values";
+import type { QueryCtx } from "../_generated/server";
 import { mutation, query } from "../_generated/server";
+import { forbidden, notFound, unauthorized } from "./errors";
 
-export const authenticatedQuery = customQuery(
-  query,
-  customCtx(async (ctx) => {
+// Optional credentials used by the public HTTP API (`/api/v1`).
+const apiCredentialArgs = {
+  apiSecret: v.optional(v.string()),
+  apiUserExternalId: v.optional(v.string()),
+};
+
+function timingSafeEqual(a: string, b: string) {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let diff = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return diff === 0;
+}
+
+async function resolveExternalId(
+  ctx: QueryCtx,
+  credentials: { apiSecret?: string; apiUserExternalId?: string },
+) {
+  if (credentials.apiSecret === undefined) {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new Error("This query requires authentication.");
+      throw unauthorized("This operation requires authentication.");
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_externalId", (q) => q.eq("externalId", identity.subject))
-      .unique();
+    return identity.subject;
+  }
 
-    if (!user) {
-      throw new Error("User not found.");
-    }
+  const expected = process.env.PUBLIC_API_SECRET;
 
-    return {
-      ...ctx,
-      user,
-    };
-  }),
-);
+  if (
+    !expected ||
+    !credentials.apiUserExternalId ||
+    !timingSafeEqual(credentials.apiSecret, expected)
+  ) {
+    throw unauthorized("Invalid API credentials.");
+  }
 
-export const authenticatedMutation = customMutation(
-  mutation,
-  customCtx(async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("This operation requires authentication.");
-    }
+  return credentials.apiUserExternalId;
+}
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_externalId", (q) => q.eq("externalId", identity.subject))
-      .unique();
+async function getAuthenticatedUser(
+  ctx: QueryCtx,
+  credentials: { apiSecret?: string; apiUserExternalId?: string },
+) {
+  const externalId = await resolveExternalId(ctx, credentials);
 
-    if (!user) {
-      throw new Error("User not found.");
-    }
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_externalId", (q) => q.eq("externalId", externalId))
+    .unique();
 
-    return {
-      ...ctx,
-      user,
-    };
-  }),
-);
+  if (!user) {
+    throw notFound("User not found.");
+  }
+
+  return user;
+}
+
+export const authenticatedQuery = customQuery(query, {
+  args: apiCredentialArgs,
+  input: async (ctx, credentials) => {
+    const user = await getAuthenticatedUser(ctx, credentials);
+    return { ctx: { ...ctx, user }, args: {} };
+  },
+});
+
+export const authenticatedMutation = customMutation(mutation, {
+  args: apiCredentialArgs,
+  input: async (ctx, credentials) => {
+    const user = await getAuthenticatedUser(ctx, credentials);
+    return { ctx: { ...ctx, user }, args: {} };
+  },
+});
 
 export const staffMutation = customMutation(
   mutation,
   customCtx(async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("This operation requires authentication.");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_externalId", (q) => q.eq("externalId", identity.subject))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found.");
-    }
+    const user = await getAuthenticatedUser(ctx, {});
 
     if (user.isSuperUser !== true) {
-      throw new Error("This operation requires staff access.");
+      throw forbidden("This operation requires staff access.");
     }
 
     return {

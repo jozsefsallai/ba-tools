@@ -1,6 +1,7 @@
 import type { UserJSON } from "@clerk/nextjs/server";
 import { type Validator, v } from "convex/values";
 import { type QueryCtx, internalMutation } from "./_generated/server";
+import { authenticatedQuery } from "./lib/auth";
 
 type ClerkMetadata = {
   isSuperUser?: unknown;
@@ -56,5 +57,13 @@ export const deleteFromClerk = internalMutation({
     if (user) {
       await ctx.db.delete(user._id);
     }
+  },
+});
+
+export const getMe = authenticatedQuery({
+  args: {},
+  handler: async (ctx) => {
+    const { _id, _creationTime, externalId, username, name, avatar } = ctx.user;
+    return { _id, _creationTime, externalId, username, name, avatar };
   },
 });

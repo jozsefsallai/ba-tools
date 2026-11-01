@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { conflict, notFound } from "./lib/errors";
 
 const targetGiftValidator = v.object({
   id: v.number(),
@@ -22,6 +23,7 @@ function normalizeGiftBoxCount(giftBoxCount: number) {
 }
 
 export const getOwn = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db
       .query("giftInventory")
@@ -38,7 +40,7 @@ export const getOwnById = authenticatedQuery({
     const giftInventory = await ctx.db.get(id);
 
     if (!giftInventory || giftInventory.userId !== ctx.user._id) {
-      throw new Error("Gift Inventory not found");
+      throw notFound("Gift Inventory not found");
     }
 
     const giftTargets = await ctx.db
@@ -94,7 +96,7 @@ export const createTarget = authenticatedMutation({
     const giftInventory = await ctx.db.get(giftInventoryId);
 
     if (!giftInventory || giftInventory.userId !== ctx.user._id) {
-      throw new Error("Gift Inventory not found");
+      throw notFound("Gift Inventory not found");
     }
 
     const existing = await ctx.db
@@ -103,7 +105,7 @@ export const createTarget = authenticatedMutation({
       .first();
 
     if (existing && existing.giftInventoryId === giftInventoryId) {
-      throw new Error("Gift Target for this student already exists");
+      throw conflict("Gift Target for this student already exists");
     }
 
     const boxCount = giftBoxCount ?? 0;
@@ -140,7 +142,7 @@ export const updateInventory = authenticatedMutation({
     const giftInventory = await ctx.db.get(id);
 
     if (!giftInventory || giftInventory.userId !== ctx.user._id) {
-      throw new Error("Gift Inventory not found");
+      throw notFound("Gift Inventory not found");
     }
 
     await ctx.db.patch(id, {
@@ -167,7 +169,7 @@ export const updateTarget = authenticatedMutation({
     const giftTarget = await ctx.db.get(id);
 
     if (!giftTarget || giftTarget.userId !== ctx.user._id) {
-      throw new Error("Gift Target not found");
+      throw notFound("Gift Target not found");
     }
 
     const patch: Record<string, unknown> = {
@@ -193,7 +195,7 @@ export const destroyInventory = authenticatedMutation({
     const giftInventory = await ctx.db.get(id);
 
     if (!giftInventory || giftInventory.userId !== ctx.user._id) {
-      throw new Error("Gift Inventory not found");
+      throw notFound("Gift Inventory not found");
     }
 
     const giftTargets = await ctx.db
@@ -217,7 +219,7 @@ export const destroyTarget = authenticatedMutation({
     const giftTarget = await ctx.db.get(id);
 
     if (!giftTarget || giftTarget.userId !== ctx.user._id) {
-      throw new Error("Gift Target not found");
+      throw notFound("Gift Target not found");
     }
 
     await ctx.db.delete(id);

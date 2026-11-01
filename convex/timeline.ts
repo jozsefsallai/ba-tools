@@ -2,6 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { notFound } from "./lib/errors";
 import {
   timelineSeparatorItem,
   timelineStudentItem,
@@ -9,6 +10,7 @@ import {
 } from "./schema";
 
 export const getOwn = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db
       .query("timeline")
@@ -113,7 +115,7 @@ export const update = authenticatedMutation({
 
     const current = await ctx.db.get(args.id);
     if (!current || current.userId !== ctx.user._id) {
-      throw new Error("Timeline not found.");
+      throw notFound("Timeline not found.");
     }
 
     await ctx.db.patch(current._id, timeline);
@@ -126,7 +128,7 @@ export const destroy = authenticatedMutation({
   handler: async (ctx, { id }) => {
     const current = await ctx.db.get(id);
     if (!current || current.userId !== ctx.user._id) {
-      throw new Error("Timeline not found.");
+      throw notFound("Timeline not found.");
     }
 
     await ctx.db.delete(id);
@@ -139,7 +141,7 @@ export const getOwnById = authenticatedQuery({
   handler: async (ctx, { id }) => {
     const timeline = await ctx.db.get(id);
     if (!timeline || timeline.userId !== ctx.user._id) {
-      throw new Error("Timeline not found");
+      throw notFound("Timeline not found");
     }
 
     return timeline;
@@ -151,7 +153,7 @@ export const getById = query({
   handler: async (ctx, { id }) => {
     const timeline = await ctx.db.get(id);
     if (!timeline) {
-      throw new Error("Timeline not found");
+      throw notFound("Timeline not found");
     }
 
     const owner = await ctx.db.get(timeline.userId);
@@ -178,7 +180,7 @@ export const getById = query({
     }
 
     if (!owner || !identity || owner.externalId !== identity?.subject) {
-      throw new Error("Timeline not found");
+      throw notFound("Timeline not found");
     }
 
     if (timeline.showCreator) {

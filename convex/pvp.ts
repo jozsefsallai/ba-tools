@@ -16,6 +16,7 @@ import {
   authenticatedQuery,
   staffMutation,
 } from "./lib/auth";
+import { invalid, notFound } from "./lib/errors";
 import { getTeamKey } from "./lib/teamKey";
 import {
   queueMatchRemoval,
@@ -106,7 +107,7 @@ async function validateEnemyPresetForMatch(
     preset.userId !== ctx.user._id ||
     preset.seasonId !== seasonId
   ) {
-    throw new Error("Opponent preset not found");
+    throw notFound("Opponent preset not found");
   }
 }
 
@@ -286,7 +287,7 @@ async function getSeasonForUser(ctx: any, seasonId: any) {
   const season = await ctx.db.get(seasonId);
 
   if (!season || season.userId !== ctx.user._id) {
-    throw new Error("Season not found");
+    throw notFound("Season not found");
   }
 
   return season;
@@ -300,6 +301,7 @@ function getSeasonSortOrder(season: {
 }
 
 export const getOwnSeasons = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     const seasons = await ctx.db
       .query("pvpSeason")
@@ -367,7 +369,7 @@ export const reorderSeasons = authenticatedMutation({
       requestedSeasons.size !== activeSeasons.length ||
       !activeSeasons.every((season) => requestedSeasons.has(season._id))
     ) {
-      throw new Error("Season order must include every active season once.");
+      throw invalid("Season order must include every active season once.");
     }
 
     for (const [sortOrder, seasonId] of seasonIds.entries()) {
@@ -430,7 +432,7 @@ export const updateSeason = authenticatedMutation({
 
     const trimmedName = name.trim();
     if (!trimmedName) {
-      throw new Error("Season name cannot be empty.");
+      throw invalid("Season name cannot be empty.");
     }
 
     await ctx.db.patch(seasonId, {
@@ -450,7 +452,7 @@ export const getMatchesForSeason = authenticatedQuery({
   handler: async (ctx, { seasonId }) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
-      throw new Error("Season not found");
+      throw notFound("Season not found");
     }
 
     const matches = await ctx.db
@@ -688,7 +690,7 @@ export const getEnemyPreset = authenticatedQuery({
       preset.userId !== ctx.user._id ||
       preset.seasonId !== seasonId
     ) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     return {
@@ -765,7 +767,7 @@ export const getMatchById = authenticatedQuery({
       match.userId !== ctx.user._id ||
       match.seasonId !== seasonId
     ) {
-      throw new Error("Match not found");
+      throw notFound("Match not found");
     }
 
     return match;
@@ -810,7 +812,7 @@ export const recordMatch = authenticatedMutation({
   ) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
-      throw new Error("Season not found");
+      throw notFound("Season not found");
     }
 
     validatePvpTeam(ownTeam, "Your team");
@@ -885,12 +887,12 @@ export const bulkImportMatches = staffMutation({
   },
   handler: async (ctx, { seasonId, matches }) => {
     if (matches.length > 100) {
-      throw new Error("Bulk imports are limited to 100 matches per batch.");
+      throw invalid("Bulk imports are limited to 100 matches per batch.");
     }
 
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
-      throw new Error("Season not found.");
+      throw notFound("Season not found.");
     }
 
     const date = Date.now();
@@ -927,7 +929,7 @@ export const clearSeasonMatches = staffMutation({
   handler: async (ctx, { seasonId, cursor }) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
-      throw new Error("Season not found.");
+      throw notFound("Season not found.");
     }
 
     const page = await ctx.db
@@ -989,7 +991,7 @@ export const updateMatch = authenticatedMutation({
   ) => {
     const match = await ctx.db.get(matchId);
     if (!match || match.userId !== ctx.user._id) {
-      throw new Error("Match not found");
+      throw notFound("Match not found");
     }
 
     const nextOwnTeam = ownTeam ?? match.ownTeam;
@@ -1056,7 +1058,7 @@ export const deleteMatch = authenticatedMutation({
   handler: async (ctx, { matchId }) => {
     const match = await ctx.db.get(matchId);
     if (!match || match.userId !== ctx.user._id) {
-      throw new Error("Match not found");
+      throw notFound("Match not found");
     }
 
     const presetId = match.enemyPresetId;
@@ -1074,7 +1076,7 @@ export const deleteSeason = authenticatedMutation({
   handler: async (ctx, { seasonId }) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
-      throw new Error("Season not found");
+      throw notFound("Season not found");
     }
 
     // Delete all matches associated with this season
@@ -1168,7 +1170,7 @@ export const updateFormationPreset = authenticatedMutation({
     const preset = await ctx.db.get(presetId);
 
     if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     await ctx.db.patch(presetId, {
@@ -1187,7 +1189,7 @@ export const deleteFormationPreset = authenticatedMutation({
     const preset = await ctx.db.get(presetId);
 
     if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     await ctx.db.delete(presetId);
@@ -1225,7 +1227,7 @@ export const updateEnemyPreset = authenticatedMutation({
     const preset = await ctx.db.get(presetId);
 
     if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     await ctx.db.patch(presetId, {
@@ -1296,12 +1298,12 @@ export const mergeEnemyPresets = authenticatedMutation({
   },
   handler: async (ctx, { sourcePresetId, targetPresetId }) => {
     if (sourcePresetId === targetPresetId) {
-      throw new Error("Choose a different opponent preset");
+      throw invalid("Choose a different opponent preset");
     }
 
     const source = await ctx.db.get(sourcePresetId);
     if (!source || source.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     await getSeasonForUser(ctx, source.seasonId);
@@ -1336,7 +1338,7 @@ export const anonymizeEnemyPreset = authenticatedMutation({
   handler: async (ctx, { presetId }) => {
     const preset = await ctx.db.get(presetId);
     if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     await getSeasonForUser(ctx, preset.seasonId);
@@ -1362,7 +1364,7 @@ export const deleteEnemyPreset = authenticatedMutation({
     const preset = await ctx.db.get(presetId);
 
     if (!preset || preset.userId !== ctx.user._id) {
-      throw new Error("Preset not found");
+      throw notFound("Preset not found");
     }
 
     const matches = await ctx.db
@@ -1389,6 +1391,19 @@ export const deleteEnemyPreset = authenticatedMutation({
   },
 });
 
+export const getEnemyTeam = authenticatedQuery({
+  args: { seasonId: v.id("pvpSeason"), teamId: v.id("pvpEnemyTeam") },
+  handler: async (ctx, { seasonId, teamId }) => {
+    const team = await ctx.db.get(teamId);
+
+    if (!team || team.userId !== ctx.user._id || team.seasonId !== seasonId) {
+      throw notFound("Team not found");
+    }
+
+    return team;
+  },
+});
+
 export const createEnemyTeam = authenticatedMutation({
   args: {
     seasonId: v.id("pvpSeason"),
@@ -1405,7 +1420,7 @@ export const createEnemyTeam = authenticatedMutation({
     await validateEnemyPresetForMatch(ctx, args.enemyPresetId, args.seasonId);
 
     if (!args.team.some((item) => item.studentId)) {
-      throw new Error("Team must contain at least one student");
+      throw invalid("Team must contain at least one student");
     }
 
     const team = withoutDamage(args.team);
@@ -1457,11 +1472,11 @@ export const updateEnemyTeam = authenticatedMutation({
     const current = await ctx.db.get(args.teamId);
 
     if (!current || current.userId !== ctx.user._id) {
-      throw new Error("Team not found");
+      throw notFound("Team not found");
     }
 
     if (args.team && !args.team.some((item) => item.studentId)) {
-      throw new Error("Team must contain at least one student");
+      throw invalid("Team must contain at least one student");
     }
 
     const team = args.team ? withoutDamage(args.team) : current.team;
@@ -1509,7 +1524,7 @@ export const deleteEnemyTeam = authenticatedMutation({
     const team = await ctx.db.get(teamId);
 
     if (!team || team.userId !== ctx.user._id) {
-      throw new Error("Team not found");
+      throw notFound("Team not found");
     }
 
     await ctx.db.delete(teamId);

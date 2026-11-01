@@ -93,7 +93,7 @@ type NavigationGroup = {
 function RecentTimelines() {
   const t = useTranslations();
   const closeMobileSidebar = useCloseMobileSidebar();
-  const timelines = useQuery(api.timeline.getOwn);
+  const timelines = useQuery(api.timeline.getOwn, {});
   const recent = timelines?.slice(0, 5);
 
   if (!recent || recent.length === 0) return null;
@@ -137,7 +137,7 @@ function RecentTimelines() {
 function RecentFormations() {
   const t = useTranslations();
   const closeMobileSidebar = useCloseMobileSidebar();
-  const formations = useQuery(api.formation.getOwn);
+  const formations = useQuery(api.formation.getOwn, {});
   const recent = formations?.slice(0, 5);
 
   if (!recent || recent.length === 0) return null;

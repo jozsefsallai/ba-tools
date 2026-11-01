@@ -49,6 +49,7 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 - `IMAGE_CDN_URL` — **required at startup/build**; Next.js config throws if missing. Use `https://aronabot.cdn.nimblebun.works` locally.
 - `DATABASE_URL` — Neon connection string (used by both Next.js and Prisma config)
 - `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CLERK_JWT_ISSUER_DOMAIN`
+- `PUBLIC_API_SECRET` — must match the same variable on the Convex deployment; the public API (`/api/v1/me/*`) uses it to act for API key owners.
 - `NEXT_PUBLIC_PLANA_AI_ENABLED`, `OPENAI_API_KEY`, `CHROMA_API_KEY`, `CHROMA_TENANT_ID`, `CHROMA_DATABASE_NAME` — Plana AI feature. Chat provider keys are supplied through Plana's BYOK settings UI.
 
 ## Key Quirks
@@ -65,6 +66,16 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 - Output: `public/wasm/main.wasm` + `public/wasm/wasm_exec.js` (TinyGo shim). Binary is committed.
 - Rebuild only when changing Go code: `sh build-native-modules.sh` (dev) or `sh build-native-modules.sh --prod`.
 - Loaded in a Web Worker (`src/workers/native-modules.ts`) to avoid blocking the main thread.
+
+## Public API (v1)
+
+Route handlers in `src/app/api/v1/` (`/api/students` is the legacy endpoint; keep it unchanged). Shared helpers are in `src/lib/public-api/`; Prisma reads shared with the MCP tools are in `src/lib/data/`.
+
+- **Public** routes (game data, public timelines/rosters, PvP stats) use `publicRoute`.
+- **User** routes under `/api/v1/me` use `userRoute`, which accepts only Clerk API keys (`auth({ acceptsToken: "api_key" })`), never session cookies. Users manage keys in Clerk's UserProfile (API keys tab, enabled in the Clerk dashboard).
+- **Convex bridge:** `authenticatedQuery`/`authenticatedMutation` (`convex/lib/auth.ts`) also accept optional `apiSecret` + `apiUserExternalId` args. `userQuery`/`userMutation` in `src/lib/public-api/convex.server.ts` fill them in, so every user function is callable from the API. Functions built with them must declare `args` (use `args: {}`), and callers without args pass `{}`.
+- **Errors:** throw `notFound`/`invalid`/`conflict`/`forbidden` from `convex/lib/errors.ts` (typed `ConvexError`s) in Convex functions, so the API can map them to HTTP statuses; plain `Error` messages are hidden in production and become `500`.
+- **Docs:** `docs/api/yaak.json` (a Yaak export; import it into Yaak, edit, re-export) plus Markdown pages in `docs/api/pages/`, served by `@yaakdoc/next` at `/developers` (built into the gitignored `public/developers`). Update the export whenever endpoints change.
 
 ## MCP Server
 

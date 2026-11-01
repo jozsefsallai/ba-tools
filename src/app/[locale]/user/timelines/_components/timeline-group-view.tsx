@@ -50,7 +50,7 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
     id: groupId,
   });
 
-  const allTimelinesQuery = useQueryWithStatus(api.timeline.getOwn);
+  const allTimelinesQuery = useQueryWithStatus(api.timeline.getOwn, {});
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");

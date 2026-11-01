@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 
 export const get = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     const existing = await ctx.db
       .query("userPreferences")

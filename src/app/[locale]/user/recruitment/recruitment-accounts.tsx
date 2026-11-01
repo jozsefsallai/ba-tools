@@ -52,7 +52,7 @@ function ChargeBar({
 export function RecruitmentAccounts() {
   const locale = useLocale();
   const t = useTranslations();
-  const accounts = useQuery(api.recruitment.getOwnAccounts);
+  const accounts = useQuery(api.recruitment.getOwnAccounts, {});
   const createAccount = useMutation(api.recruitment.createAccount);
   const [name, setName] = useState("");
   const [gameServer, setGameServer] = useState<GameServer>("JP");

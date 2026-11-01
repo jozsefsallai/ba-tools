@@ -140,7 +140,7 @@ export function PVPSeasonsView({
   onShowArchivedChange: (showArchived: boolean) => void;
 }) {
   const t = useTranslations();
-  const query = useQueryWithStatus(api.pvp.getOwnSeasons);
+  const query = useQueryWithStatus(api.pvp.getOwnSeasons, {});
   const reorderSeasons = useMutation(
     api.pvp.reorderSeasons,
   ).withOptimisticUpdate((store, { seasonIds }) => {

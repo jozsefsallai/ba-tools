@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { PVP_ICON_CATALOG_FORMAT } from "@/lib/pvp/icon-catalog-format";
 import createMDX from "@next/mdx";
 import withSerwistInit from "@serwist/next";
+import { createNextYaakdoc } from "@yaakdoc/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {
@@ -18,6 +19,12 @@ const withSerwist = withSerwistInit({
 });
 
 const withNextIntl = createNextIntlPlugin();
+
+const withYaakdoc = createNextYaakdoc({
+  path: "/developers",
+  export: "./docs/api/yaak.json",
+  configFile: "./docs/api/yaakdoc.config.json",
+});
 
 const IMAGE_CDN_URL = process.env.NEXT_PUBLIC_IMAGE_CDN_URL;
 
@@ -131,13 +138,31 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/api/v1/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,POST,PATCH,DELETE,OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Authorization, Content-Type",
+          },
+          { key: "Access-Control-Max-Age", value: "86400" },
+        ],
+      },
     ];
   },
 };
 
 const withMDX = createMDX({});
 
-export default function configuration(phase: string) {
+export default async function configuration(
+  phase: string,
+  { defaultConfig }: { defaultConfig: NextConfig },
+) {
   const config = { ...nextConfig };
 
   if (phase === PHASE_PRODUCTION_BUILD || phase === PHASE_DEVELOPMENT_SERVER) {
@@ -157,5 +182,7 @@ export default function configuration(phase: string) {
     };
   }
 
-  return withSerwist(withNextIntl(withMDX(config)));
+  return withYaakdoc(withSerwist(withNextIntl(withMDX(config))))(phase, {
+    defaultConfig,
+  });
 }

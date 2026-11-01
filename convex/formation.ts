@@ -1,9 +1,11 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { invalid, notFound } from "./lib/errors";
 import { formationRow, formationStudentItem } from "./schema";
 
 export const getOwn = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db
       .query("formation")
@@ -57,7 +59,7 @@ export const create = authenticatedMutation({
   },
   handler: async (ctx, args) => {
     if (args.name && (args.name.length < 1 || args.name.length > 100)) {
-      throw new Error("Echelon name must be between 1 and 100 characters");
+      throw invalid("Echelon name must be between 1 and 100 characters");
     }
 
     const formation = {
@@ -99,7 +101,7 @@ export const update = authenticatedMutation({
   },
   handler: async (ctx, args) => {
     if (args.name && (args.name.length < 1 || args.name.length > 100)) {
-      throw new Error("Echelon name must be between 1 and 100 characters");
+      throw invalid("Echelon name must be between 1 and 100 characters");
     }
 
     const formation = {
@@ -116,7 +118,7 @@ export const update = authenticatedMutation({
 
     const current = await ctx.db.get(args.id);
     if (!current || current.userId !== ctx.user._id) {
-      throw new Error("Formation not found");
+      throw notFound("Formation not found");
     }
 
     await ctx.db.patch(args.id, formation);
@@ -131,7 +133,7 @@ export const destroy = authenticatedMutation({
   handler: async (ctx, args) => {
     const current = await ctx.db.get(args.id);
     if (!current || current.userId !== ctx.user._id) {
-      throw new Error("Formation not found");
+      throw notFound("Formation not found");
     }
 
     await ctx.db.delete(args.id);
@@ -144,7 +146,7 @@ export const getById = authenticatedQuery({
   handler: async (ctx, { id }) => {
     const formation = await ctx.db.get(id);
     if (!formation || formation.userId !== ctx.user._id) {
-      throw new Error("Formation not found");
+      throw notFound("Formation not found");
     }
     return formation;
   },

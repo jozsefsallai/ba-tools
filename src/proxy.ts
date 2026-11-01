@@ -10,6 +10,7 @@ function isIntlExempt(req: NextRequest) {
   return (
     pathname.startsWith("/api") ||
     pathname.startsWith("/mcp") ||
+    pathname.startsWith("/developers") ||
     pathname.startsWith("/__clerk") ||
     // Static files from `public/` (e.g. /wasm/main.wasm, /assets/.../*.ogg)
     pathname.includes(".")
@@ -27,9 +28,9 @@ export default clerkMiddleware(async (_auth, req) => {
 export const config = {
   matcher: [
     // Match pages, but skip:
-    // - /api, /mcp, /_next, /_vercel
+    // - /api, /mcp, /developers (yaakdoc API docs), /_next, /_vercel
     // - any path with a dot (static files in public/, favicon, etc.)
-    "/((?!api|mcp|_next|_vercel|.*\\..*).*)",
+    "/((?!api|mcp|developers|_next|_vercel|.*\\..*).*)",
     // Always run Clerk for API routes
     "/(api|trpc)(.*)",
     "/__clerk/(.*)",

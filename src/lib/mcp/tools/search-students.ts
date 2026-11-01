@@ -1,8 +1,7 @@
-import { db } from "@/lib/db";
+import { searchStudents } from "@/lib/data/students.server";
 import { jsonText } from "@/lib/mcp/json-text";
 import { mapStudentScalarEnumsToEn } from "@/lib/mcp/student-enum-labels-en";
 import { addStudentMediaUrlFieldsForMcp } from "@/lib/mcp/student-media-urls";
-import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
@@ -45,107 +44,32 @@ export function registerSearchStudentsTool(server: McpServer) {
       },
     },
     async (args) => {
-      const {
-        query,
-        school,
-        club,
-        attackType,
-        defenseType,
-        combatClass,
-        combatRole,
-        weaponType,
-        rarity,
-        limit,
-      } = args;
+      const students = await searchStudents(args);
 
-      const structuralFilters: object[] = [];
-      if (school) structuralFilters.push({ school });
-      if (club) structuralFilters.push({ club });
-      if (attackType) structuralFilters.push({ attackType });
-      if (defenseType) structuralFilters.push({ defenseType });
-      if (combatClass) structuralFilters.push({ combatClass });
-      if (combatRole) structuralFilters.push({ combatRole });
-      if (weaponType) structuralFilters.push({ weaponType });
-      if (rarity !== undefined) structuralFilters.push({ rarity });
-
-      const select = {
-        id: true,
-        name: true,
-        devName: true,
-        school: true,
-        club: true,
-        combatClass: true,
-        combatRole: true,
-        combatPosition: true,
-        attackType: true,
-        defenseType: true,
-        weaponType: true,
-        rarity: true,
-        searchTags: true,
-      } as const;
-
-      const where =
-        structuralFilters.length > 0 ? { AND: structuralFilters } : undefined;
-
-      if (query?.trim()) {
-        const searchInput = query.trim();
-        const candidates = await db.student.findMany({
-          where,
-          orderBy: { defaultOrder: "asc" },
-          select,
-        });
-
-        const { ordered, primaryScores, secondaryScores } =
-          orderStudentsByFuzzyNameQuery(candidates, searchInput);
-
-        const students = ordered.slice(0, limit);
-
-        const forMcp = students.map((s) =>
-          addStudentMediaUrlFieldsForMcp(
-            mapStudentScalarEnumsToEn({
-              ...s,
-              matchScore:
-                primaryScores.get(s.id) ?? secondaryScores.get(s.id) ?? 0,
-            } as Record<string, unknown>),
-          ),
-        );
-
+      if (students.length === 0) {
         return {
           content: [
             {
               type: "text",
-              text:
-                students.length === 0
-                  ? "No students matched the query and filters (fuzzy score threshold 0.15)."
-                  : jsonText(forMcp),
+              text: args.query?.trim()
+                ? "No students matched the query and filters (fuzzy score threshold 0.15)."
+                : "No students matched the filters.",
             },
           ],
         };
       }
 
-      const students = await db.student.findMany({
-        where,
-        orderBy: { defaultOrder: "asc" },
-        take: limit,
-        select,
-      });
-
-      const forMcp = students.map((s) =>
+      const forMcp = students.map(({ matchScore, ...s }) =>
         addStudentMediaUrlFieldsForMcp(
-          mapStudentScalarEnumsToEn({ ...s } as Record<string, unknown>),
+          mapStudentScalarEnumsToEn({
+            ...s,
+            ...(matchScore !== undefined ? { matchScore } : {}),
+          } as Record<string, unknown>),
         ),
       );
 
       return {
-        content: [
-          {
-            type: "text",
-            text:
-              students.length === 0
-                ? "No students matched the filters."
-                : jsonText(forMcp),
-          },
-        ],
+        content: [{ type: "text", text: jsonText(forMcp) }],
       };
     },
   );

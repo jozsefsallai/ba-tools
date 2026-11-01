@@ -9,7 +9,7 @@ import { Link } from "@/i18n/navigation";
 
 export function OwnRostersBrowser() {
   const t = useTranslations();
-  const query = useQueryWithStatus(api.roster.getOwn);
+  const query = useQueryWithStatus(api.roster.getOwn, {});
 
   if (query.status === "pending") {
     return <MessageBox>{t("common.loading")}</MessageBox>;

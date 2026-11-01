@@ -1,5 +1,4 @@
 import {
-  buildCDNAbsoluteUrl,
   buildStudentIconUrlFromId,
   buildStudentPortraitUrlFromId,
 } from "@/lib/url";
@@ -12,15 +11,11 @@ export function addStudentMediaUrlFieldsForMcp(
     return { ...row };
   }
 
-  const iconUrl = buildCDNAbsoluteUrl(
-    buildStudentIconUrlFromId(id).replace("/cdn/", ""),
-  );
-
-  const portraitUrl = buildCDNAbsoluteUrl(
-    buildStudentPortraitUrlFromId(id).replace("/cdn/", ""),
-  );
-
-  return { ...row, iconUrl, portraitUrl };
+  return {
+    ...row,
+    iconUrl: buildStudentIconUrlFromId(id),
+    portraitUrl: buildStudentPortraitUrlFromId(id),
+  };
 }
 
 export function addStudentMediaUrlsDeepForMcp(

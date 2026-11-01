@@ -12,6 +12,7 @@ import {
 } from "../src/lib/recruitment";
 import { internalMutation } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { invalid, notFound } from "./lib/errors";
 
 const pickupValidator = v.object({
   charge: v.number(),
@@ -93,7 +94,7 @@ async function assertAccount(
 ) {
   const account = await ctx.db.get(accountId);
   if (!account || account.userId !== ctx.user._id) {
-    throw new Error("Recruitment account not found.");
+    throw notFound("Recruitment account not found.");
   }
   return account;
 }
@@ -104,7 +105,7 @@ async function assertSession(
 ) {
   const session = await ctx.db.get(sessionId);
   if (!session || session.userId !== ctx.user._id) {
-    throw new Error("Recruitment session not found.");
+    throw notFound("Recruitment session not found.");
   }
   return session;
 }
@@ -202,7 +203,7 @@ async function rebuildAccountAnalytics(
           error.message ===
             "The first pickup charge must be higher than the starting charge.")
       ) {
-        throw new Error(
+        throw invalid(
           `Cannot recalculate "${session.name}": its recorded pickup charges are lower than the recalculated starting charge (${permanentStartCharge}/${limitedStartCharge}). Edit this session or adjust the earlier session so the pull history is consistent.`,
         );
       }
@@ -260,6 +261,7 @@ async function rebuildAccountAnalytics(
 }
 
 export const getOwnAccounts = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db
       .query("recruitmentAccount")
@@ -310,7 +312,7 @@ export const getSession = authenticatedQuery({
     const session = await ctx.db.get(sessionId);
     if (!session) return null;
     if (session.userId !== ctx.user._id) {
-      throw new Error("Recruitment session not found.");
+      throw notFound("Recruitment session not found.");
     }
     const latestPermanent = await getLatestSession(
       ctx,
@@ -351,7 +353,7 @@ export const createAccount = authenticatedMutation({
       limitedCharge < 0 ||
       limitedCharge > 200
     ) {
-      throw new Error("Charge must be an integer from 0 to 200.");
+      throw invalid("Charge must be an integer from 0 to 200.");
     }
     return ctx.db.insert("recruitmentAccount", {
       userId: ctx.user._id,
@@ -385,7 +387,7 @@ export const updateAccount = authenticatedMutation({
       limitedCharge < 0 ||
       limitedCharge > 200
     ) {
-      throw new Error("Charge must be an integer from 0 to 200.");
+      throw invalid("Charge must be an integer from 0 to 200.");
     }
     await ctx.db.patch(accountId, {
       name,
@@ -412,7 +414,7 @@ export const createSession = authenticatedMutation({
         .collect()
     ).find((session: any) => session.date > args.date);
     if (laterSession) {
-      throw new Error(
+      throw invalid(
         "Recruitment sessions must be created in chronological order.",
       );
     }

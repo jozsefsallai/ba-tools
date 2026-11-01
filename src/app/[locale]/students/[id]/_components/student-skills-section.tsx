@@ -1,6 +1,6 @@
 import { DetailSection } from "@/app/[locale]/students/[id]/_components/detail-section";
 import { StudentSkillsPanel } from "@/app/[locale]/students/[id]/_components/student-skills-panel";
-import { getStudentSkills } from "@/app/[locale]/students/[id]/_lib/student-skills.server";
+import { getStudentSkills } from "@/lib/data/student-skills.server";
 import type { AttackType } from "@/lib/db/client";
 import { ToolboxIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";

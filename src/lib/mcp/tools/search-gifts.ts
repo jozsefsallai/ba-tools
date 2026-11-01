@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
+import { searchGifts } from "@/lib/data/gifts.server";
 import { jsonText } from "@/lib/mcp/json-text";
 import { addStudentMediaUrlFieldsForMcp } from "@/lib/mcp/student-media-urls";
-import { buildCDNAbsoluteUrl, buildItemIconUrl } from "@/lib/url";
+import { buildItemIconUrl } from "@/lib/url";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
@@ -23,35 +23,11 @@ export function registerSearchGiftsTool(server: McpServer) {
     async (args) => {
       const { query, limit } = args;
 
-      const q = query.trim();
-      const gifts = await db.gift.findMany({
-        where: {
-          OR: [
-            { name: { contains: q, mode: "insensitive" as const } },
-            { nameJP: { contains: q, mode: "insensitive" as const } },
-          ],
-        },
-        take: limit,
-        orderBy: { id: "asc" },
-        select: {
-          id: true,
-          name: true,
-          nameJP: true,
-          rarity: true,
-          expValue: true,
-          iconName: true,
-          isLovedByEveryone: true,
-          adoredBy: { select: { id: true, name: true } },
-          lovedBy: { select: { id: true, name: true } },
-          likedBy: { select: { id: true, name: true } },
-        },
-      });
+      const gifts = await searchGifts({ query, limit });
 
       const giftsForMcp = gifts.map((g) => ({
         ...g,
-        iconUrl: buildCDNAbsoluteUrl(
-          buildItemIconUrl(g.iconName).replace("/cdn/", ""),
-        ),
+        iconUrl: buildItemIconUrl(g.iconName),
         adoredBy: g.adoredBy.map((s) =>
           addStudentMediaUrlFieldsForMcp({ ...s } as Record<string, unknown>),
         ),

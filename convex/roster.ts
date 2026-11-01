@@ -3,15 +3,17 @@ import { GAME_SERVERS } from "@/lib/types";
 import { v } from "convex/values";
 import { query } from "~convex/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { conflict, invalid, notFound } from "./lib/errors";
 import { rosterItem } from "./schema";
 
 function assertValidFriendCode(friendCode: string) {
   if (!isValidFriendCode(friendCode)) {
-    throw new Error("Friend code must be exactly 8 uppercase letters (A–Z).");
+    throw invalid("Friend code must be exactly 8 uppercase letters (A–Z).");
   }
 }
 
 export const getOwn = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db
       .query("roster")
@@ -29,7 +31,7 @@ export const getOwnById = authenticatedQuery({
     const roster = await ctx.db.get(id);
 
     if (!roster || roster.userId !== ctx.user._id) {
-      throw new Error("Roster not found");
+      throw notFound("Roster not found");
     }
 
     return roster;
@@ -43,7 +45,7 @@ export const getByGameServerAndFriendCode = query({
   },
   handler: async (ctx, { gameServer, friendCode }) => {
     if (!isValidFriendCode(friendCode)) {
-      throw new Error("Roster not found");
+      throw notFound("Roster not found");
     }
 
     const roster = await ctx.db
@@ -54,7 +56,7 @@ export const getByGameServerAndFriendCode = query({
       .unique();
 
     if (!roster) {
-      throw new Error("Roster not found");
+      throw notFound("Roster not found");
     }
 
     const identity = await ctx.auth.getUserIdentity();
@@ -74,7 +76,7 @@ export const getByGameServerAndFriendCode = query({
       return roster;
     }
 
-    throw new Error("Roster not found");
+    throw notFound("Roster not found");
   },
 });
 
@@ -110,7 +112,7 @@ export const create = authenticatedMutation({
       .unique();
 
     if (existing) {
-      throw new Error(
+      throw conflict(
         "A roster with this game server and friend code already exists.",
       );
     }
@@ -163,7 +165,7 @@ export const update = authenticatedMutation({
     const roster = await ctx.db.get(id);
 
     if (!roster || roster.userId !== ctx.user._id) {
-      throw new Error("Roster not found");
+      throw notFound("Roster not found");
     }
 
     if (friendCode !== undefined) {
@@ -179,7 +181,7 @@ export const update = authenticatedMutation({
         .unique();
 
       if (existing && existing._id !== id) {
-        throw new Error(
+        throw conflict(
           "A roster with this game server and friend code already exists.",
         );
       }
@@ -208,7 +210,7 @@ export const destroy = authenticatedMutation({
   handler: async (ctx, { id }) => {
     const roster = await ctx.db.get(id);
     if (!roster || roster.userId !== ctx.user._id) {
-      throw new Error("Roster not found");
+      throw notFound("Roster not found");
     }
 
     await ctx.db.delete(id);

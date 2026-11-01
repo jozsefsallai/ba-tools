@@ -1,11 +1,5 @@
 "use client";
 
-import type {
-  SkillEffectText,
-  SkillEffectView,
-  StudentSkillView,
-  StudentSkillsView,
-} from "@/app/[locale]/students/[id]/_lib/student-skills.server";
 import {
   Popover,
   PopoverContent,
@@ -14,6 +8,12 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type {
+  SkillEffectText,
+  SkillEffectView,
+  StudentSkillView,
+  StudentSkillsView,
+} from "@/lib/data/student-skills.server";
 import type { AttackType, SkillEffectCategory } from "@/lib/db/client";
 import {
   type SkillMarkupNode,

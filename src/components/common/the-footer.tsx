@@ -53,6 +53,10 @@ export function TheFooter({
           {t("common.footer.nav.credits")}
         </Link>{" "}
         &middot;{" "}
+        <a href="/developers" className="underline">
+          {t("common.footer.nav.api")}
+        </a>{" "}
+        &middot;{" "}
         <a
           href="https://github.com/jozsefsallai/ba-tools"
           target="_blank"

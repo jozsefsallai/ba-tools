@@ -1,9 +1,11 @@
 import { paginationOptsValidator } from "convex/server";
+import { v } from "convex/values";
 import { query } from "~convex/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
-import { v } from "convex/values";
+import { notFound } from "./lib/errors";
 
 export const getOwn = authenticatedQuery({
+  args: {},
   handler: async (ctx) => {
     return await ctx.db
       .query("timelineGroup")
@@ -47,7 +49,7 @@ export const getOwnById = authenticatedQuery({
     const timelineGroup = await ctx.db.get(id);
 
     if (!timelineGroup || timelineGroup.userId !== ctx.user._id) {
-      throw new Error("Timeline group not found");
+      throw notFound("Timeline group not found");
     }
 
     const timelines = [];
@@ -70,7 +72,7 @@ export const getById = query({
   handler: async (ctx, { id }) => {
     const timelineGroup = await ctx.db.get(id);
     if (!timelineGroup) {
-      throw new Error("Timeline group not found");
+      throw notFound("Timeline group not found");
     }
 
     const owner = await ctx.db.get(timelineGroup.userId);
@@ -107,7 +109,7 @@ export const getById = query({
     }
 
     if (!owner || !identity || owner.externalId !== identity?.subject) {
-      throw new Error("Timeline group not found");
+      throw notFound("Timeline group not found");
     }
 
     if (timelineGroup.showCreator) {
@@ -167,7 +169,7 @@ export const update = authenticatedMutation({
   ) => {
     const timelineGroup = await ctx.db.get(id);
     if (!timelineGroup || timelineGroup.userId !== ctx.user._id) {
-      throw new Error("Timeline group not found");
+      throw notFound("Timeline group not found");
     }
 
     await ctx.db.patch(id, {
@@ -186,7 +188,7 @@ export const destroy = authenticatedMutation({
   handler: async (ctx, { id }) => {
     const timelineGroup = await ctx.db.get(id);
     if (!timelineGroup || timelineGroup.userId !== ctx.user._id) {
-      throw new Error("Timeline group not found");
+      throw notFound("Timeline group not found");
     }
 
     await ctx.db.delete(id);

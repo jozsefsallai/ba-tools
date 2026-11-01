@@ -3,7 +3,7 @@ import "server-only";
 import { isValidFriendCode } from "@/lib/friend-code";
 import type { GameServer } from "@/lib/types";
 import { fetchQuery } from "convex/nextjs";
-import { unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { api } from "~convex/api";
 
 export function rosterCacheTag(gameServer: GameServer, friendCode: string) {
@@ -36,4 +36,13 @@ export async function getCachedPublicRoster(
       revalidate: 86_400,
     },
   )();
+}
+
+export function invalidatePublicRosters(
+  ...rosters: Array<{ gameServer: GameServer; friendCode: string }>
+) {
+  for (const { gameServer, friendCode } of rosters) {
+    revalidateTag(rosterCacheTag(gameServer, friendCode), { expire: 0 });
+    revalidatePath(rosterPublicPath(gameServer, friendCode));
+  }
 }

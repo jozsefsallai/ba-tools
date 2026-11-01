@@ -30,6 +30,7 @@ export const CHANGELOG_SCOPES = {
   roadmap: "Global Roadmap",
   students: "Students",
   memorialLobby: "Recollection Lobby",
+  api: "API",
 } as const;
 
 type ChangelogScope = (typeof CHANGELOG_SCOPES)[keyof typeof CHANGELOG_SCOPES];
@@ -47,6 +48,27 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "November 1, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.students,
+        description: "Added Skills section to student pages.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.api,
+        description: (
+          <>
+            Added a public API for the site. Check out the{" "}
+            <a href="/developers">API documentation</a> for all the things you
+            can do with it.
+          </>
+        ),
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
   {
     date: "October 31, 2026",
     features: [
