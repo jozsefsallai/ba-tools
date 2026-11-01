@@ -238,7 +238,7 @@
           "token": "${[ api_key ]}"
         },
         "authenticationType": "bearer",
-        "description": "Your own data on Blue Archive Tools. Every request needs an API key:\ncreate one under **Manage account → API keys** in the user menu on\nthe site, and send it as `Authorization: Bearer <key>`.\n\nRequests act as the key's owner and see only that user's data.",
+        "description": "Your own data on Joe's Blue Archive Tools. Every request needs an API key:\ncreate one under **Manage account → API keys** in the user menu on\nthe site, and send it as `Authorization: Bearer <key>`.\n\nRequests act as the key's owner and see only that user's data.",
         "headers": [],
         "name": "Your data",
         "sortPriority": 3.0,
