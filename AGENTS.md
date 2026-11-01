@@ -49,7 +49,7 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 - `IMAGE_CDN_URL` — **required at startup/build**; Next.js config throws if missing. Use `https://aronabot.cdn.nimblebun.works` locally.
 - `DATABASE_URL` — Neon connection string (used by both Next.js and Prisma config)
 - `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CLERK_JWT_ISSUER_DOMAIN`
-- `PUBLIC_API_SECRET` — must match the same variable on the Convex deployment; the public API (`/api/v1/me/*`) uses it to act for API key owners.
+- `API_BRIDGE_SECRET` — must match the same variable on the Convex deployment; the public API (`/api/v1/me/*`) uses it to act for API key owners.
 - `NEXT_PUBLIC_PLANA_AI_ENABLED`, `OPENAI_API_KEY`, `CHROMA_API_KEY`, `CHROMA_TENANT_ID`, `CHROMA_DATABASE_NAME` — Plana AI feature. Chat provider keys are supplied through Plana's BYOK settings UI.
 
 ## Key Quirks

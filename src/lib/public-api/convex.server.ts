@@ -25,7 +25,7 @@ const KNOWN_CODES = new Set<ApiErrorCode>([
 ]);
 
 function credentials(userId: string): Required<ApiCredentials> {
-  const apiSecret = process.env.PUBLIC_API_SECRET;
+  const apiSecret = process.env.API_BRIDGE_SECRET;
   if (!apiSecret) {
     throw new ApiError("INTERNAL_ERROR", "The API is not configured.");
   }

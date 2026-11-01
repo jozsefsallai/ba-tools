@@ -41,7 +41,7 @@ async function resolveExternalId(
     return identity.subject;
   }
 
-  const expected = process.env.PUBLIC_API_SECRET;
+  const expected = process.env.API_BRIDGE_SECRET;
 
   if (
     !expected ||
