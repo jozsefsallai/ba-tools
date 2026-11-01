@@ -7,6 +7,7 @@ import { type Infer, v } from "convex/values";
 import { internal } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 import { internalAction, internalMutation, query } from "~convex/server";
+import { invalid } from "./lib/errors";
 import { rankingIdentity, wilsonInterval } from "./lib/pvpRankings";
 import { getPvpVideoUrl } from "./lib/pvpVideo";
 import {
@@ -929,7 +930,7 @@ export const search = query({
     },
   ) => {
     if (!validSearchTeam(defenseTeam)) {
-      throw new Error(
+      throw invalid(
         "A defense search must contain six valid slots and at least one striker criterion.",
       );
     }
@@ -1349,7 +1350,7 @@ export const listEffectiveTeams = query({
   },
   handler: async (ctx, args) => {
     if (!Number.isSafeInteger(args.minimumBattles) || args.minimumBattles < 1) {
-      throw new Error("Minimum battles must be a positive integer.");
+      throw invalid("Minimum battles must be a positive integer.");
     }
 
     const status = await ctx.db

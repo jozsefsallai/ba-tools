@@ -20,14 +20,17 @@ const bodySchema = z.object({
   excludeDefenseTeam: z.array(searchSlotSchema).max(6).optional(),
 });
 
-export const POST = publicRoute(async (req) => {
-  const { season, ...input } = await parseBody(req, bodySchema);
+export const POST = publicRoute(
+  async (req) => {
+    const { season, ...input } = await parseBody(req, bodySchema);
 
-  const result = await publicQuery(api.pvpStats.search, {
-    ...input,
-    seasonNumber: season,
-    paginationOpts: parsePagination(req),
-  });
+    const result = await publicQuery(api.pvpStats.search, {
+      ...input,
+      seasonNumber: season,
+      paginationOpts: parsePagination(req),
+    });
 
-  return okPage(result, { cache: "private" });
-});
+    return okPage(result, { cache: "private" });
+  },
+  { rateLimit: "search" },
+);

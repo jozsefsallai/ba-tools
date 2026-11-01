@@ -31,6 +31,7 @@ Errors return an HTTP status code and a JSON body with a machine-readable `code`
 | 403 | `FORBIDDEN` | The key is valid but can't do this. |
 | 404 | `NOT_FOUND` | The resource doesn't exist, or it isn't yours. |
 | 409 | `CONFLICT` | The change clashes with existing data, such as a duplicate friend code. |
+| 429 | `RATE_LIMITED` | You sent too many requests. Wait for the number of seconds in the `Retry-After` header. See [Usage limits](./index.md#usage-limits). |
 | 500 | `INTERNAL_ERROR` | Something went wrong on our side. Try again later. |
 
 Request bodies are validated strictly: unknown fields are rejected with `400`, not ignored.

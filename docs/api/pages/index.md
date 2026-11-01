@@ -68,4 +68,23 @@ The older, undocumented `GET /api/students` endpoint still works and isn't chang
 
 ## Usage limits
 
-There are no usage limits for now. Please cache what you can: game data changes rarely, and its responses can be cached for an hour.
+Requests are rate limited per minute, using a sliding window:
+
+| Requests | Limit | Counted per |
+| --- | --- | --- |
+| Public endpoints | 120 per minute | IP address |
+| `POST /api/v1/pvp/stats/search` | 20 per minute | IP address |
+| `GET /api/v1/me/...` | 120 per minute | API key owner |
+| `POST`, `PATCH` and `DELETE /api/v1/me/...` | 60 per minute | API key owner |
+
+Requests with a missing or invalid API key count towards the public limit of your IP address. Responses served from our cache don't count at all.
+
+Responses to `/api/v1/me/...` include your current standing:
+
+- `X-RateLimit-Limit`: requests allowed per minute.
+- `X-RateLimit-Remaining`: requests left in the current window.
+- `X-RateLimit-Reset`: when the window resets, as a Unix timestamp in seconds.
+
+Over the limit, you get `429 Too Many Requests` with a `RATE_LIMITED` error and a `Retry-After` header with the number of seconds to wait.
+
+Please cache what you can: game data changes rarely, and its responses can be cached for an hour.

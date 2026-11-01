@@ -8,6 +8,12 @@
     "title": "Joe's Blue Archive Tools API",
     "description": "Programmatic access to Blue Archive game data and your user data on Joe's Blue Archive Tools.",
     "url": "https://ba.joexyz.online/developers",
+    "logo": {
+      "light": "../../src/assets/plana-icon.png",
+      "alt": "Plana",
+      "width": 35,
+      "height": 28
+    },
     "favicon": "../../public/icons/icon-192.png",
     "colors": {
       "primary": "#6e318c"

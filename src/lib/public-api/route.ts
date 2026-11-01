@@ -1,6 +1,13 @@
 import "server-only";
 
 import { toApiError } from "@/lib/public-api/convex.server";
+import {
+  type RateLimitState,
+  type RateLimitTier,
+  clientIp,
+  rateLimit,
+  rateLimitHeaders,
+} from "@/lib/public-api/rate-limit.server";
 import { ApiError, errorResponse } from "@/lib/public-api/response";
 import { auth } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
@@ -34,11 +41,41 @@ type UserHandler<P extends Params> = (
   userId: string,
 ) => Promise<Response>;
 
+function withRateLimitHeaders(response: Response, state?: RateLimitState) {
+  if (state) {
+    for (const [name, value] of Object.entries(rateLimitHeaders(state))) {
+      response.headers.set(name, value);
+    }
+  }
+
+  return response;
+}
+
+function tooManyRequests(state: RateLimitState) {
+  const retryAfter = Math.max(1, Math.ceil((state.reset - Date.now()) / 1000));
+
+  const response = errorResponse(
+    new ApiError(
+      "RATE_LIMITED",
+      `Too many requests. Try again in ${retryAfter} seconds.`,
+    ),
+  );
+  response.headers.set("Retry-After", String(retryAfter));
+
+  return withRateLimitHeaders(response, state);
+}
+
 export function publicRoute<P extends Params = Params>(
   handler: PublicHandler<P>,
+  { rateLimit: tier = "public" }: { rateLimit?: RateLimitTier } = {},
 ) {
   return async (req: NextRequest, ctx: HandlerContext<P>) => {
     try {
+      const state = await rateLimit(tier, `ip:${clientIp(req)}`);
+      if (state && !state.success) {
+        return tooManyRequests(state);
+      }
+
       return await handler(req, await ctx.params);
     } catch (error) {
       return handleError(req, error);
@@ -48,21 +85,40 @@ export function publicRoute<P extends Params = Params>(
 
 export function userRoute<P extends Params = Params>(handler: UserHandler<P>) {
   return async (req: NextRequest, ctx: HandlerContext<P>) => {
+    let state: RateLimitState | undefined;
+
     try {
       const { isAuthenticated, userId } = await auth({
         acceptsToken: "api_key",
       });
 
       if (!isAuthenticated || !userId?.startsWith("user_")) {
+        const ipState = await rateLimit("public", `ip:${clientIp(req)}`);
+        if (ipState && !ipState.success) {
+          return tooManyRequests(ipState);
+        }
+
         throw new ApiError(
           "UNAUTHORIZED",
           "A valid API key is required. Send it as `Authorization: Bearer <key>`.",
         );
       }
 
-      return await handler(req, await ctx.params, userId);
+      state = await rateLimit(
+        req.method === "GET" ? "userRead" : "userWrite",
+        `user:${userId}`,
+      );
+
+      if (state && !state.success) {
+        return tooManyRequests(state);
+      }
+
+      return withRateLimitHeaders(
+        await handler(req, await ctx.params, userId),
+        state,
+      );
     } catch (error) {
-      return handleError(req, error);
+      return withRateLimitHeaders(handleError(req, error), state);
     }
   };
 }
