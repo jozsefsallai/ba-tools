@@ -1,6 +1,6 @@
-import { canManageContent, isSuperUser } from "@/lib/auth/roles";
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { canManageContent, isSuperUser } from "@/lib/auth/roles";
 
 type CurrentUser = Awaited<ReturnType<typeof currentUser>>;
 
@@ -10,11 +10,21 @@ async function requireRole(check: (user: CurrentUser) => boolean) {
   if (!check(user)) {
     return {
       user: null,
-      error: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      error: NextResponse.json(
+        {
+          error: "Forbidden",
+        },
+        {
+          status: 403,
+        },
+      ),
     };
   }
 
-  return { user, error: null };
+  return {
+    user,
+    error: null,
+  };
 }
 
 export function requireSuperUser() {

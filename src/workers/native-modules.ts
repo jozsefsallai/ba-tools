@@ -13,7 +13,7 @@ let error: Error | null = null;
 
 async function loadNativeModules(baseUrl: string) {
   try {
-    // @ts-ignore
+    // @ts-expect-error
     const go = new Go();
     let obj: WebAssembly.WebAssemblyInstantiatedSource;
 

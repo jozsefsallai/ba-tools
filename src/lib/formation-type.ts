@@ -73,5 +73,10 @@ export function resolveStarterOrders(
     return a.displayIndex - b.displayIndex;
   });
 
-  return new Map(starters.map(({ item }, index) => [item.id, index + 1]));
+  return new Map(
+    starters.map(({ item }, index) => [
+      item.id,
+      index + 1,
+    ]),
+  );
 }

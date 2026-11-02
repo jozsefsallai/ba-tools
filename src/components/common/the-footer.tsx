@@ -3,11 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 
-export function TheFooter({
-  commitHash,
-}: {
-  commitHash: string;
-}) {
+export function TheFooter({ commitHash }: { commitHash: string }) {
   const pathname = usePathname();
   const t = useTranslations();
 

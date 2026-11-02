@@ -1,11 +1,11 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type Task, logger, task } from "@trigger.dev/sdk";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import { localizeTable } from "../lib/aronabot-localize-table";
 import {
-  type SaveStudentSkillsResult,
   resolveSkillStudents,
+  type SaveStudentSkillsResult,
   saveStudentSkills,
 } from "../lib/game-data/student-skills.server";
 import { loadMxDataSync } from "./lib/mx-data-sync";
@@ -15,9 +15,15 @@ import {
 } from "./schemas";
 
 export type SyncStudentSkillsResult = {
-  gameVersion: { jp: string; global: string | null };
+  gameVersion: {
+    jp: string;
+    global: string | null;
+  };
   dryRun: boolean;
-  extracted: { effects: number; skills: number };
+  extracted: {
+    effects: number;
+    skills: number;
+  };
   saved: SaveStudentSkillsResult | null;
   missing: string[];
   warnings: string[];
@@ -42,7 +48,9 @@ export const syncStudentSkillsTask: Task<
       students: await resolveSkillStudents(devNames),
       cacheDir: join(workDir, "cache"),
       logger,
-      effectNames: { en: localizeTable.EN.buffName },
+      effectNames: {
+        en: localizeTable.EN.buffName,
+      },
     });
 
     return {

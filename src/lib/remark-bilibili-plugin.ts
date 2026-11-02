@@ -1,6 +1,6 @@
 // Source for most of this: https://github.com/tizee/gatsby-remark-b23/blob/master/src/transformer/Bilibili.ts
 
-import type { Root, Text, Link } from "mdast";
+import type { Link, Root, Text } from "mdast";
 import { visit } from "unist-util-visit";
 
 const DEFAULT_WIDTH = 560;
@@ -134,7 +134,9 @@ export default function remarkBilibiliPlugin(
           },
         };
 
-        node.children = [text];
+        node.children = [
+          text,
+        ];
       }
     });
   };

@@ -1,6 +1,19 @@
 "use client";
 
 import {
+  CalendarClockIcon,
+  CopyIcon,
+  GemIcon,
+  InfinityIcon,
+  PencilIcon,
+  PlusIcon,
+  RefreshCwIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import {
   ItemFormDialog,
   type ItemFormState,
 } from "@/app/[locale]/admin/(content)/roadmap/_components/item-form-dialog";
@@ -48,11 +61,11 @@ import {
 import { Link } from "@/i18n/navigation";
 import {
   EDITABLE_ROADMAP_KINDS,
-  PERMANENT_END_DATE,
-  ROADMAP_CATEGORIES,
   getItemSubtype,
   isEditableKind,
   isPermanent,
+  PERMANENT_END_DATE,
+  ROADMAP_CATEGORIES,
 } from "@/lib/roadmap/constants";
 import { addUTCDays, startOfUTCDay } from "@/lib/roadmap/layout";
 import type { AnyRoadmapInput } from "@/lib/roadmap/schemas";
@@ -61,19 +74,6 @@ import type {
   RoadmapCategory,
   RoadmapItem,
 } from "@/lib/roadmap/types";
-import {
-  CalendarClockIcon,
-  CopyIcon,
-  GemIcon,
-  InfinityIcon,
-  PencilIcon,
-  PlusIcon,
-  RefreshCwIcon,
-  Trash2Icon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 export type AdminRoadmapViewProps = {
   initialItems: RoadmapItem[];
@@ -98,7 +98,10 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
   itemsRef.current = items;
 
   const [form, setForm] = useState<
-    (ItemFormState & { item?: EditableRoadmapItem }) | null
+    | (ItemFormState & {
+        item?: EditableRoadmapItem;
+      })
+    | null
   >(null);
   const [pushPrompt, setPushPrompt] = useState<PushPrompt | null>(null);
   const [shiftItem, setShiftItem] = useState<EditableRoadmapItem | null>(null);
@@ -111,7 +114,12 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
   );
 
   const replaceItems = (updated: RoadmapItem[]) => {
-    const map = new Map(updated.map((item) => [item.id, item]));
+    const map = new Map(
+      updated.map((item) => [
+        item.id,
+        item,
+      ]),
+    );
     setItems((prev) => prev.map((item) => map.get(item.id) ?? item));
   };
 
@@ -187,14 +195,23 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
     input: Partial<AnyRoadmapInput>,
     offsetMs: number,
   ): Promise<boolean> => {
-    replaceItems([{ ...item, ...input } as RoadmapItem]);
+    replaceItems([
+      {
+        ...item,
+        ...input,
+      } as RoadmapItem,
+    ]);
 
     try {
       const saved = await updateRoadmapItem(item.kind, item.id, input);
-      replaceItems([saved]);
+      replaceItems([
+        saved,
+      ]);
       toast.success(t("tools.admin.roadmap.toasts.saveSuccess"));
     } catch (error) {
-      replaceItems([item]);
+      replaceItems([
+        item,
+      ]);
       toast.error(
         t("tools.admin.roadmap.toasts.saveFail", {
           error: errorMessage(error),
@@ -229,7 +246,10 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
 
     void saveItem(
       item,
-      { startDate, endDate },
+      {
+        startDate,
+        endDate,
+      },
       new Date(startDate).getTime() - new Date(item.startDate).getTime(),
     );
   };
@@ -254,7 +274,10 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
 
     try {
       const created = await createRoadmapItem(form.kind, input);
-      setItems((prev) => [...prev, created]);
+      setItems((prev) => [
+        ...prev,
+        created,
+      ]);
       toast.success(t("tools.admin.roadmap.toasts.createSuccess"));
       return true;
     } catch (error) {
@@ -302,7 +325,11 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
     if (!isEditableKind(kind)) {
       return;
     }
-    setForm({ mode: "create", kind, input: defaultInput(kind, date) });
+    setForm({
+      mode: "create",
+      kind,
+      input: defaultInput(kind, date),
+    });
   };
 
   const openEdit = (item: EditableRoadmapItem) => {
@@ -317,7 +344,11 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
   };
 
   const openDuplicate = (item: EditableRoadmapItem) => {
-    setForm({ mode: "create", kind: item.kind, input: itemToInput(item) });
+    setForm({
+      mode: "create",
+      kind: item.kind,
+      input: itemToInput(item),
+    });
   };
 
   const manageBannersItem = (
@@ -373,7 +404,13 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
         {!isPermanent(item.startDate, item.endDate) && (
           <ContextMenuItem
             onSelect={() =>
-              void saveItem(editable, { endDate: PERMANENT_END_DATE }, 0)
+              void saveItem(
+                editable,
+                {
+                  endDate: PERMANENT_END_DATE,
+                },
+                0,
+              )
             }
           >
             <InfinityIcon />

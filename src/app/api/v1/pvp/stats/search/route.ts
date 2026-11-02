@@ -16,8 +16,12 @@ export const POST = publicRoute(
         await parseBody(req, pvpStatsSearchSchema),
         parsePagination(req),
       ),
-      { cache: "private" },
+      {
+        cache: "private",
+      },
     );
   },
-  { rateLimit: "search" },
+  {
+    rateLimit: "search",
+  },
 );

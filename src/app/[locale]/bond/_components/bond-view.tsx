@@ -1,5 +1,18 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { Authenticated, useMutation } from "convex/react";
+import {
+  AlertCircleIcon,
+  ChevronsUpDownIcon,
+  EditIcon,
+  PlusIcon,
+  SaveIcon,
+  XIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { BondProgress } from "@/app/[locale]/bond/_components/bond-progress";
 import { GiftAllocationCard } from "@/app/[locale]/bond/_components/gift-allocation-card";
 import { GiftBreakdown } from "@/app/[locale]/bond/_components/gift-breakdown";
@@ -62,19 +75,6 @@ import {
 } from "@/lib/favor-table";
 import { studentStorage } from "@/lib/storage/students";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { useUser } from "@clerk/nextjs";
-import { Authenticated, useMutation } from "convex/react";
-import {
-  AlertCircleIcon,
-  ChevronsUpDownIcon,
-  EditIcon,
-  PlusIcon,
-  SaveIcon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -94,11 +94,24 @@ export function BondView({ students, gifts }: BondViewProps) {
   const { studentMap } = useStudents();
   const { preferences } = useUserPreferences();
 
-  const giftIds = useMemo(() => gifts.map((gift) => gift.id), [gifts]);
+  const giftIds = useMemo(
+    () => gifts.map((gift) => gift.id),
+    [
+      gifts,
+    ],
+  );
 
   const studentWithGiftsMap = useMemo(
-    () => new Map(students.map((student) => [student.id, student])),
-    [students],
+    () =>
+      new Map(
+        students.map((student) => [
+          student.id,
+          student,
+        ]),
+      ),
+    [
+      students,
+    ],
   );
 
   const [showAllGifts, setShowAllGifts] = useState(true);
@@ -129,7 +142,12 @@ export function BondView({ students, gifts }: BondViewProps) {
   const [giftCounts, setGiftCounts, setGiftCountsUnchecked] = useSaveableState<
     Record<number, number>
   >(
-    Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
+    Object.fromEntries(
+      gifts.map((gift) => [
+        gift.id,
+        0,
+      ]),
+    ),
     useCallback(
       (a: Record<number, number>, b: Record<number, number>) => {
         for (const gift of gifts) {
@@ -139,7 +157,9 @@ export function BondView({ students, gifts }: BondViewProps) {
         }
         return true;
       },
-      [gifts],
+      [
+        gifts,
+      ],
     ),
     "giftCounts",
   );
@@ -155,11 +175,16 @@ export function BondView({ students, gifts }: BondViewProps) {
     useCallback(
       (a: TargetAllocations, b: TargetAllocations) => {
         const targetIds = [
-          ...new Set([...Object.keys(a), ...Object.keys(b)]),
+          ...new Set([
+            ...Object.keys(a),
+            ...Object.keys(b),
+          ]),
         ] as Id<"giftTarget">[];
         return targetAllocationsEqual(a, b, targetIds, giftIds);
       },
-      [giftIds],
+      [
+        giftIds,
+      ],
     ),
     "targetAllocations",
   );
@@ -172,7 +197,10 @@ export function BondView({ students, gifts }: BondViewProps) {
     {},
     useCallback((a: TargetBoxAllocations, b: TargetBoxAllocations) => {
       const targetIds = [
-        ...new Set([...Object.keys(a), ...Object.keys(b)]),
+        ...new Set([
+          ...Object.keys(a),
+          ...Object.keys(b),
+        ]),
       ] as Id<"giftTarget">[];
       return boxAllocationsEqual(a, b, targetIds);
     }, []),
@@ -201,12 +229,18 @@ export function BondView({ students, gifts }: BondViewProps) {
 
   const inventoryQuery = useQueryWithStatus(
     api.gifts.getOwnById,
-    selectedInvenetoryId ? { id: selectedInvenetoryId } : "skip",
+    selectedInvenetoryId
+      ? {
+          id: selectedInvenetoryId,
+        }
+      : "skip",
   );
 
   const inventoryTargets = useMemo(
     () => inventoryQuery.data?.targets ?? [],
-    [inventoryQuery.data?.targets],
+    [
+      inventoryQuery.data?.targets,
+    ],
   );
 
   const filterTargetOptions = useMemo(
@@ -220,7 +254,12 @@ export function BondView({ students, gifts }: BondViewProps) {
             studentId: target.studentId,
           }),
       })),
-    [inventoryTargets, studentWithGiftsMap, studentMap, t],
+    [
+      inventoryTargets,
+      studentWithGiftsMap,
+      studentMap,
+      t,
+    ],
   );
 
   const sortTargetOptions = useMemo(() => {
@@ -238,7 +277,10 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     return [];
-  }, [filterTargetOptions, selectedStudent]);
+  }, [
+    filterTargetOptions,
+    selectedStudent,
+  ]);
 
   const showTargetRows = isSignedIn && !!selectedInvenetoryId;
 
@@ -253,17 +295,32 @@ export function BondView({ students, gifts }: BondViewProps) {
       inventoryTargets.find((target) => target.studentId === selectedStudent.id)
         ?._id ?? null
     );
-  }, [selectedTargetId, selectedStudent, inventoryTargets]);
+  }, [
+    selectedTargetId,
+    selectedStudent,
+    inventoryTargets,
+  ]);
 
   const allocatedGiftCounts = useMemo(() => {
     if (!showTargetRows) {
       return giftCounts;
     }
     if (!activeTargetId) {
-      return Object.fromEntries(gifts.map((gift) => [gift.id, 0]));
+      return Object.fromEntries(
+        gifts.map((gift) => [
+          gift.id,
+          0,
+        ]),
+      );
     }
     return targetAllocations[activeTargetId] ?? {};
-  }, [showTargetRows, giftCounts, activeTargetId, targetAllocations, gifts]);
+  }, [
+    showTargetRows,
+    giftCounts,
+    activeTargetId,
+    targetAllocations,
+    gifts,
+  ]);
 
   const allocatedBoxCount = useMemo(() => {
     if (!showTargetRows) {
@@ -273,7 +330,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       return 0;
     }
     return targetBoxAllocations[activeTargetId] ?? 0;
-  }, [showTargetRows, giftBoxesUsed, activeTargetId, targetBoxAllocations]);
+  }, [
+    showTargetRows,
+    giftBoxesUsed,
+    activeTargetId,
+    targetBoxAllocations,
+  ]);
 
   const displayedGifts = useMemo(() => {
     if (!showTargetRows) {
@@ -324,7 +386,11 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     return sortGiftsByStudentPreference(displayedGifts, student);
-  }, [displayedGifts, sortMethod, studentWithGiftsMap]);
+  }, [
+    displayedGifts,
+    sortMethod,
+    studentWithGiftsMap,
+  ]);
 
   const studentGiftKinds = useMemo(() => {
     if (!selectedStudent) {
@@ -348,7 +414,9 @@ export function BondView({ students, gifts }: BondViewProps) {
       hasLikedSR: selectedStudent.giftsLiked.some((g) => g.rarity === "SR"),
       hasNormalSR: true,
     };
-  }, [selectedStudent]);
+  }, [
+    selectedStudent,
+  ]);
 
   const totalExp = useMemo(() => {
     if (!selectedStudent) {
@@ -513,7 +581,11 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     return result;
-  }, [targetBondExp, totalExp, studentGiftKinds]);
+  }, [
+    targetBondExp,
+    totalExp,
+    studentGiftKinds,
+  ]);
 
   const targetAlreadyExists = useMemo(() => {
     if (!selectedStudent || !inventoryQuery.data) {
@@ -522,7 +594,10 @@ export function BondView({ students, gifts }: BondViewProps) {
     return inventoryQuery.data.targets.some(
       (target) => target.studentId === selectedStudent.id,
     );
-  }, [selectedStudent, inventoryQuery.data]);
+  }, [
+    selectedStudent,
+    inventoryQuery.data,
+  ]);
 
   function updateCount(giftId: number, count: number) {
     setGiftCounts((prev) => ({
@@ -639,7 +714,11 @@ export function BondView({ students, gifts }: BondViewProps) {
       setCurrentBondExpStr(entry.totalExp.toString());
       setCurrentBondStr(clampedValue.toString());
     },
-    [selectedStudent, setCurrentBondExp, setCurrentBondExpUnchecked],
+    [
+      selectedStudent,
+      setCurrentBondExp,
+      setCurrentBondExpUnchecked,
+    ],
   );
 
   const updateCurrentBondExp = useCallback(
@@ -685,7 +764,11 @@ export function BondView({ students, gifts }: BondViewProps) {
         bondExp: clampedValue,
       });
     },
-    [selectedStudent, setCurrentBondExp, setCurrentBondExpUnchecked],
+    [
+      selectedStudent,
+      setCurrentBondExp,
+      setCurrentBondExpUnchecked,
+    ],
   );
 
   const updateTargetBond = useCallback(
@@ -712,7 +795,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       setTargetBondExpStr(entry.totalExp.toString());
       setTargetBondStr(clampedValue.toString());
     },
-    [setTargetBondExp, setTargetBondExpUnchecked],
+    [
+      setTargetBondExp,
+      setTargetBondExpUnchecked,
+    ],
   );
 
   const updateTargetBondExp = useCallback(
@@ -743,7 +829,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       );
       setTargetBondExpStr(clampedValue.toString());
     },
-    [setTargetBondExp, setTargetBondExpUnchecked],
+    [
+      setTargetBondExp,
+      setTargetBondExpUnchecked,
+    ],
   );
 
   function updateStudent(baseStudent: Student) {
@@ -802,7 +891,9 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     return result ?? favorTable[0];
-  }, [currentBondExp]);
+  }, [
+    currentBondExp,
+  ]);
 
   const nextLevel = useMemo(() => {
     let result: FavorTableEntry | undefined;
@@ -815,14 +906,18 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     return result ?? favorTable[0];
-  }, [totalExp]);
+  }, [
+    totalExp,
+  ]);
 
   const currentLevel = useMemo(() => {
     return (
       favorTable.find((entry) => entry.level === nextLevel.level - 1) ??
       favorTable[0]
     );
-  }, [nextLevel]);
+  }, [
+    nextLevel,
+  ]);
 
   async function handleCreateInventory(name?: string) {
     if (busy) {
@@ -887,20 +982,34 @@ export function BondView({ students, gifts }: BondViewProps) {
         studentId: selectedStudent.id,
         currentExp: currentBondExp,
         targetExp: targetBondExp ?? undefined,
-        gifts: gifts.map((gift) => ({ id: gift.id, count: 0 })),
+        gifts: gifts.map((gift) => ({
+          id: gift.id,
+          count: 0,
+        })),
         giftBoxCount: 0,
       });
 
       setSelectedTargetId(id);
       setTargetAllocations((prev) => ({
         ...prev,
-        [id]: Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
+        [id]: Object.fromEntries(
+          gifts.map((gift) => [
+            gift.id,
+            0,
+          ]),
+        ),
       }));
       setTargetBoxAllocations((prev) => ({
         ...prev,
         [id]: 0,
       }));
-      setFilterStudentIds((prev) => new Set([...prev, selectedStudent.id]));
+      setFilterStudentIds(
+        (prev) =>
+          new Set([
+            ...prev,
+            selectedStudent.id,
+          ]),
+      );
 
       markAsSaved();
 
@@ -965,7 +1074,9 @@ export function BondView({ students, gifts }: BondViewProps) {
     setBusy(true);
 
     try {
-      await destroyInventoryMutation({ id: selectedInvenetoryId });
+      await destroyInventoryMutation({
+        id: selectedInvenetoryId,
+      });
 
       toast.success(t("tools.bond.toasts.inventoryDeleteSuccess"));
 
@@ -974,7 +1085,14 @@ export function BondView({ students, gifts }: BondViewProps) {
       updateCurrentBondExp("0", true);
       updateTargetBondExp("", true);
       setSelectedStudent(null);
-      setGiftCounts(Object.fromEntries(gifts.map((gift) => [gift.id, 0])));
+      setGiftCounts(
+        Object.fromEntries(
+          gifts.map((gift) => [
+            gift.id,
+            0,
+          ]),
+        ),
+      );
       setTargetAllocations({});
       setTargetBoxAllocations({});
       setFilterStudentIds(new Set());
@@ -1001,17 +1119,23 @@ export function BondView({ students, gifts }: BondViewProps) {
     setBusy(true);
 
     try {
-      await destroyTargetMutation({ id: selectedTargetId });
+      await destroyTargetMutation({
+        id: selectedTargetId,
+      });
 
       toast.success(t("tools.bond.toasts.targetDeleteSuccess"));
 
       setTargetAllocations((prev) => {
-        const next = { ...prev };
+        const next = {
+          ...prev,
+        };
         delete next[selectedTargetId];
         return next;
       });
       setTargetBoxAllocations((prev) => {
-        const next = { ...prev };
+        const next = {
+          ...prev,
+        };
         delete next[selectedTargetId];
         return next;
       });
@@ -1042,7 +1166,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       updateTargetBondExp("", true);
       setSelectedStudent(null);
       setGiftCountsUnchecked(
-        Object.fromEntries(gifts.map((gift) => [gift.id, 0])),
+        Object.fromEntries(
+          gifts.map((gift) => [
+            gift.id,
+            0,
+          ]),
+        ),
       );
       setTargetAllocationsUnchecked({});
       setTargetBoxAllocationsUnchecked({});
@@ -1121,7 +1250,11 @@ export function BondView({ students, gifts }: BondViewProps) {
     setFilterStudentIds(
       new Set(inventoryQuery.data.targets.map((target) => target.studentId)),
     );
-  }, [inventoryQuery.status, inventoryQuery.data?.inventory._id, giftIds]);
+  }, [
+    inventoryQuery.status,
+    inventoryQuery.data?.inventory._id,
+    giftIds,
+  ]);
 
   useEffect(() => {
     if (!inventoryQuery.data || !selectedTargetId) {
@@ -1140,7 +1273,11 @@ export function BondView({ students, gifts }: BondViewProps) {
     );
     updateCurrentBondExp(target.currentExp.toString(), true);
     updateTargetBondExp(target.targetExp?.toString() ?? "", true);
-  }, [selectedTargetId, inventoryQuery.data, students]);
+  }, [
+    selectedTargetId,
+    inventoryQuery.data,
+    students,
+  ]);
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-6">

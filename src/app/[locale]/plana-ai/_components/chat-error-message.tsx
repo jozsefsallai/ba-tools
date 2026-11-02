@@ -1,10 +1,10 @@
 "use client";
 
+import { RefreshCwIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { RefreshCwIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export function ChatErrorMessage({
   message,

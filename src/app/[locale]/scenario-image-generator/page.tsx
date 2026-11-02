@@ -1,9 +1,9 @@
+import { HelpCircleIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ScenarioEditorView } from "@/app/[locale]/scenario-image-generator/_components/scenario-editor-view";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { HelpCircleIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("scenario-image-generator", await getLocale());

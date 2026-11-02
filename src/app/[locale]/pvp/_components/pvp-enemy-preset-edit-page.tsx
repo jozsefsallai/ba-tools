@@ -1,9 +1,9 @@
 "use client";
 
-import { PVPEnemyPresetForm } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-form";
-import { MessageBox } from "@/components/common/message-box";
 import { useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
+import { PVPEnemyPresetForm } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-form";
+import { MessageBox } from "@/components/common/message-box";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -16,7 +16,10 @@ export function PVPEnemyPresetEditPage({
 }) {
   const t = useTranslations();
 
-  const preset = useQuery(api.pvp.getEnemyPreset, { seasonId, presetId });
+  const preset = useQuery(api.pvp.getEnemyPreset, {
+    seasonId,
+    presetId,
+  });
 
   if (preset === undefined) {
     return <MessageBox>{t("tools.pvp.presets.loadingEnemy")}</MessageBox>;

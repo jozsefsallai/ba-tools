@@ -1,6 +1,5 @@
 "use client";
 
-import type { NavigationGuardController } from "@/lib/navigation-guard";
 import {
   createContext,
   useCallback,
@@ -10,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { NavigationGuardController } from "@/lib/navigation-guard";
 
 export const NavigationGuardContext =
   createContext<NavigationGuardController | null>(null);
@@ -20,7 +20,9 @@ export function useNavigationGuardController() {
 
 export function useNavigationGuard({
   enabled,
-}: { enabled: boolean | (() => boolean) }) {
+}: {
+  enabled: boolean | (() => boolean);
+}) {
   const controller = useNavigationGuardController();
   if (!controller) {
     throw new Error("useNavigationGuard requires NavigationGuardProvider");
@@ -44,11 +46,30 @@ export function useNavigationGuard({
             : enabledRef.current,
         setActive,
       }),
-    [controller, id],
+    [
+      controller,
+      id,
+    ],
   );
 
-  const accept = useCallback(() => controller.accept(id), [controller, id]);
-  const reject = useCallback(() => controller.reject(id), [controller, id]);
+  const accept = useCallback(
+    () => controller.accept(id),
+    [
+      controller,
+      id,
+    ],
+  );
+  const reject = useCallback(
+    () => controller.reject(id),
+    [
+      controller,
+      id,
+    ],
+  );
 
-  return { active, accept, reject };
+  return {
+    active,
+    accept,
+    reject,
+  };
 }

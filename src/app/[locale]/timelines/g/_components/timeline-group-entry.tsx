@@ -1,8 +1,8 @@
+import { useMemo } from "react";
 import { StudentCard } from "@/components/common/student-card";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import { useMemo } from "react";
 import type { Doc } from "~convex/dataModel";
 import type { Student } from "~prisma";
 
@@ -23,7 +23,10 @@ export function TimelineGroupEntry({ entry }: OwnTimelineEntryProps) {
     }
 
     return allStudents.filter((student) => studentIds.has(student.id));
-  }, [allStudents, entry.items]);
+  }, [
+    allStudents,
+    entry.items,
+  ]);
 
   return (
     <article className="border bg-background rounded-md py-4 px-8 flex items-center justify-between gap-4 max-md:flex-col max-md:items-stretch max-md:px-4">
@@ -43,7 +46,12 @@ export function TimelineGroupEntry({ entry }: OwnTimelineEntryProps) {
 
           <div className="flex gap-1 items-center max-md:flex-wrap">
             {uniqueStudents.map((student) => (
-              <div style={{ zoom: 0.55 }} key={student.id}>
+              <div
+                style={{
+                  zoom: 0.55,
+                }}
+                key={student.id}
+              >
                 <StudentCard student={student} />
               </div>
             ))}

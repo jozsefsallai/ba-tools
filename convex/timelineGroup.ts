@@ -20,7 +20,9 @@ export const getOwn = authenticatedQuery({
 });
 
 export const getOwnPaginated = authenticatedQuery({
-  args: { paginationOpts: paginationOptsValidator },
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("timelineGroup")
@@ -31,7 +33,9 @@ export const getOwnPaginated = authenticatedQuery({
 });
 
 export const searchOwn = authenticatedQuery({
-  args: { search: v.string() },
+  args: {
+    search: v.string(),
+  },
   handler: async (ctx, args) => {
     const all = await ctx.db
       .query("timelineGroup")
@@ -48,7 +52,9 @@ export const searchOwn = authenticatedQuery({
 });
 
 export const getOwnById = authenticatedQuery({
-  args: { id: v.id("timelineGroup") },
+  args: {
+    id: v.id("timelineGroup"),
+  },
   handler: async (ctx, { id }) => {
     const timelineGroup = await ctx.db.get(id);
 
@@ -72,7 +78,9 @@ export const getOwnById = authenticatedQuery({
 });
 
 export const getById = query({
-  args: { id: v.id("timelineGroup") },
+  args: {
+    id: v.id("timelineGroup"),
+  },
   handler: async (ctx, { id }) => {
     const timelineGroup = await ctx.db.get(id);
     if (!timelineGroup) {
@@ -154,7 +162,10 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: { id: v.id("timelineGroup"), ...timelineGroupUpdateArgs },
+  args: {
+    id: v.id("timelineGroup"),
+    ...timelineGroupUpdateArgs,
+  },
   handler: async (
     ctx,
     { id, name, description, visibility, showCreator, timelines },
@@ -176,7 +187,9 @@ export const update = authenticatedMutation({
 });
 
 export const destroy = authenticatedMutation({
-  args: { id: v.id("timelineGroup") },
+  args: {
+    id: v.id("timelineGroup"),
+  },
   handler: async (ctx, { id }) => {
     const timelineGroup = await ctx.db.get(id);
     if (!timelineGroup || timelineGroup.userId !== ctx.user._id) {

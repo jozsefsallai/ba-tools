@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
+import { ResizeFit, Transformer } from "@napi-rs/image";
 import {
+  describePvpIcon,
   PVP_ICON_CATALOG_FORMAT,
   PVP_ICON_TEMPLATE_HEIGHT,
   PVP_ICON_TEMPLATE_WIDTH,
-  describePvpIcon,
 } from "@/lib/pvp/icon-match";
-import { ResizeFit, Transformer } from "@napi-rs/image";
 
 // Change this when rendering changes, even if the descriptor wire size does not
 export const PVP_ICON_PREPROCESSING_VERSION = 2;
@@ -61,7 +61,11 @@ export function describePvpIconReference(
 
   const cover = (input: Uint8Array) =>
     new Transformer(input)
-      .resize({ width, height, fit: ResizeFit.Cover })
+      .resize({
+        width,
+        height,
+        fit: ResizeFit.Cover,
+      })
       .opacity(1)
       .rawPixelsSync();
 

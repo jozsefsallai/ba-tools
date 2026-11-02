@@ -1,5 +1,5 @@
-import type { Student } from "~prisma";
 import { createContext, useContext } from "react";
+import type { Student } from "~prisma";
 
 export type StudentsContext = {
   students: Student[];

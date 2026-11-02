@@ -1,11 +1,11 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
 import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
 
 type SuggestionKey = "greeting" | "lore" | "teaParty" | "affection";
 
@@ -42,7 +42,9 @@ export function ChatEmptyState({
     return t("tools.plana.emptyState.suggestions.greetingEvening");
   };
   const heading = senseiName
-    ? t("tools.plana.emptyState.headingNamed", { name: senseiName })
+    ? t("tools.plana.emptyState.headingNamed", {
+        name: senseiName,
+      })
     : t("tools.plana.emptyState.heading");
 
   return (

@@ -25,7 +25,9 @@ export async function getPublicRoster(gameServer: string, friendCode: string) {
 export async function getPublicTimeline(id: string) {
   const { isOwn: _isOwn, ...timeline } = await publicQuery(
     api.timeline.getById,
-    { id: id as Id<"timeline"> },
+    {
+      id: id as Id<"timeline">,
+    },
   );
 
   if (timeline.visibility !== "public") {
@@ -38,7 +40,9 @@ export async function getPublicTimeline(id: string) {
 export async function getPublicTimelineGroup(id: string) {
   const { isOwn: _isOwn, ...group } = await publicQuery(
     api.timelineGroup.getById,
-    { id: id as Id<"timelineGroup"> },
+    {
+      id: id as Id<"timelineGroup">,
+    },
   );
 
   if (group.visibility !== "public") {

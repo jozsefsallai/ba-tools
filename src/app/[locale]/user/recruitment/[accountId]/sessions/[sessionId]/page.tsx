@@ -1,10 +1,13 @@
-import { RecruitmentSessionEditor } from "@/app/[locale]/user/recruitment/recruitment-session-editor";
 import { auth } from "@clerk/nextjs/server";
+import { RecruitmentSessionEditor } from "@/app/[locale]/user/recruitment/recruitment-session-editor";
 
 export default async function RecruitmentSessionPage({
   params,
 }: {
-  params: Promise<{ accountId: string; sessionId: string }>;
+  params: Promise<{
+    accountId: string;
+    sessionId: string;
+  }>;
 }) {
   await auth.protect();
   const { accountId, sessionId } = await params;

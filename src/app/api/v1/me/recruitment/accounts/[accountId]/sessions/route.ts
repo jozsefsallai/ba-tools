@@ -5,7 +5,9 @@ import {
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
 
-type Params = { accountId: string };
+type Params = {
+  accountId: string;
+};
 
 export const GET = userRoute<Params>(async (_req, { accountId }, userId) => {
   return ok(await listRecruitmentSessions(userId, accountId), {

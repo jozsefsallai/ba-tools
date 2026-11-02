@@ -22,7 +22,9 @@ const mxDataSyncPackages = existsSync(mxDataSyncEntry)
       (
         JSON.parse(
           readFileSync(resolve("vendor/mx-data-sync/package.json"), "utf8"),
-        ) as { dependencies?: Record<string, string> }
+        ) as {
+          dependencies?: Record<string, string>;
+        }
       ).dependencies ?? {},
     ).map(([name, version]) => `${name}@${version}`)
   : [];
@@ -42,24 +44,37 @@ export default defineConfig({
       randomize: true,
     },
   },
-  dirs: ["./src/trigger"],
+  dirs: [
+    "./src/trigger",
+  ],
   build: {
-    external: ["sharp"],
+    external: [
+      "sharp",
+    ],
     extensions: [
       prismaExtension({
         mode: "modern",
       }),
       ...(mxDataSyncPackages.length > 0
-        ? [additionalPackages({ packages: mxDataSyncPackages })]
+        ? [
+            additionalPackages({
+              packages: mxDataSyncPackages,
+            }),
+          ]
         : []),
       esbuildPlugin({
         name: "mx-data-sync",
         setup(build) {
-          build.onResolve({ filter: /^mx-data-sync:entry$/ }, () => ({
-            path: existsSync(mxDataSyncEntry)
-              ? mxDataSyncEntry
-              : mxDataSyncStub,
-          }));
+          build.onResolve(
+            {
+              filter: /^mx-data-sync:entry$/,
+            },
+            () => ({
+              path: existsSync(mxDataSyncEntry)
+                ? mxDataSyncEntry
+                : mxDataSyncStub,
+            }),
+          );
 
           const outdir = build.initialOptions.outdir;
           if (!existsSync(mxSpineWorker) || !outdir) {
@@ -72,12 +87,16 @@ export default defineConfig({
             }
 
             await build.esbuild.build({
-              entryPoints: [mxSpineWorker],
+              entryPoints: [
+                mxSpineWorker,
+              ],
               outfile: join(outdir, mxSpineWorkerBundle),
               bundle: true,
               platform: "node",
               format: "esm",
-              external: ["sharp"],
+              external: [
+                "sharp",
+              ],
               target: "node22",
               logLevel: "warning",
             });

@@ -1,5 +1,34 @@
 "use client";
 
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  type Modifier,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ChevronDownIcon, GripVerticalIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  memo,
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { RosterItem } from "@/app/[locale]/user/rosters/_components/roster-item-editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,38 +46,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TOUCH_DRAG_CLASS, preventTouchContextMenu } from "@/lib/dnd-mobile";
+import { preventTouchContextMenu, TOUCH_DRAG_CLASS } from "@/lib/dnd-mobile";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import {
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  type Modifier,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { ChevronDownIcon, GripVerticalIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import {
-  type PropsWithChildren,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
 
 export type ReorderRosterDialogProps = PropsWithChildren & {
   rosterItems: RosterItem[];
@@ -63,7 +63,9 @@ const restrictToVerticalAxis: Modifier = ({ transform }) => ({
 });
 
 function sortRosterItems(items: RosterItem[], key: SortKey): RosterItem[] {
-  const sorted = [...items];
+  const sorted = [
+    ...items,
+  ];
 
   switch (key) {
     case "name":
@@ -121,7 +123,9 @@ const SortableRosterRow = memo(function SortableRosterRow({
 
   const iconUrl = useMemo(
     () => buildStudentIconUrl(rosterItem.student),
-    [rosterItem.student],
+    [
+      rosterItem.student,
+    ],
   );
 
   return (
@@ -165,12 +169,22 @@ export function ReorderRosterDialog({
     if (open) {
       setDraftItems(rosterItems);
     }
-  }, [open, rosterItems]);
+  }, [
+    open,
+    rosterItems,
+  ]);
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -179,12 +193,17 @@ export function ReorderRosterDialog({
 
   const sortableIds = useMemo(
     () => draftItems.map((item) => item.student.id),
-    [draftItems],
+    [
+      draftItems,
+    ],
   );
 
   const hasChanges = useMemo(
     () => hasRosterOrderChanged(rosterItems, draftItems),
-    [rosterItems, draftItems],
+    [
+      rosterItems,
+      draftItems,
+    ],
   );
 
   const handleDragEnd = useCallback(({ active, over }: DragEndEvent) => {
@@ -236,7 +255,9 @@ export function ReorderRosterDialog({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
+          modifiers={[
+            restrictToVerticalAxis,
+          ]}
           onDragEnd={handleDragEnd}
         >
           <SortableContext

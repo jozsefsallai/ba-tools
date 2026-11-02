@@ -1,5 +1,11 @@
 "use client";
 
+import { usePaginatedQuery, useQuery } from "convex/react";
+import { addDays, format, startOfDay, subDays } from "date-fns";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PVPMatchGroup } from "@/app/[locale]/pvp/_components/pvp-match-group";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -9,12 +15,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRouter } from "@/i18n/navigation";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import { addDays, format, startOfDay, subDays } from "date-fns";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -70,8 +70,14 @@ function PVPMatchDay({
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.pvp.getMatchesForDay,
-    { seasonId, dayStart, dayEnd },
-    { initialNumItems: DAY_PAGE_SIZE },
+    {
+      seasonId,
+      dayStart,
+      dayEnd,
+    },
+    {
+      initialNumItems: DAY_PAGE_SIZE,
+    },
   );
 
   const dayStats = useQuery(api.pvp.getDayStats, {
@@ -85,7 +91,12 @@ function PVPMatchDay({
       dayStart,
       status === "LoadingFirstPage" ? null : results.length > 0,
     );
-  }, [dayStart, onStateChange, results.length, status]);
+  }, [
+    dayStart,
+    onStateChange,
+    results.length,
+    status,
+  ]);
 
   if (status === "LoadingFirstPage") {
     return null;
@@ -99,7 +110,10 @@ function PVPMatchDay({
     <PVPMatchGroup
       seasonId={seasonId}
       seasonNumber={seasonNumber}
-      group={{ dayTimestamp: dayStart, matches: results }}
+      group={{
+        dayTimestamp: dayStart,
+        matches: results,
+      }}
       stats={dayStats}
       paginationStatus={status}
       loadMore={loadMore}
@@ -126,8 +140,16 @@ export function PVPMatchesList({
   };
 
   const days = useMemo(
-    () => Array.from({ length: 7 }, (_, index) => subDays(selectedEnd, index)),
-    [selectedEnd],
+    () =>
+      Array.from(
+        {
+          length: 7,
+        },
+        (_, index) => subDays(selectedEnd, index),
+      ),
+    [
+      selectedEnd,
+    ],
   );
 
   const [dayStates, setDayStates] = useState<Record<number, boolean | null>>(
@@ -138,7 +160,9 @@ export function PVPMatchesList({
 
   useEffect(() => {
     setDayStates({});
-  }, [rangeKey]);
+  }, [
+    rangeKey,
+  ]);
 
   const handleDayStateChange = useCallback(
     (dayTimestamp: number, hasMatches: boolean | null) => {
@@ -147,7 +171,10 @@ export function PVPMatchesList({
           return current;
         }
 
-        return { ...current, [dayTimestamp]: hasMatches };
+        return {
+          ...current,
+          [dayTimestamp]: hasMatches,
+        };
       });
     },
     [],

@@ -8,7 +8,9 @@ import type {
 
 async function parseError(res: Response) {
   try {
-    const data = (await res.json()) as { error?: string };
+    const data = (await res.json()) as {
+      error?: string;
+    };
     return data.error ?? res.statusText;
   } catch {
     return res.statusText;
@@ -20,7 +22,9 @@ export async function createAdminBanner(
 ): Promise<AdminBanner> {
   const res = await fetch("/api/admin/banners", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(input),
   });
 
@@ -37,7 +41,9 @@ export async function updateAdminBanner(
 ): Promise<AdminBanner> {
   const res = await fetch(`/api/admin/banners/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(input),
   });
 
@@ -60,10 +66,16 @@ export async function deleteAdminBanner(id: string): Promise<void> {
 
 export async function updateAdminBannerGroup(
   input: UpdateGameBannerGroupInput,
-): Promise<{ startDate: string; endDate: string; updatedCount: number }> {
+): Promise<{
+  startDate: string;
+  endDate: string;
+  updatedCount: number;
+}> {
   const res = await fetch("/api/admin/banners/group", {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(input),
   });
 
@@ -76,10 +88,15 @@ export async function updateAdminBannerGroup(
 
 export async function offsetAdminBanners(
   input: OffsetGameBannersInput,
-): Promise<{ updatedCount: number; banners: AdminBanner[] }> {
+): Promise<{
+  updatedCount: number;
+  banners: AdminBanner[];
+}> {
   const res = await fetch("/api/admin/banners/offset", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(input),
   });
 

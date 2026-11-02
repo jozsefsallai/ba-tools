@@ -1,5 +1,10 @@
 "use client";
 
+import { format } from "date-fns";
+import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { createAdminBanner } from "@/app/[locale]/admin/(content)/banners/_lib/api";
 import type { AdminBanner } from "@/app/[locale]/admin/(content)/banners/types";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -25,11 +30,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { bannerGroupKey } from "@/lib/admin/game-banner-dates";
-import { format } from "date-fns";
-import { XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { type PropsWithChildren, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import type { Student } from "~prisma";
 
 export type BannerGroupOption = {
@@ -60,7 +60,10 @@ export function NewBannerDialog({
 
   const selectedGroup = useMemo(
     () => groups.find((group) => group.key === groupKey) ?? groups[0],
-    [groupKey, groups],
+    [
+      groupKey,
+      groups,
+    ],
   );
 
   async function handleCreate() {
@@ -201,7 +204,10 @@ export function NewBannerDialog({
                   if (prev.some((s) => s.id === student.id)) {
                     return prev;
                   }
-                  return [...prev, student];
+                  return [
+                    ...prev,
+                    student,
+                  ];
                 });
               }}
             >
@@ -229,7 +235,10 @@ export function NewBannerDialog({
 }
 
 export function groupOptionsFromEntries(
-  entries: Array<{ startDate: string; endDate: string }>,
+  entries: Array<{
+    startDate: string;
+    endDate: string;
+  }>,
 ): BannerGroupOption[] {
   const seen = new Set<string>();
   const options: BannerGroupOption[] = [];

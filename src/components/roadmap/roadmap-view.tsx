@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  ChartNoAxesGanttIcon,
+  ClockIcon,
+  FilterIcon,
+  GlobeIcon,
+  ListIcon,
+  ZoomInIcon,
+} from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 import { RoadmapList } from "@/components/roadmap/roadmap-list";
 import { RoadmapTimeZoneProvider } from "@/components/roadmap/roadmap-time-zone";
 import { RoadmapTimeline } from "@/components/roadmap/roadmap-timeline";
@@ -12,21 +21,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ROADMAP_CATEGORIES, getCategorySwatch } from "@/lib/roadmap/constants";
+import { getCategorySwatch, ROADMAP_CATEGORIES } from "@/lib/roadmap/constants";
 import { type RoadmapTimeZone, startOfDay } from "@/lib/roadmap/time-zone";
 import type { RoadmapCategory, RoadmapItem } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
-import {
-  ChartNoAxesGanttIcon,
-  ClockIcon,
-  FilterIcon,
-  GlobeIcon,
-  ListIcon,
-  ZoomInIcon,
-} from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
 
-export const DAY_WIDTHS = [24, 40, 64] as const;
+export const DAY_WIDTHS = [
+  24,
+  40,
+  64,
+] as const;
 export type RoadmapViewMode = "timeline" | "text";
 
 type StoredPrefs = {
@@ -63,7 +67,10 @@ export function useRoadmapRangeStart(
     if (today.getTime() !== rangeStart.getTime()) {
       setRangeStart(today);
     }
-  }, [rangeStart, tz]);
+  }, [
+    rangeStart,
+    tz,
+  ]);
 
   return rangeStart;
 }
@@ -94,17 +101,26 @@ export function useRoadmapControls(storageKey: string, allowText = true) {
       hidden: Array.isArray(prefs.hidden) ? prefs.hidden : prev.hidden,
       timeZone: prefs.timeZone === "local" ? "local" : "utc",
     }));
-  }, [storageKey, allowText]);
+  }, [
+    storageKey,
+    allowText,
+  ]);
 
   const update = (patch: Partial<RoadmapControlsState>) => {
     setState((prev) => {
-      const next = { ...prev, ...patch };
+      const next = {
+        ...prev,
+        ...patch,
+      };
       writePrefs(storageKey, next);
       return next;
     });
   };
 
-  return [state, update] as const;
+  return [
+    state,
+    update,
+  ] as const;
 }
 
 export function RoadmapControls({
@@ -132,7 +148,9 @@ export function RoadmapControls({
           value={state.view}
           onValueChange={(value) => {
             if (value) {
-              onChange({ view: value as RoadmapViewMode });
+              onChange({
+                view: value as RoadmapViewMode,
+              });
             }
           }}
           aria-label={labels.t("static.roadmap.view.label")}
@@ -156,7 +174,9 @@ export function RoadmapControls({
         value={state.timeZone}
         onValueChange={(value) => {
           if (value) {
-            onChange({ timeZone: value as RoadmapTimeZone });
+            onChange({
+              timeZone: value as RoadmapTimeZone,
+            });
           }
         }}
         aria-label={labels.t("static.roadmap.timeZone.label")}
@@ -183,7 +203,9 @@ export function RoadmapControls({
             value={String(state.dayWidth)}
             onValueChange={(value) => {
               if (value) {
-                onChange({ dayWidth: Number(value) });
+                onChange({
+                  dayWidth: Number(value),
+                });
               }
             }}
             aria-label={labels.t("static.roadmap.zoom")}
@@ -221,7 +243,10 @@ export function RoadmapControls({
                 onChange({
                   hidden: checked
                     ? state.hidden.filter((c) => c !== category)
-                    : [...state.hidden, category],
+                    : [
+                        ...state.hidden,
+                        category,
+                      ],
                 })
               }
             >

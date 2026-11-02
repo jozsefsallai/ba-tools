@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { db } from "@/lib/db";
 import type {
   SkillEffectCategory,
@@ -8,11 +9,16 @@ import type {
   StudentSkillSource,
 } from "@/lib/db/client";
 import { buildEffectIconUrl, buildSkillIconUrl } from "@/lib/url";
-import { cache } from "react";
 
 const TEXT_LOCALES: Record<string, SkillLocale[]> = {
-  en: ["en", "jp"],
-  ja: ["jp", "en"],
+  en: [
+    "en",
+    "jp",
+  ],
+  ja: [
+    "jp",
+    "en",
+  ],
 };
 
 export type StudentSkillView = {
@@ -56,10 +62,11 @@ export type StudentSkillsView = {
   effects: Record<string, SkillEffectView>;
 };
 
-function pick<T extends { locale: SkillLocale }>(
-  texts: T[],
-  locales: SkillLocale[],
-): T | null {
+function pick<
+  T extends {
+    locale: SkillLocale;
+  },
+>(texts: T[], locales: SkillLocale[]): T | null {
   for (const locale of locales) {
     const text = texts.find((t) => t.locale === locale);
     if (text) {
@@ -75,14 +82,32 @@ export const getStudentSkills = cache(
     const locales = TEXT_LOCALES[locale] ?? TEXT_LOCALES.en;
 
     const rows = await db.studentSkill.findMany({
-      where: { studentId },
-      orderBy: { sortOrder: "asc" },
+      where: {
+        studentId,
+      },
+      orderBy: {
+        sortOrder: "asc",
+      },
       include: {
-        texts: { where: { locale: { in: locales } } },
+        texts: {
+          where: {
+            locale: {
+              in: locales,
+            },
+          },
+        },
         effects: {
           select: {
             effect: {
-              include: { texts: { where: { locale: { in: locales } } } },
+              include: {
+                texts: {
+                  where: {
+                    locale: {
+                      in: locales,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -142,6 +167,9 @@ export const getStudentSkills = cache(
       });
     }
 
-    return { skills, effects };
+    return {
+      skills,
+      effects,
+    };
   },
 );

@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { FileJsonIcon, UploadIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { type DragEvent, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -15,11 +20,6 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useStudents } from "@/hooks/use-students";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
-import { useMutation } from "convex/react";
-import { FileJsonIcon, UploadIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { type DragEvent, useRef, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -27,8 +27,12 @@ import type { Student } from "~prisma";
 const IMPORT_BATCH_SIZE = 100;
 
 type ImportedMatch = {
-  attackTeam: Array<{ studentId?: string }>;
-  defenseTeam: Array<{ studentId?: string }>;
+  attackTeam: Array<{
+    studentId?: string;
+  }>;
+  defenseTeam: Array<{
+    studentId?: string;
+  }>;
   attackWins: boolean;
   videoUrl?: string;
 };
@@ -108,7 +112,9 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
     setIsValidating(true);
 
     if (students.length === 0) {
-      setValidationErrors([t("tools.pvp.bulkImport.studentsUnavailable")]);
+      setValidationErrors([
+        t("tools.pvp.bulkImport.studentsUnavailable"),
+      ]);
       setIsValidating(false);
       return;
     }
@@ -149,7 +155,11 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
 
           const row = index + 1;
           if (!isRecord(value)) {
-            errors.push(t("tools.pvp.bulkImport.invalidRow", { row }));
+            errors.push(
+              t("tools.pvp.bulkImport.invalidRow", {
+                row,
+              }),
+            );
             continue;
           }
 
@@ -164,22 +174,36 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
             !Array.isArray(defense) ||
             defense.length !== 6
           ) {
-            errors.push(t("tools.pvp.bulkImport.invalidFormation", { row }));
+            errors.push(
+              t("tools.pvp.bulkImport.invalidFormation", {
+                row,
+              }),
+            );
             continue;
           }
 
           if (typeof attackWins !== "boolean") {
-            errors.push(t("tools.pvp.bulkImport.invalidResult", { row }));
+            errors.push(
+              t("tools.pvp.bulkImport.invalidResult", {
+                row,
+              }),
+            );
             continue;
           }
 
           if (videoUrl !== undefined && typeof videoUrl !== "string") {
-            errors.push(t("tools.pvp.bulkImport.invalidVideoUrl", { row }));
+            errors.push(
+              t("tools.pvp.bulkImport.invalidVideoUrl", {
+                row,
+              }),
+            );
             continue;
           }
 
           const resolveTeam = (values: unknown[], label: string) => {
-            const team: Array<{ studentId?: string }> = [];
+            const team: Array<{
+              studentId?: string;
+            }> = [];
             let hasStriker = false;
             const ids = new Set<string>();
             let valid = true;
@@ -227,17 +251,25 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
               }
 
               ids.add(student.id);
-              team.push({ studentId: student.id });
+              team.push({
+                studentId: student.id,
+              });
             }
 
             if (!hasStriker) {
               errors.push(
-                t("tools.pvp.bulkImport.missingStriker", { row, label }),
+                t("tools.pvp.bulkImport.missingStriker", {
+                  row,
+                  label,
+                }),
               );
               valid = false;
             }
 
-            return { team, valid };
+            return {
+              team,
+              valid,
+            };
           };
 
           const attackTeam = resolveTeam(attack, "attack");
@@ -259,10 +291,14 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
 
     setValidationErrors(errors);
     setUnresolvedStudents(
-      [...unresolved.entries()].map(([value, rows]) =>
+      [
+        ...unresolved.entries(),
+      ].map(([value, rows]) =>
         t("tools.pvp.bulkImport.unresolvedStudent", {
           value,
-          rows: [...rows].join(", "),
+          rows: [
+            ...rows,
+          ].join(", "),
         }),
       ),
     );
@@ -307,7 +343,10 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
         let cursor: string | undefined;
 
         do {
-          const page = await clearSeasonMatches({ seasonId, cursor });
+          const page = await clearSeasonMatches({
+            seasonId,
+            cursor,
+          });
           cursor = page.isDone ? undefined : page.continueCursor;
         } while (cursor);
 
@@ -316,12 +355,17 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
 
       for (let index = 0; index < matches.length; index += IMPORT_BATCH_SIZE) {
         const batch = matches.slice(index, index + IMPORT_BATCH_SIZE);
-        await importMatches({ seasonId, matches: batch });
+        await importMatches({
+          seasonId,
+          matches: batch,
+        });
         setProcessed(Math.min(index + batch.length, matches.length));
       }
 
       toast.success(
-        t("tools.pvp.bulkImport.completed", { count: matches.length }),
+        t("tools.pvp.bulkImport.completed", {
+          count: matches.length,
+        }),
       );
 
       setOpen(false);
@@ -440,7 +484,9 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
 
           {matches.length > 0 && !isImporting && (
             <p className="text-sm text-muted-foreground">
-              {t("tools.pvp.bulkImport.ready", { count: matches.length })}
+              {t("tools.pvp.bulkImport.ready", {
+                count: matches.length,
+              })}
             </p>
           )}
 

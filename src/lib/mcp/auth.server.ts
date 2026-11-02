@@ -23,7 +23,9 @@ export async function verifyMcpToken(
     return undefined;
   }
 
-  const result = await auth({ acceptsToken: "oauth_token" });
+  const result = await auth({
+    acceptsToken: "oauth_token",
+  });
   if (!result.isAuthenticated || !result.userId.startsWith("user_")) {
     return undefined;
   }
@@ -32,7 +34,9 @@ export async function verifyMcpToken(
     token: bearerToken,
     clientId: result.clientId,
     scopes: result.scopes,
-    extra: { userId: result.userId },
+    extra: {
+      userId: result.userId,
+    },
   };
 }
 

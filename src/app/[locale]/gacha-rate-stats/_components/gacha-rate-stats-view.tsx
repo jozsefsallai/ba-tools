@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface AttemptProps {
   index: number;
@@ -109,7 +109,10 @@ export function GachaRateStatsView() {
   const [attempts, setAttempts] = useState<number[]>([]);
 
   function addAttempt(count: number) {
-    setAttempts([...attempts, count]);
+    setAttempts([
+      ...attempts,
+      count,
+    ]);
   }
 
   function removeAttempt(idx: number) {
@@ -125,11 +128,20 @@ export function GachaRateStatsView() {
           <p className="mb-3 text-center">{t("tools.gachaStats.question")}</p>
 
           <div className="flex w-full flex-wrap justify-center gap-2 sm:w-auto sm:flex-nowrap sm:gap-3">
-            {Array.from({ length: 11 }, (_, i) => (
-              <Button key={`add-${i}`} size="sm" onClick={() => addAttempt(i)}>
-                {i}
-              </Button>
-            ))}
+            {Array.from(
+              {
+                length: 11,
+              },
+              (_, i) => (
+                <Button
+                  key={`add-${i}`}
+                  size="sm"
+                  onClick={() => addAttempt(i)}
+                >
+                  {i}
+                </Button>
+              ),
+            )}
           </div>
         </div>
 

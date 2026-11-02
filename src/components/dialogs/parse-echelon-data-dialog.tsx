@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,8 +16,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { type EchelonData, parseEchelon } from "@/lib/echelon-parser";
-import { type PropsWithChildren, useCallback, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
 
 const EXAMPLE = `Hikari: lv.90 UE40
 Seia [S]: lv.90 4*
@@ -44,7 +44,11 @@ export function ParseEchelonDataDialog({
     const data = parseEchelon(students, raw);
     onParse(data);
     closeRef.current?.click();
-  }, [onParse, raw, students]);
+  }, [
+    onParse,
+    raw,
+    students,
+  ]);
 
   return (
     <Dialog>
@@ -52,8 +56,12 @@ export function ParseEchelonDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("tools.formationDisplay.parseDialog.title")}</DialogTitle>
-          <DialogDescription>{t("tools.formationDisplay.parseDialog.description")}</DialogDescription>
+          <DialogTitle>
+            {t("tools.formationDisplay.parseDialog.title")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("tools.formationDisplay.parseDialog.description")}
+          </DialogDescription>
         </DialogHeader>
 
         <Textarea

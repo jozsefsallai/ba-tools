@@ -1,14 +1,14 @@
 "use client";
 
+import { useQuery } from "convex/react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { PVPBreadcrumbs } from "@/app/[locale]/pvp/_components/pvp-breadcrumbs";
 import { PVPMatch } from "@/app/[locale]/pvp/_components/pvp-match";
 import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { useQuery } from "convex/react";
-import { ChevronLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 

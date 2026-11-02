@@ -69,7 +69,10 @@ export interface StudentSpriteManifest {
    * the slots the expressions change. Missing before version 2, and for
    * skeletons with a single expression.
    */
-  face?: { x: number; y: number };
+  face?: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface MemorialLobbySkeleton {
@@ -98,7 +101,10 @@ export interface MemorialLobbySkeleton {
    * in the draw order. `order` is the first layer's.
    */
   pageQueues?: Record<string, number>;
-  layers?: { queue: number; order: number }[];
+  layers?: {
+    queue: number;
+    order: number;
+  }[];
   /** Whether the skeleton is shown before the timeline switches it. */
   active?: boolean;
 }
@@ -207,7 +213,10 @@ export interface MemorialLobbyTimelineClip {
 export interface MemorialLobbyActivation {
   skeleton: string;
   /** Visibility changes, in time order. */
-  keys: { time: number; active: boolean }[];
+  keys: {
+    time: number;
+    active: boolean;
+  }[];
 }
 
 /**
@@ -218,7 +227,9 @@ export interface MemorialLobbyActivation {
  */
 export interface MemorialLobbyTimelineTransform {
   skeleton: string;
-  keys: ({ time: number } & MemorialLobbyTransform)[];
+  keys: ({
+    time: number;
+  } & MemorialLobbyTransform)[];
 }
 
 /** The intro: a Unity timeline the game plays when the lobby opens. */
@@ -240,10 +251,22 @@ export interface MemorialLobbyTimeline {
  */
 export type MemorialLobbyCurve =
   | number
-  | { min: number; max: number }
-  | { scale: number; curve: number[]; minCurve?: number[] };
+  | {
+      min: number;
+      max: number;
+    }
+  | {
+      scale: number;
+      curve: number[];
+      minCurve?: number[];
+    };
 
-export type MemorialLobbyColor = [r: number, g: number, b: number, a: number];
+export type MemorialLobbyColor = [
+  r: number,
+  g: number,
+  b: number,
+  a: number,
+];
 
 /** Color keys `[time, r, g, b, …]` and alpha keys `[time, a, …]`. */
 export interface MemorialLobbyGradient {
@@ -255,14 +278,34 @@ export interface MemorialLobbyGradient {
 
 /** Unity's MinMaxGradient. */
 export type MemorialLobbyColorValue =
-  | { color: MemorialLobbyColor }
-  | { colors: [MemorialLobbyColor, MemorialLobbyColor] }
-  | { gradient: MemorialLobbyGradient }
-  | { gradients: [MemorialLobbyGradient, MemorialLobbyGradient] }
+  | {
+      color: MemorialLobbyColor;
+    }
+  | {
+      colors: [
+        MemorialLobbyColor,
+        MemorialLobbyColor,
+      ];
+    }
+  | {
+      gradient: MemorialLobbyGradient;
+    }
+  | {
+      gradients: [
+        MemorialLobbyGradient,
+        MemorialLobbyGradient,
+      ];
+    }
   /** A random color picked from the gradient. */
-  | { randomGradient: MemorialLobbyGradient };
+  | {
+      randomGradient: MemorialLobbyGradient;
+    };
 
-export type MemorialLobbyVector = [x: number, y: number, z: number];
+export type MemorialLobbyVector = [
+  x: number,
+  y: number,
+  z: number,
+];
 
 /**
  * A Unity particle system, with the modules lobbies use. Distances are in the
@@ -285,7 +328,13 @@ export interface MemorialLobbyParticleSystem {
    * new ones past `maxParticles`), either paused at its end or looping
    * through part of it (`range`, 0–1 of the lifetime). Mika (Swimsuit)'s halo.
    */
-  ringBuffer: { loop: boolean; range: [number, number] } | null;
+  ringBuffer: {
+    loop: boolean;
+    range: [
+      number,
+      number,
+    ];
+  } | null;
   /**
    * Maps world vectors (velocities and forces flagged `world`, gravity) into
    * the effect's space: a 3x3 matrix, row by row. World units are the
@@ -300,7 +349,12 @@ export interface MemorialLobbyParticleSystem {
     sizeY: MemorialLobbyCurve | null;
     rotation: MemorialLobbyCurve;
     /** Rotations around x and y as well, for 3D (mesh) particles. */
-    rotation3D: [MemorialLobbyCurve, MemorialLobbyCurve] | null;
+    rotation3D:
+      | [
+          MemorialLobbyCurve,
+          MemorialLobbyCurve,
+        ]
+      | null;
     /** Share of particles that rotate the other way. */
     flipRotation: number;
     color: MemorialLobbyColorValue;
@@ -349,8 +403,16 @@ export interface MemorialLobbyParticleSystem {
     y: MemorialLobbyCurve;
     z: MemorialLobbyCurve;
     /** Radians per second around each axis. */
-    orbital: [MemorialLobbyCurve, MemorialLobbyCurve, MemorialLobbyCurve];
-    offset: [MemorialLobbyCurve, MemorialLobbyCurve, MemorialLobbyCurve];
+    orbital: [
+      MemorialLobbyCurve,
+      MemorialLobbyCurve,
+      MemorialLobbyCurve,
+    ];
+    offset: [
+      MemorialLobbyCurve,
+      MemorialLobbyCurve,
+      MemorialLobbyCurve,
+    ];
     radial: MemorialLobbyCurve;
     speedModifier: MemorialLobbyCurve;
     world: boolean;
@@ -371,7 +433,10 @@ export interface MemorialLobbyParticleSystem {
   /** Multiplies the start color over the particle's life. */
   color: MemorialLobbyColorValue | null;
   /** Multiplies the start size over the particle's life. */
-  size: { x: MemorialLobbyCurve; y: MemorialLobbyCurve | null } | null;
+  size: {
+    x: MemorialLobbyCurve;
+    y: MemorialLobbyCurve | null;
+  } | null;
   /** Rotation speed over the particle's life. */
   rotation: MemorialLobbyCurve | null;
   textureSheet: {
@@ -387,8 +452,12 @@ export interface MemorialLobbyParticleSystem {
   /** Values the material's shader reads (UV offsets, dissolve), per stream. */
   customData:
     | (
-        | { vector: MemorialLobbyCurve[] }
-        | { color: MemorialLobbyColorValue }
+        | {
+            vector: MemorialLobbyCurve[];
+          }
+        | {
+            color: MemorialLobbyColorValue;
+          }
         | null
       )[]
     | null;
@@ -437,7 +506,10 @@ export interface MemorialLobbyEffect {
   /** Whether it's shown before the timeline switches it. */
   active: boolean;
   particles?: MemorialLobbyParticleSystem;
-  mesh?: { mesh: number; material: number | null };
+  mesh?: {
+    mesh: number;
+    material: number | null;
+  };
 }
 
 /**
@@ -454,8 +526,14 @@ export interface MemorialLobbyMaterial {
     string,
     {
       texture: string;
-      scale: [number, number];
-      offset: [number, number];
+      scale: [
+        number,
+        number,
+      ];
+      offset: [
+        number,
+        number,
+      ];
       /** The texture clamps at its edges instead of repeating. */
       clamp?: true;
       /** The texture holds data (noise, masks) rather than sRGB color. */
@@ -483,7 +561,12 @@ export interface MemorialLobbyMesh {
 /** What the lobby's Unity prefab adds to its skeletons. */
 export interface MemorialLobbyScene {
   /** The game's 2732x2048 screen, in the main skeleton's coordinates (y up). */
-  camera: { x: number; y: number; width: number; height: number };
+  camera: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
   controller: MemorialLobbyController | null;
   touch: MemorialLobbyTouchArea[];
   timeline: MemorialLobbyTimeline | null;
@@ -504,7 +587,13 @@ export interface MemorialLobbyEffects {
    * When the intro timeline switches effects on and off, by index into
    * `effects`. A particle system switched on starts over.
    */
-  switches: { effect: number; keys: { time: number; active: boolean }[] }[];
+  switches: {
+    effect: number;
+    keys: {
+      time: number;
+      active: boolean;
+    }[];
+  }[];
 }
 
 export interface MemorialLobby {
@@ -651,7 +740,10 @@ export interface ExtractStudentSkillsOptions {
 }
 
 export interface ExtractStudentSkillsResult {
-  gameVersion: { jp: string; global: string | null };
+  gameVersion: {
+    jp: string;
+    global: string | null;
+  };
   effects: SkillEffectData[];
   skills: StudentSkillData[];
   missing: string[];

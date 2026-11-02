@@ -6,8 +6,16 @@ import {
 } from "../lib/db/client";
 
 export const rawGameBanner = z.object({
-  start: z.tuple([z.number().int(), z.number().int(), z.number().int()]),
-  end: z.tuple([z.number().int(), z.number().int(), z.number().int()]),
+  start: z.tuple([
+    z.number().int(),
+    z.number().int(),
+    z.number().int(),
+  ]),
+  end: z.tuple([
+    z.number().int(),
+    z.number().int(),
+    z.number().int(),
+  ]),
   students: z.array(z.string()),
   freePulls: z.number().int().optional(),
   name: z.string().optional(),
@@ -23,7 +31,11 @@ export const addGameBannersPayload = z.object({
 export type AddGameBannersPayload = z.infer<typeof addGameBannersPayload>;
 
 export const offsetGameBannersPayload = z.object({
-  currentStart: z.tuple([z.number().int(), z.number().int(), z.number().int()]),
+  currentStart: z.tuple([
+    z.number().int(),
+    z.number().int(),
+    z.number().int(),
+  ]),
   offsetDays: z.number().int(),
 });
 
@@ -55,7 +67,9 @@ const sqlcipherKey = z
   .regex(/^[0-9a-fA-F]{64}$/, "Expected 64 hex characters")
   .optional();
 
-export const listNewStudentsPayload = z.object({ sqlcipherKey });
+export const listNewStudentsPayload = z.object({
+  sqlcipherKey,
+});
 
 export type ListNewStudentsPayload = z.input<typeof listNewStudentsPayload>;
 
@@ -81,7 +95,11 @@ export const syncStudentSkillsPayload = z.object({
 export type SyncStudentSkillsPayload = z.input<typeof syncStudentSkillsPayload>;
 
 const perServerTuple = <T extends z.ZodType>(item: T) =>
-  z.tuple([item, item, item]);
+  z.tuple([
+    item,
+    item,
+    item,
+  ]);
 
 const nameOverride = z.object({
   name: z.string(),

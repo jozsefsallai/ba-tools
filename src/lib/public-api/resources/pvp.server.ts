@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { PaginationOptions } from "convex/server";
 import {
   type UserArgs,
   userMutation,
@@ -7,11 +8,14 @@ import {
 } from "@/lib/public-api/convex.server";
 import { mergeForUpdate, notFound } from "@/lib/public-api/route";
 import { toPage, toResource } from "@/lib/public-api/serialize";
-import type { PaginationOptions } from "convex/server";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
-const SEASON_UPDATE_KEYS = ["name", "gameServer", "seasonNumber"] as const;
+const SEASON_UPDATE_KEYS = [
+  "name",
+  "gameServer",
+  "seasonNumber",
+] as const;
 
 async function findSeason(userId: string, seasonId: string) {
   return await userQuery(userId, api.pvp.getSeason, {
@@ -119,7 +123,13 @@ export async function deletePvpSeason(userId: string, seasonId: string) {
 export async function listPvpMatches(
   userId: string,
   seasonId: string,
-  { from, to }: { from?: number; to?: number },
+  {
+    from,
+    to,
+  }: {
+    from?: number;
+    to?: number;
+  },
 ) {
   const id = seasonId as Id<"pvpSeason">;
 
@@ -130,7 +140,9 @@ export async function listPvpMatches(
           startDate: from ?? 0,
           endDate: to ?? Number.MAX_SAFE_INTEGER,
         })
-      : await userQuery(userId, api.pvp.getMatchesForSeason, { seasonId: id });
+      : await userQuery(userId, api.pvp.getMatchesForSeason, {
+          seasonId: id,
+        });
 
   return toResource(matches);
 }
@@ -178,7 +190,9 @@ export async function deletePvpMatch(
   matchId: string,
 ) {
   const match = await findMatch(userId, seasonId, matchId);
-  await userMutation(userId, api.pvp.deleteMatch, { matchId: match._id });
+  await userMutation(userId, api.pvp.deleteMatch, {
+    matchId: match._id,
+  });
 }
 
 // Formation presets
@@ -186,7 +200,11 @@ export async function deletePvpMatch(
 export async function listPvpFormationPresets(
   userId: string,
   seasonId: string,
-  { search }: { search?: string },
+  {
+    search,
+  }: {
+    search?: string;
+  },
 ) {
   return toResource(
     await userQuery(userId, api.pvp.listFormationPresets, {
@@ -250,7 +268,11 @@ export async function deletePvpFormationPreset(
 export async function listPvpEnemyPresets(
   userId: string,
   seasonId: string,
-  { search }: { search?: string },
+  {
+    search,
+  }: {
+    search?: string;
+  },
   paginationOpts: PaginationOptions,
 ) {
   return toPage(
@@ -369,5 +391,7 @@ export async function deletePvpEnemyTeam(
   teamId: string,
 ) {
   const team = await findEnemyTeam(userId, seasonId, teamId);
-  await userMutation(userId, api.pvp.deleteEnemyTeam, { teamId: team._id });
+  await userMutation(userId, api.pvp.deleteEnemyTeam, {
+    teamId: team._id,
+  });
 }

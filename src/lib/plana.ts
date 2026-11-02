@@ -1,6 +1,6 @@
+import type * as PIXI from "pixi.js-v7";
 import type { PlanaExpression } from "@/lib/plana-expressions";
 import { SpineRenderer } from "@/lib/spine";
-import type * as PIXI from "pixi.js-v7";
 
 type SpineBone = {
   x: number;

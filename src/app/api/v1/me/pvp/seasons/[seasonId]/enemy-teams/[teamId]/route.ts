@@ -6,7 +6,10 @@ import {
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
 
-type Params = { seasonId: string; teamId: string };
+type Params = {
+  seasonId: string;
+  teamId: string;
+};
 
 export const GET = userRoute<Params>(
   async (_req, { seasonId, teamId }, userId) => {
@@ -35,6 +38,8 @@ export const PATCH = userRoute<Params>(
 export const DELETE = userRoute<Params>(
   async (_req, { seasonId, teamId }, userId) => {
     await deletePvpEnemyTeam(userId, seasonId, teamId);
-    return new Response(null, { status: 204 });
+    return new Response(null, {
+      status: 204,
+    });
   },
 );

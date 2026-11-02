@@ -1,4 +1,5 @@
 ---
+
 title: MCP server
 description: Use the API from Claude, ChatGPT, Cursor and other AI assistants.
 icon: bot

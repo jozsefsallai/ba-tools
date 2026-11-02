@@ -135,7 +135,9 @@ function parseStudentToken(
     return undefined;
   }
 
-  return { student };
+  return {
+    student,
+  };
 }
 
 function emitVerticalSeparators(items: ParsedTimelineItem[], count: number) {
@@ -185,7 +187,10 @@ export function serializeTimelineToText(items: TimelineItem[]): string {
         }
       }
 
-      const targetShorthands = [item.target, ...(item.extraTargets ?? [])]
+      const targetShorthands = [
+        item.target,
+        ...(item.extraTargets ?? []),
+      ]
         .filter((target): target is Student => !!target)
         .map(getShorthand);
 
@@ -220,7 +225,7 @@ export function parseTimelineFromText(
   const items: ParsedTimelineItem[] = [];
 
   const tokens =
-    raw.match(/\n|\{[^}]*}|\[[^\]]*]|\([^)]*\)|[^\s\[\]\(\)\{\}]+/g) ?? [];
+    raw.match(/\n|\{[^}]*}|\[[^\]]*]|\([^)]*\)|[^\s[\](){}]+/g) ?? [];
 
   let i = 0;
   let pendingNewlines = 0;

@@ -1,18 +1,18 @@
+import { notFound } from "next/navigation";
+import { createTranslator } from "next-intl";
+import { getLocalizedStudentNames } from "@/app/[locale]/students/_lib/student-display";
 import { StudentOgImage } from "@/app/[locale]/students/[id]/_components/student-og-image";
 import {
   getStudentDetail,
   resolveStudent,
 } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
-import { getLocalizedStudentNames } from "@/app/[locale]/students/_lib/student-display";
 import { getMessagesForLocale } from "@/i18n/messages";
+import { fetchOgArtwork } from "@/lib/og/artwork.server";
+import { OG_SCHOOL_LOGOS } from "@/lib/og/school-logos.server";
 import { getOgAssetUrls } from "@/lib/og-assets.server";
 import { makeOgImage } from "@/lib/og-image.server";
 import { ogLocale } from "@/lib/og-metadata.server";
-import { fetchOgArtwork } from "@/lib/og/artwork.server";
-import { OG_SCHOOL_LOGOS } from "@/lib/og/school-logos.server";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { createTranslator } from "next-intl";
-import { notFound } from "next/navigation";
 import type { AttackType, DefenseType } from "~prisma";
 
 export const runtime = "nodejs";
@@ -44,7 +44,14 @@ const DEFENSE_TYPE_COLORS: Partial<Record<DefenseType, string>> = {
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ locale: string; id: string }> },
+  {
+    params,
+  }: {
+    params: Promise<{
+      locale: string;
+      id: string;
+    }>;
+  },
 ) {
   const { locale: rawLocale, id } = await params;
   const locale = ogLocale(rawLocale);

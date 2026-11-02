@@ -1,5 +1,14 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import {
+  ChevronLeftIcon,
+  LoaderCircleIcon,
+  MoreHorizontalIcon,
+  SearchIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { PVPEnemyPresetMergeDialog } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-merge-dialog";
 import pvpAnon from "@/assets/images/pvp-anon.png";
 import { EmptyCard } from "@/components/common/empty-card";
@@ -26,21 +35,14 @@ import { Input } from "@/components/ui/input";
 import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import { useMutation } from "convex/react";
-import {
-  ChevronLeftIcon,
-  LoaderCircleIcon,
-  MoreHorizontalIcon,
-  SearchIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
 export function PVPEnemyPresetsPage({
   seasonId,
-}: { seasonId: Id<"pvpSeason"> }) {
+}: {
+  seasonId: Id<"pvpSeason">;
+}) {
   const t = useTranslations();
   const { studentMap } = useStudents();
 
@@ -70,7 +72,9 @@ export function PVPEnemyPresetsPage({
     setAnonymizeFailed(false);
 
     try {
-      await anonymize({ presetId: anonymizeSource._id });
+      await anonymize({
+        presetId: anonymizeSource._id,
+      });
       setAnonymizeSource(undefined);
     } catch {
       setAnonymizeFailed(true);
@@ -90,7 +94,12 @@ export function PVPEnemyPresetsPage({
         key={preset._id}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <div className="shrink-0 px-2" style={{ zoom: 0.65 }}>
+          <div
+            className="shrink-0 px-2"
+            style={{
+              zoom: 0.65,
+            }}
+          >
             {rep ? (
               <StudentCard student={rep} noDisplayRole noAttackTypeStyling />
             ) : (
@@ -260,7 +269,9 @@ export function PVPEnemyPresetsPage({
       <Dialog
         open={!!anonymizeSource}
         onOpenChange={(open) => {
-          if (!open && !isAnonymizing) setAnonymizeSource(undefined);
+          if (!open && !isAnonymizing) {
+            setAnonymizeSource(undefined);
+          }
         }}
       >
         <DialogContent>
@@ -311,7 +322,11 @@ export function PVPEnemyPresetsPage({
           title={t("tools.pvp.presets.deleteEnemyTitle")}
           description={t("tools.pvp.presets.deleteEnemyDescription")}
           confirmVariant="destructive"
-          onConfirm={() => remove({ presetId: deleteSource._id })}
+          onConfirm={() =>
+            remove({
+              presetId: deleteSource._id,
+            })
+          }
         />
       )}
 

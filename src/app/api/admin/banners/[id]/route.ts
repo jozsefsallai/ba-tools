@@ -1,14 +1,16 @@
+import { NextResponse } from "next/server";
 import { updateGameBannerSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import { invalidateGameBannersCache } from "@/lib/game-banners.server";
-import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 type RouteContext = {
-  params: Promise<{ id: string }>;
+  params: Promise<{
+    id: string;
+  }>;
 };
 
 export async function PATCH(req: Request, context: RouteContext) {
@@ -23,20 +25,43 @@ export async function PATCH(req: Request, context: RouteContext) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Invalid JSON",
+      },
+      {
+        status: 400,
+      },
+    );
   }
 
   const parsed = updateGameBannerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid payload", details: parsed.error.flatten() },
-      { status: 400 },
+      {
+        error: "Invalid payload",
+        details: parsed.error.flatten(),
+      },
+      {
+        status: 400,
+      },
     );
   }
 
-  const existing = await db.gameBanner.findUnique({ where: { id } });
+  const existing = await db.gameBanner.findUnique({
+    where: {
+      id,
+    },
+  });
   if (!existing) {
-    return NextResponse.json({ error: "Banner not found" }, { status: 404 });
+    return NextResponse.json(
+      {
+        error: "Banner not found",
+      },
+      {
+        status: 404,
+      },
+    );
   }
 
   const data = parsed.data;
@@ -47,33 +72,65 @@ export async function PATCH(req: Request, context: RouteContext) {
 
   if (endDate <= startDate) {
     return NextResponse.json(
-      { error: "endDate must be after startDate" },
-      { status: 400 },
+      {
+        error: "endDate must be after startDate",
+      },
+      {
+        status: 400,
+      },
     );
   }
 
   if (data.pickupStudentIds) {
     const students = await db.student.findMany({
-      where: { id: { in: data.pickupStudentIds } },
+      where: {
+        id: {
+          in: data.pickupStudentIds,
+        },
+      },
     });
 
     if (students.length !== data.pickupStudentIds.length) {
       return NextResponse.json(
-        { error: "One or more pickup students were not found" },
-        { status: 400 },
+        {
+          error: "One or more pickup students were not found",
+        },
+        {
+          status: 400,
+        },
       );
     }
   }
 
   const banner = await db.gameBanner.update({
-    where: { id },
+    where: {
+      id,
+    },
     data: {
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.startDate !== undefined ? { startDate } : {}),
-      ...(data.endDate !== undefined ? { endDate } : {}),
-      ...(data.freePulls !== undefined ? { freePulls: data.freePulls } : {}),
+      ...(data.name !== undefined
+        ? {
+            name: data.name,
+          }
+        : {}),
+      ...(data.startDate !== undefined
+        ? {
+            startDate,
+          }
+        : {}),
+      ...(data.endDate !== undefined
+        ? {
+            endDate,
+          }
+        : {}),
+      ...(data.freePulls !== undefined
+        ? {
+            freePulls: data.freePulls,
+          }
+        : {}),
       ...(data.isSelectablePickup !== undefined
-        ? { isSelectablePickup: data.isSelectablePickup }
+        ? {
+            isSelectablePickup: data.isSelectablePickup,
+          }
         : {}),
       ...(data.pickupStudentIds
         ? {
@@ -85,7 +142,9 @@ export async function PATCH(req: Request, context: RouteContext) {
           }
         : {}),
     },
-    include: { pickupStudents: true },
+    include: {
+      pickupStudents: true,
+    },
   });
 
   invalidateGameBannersCache();
@@ -100,13 +159,30 @@ export async function DELETE(_req: Request, context: RouteContext) {
 
   const { id } = await context.params;
 
-  const existing = await db.gameBanner.findUnique({ where: { id } });
+  const existing = await db.gameBanner.findUnique({
+    where: {
+      id,
+    },
+  });
   if (!existing) {
-    return NextResponse.json({ error: "Banner not found" }, { status: 404 });
+    return NextResponse.json(
+      {
+        error: "Banner not found",
+      },
+      {
+        status: 404,
+      },
+    );
   }
 
-  await db.gameBanner.delete({ where: { id } });
+  await db.gameBanner.delete({
+    where: {
+      id,
+    },
+  });
 
   invalidateGameBannersCache();
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+  });
 }

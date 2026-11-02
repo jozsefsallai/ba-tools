@@ -1,12 +1,15 @@
-import {
-  type NavigationGuardController,
-  isHashOnlyNavigation,
-} from "@/lib/navigation-guard";
 import { v4 as uuid } from "uuid";
+import {
+  isHashOnlyNavigation,
+  type NavigationGuardController,
+} from "@/lib/navigation-guard";
 
 const STATE_KEY = "__baNavigationGuard";
 
-type Position = { session: string; index: number };
+type Position = {
+  session: string;
+  index: number;
+};
 
 function readPosition(state: unknown): Position | null {
   if (!state || typeof state !== "object" || !(STATE_KEY in state)) {
@@ -55,7 +58,10 @@ export function installNavigationGuardHistory(
   } | null = null;
 
   function stamp(state: unknown, next: Position) {
-    return { ...(state as Record<string, unknown>), [STATE_KEY]: next };
+    return {
+      ...(state as Record<string, unknown>),
+      [STATE_KEY]: next,
+    };
   }
 
   originalReplace.call(history, stamp(history.state, position), "");
@@ -72,7 +78,10 @@ export function installNavigationGuardHistory(
     }
 
     const current = readPosition(this.state) ?? position;
-    const next = { session: current.session, index: current.index + 1 };
+    const next = {
+      session: current.session,
+      index: current.index + 1,
+    };
 
     originalPush.call(this, stamp(state, next), unused, url);
 
@@ -148,7 +157,10 @@ export function installNavigationGuardHistory(
       if (next) {
         position = next;
       } else if (!isHashOnlyNavigation(currentUrl)) {
-        position = { session: uuid(), index: 0 };
+        position = {
+          session: uuid(),
+          index: 0,
+        };
         originalReplace.call(history, stamp(history.state, position), "");
       }
 
@@ -225,11 +237,20 @@ export function installNavigationGuardHistory(
     if (next?.session === position.session) {
       position = next;
     } else {
-      position = { session: position.session, index: position.index + 1 };
+      position = {
+        session: position.session,
+        index: position.index + 1,
+      };
 
       originalReplace.call(
         history,
-        stamp({ ...currentState, ...history.state }, position),
+        stamp(
+          {
+            ...currentState,
+            ...history.state,
+          },
+          position,
+        ),
         "",
       );
     }

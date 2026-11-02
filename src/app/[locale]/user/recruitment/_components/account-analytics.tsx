@@ -1,21 +1,5 @@
 "use client";
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
-  type AccountAggregates,
-  type AggregateBucket,
-  HARD_PITY,
-  type RecruitmentSessionKind,
-  type RecruitmentStats,
-  SOFT_PITY,
-  applySessionToAggregates,
-  calculateRecruitmentStats,
-  emptyAccountAggregates,
-} from "@/lib/recruitment";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -28,6 +12,22 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  type AccountAggregates,
+  type AggregateBucket,
+  applySessionToAggregates,
+  calculateRecruitmentStats,
+  emptyAccountAggregates,
+  HARD_PITY,
+  type RecruitmentSessionKind,
+  type RecruitmentStats,
+  SOFT_PITY,
+} from "@/lib/recruitment";
 
 const PITY_COLORS = {
   beforeSoftPity: "#22c55e",
@@ -91,7 +91,10 @@ export function AccountAnalytics({
   const [filter, setFilter] = useState<Filter>("all");
   const sourceAggregates = useMemo(
     () => aggregates ?? rebuildAggregate(sessions),
-    [aggregates, sessions],
+    [
+      aggregates,
+      sessions,
+    ],
   );
   const aggregate = aggregateForFilter(sourceAggregates, filter);
   const regular =
@@ -105,7 +108,14 @@ export function AccountAnalytics({
   return (
     <section className="grid w-full max-w-4xl gap-4">
       <div className="flex flex-wrap justify-end gap-1">
-        {(["all", "permanent", "limited", "fest"] as const).map((value) => (
+        {(
+          [
+            "all",
+            "permanent",
+            "limited",
+            "fest",
+          ] as const
+        ).map((value) => (
           <button
             className={`rounded-md border px-3 py-1 text-sm ${
               filter === value ? "bg-accent font-medium" : ""
@@ -226,7 +236,9 @@ function PitySummary({ aggregate }: { aggregate: AggregateBucket }) {
               <div className="flex items-center gap-2" key={item.key}>
                 <span
                   className="size-3 rounded-full"
-                  style={{ backgroundColor: item.color }}
+                  style={{
+                    backgroundColor: item.color,
+                  }}
                 />
                 <span>
                   {classificationLabel(t, item.key)}: {item.value}
@@ -249,23 +261,39 @@ function classificationLabel(
 
 function chargeBucketColor(start: number) {
   const end = start + 9;
-  if (end < SOFT_PITY) return PITY_COLORS.beforeSoftPity;
-  if (start <= SOFT_PITY && end >= SOFT_PITY) return PITY_COLORS.softWin;
-  if (end < HARD_PITY) return PITY_COLORS.afterSoftPity;
+  if (end < SOFT_PITY) {
+    return PITY_COLORS.beforeSoftPity;
+  }
+  if (start <= SOFT_PITY && end >= SOFT_PITY) {
+    return PITY_COLORS.softWin;
+  }
+  if (end < HARD_PITY) {
+    return PITY_COLORS.afterSoftPity;
+  }
   return PITY_COLORS.hardPity;
 }
 
 function PickupDistributionChart({
   aggregate,
-}: { aggregate: AggregateBucket }) {
+}: {
+  aggregate: AggregateBucket;
+}) {
   const t = useTranslations();
-  const data = Array.from({ length: 20 }, (_, index) => {
-    const start = index * 10 + 1;
-    const count = aggregate.pickupChargeHistogram
-      .slice(start, start + 10)
-      .reduce((sum, value) => sum + value, 0);
-    return { charge: start, count };
-  });
+  const data = Array.from(
+    {
+      length: 20,
+    },
+    (_, index) => {
+      const start = index * 10 + 1;
+      const count = aggregate.pickupChargeHistogram
+        .slice(start, start + 10)
+        .reduce((sum, value) => sum + value, 0);
+      return {
+        charge: start,
+        count,
+      };
+    },
+  );
 
   return (
     <ChartCard title={t("tools.recruitment.pickupDistribution")}>
@@ -277,7 +305,14 @@ function PickupDistributionChart({
           },
         }}
       >
-        <BarChart accessibilityLayer data={data} margin={{ left: 8, right: 8 }}>
+        <BarChart
+          accessibilityLayer
+          data={data}
+          margin={{
+            left: 8,
+            right: 8,
+          }}
+        >
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="charge"
@@ -291,7 +326,9 @@ function PickupDistributionChart({
               <ChartTooltipContent
                 labelFormatter={(_value, tooltipPayload) => {
                   const charge = Number(tooltipPayload?.[0]?.payload?.charge);
-                  if (!Number.isFinite(charge)) return "";
+                  if (!Number.isFinite(charge)) {
+                    return "";
+                  }
                   return `${charge}-${charge + 9}`;
                 }}
               />
@@ -321,7 +358,10 @@ function PickupDistributionChart({
 function ChartCard({
   title,
   children,
-}: { title: string; children: ReactNode }) {
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <div className="rounded-lg border p-4">
       <h3 className="mb-3 font-semibold">{title}</h3>
@@ -374,15 +414,25 @@ function emptyBucket(): AggregateBucket {
     softWinPickups: 0,
     softLossPickups: 0,
     hardPityPickups: 0,
-    pickupChargeHistogram: Array.from({ length: 201 }, () => 0),
+    pickupChargeHistogram: Array.from(
+      {
+        length: 201,
+      },
+      () => 0,
+    ),
   };
 }
 
 function aggregateForFilter(aggregates: AccountAggregates, filter: Filter) {
-  if (filter === "permanent") return aggregates.permanent;
-  if (filter === "fest") return aggregates.fest;
-  if (filter === "limited")
+  if (filter === "permanent") {
+    return aggregates.permanent;
+  }
+  if (filter === "fest") {
+    return aggregates.fest;
+  }
+  if (filter === "limited") {
     return mergeBuckets(aggregates.limited, aggregates.fest);
+  }
   return mergeBuckets(
     mergeBuckets(aggregates.permanent, aggregates.limited),
     aggregates.fest,

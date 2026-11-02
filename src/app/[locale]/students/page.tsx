@@ -1,7 +1,7 @@
-import { StudentsDirectoryView } from "@/app/[locale]/students/_components/students-directory-view";
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { StudentsDirectoryView } from "@/app/[locale]/students/_components/students-directory-view";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 
 export async function generateMetadata() {
   return getCardMetadata("students", await getLocale());

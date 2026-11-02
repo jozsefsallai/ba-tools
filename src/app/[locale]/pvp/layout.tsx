@@ -1,5 +1,5 @@
-import { PVPBreadcrumbs } from "@/app/[locale]/pvp/_components/pvp-breadcrumbs";
 import type { PropsWithChildren } from "react";
+import { PVPBreadcrumbs } from "@/app/[locale]/pvp/_components/pvp-breadcrumbs";
 
 export default function PVPLayout({ children }: PropsWithChildren) {
   return (

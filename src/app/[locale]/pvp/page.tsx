@@ -1,6 +1,6 @@
+import { getLocale } from "next-intl/server";
 import { PVPPageClient } from "@/app/[locale]/pvp/_components/pvp-page-client";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("pvp", await getLocale());

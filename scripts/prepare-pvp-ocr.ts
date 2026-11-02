@@ -11,8 +11,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import {
-  PVP_OCR_CORE_VARIANTS,
   getPvpOcrAssetBaseUrl,
+  PVP_OCR_CORE_VARIANTS,
 } from "@/lib/pvp/ocr-asset-url";
 import config from "@/lib/pvp/ocr-assets.json";
 
@@ -25,7 +25,10 @@ const core = dirname(
   ),
 );
 
-for (const directory of [runtime, core]) {
+for (const directory of [
+  runtime,
+  core,
+]) {
   const { version } = JSON.parse(
     await readFile(join(directory, "package.json"), "utf8"),
   );
@@ -59,8 +62,12 @@ if (
   );
 }
 
-await mkdir(join(target, "core"), { recursive: true });
-await mkdir(join(target, "lang"), { recursive: true });
+await mkdir(join(target, "core"), {
+  recursive: true,
+});
+await mkdir(join(target, "lang"), {
+  recursive: true,
+});
 await copyFile(
   join(runtime, "dist/worker.min.js"),
   join(target, "worker.min.js"),
@@ -73,7 +80,10 @@ await copyFile(
 await copyFile(join(core, "LICENSE"), join(target, "CORE-LICENSE"));
 
 for (const suffix of PVP_OCR_CORE_VARIANTS) {
-  for (const extension of ["wasm", "wasm.js"]) {
+  for (const extension of [
+    "wasm",
+    "wasm.js",
+  ]) {
     const filename = `tesseract-core-${suffix}.${extension}`;
     await copyFile(join(core, filename), join(target, "core", filename));
   }
@@ -92,7 +102,9 @@ await Promise.all(
     }
 
     const url = `https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/${config.languageRevision}/${language}.traineddata`;
-    const response = await fetch(url, { signal: AbortSignal.timeout(120_000) });
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(120_000),
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -101,7 +113,12 @@ await Promise.all(
     }
 
     const bytes = Buffer.from(await response.arrayBuffer());
-    await writeFile(`${filename}.tmp`, gzipSync(bytes, { level: 9 }));
+    await writeFile(
+      `${filename}.tmp`,
+      gzipSync(bytes, {
+        level: 9,
+      }),
+    );
     await rename(`${filename}.tmp`, filename);
 
     console.log(

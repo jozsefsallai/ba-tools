@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { auth } from "@clerk/nextjs/server";
 import { ChevronLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { PropsWithChildren } from "react";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
 export default async function MyRostersOthersLayout({

@@ -1,3 +1,4 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   defineTool,
   paginationInput,
@@ -12,7 +13,6 @@ import {
   pvpTeamsSchema,
   searchPvpStats,
 } from "@/lib/public-api/resources/pvp-stats.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 export function registerPvpStatsTools(server: McpServer) {
   defineTool(
@@ -48,10 +48,19 @@ export function registerPvpStatsTools(server: McpServer) {
       description:
         "Ranked attack or defense teams for a PvP season, from community match records. Paginated.",
       kind: "read",
-      input: { ...pvpTeamsSchema.shape, ...paginationInput },
+      input: {
+        ...pvpTeamsSchema.shape,
+        ...paginationInput,
+      },
     },
     ({ limit, cursor, ...input }) =>
-      listPvpTeams(input, paginationOpts({ limit, cursor })),
+      listPvpTeams(
+        input,
+        paginationOpts({
+          limit,
+          cursor,
+        }),
+      ),
   );
 
   defineTool(
@@ -63,9 +72,18 @@ export function registerPvpStatsTools(server: McpServer) {
         "Find attack teams that beat a given defense team in a PvP season. Each `defenseTeam` slot takes a `studentId`, and optionally a `range` or `tank` flag to match by role instead. Paginated.",
       kind: "read",
       rateLimit: "search",
-      input: { ...pvpStatsSearchSchema.shape, ...paginationInput },
+      input: {
+        ...pvpStatsSearchSchema.shape,
+        ...paginationInput,
+      },
     },
     ({ limit, cursor, ...input }) =>
-      searchPvpStats(input, paginationOpts({ limit, cursor })),
+      searchPvpStats(
+        input,
+        paginationOpts({
+          limit,
+          cursor,
+        }),
+      ),
   );
 }

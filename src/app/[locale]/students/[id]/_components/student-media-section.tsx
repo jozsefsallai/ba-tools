@@ -1,5 +1,7 @@
 "use client";
 
+import { ExternalLinkIcon, ImagesIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DetailSection } from "@/app/[locale]/students/[id]/_components/detail-section";
 import { FallbackImage } from "@/components/common/fallback-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,8 +13,6 @@ import {
   buildStudentPortraitUrl,
 } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ExternalLinkIcon, ImagesIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import type { Student } from "~prisma";
 
 type MediaItem = {
@@ -98,7 +98,9 @@ export function StudentMediaSection({
 
   const bondTitles: MediaItem[] = FAVOR_EMBLEM_RANKS.map((rank) => ({
     key: `bond-${rank.id}`,
-    label: t("tools.students.detail.media.bondRank", { rank: rank.id }),
+    label: t("tools.students.detail.media.bondRank", {
+      rank: rank.id,
+    }),
     src: `/api/emblem/favor/${student.id}/${rank.id}.png`,
     className: "w-full max-w-[420px]",
   }));

@@ -1,7 +1,7 @@
 "use client";
 
-import { requestVirtualGridRestore } from "@/components/common/virtual-grid";
 import { useEffect, useState } from "react";
+import { requestVirtualGridRestore } from "@/components/common/virtual-grid";
 
 export const STUDENT_LIST_RESTORE_KEY = "students";
 

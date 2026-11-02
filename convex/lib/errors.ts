@@ -7,10 +7,16 @@ export type ApiErrorCode =
   | "INVALID_REQUEST"
   | "CONFLICT";
 
-export type ApiErrorData = { code: ApiErrorCode; message: string };
+export type ApiErrorData = {
+  code: ApiErrorCode;
+  message: string;
+};
 
 function apiError(code: ApiErrorCode, message: string) {
-  return new ConvexError<ApiErrorData>({ code, message });
+  return new ConvexError<ApiErrorData>({
+    code,
+    message,
+  });
 }
 
 export const unauthorized = (message: string) =>

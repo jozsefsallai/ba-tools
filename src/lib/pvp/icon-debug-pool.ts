@@ -15,7 +15,9 @@ export async function runIconDebugPool<T>(
 
   const outcomes = await Promise.allSettled(
     Array.from(
-      { length: Math.min(concurrency, items.length) },
+      {
+        length: Math.min(concurrency, items.length),
+      },
       async (_, lane) => {
         while (!signal.aborted && !failed) {
           const index = next++;

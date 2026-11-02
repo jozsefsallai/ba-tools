@@ -1,18 +1,18 @@
 /// <reference lib="webworker" />
 
+import { defaultCache } from "@serwist/next/worker";
+import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import {
+  CacheableResponsePlugin,
+  CacheFirst,
+  ExpirationPlugin,
+  Serwist,
+} from "serwist";
 import {
   getPvpIconAssetBaseUrl,
   getPvpIconCatalogUrl,
   getPvpOcrAssetBaseUrl,
 } from "@/lib/pvp/ocr-asset-url";
-import { defaultCache } from "@serwist/next/worker";
-import {
-  CacheFirst,
-  CacheableResponsePlugin,
-  ExpirationPlugin,
-  Serwist,
-} from "serwist";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -40,7 +40,14 @@ const serwist = new Serwist({
       },
       handler: new CacheFirst({
         cacheName: "pvp-ocr-assets",
-        plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
+        plugins: [
+          new CacheableResponsePlugin({
+            statuses: [
+              0,
+              200,
+            ],
+          }),
+        ],
       }),
     },
     {
@@ -49,7 +56,11 @@ const serwist = new Serwist({
       },
       handler: new CacheFirst({
         cacheName: "pvp-icon-manifest",
-        plugins: [new ExpirationPlugin({ maxEntries: 4 })],
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 4,
+          }),
+        ],
       }),
     },
     {
@@ -64,7 +75,11 @@ const serwist = new Serwist({
       },
       handler: new CacheFirst({
         cacheName: "pvp-icon-templates",
-        plugins: [new ExpirationPlugin({ maxEntries: 4 })],
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 4,
+          }),
+        ],
       }),
     },
     ...defaultCache,

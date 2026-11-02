@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronDownIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -7,9 +10,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
 
 export type GroupedToggleOption<T extends string> = {
   value: T;
@@ -66,7 +66,10 @@ export function GroupedToggleFilter<K extends string, T extends string>({
       group,
       current.includes(value)
         ? current.filter((v) => v !== value)
-        : [...current, value],
+        : [
+            ...current,
+            value,
+          ],
     );
   }
 
@@ -85,7 +88,9 @@ export function GroupedToggleFilter<K extends string, T extends string>({
 
           {activeCount > 0 && (
             <span className="font-semibold">
-              {t("common.filters.selected", { count: activeCount })}
+              {t("common.filters.selected", {
+                count: activeCount,
+              })}
             </span>
           )}
 

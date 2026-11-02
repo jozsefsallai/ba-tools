@@ -85,7 +85,9 @@ export function ExportBackgroundControls({
           min={0}
           max={100}
           step={1}
-          value={[backgroundOpacity]}
+          value={[
+            backgroundOpacity,
+          ]}
           disabled={transparentBackground}
           onValueChange={([value]) => onBackgroundOpacityChange(value)}
           className="w-28"

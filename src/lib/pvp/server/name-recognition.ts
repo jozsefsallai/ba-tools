@@ -1,11 +1,11 @@
+import { createGateway } from "@ai-sdk/gateway";
+import { JsColorType, Transformer } from "@napi-rs/image";
+import { generateText, Output } from "ai";
+import { z } from "zod";
 import { parsePvpOpponentName } from "@/lib/pvp";
 import type { PvpOpponentNameRecognition } from "@/lib/pvp/opponent-name-types";
 import { createNameReceipt, lookupName } from "@/lib/pvp/server/name-cache";
 import { fingerprintName } from "@/lib/pvp/server/name-fingerprint";
-import { createGateway } from "@ai-sdk/gateway";
-import { JsColorType, Transformer } from "@napi-rs/image";
-import { Output, generateText } from "ai";
-import { z } from "zod";
 
 export const recognitionInput = z.object({
   image: z.string().min(1).max(150000),
@@ -36,7 +36,18 @@ export async function recognizeOpponentName(
   const bytes = Buffer.from(input.image, "base64");
 
   if (
-    !bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    !bytes.subarray(0, 8).equals(
+      Buffer.from([
+        137,
+        80,
+        78,
+        71,
+        13,
+        10,
+        26,
+        10,
+      ]),
+    )
   ) {
     throw new Error("Expected PNG name crop");
   }
@@ -84,7 +95,11 @@ export async function recognizeOpponentName(
       : undefined;
 
   const descriptor = fingerprintName(
-    { width: metadata.width, height: metadata.height, pixels },
+    {
+      width: metadata.width,
+      height: metadata.height,
+      pixels,
+    },
     levelEnd,
   );
 
@@ -112,7 +127,10 @@ export async function recognizeOpponentName(
         source: "cache",
         uncertain: false,
         receipt,
-        diagnostics: { ...diagnostics, elapsedMs: performance.now() - started },
+        diagnostics: {
+          ...diagnostics,
+          elapsedMs: performance.now() - started,
+        },
       };
     }
   } catch {
@@ -131,11 +149,16 @@ export async function recognizeOpponentName(
       throw new Error("Vision unavailable");
     }
 
-    const gateway = createGateway({ apiKey: process.env.AI_GATEWAY_API_KEY });
+    const gateway = createGateway({
+      apiKey: process.env.AI_GATEWAY_API_KEY,
+    });
 
     const { output } = await generateText({
       model: gateway(model),
-      abortSignal: AbortSignal.any([signal, AbortSignal.timeout(20000)]),
+      abortSignal: AbortSignal.any([
+        signal,
+        AbortSignal.timeout(20000),
+      ]),
       maxOutputTokens: 1024,
       output: Output.object({
         schema: z.object({
@@ -148,7 +171,13 @@ export async function recognizeOpponentName(
       messages: [
         {
           role: "user",
-          content: [{ type: "image", image: bytes, mediaType: "image/png" }],
+          content: [
+            {
+              type: "image",
+              image: bytes,
+              mediaType: "image/png",
+            },
+          ],
         },
       ],
     });
@@ -166,7 +195,10 @@ export async function recognizeOpponentName(
       source: name ? "vision" : "unresolved",
       uncertain: output.uncertain || !name,
       receipt,
-      diagnostics: { ...diagnostics, elapsedMs: performance.now() - started },
+      diagnostics: {
+        ...diagnostics,
+        elapsedMs: performance.now() - started,
+      },
     };
   } catch (error) {
     if (signal.aborted) {

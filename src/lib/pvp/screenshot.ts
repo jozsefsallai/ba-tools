@@ -1,23 +1,23 @@
 import { drawPvpPixels } from "@/lib/pvp/canvas";
 import {
+  detectPvpReportAlignment,
   PVP_REPORT_SIZE,
   type PvpAlignmentDiagnostics,
   PvpScreenshotAlignmentError,
-  detectPvpReportAlignment,
   refinePvpReportAlignment,
 } from "@/lib/pvp/screenshot-layout";
 import {
-  type PVPScreenshotROIImages,
-  type PVPScreenshotROIs,
   PVP_SCREENSHOT_REGIONS,
   PVP_SCREENSHOT_ROI_BOUNDS,
+  type PVPScreenshotROIImages,
+  type PVPScreenshotROIs,
 } from "@/lib/pvp/screenshot-types";
 
-export { PVP_SCREENSHOT_ROI_BOUNDS } from "@/lib/pvp/screenshot-types";
 export type {
-  PVPScreenshotROIs,
   PVPScreenshotROIImages,
+  PVPScreenshotROIs,
 } from "@/lib/pvp/screenshot-types";
+export { PVP_SCREENSHOT_ROI_BOUNDS } from "@/lib/pvp/screenshot-types";
 
 async function alignScreenshot(sourceUrl: string) {
   const image = new Image();
@@ -104,7 +104,10 @@ async function alignScreenshot(sourceUrl: string) {
   );
 
   const diagnostics: PvpAlignmentDiagnostics = {
-    imageSize: { width: source.width, height: source.height },
+    imageSize: {
+      width: source.width,
+      height: source.height,
+    },
     rules: detected.diagnostics.rules.map((rule) => ({
       left: rule.left / ratioX,
       right: rule.right / ratioX,
@@ -134,7 +137,12 @@ async function alignScreenshot(sourceUrl: string) {
     source.height / alignment.scale,
   );
 
-  return { source, normalized, alignment, diagnostics };
+  return {
+    source,
+    normalized,
+    alignment,
+    diagnostics,
+  };
 }
 
 async function getCroppedScreenshot(
@@ -172,7 +180,13 @@ export async function getScreenshotPreview(input: File) {
       encodeRegions(extractRegions(normalized)),
     ]);
 
-    return { overlay, report, regions, alignment, diagnostics };
+    return {
+      overlay,
+      report,
+      regions,
+      alignment,
+      diagnostics,
+    };
   } finally {
     URL.revokeObjectURL(sourceUrl);
   }
@@ -231,7 +245,13 @@ function encodeROI(
   const [, , width, height] = area;
 
   const canvas = document.createElement("canvas");
-  if (!drawPvpPixels(canvas, { width, height, pixels })) {
+  if (
+    !drawPvpPixels(canvas, {
+      width,
+      height,
+      pixels,
+    })
+  ) {
     return Promise.reject(new Error("Failed to get canvas context"));
   }
 

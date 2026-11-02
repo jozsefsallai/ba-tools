@@ -18,23 +18,31 @@ export type PvpIconCatalog = {
 
 export type PvpIconMatch = {
   studentId: string | null;
-  candidates: { studentId: string; distance: number }[];
+  candidates: {
+    studentId: string;
+    distance: number;
+  }[];
   margin: number;
   confidence: number;
   uncertain: boolean;
 };
 
 export function pvpIconSamplePoints() {
-  return Array.from({ length: PVP_ICON_SAMPLE_COUNT }, (_, index) => ({
-    u:
-      0.2 +
-      ((index % PVP_ICON_SAMPLE_GRID_SIZE) * 0.6) /
-        (PVP_ICON_SAMPLE_GRID_SIZE - 1),
-    v:
-      0.12 +
-      (Math.floor(index / PVP_ICON_SAMPLE_GRID_SIZE) * 0.76) /
-        (PVP_ICON_SAMPLE_GRID_SIZE - 1),
-  }));
+  return Array.from(
+    {
+      length: PVP_ICON_SAMPLE_COUNT,
+    },
+    (_, index) => ({
+      u:
+        0.2 +
+        ((index % PVP_ICON_SAMPLE_GRID_SIZE) * 0.6) /
+          (PVP_ICON_SAMPLE_GRID_SIZE - 1),
+      v:
+        0.12 +
+        (Math.floor(index / PVP_ICON_SAMPLE_GRID_SIZE) * 0.76) /
+          (PVP_ICON_SAMPLE_GRID_SIZE - 1),
+    }),
+  );
 }
 
 export function describePvpIcon(pixels: Uint8Array | Uint8ClampedArray) {
@@ -124,14 +132,34 @@ function samplePvpIcon(
   const fy = y - top;
 
   const neighbors = [
-    [left, top, (1 - fx) * (1 - fy)],
-    [right, top, fx * (1 - fy)],
-    [left, bottom, (1 - fx) * fy],
-    [right, bottom, fx * fy],
+    [
+      left,
+      top,
+      (1 - fx) * (1 - fy),
+    ],
+    [
+      right,
+      top,
+      fx * (1 - fy),
+    ],
+    [
+      left,
+      bottom,
+      (1 - fx) * fy,
+    ],
+    [
+      right,
+      bottom,
+      fx * fy,
+    ],
   ];
 
   let weight = 0;
-  const rgb = [0, 0, 0];
+  const rgb = [
+    0,
+    0,
+    0,
+  ];
 
   for (const [px, py, contribution] of neighbors) {
     const source = (py * width + px) * 4;
@@ -193,10 +221,48 @@ export function matchPvpIcon(
 
   const queries: Uint8Array[] = [];
 
-  const scalesX = card ? [0.97, 1, 1.03] : [0.75, 0.85, 0.95];
-  const scalesY = card ? [0.97, 1, 1.03] : [0.85, 0.95];
-  const shears = card ? [0] : [-0.18, 0];
-  const shifts = card ? [-0.02, -0.01, 0, 0.01, 0.02] : [-0.04, 0, 0.04];
+  const scalesX = card
+    ? [
+        0.97,
+        1,
+        1.03,
+      ]
+    : [
+        0.75,
+        0.85,
+        0.95,
+      ];
+  const scalesY = card
+    ? [
+        0.97,
+        1,
+        1.03,
+      ]
+    : [
+        0.85,
+        0.95,
+      ];
+  const shears = card
+    ? [
+        0,
+      ]
+    : [
+        -0.18,
+        0,
+      ];
+  const shifts = card
+    ? [
+        -0.02,
+        -0.01,
+        0,
+        0.01,
+        0.02,
+      ]
+    : [
+        -0.04,
+        0,
+        0.04,
+      ];
 
   for (const sx of scalesX) {
     for (const sy of scalesY) {
@@ -293,7 +359,10 @@ export function matchPvpIcon(
     }
 
     if (Number.isFinite(best)) {
-      candidates.push({ studentId: student.id, distance: best });
+      candidates.push({
+        studentId: student.id,
+        distance: best,
+      });
     }
   }
 

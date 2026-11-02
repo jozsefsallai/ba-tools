@@ -24,7 +24,14 @@ const ENUM_SECTIONS = {
 
 export type EnumSection = (typeof ENUM_SECTIONS)[keyof typeof ENUM_SECTIONS];
 
-const TERRAIN_GRADES = ["D", "C", "B", "A", "S", "SS"] as const;
+const TERRAIN_GRADES = [
+  "D",
+  "C",
+  "B",
+  "A",
+  "S",
+  "SS",
+] as const;
 
 const ADAPTATION_KEYS = new Set([
   "streetBattleAdaptation",
@@ -79,7 +86,9 @@ function mapDeep(
 
 export function withEnumLabels(value: unknown) {
   return mapDeep(value, (record) => {
-    const out = { ...record };
+    const out = {
+      ...record,
+    };
 
     for (const [key, child] of Object.entries(record)) {
       if (key in ENUM_SECTIONS) {
@@ -105,7 +114,11 @@ export function withEnumLabels(value: unknown) {
   });
 }
 
-type GiftCount = { id: number; count: number; name?: string };
+type GiftCount = {
+  id: number;
+  count: number;
+  name?: string;
+};
 
 function isGiftCountList(value: unknown): value is GiftCount[] {
   return (
@@ -138,11 +151,25 @@ export async function withGiftNames(value: unknown) {
   }
 
   const gifts = await db.gift.findMany({
-    where: { id: { in: [...ids] } },
-    select: { id: true, name: true },
+    where: {
+      id: {
+        in: [
+          ...ids,
+        ],
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
   });
 
-  const names = new Map(gifts.map((gift) => [gift.id, gift.name]));
+  const names = new Map(
+    gifts.map((gift) => [
+      gift.id,
+      gift.name,
+    ]),
+  );
 
   return mapDeep(value, (record) =>
     isGiftCountList(record.gifts)

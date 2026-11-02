@@ -71,7 +71,13 @@ export function RosterOgImage({
       }}
     >
       <div tw="flex items-start w-full">
-        <div tw="flex flex-col shrink-0" style={{ width: 200, gap: 12 }}>
+        <div
+          tw="flex flex-col shrink-0"
+          style={{
+            width: 200,
+            gap: 12,
+          }}
+        >
           {repPortraitUrl ? (
             <img
               src={repPortraitUrl}
@@ -94,13 +100,23 @@ export function RosterOgImage({
                 border: `1px solid ${colors.border}`,
               }}
             >
-              <div tw="flex text-6xl" style={{ color: colors.mutedForeground }}>
+              <div
+                tw="flex text-6xl"
+                style={{
+                  color: colors.mutedForeground,
+                }}
+              >
                 ?
               </div>
             </div>
           )}
 
-          <div tw="flex flex-col" style={{ gap: 8 }}>
+          <div
+            tw="flex flex-col"
+            style={{
+              gap: 8,
+            }}
+          >
             <div
               tw="flex items-center justify-center text-center font-semibold rounded-3xl"
               style={{
@@ -177,7 +193,13 @@ export function RosterOgImage({
           )}
 
           {featuredBorrowCategories.length > 0 && (
-            <div tw="flex flex-wrap" style={{ marginTop: 24, gap: 8 }}>
+            <div
+              tw="flex flex-wrap"
+              style={{
+                marginTop: 24,
+                gap: 8,
+              }}
+            >
               {featuredBorrowCategories.map((category) => (
                 <div
                   key={category.label}
@@ -205,7 +227,12 @@ export function RosterOgImage({
                     {category.label}
                   </div>
 
-                  <div tw="flex" style={{ gap: 2 }}>
+                  <div
+                    tw="flex"
+                    style={{
+                      gap: 2,
+                    }}
+                  >
                     {category.students.map((student) => (
                       <OgStudentCard
                         key={student.iconUrl}

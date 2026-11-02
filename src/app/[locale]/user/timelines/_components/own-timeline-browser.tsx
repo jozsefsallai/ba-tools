@@ -1,12 +1,12 @@
 "use client";
 
+import { usePaginatedQuery, useQuery } from "convex/react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { OwnTimelineEntry } from "@/app/[locale]/user/timelines/_components/own-timeline-entry";
 import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
 import { MessageBox } from "@/components/common/message-box";
 import { useDebounce } from "@/hooks/use-debounce";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { api } from "~convex/api";
 
 export function OwnTimelineBrowser() {
@@ -22,12 +22,18 @@ export function OwnTimelineBrowser() {
   } = usePaginatedQuery(
     api.timeline.getOwnPaginated,
     isSearching ? "skip" : {},
-    { initialNumItems: 20 },
+    {
+      initialNumItems: 20,
+    },
   );
 
   const searchResults = useQuery(
     api.timeline.searchOwn,
-    isSearching ? { search: debouncedSearch.trim() } : "skip",
+    isSearching
+      ? {
+          search: debouncedSearch.trim(),
+        }
+      : "skip",
   );
 
   const items = isSearching ? (searchResults ?? []) : paginatedResults;

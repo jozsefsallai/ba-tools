@@ -1,8 +1,8 @@
+import { NextResponse } from "next/server";
 import { updateGameBannerGroupSchema } from "@/lib/admin/game-banner-schemas";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import { invalidateGameBannersCache } from "@/lib/game-banners.server";
-import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -16,14 +16,26 @@ export async function PATCH(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Invalid JSON",
+      },
+      {
+        status: 400,
+      },
+    );
   }
 
   const parsed = updateGameBannerGroupSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid payload", details: parsed.error.flatten() },
-      { status: 400 },
+      {
+        error: "Invalid payload",
+        details: parsed.error.flatten(),
+      },
+      {
+        status: 400,
+      },
     );
   }
 
@@ -35,8 +47,12 @@ export async function PATCH(req: Request) {
 
   if (newEnd <= newStart) {
     return NextResponse.json(
-      { error: "endDate must be after startDate" },
-      { status: 400 },
+      {
+        error: "endDate must be after startDate",
+      },
+      {
+        status: 400,
+      },
     );
   }
 

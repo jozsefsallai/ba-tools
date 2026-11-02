@@ -1,5 +1,10 @@
 "use client";
 
+import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { toast } from "sonner";
 import { ScenarioCanvas } from "@/app/[locale]/scenario-image-generator/_components/scenario-canvas";
 import { ScenarioEditorCharacterSettings } from "@/app/[locale]/scenario-image-generator/_components/scenario-editor-character-settings";
 import {
@@ -7,8 +12,8 @@ import {
   SCENARIO_TEXT_SCROLL_SPEED,
 } from "@/app/[locale]/scenario-image-generator/_lib/constants";
 import {
-  SCENARIO_FONTS,
   SCENARIO_FONT_EN,
+  SCENARIO_FONTS,
 } from "@/app/[locale]/scenario-image-generator/_lib/fonts";
 import { getActiveScenarioRenderer } from "@/app/[locale]/scenario-image-generator/_lib/renderer/scenario-renderer";
 import { parseScenarioScript } from "@/app/[locale]/scenario-image-generator/_lib/script/parser";
@@ -32,11 +37,6 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { GlobeIcon, ImageIcon, PlusIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
-import { toast } from "sonner";
 
 const SCRIPTING_ENABLED = process.env.NODE_ENV !== "production";
 
@@ -88,7 +88,9 @@ export function ScenarioEditorView() {
 
   const scriptParseResult = useMemo(
     () => parseScenarioScript(script),
-    [script],
+    [
+      script,
+    ],
   );
   const scriptPlayable =
     script.trim().length > 0 && scriptParseResult.errors.length === 0;
@@ -96,17 +98,23 @@ export function ScenarioEditorView() {
   function handleBackgroundImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) {
-      scenarioStore.set({ backgroundImage: null });
+      scenarioStore.set({
+        backgroundImage: null,
+      });
       return;
     }
 
     const file = files[0];
-    scenarioStore.set({ backgroundName: file.name });
+    scenarioStore.set({
+      backgroundName: file.name,
+    });
 
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        scenarioStore.set({ backgroundImage: event.target.result as string });
+        scenarioStore.set({
+          backgroundImage: event.target.result as string,
+        });
       }
     };
     reader.readAsDataURL(file);
@@ -119,7 +127,10 @@ export function ScenarioEditorView() {
   }
 
   function handleRemoveBackgroundImage() {
-    scenarioStore.set({ backgroundImage: null, backgroundName: null });
+    scenarioStore.set({
+      backgroundImage: null,
+      backgroundName: null,
+    });
   }
 
   function handleCharacterImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -188,10 +199,16 @@ export function ScenarioEditorView() {
         return;
       }
 
-      const item = new ClipboardItem({ "image/png": blob });
-      navigator.clipboard.write([item]).then(() => {
-        toast.success(t("tools.scenarioImageGenerator.toasts.copied"));
+      const item = new ClipboardItem({
+        "image/png": blob,
       });
+      navigator.clipboard
+        .write([
+          item,
+        ])
+        .then(() => {
+          toast.success(t("tools.scenarioImageGenerator.toasts.copied"));
+        });
     });
   }
 
@@ -218,7 +235,9 @@ export function ScenarioEditorView() {
       return;
     }
 
-    scenarioStore.set((s) => ({ animate: !s.animate }));
+    scenarioStore.set((s) => ({
+      animate: !s.animate,
+    }));
   }
 
   function handlePlayScript() {
@@ -246,16 +265,27 @@ export function ScenarioEditorView() {
       }
 
       scenarioScriptPlayer.stop();
-      scenarioStore.set({ animate: false });
+      scenarioStore.set({
+        animate: false,
+      });
     }
-  }, [recordingMode]);
+  }, [
+    recordingMode,
+  ]);
 
-  useHotkeys("esc", () => scenarioStore.set({ recordingMode: false }), {
-    enabled: recordingMode,
-    enableOnFormTags: true,
-    enableOnContentEditable: true,
-    preventDefault: true,
-  });
+  useHotkeys(
+    "esc",
+    () =>
+      scenarioStore.set({
+        recordingMode: false,
+      }),
+    {
+      enabled: recordingMode,
+      enableOnFormTags: true,
+      enableOnContentEditable: true,
+      preventDefault: true,
+    },
+  );
 
   useEffect(() => {
     const newScale = Number.parseFloat(backgroundScaleStr);
@@ -273,7 +303,11 @@ export function ScenarioEditorView() {
         backgroundYOffset: newYOffset,
       });
     }
-  }, [backgroundScaleStr, backgroundXOffsetStr, backgroundYOffsetStr]);
+  }, [
+    backgroundScaleStr,
+    backgroundXOffsetStr,
+    backgroundYOffsetStr,
+  ]);
 
   return (
     <div className="flex flex-col gap-6 items-center min-w-0">
@@ -292,7 +326,11 @@ export function ScenarioEditorView() {
 
         <Button
           disabled={animate}
-          onClick={() => scenarioStore.set({ recordingMode: true })}
+          onClick={() =>
+            scenarioStore.set({
+              recordingMode: true,
+            })
+          }
         >
           {t("tools.scenarioImageGenerator.recordingMode")}
         </Button>
@@ -340,7 +378,9 @@ export function ScenarioEditorView() {
                     id="name"
                     value={name}
                     onChange={(e) =>
-                      scenarioStore.set({ name: e.target.value })
+                      scenarioStore.set({
+                        name: e.target.value,
+                      })
                     }
                     placeholder={t(
                       "tools.scenarioImageGenerator.content.characterNamePlaceholder",
@@ -355,7 +395,9 @@ export function ScenarioEditorView() {
                     id="affiliation"
                     value={affiliation}
                     onChange={(e) =>
-                      scenarioStore.set({ affiliation: e.target.value })
+                      scenarioStore.set({
+                        affiliation: e.target.value,
+                      })
                     }
                     placeholder={t(
                       "tools.scenarioImageGenerator.content.affiliationPlaceholder",
@@ -370,7 +412,9 @@ export function ScenarioEditorView() {
                     id="content"
                     value={content}
                     onChange={(e) =>
-                      scenarioStore.set({ content: e.target.value })
+                      scenarioStore.set({
+                        content: e.target.value,
+                      })
                     }
                     placeholder={t(
                       "tools.scenarioImageGenerator.content.dialoguePlaceholder",
@@ -422,7 +466,9 @@ export function ScenarioEditorView() {
                         type="url"
                         value={backgroundUrl ?? ""}
                         onChange={(e) =>
-                          scenarioStore.set({ backgroundUrl: e.target.value })
+                          scenarioStore.set({
+                            backgroundUrl: e.target.value,
+                          })
                         }
                         placeholder={t(
                           "tools.scenarioImageGenerator.background.backgroundUrl",
@@ -545,7 +591,9 @@ export function ScenarioEditorView() {
                     type="number"
                     value={fontSize}
                     onChange={(e) =>
-                      scenarioStore.set({ fontSize: Number(e.target.value) })
+                      scenarioStore.set({
+                        fontSize: Number(e.target.value),
+                      })
                     }
                     placeholder={t(
                       "tools.scenarioImageGenerator.fontSettings.fontSizePlaceholder",
@@ -564,7 +612,9 @@ export function ScenarioEditorView() {
                     id="displayButtons"
                     checked={displayButtons}
                     onCheckedChange={(checked) =>
-                      scenarioStore.set({ displayButtons: checked })
+                      scenarioStore.set({
+                        displayButtons: checked,
+                      })
                     }
                     className="md:col-span-2"
                   />
@@ -576,7 +626,9 @@ export function ScenarioEditorView() {
                     id="autoEnabled"
                     checked={autoEnabled}
                     onCheckedChange={(checked) =>
-                      scenarioStore.set({ autoEnabled: checked })
+                      scenarioStore.set({
+                        autoEnabled: checked,
+                      })
                     }
                     className="md:col-span-2"
                   />
@@ -590,7 +642,9 @@ export function ScenarioEditorView() {
                     id="displayLine"
                     checked={displayLine}
                     onCheckedChange={(checked) =>
-                      scenarioStore.set({ displayLine: checked })
+                      scenarioStore.set({
+                        displayLine: checked,
+                      })
                     }
                     className="md:col-span-2"
                   />
@@ -602,7 +656,9 @@ export function ScenarioEditorView() {
                     id="displayGradient"
                     checked={displayGradient}
                     onCheckedChange={(checked) =>
-                      scenarioStore.set({ displayGradient: checked })
+                      scenarioStore.set({
+                        displayGradient: checked,
+                      })
                     }
                     className="md:col-span-2"
                   />
@@ -614,7 +670,9 @@ export function ScenarioEditorView() {
                     id="displayTriangle"
                     checked={displayTriangle}
                     onCheckedChange={(checked) =>
-                      scenarioStore.set({ displayTriangle: checked })
+                      scenarioStore.set({
+                        displayTriangle: checked,
+                      })
                     }
                     className="md:col-span-2"
                   />
@@ -626,7 +684,9 @@ export function ScenarioEditorView() {
                   <Label htmlFor="scrollSpeed">
                     {t(
                       "tools.scenarioImageGenerator.behaviorSettings.textScrollSpeed",
-                      { defaultSpeed: SCENARIO_TEXT_SCROLL_SPEED },
+                      {
+                        defaultSpeed: SCENARIO_TEXT_SCROLL_SPEED,
+                      },
                     )}
                   </Label>
                   <Input
@@ -637,7 +697,9 @@ export function ScenarioEditorView() {
                     max={1}
                     step={0.01}
                     onChange={(e) =>
-                      scenarioStore.set({ scrollSpeed: Number(e.target.value) })
+                      scenarioStore.set({
+                        scrollSpeed: Number(e.target.value),
+                      })
                     }
                     placeholder={t(
                       "tools.scenarioImageGenerator.behaviorSettings.scrollSpeedPlaceholder",
@@ -654,7 +716,9 @@ export function ScenarioEditorView() {
                     id="transparentBackground"
                     checked={transparentBackground}
                     onCheckedChange={(checked) =>
-                      scenarioStore.set({ transparentBackground: checked })
+                      scenarioStore.set({
+                        transparentBackground: checked,
+                      })
                     }
                     className="md:col-span-2"
                   />
@@ -672,7 +736,9 @@ export function ScenarioEditorView() {
                       id="script"
                       value={script}
                       onChange={(e) =>
-                        scenarioStore.set({ script: e.target.value })
+                        scenarioStore.set({
+                          script: e.target.value,
+                        })
                       }
                       placeholder={t(
                         "tools.scenarioImageGenerator.script.scriptPlaceholder",
@@ -749,7 +815,12 @@ export function ScenarioEditorView() {
                 onChange={(updatedCharacter) => {
                   scenarioStore.set((s) => ({
                     characters: s.characters.map((c, i) =>
-                      i === idx ? { ...c, ...updatedCharacter } : c,
+                      i === idx
+                        ? {
+                            ...c,
+                            ...updatedCharacter,
+                          }
+                        : c,
                     ),
                   }));
                 }}
@@ -760,24 +831,32 @@ export function ScenarioEditorView() {
                 }}
                 onMoveUp={() => {
                   scenarioStore.set((s) => {
-                    const newCharacters = [...s.characters];
+                    const newCharacters = [
+                      ...s.characters,
+                    ];
                     if (idx > 0) {
                       const temp = newCharacters[idx - 1];
                       newCharacters[idx - 1] = newCharacters[idx];
                       newCharacters[idx] = temp;
                     }
-                    return { characters: newCharacters };
+                    return {
+                      characters: newCharacters,
+                    };
                   });
                 }}
                 onMoveDown={() => {
                   scenarioStore.set((s) => {
-                    const newCharacters = [...s.characters];
+                    const newCharacters = [
+                      ...s.characters,
+                    ];
                     if (idx < newCharacters.length - 1) {
                       const temp = newCharacters[idx + 1];
                       newCharacters[idx + 1] = newCharacters[idx];
                       newCharacters[idx] = temp;
                     }
-                    return { characters: newCharacters };
+                    return {
+                      characters: newCharacters,
+                    };
                   });
                 }}
               />
@@ -834,7 +913,11 @@ export function ScenarioEditorView() {
 
             <div className="flex gap-4">
               <Button
-                onClick={() => scenarioStore.set({ animate: true })}
+                onClick={() =>
+                  scenarioStore.set({
+                    animate: true,
+                  })
+                }
                 className="bg-amber-500 hover:bg-amber-600"
               >
                 {t("tools.scenarioImageGenerator.recording.start")}
@@ -851,7 +934,11 @@ export function ScenarioEditorView() {
 
               <Button
                 variant="outline"
-                onClick={() => scenarioStore.set({ recordingMode: false })}
+                onClick={() =>
+                  scenarioStore.set({
+                    recordingMode: false,
+                  })
+                }
                 className="text-foreground [@media(hover:hover)]:hidden"
               >
                 {t("common.cancel")}

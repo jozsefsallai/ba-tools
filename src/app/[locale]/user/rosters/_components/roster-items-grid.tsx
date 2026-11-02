@@ -1,31 +1,31 @@
 "use client";
 
 import {
-  type RosterItem,
-  RosterItemEditor,
-} from "@/app/[locale]/user/rosters/_components/roster-item-editor";
-import { useGridColumnCount } from "@/hooks/use-grid-column-count";
-import type { GameServer } from "@/lib/types";
-import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
   rectSortingStrategy,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { memo, useCallback, useMemo } from "react";
 import { WindowVirtualizer } from "virtua";
+import {
+  type RosterItem,
+  RosterItemEditor,
+} from "@/app/[locale]/user/rosters/_components/roster-item-editor";
+import { useGridColumnCount } from "@/hooks/use-grid-column-count";
+import type { GameServer } from "@/lib/types";
 
 export type RosterItemsGridProps = {
   items: RosterItem[];
@@ -165,9 +165,16 @@ export const RosterItemsGrid = memo(function RosterItemsGrid({
   const columnCount = useGridColumnCount();
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -184,17 +191,25 @@ export const RosterItemsGrid = memo(function RosterItemsGrid({
         reorderRosterItems(items, active.id as string, over.id as string),
       );
     },
-    [items, onReorder],
+    [
+      items,
+      onReorder,
+    ],
   );
 
   const sortableIds = useMemo(
     () => items.map((item) => item.student.id),
-    [items],
+    [
+      items,
+    ],
   );
 
   const itemRows = useMemo(
     () => chunkItems(items, columnCount),
-    [items, columnCount],
+    [
+      items,
+      columnCount,
+    ],
   );
 
   const grid = (

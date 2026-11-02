@@ -1,10 +1,10 @@
 import type { PVPFormationStudentRecord } from "@/app/[locale]/pvp/_lib/types";
 import {
+  PVP_COUNTER_RANGES,
+  PVP_SEASONS,
   type PVPCounterDefenseSlot,
   type PVPCounterRange,
   type PVPSeasonNumber,
-  PVP_COUNTER_RANGES,
-  PVP_SEASONS,
 } from "@/lib/types";
 
 export type InitialCounterSearch = {
@@ -14,7 +14,12 @@ export type InitialCounterSearch = {
 
 const STUDENT_ID_ALPHABET = "abcdefghijklmnopqrstuvwxyz_";
 const STUDENT_ID_CODE = new Map(
-  [...STUDENT_ID_ALPHABET].map((character, index) => [character, index]),
+  [
+    ...STUDENT_ID_ALPHABET,
+  ].map((character, index) => [
+    character,
+    index,
+  ]),
 );
 const FLEXIBLE_FORMAT_MARKER = 0xf2;
 const FLEXIBLE_STUDENT_SLOT = 0;
@@ -49,7 +54,13 @@ function decodeBase64Url(value: string) {
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
 }
 
-function readBits(bits: number[], offset: { value: number }, width: number) {
+function readBits(
+  bits: number[],
+  offset: {
+    value: number;
+  },
+  width: number,
+) {
   if (offset.value + width > bits.length) {
     throw new Error("Invalid defense payload");
   }
@@ -81,7 +92,12 @@ function decodeDefenseTeam(value: string): PVPFormationStudentRecord[] {
   }
 
   const bits = Array.from(bytes, (byte) =>
-    Array.from({ length: 8 }, (_, index) => (byte >> (7 - index)) & 1),
+    Array.from(
+      {
+        length: 8,
+      },
+      (_, index) => (byte >> (7 - index)) & 1,
+    ),
   ).flat();
 
   const lengths = bytes.slice(0, 6);
@@ -122,7 +138,9 @@ function decodeDefenseTeam(value: string): PVPFormationStudentRecord[] {
     throw new Error("Invalid defense payload");
   }
 
-  return ids.map((studentId) => ({ studentId: studentId || undefined }));
+  return ids.map((studentId) => ({
+    studentId: studentId || undefined,
+  }));
 }
 
 function encodeFlexibleDefenseTeam(
@@ -275,10 +293,17 @@ function decodePackedFlexibleDefenseTeam(
   bytes: Uint8Array,
 ): PVPCounterDefenseSlot[] {
   const bits = Array.from(bytes, (byte) =>
-    Array.from({ length: 8 }, (_, index) => (byte >> (7 - index)) & 1),
+    Array.from(
+      {
+        length: 8,
+      },
+      (_, index) => (byte >> (7 - index)) & 1,
+    ),
   ).flat();
 
-  const offset = { value: 8 };
+  const offset = {
+    value: 8,
+  };
   const defenseTeam: PVPCounterDefenseSlot[] = [];
 
   for (let index = 0; index < 6; index += 1) {
@@ -299,7 +324,9 @@ function decodePackedFlexibleDefenseTeam(
         studentId += decodedCharacter;
       }
 
-      defenseTeam.push({ studentId: studentId || undefined });
+      defenseTeam.push({
+        studentId: studentId || undefined,
+      });
       continue;
     }
 
@@ -315,7 +342,9 @@ function decodePackedFlexibleDefenseTeam(
         throw new Error("Invalid defense payload");
       }
 
-      defenseTeam.push({ range });
+      defenseTeam.push({
+        range,
+      });
       continue;
     }
 
@@ -324,7 +353,9 @@ function decodePackedFlexibleDefenseTeam(
         throw new Error("Tank criteria require a striker slot");
       }
 
-      defenseTeam.push({ tank: true });
+      defenseTeam.push({
+        tank: true,
+      });
       continue;
     }
 

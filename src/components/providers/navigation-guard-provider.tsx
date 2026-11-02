@@ -49,7 +49,9 @@ export function NavigationGuardProvider({ children }: PropsWithChildren) {
       window.removeEventListener("beforeunload", beforeUnload);
       controller.cancel();
     };
-  }, [controller]);
+  }, [
+    controller,
+  ]);
 
   return (
     <NavigationGuardContext.Provider value={controller}>

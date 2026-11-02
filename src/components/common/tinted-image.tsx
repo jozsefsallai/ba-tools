@@ -74,7 +74,10 @@ export function TintedImage({
     return () => {
       cancelled = true;
     };
-  }, [src, tint]);
+  }, [
+    src,
+    tint,
+  ]);
 
   if (!tinted) {
     return null;

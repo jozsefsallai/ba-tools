@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { RoadmapItemDetails } from "@/components/roadmap/roadmap-item-details";
 import { useBirthdaySources } from "@/components/roadmap/use-birthday-sources";
 import { useRoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
@@ -13,7 +14,6 @@ import {
 import { startOfMonth } from "@/lib/roadmap/time-zone";
 import type { RoadmapCategory, RoadmapItem } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
 
 const SHOP_RESET_MONTHS = 6;
 
@@ -57,7 +57,13 @@ export function RoadmapList({
           categories.indexOf(a.kind) - categories.indexOf(b.kind),
       );
 
-    const map = new Map<string, { month: Date; items: RoadmapItem[] }>();
+    const map = new Map<
+      string,
+      {
+        month: Date;
+        items: RoadmapItem[];
+      }
+    >();
 
     for (const item of visible) {
       // ongoing items are listed under the current month
@@ -68,13 +74,22 @@ export function RoadmapList({
       const key = month.toISOString();
 
       if (!map.has(key)) {
-        map.set(key, { month, items: [] });
+        map.set(key, {
+          month,
+          items: [],
+        });
       }
       map.get(key)?.items.push(item);
     }
 
     return Array.from(map.entries());
-  }, [items, categories, rangeStart, birthdaySources, labels.tz]);
+  }, [
+    items,
+    categories,
+    rangeStart,
+    birthdaySources,
+    labels.tz,
+  ]);
 
   if (groups.length === 0) {
     return (

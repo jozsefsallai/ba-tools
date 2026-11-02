@@ -183,7 +183,9 @@ export function fingerprintName(
 
 export function nameBuckets(descriptor: NameDescriptor) {
   return Array.from(
-    { length: 8 },
+    {
+      length: 8,
+    },
     (_, band) =>
       `pvp_ocr_index_v${descriptor.version}_${Number(descriptor.levelRemoved)}_${band}_${descriptor.perceptual.slice(band * 4, band * 4 + 4)}`,
   );
@@ -225,7 +227,9 @@ export function verifyNameSimilarity(a: NameDescriptor, b: NameDescriptor) {
         continue;
       }
 
-      const queue = [start];
+      const queue = [
+        start,
+      ];
       seen[start] = 1;
 
       for (let i = 0; i < queue.length; i++) {

@@ -1,4 +1,18 @@
 import {
+  Application,
+  Assets,
+  CanvasTextMetrics,
+  Container,
+  type Filter,
+  Graphics,
+  Sprite,
+  Text,
+  TextStyle,
+  Texture,
+  type Ticker,
+} from "pixi.js";
+import { AdjustmentFilter, ColorOverlayFilter, CRTFilter } from "pixi-filters";
+import {
   SCENARIO_LINE_HEIGHT,
   SCENARIO_LINE_WIDTH,
   SCENARIO_VIEW_HEIGHT,
@@ -13,20 +27,6 @@ import {
   selectBackground,
 } from "@/app/[locale]/scenario-image-generator/_lib/store";
 import type { ScenarioCharacterData } from "@/app/[locale]/scenario-image-generator/_lib/types";
-import { AdjustmentFilter, CRTFilter, ColorOverlayFilter } from "pixi-filters";
-import {
-  Application,
-  Assets,
-  CanvasTextMetrics,
-  Container,
-  type Filter,
-  Graphics,
-  Sprite,
-  Text,
-  TextStyle,
-  Texture,
-  type Ticker,
-} from "pixi.js";
 
 const TEXT_X = (SCENARIO_VIEW_WIDTH - SCENARIO_LINE_WIDTH) / 2;
 
@@ -57,7 +57,9 @@ function loadScenarioFonts(): Promise<void> {
           src: "/assets/fonts/noto-sans/NotoSans-SemiBold.ttf",
           data: {
             family: "Noto Sans",
-            weights: ["600"],
+            weights: [
+              "600",
+            ],
           },
         },
         {
@@ -65,7 +67,10 @@ function loadScenarioFonts(): Promise<void> {
           src: "/assets/fonts/noto-sans/NotoSans-Bold.ttf",
           data: {
             family: "Noto Sans",
-            weights: ["700", "bold"],
+            weights: [
+              "700",
+              "bold",
+            ],
           },
         },
         {
@@ -126,12 +131,20 @@ function buildCharacterFilters(character: ScenarioCharacterData): Filter[] {
   }
 
   if (character.darken) {
-    filters.push(new ColorOverlayFilter({ color: 0x000000, alpha: 0.33 }));
+    filters.push(
+      new ColorOverlayFilter({
+        color: 0x000000,
+        alpha: 0.33,
+      }),
+    );
   }
 
   if (character.hologram) {
     filters.push(
-      new ColorOverlayFilter({ color: 0x71c5ff, alpha: 0.35 }),
+      new ColorOverlayFilter({
+        color: 0x71c5ff,
+        alpha: 0.35,
+      }),
       new AdjustmentFilter({
         contrast: 1.1,
         saturation: 0.6,
@@ -386,7 +399,9 @@ export class ScenarioRenderer {
     this.app.ticker.remove(this.tick, this);
     this.cancelWaits();
     this.cancelTweens(false);
-    this.app.destroy(true, { children: true });
+    this.app.destroy(true, {
+      children: true,
+    });
   }
 
   renderToCanvas(): HTMLCanvasElement {
@@ -686,7 +701,10 @@ export class ScenarioRenderer {
       });
       rubyText.anchor.set(0.5, 1);
       this.rubyLayer.addChild(rubyText);
-      this.rubySlots.push({ text: rubyText, revealAt: placement.revealAt });
+      this.rubySlots.push({
+        text: rubyText,
+        revealAt: placement.revealAt,
+      });
     }
   }
 
@@ -823,7 +841,12 @@ export class ScenarioRenderer {
       }
 
       apply(0);
-      this.tweens.push({ elapsed: 0, duration: durationMs, apply, resolve });
+      this.tweens.push({
+        elapsed: 0,
+        duration: durationMs,
+        apply,
+        resolve,
+      });
     });
   }
 
@@ -847,7 +870,9 @@ export class ScenarioRenderer {
       resolve();
     }
 
-    const clickCancels = [...this.clickWaitCancels];
+    const clickCancels = [
+      ...this.clickWaitCancels,
+    ];
     this.clickWaitCancels.clear();
     for (const cancel of clickCancels) {
       cancel();

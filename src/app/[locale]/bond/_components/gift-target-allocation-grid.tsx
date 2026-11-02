@@ -1,15 +1,15 @@
 "use client";
 
-import type { StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { useState } from "react";
 import type { GiftTargetDoc } from "@/app/[locale]/bond/_lib/gift-utils";
+import type { StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
 import bondImage from "@/assets/images/bond.png";
 import { StudentCard } from "@/components/common/student-card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { useState } from "react";
-import type { ReactNode } from "react";
 import type { Id } from "~convex/dataModel";
 
 export type GiftTargetAllocationGridItem = {
@@ -136,7 +136,11 @@ export function GiftTargetAllocationGrid({
                 onTargetSelect && "cursor-pointer hover:opacity-90",
               )}
             >
-              <div style={{ zoom: 0.55 }}>
+              <div
+                style={{
+                  zoom: 0.55,
+                }}
+              >
                 <StudentCard student={student} noDisplayRole />
               </div>
               <div className="absolute -top-2 -left-2 z-10 pointer-events-none [&_img]:size-6">

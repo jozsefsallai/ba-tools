@@ -1,12 +1,12 @@
 "use client";
 
+import { usePaginatedQuery, useQuery } from "convex/react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { FormationEntry } from "@/app/[locale]/user/formations/_components/formation-entry";
 import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
 import { MessageBox } from "@/components/common/message-box";
 import { useDebounce } from "@/hooks/use-debounce";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { api } from "~convex/api";
 
 export function FormationsBrowser() {
@@ -22,12 +22,18 @@ export function FormationsBrowser() {
   } = usePaginatedQuery(
     api.formation.getOwnPaginated,
     isSearching ? "skip" : {},
-    { initialNumItems: 20 },
+    {
+      initialNumItems: 20,
+    },
   );
 
   const searchResults = useQuery(
     api.formation.searchOwn,
-    isSearching ? { search: debouncedSearch.trim() } : "skip",
+    isSearching
+      ? {
+          search: debouncedSearch.trim(),
+        }
+      : "skip",
   );
 
   const items = isSearching ? (searchResults ?? []) : paginatedResults;

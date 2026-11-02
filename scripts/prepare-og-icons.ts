@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { OgIconName } from "@/lib/og/registry";
 import {
   BookOpenText,
   Cake,
@@ -24,6 +23,7 @@ import {
 } from "lucide-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import type { OgIconName } from "@/lib/og/registry";
 
 const ICONS: Record<OgIconName, LucideIcon> = {
   heart: Heart,
@@ -50,7 +50,9 @@ const ICONS: Record<OgIconName, LucideIcon> = {
 // time
 const directory = path.join(process.cwd(), "src/assets/og-icons");
 
-fs.mkdirSync(directory, { recursive: true });
+fs.mkdirSync(directory, {
+  recursive: true,
+});
 
 for (const [name, Icon] of Object.entries(ICONS)) {
   const svg = renderToStaticMarkup(

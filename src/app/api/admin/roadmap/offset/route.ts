@@ -1,17 +1,19 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { handleRoadmapRequest, parseBody } from "@/lib/roadmap/api.server";
 import { isEditableKind } from "@/lib/roadmap/constants";
 import {
-  RoadmapError,
   invalidateRoadmapCache,
   offsetRoadmapItems,
+  RoadmapError,
 } from "@/lib/roadmap/roadmap.server";
 import { offsetRoadmapSchema } from "@/lib/roadmap/schemas";
-import { NextResponse } from "next/server";
-import { z } from "zod";
 
 export const runtime = "nodejs";
 
-const bodySchema = offsetRoadmapSchema.extend({ kind: z.string() });
+const bodySchema = offsetRoadmapSchema.extend({
+  kind: z.string(),
+});
 
 export async function POST(req: Request) {
   return handleRoadmapRequest(req, null, async ({ body }) => {
@@ -24,6 +26,9 @@ export async function POST(req: Request) {
     const items = await offsetRoadmapItems(kind, ids, offsetMs);
 
     invalidateRoadmapCache();
-    return NextResponse.json({ updatedCount: items.length, items });
+    return NextResponse.json({
+      updatedCount: items.length,
+      items,
+    });
   });
 }

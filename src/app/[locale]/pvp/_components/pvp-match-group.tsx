@@ -1,9 +1,9 @@
-import { PVPMatch } from "@/app/[locale]/pvp/_components/pvp-match";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { PVPMatch } from "@/app/[locale]/pvp/_components/pvp-match";
+import { Button } from "@/components/ui/button";
 import type { Doc, Id } from "~convex/dataModel";
 
 const INITIAL_VISIBLE_MATCHES = 3;
@@ -25,8 +25,14 @@ export type PVPMatchGroupProps = {
   loadMore: (numItems: number) => void;
   seasonNumber?: number;
   stats?: {
-    attack: { wins: number; losses: number };
-    defense: { wins: number; losses: number };
+    attack: {
+      wins: number;
+      losses: number;
+    };
+    defense: {
+      wins: number;
+      losses: number;
+    };
   };
 };
 
@@ -56,11 +62,17 @@ export function PVPMatchGroup({
     );
 
     setPendingLoadStart(null);
-  }, [group.matches.length, paginationStatus, pendingLoadStart]);
+  }, [
+    group.matches.length,
+    paginationStatus,
+    pendingLoadStart,
+  ]);
 
   const formattedDate = useMemo(() => {
     return format(new Date(group.dayTimestamp), "MMMM d, yyyy");
-  }, [group.dayTimestamp]);
+  }, [
+    group.dayTimestamp,
+  ]);
 
   const attackWins = stats?.attack.wins ?? 0;
   const attackLoses = stats?.attack.losses ?? 0;

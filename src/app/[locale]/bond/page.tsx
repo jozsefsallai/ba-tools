@@ -1,3 +1,6 @@
+import { HelpCircleIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import {
   BondView,
   type GiftWithStudents,
@@ -10,9 +13,6 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import type { Gift, Student } from "@/lib/db/client";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { HelpCircleIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
-import { Suspense } from "react";
 
 export async function generateMetadata() {
   return getCardMetadata("bond", await getLocale());

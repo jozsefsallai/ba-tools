@@ -1,5 +1,5 @@
-import type { toPage } from "@/lib/public-api/serialize";
 import { NextResponse } from "next/server";
+import type { toPage } from "@/lib/public-api/serialize";
 
 export type ApiErrorCode =
   | "UNAUTHORIZED"
@@ -55,16 +55,33 @@ export function ok(
   },
 ) {
   return NextResponse.json(
-    { data, ...extra },
-    { status, headers: { "Cache-Control": CACHE_CONTROL[cache] } },
+    {
+      data,
+      ...extra,
+    },
+    {
+      status,
+      headers: {
+        "Cache-Control": CACHE_CONTROL[cache],
+      },
+    },
   );
 }
 
 export function okPage(
   { data, pagination }: ReturnType<typeof toPage>,
-  { cache }: { cache: CachePolicy },
+  {
+    cache,
+  }: {
+    cache: CachePolicy;
+  },
 ) {
-  return ok(data, { cache, extra: { pagination } });
+  return ok(data, {
+    cache,
+    extra: {
+      pagination,
+    },
+  });
 }
 
 export function errorResponse(error: ApiError) {
@@ -73,12 +90,18 @@ export function errorResponse(error: ApiError) {
       error: {
         code: error.code,
         message: error.message,
-        ...(error.details !== undefined ? { details: error.details } : {}),
+        ...(error.details !== undefined
+          ? {
+              details: error.details,
+            }
+          : {}),
       },
     },
     {
       status: error.status,
-      headers: { "Cache-Control": CACHE_CONTROL.private },
+      headers: {
+        "Cache-Control": CACHE_CONTROL.private,
+      },
     },
   );
 }

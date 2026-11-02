@@ -1,5 +1,5 @@
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { getLocale } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 
 const CONTENT = `The sound of the clock counting down grows even louder.
 Hearing its powerful ticking makes my body ache.

@@ -1,13 +1,15 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { MemorialLobbyGrid } from "@/app/[locale]/debug/memorial-lobbies/_components/memorial-lobby-grid";
 import { db } from "@/lib/db";
 import { fetchMemorialLobby } from "@/lib/student-spine";
 import { buildStudentPortraitUrlFromId } from "@/lib/url";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Memorial lobby debug",
-  robots: { index: false },
+  robots: {
+    index: false,
+  },
 };
 
 export type DebugLobbyStudent = {
@@ -24,12 +26,20 @@ export type DebugLobbyStudent = {
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const FETCH_BATCH_SIZE = 24;
 
-let cache: { at: number; students: Promise<DebugLobbyStudent[]> } | null = null;
+let cache: {
+  at: number;
+  students: Promise<DebugLobbyStudent[]>;
+} | null = null;
 
 async function loadStudentsWithLobbies() {
   const students = await db.student.findMany({
-    select: { id: true, name: true },
-    orderBy: { defaultOrder: "asc" },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      defaultOrder: "asc",
+    },
   });
 
   const result: DebugLobbyStudent[] = [];
@@ -60,7 +70,10 @@ async function loadStudentsWithLobbies() {
 function getStudentsWithLobbies() {
   if (!cache || Date.now() - cache.at > CACHE_TTL_MS) {
     const students = loadStudentsWithLobbies();
-    cache = { at: Date.now(), students };
+    cache = {
+      at: Date.now(),
+      students,
+    };
     // Don't keep a failed lookup around.
     students.catch(() => {
       cache = null;

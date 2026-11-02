@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,9 +36,6 @@ import {
 } from "@/lib/emblems";
 import { cn } from "@/lib/utils";
 import type { Club, School, Student } from "~prisma";
-import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
 
 type TitleGeneratorMode =
   | "basic"
@@ -136,15 +136,21 @@ export function TitleGeneratorView() {
     ).map((c) => c.club);
 
     return GROUP_EMBLEM_CLUBS.filter((c) => validClubs.includes(c.id));
-  }, [groupSchool]);
+  }, [
+    groupSchool,
+  ]);
 
   const bossItemValue = useMemo(() => {
     return `${bossItem.name}_${bossItem.terrain}`;
-  }, [bossItem]);
+  }, [
+    bossItem,
+  ]);
 
   const towerBossItemValue = useMemo(() => {
     return towerBossItem.name;
-  }, [towerBossItem]);
+  }, [
+    towerBossItem,
+  ]);
 
   const url = useMemo(() => {
     if (typeof window === "undefined") {
@@ -211,7 +217,9 @@ export function TitleGeneratorView() {
     }
 
     return new URL(url, window.location.href).toString();
-  }, [url]);
+  }, [
+    url,
+  ]);
 
   function handleBasicTextUpdate() {
     if (basicTextStr.trim().length === 0) {
@@ -282,7 +290,11 @@ export function TitleGeneratorView() {
 
     if (mode === "favor") {
       for (const student of students) {
-        for (const rank of [20, 50, 100] as FavorEmblemRank[]) {
+        for (const rank of [
+          20,
+          50,
+          100,
+        ] as FavorEmblemRank[]) {
           newDefaults.push(
             `/api/emblem/favor/${student.schaleDbId ?? student.devName}/${rank}.png`,
           );
@@ -293,7 +305,11 @@ export function TitleGeneratorView() {
         FAVOR_EMBLEM_EXTRA_ARONA,
         FAVOR_EMBLEM_EXTRA_PLANA,
       ]) {
-        for (const rank of [20, 50, 100] as FavorEmblemRank[]) {
+        for (const rank of [
+          20,
+          50,
+          100,
+        ] as FavorEmblemRank[]) {
           newDefaults.push(`/api/emblem/favor/${extraStudent.id}/${rank}.png`);
         }
       }
@@ -301,7 +317,10 @@ export function TitleGeneratorView() {
 
     if (mode === "potential") {
       for (const student of students) {
-        for (const rank of [25, 50] as PotentialEmblemRank[]) {
+        for (const rank of [
+          25,
+          50,
+        ] as PotentialEmblemRank[]) {
           newDefaults.push(
             `/api/emblem/potential/${student.schaleDbId ?? student.devName}/${rank}.png`,
           );
@@ -311,7 +330,12 @@ export function TitleGeneratorView() {
 
     if (mode === "boss") {
       for (const combo of VALID_BOSS_EMBLEM_COMBINATIONS) {
-        for (const rarity of ["N", "R", "SR", "SSR"] as BossEmblemRarity[]) {
+        for (const rarity of [
+          "N",
+          "R",
+          "SR",
+          "SSR",
+        ] as BossEmblemRarity[]) {
           newDefaults.push(
             `/api/emblem/boss/${combo.name}/${combo.terrain}/${rarity}.png`,
           );
@@ -322,7 +346,10 @@ export function TitleGeneratorView() {
     if (mode === "tower") {
       for (const boss of TOWER_EMBLEM_BOSSES) {
         for (const defenseType of TOWER_EMBLEM_DEFENSE_TYPES) {
-          for (const floorOption of [50, 100] as (50 | 100)[]) {
+          for (const floorOption of [
+            50,
+            100,
+          ] as (50 | 100)[]) {
             newDefaults.push(
               `/api/emblem/tower/${boss.name}/${defenseType}/${floorOption}.png`,
             );
@@ -802,7 +829,9 @@ export function TitleGeneratorView() {
             <div key={idx} className="flex flex-col items-center gap-2">
               <img
                 src={defaultUrl}
-                alt={t("tools.emblem.defaultTitleAlt", { index: idx + 1 })}
+                alt={t("tools.emblem.defaultTitleAlt", {
+                  index: idx + 1,
+                })}
                 className="max-w-full"
               />
 

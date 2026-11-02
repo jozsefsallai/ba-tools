@@ -53,4 +53,4 @@ const dialogueCollection = await client.getOrCreateCollection({
   embeddingFunction,
 });
 
-export { client, summaryCollection, dialogueCollection };
+export { client, dialogueCollection, summaryCollection };

@@ -62,7 +62,9 @@ export async function updateRoster(
 export async function deleteRoster(userId: string, id: string) {
   const roster = await findRoster(userId, id);
 
-  await userMutation(userId, api.roster.destroy, { id: roster._id });
+  await userMutation(userId, api.roster.destroy, {
+    id: roster._id,
+  });
 
   invalidatePublicRosters(roster);
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export type FlippableCardProps = {
   isFlipped: boolean;
@@ -19,7 +19,9 @@ export function FlippableCard({
   return (
     <div
       className={cn("perspective-midrange", className)}
-      style={{ perspective: "1000px" }}
+      style={{
+        perspective: "1000px",
+      }}
     >
       <div
         className={cn(

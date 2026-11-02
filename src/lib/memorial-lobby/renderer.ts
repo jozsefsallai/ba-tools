@@ -104,13 +104,21 @@ const SCENE_ASPECT = 4 / 3;
 // art is painted around it with varying margins (backdrops are centered on it
 // and cover it, intro cinematics included), which is why framing by the
 // backdrop alone can zoom or pan wrongly.
-const CAMERA = { x: -1366, y: -1986, width: 2732, height: 2048 };
+const CAMERA = {
+  x: -1366,
+  y: -1986,
+  width: 2732,
+  height: 2048,
+};
 
 // Intros and idle loops are mostly `Start_Idle_01` and `Idle_01`, but some
 // lobbies spell them differently: `Start_Idle_1` (Karin), `Start_idle_01`
 // (Armed Hoshino), `Idle` (Konoka).
 const INTRO_ANIMATION_RE = /^start_idle_0?1$/i;
-const IDLE_ANIMATION_RES = [/^idle_0?1$/i, /^idle$/i];
+const IDLE_ANIMATION_RES = [
+  /^idle_0?1$/i,
+  /^idle$/i,
+];
 
 export type TouchMode = "look" | "pat" | "cheek" | "hand";
 
@@ -184,7 +192,10 @@ async function loadSkeleton(skeleton: MemorialLobbySkeletonUrls) {
 
   // The renderer updates every skeleton itself, on one clock, so the intro
   // timeline stays in sync across them.
-  const spine = new Spine({ skeletonData, autoUpdate: false });
+  const spine = new Spine({
+    skeletonData,
+    autoUpdate: false,
+  });
   spine.state.data.defaultMix = MIX_DURATION;
 
   return spine;
@@ -201,9 +212,17 @@ const LAYER_Z = 100_000;
 function drawInLayers(
   spine: Spine,
   pageQueues: Record<string, number>,
-  layers: { queue: number; order: number }[],
+  layers: {
+    queue: number;
+    order: number;
+  }[],
 ) {
-  const layerOf = new Map(layers.map((l, i) => [l.queue, i]));
+  const layerOf = new Map(
+    layers.map((l, i) => [
+      l.queue,
+      i,
+    ]),
+  );
 
   // The runtime keeps a mesh per slot, ordered by zIndex after it redraws
   // them; both are private in its typings.
@@ -281,7 +300,9 @@ function linearizeAdditiveAttachments(
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
 
-    const context = canvas.getContext("2d", { willReadFrequently: true });
+    const context = canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     if (!context) {
       return null;
     }
@@ -300,7 +321,9 @@ function linearizeAdditiveAttachments(
     context.putImageData(pixels, 0, 0);
 
     const texture = SpineTexture.from(
-      PIXI.BaseTexture.from(canvas, { alphaMode: alphaModeFor(page) }),
+      PIXI.BaseTexture.from(canvas, {
+        alphaMode: alphaModeFor(page),
+      }),
     );
 
     linearPages.set(page, texture);
@@ -383,15 +406,37 @@ function touchAnimationNames(
   const ends = [
     `${name}End_01`,
     `${name}_End_01`,
-    ...(variant ? [`${prefix}End${variant}_01`] : []),
+    ...(variant
+      ? [
+          `${prefix}End${variant}_01`,
+        ]
+      : []),
   ];
 
   return {
-    intro: [`${name}_01${suffix}`, ...(bare ? [`${name}_01`] : [])],
-    loop: [`${name}_02${suffix}`, ...(bare ? [`${name}_02`] : [])],
+    intro: [
+      `${name}_01${suffix}`,
+      ...(bare
+        ? [
+            `${name}_01`,
+          ]
+        : []),
+    ],
+    loop: [
+      `${name}_02${suffix}`,
+      ...(bare
+        ? [
+            `${name}_02`,
+          ]
+        : []),
+    ],
     end: [
       ...ends.map((end) => `${end}${suffix}`),
-      ...(bare ? [`${name}End_01`] : []),
+      ...(bare
+        ? [
+            `${name}End_01`,
+          ]
+        : []),
     ],
   };
 }
@@ -409,7 +454,9 @@ function touchVariants(spine: Spine, prefix: string) {
     }
   }
 
-  return [...variants];
+  return [
+    ...variants,
+  ];
 }
 
 /**
@@ -417,10 +464,19 @@ function touchVariants(spine: Spine, prefix: string) {
  * parent's space using the parent's transform from the previous frame.
  * Returns the local offset applied, so it can be undone.
  */
-function offsetBone(bone: Bone, offset: { x: number; y: number }) {
+function offsetBone(
+  bone: Bone,
+  offset: {
+    x: number;
+    y: number;
+  },
+) {
   const parent = bone.parent;
   if (!parent) {
-    return { x: 0, y: 0 };
+    return {
+      x: 0,
+      y: 0,
+    };
   }
 
   const from = parent.worldToLocal(new Vector2(bone.worldX, bone.worldY));
@@ -428,7 +484,10 @@ function offsetBone(bone: Bone, offset: { x: number; y: number }) {
     new Vector2(bone.worldX + offset.x, bone.worldY + offset.y),
   );
 
-  const applied = { x: to.x - from.x, y: to.y - from.y };
+  const applied = {
+    x: to.x - from.x,
+    y: to.y - from.y,
+  };
 
   bone.x += applied.x;
   bone.y += applied.y;
@@ -444,7 +503,12 @@ const BACKGROUND_BONE_RE = /^(bg|back_?ground|back$)/i;
 // at its edges.
 const FRAME_INSET = 0.05;
 
-type Bounds = { minX: number; minY: number; maxX: number; maxY: number };
+type Bounds = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+};
 
 type MeasuredSlot = {
   slot: Slot;
@@ -481,7 +545,14 @@ function measureSlot(slot: Slot): MeasuredSlot | null {
 
   if (attachment instanceof RegionAttachment) {
     attachment.computeWorldVertices(slot, vertices, 0, 2);
-    indices = [0, 1, 2, 2, 3, 0];
+    indices = [
+      0,
+      1,
+      2,
+      2,
+      3,
+      0,
+    ];
   } else if (attachment instanceof MeshAttachment) {
     attachment.computeWorldVertices(
       slot,
@@ -515,7 +586,11 @@ function measureSlot(slot: Slot): MeasuredSlot | null {
     triangles.push(vertices[indices[i] * 2], vertices[indices[i] * 2 + 1]);
   }
 
-  return { slot, bounds, triangles };
+  return {
+    slot,
+    bounds,
+    triangles,
+  };
 }
 
 /**
@@ -585,7 +660,11 @@ const BACKDROP_MIN_HEIGHT = 1400;
 
 function findBackdropWith(
   measured: MeasuredSlot[],
-  { anyBone }: { anyBone: boolean },
+  {
+    anyBone,
+  }: {
+    anyBone: boolean;
+  },
 ) {
   const candidates = measured.filter(
     ({ slot }) =>
@@ -646,12 +725,16 @@ function isPlausibleBackdrop(parts: MeasuredSlot[] | null) {
  * backdrop-sized, any bone is considered. Expects `measured` in draw order.
  */
 function findBackdrop(measured: MeasuredSlot[]) {
-  const onBackgroundBone = findBackdropWith(measured, { anyBone: false });
+  const onBackgroundBone = findBackdropWith(measured, {
+    anyBone: false,
+  });
   if (isPlausibleBackdrop(onBackgroundBone)) {
     return onBackgroundBone;
   }
 
-  const onAnyBone = findBackdropWith(measured, { anyBone: true });
+  const onAnyBone = findBackdropWith(measured, {
+    anyBone: true,
+  });
   if (isPlausibleBackdrop(onAnyBone)) {
     return onAnyBone;
   }
@@ -707,7 +790,12 @@ const COVERAGE_SAMPLES = 9;
  * meshes), so their bounding box can include empty corners.
  */
 function shrinkToCoverage(
-  view: { x: number; y: number; width: number; height: number },
+  view: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  },
   art: MeasuredSlot[],
 ) {
   const cx = view.x + view.width / 2;
@@ -769,9 +857,10 @@ function measureFrame(main: Spine, backgrounds: Spine[]) {
   const mainMeasured = measureIdlePose(main);
   const backgroundMeasured = backgrounds.flatMap(measureIdlePose);
 
-  const art = [...backgroundMeasured, ...mainMeasured].filter(
-    ({ slot }) => slot.data.blendMode === BlendMode.Normal,
-  );
+  const art = [
+    ...backgroundMeasured,
+    ...mainMeasured,
+  ].filter(({ slot }) => slot.data.blendMode === BlendMode.Normal);
 
   if (shrinkToCoverage(CAMERA, art) === CAMERA) {
     return new PIXI.Rectangle(CAMERA.x, CAMERA.y, CAMERA.width, CAMERA.height);
@@ -847,7 +936,12 @@ function centroid(slots: Slot[]) {
     }
   }
 
-  return count > 0 ? { x: x / count, y: y / count } : null;
+  return count > 0
+    ? {
+        x: x / count,
+        y: y / count,
+      }
+    : null;
 }
 
 // Cheek bones that can be dragged when the pinch doesn't re-wire the rig:
@@ -866,7 +960,10 @@ function findCheekDragBones(spine: Spine, prefix: string): Bone[] {
   const { skeleton } = spine;
 
   const names = touchAnimationNames(prefix, "_M");
-  const pinch = firstAnimation(spine, [...names.loop, ...names.intro]);
+  const pinch = firstAnimation(spine, [
+    ...names.loop,
+    ...names.intro,
+  ]);
   const idle = idleAnimation(skeleton.data);
 
   if (!pinch) {
@@ -904,7 +1001,9 @@ function findCheekDragBones(spine: Spine, prefix: string): Bone[] {
   );
 
   if (fromTouchPoint) {
-    return [fromTouchPoint.target];
+    return [
+      fromTouchPoint.target,
+    ];
   }
 
   const head = skeleton.bones.find((b) =>
@@ -996,12 +1095,18 @@ const TOUCH_AREA_PRIORITY: MemorialLobbyTouchArea["kind"][] = [
 ];
 
 /** Converts a point from the manifest (Spine coordinates, y up) to the scene's. */
-const fromSpine = (p: MemorialLobbyPoint) => ({ x: p.x, y: -p.y });
+const fromSpine = (p: MemorialLobbyPoint) => ({
+  x: p.x,
+  y: -p.y,
+});
 
 function isInPolygon(
   x: number,
   y: number,
-  polygon: { x: number; y: number }[],
+  polygon: {
+    x: number;
+    y: number;
+  }[],
 ) {
   let inside = false;
 
@@ -1027,8 +1132,14 @@ const clamp = (value: number, min: number, max: number) =>
 type DraggedBone = {
   area: MemorialLobbyTouchArea;
   bone: Bone;
-  position: { x: number; y: number };
-  saved: { x: number; y: number } | null;
+  position: {
+    x: number;
+    y: number;
+  };
+  saved: {
+    x: number;
+    y: number;
+  } | null;
 };
 
 function maxRenderSize(gl: WebGLRenderingContext) {
@@ -1051,10 +1162,19 @@ export class MemorialLobbyRenderer {
   private lookBone: Bone | null = null;
   private lookOrigin: Bone | null = null;
   private touchPointBone: Bone | null = null;
-  private lookTarget: { x: number; y: number } | null = null;
+  private lookTarget: {
+    x: number;
+    y: number;
+  } | null = null;
   private touchMode: TouchMode | null = null;
-  private lookOffset = { x: 0, y: 0 };
-  private lookApplied = { x: 0, y: 0 };
+  private lookOffset = {
+    x: 0,
+    y: 0,
+  };
+  private lookApplied = {
+    x: 0,
+    y: 0,
+  };
   private lastLookUpdate = 0;
 
   /** `Pinch` or `Touch` (poke), for lobbies with a cheek interaction. */
@@ -1075,17 +1195,33 @@ export class MemorialLobbyRenderer {
   // The bone being dragged by the current (or last) touch, where it was when
   // pressed, and how far to let it go.
   private dragBone: Bone | null = null;
-  private dragRest: { x: number; y: number } | null = null;
+  private dragRest: {
+    x: number;
+    y: number;
+  } | null = null;
   private dragLimit = 0;
 
   /** For cheek stretches: the unit vector pointing away from the face. */
-  private dragOutward: { x: number; y: number } | null = null;
-  private dragOffset = { x: 0, y: 0 };
-  private dragApplied = { x: 0, y: 0 };
+  private dragOutward: {
+    x: number;
+    y: number;
+  } | null = null;
+  private dragOffset = {
+    x: 0,
+    y: 0,
+  };
+  private dragApplied = {
+    x: 0,
+    y: 0,
+  };
 
   // Lobbies exported with their Unity prefab come with scene data: the intro
   // timeline, the game's clip system and its touch areas.
-  private spines: { spine: Spine; name: string; active: boolean }[] = [];
+  private spines: {
+    spine: Spine;
+    name: string;
+    active: boolean;
+  }[] = [];
   private sceneData: MemorialLobbyScene | null = null;
   private effects: MemorialLobbyEffectPlayer | null = null;
 
@@ -1134,7 +1270,9 @@ export class MemorialLobbyRenderer {
   async load(lobby: ResolvedMemorialLobby) {
     // Skeletons come in draw order when the lobby has scene data; otherwise
     // background skeletons go behind the character.
-    const ordered = [...lobby.skeletons].sort(
+    const ordered = [
+      ...lobby.skeletons,
+    ].sort(
       (a, b) =>
         (a.order ?? (a.role === "background" ? 0 : 1)) -
         (b.order ?? (b.role === "background" ? 0 : 1)),
@@ -1153,14 +1291,19 @@ export class MemorialLobbyRenderer {
         : null,
     ]);
 
-    this.scene.removeChildren().forEach((child) => child.destroy());
+    this.scene.removeChildren().forEach((child) => {
+      child.destroy();
+    });
     this.effects?.destroy();
     this.effects = effects;
     this.sceneData = scene ?? null;
     this.collectReactionTracks();
     this.spines = [];
 
-    const drawn: { order: number; display: PIXI.DisplayObject }[] = [];
+    const drawn: {
+      order: number;
+      display: PIXI.DisplayObject;
+    }[] = [];
 
     const timelineSkeletons = new Set(
       this.sceneData?.timeline?.clips.map((clip) => clip.skeleton),
@@ -1184,7 +1327,10 @@ export class MemorialLobbyRenderer {
 
       spine.visible = skeleton.active ?? true;
 
-      drawn.push({ order: skeleton.order ?? idx, display: spine });
+      drawn.push({
+        order: skeleton.order ?? idx,
+        display: spine,
+      });
 
       if (skeleton.layers && skeleton.pageQueues) {
         drawInLayers(spine, skeleton.pageQueues, skeleton.layers);
@@ -1218,7 +1364,10 @@ export class MemorialLobbyRenderer {
         spines[host].addChild(display);
         effects?.setParent(index, spines[host]);
       } else {
-        drawn.push({ order, display });
+        drawn.push({
+          order,
+          display,
+        });
       }
     }
 
@@ -1282,7 +1431,12 @@ export class MemorialLobbyRenderer {
     // After the skeletons, so effects follow their bones' current pose.
     this.effects?.update(dt, (name) => {
       const spine = this.spineNamed(name);
-      return spine ? { spine, display: spine } : null;
+      return spine
+        ? {
+            spine,
+            display: spine,
+          }
+        : null;
     });
   };
 
@@ -1615,7 +1769,9 @@ export class MemorialLobbyRenderer {
 
       if (idle) {
         const entry = state.addAnimationWith(0, idle, true, 0);
-        entry.listener = { start: startRepeats };
+        entry.listener = {
+          start: startRepeats,
+        };
       }
     } else {
       if (idle) {
@@ -1639,10 +1795,14 @@ export class MemorialLobbyRenderer {
       }
     }
 
-    return [...ids].sort().map((id) => ({
-      id,
-      index: Number.parseInt(id.split("_")[1], 10) || 1,
-    }));
+    return [
+      ...ids,
+    ]
+      .sort()
+      .map((id) => ({
+        id,
+        index: Number.parseInt(id.split("_")[1], 10) || 1,
+      }));
   }
 
   /**
@@ -1660,8 +1820,14 @@ export class MemorialLobbyRenderer {
     const endId = `${prefix}End_${index}`;
 
     for (const [track, suffix] of [
-      [INTERACTION_BODY_TRACK, "_A"],
-      [INTERACTION_MOUTH_TRACK, "_M"],
+      [
+        INTERACTION_BODY_TRACK,
+        "_A",
+      ],
+      [
+        INTERACTION_MOUTH_TRACK,
+        "_M",
+      ],
     ] as const) {
       const name = `${id}${suffix}`;
       const endName = `${endId}${suffix}`;
@@ -1733,7 +1899,10 @@ export class MemorialLobbyRenderer {
 
     // Tracks the idle, its scenery loops and the random clips play on are
     // always busy; they don't say anything about interactions.
-    for (const idx of [...controller.idle, ...controller.randomIdle]) {
+    for (const idx of [
+      ...controller.idle,
+      ...controller.randomIdle,
+    ]) {
       const clip = controller.clips[idx];
       this.reactionTracks.delete(clip.track);
 
@@ -1793,7 +1962,10 @@ export class MemorialLobbyRenderer {
       null;
 
     this.cheekPrefix =
-      ["Pinch", "Touch"].find((prefix) =>
+      [
+        "Pinch",
+        "Touch",
+      ].find((prefix) =>
         firstAnimation(spine, touchAnimationNames(prefix, "_M").intro),
       ) ?? null;
 
@@ -1867,8 +2039,12 @@ export class MemorialLobbyRenderer {
       y: head.y + head.uy * distance * head.size,
     });
 
-    const zones: { mode: ZoneMode; x: number; y: number; radius: number }[] =
-      [];
+    const zones: {
+      mode: ZoneMode;
+      x: number;
+      y: number;
+      radius: number;
+    }[] = [];
 
     if (this.handBone) {
       const finger = centroid(this.handSpotSlots);
@@ -1994,11 +2170,17 @@ export class MemorialLobbyRenderer {
     if (dragBone) {
       // Let a previous drag's leftover offset settle on its own bone first.
       if (this.dragBone !== dragBone) {
-        this.dragOffset = { x: 0, y: 0 };
+        this.dragOffset = {
+          x: 0,
+          y: 0,
+        };
       }
 
       this.dragBone = dragBone;
-      this.dragRest = { x: dragBone.worldX, y: dragBone.worldY };
+      this.dragRest = {
+        x: dragBone.worldX,
+        y: dragBone.worldY,
+      };
       this.dragLimit = mode === "hand" ? HAND_MAX_OFFSET : CHEEK_MAX_STRETCH;
       this.dragOutward = null;
 
@@ -2010,7 +2192,10 @@ export class MemorialLobbyRenderer {
 
         const length = Math.hypot(ox, oy);
         if (length > 0) {
-          this.dragOutward = { x: ox / length, y: oy / length };
+          this.dragOutward = {
+            x: ox / length,
+            y: oy / length,
+          };
         }
       }
     } else {
@@ -2018,8 +2203,14 @@ export class MemorialLobbyRenderer {
     }
 
     for (const [track, suffix] of [
-      [TOUCH_MOUTH_TRACK, "_M"],
-      [TOUCH_BODY_TRACK, "_A"],
+      [
+        TOUCH_MOUTH_TRACK,
+        "_M",
+      ],
+      [
+        TOUCH_BODY_TRACK,
+        "_A",
+      ],
     ] as const) {
       const names = touchAnimationNames(prefix, suffix, this.touchVariant);
       const intro = firstAnimation(spine, names.intro);
@@ -2083,7 +2274,9 @@ export class MemorialLobbyRenderer {
         this.draggedBones.set(bone, {
           area,
           bone,
-          position: { ...area.origin },
+          position: {
+            ...area.origin,
+          },
           saved: null,
         });
       }
@@ -2126,7 +2319,10 @@ export class MemorialLobbyRenderer {
     } else if (area.clip !== null) {
       const clip = controller.clips[area.clip];
 
-      for (const idx of [area.clip, ...clip.sync]) {
+      for (const idx of [
+        area.clip,
+        ...clip.sync,
+      ]) {
         this.main?.state.setEmptyAnimation(
           controller.clips[idx].track,
           clip.outroMix ?? MIX_DURATION,
@@ -2173,8 +2369,14 @@ export class MemorialLobbyRenderer {
     const prefix = this.touchPrefix(mode);
 
     for (const [track, suffix] of [
-      [TOUCH_MOUTH_TRACK, "_M"],
-      [TOUCH_BODY_TRACK, "_A"],
+      [
+        TOUCH_MOUTH_TRACK,
+        "_M",
+      ],
+      [
+        TOUCH_BODY_TRACK,
+        "_A",
+      ],
     ] as const) {
       const endName = firstAnimation(
         spine,
@@ -2334,7 +2536,10 @@ export class MemorialLobbyRenderer {
         continue;
       }
 
-      dragged.saved = { x: bone.x, y: bone.y };
+      dragged.saved = {
+        x: bone.x,
+        y: bone.y,
+      };
       bone.x = position.x;
       bone.y = position.y;
     }
@@ -2357,13 +2562,19 @@ export class MemorialLobbyRenderer {
 
     this.lookBone.x -= this.lookApplied.x;
     this.lookBone.y -= this.lookApplied.y;
-    this.lookApplied = { x: 0, y: 0 };
+    this.lookApplied = {
+      x: 0,
+      y: 0,
+    };
 
     if (this.dragBone) {
       this.dragBone.x -= this.dragApplied.x;
       this.dragBone.y -= this.dragApplied.y;
     }
-    this.dragApplied = { x: 0, y: 0 };
+    this.dragApplied = {
+      x: 0,
+      y: 0,
+    };
   }
 
   private zoneOverlay: PIXI.Graphics | null = null;

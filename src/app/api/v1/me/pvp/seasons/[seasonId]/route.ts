@@ -6,10 +6,14 @@ import {
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
 
-type Params = { seasonId: string };
+type Params = {
+  seasonId: string;
+};
 
 export const GET = userRoute<Params>(async (_req, { seasonId }, userId) => {
-  return ok(await getPvpSeason(userId, seasonId), { cache: "private" });
+  return ok(await getPvpSeason(userId, seasonId), {
+    cache: "private",
+  });
 });
 
 export const PATCH = userRoute<Params>(async (req, { seasonId }, userId) => {
@@ -23,5 +27,7 @@ export const PATCH = userRoute<Params>(async (req, { seasonId }, userId) => {
 
 export const DELETE = userRoute<Params>(async (_req, { seasonId }, userId) => {
   await deletePvpSeason(userId, seasonId);
-  return new Response(null, { status: 204 });
+  return new Response(null, {
+    status: 204,
+  });
 });

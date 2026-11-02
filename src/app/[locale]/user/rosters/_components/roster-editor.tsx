@@ -1,5 +1,21 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronsUpDownIcon,
+  CopyIcon,
+  DownloadIcon,
+  ExternalLinkIcon,
+  ListOrderedIcon,
+  SaveIcon,
+  UploadIcon,
+  XIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import type { RosterItem } from "@/app/[locale]/user/rosters/_components/roster-item-editor";
 import { RosterItemsGrid } from "@/app/[locale]/user/rosters/_components/roster-items-grid";
 import { SearchBar } from "@/components/common/list-controls";
@@ -36,27 +52,11 @@ import {
 } from "@/lib/friend-code";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import {
-  GAME_SERVERS,
   GAME_SERVER_NAMES,
+  GAME_SERVERS,
   type GameServer,
   type StarLevel,
 } from "@/lib/types";
-import { useMutation } from "convex/react";
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronsUpDownIcon,
-  CopyIcon,
-  DownloadIcon,
-  ExternalLinkIcon,
-  ListOrderedIcon,
-  SaveIcon,
-  UploadIcon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -399,13 +399,19 @@ const RosterStudentsPanel = memo(function RosterStudentsPanel({
       trimmed,
     );
     const itemByStudentId = new Map(
-      rosterItems.map((item) => [item.student.id, item]),
+      rosterItems.map((item) => [
+        item.student.id,
+        item,
+      ]),
     );
 
     return ordered
       .map((student) => itemByStudentId.get(student.id))
       .filter((item): item is RosterItem => item !== undefined);
-  }, [rosterItems, searchQuery]);
+  }, [
+    rosterItems,
+    searchQuery,
+  ]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -520,7 +526,11 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     }
 
     return `/rosters/${gameServer}/${friendCode}`;
-  }, [gameServer, friendCode, friendCodeValid]);
+  }, [
+    gameServer,
+    friendCode,
+    friendCodeValid,
+  ]);
 
   const canCopyShareLink = publicRosterPath !== null && visibility === "public";
 
@@ -528,11 +538,18 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     (studentId: string, updatedItem: Partial<RosterItem>) => {
       setRosterItems((items) =>
         items.map((item) =>
-          item.student.id === studentId ? { ...item, ...updatedItem } : item,
+          item.student.id === studentId
+            ? {
+                ...item,
+                ...updatedItem,
+              }
+            : item,
         ),
       );
     },
-    [setRosterItems],
+    [
+      setRosterItems,
+    ],
   );
 
   const addStudent = useCallback(
@@ -542,10 +559,15 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
           return items;
         }
 
-        return [...items, createRosterItem(student)];
+        return [
+          ...items,
+          createRosterItem(student),
+        ];
       });
     },
-    [setRosterItems],
+    [
+      setRosterItems,
+    ],
   );
 
   const removeStudent = useCallback(
@@ -554,21 +576,27 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
         items.filter((item) => item.student.id !== studentId),
       );
     },
-    [setRosterItems],
+    [
+      setRosterItems,
+    ],
   );
 
   const reorderRosterItems = useCallback(
     (items: RosterItem[]) => {
       setRosterItems(items);
     },
-    [setRosterItems],
+    [
+      setRosterItems,
+    ],
   );
 
   const onImportFromJustin = useCallback(
     (items: RosterItem[]) => {
       setRosterItems(items);
     },
-    [setRosterItems],
+    [
+      setRosterItems,
+    ],
   );
 
   const addableStudents = useMemo(() => {
@@ -580,7 +608,10 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       (student) =>
         student.devName !== "CH0258_02" && !rosterStudentIds.has(student.id),
     );
-  }, [students, rosterItems]);
+  }, [
+    students,
+    rosterItems,
+  ]);
 
   useEffect(() => {
     if (query.status !== "success" || !query.data) {
@@ -625,7 +656,10 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
     );
 
     hydratedRosterIdRef.current = rosterId;
-  }, [rosterId, query.status]);
+  }, [
+    rosterId,
+    query.status,
+  ]);
 
   const syncSavedBaseline = useCallback(() => {
     setNameUnchecked(name);
@@ -675,7 +709,12 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       console.error(err);
       toast.error(t("tools.roster.editor.toasts.shareLinkCopyFailed"));
     }
-  }, [canCopyShareLink, publicRosterPath, copiedShareLink, t]);
+  }, [
+    canCopyShareLink,
+    publicRosterPath,
+    copiedShareLink,
+    t,
+  ]);
 
   async function handleWantsToUpdate() {
     if (isSaving || !friendCodeValid) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PvpCropPreview } from "@/app/[locale]/pvp/_components/pvp-screenshot-preview";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -17,15 +18,14 @@ import { drawPvpPixels } from "@/lib/pvp/canvas";
 import type { PvpIconDebugRunner } from "@/lib/pvp/icon-debug";
 import { runIconDebugPool } from "@/lib/pvp/icon-debug-pool";
 import {
+  failedIconDebugResult,
   type IconDebugCase,
   type IconDebugResult,
-  failedIconDebugResult,
   iconDebugCases,
   iconDebugCorrect,
 } from "@/lib/pvp/icon-debug-results";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 25;
 
@@ -84,8 +84,15 @@ export function PvpIconDebugger() {
       }
     }
 
-    return { correct, uncertain, incorrectRows, total };
-  }, [rows]);
+    return {
+      correct,
+      uncertain,
+      incorrectRows,
+      total,
+    };
+  }, [
+    rows,
+  ]);
 
   const filtered = useMemo(
     () =>
@@ -98,7 +105,10 @@ export function PvpIconDebugger() {
               ),
           )
         : rows,
-    [rows, incorrectOnly],
+    [
+      rows,
+      incorrectOnly,
+    ],
   );
 
   const lastPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
@@ -158,7 +168,9 @@ export function PvpIconDebugger() {
       );
 
       const runners = Array.from(
-        { length: concurrency },
+        {
+          length: concurrency,
+        },
         () => new PvpIconDebugRunner(),
       );
 
@@ -367,7 +379,10 @@ export function PvpIconDebugger() {
                   />
                 </TableCell>
 
-                {[row.myTeam, row.opponentTeam].map((team, side) => (
+                {[
+                  row.myTeam,
+                  row.opponentTeam,
+                ].map((team, side) => (
                   <TableCell key={side} className="align-top">
                     <div className="flex flex-col gap-2">
                       {team.map((result, index) => (
@@ -427,7 +442,11 @@ function MatchResult({
   result,
   expectedId,
   slot,
-}: { result: IconDebugCase; expectedId: string; slot?: number }) {
+}: {
+  result: IconDebugCase;
+  expectedId: string;
+  slot?: number;
+}) {
   const { studentMap } = useStudents();
 
   const correct = iconDebugCorrect(result, expectedId);
@@ -501,7 +520,9 @@ function CropCollection({ row }: { row: IconDebugResult }) {
     const scratch = document.createElement("canvas");
 
     for (const [group, cases] of [
-      [row.representative],
+      [
+        row.representative,
+      ],
       row.myTeam,
       row.opponentTeam,
     ].entries()) {
@@ -511,7 +532,9 @@ function CropCollection({ row }: { row: IconDebugResult }) {
         }
       }
     }
-  }, [row]);
+  }, [
+    row,
+  ]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -531,28 +554,33 @@ function CropCollection({ row }: { row: IconDebugResult }) {
 
         {expanded && (
           <div className="flex flex-col gap-2">
-            {[[row.representative], row.myTeam, row.opponentTeam].flatMap(
-              (group, side) =>
-                group.map(
-                  (item, index) =>
-                    !item.skipped && (
-                      <div key={`${side}-${index}`}>
-                        <p className="text-xs">
-                          {side === 0
-                            ? "Representative"
-                            : `${side === 1 ? "My team" : "Opponent team"} ${index + 1}`}
-                        </p>
+            {[
+              [
+                row.representative,
+              ],
+              row.myTeam,
+              row.opponentTeam,
+            ].flatMap((group, side) =>
+              group.map(
+                (item, index) =>
+                  !item.skipped && (
+                    <div key={`${side}-${index}`}>
+                      <p className="text-xs">
+                        {side === 0
+                          ? "Representative"
+                          : `${side === 1 ? "My team" : "Opponent team"} ${index + 1}`}
+                      </p>
 
-                        {item.crop ? (
-                          <PvpCropPreview image={item.crop} />
-                        ) : (
-                          <p className="text-xs text-destructive">
-                            No detected crop
-                          </p>
-                        )}
-                      </div>
-                    ),
-                ),
+                      {item.crop ? (
+                        <PvpCropPreview image={item.crop} />
+                      ) : (
+                        <p className="text-xs text-destructive">
+                          No detected crop
+                        </p>
+                      )}
+                    </div>
+                  ),
+              ),
             )}
           </div>
         )}
@@ -565,7 +593,11 @@ function ScreenshotPreview({
   studentId,
   runner,
   disabled,
-}: { studentId: string; runner?: PvpIconDebugRunner; disabled: boolean }) {
+}: {
+  studentId: string;
+  runner?: PvpIconDebugRunner;
+  disabled: boolean;
+}) {
   const [url, setUrl] = useState<string>();
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
@@ -576,9 +608,13 @@ function ScreenshotPreview({
 
   useEffect(
     () => () => {
-      if (url) URL.revokeObjectURL(url);
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
     },
-    [url],
+    [
+      url,
+    ],
   );
 
   async function preview() {

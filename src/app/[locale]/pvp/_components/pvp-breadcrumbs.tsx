@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import type { PropsWithChildren } from "react";
 import { BreadcrumbScope } from "@/components/providers/breadcrumbs-provider";
 import { usePathname } from "@/i18n/navigation";
 import { buildPvpBreadcrumbs } from "@/lib/pvp/breadcrumbs";
-import { useTranslations } from "next-intl";
-import type { PropsWithChildren } from "react";
 
 export function PVPBreadcrumbs({
   children,

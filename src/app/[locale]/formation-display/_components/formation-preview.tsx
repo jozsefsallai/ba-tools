@@ -1,21 +1,5 @@
 "use client";
 
-import { FormationItemPopover } from "@/app/[locale]/formation-display/_components/formation-item-popover";
-import { EmptyCard } from "@/components/common/empty-card";
-import { StudentCard } from "@/components/common/student-card";
-import { Popover, PopoverAnchor } from "@/components/ui/popover";
-import {
-  TOUCH_DRAG_CLASS,
-  preventTouchContextMenu,
-  useZoomCorrectedTransform,
-} from "@/lib/dnd-mobile";
-import {
-  type FormationType,
-  resolveStarterOrders,
-  starterThresholdFor,
-} from "@/lib/formation-type";
-import type { StarLevel, Student, UELevel } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import {
   DndContext,
   type DragEndEvent,
@@ -27,14 +11,30 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
   rectSortingStrategy,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { type SetStateAction, useCallback, useState } from "react";
+import { FormationItemPopover } from "@/app/[locale]/formation-display/_components/formation-item-popover";
+import { EmptyCard } from "@/components/common/empty-card";
+import { StudentCard } from "@/components/common/student-card";
+import { Popover, PopoverAnchor } from "@/components/ui/popover";
+import {
+  preventTouchContextMenu,
+  TOUCH_DRAG_CLASS,
+  useZoomCorrectedTransform,
+} from "@/lib/dnd-mobile";
+import {
+  type FormationType,
+  resolveStarterOrders,
+  starterThresholdFor,
+} from "@/lib/formation-type";
+import type { StarLevel, Student, UELevel } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export type StudentItem = {
   id: string;
@@ -74,7 +74,10 @@ export type FormationPreviewProps = {
 function Overline({
   color,
   hasStarter,
-}: { color: string; hasStarter: boolean }) {
+}: {
+  color: string;
+  hasStarter: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -83,7 +86,9 @@ function Overline({
           "mt-[-1px]": !hasStarter,
         },
       )}
-      style={{ backgroundColor: color }}
+      style={{
+        backgroundColor: color,
+      }}
     />
   );
 }
@@ -176,9 +181,16 @@ function SortableGroup({
   const [, setActiveDragId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -188,14 +200,18 @@ function SortableGroup({
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       setActiveDragId(null);
-      if (!over || active.id === over.id) return;
+      if (!over || active.id === over.id) {
+        return;
+      }
       setItems((current) => {
         const oldIndex = current.findIndex((item) => item.id === active.id);
         const newIndex = current.findIndex((item) => item.id === over.id);
         return arrayMove(current, oldIndex, newIndex);
       });
     },
-    [setItems],
+    [
+      setItems,
+    ],
   );
 
   const handleDragStart = useCallback(
@@ -203,7 +219,9 @@ function SortableGroup({
       editableConfig.onItemSelected(null);
       setActiveDragId(active.id as string);
     },
-    [editableConfig],
+    [
+      editableConfig,
+    ],
   );
 
   const handleDragCancel = useCallback(() => {
@@ -231,7 +249,9 @@ function SortableGroup({
                 onItemSelected(selectedItemId === entry.id ? null : entry.id)
               }
               onOpenChange={(open) => {
-                if (!open) onItemSelected(null);
+                if (!open) {
+                  onItemSelected(null);
+                }
               }}
               popoverContent={
                 <FormationItemPopover

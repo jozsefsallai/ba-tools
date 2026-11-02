@@ -35,7 +35,13 @@ export type PvpOcrReading = {
 };
 
 export function getPvpLevelEnd(
-  words: { text: string; confidence: number; bbox: { x1: number } }[],
+  words: {
+    text: string;
+    confidence: number;
+    bbox: {
+      x1: number;
+    };
+  }[],
 ) {
   const prefix = /^Lv[.．]?\p{Nd}+$/iu.test(words[0]?.text ?? "")
     ? words.slice(0, 1)
@@ -125,8 +131,16 @@ export function getPvpEnemyNameStatus(
 export function resolvePvpReportTeam<
   T extends PvpStudentIdentity & Pick<Student, "combatClass">,
 >(units: PvpExtractedUnit[], students: T[]) {
-  const team: { student?: T; damage?: number; report?: PvpUnitImport }[] =
-    Array.from({ length: 6 }, () => ({}));
+  const team: {
+    student?: T;
+    damage?: number;
+    report?: PvpUnitImport;
+  }[] = Array.from(
+    {
+      length: 6,
+    },
+    () => ({}),
+  );
 
   let striker = 0;
   let special = 4;
@@ -142,11 +156,18 @@ export function resolvePvpReportTeam<
           (student) => student.id === candidate.studentId,
         );
 
-        return match ? [match] : [];
+        return match
+          ? [
+              match,
+            ]
+          : [];
       },
     );
 
-    const recognized = { ...unit.student, value: student?.name ?? null };
+    const recognized = {
+      ...unit.student,
+      value: student?.name ?? null,
+    };
 
     const combatClass =
       unit.combatClass ??
@@ -191,14 +212,19 @@ export function resolvePvpReportTeam<
   return team;
 }
 
-export function correctPvpImportedItem<T extends { report?: PvpUnitImport }>(
-  item: T,
-  changes: Partial<T>,
-) {
+export function correctPvpImportedItem<
+  T extends {
+    report?: PvpUnitImport;
+  },
+>(item: T, changes: Partial<T>) {
   const report = item.report && {
     ...item.report,
-    student: { ...item.report.student },
-    damage: { ...item.report.damage },
+    student: {
+      ...item.report.student,
+    },
+    damage: {
+      ...item.report.damage,
+    },
   };
 
   if (report) {
@@ -211,5 +237,9 @@ export function correctPvpImportedItem<T extends { report?: PvpUnitImport }>(
     }
   }
 
-  return { ...item, ...changes, report };
+  return {
+    ...item,
+    ...changes,
+    report,
+  };
 }

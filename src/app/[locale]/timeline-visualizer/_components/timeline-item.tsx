@@ -1,5 +1,25 @@
 "use client";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  ChevronDownIcon,
+  ChevronsUpDownIcon,
+  ChevronUpIcon,
+  CopyIcon,
+  GripVerticalIcon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { v4 as uuid } from "uuid";
 import { TimelineItemTargetPicker } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-target-picker";
 import type { TimelineItem as TimelineItemType } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/[locale]/timeline-visualizer/_components/timeline-quick-add";
@@ -18,26 +38,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  ChevronsUpDownIcon,
-  CopyIcon,
-  GripVerticalIcon,
-  PlusIcon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import {
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { v4 as uuid } from "uuid";
 import type { Student } from "~prisma";
 
 const MAX_TIMELINE_TARGETS = 10;
@@ -72,7 +72,10 @@ export function TimelineItem({
   const t = useTranslations();
 
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: item.id, animateLayoutChanges: () => false });
+    useSortable({
+      id: item.id,
+      animateLayoutChanges: () => false,
+    });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -92,18 +95,26 @@ export function TimelineItem({
 
   const handleRemove = useCallback(() => {
     onWantsToRemove(item.id);
-  }, [onWantsToRemove]);
+  }, [
+    onWantsToRemove,
+  ]);
 
   const handleTriggerUpdate = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
-        onWantsToUpdate(item.id, { trigger: undefined });
+        onWantsToUpdate(item.id, {
+          trigger: undefined,
+        });
         return;
       }
 
-      onWantsToUpdate(item.id, { trigger: event.target.value });
+      onWantsToUpdate(item.id, {
+        trigger: event.target.value,
+      });
     },
-    [onWantsToUpdate],
+    [
+      onWantsToUpdate,
+    ],
   );
 
   const handleTargetUpdate = useCallback(
@@ -113,7 +124,9 @@ export function TimelineItem({
       }
 
       if (!student || student.id === item.target?.id) {
-        onWantsToUpdate(item.id, { target: undefined });
+        onWantsToUpdate(item.id, {
+          target: undefined,
+        });
         return;
       }
 
@@ -121,9 +134,14 @@ export function TimelineItem({
         return;
       }
 
-      onWantsToUpdate(item.id, { target: student });
+      onWantsToUpdate(item.id, {
+        target: student,
+      });
     },
-    [item, onWantsToUpdate],
+    [
+      item,
+      onWantsToUpdate,
+    ],
   );
 
   const handleExtraTargetUpdate = useCallback(
@@ -132,7 +150,9 @@ export function TimelineItem({
         return;
       }
 
-      const extraTargets = [...(item.extraTargets ?? [])];
+      const extraTargets = [
+        ...(item.extraTargets ?? []),
+      ];
 
       if (
         student &&
@@ -145,9 +165,14 @@ export function TimelineItem({
       }
 
       extraTargets[index] = student ?? undefined;
-      onWantsToUpdate(item.id, { extraTargets });
+      onWantsToUpdate(item.id, {
+        extraTargets,
+      });
     },
-    [item, onWantsToUpdate],
+    [
+      item,
+      onWantsToUpdate,
+    ],
   );
 
   const addExtraTarget = useCallback(() => {
@@ -156,10 +181,16 @@ export function TimelineItem({
       (item.extraTargets?.length ?? 0) < MAX_TIMELINE_TARGETS - 1
     ) {
       onWantsToUpdate(item.id, {
-        extraTargets: [...(item.extraTargets ?? []), undefined],
+        extraTargets: [
+          ...(item.extraTargets ?? []),
+          undefined,
+        ],
       });
     }
-  }, [item, onWantsToUpdate]);
+  }, [
+    item,
+    onWantsToUpdate,
+  ]);
 
   const removeExtraTarget = useCallback(
     (index: number) => {
@@ -169,45 +200,68 @@ export function TimelineItem({
         });
       }
     },
-    [item, onWantsToUpdate],
+    [
+      item,
+      onWantsToUpdate,
+    ],
   );
 
   const handleVariantUpdate = useCallback(
     (variantId: string) => {
       if (variantId === "default") {
-        onWantsToUpdate(item.id, { variantId: undefined });
+        onWantsToUpdate(item.id, {
+          variantId: undefined,
+        });
         return;
       }
 
-      onWantsToUpdate(item.id, { variantId });
+      onWantsToUpdate(item.id, {
+        variantId,
+      });
     },
-    [onWantsToUpdate],
+    [
+      onWantsToUpdate,
+    ],
   );
 
   const handleCopyUpdate = useCallback(
     (checked: boolean) => {
-      onWantsToUpdate(item.id, { copy: checked });
+      onWantsToUpdate(item.id, {
+        copy: checked,
+      });
     },
-    [onWantsToUpdate],
+    [
+      onWantsToUpdate,
+    ],
   );
 
   const handleNotesUpdate = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (event.target.value === "") {
-        onWantsToUpdate(item.id, { notes: undefined });
+        onWantsToUpdate(item.id, {
+          notes: undefined,
+        });
         return;
       }
 
-      onWantsToUpdate(item.id, { notes: event.target.value });
+      onWantsToUpdate(item.id, {
+        notes: event.target.value,
+      });
     },
-    [onWantsToUpdate],
+    [
+      onWantsToUpdate,
+    ],
   );
 
   const handleTextUpdate = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onWantsToUpdate(item.id, { text: event.target.value });
+      onWantsToUpdate(item.id, {
+        text: event.target.value,
+      });
     },
-    [onWantsToUpdate],
+    [
+      onWantsToUpdate,
+    ],
   );
 
   const insertStudentBelow = useCallback(
@@ -218,7 +272,9 @@ export function TimelineItem({
         student,
       });
     },
-    [onWantsToAddBelow],
+    [
+      onWantsToAddBelow,
+    ],
   );
 
   const insertSeparatorBelow = useCallback(
@@ -229,7 +285,9 @@ export function TimelineItem({
         orientation,
       });
     },
-    [onWantsToAddBelow],
+    [
+      onWantsToAddBelow,
+    ],
   );
 
   const insertTextBelow = useCallback(() => {
@@ -238,7 +296,9 @@ export function TimelineItem({
       id: uuid(),
       text: "Enter text",
     });
-  }, [onWantsToAddBelow]);
+  }, [
+    onWantsToAddBelow,
+  ]);
 
   const duplicate = useCallback(() => {
     const newItem: TimelineItemType = {
@@ -246,8 +306,14 @@ export function TimelineItem({
       id: uuid(),
     };
 
-    setItems((prev) => [...prev, newItem]);
-  }, [item, setItems]);
+    setItems((prev) => [
+      ...prev,
+      newItem,
+    ]);
+  }, [
+    item,
+    setItems,
+  ]);
 
   const skillVariants = useMemo(() => {
     if (item.type !== "student") {
@@ -260,18 +326,26 @@ export function TimelineItem({
     }
 
     return variants;
-  }, [item]);
+  }, [
+    item,
+  ]);
 
   useEffect(() => {
     if (!separatorOverride) {
-      onWantsToUpdate(item.id, { size: undefined });
+      onWantsToUpdate(item.id, {
+        size: undefined,
+      });
     } else if (typeof separatorSizeStr === "string") {
       const value = Number.parseInt(separatorSizeStr, 10);
       if (!Number.isNaN(value)) {
-        onWantsToUpdate(item.id, { size: value });
+        onWantsToUpdate(item.id, {
+          size: value,
+        });
       }
     }
-  }, [separatorOverride]);
+  }, [
+    separatorOverride,
+  ]);
 
   useEffect(() => {
     if (item.type !== "separator" || !separatorOverride) {
@@ -280,9 +354,13 @@ export function TimelineItem({
 
     const value = Number.parseInt(separatorSizeStr ?? "", 10);
     if (!Number.isNaN(value)) {
-      onWantsToUpdate(item.id, { size: value });
+      onWantsToUpdate(item.id, {
+        size: value,
+      });
     }
-  }, [separatorSizeStr]);
+  }, [
+    separatorSizeStr,
+  ]);
 
   return (
     <article

@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormatter, useTranslations } from "next-intl";
+import { useCallback, useState } from "react";
 import { MultiTeamCalculator } from "@/app/[locale]/raid-score-calculator/_components/multi-team-calculator";
 import { SingleTeamCalculator } from "@/app/[locale]/raid-score-calculator/_components/single-team-calculator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,8 +11,6 @@ import {
   type RaidDifficultyData,
   type RaidDuration,
 } from "@/lib/raids";
-import { useFormatter, useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
 
 type CalculatorMode = "single" | "multi";
 

@@ -1,7 +1,7 @@
 import "server-only";
 
-import { db } from "@/lib/db";
 import { unstable_cache } from "next/cache";
+import { db } from "@/lib/db";
 
 export type EmblemStudent = {
   id: string;
@@ -21,11 +21,19 @@ export function getCachedEmblemStudent(rawStudent: string) {
       db.student.findFirst({
         where: {
           OR: [
-            { devName: finalRawStudent },
-            { id: finalRawStudent },
+            {
+              devName: finalRawStudent,
+            },
+            {
+              id: finalRawStudent,
+            },
             ...(Number.isNaN(numberParsedStudent)
               ? []
-              : [{ schaleDbId: numberParsedStudent }]),
+              : [
+                  {
+                    schaleDbId: numberParsedStudent,
+                  },
+                ]),
           ],
         },
         select: {
@@ -35,7 +43,10 @@ export function getCachedEmblemStudent(rawStudent: string) {
           lastName: true,
         },
       }),
-    ["emblem-student", finalRawStudent],
+    [
+      "emblem-student",
+      finalRawStudent,
+    ],
     {
       revalidate: 86_400,
     },

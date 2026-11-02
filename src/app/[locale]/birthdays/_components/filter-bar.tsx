@@ -1,8 +1,8 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Input } from "@/components/ui/input";
 
 type FilterBarProps = {
   search: string;

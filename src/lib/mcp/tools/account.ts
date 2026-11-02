@@ -1,3 +1,4 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool } from "@/lib/mcp/define-tool";
 import {
@@ -5,7 +6,6 @@ import {
   getPreferences,
   updatePreferences,
 } from "@/lib/public-api/resources/account.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { userPreferencesArgs } from "~convex-lib/validators";
 
 export function registerAccountTools(server: McpServer) {

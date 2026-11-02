@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -7,11 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  lessonsFavorTable,
   type LessonsFavorTableEntry,
+  lessonsFavorTable,
 } from "@/lib/favor-table";
-import { useTranslations } from "next-intl";
-import { useMemo } from "react";
 
 export type LessonsTableProps = {
   exp: number;
@@ -36,7 +36,9 @@ export function LessonsTable({ exp }: LessonsTableProps) {
         exp / (lesson.exp + lesson.bonusExp * lesson.bonusChance),
       ),
     }));
-  }, [exp]);
+  }, [
+    exp,
+  ]);
 
   // Area | Level | Exp | Bonus | Count
 

@@ -11,7 +11,11 @@ export type MarkdownRendererProps = {
 export function MarkdownRenderer({ children }: MarkdownRendererProps) {
   return (
     <Markdown
-      remarkPlugins={[remarkYoutube, remarkBilibili, remarkEchelonPlugin]}
+      remarkPlugins={[
+        remarkYoutube,
+        remarkBilibili,
+        remarkEchelonPlugin,
+      ]}
     >
       {children}
     </Markdown>

@@ -1,8 +1,8 @@
+import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import { TimelineView } from "@/app/[locale]/timelines/[id]/_components/timeline-view";
 import { redirect } from "@/i18n/navigation";
 import { getPublicTimelineMetadata } from "@/lib/og/public-timeline.server";
-import type { Metadata } from "next";
-import { getLocale } from "next-intl/server";
 
 type PageParams = {
   id: string;
@@ -18,7 +18,10 @@ export async function generateMetadata({
 
     return await getPublicTimelineMetadata("timeline", id, await getLocale());
   } catch (err) {
-    return redirect({ href: "/404", locale: await getLocale() });
+    return redirect({
+      href: "/404",
+      locale: await getLocale(),
+    });
   }
 }
 

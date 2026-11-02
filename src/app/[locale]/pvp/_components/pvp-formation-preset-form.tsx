@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import type {
   PVPFormationPresetType,
@@ -18,14 +22,17 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useMutation } from "convex/react";
-import { ChevronLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
-const blankTeam = (): PVPFormationStudentItem[] => [{}, {}, {}, {}, {}, {}];
+const blankTeam = (): PVPFormationStudentItem[] => [
+  {},
+  {},
+  {},
+  {},
+  {},
+  {},
+];
 
 export function PVPFormationPresetForm({
   seasonId,
@@ -62,12 +69,20 @@ export function PVPFormationPresetForm({
         ueLevel: item.ueLevel,
       })),
     );
-  }, [preset, studentMap]);
+  }, [
+    preset,
+    studentMap,
+  ]);
 
   const updateSlot = (index: number, value: Partial<PVPFormationStudentItem>) =>
     setTeam((current) =>
       current.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...value } : item,
+        itemIndex === index
+          ? {
+              ...item,
+              ...value,
+            }
+          : item,
       ),
     );
 
@@ -193,7 +208,9 @@ export function PVPFormationPresetForm({
                 return current;
               }
 
-              const updated = [...current];
+              const updated = [
+                ...current,
+              ];
               const [item] = updated.splice(from, 1);
               updated.splice(to, 0, item);
 

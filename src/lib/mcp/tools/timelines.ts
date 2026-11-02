@@ -1,3 +1,5 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import {
   defineTool,
@@ -12,8 +14,6 @@ import {
   listTimelines,
   updateTimeline,
 } from "@/lib/public-api/resources/timelines.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import { timelineArgs } from "~convex-lib/validators";
 
 const fields = convexToZodShape(timelineArgs);
@@ -43,7 +43,9 @@ export function registerTimelineTools(server: McpServer) {
       title: "Get timeline",
       description: "One of the user's timelines, public or private.",
       kind: "read",
-      input: { timelineId },
+      input: {
+        timelineId,
+      },
     },
     ({ timelineId }, userId) => getTimeline(userId, timelineId),
   );
@@ -67,7 +69,10 @@ export function registerTimelineTools(server: McpServer) {
       title: "Update timeline",
       description: `Change a timeline. Only the fields sent change; \`items\` sent replaces the whole list. ${LAYOUT_GUIDE}`,
       kind: "update",
-      input: { timelineId, ...z.object(fields).partial().shape },
+      input: {
+        timelineId,
+        ...z.object(fields).partial().shape,
+      },
     },
     ({ timelineId, ...patch }, userId) =>
       updateTimeline(userId, timelineId, patch),
@@ -80,7 +85,9 @@ export function registerTimelineTools(server: McpServer) {
       title: "Delete timeline",
       description: "Permanently delete a timeline.",
       kind: "delete",
-      input: { timelineId },
+      input: {
+        timelineId,
+      },
     },
     ({ timelineId }, userId) => deleteTimeline(userId, timelineId),
   );

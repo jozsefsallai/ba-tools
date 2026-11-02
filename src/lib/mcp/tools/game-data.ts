@@ -1,5 +1,6 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
-import { type EnumSection, describeEnumLabels } from "@/lib/mcp/enrich.server";
+import { describeEnumLabels, type EnumSection } from "@/lib/mcp/enrich.server";
 import {
   getGift,
   getRoadmap,
@@ -12,7 +13,6 @@ import {
   studentSearchSchema,
   studentSkillsSchema,
 } from "@/lib/public-api/resources/game-data.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const studentIdentifier = idInput(
   "Student id, or a name to resolve (e.g. `Hoshino`, `Shiroko (Swimsuit)`).",
@@ -62,7 +62,9 @@ export function registerGameDataTools(server: McpServer) {
       description:
         "One student's full profile: stats, terrain adaptation (`…Grade`: D to SS; street = Urban, outdoor = Field, indoor = Indoor), gift preferences (adored/loved/liked gifts), and variants. Use the `…Label` fields, not the internal enum names, when talking to the user.",
       kind: "read",
-      input: { student: studentIdentifier },
+      input: {
+        student: studentIdentifier,
+      },
     },
     ({ student }) => getStudent(student),
   );
@@ -75,7 +77,10 @@ export function registerGameDataTools(server: McpServer) {
       description:
         "A student's skills (EX, basic, enhanced, sub, and weapon/gear upgrades) with per-level descriptions and effects.",
       kind: "read",
-      input: { student: studentIdentifier, ...studentSkillsSchema.shape },
+      input: {
+        student: studentIdentifier,
+        ...studentSkillsSchema.shape,
+      },
     },
     ({ student, ...options }) => getStudentSkills(student, options),
   );
@@ -100,7 +105,9 @@ export function registerGameDataTools(server: McpServer) {
       title: "Get gift",
       description: "One gift, including its description.",
       kind: "read",
-      input: { giftId: idInput("Numeric gift id from `search_gifts`.") },
+      input: {
+        giftId: idInput("Numeric gift id from `search_gifts`."),
+      },
     },
     ({ giftId }) => getGift(giftId),
   );

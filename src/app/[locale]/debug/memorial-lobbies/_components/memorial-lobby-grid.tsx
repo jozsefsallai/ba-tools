@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlayIcon,
+  RotateCcwIcon,
+  ScanIcon,
+  SquareIcon,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 import type { DebugLobbyStudent } from "@/app/[locale]/debug/memorial-lobbies/page";
 import {
   MemorialLobbyViewer,
@@ -15,22 +24,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Link } from "@/i18n/navigation";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PlayIcon,
-  RotateCcwIcon,
-  ScanIcon,
-  SquareIcon,
-} from "lucide-react";
-import { useMemo, useState } from "react";
 
 // Every playing lobby is its own WebGL canvas, and browsers only keep around
 // 16 contexts alive (older ones are lost), so pages stay at or below that.
-const PAGE_SIZES = [4, 8, 12, 16];
+const PAGE_SIZES = [
+  4,
+  8,
+  12,
+  16,
+];
 const DEFAULT_PAGE_SIZE = 12;
 
-type CellState = { playing: boolean; version: number };
+type CellState = {
+  playing: boolean;
+  version: number;
+};
 
 export function MemorialLobbyGrid({
   students,
@@ -52,7 +60,10 @@ export function MemorialLobbyGrid({
             s.id.toLowerCase().includes(query),
         )
       : students;
-  }, [students, search]);
+  }, [
+    students,
+    search,
+  ]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, pageCount - 1);
@@ -61,15 +72,27 @@ export function MemorialLobbyGrid({
     (currentPage + 1) * pageSize,
   );
 
-  const cellState = (id: string) => cells[id] ?? { playing: false, version: 0 };
+  const cellState = (id: string) =>
+    cells[id] ?? {
+      playing: false,
+      version: 0,
+    };
 
   const update = (ids: string[], playing: boolean) =>
     setCells((previous) => {
-      const next = { ...previous };
+      const next = {
+        ...previous,
+      };
 
       for (const id of ids) {
-        const current = previous[id] ?? { playing: false, version: 0 };
-        next[id] = { playing, version: current.version + 1 };
+        const current = previous[id] ?? {
+          playing: false,
+          version: 0,
+        };
+        next[id] = {
+          playing,
+          version: current.version + 1,
+        };
       }
 
       return next;
@@ -160,7 +183,9 @@ export function MemorialLobbyGrid({
               <span key={label} className="inline-flex items-center gap-1">
                 <span
                   className="size-2.5 rounded-full"
-                  style={{ backgroundColor: color }}
+                  style={{
+                    backgroundColor: color,
+                  }}
                 />
                 {label}
               </span>
@@ -223,7 +248,14 @@ export function MemorialLobbyGrid({
                     <Button
                       variant="outline"
                       size="xs"
-                      onClick={() => update([student.id], true)}
+                      onClick={() =>
+                        update(
+                          [
+                            student.id,
+                          ],
+                          true,
+                        )
+                      }
                     >
                       {state.playing ? <RotateCcwIcon /> : <PlayIcon />}
                       {state.playing ? "Replay" : "Play"}
@@ -233,7 +265,14 @@ export function MemorialLobbyGrid({
                       <Button
                         variant="ghost"
                         size="xs"
-                        onClick={() => update([student.id], false)}
+                        onClick={() =>
+                          update(
+                            [
+                              student.id,
+                            ],
+                            false,
+                          )
+                        }
                       >
                         <SquareIcon />
                       </Button>

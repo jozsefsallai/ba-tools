@@ -37,7 +37,10 @@ export async function listGiftInventories(userId: string) {
 
 export async function getGiftInventory(userId: string, id: string) {
   const { inventory, targets } = await findInventory(userId, id);
-  return toResource({ ...inventory, targets });
+  return toResource({
+    ...inventory,
+    targets,
+  });
 }
 
 export async function createGiftInventory(
@@ -115,5 +118,7 @@ export async function deleteGiftTarget(
   targetId: string,
 ) {
   const target = await findTarget(userId, inventoryId, targetId);
-  await userMutation(userId, api.gifts.destroyTarget, { id: target._id });
+  await userMutation(userId, api.gifts.destroyTarget, {
+    id: target._id,
+  });
 }

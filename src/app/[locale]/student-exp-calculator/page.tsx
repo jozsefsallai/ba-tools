@@ -1,6 +1,6 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { StudentExpCalculator } from "@/app/[locale]/student-exp-calculator/_components/calculator";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("student-exp-calculator", await getLocale());

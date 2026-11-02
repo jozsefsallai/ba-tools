@@ -1,6 +1,6 @@
+import type { PropsWithChildren, ReactNode } from "react";
 import { EMBLEM_HEIGHT, EMBLEM_WIDTH } from "@/lib/emblems";
 import { cn } from "@/lib/utils";
-import type { PropsWithChildren, ReactNode } from "react";
 
 export type EmblemProps = PropsWithChildren<{
   backgroundUrl: string;
@@ -19,7 +19,10 @@ export function Emblem({
   return (
     <div
       tw="flex relative"
-      style={{ width: EMBLEM_WIDTH, height: EMBLEM_HEIGHT }}
+      style={{
+        width: EMBLEM_WIDTH,
+        height: EMBLEM_HEIGHT,
+      }}
     >
       <img src={backgroundUrl} alt="Emblem Background" tw="w-full h-full" />
 

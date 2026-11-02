@@ -1,12 +1,11 @@
 "use client";
 
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import bondImage from "@/assets/images/bond.png";
 import { Progress } from "@/components/ui/progress";
 import type { FavorTableEntry } from "@/lib/favor-table";
 import { cn } from "@/lib/utils";
-
-import bondImage from "@/assets/images/bond.png";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
 
 export type BondProgressProps = {
   startingLevel: FavorTableEntry;
@@ -34,7 +33,11 @@ export function BondProgress({
 
           {!!targetBond && (
             <small className="text-sm text-muted-foreground">
-              ({t("tools.bond.progress.goal", { targetBond })})
+              (
+              {t("tools.bond.progress.goal", {
+                targetBond,
+              })}
+              )
             </small>
           )}
         </div>

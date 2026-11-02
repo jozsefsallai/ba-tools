@@ -1,11 +1,11 @@
 import "server-only";
 
+import type { PaginationOptions } from "convex/server";
+import { z } from "zod";
 import { publicQuery } from "@/lib/public-api/convex.server";
 import { ApiError } from "@/lib/public-api/response";
 import { toPage, toResource } from "@/lib/public-api/serialize";
 import { PVP_SEASONS } from "@/lib/types";
-import type { PaginationOptions } from "convex/server";
-import { z } from "zod";
 import { api } from "~convex/api";
 
 export const seasonNumberSchema = z.coerce
@@ -28,22 +28,34 @@ export async function getPvpStatsStatus() {
   };
 }
 
-export const pvpStatsSummarySchema = z.object({ season: seasonNumberSchema });
+export const pvpStatsSummarySchema = z.object({
+  season: seasonNumberSchema,
+});
 
 export async function getPvpStatsSummary({
   season,
 }: z.infer<typeof pvpStatsSummarySchema>) {
   return toResource(
-    await publicQuery(api.pvpStats.getSummary, { seasonNumber: season }),
+    await publicQuery(api.pvpStats.getSummary, {
+      seasonNumber: season,
+    }),
   );
 }
 
 export const pvpTeamsSchema = z.object({
   season: seasonNumberSchema,
-  role: z.enum(["attack", "defense"]),
+  role: z.enum([
+    "attack",
+    "defense",
+  ]),
   minimumBattles: z.coerce.number().int().min(1).default(10),
   sort: z
-    .enum(["confidence", "winRateDesc", "winRateAsc", "battles"])
+    .enum([
+      "confidence",
+      "winRateDesc",
+      "winRateAsc",
+      "battles",
+    ])
     .default("confidence"),
   exclude: z
     .array(z.string())
@@ -83,7 +95,12 @@ export const pvpStatsSearchSchema = z.object({
   season: seasonNumberSchema,
   defenseTeam: z.array(searchSlotSchema).max(6),
   excludedStudentIds: z.array(z.string()).default([]),
-  matchMode: z.enum(["primary", "similar"]).optional(),
+  matchMode: z
+    .enum([
+      "primary",
+      "similar",
+    ])
+    .optional(),
   excludeDefenseTeam: z.array(searchSlotSchema).max(6).optional(),
 });
 

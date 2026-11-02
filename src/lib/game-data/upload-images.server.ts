@@ -57,7 +57,10 @@ export async function uploadImages(
   {
     overwrite,
     logger,
-  }: { overwrite: boolean; logger?: Pick<SyncLogger, "info"> },
+  }: {
+    overwrite: boolean;
+    logger?: Pick<SyncLogger, "info">;
+  },
 ): Promise<UploadImagesResult> {
   const bucket = required("R2_BUCKET_NAME");
 
@@ -72,7 +75,10 @@ export async function uploadImages(
     responseChecksumValidation: "WHEN_REQUIRED",
   });
 
-  const result: UploadImagesResult = { uploaded: [], unchanged: [] };
+  const result: UploadImagesResult = {
+    uploaded: [],
+    unchanged: [],
+  };
 
   async function uploadOne(file: ExtractedImage) {
     const body = await readFile(file.path);
@@ -80,7 +86,10 @@ export async function uploadImages(
 
     try {
       const head = await client.send(
-        new HeadObjectCommand({ Bucket: bucket, Key: file.key }),
+        new HeadObjectCommand({
+          Bucket: bucket,
+          Key: file.key,
+        }),
       );
 
       if (!overwrite || head.ETag?.replaceAll('"', "") === md5) {
@@ -111,7 +120,9 @@ export async function uploadImages(
     result.uploaded.push(file.key);
   }
 
-  const queue = [...files];
+  const queue = [
+    ...files,
+  ];
   let done = 0;
 
   const logProgress = () =>
@@ -120,15 +131,20 @@ export async function uploadImages(
     );
 
   await Promise.all(
-    Array.from({ length: CONCURRENCY }, async () => {
-      for (let file = queue.shift(); file; file = queue.shift()) {
-        await uploadOne(file);
+    Array.from(
+      {
+        length: CONCURRENCY,
+      },
+      async () => {
+        for (let file = queue.shift(); file; file = queue.shift()) {
+          await uploadOne(file);
 
-        if (++done % PROGRESS_EVERY === 0 && done < files.length) {
-          logProgress();
+          if (++done % PROGRESS_EVERY === 0 && done < files.length) {
+            logProgress();
+          }
         }
-      }
-    }),
+      },
+    ),
   );
 
   logProgress();

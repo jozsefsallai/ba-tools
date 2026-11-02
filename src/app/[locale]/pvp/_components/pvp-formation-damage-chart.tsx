@@ -1,9 +1,9 @@
 "use client";
 
-import { ChartContainer } from "@/components/ui/chart";
-import { useStudents } from "@/hooks/use-students";
 import { useCallback, useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { useStudents } from "@/hooks/use-students";
 import type { Doc } from "~convex/dataModel";
 
 export type PVPFormationDamageChartProps = {
@@ -28,7 +28,9 @@ export function PVPFormationDamageChart({
       student: item.studentId,
       damage: item.damage ?? 0,
     }));
-  }, [formation]);
+  }, [
+    formation,
+  ]);
 
   const StudentNameTick = useCallback(
     ({ x, y, payload }: any) => {
@@ -47,7 +49,9 @@ export function PVPFormationDamageChart({
         </g>
       );
     },
-    [studentMap],
+    [
+      studentMap,
+    ],
   );
 
   return (
@@ -55,7 +59,13 @@ export function PVPFormationDamageChart({
       config={chartConfig}
       className="w-[450px] h-[300px] max-md:w-full max-md:[&_.recharts-label]:text-[10px]"
     >
-      <BarChart accessibilityLayer data={chartData} margin={{ top: 20 }}>
+      <BarChart
+        accessibilityLayer
+        data={chartData}
+        margin={{
+          top: 20,
+        }}
+      >
         <CartesianGrid vertical={false} />
 
         <XAxis
@@ -68,14 +78,23 @@ export function PVPFormationDamageChart({
           height={50}
         />
 
-        <YAxis hide type="number" domain={[0, highestDamage]} />
+        <YAxis
+          hide
+          type="number"
+          domain={[
+            0,
+            highestDamage,
+          ]}
+        />
 
         <Bar
           dataKey="damage"
           fill="#ffffff"
           radius={4}
           barSize={30}
-          label={{ position: "top" }}
+          label={{
+            position: "top",
+          }}
         >
           {chartData.map((_, idx) => (
             <Cell key={`cell-${idx}`} fill={idx < 4 ? "#f34a23" : "#017efe"} />

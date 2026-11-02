@@ -1,11 +1,11 @@
-import { streamPlanaResponse } from "@/lib/ai/chat";
-import { canAccessPlanaAi } from "@/lib/ai/plana-access";
-import { PlanaNotConfiguredError } from "@/lib/ai/providers";
-import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import type { UIMessage } from "ai";
 import { fetchQuery } from "convex/nextjs";
 import type { NextRequest } from "next/server";
+import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
+import { streamPlanaResponse } from "@/lib/ai/chat";
+import { canAccessPlanaAi } from "@/lib/ai/plana-access";
+import { PlanaNotConfiguredError } from "@/lib/ai/providers";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -14,7 +14,10 @@ export const runtime = "nodejs";
 function toUiMessages(
   messages: {
     role: "user" | "assistant";
-    parts: { type: "text"; text: string }[];
+    parts: {
+      type: "text";
+      text: string;
+    }[];
   }[],
 ): UIMessage[] {
   return messages.map((message, index) => ({
@@ -29,14 +32,20 @@ export async function POST(req: NextRequest) {
     const user = await currentUser();
 
     if (!canAccessPlanaAi(user)) {
-      return new Response("Plana AI is disabled", { status: 503 });
+      return new Response("Plana AI is disabled", {
+        status: 503,
+      });
     }
 
     const authResult = await auth();
-    const token = await authResult.getToken({ template: "convex" });
+    const token = await authResult.getToken({
+      template: "convex",
+    });
 
     if (!token) {
-      return new Response("Unauthorized", { status: 401 });
+      return new Response("Unauthorized", {
+        status: 401,
+      });
     }
 
     const { chatId, messages, timeZone } = (await req.json()) as {
@@ -51,8 +60,13 @@ export async function POST(req: NextRequest) {
       if (chatId) {
         await fetchQuery(
           api.planaChat.getLlmContext,
-          { chatId, maxTurns: 0 },
-          { token },
+          {
+            chatId,
+            maxTurns: 0,
+          },
+          {
+            token,
+          },
         );
       }
 
@@ -60,12 +74,18 @@ export async function POST(req: NextRequest) {
     } else if (chatId) {
       const context = await fetchQuery(
         api.planaChat.getLlmContext,
-        { chatId },
-        { token },
+        {
+          chatId,
+        },
+        {
+          token,
+        },
       );
       resolvedMessages = toUiMessages(context);
     } else {
-      return new Response("Invalid messages", { status: 400 });
+      return new Response("Invalid messages", {
+        status: 400,
+      });
     }
 
     const senseiName = getSenseiDisplayName(user);
@@ -76,7 +96,9 @@ export async function POST(req: NextRequest) {
     return result.toUIMessageStreamResponse();
   } catch (error) {
     if (error instanceof PlanaNotConfiguredError) {
-      return new Response("Plana AI is not configured", { status: 503 });
+      return new Response("Plana AI is not configured", {
+        status: 503,
+      });
     }
 
     console.error("Error streaming Plana AI response:", error);

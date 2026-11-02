@@ -1,9 +1,5 @@
 "use client";
 
-import { StudentCard } from "@/components/common/student-card";
-import { Button } from "@/components/ui/button";
-import { useStudents } from "@/hooks/use-students";
-import { Link } from "@/i18n/navigation";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useMutation } from "convex/react";
@@ -11,6 +7,10 @@ import type { FunctionReturnType } from "convex/server";
 import { GlobeIcon, GripVerticalIcon, LockIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { StudentCard } from "@/components/common/student-card";
+import { Button } from "@/components/ui/button";
+import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -30,7 +30,10 @@ export function OwnTimelineEntry({
   const { students: allStudents } = useStudents();
 
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: entry._id, animateLayoutChanges: () => false });
+    useSortable({
+      id: entry._id,
+      animateLayoutChanges: () => false,
+    });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -49,7 +52,10 @@ export function OwnTimelineEntry({
     }
 
     return allStudents.filter((student) => studentIds.has(student.id));
-  }, [allStudents, entry.items]);
+  }, [
+    allStudents,
+    entry.items,
+  ]);
 
   const destroyMutation = useMutation(api.timeline.destroy);
 
@@ -110,7 +116,12 @@ export function OwnTimelineEntry({
 
           <div className="flex gap-1 items-center max-md:flex-wrap">
             {uniqueStudents.map((student) => (
-              <div style={{ zoom: 0.55 }} key={student.id}>
+              <div
+                style={{
+                  zoom: 0.55,
+                }}
+                key={student.id}
+              >
                 <StudentCard student={student} />
               </div>
             ))}

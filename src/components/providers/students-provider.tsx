@@ -1,9 +1,9 @@
 "use client";
 
+import { type Locale, useLocale } from "next-intl";
+import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { studentsContext } from "@/hooks/use-students";
 import type { Student } from "~prisma";
-import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { type Locale, useLocale } from "next-intl";
 
 function getStudentName(student: Student, locale: Locale) {
   switch (locale) {
@@ -34,7 +34,9 @@ export function StudentsProvider({
     }
 
     return map;
-  }, [students]);
+  }, [
+    students,
+  ]);
 
   useEffect(() => {
     const newStudents = loadedStudents.slice().map((student) => ({
@@ -43,10 +45,17 @@ export function StudentsProvider({
     }));
 
     setStudents(newStudents);
-  }, [locale]);
+  }, [
+    locale,
+  ]);
 
   return (
-    <studentsContext.Provider value={{ students, studentMap }}>
+    <studentsContext.Provider
+      value={{
+        students,
+        studentMap,
+      }}
+    >
       {children}
     </studentsContext.Provider>
   );

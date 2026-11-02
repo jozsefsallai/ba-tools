@@ -1,14 +1,14 @@
 "use client";
 
-import { PVPView } from "@/app/[locale]/pvp/_components/pvp-view";
-import { Separator } from "@/components/ui/separator";
-import { Toggle } from "@/components/ui/toggle";
-import { Link } from "@/i18n/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { ArchiveIcon, ChartNoAxesCombinedIcon, SwordsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { PVPView } from "@/app/[locale]/pvp/_components/pvp-view";
+import { Separator } from "@/components/ui/separator";
+import { Toggle } from "@/components/ui/toggle";
+import { Link } from "@/i18n/navigation";
 import { api } from "~convex/api";
 
 export function PVPPageClient() {
@@ -88,7 +88,9 @@ export function PVPPageClient() {
               variant="outline"
             >
               <ArchiveIcon />
-              {t("tools.pvp.seasons.archived", { count: archivedCount })}
+              {t("tools.pvp.seasons.archived", {
+                count: archivedCount,
+              })}
             </Toggle>
           )}
         </div>

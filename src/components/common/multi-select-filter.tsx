@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronDownIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -8,9 +11,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
 
 export type MultiSelectFilterOption<T extends string | number> = {
   value: T;
@@ -40,7 +40,10 @@ export function MultiSelectFilter<T extends string | number>({
     if (selectedSet.has(value)) {
       onChange(selected.filter((v) => v !== value));
     } else {
-      onChange([...selected, value]);
+      onChange([
+        ...selected,
+        value,
+      ]);
     }
   }
 
@@ -48,7 +51,9 @@ export function MultiSelectFilter<T extends string | number>({
     selected.length === 1
       ? options.find((o) => o.value === selected[0])?.label
       : selected.length > 1
-        ? t("common.filters.selected", { count: selected.length })
+        ? t("common.filters.selected", {
+            count: selected.length,
+          })
         : null;
 
   return (

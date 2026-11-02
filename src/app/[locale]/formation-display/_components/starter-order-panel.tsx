@@ -1,15 +1,5 @@
 "use client";
 
-import type { StudentItem } from "@/app/[locale]/formation-display/_components/formation-preview";
-import { Button } from "@/components/ui/button";
-import {
-  type FormationType,
-  resolveStarterOrders,
-  starterMaxFor,
-  starterThresholdFor,
-} from "@/lib/formation-type";
-import { buildStudentIconUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
 import {
   DndContext,
   type DragEndEvent,
@@ -20,8 +10,8 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
@@ -30,6 +20,16 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVerticalIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import type { StudentItem } from "@/app/[locale]/formation-display/_components/formation-preview";
+import { Button } from "@/components/ui/button";
+import {
+  type FormationType,
+  resolveStarterOrders,
+  starterMaxFor,
+  starterThresholdFor,
+} from "@/lib/formation-type";
+import { buildStudentIconUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 
 type StarterOrderPanelProps = {
   row?: {
@@ -50,12 +50,17 @@ type SortableStarterEntryProps = {
 
 function SortableStarterEntry({ id, content }: SortableStarterEntryProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+    useSortable({
+      id,
+    });
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Translate.toString(transform), transition }}
+      style={{
+        transform: CSS.Translate.toString(transform),
+        transition,
+      }}
       className="flex items-center gap-2 rounded-md border px-2 py-1.5 bg-background"
     >
       <button
@@ -83,13 +88,20 @@ export function StarterOrderPanel({
   const starterMax = starterMaxFor(formationType);
 
   const rowItems = useMemo(
-    () => [...(row?.strikers ?? []), ...(row?.specials ?? [])],
-    [row],
+    () => [
+      ...(row?.strikers ?? []),
+      ...(row?.specials ?? []),
+    ],
+    [
+      row,
+    ],
   );
 
   const resolvedOrders = useMemo(
     () => resolveStarterOrders(rowItems),
-    [rowItems],
+    [
+      rowItems,
+    ],
   );
 
   const starterEntries = useMemo(
@@ -101,13 +113,23 @@ export function StarterOrderPanel({
             (resolvedOrders.get(a.id) ?? Number.POSITIVE_INFINITY) -
             (resolvedOrders.get(b.id) ?? Number.POSITIVE_INFINITY),
         ),
-    [rowItems, resolvedOrders],
+    [
+      rowItems,
+      resolvedOrders,
+    ],
   );
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -129,7 +151,9 @@ export function StarterOrderPanel({
 
     const moved = arrayMove(starterEntries, currentIndex, nextIndex);
     moved.forEach((item, index) => {
-      onUpdateItem(item.id, { starterOrder: index + 1 });
+      onUpdateItem(item.id, {
+        starterOrder: index + 1,
+      });
     });
   }
 

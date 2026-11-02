@@ -1,6 +1,6 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { RaidScoreCalculator } from "@/app/[locale]/raid-score-calculator/_components/calculator";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("raid-score-calculator", await getLocale());

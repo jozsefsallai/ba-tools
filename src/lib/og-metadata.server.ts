@@ -1,4 +1,6 @@
 import "server-only";
+import type { Metadata } from "next";
+import { createTranslator } from "next-intl";
 import { getMessagesForLocale } from "@/i18n/messages";
 import {
   OG_CARDS,
@@ -6,8 +8,6 @@ import {
   type OgCardDefinition,
   type OgCardKey,
 } from "@/lib/og/registry";
-import type { Metadata } from "next";
-import { createTranslator } from "next-intl";
 
 export const SITE_ORIGIN = "https://ba.joexyz.online";
 
@@ -43,13 +43,25 @@ export function sharingMetadata({
       locale: ogLocale(locale) === "ja" ? "ja_JP" : "en_US",
       title,
       description,
-      images: [{ url, width: 1200, height: 630, alt }],
+      images: [
+        {
+          url,
+          width: 1200,
+          height: 630,
+          alt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url, alt }],
+      images: [
+        {
+          url,
+          alt,
+        },
+      ],
     },
   };
 }

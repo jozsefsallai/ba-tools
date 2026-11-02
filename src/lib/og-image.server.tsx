@@ -56,8 +56,18 @@ export async function loadOgImageFonts(): Promise<Font[]> {
         weight: 700,
         style: "italic",
       },
-      { name: "Japanese", data: japanese, weight: 400, style: "normal" },
-      { name: "Japanese", data: japanese, weight: 700, style: "normal" },
+      {
+        name: "Japanese",
+        data: japanese,
+        weight: 400,
+        style: "normal",
+      },
+      {
+        name: "Japanese",
+        data: japanese,
+        weight: 700,
+        style: "normal",
+      },
     ];
   }
 

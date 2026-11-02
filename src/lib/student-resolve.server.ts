@@ -21,37 +21,65 @@ export async function resolveStudentIdentifier(
   }
 
   const byId = await db.student.findUnique({
-    where: { id: decoded },
-    select: { id: true },
+    where: {
+      id: decoded,
+    },
+    select: {
+      id: true,
+    },
   });
 
   if (byId) {
-    return { id: byId.id, canonical: true };
+    return {
+      id: byId.id,
+      canonical: true,
+    };
   }
 
   if (/^\d+$/.test(decoded)) {
     const bySchaleDbId = await db.student.findFirst({
-      where: { schaleDbId: Number.parseInt(decoded, 10) },
-      select: { id: true },
+      where: {
+        schaleDbId: Number.parseInt(decoded, 10),
+      },
+      select: {
+        id: true,
+      },
     });
 
     if (bySchaleDbId) {
-      return { id: bySchaleDbId.id, canonical: false };
+      return {
+        id: bySchaleDbId.id,
+        canonical: false,
+      };
     }
   }
 
   const byDevName =
     (await db.student.findFirst({
-      where: { devName: decoded },
-      select: { id: true },
+      where: {
+        devName: decoded,
+      },
+      select: {
+        id: true,
+      },
     })) ??
     (await db.student.findFirst({
-      where: { devName: { equals: decoded, mode: "insensitive" } },
-      select: { id: true },
+      where: {
+        devName: {
+          equals: decoded,
+          mode: "insensitive",
+        },
+      },
+      select: {
+        id: true,
+      },
     }));
 
   if (byDevName) {
-    return { id: byDevName.id, canonical: false };
+    return {
+      id: byDevName.id,
+      canonical: false,
+    };
   }
 
   return null;

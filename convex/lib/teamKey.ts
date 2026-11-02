@@ -1,6 +1,8 @@
-export function canonicalPvpStatsTeam<T extends { studentId?: string }>(
-  team: T[],
-): T[] {
+export function canonicalPvpStatsTeam<
+  T extends {
+    studentId?: string;
+  },
+>(team: T[]): T[] {
   return [
     ...team.slice(0, 4),
     ...team.slice(4, 6).sort((a, b) => {
@@ -11,11 +13,19 @@ export function canonicalPvpStatsTeam<T extends { studentId?: string }>(
   ];
 }
 
-export function getPvpStatsTeamKey(team: Array<{ studentId?: string }>) {
+export function getPvpStatsTeamKey(
+  team: Array<{
+    studentId?: string;
+  }>,
+) {
   return getTeamKey(canonicalPvpStatsTeam(team));
 }
 
-export function getTeamKey(team: Array<{ studentId?: string }>) {
+export function getTeamKey(
+  team: Array<{
+    studentId?: string;
+  }>,
+) {
   const input = team
     .map((item) => {
       const studentId = item.studentId ?? "";

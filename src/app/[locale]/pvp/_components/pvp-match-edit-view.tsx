@@ -1,9 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PVPMatchEditor } from "@/app/[locale]/pvp/_components/pvp-match-editor";
 import { MessageBox } from "@/components/common/message-box";
 import { useQueryWithStatus } from "@/lib/convex";
-import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 

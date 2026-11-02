@@ -1,15 +1,5 @@
 "use client";
 
-import {
-  type PlanaBranches,
-  type PlanaChatMessage,
-  type PlanaTurnDoc,
-  findParentUserMessageId,
-  findTurnOrderForAssistantMessage,
-  mergeTurnPages,
-  messageToParts,
-  turnsToMessagesAndBranches,
-} from "@/app/[locale]/plana-ai/_lib/chat-persistence";
 import type { ChatStatus } from "ai";
 import { generateId } from "ai";
 import { useMutation, usePaginatedQuery } from "convex/react";
@@ -21,6 +11,16 @@ import {
   useEffect,
   useRef,
 } from "react";
+import {
+  findParentUserMessageId,
+  findTurnOrderForAssistantMessage,
+  mergeTurnPages,
+  messageToParts,
+  type PlanaBranches,
+  type PlanaChatMessage,
+  type PlanaTurnDoc,
+  turnsToMessagesAndBranches,
+} from "@/app/[locale]/plana-ai/_lib/chat-persistence";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -87,17 +87,27 @@ export function usePlanaChatPersistence({
     status: turnsStatus,
   } = usePaginatedQuery(
     api.planaChat.getTurnsPaginated,
-    chatId ? { chatId } : "skip",
-    { initialNumItems: TURNS_PAGE_SIZE },
+    chatId
+      ? {
+          chatId,
+        }
+      : "skip",
+    {
+      initialNumItems: TURNS_PAGE_SIZE,
+    },
   );
 
   useEffect(() => {
     chatIdRef.current = chatId;
-  }, [chatId]);
+  }, [
+    chatId,
+  ]);
 
   useEffect(() => {
     bumpBranchesRef.current = bumpBranches;
-  }, [bumpBranches]);
+  }, [
+    bumpBranches,
+  ]);
 
   useEffect(() => {
     if (!chatId) {
@@ -116,7 +126,9 @@ export function usePlanaChatPersistence({
       turnOrderByUserClientIdRef.current = {};
       persistedAssistantIdsRef.current = new Set();
     }
-  }, [chatId]);
+  }, [
+    chatId,
+  ]);
 
   useEffect(() => {
     if (turnsStatus === "LoadingMore") {
@@ -127,7 +139,9 @@ export function usePlanaChatPersistence({
     if (turnsStatus !== "LoadingMore") {
       isLoadingMoreRef.current = false;
     }
-  }, [turnsStatus]);
+  }, [
+    turnsStatus,
+  ]);
 
   useEffect(() => {
     if (
@@ -203,7 +217,14 @@ export function usePlanaChatPersistence({
     if (isInitialHydration) {
       shouldStickToBottomRef.current = true;
     }
-  }, [branchesRef, chatId, isBusy, setMessages, turnPages, turnsStatus]);
+  }, [
+    branchesRef,
+    chatId,
+    isBusy,
+    setMessages,
+    turnPages,
+    turnsStatus,
+  ]);
 
   useEffect(() => {
     if (
@@ -257,7 +278,12 @@ export function usePlanaChatPersistence({
     return () => {
       observer.disconnect();
     };
-  }, [chatId, isBusy, loadMore, turnsStatus]);
+  }, [
+    chatId,
+    isBusy,
+    loadMore,
+    turnsStatus,
+  ]);
 
   const persistAssistantCompletion = useCallback(
     async (assistantMessage: PlanaChatMessage) => {
@@ -280,7 +306,9 @@ export function usePlanaChatPersistence({
         parts: messageToParts(assistantMessage),
       });
     },
-    [completeAssistantVariant],
+    [
+      completeAssistantVariant,
+    ],
   );
 
   useEffect(() => {
@@ -288,7 +316,9 @@ export function usePlanaChatPersistence({
       return;
     }
 
-    const latestAssistant = [...messages]
+    const latestAssistant = [
+      ...messages,
+    ]
       .reverse()
       .find((message) => message.role === "assistant");
 
@@ -297,11 +327,21 @@ export function usePlanaChatPersistence({
     }
 
     void persistAssistantCompletion(latestAssistant);
-  }, [isBusy, messages, persistAssistantCompletion, status]);
+  }, [
+    isBusy,
+    messages,
+    persistAssistantCompletion,
+    status,
+  ]);
 
   const prepareOutgoingUserMessage = useCallback((text: string) => {
     const userClientId = generateId();
-    const userParts = [{ type: "text" as const, text }];
+    const userParts = [
+      {
+        type: "text" as const,
+        text,
+      },
+    ];
 
     return {
       id: userClientId,
@@ -354,7 +394,10 @@ export function usePlanaChatPersistence({
       await persistOutgoingUserMessage(userMessage);
       return userMessage;
     },
-    [persistOutgoingUserMessage, prepareOutgoingUserMessage],
+    [
+      persistOutgoingUserMessage,
+      prepareOutgoingUserMessage,
+    ],
   );
 
   const persistBranchSwitch = useCallback(
@@ -372,7 +415,9 @@ export function usePlanaChatPersistence({
         selectedVariantIndex,
       });
     },
-    [selectVariant],
+    [
+      selectVariant,
+    ],
   );
 
   const persistRewind = useCallback(
@@ -414,7 +459,9 @@ export function usePlanaChatPersistence({
         loadedTurnsRef.current,
       );
     },
-    [rewindFromTurn],
+    [
+      rewindFromTurn,
+    ],
   );
 
   const prepareRegenerate = useCallback(
@@ -432,7 +479,9 @@ export function usePlanaChatPersistence({
         turnOrderByUserClientIdRef.current[parentUserMessageId] ?? null;
       pendingTurnOrderRef.current = turnOrder;
     },
-    [messages],
+    [
+      messages,
+    ],
   );
 
   return {

@@ -1,8 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { NotFoundView } from "@/components/common/not-found-view";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
 
 export function LocaleNotFoundView() {
   const t = useTranslations();

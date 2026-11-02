@@ -1,5 +1,10 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
+import { CheckIcon, ImageIcon, LinkIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -10,11 +15,6 @@ import {
 import { useQueryWithStatus } from "@/lib/convex";
 import { OG_DESIGN_VERSION } from "@/lib/og/registry";
 import type { GameServer } from "@/lib/types";
-import { useAuth } from "@clerk/nextjs";
-import { CheckIcon, ImageIcon, LinkIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 
 type RosterOwnerActionsProps = {
@@ -48,7 +48,12 @@ export function RosterOwnerActions({
       (roster) =>
         roster.gameServer === gameServer && roster.friendCode === friendCode,
     );
-  }, [ownRostersQuery.status, ownRostersQuery.data, gameServer, friendCode]);
+  }, [
+    ownRostersQuery.status,
+    ownRostersQuery.data,
+    gameServer,
+    friendCode,
+  ]);
 
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
@@ -74,7 +79,11 @@ export function RosterOwnerActions({
         setCopiedLink(false);
       }, 3000);
     }
-  }, [copiedLink, publicRosterPath, t]);
+  }, [
+    copiedLink,
+    publicRosterPath,
+    t,
+  ]);
 
   const handleCopyImage = useCallback(async () => {
     if (copiedImage || !canCopyImage) {
@@ -93,7 +102,9 @@ export function RosterOwnerActions({
 
       const blob = await response.blob();
       await navigator.clipboard.write([
-        new ClipboardItem({ [blob.type]: blob }),
+        new ClipboardItem({
+          [blob.type]: blob,
+        }),
       ]);
       toast.success(t("tools.roster.view.toasts.imageCardCopied"));
     } catch (err) {
@@ -104,7 +115,14 @@ export function RosterOwnerActions({
         setCopiedImage(false);
       }, 3000);
     }
-  }, [canCopyImage, copiedImage, lastUpdated, locale, publicRosterPath, t]);
+  }, [
+    canCopyImage,
+    copiedImage,
+    lastUpdated,
+    locale,
+    publicRosterPath,
+    t,
+  ]);
 
   if (!isOwnRoster) {
     return null;

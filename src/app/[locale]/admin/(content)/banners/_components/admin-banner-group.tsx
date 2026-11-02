@@ -1,5 +1,10 @@
 "use client";
 
+import { useDroppable } from "@dnd-kit/core";
+import { Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AdminBannerItem } from "@/app/[locale]/admin/(content)/banners/_components/admin-banner-item";
 import { DatePickerButton } from "@/app/[locale]/admin/(content)/banners/_components/date-picker-button";
 import { updateAdminBannerGroup } from "@/app/[locale]/admin/(content)/banners/_lib/api";
@@ -18,11 +23,6 @@ import {
   toBannerStartFromCalendar,
 } from "@/lib/admin/game-banner-dates";
 import { cn } from "@/lib/utils";
-import { useDroppable } from "@dnd-kit/core";
-import { Trash2Icon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export type AdminBannerGroupProps = {
   groupKey: string;
@@ -71,7 +71,9 @@ export function AdminBannerGroup({
   );
   let distanceDays: string;
   if (distanceDaysVal > 1) {
-    distanceDays = t("static.banners.group.inDays", { count: distanceDaysVal });
+    distanceDays = t("static.banners.group.inDays", {
+      count: distanceDaysVal,
+    });
   } else if (distanceDaysVal === 1) {
     distanceDays = t("static.banners.group.tomorrow");
   } else if (distanceDaysVal === 0) {
@@ -204,7 +206,9 @@ export function AdminBannerGroup({
               </div>
             )}
 
-            {[...banners]
+            {[
+              ...banners,
+            ]
               .sort(
                 (a, b) =>
                   new Date(a.createdAt).getTime() -

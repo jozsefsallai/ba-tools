@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronsUpDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,13 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronsUpDownIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export type GiftPreferenceFilterProps = {
   showAllGifts: boolean;
   filterStudentIds: Set<string>;
-  targets: { studentId: string; studentName: string }[];
+  targets: {
+    studentId: string;
+    studentName: string;
+  }[];
   onShowAllGiftsChange: (checked: boolean) => void;
   onFilterStudentToggle: (studentId: string, checked: boolean) => void;
 };

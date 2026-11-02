@@ -16,7 +16,9 @@ export const getOwn = authenticatedQuery({
 });
 
 export const getOwnPaginated = authenticatedQuery({
-  args: { paginationOpts: paginationOptsValidator },
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("formation")
@@ -27,7 +29,9 @@ export const getOwnPaginated = authenticatedQuery({
 });
 
 export const searchOwn = authenticatedQuery({
-  args: { search: v.string() },
+  args: {
+    search: v.string(),
+  },
   handler: async (ctx, args) => {
     const all = await ctx.db
       .query("formation")
@@ -49,11 +53,23 @@ export const create = authenticatedMutation({
     const formation = {
       userId: ctx.user._id,
       name: args.name,
-      ...(args.type !== undefined ? { type: args.type } : {}),
+      ...(args.type !== undefined
+        ? {
+            type: args.type,
+          }
+        : {}),
       strikers: args.strikers,
       specials: args.specials,
-      ...(args.rows !== undefined ? { rows: args.rows } : {}),
-      ...(args.rowGap !== undefined ? { rowGap: args.rowGap } : {}),
+      ...(args.rows !== undefined
+        ? {
+            rows: args.rows,
+          }
+        : {}),
+      ...(args.rowGap !== undefined
+        ? {
+            rowGap: args.rowGap,
+          }
+        : {}),
       displayOverline: args.displayOverline ?? false,
       noDisplayRole: args.noDisplayRole ?? false,
       groupsVertical: args.groupsVertical ?? false,
@@ -65,7 +81,10 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: { id: v.id("formation"), ...formationArgs },
+  args: {
+    id: v.id("formation"),
+    ...formationArgs,
+  },
   handler: async (ctx, args) => {
     if (args.name && (args.name.length < 1 || args.name.length > 100)) {
       throw invalid("Echelon name must be between 1 and 100 characters");
@@ -73,14 +92,26 @@ export const update = authenticatedMutation({
 
     const formation = {
       name: args.name,
-      ...(args.type !== undefined ? { type: args.type } : {}),
+      ...(args.type !== undefined
+        ? {
+            type: args.type,
+          }
+        : {}),
       strikers: args.strikers,
       specials: args.specials,
       displayOverline: args.displayOverline ?? false,
       noDisplayRole: args.noDisplayRole ?? false,
       groupsVertical: args.groupsVertical ?? false,
-      ...(args.rows !== undefined ? { rows: args.rows } : {}),
-      ...(args.rowGap !== undefined ? { rowGap: args.rowGap } : {}),
+      ...(args.rows !== undefined
+        ? {
+            rows: args.rows,
+          }
+        : {}),
+      ...(args.rowGap !== undefined
+        ? {
+            rowGap: args.rowGap,
+          }
+        : {}),
     };
 
     const current = await ctx.db.get(args.id);
@@ -109,7 +140,9 @@ export const destroy = authenticatedMutation({
 });
 
 export const getById = authenticatedQuery({
-  args: { id: v.id("formation") },
+  args: {
+    id: v.id("formation"),
+  },
   handler: async (ctx, { id }) => {
     const formation = await ctx.db.get(id);
     if (!formation || formation.userId !== ctx.user._id) {

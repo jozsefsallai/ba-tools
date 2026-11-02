@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,8 +11,6 @@ import {
   raidScoreToClearTime,
   secsToTimeString,
 } from "@/lib/raids";
-import { useTranslations } from "next-intl";
-import { useCallback, useState } from "react";
 
 export type SingleTeamCalculatorProps = {
   duration: RaidDuration;
@@ -68,7 +68,10 @@ export function SingleTeamCalculator({
 
       setRaidScore(raidScore.toLocaleString("en-US"));
     },
-    [duration, difficulty],
+    [
+      duration,
+      difficulty,
+    ],
   );
 
   const handleRemainingTimeChange = useCallback(
@@ -110,7 +113,10 @@ export function SingleTeamCalculator({
 
       setRaidScore(raidScore.toLocaleString("en-US"));
     },
-    [duration, difficulty],
+    [
+      duration,
+      difficulty,
+    ],
   );
 
   const handleRaidScoreChange = useCallback(
@@ -139,7 +145,10 @@ export function SingleTeamCalculator({
         setRemainingTime(secsToTimeString(remainingTimeSecs));
       }
     },
-    [duration, difficulty],
+    [
+      duration,
+      difficulty,
+    ],
   );
 
   return (

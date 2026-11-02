@@ -1,5 +1,9 @@
 "use client";
 
+import { ShieldIcon, SwordIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { PVPFormationDamageChart } from "@/app/[locale]/pvp/_components/pvp-formation-damage-chart";
 import type {
   PVPMatchResult,
@@ -16,10 +20,6 @@ import {
 import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ShieldIcon, SwordIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useMemo } from "react";
-import type { ReactNode } from "react";
 import type { Doc } from "~convex/dataModel";
 import type { Student } from "~prisma";
 
@@ -87,7 +87,9 @@ export function PVPFormation({
         ...item,
         student: item.studentId ? (studentMap[item.studentId] ?? null) : null,
       }));
-  }, [formation]);
+  }, [
+    formation,
+  ]);
 
   const specials = useMemo(() => {
     return formation
@@ -96,7 +98,9 @@ export function PVPFormation({
         ...item,
         student: item.studentId ? (studentMap[item.studentId] ?? null) : null,
       }));
-  }, [formation]);
+  }, [
+    formation,
+  ]);
 
   const studentPortraitUrl = useMemo(() => {
     if (!studentRep) {
@@ -104,7 +108,9 @@ export function PVPFormation({
     }
 
     return buildStudentPortraitUrl(studentRep);
-  }, [studentRep]);
+  }, [
+    studentRep,
+  ]);
 
   function renderStudentCard(item: (typeof strikers)[number], index: number) {
     const tooltip = slotTooltips?.[index];

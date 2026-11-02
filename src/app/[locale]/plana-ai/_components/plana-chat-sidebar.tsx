@@ -1,5 +1,17 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import {
+  LoaderCircleIcon,
+  MoreHorizontalIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { useFormatter, useNow, useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatSidebarSkeleton } from "@/app/[locale]/plana-ai/_components/chat-messages-skeleton";
 import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
 import { Button } from "@/components/ui/button";
@@ -20,18 +32,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery } from "convex/react";
-import {
-  LoaderCircleIcon,
-  MoreHorizontalIcon,
-  PanelLeftCloseIcon,
-  PanelLeftOpenIcon,
-  PencilIcon,
-  PlusIcon,
-  Trash2Icon,
-} from "lucide-react";
-import { useFormatter, useNow, useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -68,7 +68,11 @@ export function PlanaChatSidebar({
 
   const chatList = useQuery(
     api.planaChat.listRecentChats,
-    collapsed ? "skip" : { limit },
+    collapsed
+      ? "skip"
+      : {
+          limit,
+        },
   );
 
   const chats = useMemo(() => {
@@ -76,7 +80,9 @@ export function PlanaChatSidebar({
       return undefined;
     }
 
-    return [...chatList.chats]
+    return [
+      ...chatList.chats,
+    ]
       .map((chat) => ({
         ...chat,
         displayUpdatedAt: Math.max(
@@ -85,7 +91,10 @@ export function PlanaChatSidebar({
         ),
       }))
       .sort((left, right) => right.displayUpdatedAt - left.displayUpdatedAt);
-  }, [activityTimestamps, chatList]);
+  }, [
+    activityTimestamps,
+    chatList,
+  ]);
 
   const hasMore = chatList?.hasMore ?? false;
   const isLoadingChats = chatList === undefined;
@@ -95,7 +104,9 @@ export function PlanaChatSidebar({
   }
 
   async function handleDelete(chatId: Id<"planaChat">) {
-    await deleteChat({ chatId });
+    await deleteChat({
+      chatId,
+    });
 
     if (activeChatId === chatId) {
       replaceChatUrl(undefined);
@@ -103,7 +114,10 @@ export function PlanaChatSidebar({
   }
 
   async function handleRename(chatId: Id<"planaChat">, title: string) {
-    await renameChat({ chatId, title });
+    await renameChat({
+      chatId,
+      title,
+    });
   }
 
   if (collapsed) {
@@ -239,7 +253,9 @@ function PlanaChatSidebarItem({
 
   useEffect(() => {
     setTitle(chat.title);
-  }, [chat.title]);
+  }, [
+    chat.title,
+  ]);
 
   async function handleRename() {
     const trimmed = title.trim();

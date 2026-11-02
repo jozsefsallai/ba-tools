@@ -1,3 +1,4 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import {
@@ -7,7 +8,6 @@ import {
   listRosters,
   updateRoster,
 } from "@/lib/public-api/resources/rosters.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { rosterCreateArgs, rosterUpdateArgs } from "~convex-lib/validators";
 
 const rosterId = idInput("Roster id.");
@@ -32,7 +32,9 @@ export function registerRosterTools(server: McpServer) {
       title: "Get roster",
       description: "One of the user's rosters, with every student entry.",
       kind: "read",
-      input: { rosterId },
+      input: {
+        rosterId,
+      },
     },
     ({ rosterId }, userId) => getRoster(userId, rosterId),
   );
@@ -58,7 +60,10 @@ export function registerRosterTools(server: McpServer) {
       description:
         "Change a roster. Only the fields sent change; `students` replaces the whole student list, so send every entry.",
       kind: "update",
-      input: { rosterId, ...convexToZodShape(rosterUpdateArgs) },
+      input: {
+        rosterId,
+        ...convexToZodShape(rosterUpdateArgs),
+      },
     },
     ({ rosterId, ...patch }, userId) => updateRoster(userId, rosterId, patch),
   );
@@ -70,7 +75,9 @@ export function registerRosterTools(server: McpServer) {
       title: "Delete roster",
       description: "Permanently delete a roster.",
       kind: "delete",
-      input: { rosterId },
+      input: {
+        rosterId,
+      },
     },
     ({ rosterId }, userId) => deleteRoster(userId, rosterId),
   );

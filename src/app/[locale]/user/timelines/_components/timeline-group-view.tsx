@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { SaveIcon, ShareIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   type TimelineDocWithId,
   TimelineGroupItemsContainer,
@@ -32,11 +37,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useQueryWithStatus } from "@/lib/convex";
-import { useMutation } from "convex/react";
-import { SaveIcon, ShareIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -68,20 +68,34 @@ export function TimelineGroupView({ groupId }: TimelineGroupViewProps) {
       return;
     }
 
-    setItems(query.data.timelines.map((t) => ({ ...t, id: t._id })));
+    setItems(
+      query.data.timelines.map((t) => ({
+        ...t,
+        id: t._id,
+      })),
+    );
 
     setName(query.data.name);
     setDescription(query.data.description || "");
     setVisibility(query.data.visibility);
     setShowCreator(query.data.showCreator ?? false);
-  }, [groupId, query.status]);
+  }, [
+    groupId,
+    query.status,
+  ]);
 
   function onWantsToAdd(item: Doc<"timeline">) {
     if (items.find((i) => i._id === item._id)) {
       return;
     }
 
-    setItems((current) => [...current, { ...item, id: item._id }]);
+    setItems((current) => [
+      ...current,
+      {
+        ...item,
+        id: item._id,
+      },
+    ]);
   }
 
   function onWantsToRemove(item: TimelineDocWithId) {

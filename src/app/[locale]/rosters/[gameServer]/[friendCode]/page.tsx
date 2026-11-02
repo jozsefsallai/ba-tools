@@ -1,13 +1,13 @@
+import { getLocale, getTranslations } from "next-intl/server";
+import removeMd from "remove-markdown";
 import { RosterView } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-view";
 import { redirect } from "@/i18n/navigation";
 import { isValidFriendCode } from "@/lib/friend-code";
-import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
 import { OG_DESIGN_VERSION } from "@/lib/og/registry";
+import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import { truncateText } from "@/lib/text-utils";
 import { GAME_SERVERS, type GameServer } from "@/lib/types";
-import { getLocale, getTranslations } from "next-intl/server";
-import removeMd from "remove-markdown";
 
 export const revalidate = 86_400;
 
@@ -24,7 +24,10 @@ export async function generateMetadata({
   const { gameServer, friendCode } = await params;
 
   if (!GAME_SERVERS.includes(gameServer) || !isValidFriendCode(friendCode)) {
-    return redirect({ href: "/404", locale: await getLocale() });
+    return redirect({
+      href: "/404",
+      locale: await getLocale(),
+    });
   }
 
   try {
@@ -35,7 +38,9 @@ export async function generateMetadata({
     }
 
     const locale = await getLocale();
-    const t = await getTranslations({ locale });
+    const t = await getTranslations({
+      locale,
+    });
 
     const name = roster.name?.trim();
 
@@ -78,7 +83,10 @@ export async function generateMetadata({
       alt: t("common.sharing.roster.imageAlt"),
     });
   } catch {
-    return redirect({ href: "/404", locale: await getLocale() });
+    return redirect({
+      href: "/404",
+      locale: await getLocale(),
+    });
   }
 }
 
@@ -90,7 +98,10 @@ export default async function RosterPage({
   const { gameServer, friendCode } = await params;
 
   if (!GAME_SERVERS.includes(gameServer) || !isValidFriendCode(friendCode)) {
-    redirect({ href: "/404", locale: await getLocale() });
+    redirect({
+      href: "/404",
+      locale: await getLocale(),
+    });
   }
 
   return <RosterView gameServer={gameServer} friendCode={friendCode} />;

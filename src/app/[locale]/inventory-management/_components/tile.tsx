@@ -1,8 +1,8 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 
 export type TileProps = {
   value?: number;

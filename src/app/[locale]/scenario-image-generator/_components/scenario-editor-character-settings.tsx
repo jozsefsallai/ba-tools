@@ -1,12 +1,12 @@
 "use client";
 
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
 
 type SpriteMode = "image" | "url";
 
@@ -74,7 +74,9 @@ export function ScenarioEditorCharacterSettings({
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0) {
+      return;
+    }
 
     const file = files[0];
     const reader = new FileReader();
@@ -104,9 +106,19 @@ export function ScenarioEditorCharacterSettings({
     const newScale = Number.parseFloat(scaleStr);
 
     if (!Number.isNaN(newX) && !Number.isNaN(newY) && !Number.isNaN(newScale)) {
-      onChange({ spriteUrl, filename, x: newX, y: newY, scale: newScale });
+      onChange({
+        spriteUrl,
+        filename,
+        x: newX,
+        y: newY,
+        scale: newScale,
+      });
     }
-  }, [xStr, yStr, scaleStr]);
+  }, [
+    xStr,
+    yStr,
+    scaleStr,
+  ]);
 
   return (
     <div className="border rounded-md px-6 py-4 flex flex-col gap-2">
@@ -132,7 +144,13 @@ export function ScenarioEditorCharacterSettings({
               type="url"
               value={spriteUrl}
               onChange={(e) =>
-                onChange({ spriteUrl: e.target.value, filename, x, y, scale })
+                onChange({
+                  spriteUrl: e.target.value,
+                  filename,
+                  x,
+                  y,
+                  scale,
+                })
               }
               placeholder={t(
                 "tools.scenarioImageGenerator.character.enterImageUrl",

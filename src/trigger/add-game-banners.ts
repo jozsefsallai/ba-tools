@@ -1,11 +1,11 @@
-import { logger, task, type Task } from "@trigger.dev/sdk";
-import {
-  addGameBannersPayload,
-  type AddGameBannersPayload,
-  type RawGameBanner,
-} from "./schemas";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import { db } from "../lib/db";
 import type { Student } from "../lib/db/client";
+import {
+  type AddGameBannersPayload,
+  addGameBannersPayload,
+  type RawGameBanner,
+} from "./schemas";
 
 export const addGameBannersTask: Task<
   "add-game-banners",
@@ -70,7 +70,9 @@ export const addGameBannersTask: Task<
           startDate,
           endDate,
           pickupStudents: {
-            connect: studentsToAdd.map((s) => ({ id: s.id })),
+            connect: studentsToAdd.map((s) => ({
+              id: s.id,
+            })),
           },
           freePulls: banner.freePulls,
           isSelectablePickup: banner.isSelectablePickup,

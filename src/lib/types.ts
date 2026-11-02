@@ -1,7 +1,18 @@
 import type { Student } from "~prisma";
 
-export const STAR_LEVELS = [1, 2, 3, 4, 5] as const;
-export const UE_LEVELS = [1, 2, 3, 4] as const;
+export const STAR_LEVELS = [
+  1,
+  2,
+  3,
+  4,
+  5,
+] as const;
+export const UE_LEVELS = [
+  1,
+  2,
+  3,
+  4,
+] as const;
 
 export const GAME_SERVERS = [
   "JP",
@@ -13,7 +24,19 @@ export const GAME_SERVERS = [
   "CN",
 ] as const;
 
-export const PVP_SEASONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+export const PVP_SEASONS = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+] as const;
 
 export type PVPSeasonNumber = (typeof PVP_SEASONS)[number];
 
@@ -34,13 +57,28 @@ export type BorrowSlotGameMode = (typeof BORROW_SLOT_GAMEMODES)[number];
 export type PVPMatchType = "attack" | "defense";
 export type PVPFormationPresetType = PVPMatchType | "both";
 
-export const PVP_COUNTER_RANGES = [350, 450, 550, 650, 750, 850] as const;
+export const PVP_COUNTER_RANGES = [
+  350,
+  450,
+  550,
+  650,
+  750,
+  850,
+] as const;
 export type PVPCounterRange = (typeof PVP_COUNTER_RANGES)[number];
 
 export type PVPCounterDefenseSlot =
-  | { studentId?: string; range?: number; tank?: boolean }
-  | { range: PVPCounterRange }
-  | { tank: true };
+  | {
+      studentId?: string;
+      range?: number;
+      tank?: boolean;
+    }
+  | {
+      range: PVPCounterRange;
+    }
+  | {
+      tank: true;
+    };
 
 export const GAME_SERVER_NAMES: Record<GameServer, string> = {
   JP: "Japan",

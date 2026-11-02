@@ -2,7 +2,12 @@ import "server-only";
 
 import { db } from "@/lib/db";
 
-const studentSelect = { select: { id: true, name: true } } as const;
+const studentSelect = {
+  select: {
+    id: true,
+    name: true,
+  },
+} as const;
 
 const giftSelect = {
   id: true,
@@ -30,20 +35,38 @@ export async function searchGifts({
     where: q
       ? {
           OR: [
-            { name: { contains: q, mode: "insensitive" as const } },
-            { nameJP: { contains: q, mode: "insensitive" as const } },
+            {
+              name: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              nameJP: {
+                contains: q,
+                mode: "insensitive" as const,
+              },
+            },
           ],
         }
       : undefined,
     take: limit,
-    orderBy: { id: "asc" },
+    orderBy: {
+      id: "asc",
+    },
     select: giftSelect,
   });
 }
 
 export async function getGift(id: number) {
   return await db.gift.findUnique({
-    where: { id },
-    select: { ...giftSelect, description: true, descriptionJP: true },
+    where: {
+      id,
+    },
+    select: {
+      ...giftSelect,
+      description: true,
+      descriptionJP: true,
+    },
   });
 }

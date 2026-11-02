@@ -55,8 +55,8 @@ const PENALTY_DISTANCE_FROM_START = 0.9;
 // with the number of tokens.
 const PENALTY_NOT_COMPLETE = 0.99;
 
-const IS_GAP_REGEXP = /[\\\/_+.#"@\[\(\{&]/;
-const COUNT_GAPS_REGEXP = /[\\\/_+.#"@\[\(\{&]/g;
+const IS_GAP_REGEXP = /[\\/_+.#"@[({&]/;
+const COUNT_GAPS_REGEXP = /[\\/_+.#"@[({&]/g;
 const IS_SPACE_REGEXP = /[\s-]/;
 const COUNT_SPACE_REGEXP = /[\s-]/g;
 

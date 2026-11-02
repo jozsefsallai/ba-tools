@@ -35,7 +35,11 @@ export function swapStudentSearchQueryOnFirstSpace(
 }
 
 export function orderStudentsByFuzzyNameQuery<
-  T extends { id: string; name: string; searchTags: string[] },
+  T extends {
+    id: string;
+    name: string;
+    searchTags: string[];
+  },
 >(
   candidates: T[],
   searchInput: string,
@@ -93,7 +97,10 @@ export function orderStudentsByFuzzyNameQuery<
       : [];
 
   return {
-    ordered: [...primary, ...secondary],
+    ordered: [
+      ...primary,
+      ...secondary,
+    ],
     primaryScores,
     secondaryScores,
   };

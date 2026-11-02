@@ -1,15 +1,15 @@
 "use client";
 
+import { HeartIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { DetailSection } from "@/app/[locale]/students/[id]/_components/detail-section";
 import { MemorialLobbyViewer } from "@/app/[locale]/students/[id]/_components/memorial-lobby-viewer";
 import bondIcon from "@/assets/images/bond.png";
 import {
-  type ResolvedMemorialLobbyManifest,
   fetchMemorialLobby,
+  type ResolvedMemorialLobbyManifest,
 } from "@/lib/student-spine";
-import { HeartIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 export function MemorialLobbySection({
   studentId,
@@ -41,7 +41,9 @@ export function MemorialLobbySection({
     return () => {
       cancelled = true;
     };
-  }, [studentId]);
+  }, [
+    studentId,
+  ]);
 
   return (
     <DetailSection

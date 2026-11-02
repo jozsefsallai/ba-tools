@@ -1,5 +1,3 @@
-import type { Student } from "@/lib/types";
-
 import abydos from "@/assets/images/school/Abydos.png";
 import arius from "@/assets/images/school/Arius.png";
 import etc from "@/assets/images/school/ETC.png";
@@ -9,14 +7,15 @@ import hyakkiyako from "@/assets/images/school/Hyakkiyako.png";
 import millennium from "@/assets/images/school/Millennium.png";
 import odyssey from "@/assets/images/school/Odyssey.png";
 import redWinter from "@/assets/images/school/RedWinter.png";
-import srt from "@/assets/images/school/SRT.png";
 import sakugawa from "@/assets/images/school/Sakugawa.png";
 import shanhaijing from "@/assets/images/school/Shanhaijing.png";
+import srt from "@/assets/images/school/SRT.png";
 import tokiwadai from "@/assets/images/school/Tokiwadai.png";
 import trinity from "@/assets/images/school/Trinity.png";
 import valkyrie from "@/assets/images/school/Valkyrie.png";
 import wildHunt from "@/assets/images/school/WildHunt.png";
 import { MaskIcon } from "@/components/common/mask-icon";
+import type { Student } from "@/lib/types";
 
 const SCHOOL_LOGOS = {
   Abydos: abydos,
@@ -35,7 +34,12 @@ const SCHOOL_LOGOS = {
   Trinity: trinity,
   Valkyrie: valkyrie,
   WildHunt: wildHunt,
-} satisfies Record<Student["school"], { src: string }>;
+} satisfies Record<
+  Student["school"],
+  {
+    src: string;
+  }
+>;
 
 export type SchoolLogoProps = {
   school: Student["school"];

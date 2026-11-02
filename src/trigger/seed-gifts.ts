@@ -1,4 +1,4 @@
-import { type Task, logger, task } from "@trigger.dev/sdk";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 
 import axios from "axios";
 
@@ -25,7 +25,11 @@ type RawGiftItemData = RawItemData & {
   Icon: string;
 };
 
-const commonFavorItemTags = ["BC", "Bc", "ew"];
+const commonFavorItemTags = [
+  "BC",
+  "Bc",
+  "ew",
+];
 
 async function fetchGifts() {
   const { data } = await axios.get<Record<string, RawItemData>>(ITEMS_TABLE);

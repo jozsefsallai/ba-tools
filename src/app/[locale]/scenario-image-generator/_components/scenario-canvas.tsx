@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   ScenarioRenderer,
   setActiveScenarioRenderer,
@@ -10,7 +11,6 @@ import {
 } from "@/app/[locale]/scenario-image-generator/_lib/store";
 import { MessageBox } from "@/components/common/message-box";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
 
 export function ScenarioCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);

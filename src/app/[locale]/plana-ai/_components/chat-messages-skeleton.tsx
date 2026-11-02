@@ -30,7 +30,9 @@ export function ChatMessagesSkeleton() {
 export function ChatSidebarSkeleton() {
   return (
     <div className="flex flex-col gap-2 p-3">
-      {Array.from({ length: 6 }).map((_, index) => (
+      {Array.from({
+        length: 6,
+      }).map((_, index) => (
         <div className="flex flex-col gap-1 rounded-lg px-3 py-2" key={index}>
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-3 w-16" />

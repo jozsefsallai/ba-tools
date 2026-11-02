@@ -1,14 +1,14 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
+import { z } from "zod";
 import type { PvpOpponentNameRecognition } from "@/lib/pvp/opponent-name-types";
 import { readNameReceipt, saveNameReceipt } from "@/lib/pvp/server/name-cache";
 import {
   recognitionInput,
   recognizeOpponentName,
 } from "@/lib/pvp/server/name-recognition";
-import { auth } from "@clerk/nextjs/server";
-import { fetchQuery } from "convex/nextjs";
-import { z } from "zod";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -54,7 +54,9 @@ export async function cachePvpOpponentName(input: {
     const parsed = cacheInput.parse(input);
     readNameReceipt(parsed.receipt, session.userId);
 
-    const token = await session.getToken({ template: "convex" });
+    const token = await session.getToken({
+      template: "convex",
+    });
 
     if (!token) {
       return false;
@@ -66,7 +68,9 @@ export async function cachePvpOpponentName(input: {
         matchId: parsed.matchId as Id<"pvpMatchRecord">,
         seasonId: parsed.seasonId as Id<"pvpSeason">,
       },
-      { token },
+      {
+        token,
+      },
     );
 
     await saveNameReceipt(

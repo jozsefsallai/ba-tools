@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+import type { ReactNode, SVGProps } from "react";
 import ClerkLogo from "@/app/[locale]/credits/_components/stack/clerk";
 import ConvexLogo from "@/app/[locale]/credits/_components/stack/convex";
 import GoLogo from "@/app/[locale]/credits/_components/stack/go";
@@ -10,8 +12,6 @@ import ShadcnUILogo from "@/app/[locale]/credits/_components/stack/shadcn";
 import SpineLogo from "@/app/[locale]/credits/_components/stack/spine";
 import TailwindCSSLogo from "@/app/[locale]/credits/_components/stack/tailwind";
 import VercelLogo from "@/app/[locale]/credits/_components/stack/vercel";
-import { getTranslations } from "next-intl/server";
-import type { ReactNode, SVGProps } from "react";
 
 type StackItem = {
   role: string;

@@ -14,9 +14,10 @@ export function getPvpOcrAssetFilenames() {
     "worker.min.js.LICENSE.txt",
     "CORE-LICENSE",
     ...PVP_OCR_CORE_VARIANTS.flatMap((variant) =>
-      ["wasm", "wasm.js"].map(
-        (extension) => `core/tesseract-core-${variant}.${extension}`,
-      ),
+      [
+        "wasm",
+        "wasm.js",
+      ].map((extension) => `core/tesseract-core-${variant}.${extension}`),
     ),
     ...assets.languages.map((language) => `lang/${language}.traineddata.gz`),
     "manifest.json",

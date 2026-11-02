@@ -1,24 +1,5 @@
 "use client";
 
-import { ChatEmptyState } from "@/app/[locale]/plana-ai/_components/chat-empty-state";
-import { ChatErrorMessage } from "@/app/[locale]/plana-ai/_components/chat-error-message";
-import { ChatInput } from "@/app/[locale]/plana-ai/_components/chat-input";
-import { ChatMessage } from "@/app/[locale]/plana-ai/_components/chat-message";
-import { ChatMessagesSkeleton } from "@/app/[locale]/plana-ai/_components/chat-messages-skeleton";
-import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
-import { PlanaMobileChatSidebar } from "@/app/[locale]/plana-ai/_components/plana-mobile-chat-sidebar";
-import { PlanaSettingsDialog } from "@/app/[locale]/plana-ai/_components/plana-settings-dialog";
-import { usePlanaChatPersistence } from "@/app/[locale]/plana-ai/_hooks/use-plana-chat-persistence";
-import {
-  type PlanaBranches,
-  type PlanaChatMessage,
-  findParentUserMessageId,
-} from "@/app/[locale]/plana-ai/_lib/chat-persistence";
-import { Plana } from "@/components/plana";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import type { PlanaExpression } from "@/lib/plana-expressions";
-import { cn } from "@/lib/utils";
 import { Chat, useChat } from "@ai-sdk/react";
 import { type ChatInit, DefaultChatTransport } from "ai";
 import {
@@ -29,6 +10,25 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChatEmptyState } from "@/app/[locale]/plana-ai/_components/chat-empty-state";
+import { ChatErrorMessage } from "@/app/[locale]/plana-ai/_components/chat-error-message";
+import { ChatInput } from "@/app/[locale]/plana-ai/_components/chat-input";
+import { ChatMessage } from "@/app/[locale]/plana-ai/_components/chat-message";
+import { ChatMessagesSkeleton } from "@/app/[locale]/plana-ai/_components/chat-messages-skeleton";
+import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
+import { PlanaMobileChatSidebar } from "@/app/[locale]/plana-ai/_components/plana-mobile-chat-sidebar";
+import { PlanaSettingsDialog } from "@/app/[locale]/plana-ai/_components/plana-settings-dialog";
+import { usePlanaChatPersistence } from "@/app/[locale]/plana-ai/_hooks/use-plana-chat-persistence";
+import {
+  findParentUserMessageId,
+  type PlanaBranches,
+  type PlanaChatMessage,
+} from "@/app/[locale]/plana-ai/_lib/chat-persistence";
+import { Plana } from "@/components/plana";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { PlanaExpression } from "@/lib/plana-expressions";
+import { cn } from "@/lib/utils";
 import type { Id } from "~convex/dataModel";
 import {
   getExpressionFromText,
@@ -47,7 +47,9 @@ function getLatestAssistantExpression(messages: PlanaChatMessage[]) {
   );
   const messagesAfterLatestUser =
     latestUserIndex === -1 ? messages : messages.slice(latestUserIndex + 1);
-  const latestAssistant = [...messagesAfterLatestUser]
+  const latestAssistant = [
+    ...messagesAfterLatestUser,
+  ]
     .reverse()
     .find((message) => message.role === "assistant");
 
@@ -88,7 +90,9 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
 
   useEffect(() => {
     chatIdRef.current = chatId;
-  }, [chatId]);
+  }, [
+    chatId,
+  ]);
 
   const chat = useMemo(
     () =>
@@ -133,7 +137,9 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     setMessages,
     status,
     stop,
-  } = useChat<PlanaChatMessage>({ chat });
+  } = useChat<PlanaChatMessage>({
+    chat,
+  });
 
   const isBusy = status === "submitted" || status === "streaming";
 
@@ -167,7 +173,13 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     setInputDraft("");
     setOptimisticExpression(null);
     setMessages([]);
-  }, [bumpBranches, chatId, clearError, setMessages, stop]);
+  }, [
+    bumpBranches,
+    chatId,
+    clearError,
+    setMessages,
+    stop,
+  ]);
 
   const {
     isLoadingHistory,
@@ -241,7 +253,9 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     : isBusy || optimisticExpression
       ? (optimisticExpression ?? "thinking")
       : (latestExpression ?? "idle");
-  const latestAssistantMessageId = [...messages]
+  const latestAssistantMessageId = [
+    ...messages,
+  ]
     .reverse()
     .find((message) => message.role === "assistant")?.id;
   const errorMessage = hasError
@@ -273,7 +287,10 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     );
 
     if (existingIndex === -1) {
-      branch.siblings = [...branch.siblings, assistantMessage];
+      branch.siblings = [
+        ...branch.siblings,
+        assistantMessage,
+      ];
       branch.activeIndex = makeActive
         ? branch.siblings.length - 1
         : branch.activeIndex;
@@ -312,7 +329,10 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
       return;
     }
 
-    bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({
+      block: "end",
+      behavior: "smooth",
+    });
   }, [
     messages,
     status,
@@ -326,7 +346,10 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     if (isBusy && !hasError) {
       setOptimisticExpression((current) => current ?? "thinking");
     }
-  }, [hasError, isBusy]);
+  }, [
+    hasError,
+    isBusy,
+  ]);
 
   useEffect(() => {
     if (wasBusyRef.current && !isBusy) {
@@ -338,14 +361,19 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     }
 
     wasBusyRef.current = isBusy;
-  }, [isBusy, shouldStickToBottomRef]);
+  }, [
+    isBusy,
+    shouldStickToBottomRef,
+  ]);
 
   useEffect(() => {
     if (status !== "ready" || isBusy || isLoadingHistory) {
       return;
     }
 
-    const latestAssistant = [...messages]
+    const latestAssistant = [
+      ...messages,
+    ]
       .reverse()
       .find((message) => message.role === "assistant");
 
@@ -372,7 +400,12 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     }
 
     upsertBranchSibling(parentUserMessageId, latestAssistant, true);
-  }, [isBusy, isLoadingHistory, messages, status]);
+  }, [
+    isBusy,
+    isLoadingHistory,
+    messages,
+    status,
+  ]);
 
   useEffect(() => {
     const panel = avatarPanelRef.current;
@@ -448,7 +481,9 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
         prepareRegenerate(latestAssistant);
       }
 
-      void regenerate({ messageId: latestAssistantMessageId });
+      void regenerate({
+        messageId: latestAssistantMessageId,
+      });
       return;
     }
 
@@ -472,7 +507,9 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     prepareRegenerate(assistantMessage);
     clearAllErrors();
     setOptimisticExpression("thinking");
-    void regenerate({ messageId: assistantMessage.id });
+    void regenerate({
+      messageId: assistantMessage.id,
+    });
   }
 
   function switchBranch(assistantMessage: PlanaChatMessage, delta: -1 | 1) {

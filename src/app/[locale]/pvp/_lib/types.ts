@@ -19,7 +19,14 @@ export type PVPFormationStudentItem = {
   starLevel?: StarLevel;
   ueLevel?: UELevel;
   damage?: number;
-  counter?: { kind: "range"; value: PVPCounterRange } | { kind: "tank" };
+  counter?:
+    | {
+        kind: "range";
+        value: PVPCounterRange;
+      }
+    | {
+        kind: "tank";
+      };
 };
 
 export type PVPFormationStudentRecord = {

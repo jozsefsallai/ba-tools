@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { handleRoadmapRequest, parseBody } from "@/lib/roadmap/api.server";
 import {
   deleteRoadmapItem,
@@ -6,12 +7,14 @@ import {
 } from "@/lib/roadmap/roadmap.server";
 import { roadmapInputSchemas } from "@/lib/roadmap/schemas";
 import type { EditableRoadmapKind } from "@/lib/roadmap/types";
-import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
 type RouteContext = {
-  params: Promise<{ kind: string; id: string }>;
+  params: Promise<{
+    kind: string;
+    id: string;
+  }>;
 };
 
 export async function PATCH(req: Request, context: RouteContext) {
@@ -34,6 +37,8 @@ export async function DELETE(req: Request, context: RouteContext) {
     await deleteRoadmapItem(kind as EditableRoadmapKind, id);
 
     invalidateRoadmapCache();
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+    });
   });
 }

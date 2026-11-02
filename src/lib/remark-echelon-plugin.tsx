@@ -1,10 +1,10 @@
+import type { Root } from "mdast";
+import { createElement, useMemo } from "react";
+import { visit } from "unist-util-visit";
 import { FormationPreview } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { useStudents } from "@/hooks/use-students";
 import { parseEchelon } from "@/lib/echelon-parser";
 import { inferFormationType } from "@/lib/formation-type";
-import type { Root } from "mdast";
-import { createElement, useMemo } from "react";
-import { visit } from "unist-util-visit";
 
 type EchelonComponentProps = {
   data: string;
@@ -15,7 +15,9 @@ function EchelonComponent({ data }: EchelonComponentProps) {
 
   const parsedData = useMemo(() => {
     return parseEchelon(students, data);
-  }, [data]);
+  }, [
+    data,
+  ]);
 
   const strikers = useMemo(
     () =>
@@ -31,9 +33,13 @@ function EchelonComponent({ data }: EchelonComponentProps) {
               starterOrder: item.starterOrder,
               borrowed: item.borrowed,
             }
-          : { id: `striker-empty-${idx}` },
+          : {
+              id: `striker-empty-${idx}`,
+            },
       ),
-    [parsedData],
+    [
+      parsedData,
+    ],
   );
 
   const specials = useMemo(
@@ -50,9 +56,13 @@ function EchelonComponent({ data }: EchelonComponentProps) {
               starterOrder: item.starterOrder,
               borrowed: item.borrowed,
             }
-          : { id: `special-empty-${idx}` },
+          : {
+              id: `special-empty-${idx}`,
+            },
       ),
-    [parsedData],
+    [
+      parsedData,
+    ],
   );
 
   const formationType = useMemo(
@@ -63,13 +73,18 @@ function EchelonComponent({ data }: EchelonComponentProps) {
           specials,
         },
       ]),
-    [strikers, specials],
+    [
+      strikers,
+      specials,
+    ],
   );
 
   return (
     <div
       className="flex items-center gap-3 prose-img:my-0"
-      style={{ zoom: 0.8 }}
+      style={{
+        zoom: 0.8,
+      }}
     >
       <FormationPreview
         strikers={strikers}
@@ -87,7 +102,9 @@ export default function remarkEchelonPlugin() {
         const data = node.value;
 
         (node as any).type = "element";
-        (node as any).value = createElement(EchelonComponent, { data });
+        (node as any).value = createElement(EchelonComponent, {
+          data,
+        });
       }
     });
   };

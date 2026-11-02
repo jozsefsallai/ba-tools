@@ -1,3 +1,5 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import {
   defineTool,
@@ -12,8 +14,6 @@ import {
   listFormations,
   updateFormation,
 } from "@/lib/public-api/resources/formations.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import { formationArgs } from "~convex-lib/validators";
 
 const fields = convexToZodShape(formationArgs);
@@ -40,7 +40,9 @@ export function registerFormationTools(server: McpServer) {
       title: "Get formation",
       description: "One of the user's formations.",
       kind: "read",
-      input: { formationId },
+      input: {
+        formationId,
+      },
     },
     ({ formationId }, userId) => getFormation(userId, formationId),
   );
@@ -66,7 +68,10 @@ export function registerFormationTools(server: McpServer) {
       description:
         "Change a formation. Only the fields sent change; arrays sent replace the whole array.",
       kind: "update",
-      input: { formationId, ...z.object(fields).partial().shape },
+      input: {
+        formationId,
+        ...z.object(fields).partial().shape,
+      },
     },
     ({ formationId, ...patch }, userId) =>
       updateFormation(userId, formationId, patch),
@@ -79,7 +84,9 @@ export function registerFormationTools(server: McpServer) {
       title: "Delete formation",
       description: "Permanently delete a formation.",
       kind: "delete",
-      input: { formationId },
+      input: {
+        formationId,
+      },
     },
     ({ formationId }, userId) => deleteFormation(userId, formationId),
   );

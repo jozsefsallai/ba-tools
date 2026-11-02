@@ -7,10 +7,25 @@ export type IconDebugStudent = Pick<Student, "id" | "combatClass">;
 export function iconDebugSlotIndices(
   combatClass: IconDebugStudent["combatClass"],
 ): readonly number[] {
-  return combatClass === "Main" ? [0, 1, 2, 3] : [4, 5];
+  return combatClass === "Main"
+    ? [
+        0,
+        1,
+        2,
+        3,
+      ]
+    : [
+        4,
+        5,
+      ];
 }
 
-export type Cutout = { x: number; y: number; width: number; height: number };
+export type Cutout = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 export type IconDebugCase = {
   skipped?: boolean;
@@ -79,20 +94,24 @@ export function findTemplateCutouts(image: PvpPixelImage): Cutout[] {
       }
     }
 
-    if (write > 100)
+    if (write > 100) {
       found.push({
         x: left,
         y: top,
         width: right - left + 1,
         height: bottom - top + 1,
       });
+    }
   }
 
   const representatives = found
     .filter((box) => box.y < height / 2)
     .sort((a, b) => a.x - b.x);
 
-  const teams = [false, true].map((right) =>
+  const teams = [
+    false,
+    true,
+  ].map((right) =>
     found
       .filter((box) => box.y >= height / 2 && box.x >= width / 2 === right)
       .sort((a, b) => a.x - b.x),
@@ -110,13 +129,18 @@ export function findTemplateCutouts(image: PvpPixelImage): Cutout[] {
     );
   }
 
-  return [...representatives, ...teams.flat()];
+  return [
+    ...representatives,
+    ...teams.flat(),
+  ];
 }
 
 export function iconDebugCases(row: IconDebugResult) {
-  return [row.representative, ...row.myTeam, ...row.opponentTeam].filter(
-    (item) => !item.skipped,
-  );
+  return [
+    row.representative,
+    ...row.myTeam,
+    ...row.opponentTeam,
+  ].filter((item) => !item.skipped);
 }
 
 export function iconDebugCorrect(result: IconDebugCase, studentId: string) {
@@ -133,14 +157,26 @@ export function failedIconDebugResult(
   const slots = iconDebugSlotIndices(combatClass);
 
   const team = () =>
-    Array.from({ length: 6 }, (_, index) =>
-      slots.includes(index) ? { error } : { skipped: true },
+    Array.from(
+      {
+        length: 6,
+      },
+      (_, index) =>
+        slots.includes(index)
+          ? {
+              error,
+            }
+          : {
+              skipped: true,
+            },
     );
 
   return {
     studentId,
     error,
-    representative: { error },
+    representative: {
+      error,
+    },
     myTeam: team(),
     opponentTeam: team(),
   };

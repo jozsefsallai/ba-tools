@@ -3,6 +3,15 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  type CORSRule,
+  GetBucketCorsCommand,
+  HeadObjectCommand,
+  PutBucketCorsCommand,
+  PutObjectCommand,
+  S3Client,
+  S3ServiceException,
+} from "@aws-sdk/client-s3";
+import {
   PVP_ICON_CATALOG_FORMAT,
   PVP_ICON_TEMPLATE_BYTES,
   type PvpIconCatalog,
@@ -13,15 +22,6 @@ import {
   getPvpOcrAssetFilenames,
 } from "@/lib/pvp/ocr-asset-url";
 import config from "@/lib/pvp/ocr-assets.json";
-import {
-  type CORSRule,
-  GetBucketCorsCommand,
-  HeadObjectCommand,
-  PutBucketCorsCommand,
-  PutObjectCommand,
-  S3Client,
-  S3ServiceException,
-} from "@aws-sdk/client-s3";
 
 // Only production deployments publish to the bucket; previews have no R2
 // credentials and reuse the assets production already uploaded
@@ -163,7 +163,10 @@ try {
 
     try {
       const existing = await client.send(
-        new HeadObjectCommand({ Bucket: bucket, Key: key }),
+        new HeadObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
       );
 
       const identical =
@@ -187,7 +190,10 @@ try {
         throw error;
       }
 
-      uploads.push({ ...file, md5 });
+      uploads.push({
+        ...file,
+        md5,
+      });
     }
   }
 
@@ -196,7 +202,9 @@ try {
 
     try {
       const existing = await client.send(
-        new GetBucketCorsCommand({ Bucket: bucket }),
+        new GetBucketCorsCommand({
+          Bucket: bucket,
+        }),
       );
 
       rules = existing.CORSRules ?? [];
@@ -219,8 +227,13 @@ try {
             ...rules.filter((rule) => rule.ID !== id),
             {
               ID: id,
-              AllowedOrigins: ["*"],
-              AllowedMethods: ["GET", "HEAD"],
+              AllowedOrigins: [
+                "*",
+              ],
+              AllowedMethods: [
+                "GET",
+                "HEAD",
+              ],
               MaxAgeSeconds: 86400,
             },
           ],

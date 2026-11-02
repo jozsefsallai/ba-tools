@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
+import { cn } from "@/lib/utils";
 
 type DetailSectionProps = PropsWithChildren<{
   title: string;
@@ -30,7 +30,10 @@ export function DetailField({
   label,
   className,
   children,
-}: PropsWithChildren<{ label: string; className?: string }>) {
+}: PropsWithChildren<{
+  label: string;
+  className?: string;
+}>) {
   return (
     <div className={cn("flex flex-col gap-0.5", className)}>
       <dt className="text-muted-foreground text-xs font-medium uppercase tracking-wide">

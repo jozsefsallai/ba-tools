@@ -1,7 +1,9 @@
 import type { GameBanner, Student } from "~prisma";
 
 export function serializeGameBanner(
-  banner: GameBanner & { pickupStudents: Student[] },
+  banner: GameBanner & {
+    pickupStudents: Student[];
+  },
 ) {
   return {
     id: banner.id,

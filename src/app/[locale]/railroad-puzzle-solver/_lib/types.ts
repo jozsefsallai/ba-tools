@@ -1,15 +1,33 @@
-export const DIRECTIONS = ["E", "SE", "SW", "W", "NW", "NE"] as const;
+export const DIRECTIONS = [
+  "E",
+  "SE",
+  "SW",
+  "W",
+  "NW",
+  "NE",
+] as const;
 
 export type Direction = (typeof DIRECTIONS)[number];
 
 export type RailType = "STRAIGHT" | "SLIGHTLY_CURVED" | "VERY_CURVED";
 
-export type RailConnection = [from: Direction, to: Direction];
+export type RailConnection = [
+  from: Direction,
+  to: Direction,
+];
 
 export type TileState =
-  | { type: "EMPTY" }
-  | { type: "START"; exit: Direction }
-  | { type: "GOAL"; entrance: Direction }
+  | {
+      type: "EMPTY";
+    }
+  | {
+      type: "START";
+      exit: Direction;
+    }
+  | {
+      type: "GOAL";
+      entrance: Direction;
+    }
   | {
       type: "STATION";
       railType: RailType;
@@ -21,7 +39,9 @@ export type TileState =
       entrance: Direction;
       exit: Direction;
     }
-  | { type: "TERRAIN" }
+  | {
+      type: "TERRAIN";
+    }
   | {
       type: "RAIL_PIECE";
       railType: RailType;

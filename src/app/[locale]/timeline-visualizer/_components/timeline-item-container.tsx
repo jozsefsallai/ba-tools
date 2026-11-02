@@ -1,7 +1,5 @@
 "use client";
 
-import { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-item";
-import type { TimelineItem as TimelineItemType } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import {
   closestCenter,
   DndContext,
@@ -17,14 +15,16 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { Student } from "~prisma";
 import {
   type RefObject,
+  type SetStateAction,
   useCallback,
   useMemo,
-  type SetStateAction,
 } from "react";
 import { WindowVirtualizer, type WindowVirtualizerHandle } from "virtua";
+import { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-item";
+import type { TimelineItem as TimelineItemType } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
+import type { Student } from "~prisma";
 
 export type TimelineItemContainerProps = {
   virtualListHandlerRef?: RefObject<WindowVirtualizerHandle | null>;
@@ -78,12 +78,18 @@ export function TimelineItemContainer({
         return arrayMove(current, oldIndex, newIndex);
       });
     },
-    [setItems],
+    [
+      setItems,
+    ],
   );
 
   const reversedItems = useMemo(() => {
-    return [...items].reverse();
-  }, [items]);
+    return [
+      ...items,
+    ].reverse();
+  }, [
+    items,
+  ]);
 
   return (
     <DndContext

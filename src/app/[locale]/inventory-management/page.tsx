@@ -1,11 +1,11 @@
+import { HelpCircleIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import { InventoryManagementSimulatorView } from "@/app/[locale]/inventory-management/_components/simulator-view";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { HelpCircleIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
-import { Suspense } from "react";
 
 export async function generateMetadata() {
   return getCardMetadata("inventory-management", await getLocale());

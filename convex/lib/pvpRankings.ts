@@ -1,6 +1,8 @@
 import { canonicalPvpStatsTeam, getTeamKey } from "./teamKey";
 
-export type RankingTeam = Array<{ studentId?: string }>;
+export type RankingTeam = Array<{
+  studentId?: string;
+}>;
 
 export function canonicalRankingTeam(team: RankingTeam): RankingTeam {
   return canonicalPvpStatsTeam(team);
@@ -8,12 +10,18 @@ export function canonicalRankingTeam(team: RankingTeam): RankingTeam {
 
 export function rankingIdentity(team: RankingTeam) {
   const canonical = canonicalRankingTeam(team);
-  return { team: canonical, formationKey: getTeamKey(canonical) };
+  return {
+    team: canonical,
+    formationKey: getTeamKey(canonical),
+  };
 }
 
 export function wilsonInterval(wins: number, total: number) {
   if (total <= 0) {
-    return { lower: 0, upper: 0 };
+    return {
+      lower: 0,
+      upper: 0,
+    };
   }
 
   const z = 1.96;

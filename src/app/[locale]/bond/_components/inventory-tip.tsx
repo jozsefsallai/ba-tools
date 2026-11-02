@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { SignInButton } from "@clerk/nextjs";
 import { Unauthenticated } from "convex/react";
 import { LightbulbIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 export function InventoryTip() {
   const t = useTranslations();

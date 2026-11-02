@@ -12,8 +12,12 @@ import {
 
 const { values } = parseArgs({
   options: {
-    "sqlcipher-key": { type: "string" },
-    out: { type: "string" },
+    "sqlcipher-key": {
+      type: "string",
+    },
+    out: {
+      type: "string",
+    },
   },
 });
 
@@ -30,7 +34,9 @@ const result = await listNewStudents({
 const json = `${JSON.stringify(result.students, null, 2)}\n`;
 
 if (values.out) {
-  await mkdir(dirname(values.out), { recursive: true });
+  await mkdir(dirname(values.out), {
+    recursive: true,
+  });
   await writeFile(values.out, json);
   logger.info(`Wrote ${result.students.length} students to ${values.out}`);
 } else {

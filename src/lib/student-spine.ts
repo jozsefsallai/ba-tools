@@ -47,7 +47,10 @@ export async function fetchStudentSprites(
   return {
     ...manifest,
     urls: Object.fromEntries(
-      manifest.sprites.map((s) => [s, buildStudentSpriteUrl(studentId, s)]),
+      manifest.sprites.map((s) => [
+        s,
+        buildStudentSpriteUrl(studentId, s),
+      ]),
     ),
   };
 }
@@ -91,7 +94,10 @@ export async function fetchMemorialLobby(
         skelUrl: url(skeleton.skel),
         atlasUrl: url(skeleton.atlas),
         textureUrls: Object.fromEntries(
-          skeleton.textures.map((t) => [t, url(t)]),
+          skeleton.textures.map((t) => [
+            t,
+            url(t),
+          ]),
         ),
       })),
       effectsUrl: lobby.scene?.effects ? url(lobby.scene.effects) : null,

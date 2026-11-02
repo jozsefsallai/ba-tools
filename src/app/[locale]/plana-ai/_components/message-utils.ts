@@ -1,5 +1,5 @@
-import type { PlanaExpression } from "@/lib/plana-expressions";
 import type { FinishReason, UIMessage } from "ai";
+import type { PlanaExpression } from "@/lib/plana-expressions";
 
 const ALLOWED_EXPRESSIONS = new Set<string>([
   "idle",

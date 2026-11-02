@@ -1,4 +1,5 @@
 ---
+
 title: Introduction
 description: Read Blue Archive game data and manage your user data on Joe's Blue Archive Tools over HTTP.
 icon: book-open
@@ -69,12 +70,12 @@ The older, undocumented `GET /api/students` endpoint still works and isn't chang
 
 Requests are rate limited per minute, using a sliding window:
 
-| Requests | Limit | Counted per |
-| --- | --- | --- |
-| Public endpoints | 120 per minute | IP address |
-| `POST /api/v1/pvp/stats/search` | 20 per minute | IP address |
-| `GET /api/v1/me/...` | 120 per minute | API key owner |
-| `POST`, `PATCH` and `DELETE /api/v1/me/...` | 60 per minute | API key owner |
+| Requests                                    | Limit          | Counted per   |
+| ------------------------------------------- | -------------- | ------------- |
+| Public endpoints                            | 120 per minute | IP address    |
+| `POST /api/v1/pvp/stats/search`             | 20 per minute  | IP address    |
+| `GET /api/v1/me/...`                        | 120 per minute | API key owner |
+| `POST`, `PATCH` and `DELETE /api/v1/me/...` | 60 per minute  | API key owner |
 
 Requests with a missing or invalid API key count towards the public limit of your IP address. Responses served from our cache don't count at all.
 

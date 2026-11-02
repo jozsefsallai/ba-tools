@@ -1,10 +1,12 @@
-import { clerkIssuer } from "@/lib/mcp/auth.server";
 import { metadataCorsOptionsRequestHandler } from "mcp-handler";
+import { clerkIssuer } from "@/lib/mcp/auth.server";
 
 export async function GET() {
   const response = await fetch(
     `${clerkIssuer()}/.well-known/oauth-authorization-server`,
-    { cache: "no-store" },
+    {
+      cache: "no-store",
+    },
   );
 
   return new Response(await response.text(), {

@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 export type TimelinePreviewTriggerProps = {
   trigger: string;
@@ -24,7 +24,9 @@ export function TimelinePreviewTrigger({
 
   const containsCJK = useMemo(() => {
     return CJK_REGEX.test(trigger);
-  }, [trigger]);
+  }, [
+    trigger,
+  ]);
 
   return (
     <div

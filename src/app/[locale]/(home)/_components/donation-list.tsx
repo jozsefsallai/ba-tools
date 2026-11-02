@@ -27,7 +27,9 @@ export function DonationList({
   anonymousLabel,
   thankYouText,
 }: DonationListProps) {
-  const donations = useQuery(api.donations.list, { limit: 20 });
+  const donations = useQuery(api.donations.list, {
+    limit: 20,
+  });
 
   if (!donations || donations.length === 0) {
     return null;

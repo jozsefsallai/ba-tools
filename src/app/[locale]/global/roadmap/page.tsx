@@ -1,8 +1,8 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { RoadmapView } from "@/components/roadmap/roadmap-view";
 import { Separator } from "@/components/ui/separator";
 import { getCardMetadata } from "@/lib/og-metadata.server";
 import { getCachedRoadmapItems } from "@/lib/roadmap/roadmap.server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("global-roadmap", await getLocale());

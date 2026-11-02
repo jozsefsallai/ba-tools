@@ -1,5 +1,8 @@
 "use client";
 
+import { Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback } from "react";
 import type { StudentItem } from "@/app/[locale]/formation-display/_components/formation-preview";
 import {
   StarLevelInput,
@@ -11,9 +14,6 @@ import { Label } from "@/components/ui/label";
 import { PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Trash2Icon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback } from "react";
 
 function isFormationPreviewAnchorTarget(target: EventTarget | null) {
   return (
@@ -42,20 +42,30 @@ export function FormationItemPopover({
 
   const handleRemove = useCallback(() => {
     onWantsToRemove(item.id);
-  }, [onWantsToRemove, item.id]);
+  }, [
+    onWantsToRemove,
+    item.id,
+  ]);
 
   const handleLevelUpdate = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
-        onWantsToUpdate(item.id, { level: undefined });
+        onWantsToUpdate(item.id, {
+          level: undefined,
+        });
         return;
       }
       const level = Number.parseInt(event.target.value, 10);
       if (!Number.isNaN(level)) {
-        onWantsToUpdate(item.id, { level });
+        onWantsToUpdate(item.id, {
+          level,
+        });
       }
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleStarsUpdate = useCallback(
@@ -65,24 +75,39 @@ export function FormationItemPopover({
         ueLevel: value.ueLevel,
       });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleBorrowedUpdate = useCallback(
     (checked: boolean) => {
-      onWantsToUpdate(item.id, { borrowed: checked });
+      onWantsToUpdate(item.id, {
+        borrowed: checked,
+      });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleStarterUpdate = useCallback(
     (checked: boolean) => {
       onWantsToUpdate(item.id, {
         starter: checked,
-        ...(checked ? {} : { starterOrder: undefined }),
+        ...(checked
+          ? {}
+          : {
+              starterOrder: undefined,
+            }),
       });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   return (
@@ -90,10 +115,14 @@ export function FormationItemPopover({
       className="w-72 flex flex-col gap-3"
       onOpenAutoFocus={(e) => e.preventDefault()}
       onPointerDownOutside={(e) => {
-        if (isFormationPreviewAnchorTarget(e.target)) e.preventDefault();
+        if (isFormationPreviewAnchorTarget(e.target)) {
+          e.preventDefault();
+        }
       }}
       onFocusOutside={(e) => {
-        if (isFormationPreviewAnchorTarget(e.target)) e.preventDefault();
+        if (isFormationPreviewAnchorTarget(e.target)) {
+          e.preventDefault();
+        }
       }}
     >
       <div className="font-semibold text-base">
@@ -122,7 +151,10 @@ export function FormationItemPopover({
             <StarLevelInput
               className="flex-1 items-center"
               imageClassName="size-6"
-              value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
+              value={{
+                starLevel: item.starLevel,
+                ueLevel: item.ueLevel,
+              }}
               onValueChanged={handleStarsUpdate}
             />
           </div>

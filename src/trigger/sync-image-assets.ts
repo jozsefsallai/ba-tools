@@ -1,7 +1,7 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type Task, logger, task } from "@trigger.dev/sdk";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import { resolveImageStudents } from "../lib/game-data/existing-students.server";
 import { uploadImages } from "../lib/game-data/upload-images.server";
 import { loadMxDataSync } from "./lib/mx-data-sync";
@@ -48,8 +48,14 @@ export const syncImageAssetsTask: Task<
     });
 
     const upload = dryRun
-      ? { uploaded: [], unchanged: [] }
-      : await uploadImages(result.files, { overwrite, logger });
+      ? {
+          uploaded: [],
+          unchanged: [],
+        }
+      : await uploadImages(result.files, {
+          overwrite,
+          logger,
+        });
 
     return {
       gameVersion: result.gameVersion,

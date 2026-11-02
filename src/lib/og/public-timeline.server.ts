@@ -1,15 +1,15 @@
 import "server-only";
 
+import { fetchQuery } from "convex/nextjs";
+import { getTranslations } from "next-intl/server";
+import removeMd from "remove-markdown";
+import { OG_DESIGN_VERSION } from "@/lib/og/registry";
+import { boundedText } from "@/lib/og/text";
 import {
   getCardContent,
   ogLocale,
   sharingMetadata,
 } from "@/lib/og-metadata.server";
-import { OG_DESIGN_VERSION } from "@/lib/og/registry";
-import { boundedText } from "@/lib/og/text";
-import { fetchQuery } from "convex/nextjs";
-import { getTranslations } from "next-intl/server";
-import removeMd from "remove-markdown";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -24,7 +24,9 @@ export async function getPublicTimelineMetadata(
   // private records
   const record =
     kind === "timeline"
-      ? await fetchQuery(api.timeline.getById, { id: id as Id<"timeline"> })
+      ? await fetchQuery(api.timeline.getById, {
+          id: id as Id<"timeline">,
+        })
       : await fetchQuery(api.timelineGroup.getById, {
           id: id as Id<"timelineGroup">,
         });
@@ -34,7 +36,9 @@ export async function getPublicTimelineMetadata(
   }
 
   const card = await getCardContent("timeline-visualizer", language);
-  const t = await getTranslations({ locale: language });
+  const t = await getTranslations({
+    locale: language,
+  });
   const isGroup = kind === "timeline-group";
   const fallbackTitle = t(
     isGroup ? "common.untitledTimelineGroup" : "common.untitledTimeline",
@@ -51,7 +55,10 @@ export async function getPublicTimelineMetadata(
     boundedText(removeMd(record.description ?? ""), 160) || fallbackDescription;
 
   return sharingMetadata({
-    title: t("common.sharing.title", { title, appName: t("common.appName") }),
+    title: t("common.sharing.title", {
+      title,
+      appName: t("common.appName"),
+    }),
     description,
     locale: language,
     image: `/api/og/${language}/timeline-visualizer?v=${OG_DESIGN_VERSION}`,

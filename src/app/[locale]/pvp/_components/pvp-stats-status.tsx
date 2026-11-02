@@ -51,7 +51,12 @@ export function PVPStatsStatus() {
 
   return (
     <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-      <p>{t("tools.pvp.stats.status.label", { lastUpdated, nextUpdate })}</p>
+      <p>
+        {t("tools.pvp.stats.status.label", {
+          lastUpdated,
+          nextUpdate,
+        })}
+      </p>
 
       {"traitsReady" in status && status.traitsReady !== true && (
         <p>{t("tools.pvp.stats.status.traitsUpdating")}</p>

@@ -1,15 +1,20 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import {
   type StudentGrowthStats as GrowthStats,
-  STUDENT_MAX_LEVEL,
   getStudentStatsAtLevel,
+  STUDENT_MAX_LEVEL,
 } from "@/lib/student-stats";
-import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
 
-const STAT_KEYS = ["maxHP", "atk", "def", "heal"] as const;
+const STAT_KEYS = [
+  "maxHP",
+  "atk",
+  "def",
+  "heal",
+] as const;
 
 type StudentGrowthStatsProps = {
   stats: GrowthStats;
@@ -28,14 +33,18 @@ export function StudentGrowthStats({ stats, rarity }: StudentGrowthStatsProps) {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <span className="w-14 shrink-0 text-sm font-semibold tabular-nums">
-          {t("tools.students.detail.stats.level", { level })}
+          {t("tools.students.detail.stats.level", {
+            level,
+          })}
         </span>
 
         <Slider
           min={1}
           max={STUDENT_MAX_LEVEL}
           step={1}
-          value={[level]}
+          value={[
+            level,
+          ]}
           onValueChange={([value]) => setLevel(value)}
           aria-label={t("tools.students.detail.stats.levelLabel")}
         />

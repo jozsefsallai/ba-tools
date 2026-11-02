@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,13 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GAME_SERVERS, GAME_SERVER_NAMES, PVP_SEASONS } from "@/lib/types";
 import type { GameServer, PVPSeasonNumber } from "@/lib/types";
-import { useMutation } from "convex/react";
-import { PencilIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { GAME_SERVER_NAMES, GAME_SERVERS, PVP_SEASONS } from "@/lib/types";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 
@@ -50,7 +50,10 @@ export function PVPSeasonEditDialog({ season }: PVPSeasonEditDialogProps) {
       setGameServer(season.gameServer);
       setSeasonNumber(season.seasonNumber);
     }
-  }, [open, season]);
+  }, [
+    open,
+    season,
+  ]);
 
   async function handleSave() {
     if (!name.trim() || !seasonNumber || isSaving) {

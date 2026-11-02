@@ -1,11 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   readPvpStatsFilters,
   writePvpStatsFilters,
 } from "@/lib/pvp/stats-filters";
 import type { PVPSeasonNumber } from "@/lib/types";
-import { useEffect, useState } from "react";
 
 export function usePvpStatsFilters() {
   const [seasonNumber, setSeasonNumber] = useState<PVPSeasonNumber>(11);
@@ -25,7 +25,11 @@ export function usePvpStatsFilters() {
     }
 
     writePvpStatsFilters(seasonNumber, excludedStudentIds);
-  }, [loaded, seasonNumber, excludedStudentIds]);
+  }, [
+    loaded,
+    seasonNumber,
+    excludedStudentIds,
+  ]);
 
   return {
     seasonNumber,

@@ -1,18 +1,18 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStudents } from "@/hooks/use-students";
-import { useMutation } from "convex/react";
-import { ChevronLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { Link, useRouter } from "@/i18n/navigation";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
-import { Link, useRouter } from "@/i18n/navigation";
 
 export function PVPEnemyPresetForm({
   seasonId,
@@ -36,7 +36,10 @@ export function PVPEnemyPresetForm({
     if (preset?.opponentStudentRepId) {
       setStudentRep(studentMap[preset.opponentStudentRepId]);
     }
-  }, [preset, studentMap]);
+  }, [
+    preset,
+    studentMap,
+  ]);
 
   async function save() {
     setSaving(true);

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,8 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useTranslations } from "next-intl";
-import { type PropsWithChildren, useRef, useState } from "react";
 
 export type CreateGiftInventoryDialogProps = PropsWithChildren<{
   onCreate?: (name: string) => any;
@@ -39,7 +39,9 @@ export function CreateGiftInventoryDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.createGiftInventory.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.createGiftInventory.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.createGiftInventory.description")}
           </DialogDescription>

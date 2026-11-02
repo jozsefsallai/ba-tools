@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,8 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useTranslations } from "next-intl";
-import { type PropsWithChildren, useEffect, useRef, useState } from "react";
 
 export type RenameGiftInventoryDialogProps = PropsWithChildren<{
   current: string;
@@ -37,7 +37,9 @@ export function RenameGiftInventoryDialog({
 
   useEffect(() => {
     setName(current);
-  }, [current]);
+  }, [
+    current,
+  ]);
 
   return (
     <Dialog>
@@ -45,7 +47,9 @@ export function RenameGiftInventoryDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.renameGiftInventory.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.renameGiftInventory.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.renameGiftInventory.description")}
           </DialogDescription>

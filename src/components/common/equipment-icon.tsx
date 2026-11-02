@@ -1,5 +1,3 @@
-import type { Student } from "@/lib/types";
-
 import badge from "@/assets/images/equipment/Badge.png";
 import bag from "@/assets/images/equipment/Bag.png";
 import charm from "@/assets/images/equipment/Charm.png";
@@ -9,6 +7,7 @@ import hat from "@/assets/images/equipment/Hat.png";
 import necklace from "@/assets/images/equipment/Necklace.png";
 import shoes from "@/assets/images/equipment/Shoes.png";
 import watch from "@/assets/images/equipment/Watch.png";
+import type { Student } from "@/lib/types";
 
 export type EquipmentKind = Student["equipment"][number];
 
@@ -22,7 +21,12 @@ const EQUIPMENT_ICONS = {
   Necklace: necklace,
   Shoes: shoes,
   Watch: watch,
-} satisfies Record<EquipmentKind, { src: string }>;
+} satisfies Record<
+  EquipmentKind,
+  {
+    src: string;
+  }
+>;
 
 export type EquipmentIconProps = {
   equipment: EquipmentKind;

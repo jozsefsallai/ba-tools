@@ -1,10 +1,8 @@
-import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 import {
   BookOpenTextIcon,
   CakeIcon,
-  CalendarRangeIcon,
   CalculatorIcon,
+  CalendarRangeIcon,
   ClipboardMinusIcon,
   DicesIcon,
   GemIcon,
@@ -20,6 +18,8 @@ import {
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 type Resource = {
   name: string;

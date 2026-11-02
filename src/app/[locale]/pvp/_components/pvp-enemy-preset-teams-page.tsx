@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { PVPBreadcrumbs } from "@/app/[locale]/pvp/_components/pvp-breadcrumbs";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
 import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
@@ -33,10 +37,6 @@ import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { Storage } from "@/lib/storage";
-import { useMutation, useQuery } from "convex/react";
-import { ChevronLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -112,7 +112,14 @@ export function PVPEnemyPresetTeamsPage({
             starLevel: slot.starLevel,
             ueLevel: slot.ueLevel,
           }))
-        : [{}, {}, {}, {}, {}, {}],
+        : [
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+          ],
     );
     setDialogOpen(true);
   }
@@ -124,7 +131,9 @@ export function PVPEnemyPresetTeamsPage({
       starLevel: slot.starLevel,
       ueLevel: slot.ueLevel,
     }));
-    if (!teamsResult) return;
+    if (!teamsResult) {
+      return;
+    }
     if (editingTeamId) {
       await updateTeam({
         teamId: editingTeamId as Id<"pvpEnemyTeam">,
@@ -253,7 +262,9 @@ export function PVPEnemyPresetTeamsPage({
 
                 <div
                   className="flex min-w-0 gap-4 overflow-x-auto px-3 py-1 max-md:basis-full"
-                  style={{ zoom: 0.65 }}
+                  style={{
+                    zoom: 0.65,
+                  }}
                 >
                   {knownTeam.team.map(
                     (item: PVPEnemyTeam["team"][number], index: number) => {
@@ -390,7 +401,9 @@ export function PVPEnemyPresetTeamsPage({
                       return current;
                     }
 
-                    const updated = [...current];
+                    const updated = [
+                      ...current,
+                    ];
                     const [item] = updated.splice(from, 1);
                     updated.splice(to, 0, item);
 
@@ -400,7 +413,12 @@ export function PVPEnemyPresetTeamsPage({
                 onUpdate={(index, value) =>
                   setTeam((current) =>
                     current.map((slot, slotIndex) =>
-                      slotIndex === index ? { ...slot, ...value } : slot,
+                      slotIndex === index
+                        ? {
+                            ...slot,
+                            ...value,
+                          }
+                        : slot,
                     ),
                   )
                 }

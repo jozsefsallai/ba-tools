@@ -116,7 +116,10 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
             reverseDirection(exitDir),
             railsLeft,
             currentStationsVisited,
-            [...path, railTile],
+            [
+              ...path,
+              railTile,
+            ],
           );
         }
 
@@ -158,7 +161,12 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
             }
 
             const newGridState = gridState.map((row) =>
-              row.map((t) => ({ ...t, state: { ...t.state } })),
+              row.map((t) => ({
+                ...t,
+                state: {
+                  ...t.state,
+                },
+              })),
             );
 
             const placedTile: Tile = {
@@ -173,7 +181,9 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
 
             newGridState[y][x] = placedTile;
 
-            const newRailsLeft = { ...railsLeft };
+            const newRailsLeft = {
+              ...railsLeft,
+            };
             newRailsLeft[railType]--;
 
             dfs(
@@ -183,7 +193,10 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
               nextIncomingDir,
               newRailsLeft,
               currentStationsVisited,
-              [...path, placedTile],
+              [
+                ...path,
+                placedTile,
+              ],
             );
 
             if (solution) {
@@ -199,12 +212,19 @@ export function solveRailroadPuzzle(config: PuzzleConfig): Tile[] | null {
 
   dfs(
     grid.tiles.map((row) =>
-      row.map((tile) => ({ ...tile, state: { ...tile.state } })),
+      row.map((tile) => ({
+        ...tile,
+        state: {
+          ...tile.state,
+        },
+      })),
     ),
     start.x,
     start.y,
     null,
-    { ...availableRails },
+    {
+      ...availableRails,
+    },
     new Set(),
     [],
   );
@@ -224,12 +244,16 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
     x: start.x,
     y: start.y,
     incoming: null,
-    railsLeft: { ...availableRails },
+    railsLeft: {
+      ...availableRails,
+    },
     stationsVisited: new Set(),
     path: [],
   };
 
-  const queue: BFSState[] = [initialState];
+  const queue: BFSState[] = [
+    initialState,
+  ];
   const solutions: Tile[][] = [];
   let minPathLength: number | null = null;
 
@@ -335,7 +359,10 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
             incoming: reverseDirection(exitDir),
             railsLeft,
             stationsVisited: currentStationsVisited,
-            path: [...path, railTile],
+            path: [
+              ...path,
+              railTile,
+            ],
           };
 
           const key = getVisitedKey(nextState);
@@ -383,7 +410,9 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
               continue;
             }
 
-            const newRailsLeft = { ...railsLeft };
+            const newRailsLeft = {
+              ...railsLeft,
+            };
             newRailsLeft[railType]--;
 
             const placedTile: Tile = {
@@ -402,7 +431,10 @@ export function findShortestRailPaths(config: PuzzleConfig): Tile[][] {
               incoming: nextIncomingDir,
               railsLeft: newRailsLeft,
               stationsVisited: currentStationsVisited,
-              path: [...path, placedTile],
+              path: [
+                ...path,
+                placedTile,
+              ],
             };
 
             const key = getVisitedKey(nextState);

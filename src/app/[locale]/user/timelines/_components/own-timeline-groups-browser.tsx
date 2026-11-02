@@ -1,14 +1,14 @@
 "use client";
 
-import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
-import { MessageBox } from "@/components/common/message-box";
-import { useDebounce } from "@/hooks/use-debounce";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
+import { MessageBox } from "@/components/common/message-box";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Link } from "@/i18n/navigation";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export function OwnTimelineGroupsBrowser() {
   const t = useTranslations();
@@ -23,12 +23,18 @@ export function OwnTimelineGroupsBrowser() {
   } = usePaginatedQuery(
     api.timelineGroup.getOwnPaginated,
     isSearching ? "skip" : {},
-    { initialNumItems: 20 },
+    {
+      initialNumItems: 20,
+    },
   );
 
   const searchResults = useQuery(
     api.timelineGroup.searchOwn,
-    isSearching ? { search: debouncedSearch.trim() } : "skip",
+    isSearching
+      ? {
+          search: debouncedSearch.trim(),
+        }
+      : "skip",
   );
 
   const ungrouped = useMemo<Doc<"timelineGroup">>(
@@ -42,7 +48,9 @@ export function OwnTimelineGroupsBrowser() {
       timelines: [],
       _creationTime: new Date().getTime(),
     }),
-    [t],
+    [
+      t,
+    ],
   );
 
   const items = isSearching ? (searchResults ?? []) : paginatedResults;

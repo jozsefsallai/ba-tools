@@ -1,5 +1,6 @@
 import "server-only";
 
+import { z } from "zod";
 import { getGift as findGift, searchGifts } from "@/lib/data/gifts.server";
 import { getStudentSkills as getSkills } from "@/lib/data/student-skills.server";
 import {
@@ -12,7 +13,6 @@ import { notFound } from "@/lib/public-api/route";
 import { getCachedRoadmapItems } from "@/lib/roadmap/roadmap.server";
 import { resolveStudentIdentifier } from "@/lib/student-resolve.server";
 import { buildItemIconUrl } from "@/lib/url";
-import { z } from "zod";
 import {
   AttackType,
   Club,
@@ -40,7 +40,10 @@ export async function listStudents({
   q,
   ...filters
 }: z.infer<typeof studentSearchSchema>) {
-  const students = await searchStudents({ query: q, ...filters });
+  const students = await searchStudents({
+    query: q,
+    ...filters,
+  });
 
   return students.map((student) => ({
     ...student,
@@ -54,11 +57,19 @@ export async function getStudent(identifier: string) {
     throw notFound("Student not found.");
   }
 
-  return { ...student, ...studentMediaUrls(student.id) };
+  return {
+    ...student,
+    ...studentMediaUrls(student.id),
+  };
 }
 
 export const studentSkillsSchema = z.object({
-  locale: z.enum(["en", "ja"]).default("en"),
+  locale: z
+    .enum([
+      "en",
+      "ja",
+    ])
+    .default("en"),
 });
 
 export async function getStudentSkills(
@@ -82,7 +93,10 @@ export async function listGifts({
   q,
   limit,
 }: z.infer<typeof giftSearchSchema>) {
-  const gifts = await searchGifts({ query: q, limit });
+  const gifts = await searchGifts({
+    query: q,
+    limit,
+  });
 
   return gifts.map((gift) => ({
     ...gift,
@@ -97,7 +111,10 @@ export async function getGift(id: string | number) {
     throw notFound("Gift not found.");
   }
 
-  return { ...gift, iconUrl: buildItemIconUrl(gift.iconName) };
+  return {
+    ...gift,
+    iconUrl: buildItemIconUrl(gift.iconName),
+  };
 }
 
 export async function listBanners() {

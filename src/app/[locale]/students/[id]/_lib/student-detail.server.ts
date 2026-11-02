@@ -1,8 +1,8 @@
 import "server-only";
 
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { resolveStudentIdentifier } from "@/lib/student-resolve.server";
-import { cache } from "react";
 
 const GIFT_SELECT = {
   id: true,
@@ -29,18 +29,30 @@ export const resolveStudent = cache(resolveStudentIdentifier);
 
 export const getStudentDetail = cache(async (id: string) => {
   return db.student.findUnique({
-    where: { id },
+    where: {
+      id,
+    },
     include: {
-      giftsAdored: { select: GIFT_SELECT },
-      giftsLoved: { select: GIFT_SELECT },
-      giftsLiked: { select: GIFT_SELECT },
+      giftsAdored: {
+        select: GIFT_SELECT,
+      },
+      giftsLoved: {
+        select: GIFT_SELECT,
+      },
+      giftsLiked: {
+        select: GIFT_SELECT,
+      },
       baseVariant: {
         select: {
           ...VARIANT_SELECT,
-          variants: { select: VARIANT_SELECT },
+          variants: {
+            select: VARIANT_SELECT,
+          },
         },
       },
-      variants: { select: VARIANT_SELECT },
+      variants: {
+        select: VARIANT_SELECT,
+      },
     },
   });
 });

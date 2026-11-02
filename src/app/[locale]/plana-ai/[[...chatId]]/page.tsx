@@ -1,9 +1,9 @@
+import { currentUser } from "@clerk/nextjs/server";
+import { getLocale } from "next-intl/server";
 import { PlanaAiView } from "@/app/[locale]/plana-ai/_components/plana-ai-view";
 import { redirect } from "@/i18n/navigation";
 import { canAccessPlanaAi } from "@/lib/ai/plana-access";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { currentUser } from "@clerk/nextjs/server";
-import { getLocale } from "next-intl/server";
 import type { Id } from "~convex/dataModel";
 
 type PageParams = {
@@ -22,7 +22,10 @@ export default async function PlanaAIPage({
   const user = await currentUser();
 
   if (!canAccessPlanaAi(user)) {
-    return redirect({ href: "/", locale: await getLocale() });
+    return redirect({
+      href: "/",
+      locale: await getLocale(),
+    });
   }
 
   const { chatId: chatIdSegments } = await params;

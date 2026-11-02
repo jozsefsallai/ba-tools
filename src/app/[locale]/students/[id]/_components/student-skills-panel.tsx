@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type ReactNode, useId, useMemo, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -11,17 +13,15 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type {
   SkillEffectText,
   SkillEffectView,
-  StudentSkillView,
   StudentSkillsView,
+  StudentSkillView,
 } from "@/lib/data/student-skills.server";
 import type { AttackType, SkillEffectCategory } from "@/lib/db/client";
 import {
-  type SkillMarkupNode,
   parseSkillMarkup,
+  type SkillMarkupNode,
 } from "@/lib/skills/skill-markup";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import { type ReactNode, useId, useMemo, useState } from "react";
 
 const EX_MAX_LEVEL = 5;
 const SKILL_MAX_LEVEL = 10;
@@ -86,7 +86,10 @@ function effectLookup(effects: Effects, isFallback: boolean): EffectLookup {
   };
 }
 
-type Unlocks = { weapon: boolean; gear: boolean };
+type Unlocks = {
+  weapon: boolean;
+  gear: boolean;
+};
 
 function visibleSkills(
   skills: StudentSkillView[],
@@ -246,6 +249,8 @@ function SkillDescription({
           </span>
         );
     }
+
+    return null;
   });
 }
 
@@ -274,7 +279,9 @@ function EffectChips({
 
     return {
       category,
-      effects: [...byName.values()],
+      effects: [
+        ...byName.values(),
+      ],
     };
   }).filter((g) => g.effects.length > 0);
 
@@ -330,7 +337,9 @@ function SkillCard({
   const template = skill.templates[skill.levelTemplates[index]];
   const nodes = useMemo(
     () => (template ? parseSkillMarkup(template) : []),
-    [template],
+    [
+      template,
+    ],
   );
   const cost = skill.type === "EX" ? skill.costs[index] : undefined;
   const showCost = cost !== undefined;
@@ -365,7 +374,9 @@ function SkillCard({
 
           {showCost && (
             <span
-              title={t("tools.students.detail.skills.cost", { cost })}
+              title={t("tools.students.detail.skills.cost", {
+                cost,
+              })}
               className={cn(
                 "ring-card absolute -right-2 -bottom-2 flex size-6 items-center justify-center rounded-full text-sm font-bold text-white tabular-nums ring-2",
                 iconBackground,
@@ -373,7 +384,9 @@ function SkillCard({
             >
               <span aria-hidden>{cost}</span>
               <span className="sr-only">
-                {t("tools.students.detail.skills.cost", { cost })}
+                {t("tools.students.detail.skills.cost", {
+                  cost,
+                })}
               </span>
             </span>
           )}
@@ -445,7 +458,9 @@ function LevelSlider({
         min={1}
         max={max}
         step={1}
-        value={[value]}
+        value={[
+          value,
+        ]}
         onValueChange={([next]) => onChange(next)}
         aria-label={ariaLabel}
       />
@@ -476,15 +491,21 @@ export function StudentSkillsPanel({
   skills,
   effects,
   attackType,
-}: StudentSkillsView & { attackType: AttackType }) {
+}: StudentSkillsView & {
+  attackType: AttackType;
+}) {
   const t = useTranslations();
 
   const iconBackground = ICON_BACKGROUNDS[attackType] ?? "bg-slate-600";
 
   const forms = useMemo(
     () =>
-      [...new Set(skills.flatMap((s) => s.formIndices))].sort((a, b) => a - b),
-    [skills],
+      [
+        ...new Set(skills.flatMap((s) => s.formIndices)),
+      ].sort((a, b) => a - b),
+    [
+      skills,
+    ],
   );
 
   const hasWeaponSkills = skills.some((s) => s.requiredWeaponGrade > 0);
@@ -560,7 +581,12 @@ export function StudentSkillsPanel({
               <UnlockSwitch
                 label={t("tools.students.detail.skills.exclusiveWeapon")}
                 checked={unlocks.weapon}
-                onChange={(weapon) => setUnlocks((u) => ({ ...u, weapon }))}
+                onChange={(weapon) =>
+                  setUnlocks((u) => ({
+                    ...u,
+                    weapon,
+                  }))
+                }
               />
             )}
 
@@ -568,7 +594,12 @@ export function StudentSkillsPanel({
               <UnlockSwitch
                 label={t("tools.students.detail.skills.bondGear")}
                 checked={unlocks.gear}
-                onChange={(gear) => setUnlocks((u) => ({ ...u, gear }))}
+                onChange={(gear) =>
+                  setUnlocks((u) => ({
+                    ...u,
+                    gear,
+                  }))
+                }
               />
             )}
           </div>

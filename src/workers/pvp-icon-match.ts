@@ -1,7 +1,7 @@
 import {
+  matchPvpIcon,
   type PvpIconCatalog,
   type PvpIconMatch,
-  matchPvpIcon,
 } from "@/lib/pvp/icon-match";
 import type {
   PvpIconWorkerRequest,
@@ -16,9 +16,9 @@ self.onmessage = (event: MessageEvent<PvpIconWorkerRequest>) => {
     if (event.data.kind === "init") {
       catalog = event.data.catalog;
       templates = event.data.templates;
-      self.postMessage({ result: [] } satisfies PvpWorkerResponse<
-        PvpIconMatch[]
-      >);
+      self.postMessage({
+        result: [],
+      } satisfies PvpWorkerResponse<PvpIconMatch[]>);
       return;
     }
 

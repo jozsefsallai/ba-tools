@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   ATTACK_TYPES,
   BONUS_CAMPAIGN_TYPES,
@@ -12,7 +13,6 @@ import {
   WORLD_RAID_BOSSES,
 } from "@/lib/roadmap/constants";
 import type { EditableRoadmapKind } from "@/lib/roadmap/types";
-import { z } from "zod";
 
 const dates = {
   startDate: z.string().datetime(),

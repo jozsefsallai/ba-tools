@@ -8,31 +8,76 @@ import type {
 
 export const EVEN_Q_DELTAS: Record<
   Direction,
-  [even: [dx: number, dy: number], odd: [dx: number, dy: number]]
+  [
+    even: [
+      dx: number,
+      dy: number,
+    ],
+    odd: [
+      dx: number,
+      dy: number,
+    ],
+  ]
 > = {
   E: [
-    [1, 0],
-    [1, 0],
+    [
+      1,
+      0,
+    ],
+    [
+      1,
+      0,
+    ],
   ],
   W: [
-    [-1, 0],
-    [-1, 0],
+    [
+      -1,
+      0,
+    ],
+    [
+      -1,
+      0,
+    ],
   ],
   NE: [
-    [0, -1],
-    [1, -1],
+    [
+      0,
+      -1,
+    ],
+    [
+      1,
+      -1,
+    ],
   ],
   NW: [
-    [-1, -1],
-    [0, -1],
+    [
+      -1,
+      -1,
+    ],
+    [
+      0,
+      -1,
+    ],
   ],
   SE: [
-    [0, 1],
-    [1, 1],
+    [
+      0,
+      1,
+    ],
+    [
+      1,
+      1,
+    ],
   ],
   SW: [
-    [-1, 1],
-    [0, 1],
+    [
+      -1,
+      1,
+    ],
+    [
+      0,
+      1,
+    ],
   ],
 };
 
@@ -40,20 +85,32 @@ export function getNeighbor(
   x: number,
   y: number,
   direction: Direction,
-): [x: number, y: number] {
+): [
+  x: number,
+  y: number,
+] {
   const [dx, dy] = EVEN_Q_DELTAS[direction][y % 2];
-  return [x + dx, y + dy];
+  return [
+    x + dx,
+    y + dy,
+  ];
 }
 
 function makeBidirectional(connections: RailConnection[]): RailConnection[] {
   const bidirectional: RailConnection[] = [];
   for (const [from, to] of connections) {
-    bidirectional.push([from, to]);
+    bidirectional.push([
+      from,
+      to,
+    ]);
   }
 
   // the separate for loop here is intentional
   for (const [from, to] of connections) {
-    bidirectional.push([to, from]);
+    bidirectional.push([
+      to,
+      from,
+    ]);
   }
 
   return bidirectional.filter(
@@ -64,25 +121,70 @@ function makeBidirectional(connections: RailConnection[]): RailConnection[] {
 
 export const RAIL_CONNECTIONS: Record<RailType, RailConnection[]> = {
   STRAIGHT: makeBidirectional([
-    ["E", "W"],
-    ["SE", "NW"],
-    ["SW", "NE"],
+    [
+      "E",
+      "W",
+    ],
+    [
+      "SE",
+      "NW",
+    ],
+    [
+      "SW",
+      "NE",
+    ],
   ]),
   SLIGHTLY_CURVED: makeBidirectional([
-    ["E", "SW"],
-    ["SE", "W"],
-    ["SW", "NW"],
-    ["W", "NE"],
-    ["NW", "E"],
-    ["NE", "SE"],
+    [
+      "E",
+      "SW",
+    ],
+    [
+      "SE",
+      "W",
+    ],
+    [
+      "SW",
+      "NW",
+    ],
+    [
+      "W",
+      "NE",
+    ],
+    [
+      "NW",
+      "E",
+    ],
+    [
+      "NE",
+      "SE",
+    ],
   ]),
   VERY_CURVED: makeBidirectional([
-    ["E", "SE"],
-    ["SE", "SW"],
-    ["SW", "W"],
-    ["W", "NW"],
-    ["NW", "NE"],
-    ["NE", "E"],
+    [
+      "E",
+      "SE",
+    ],
+    [
+      "SE",
+      "SW",
+    ],
+    [
+      "SW",
+      "W",
+    ],
+    [
+      "W",
+      "NW",
+    ],
+    [
+      "NW",
+      "NE",
+    ],
+    [
+      "NE",
+      "E",
+    ],
   ]),
 };
 

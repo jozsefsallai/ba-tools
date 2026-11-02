@@ -1,13 +1,5 @@
 import "server-only";
 
-import { mcpUserId } from "@/lib/mcp/auth.server";
-import { withEnumLabels, withGiftNames } from "@/lib/mcp/enrich.server";
-import { toApiError } from "@/lib/public-api/convex.server";
-import {
-  type RateLimitTier,
-  rateLimit,
-} from "@/lib/public-api/rate-limit.server";
-import { ApiError } from "@/lib/public-api/response";
 import type {
   McpServer,
   ToolCallback,
@@ -18,12 +10,27 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import type { PaginationOptions } from "convex/server";
 import { z } from "zod";
+import { mcpUserId } from "@/lib/mcp/auth.server";
+import { withEnumLabels, withGiftNames } from "@/lib/mcp/enrich.server";
+import { toApiError } from "@/lib/public-api/convex.server";
+import {
+  type RateLimitTier,
+  rateLimit,
+} from "@/lib/public-api/rate-limit.server";
+import { ApiError } from "@/lib/public-api/response";
 
 type ToolKind = "read" | "create" | "update" | "delete";
 
 const ANNOTATIONS: Record<ToolKind, ToolAnnotations> = {
-  read: { readOnlyHint: true, openWorldHint: false },
-  create: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  read: {
+    readOnlyHint: true,
+    openWorldHint: false,
+  },
+  create: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    openWorldHint: false,
+  },
   update: {
     readOnlyHint: false,
     destructiveHint: true,
@@ -48,7 +55,17 @@ type ToolConfig<S extends z.ZodRawShape> = {
 };
 
 function textResult(text: string, isError = false): CallToolResult {
-  return { content: [{ type: "text", text }], ...(isError && { isError }) };
+  return {
+    content: [
+      {
+        type: "text",
+        text,
+      },
+    ],
+    ...(isError && {
+      isError,
+    }),
+  };
 }
 
 function errorResult(error: ApiError) {
@@ -126,7 +143,10 @@ export function defineTool<S extends z.ZodRawShape = z.ZodRawShape>(
       title,
       description,
       inputSchema: input ?? ({} as S),
-      annotations: { title, ...ANNOTATIONS[kind] },
+      annotations: {
+        title,
+        ...ANNOTATIONS[kind],
+      },
     },
     callback as unknown as ToolCallback<S>,
   );
@@ -153,7 +173,10 @@ export function paginationOpts({
   limit: number;
   cursor?: string;
 }): PaginationOptions {
-  return { numItems: limit, cursor: cursor ?? null };
+  return {
+    numItems: limit,
+    cursor: cursor ?? null,
+  };
 }
 
 export function idInput(description: string) {

@@ -8,7 +8,10 @@ export const RAID_DURATIONS: {
   {
     label: "3min",
     value: 180,
-    raids: ["binah", "kaiten"],
+    raids: [
+      "binah",
+      "kaiten",
+    ],
   },
   {
     label: "4min",
@@ -30,7 +33,10 @@ export const RAID_DURATIONS: {
   {
     label: "4min30sec",
     value: 270,
-    raids: ["yesod", "drumbarka"],
+    raids: [
+      "yesod",
+      "drumbarka",
+    ],
   },
 ];
 

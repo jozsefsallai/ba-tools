@@ -1,21 +1,23 @@
 import "server-only";
 
+import { auth } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
+import { z } from "zod";
 import { toApiError } from "@/lib/public-api/convex.server";
 import {
+  clientIp,
   type RateLimitState,
   type RateLimitTier,
-  clientIp,
   rateLimit,
   rateLimitHeaders,
 } from "@/lib/public-api/rate-limit.server";
 import { ApiError, errorResponse } from "@/lib/public-api/response";
-import { auth } from "@clerk/nextjs/server";
-import type { NextRequest } from "next/server";
-import { z } from "zod";
 
 type Params = Record<string, string | string[]>;
 
-type HandlerContext<P extends Params> = { params: Promise<P> };
+type HandlerContext<P extends Params> = {
+  params: Promise<P>;
+};
 
 function handleError(req: NextRequest, error: unknown) {
   const apiError = toApiError(error);
@@ -67,7 +69,11 @@ function tooManyRequests(state: RateLimitState) {
 
 export function publicRoute<P extends Params = Params>(
   handler: PublicHandler<P>,
-  { rateLimit: tier = "public" }: { rateLimit?: RateLimitTier } = {},
+  {
+    rateLimit: tier = "public",
+  }: {
+    rateLimit?: RateLimitTier;
+  } = {},
 ) {
   return async (req: NextRequest, ctx: HandlerContext<P>) => {
     try {
@@ -204,7 +210,10 @@ const paginationSchema = z.object({
 
 export function parsePagination(req: NextRequest) {
   const { limit, cursor } = parseQuery(req, paginationSchema);
-  return { numItems: limit, cursor: cursor ?? null };
+  return {
+    numItems: limit,
+    cursor: cursor ?? null,
+  };
 }
 
 export function mergeForUpdate(
@@ -220,5 +229,8 @@ export function mergeForUpdate(
     }
   }
 
-  return { ...merged, ...body };
+  return {
+    ...merged,
+    ...body,
+  };
 }

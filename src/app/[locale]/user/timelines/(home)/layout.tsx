@@ -1,10 +1,10 @@
+import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { PropsWithChildren } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { auth } from "@clerk/nextjs/server";
-import { getLocale, getTranslations } from "next-intl/server";
-import type { PropsWithChildren } from "react";
 
 export async function generateMetadata() {
   return getCardMetadata("user-timelines", await getLocale());

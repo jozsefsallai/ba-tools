@@ -1,10 +1,10 @@
 "use client";
 
-import { JapaneseTranslationNotice } from "@/components/common/japanese-translation-notice";
-import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
 import type { PropsWithChildren } from "react";
+import { JapaneseTranslationNotice } from "@/components/common/japanese-translation-notice";
 import { usePathname } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 export function AppMain({ children }: PropsWithChildren) {
   const pathname = usePathname();

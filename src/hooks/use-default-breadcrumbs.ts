@@ -1,11 +1,11 @@
 "use client";
 
+import { useQuery } from "convex/react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { usePathname } from "@/i18n/navigation";
 import type { PageBreadcrumb } from "@/lib/breadcrumbs";
-import { useQuery } from "convex/react";
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useMemo } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -22,7 +22,11 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
   return useMemo(() => {
     const PATH_LABELS: Record<
       string,
-      { label: string; group?: string; href?: string }
+      {
+        label: string;
+        group?: string;
+        href?: string;
+      }
     > = {
       "/bond": {
         label: t("common.header.nav.gameplay.bond"),
@@ -107,10 +111,18 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
         group: t("common.header.nav.gameplay.title"),
         href: "/timeline-visualizer",
       },
-      "/user/formations": { label: "My Formations" },
-      "/user/timelines": { label: "My Timelines" },
-      "/credits": { label: "Credits" },
-      "/changelog": { label: "Changelog" },
+      "/user/formations": {
+        label: "My Formations",
+      },
+      "/user/timelines": {
+        label: "My Timelines",
+      },
+      "/credits": {
+        label: "Credits",
+      },
+      "/changelog": {
+        label: "Changelog",
+      },
     };
 
     const match = Object.entries(PATH_LABELS).find(([path]) =>
@@ -122,8 +134,15 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
     }
 
     const [path, { label, group, href }] = match;
-    return { label, group, href: href ?? path };
-  }, [pathname, t]);
+    return {
+      label,
+      group,
+      href: href ?? path,
+    };
+  }, [
+    pathname,
+    t,
+  ]);
 }
 
 function extractTimelineIdFromPath(pathname: string): string | null {
@@ -162,22 +181,38 @@ function useEditingItemName(): string | null {
 
   const editingTimeline = useQuery(
     api.timeline.getOwnById,
-    isEditingTimeline ? { id: searchId as Id<"timeline"> } : "skip",
+    isEditingTimeline
+      ? {
+          id: searchId as Id<"timeline">,
+        }
+      : "skip",
   );
 
   const editingFormation = useQuery(
     api.formation.getById,
-    isEditingFormation ? { id: searchId as Id<"formation"> } : "skip",
+    isEditingFormation
+      ? {
+          id: searchId as Id<"formation">,
+        }
+      : "skip",
   );
 
   const viewingTimeline = useQuery(
     api.timeline.getById,
-    viewingTimelineId ? { id: viewingTimelineId as Id<"timeline"> } : "skip",
+    viewingTimelineId
+      ? {
+          id: viewingTimelineId as Id<"timeline">,
+        }
+      : "skip",
   );
 
   const viewingGroup = useQuery(
     api.timelineGroup.getById,
-    viewingGroupId ? { id: viewingGroupId as Id<"timelineGroup"> } : "skip",
+    viewingGroupId
+      ? {
+          id: viewingGroupId as Id<"timelineGroup">,
+        }
+      : "skip",
   );
 
   if (isEditingTimeline && editingTimeline) {
@@ -204,13 +239,37 @@ function makeBreadcrumbs(
   itemName?: string | null,
 ): PageBreadcrumb[] {
   if (!tool) {
-    return [{ label: "Home" }];
+    return [
+      {
+        label: "Home",
+      },
+    ];
   }
 
   return [
-    ...(tool.group ? [{ label: tool.group, href: "/" }] : []),
-    { label: tool.label, ...(itemName ? { href: tool.href } : {}) },
-    ...(itemName ? [{ label: itemName }] : []),
+    ...(tool.group
+      ? [
+          {
+            label: tool.group,
+            href: "/",
+          },
+        ]
+      : []),
+    {
+      label: tool.label,
+      ...(itemName
+        ? {
+            href: tool.href,
+          }
+        : {}),
+    },
+    ...(itemName
+      ? [
+          {
+            label: itemName,
+          },
+        ]
+      : []),
   ];
 }
 

@@ -1,5 +1,22 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { Authenticated, useMutation } from "convex/react";
+import html2canvas from "html2canvas-pro";
+import {
+  ChevronsUpDownIcon,
+  ChevronUpIcon,
+  DownloadIcon,
+  ImageUpIcon,
+  SaveIcon,
+  ShareIcon,
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import slugify from "slugify";
+import { toast } from "sonner";
+import { v4 as uuid } from "uuid";
 import { CopyTextTimelineButton } from "@/app/[locale]/timeline-visualizer/_components/copy-text-timeline-button";
 import { ImportTextTimelineButton } from "@/app/[locale]/timeline-visualizer/_components/import-text-timeline-button";
 import {
@@ -50,23 +67,6 @@ import {
   timelineStorage,
 } from "@/lib/storage/timeline";
 import { cn } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
-import { Authenticated, useMutation } from "convex/react";
-import html2canvas from "html2canvas-pro";
-import {
-  ChevronUpIcon,
-  ChevronsUpDownIcon,
-  DownloadIcon,
-  ImageUpIcon,
-  SaveIcon,
-  ShareIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import slugify from "slugify";
-import { toast } from "sonner";
-import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -297,7 +297,9 @@ export function TimelineEditor() {
     });
 
     return Array.from(studentsSet);
-  }, [items]);
+  }, [
+    items,
+  ]);
 
   const clearFocusTriggerFieldRequest = useCallback(() => {
     setFocusTriggerFieldItemId(null);
@@ -323,7 +325,10 @@ export function TimelineEditor() {
         setFocusTriggerFieldItemId(id);
       }
     },
-    [preferences.timelineVisualizer.triggerAutoFocus, setItems],
+    [
+      preferences.timelineVisualizer.triggerAutoFocus,
+      setItems,
+    ],
   );
 
   const addSeparator = useCallback((orientation: "horizontal" | "vertical") => {
@@ -363,7 +368,14 @@ export function TimelineEditor() {
       newData: Omit<TimelineItem, "type" | "student" | "id">,
     ) => {
       setItems((prev) =>
-        prev.map((i) => (i.id === itemId ? { ...i, ...newData } : i)),
+        prev.map((i) =>
+          i.id === itemId
+            ? {
+                ...i,
+                ...newData,
+              }
+            : i,
+        ),
       );
     },
     [],
@@ -371,14 +383,20 @@ export function TimelineEditor() {
 
   const handleTriggerKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key !== "Enter") return;
-      if (!preferences.timelineVisualizer.triggerAutoFocus) return;
+      if (e.key !== "Enter") {
+        return;
+      }
+      if (!preferences.timelineVisualizer.triggerAutoFocus) {
+        return;
+      }
       e.preventDefault();
       setSelectedItemId(null);
       setFocusTriggerFieldItemId(null);
       studentPickerRef.current?.open();
     },
-    [preferences.timelineVisualizer.triggerAutoFocus],
+    [
+      preferences.timelineVisualizer.triggerAutoFocus,
+    ],
   );
 
   const editableConfig = useMemo(
@@ -554,7 +572,7 @@ export function TimelineEditor() {
           continue;
         }
 
-        let target: Student | undefined = undefined;
+        let target: Student | undefined;
         if (item.targetId) {
           target = allStudents.find((s) => s.id === item.targetId);
         }
@@ -655,7 +673,10 @@ export function TimelineEditor() {
   }
 
   function goToTop() {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
   async function copyLink() {
@@ -675,21 +696,27 @@ export function TimelineEditor() {
     if (!Number.isNaN(value)) {
       setItemSpacing(value);
     }
-  }, [itemSpacingStr]);
+  }, [
+    itemSpacingStr,
+  ]);
 
   useEffect(() => {
     const value = Number.parseInt(verticalSeparatorSizeStr, 10);
     if (!Number.isNaN(value)) {
       setVerticalSeparatorSize(value);
     }
-  }, [verticalSeparatorSizeStr]);
+  }, [
+    verticalSeparatorSizeStr,
+  ]);
 
   useEffect(() => {
     const value = Number.parseInt(horizontalSeparatorSizeStr, 10);
     if (!Number.isNaN(value)) {
       setHorizontalSeparatorSize(value);
     }
-  }, [horizontalSeparatorSizeStr]);
+  }, [
+    horizontalSeparatorSizeStr,
+  ]);
 
   useEffect(() => {
     if (!timelineId) {
@@ -729,7 +756,7 @@ export function TimelineEditor() {
             continue;
           }
 
-          let target: Student | undefined = undefined;
+          let target: Student | undefined;
           if (item.targetId) {
             target = allStudents.find((s) => s.id === item.targetId);
           }
@@ -790,7 +817,10 @@ export function TimelineEditor() {
       toast.error("Failed to load timeline data.");
       router.push("/timeline-visualizer");
     }
-  }, [timelineId, query.status]);
+  }, [
+    timelineId,
+    query.status,
+  ]);
 
   useEffect(() => {
     if (items.length > 0) {
@@ -826,7 +856,10 @@ export function TimelineEditor() {
     setHorizontalSeparatorSizeStr(
       preferences.timelineVisualizer.defaultHorizontalSeparatorSize.toString(),
     );
-  }, [preferences, items]);
+  }, [
+    preferences,
+    items,
+  ]);
 
   if (timelineId && query.status === "pending") {
     return <MessageBox>{t("tools.timeline.loading")}</MessageBox>;
@@ -852,7 +885,11 @@ export function TimelineEditor() {
         </p>
       </div>
 
-      <div className={cn("flex flex-col", { "gap-2": items.length > 0 })}>
+      <div
+        className={cn("flex flex-col", {
+          "gap-2": items.length > 0,
+        })}
+      >
         {items.length > 0 && (
           <p className="text-sm text-muted-foreground">
             {t("tools.timeline.clickToEditPreview")}
@@ -1160,7 +1197,9 @@ export function TimelineEditor() {
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) importFromImage(file);
+                    if (file) {
+                      importFromImage(file);
+                    }
                     e.target.value = "";
                   }}
                 />

@@ -1,12 +1,12 @@
 "use client";
 
+import { CalendarIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 import type { BirthdayStudent } from "@/lib/birthdays";
 import { daysUntilNextBirthday } from "@/lib/birthdays";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
-import { motion } from "motion/react";
-import { useTranslations } from "next-intl";
 
 type UpcomingStripProps = {
   students: BirthdayStudent[];
@@ -41,9 +41,18 @@ export function UpcomingStrip({ students }: UpcomingStripProps) {
           return (
             <motion.div
               key={`${row.student.id}-${row.key}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.03, duration: 0.25 }}
+              initial={{
+                opacity: 0,
+                y: 8,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                delay: index * 0.03,
+                duration: 0.25,
+              }}
               className={cn(
                 "relative w-full sm:w-44 rounded-lg border bg-background p-3 transition-all",
                 isVerySoon && "shadow-md",

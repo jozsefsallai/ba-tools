@@ -1,5 +1,8 @@
 "use client";
 
+import { GripVerticalIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import React, { type HTMLAttributes, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,17 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  BORROW_SLOT_GAMEMODES,
   BORROW_SLOT_GAMEMODE_NAMES,
+  BORROW_SLOT_GAMEMODES,
   type BorrowSlotGameMode,
   type GameServer,
   type StarLevel,
   type UELevel,
 } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { GripVerticalIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import React, { useCallback, useMemo, type HTMLAttributes } from "react";
 import type { Student } from "~prisma";
 
 export type RosterItem = {
@@ -79,16 +79,26 @@ export const RosterItemEditor = React.memo(
 
     const handleStarLevelChange = useCallback(
       (newLevel: StarLevel) => {
-        updateRosterItem(rosterItem.student.id, { starLevel: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          starLevel: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleUELevelChange = useCallback(
       (newLevel: UELevel | null) => {
-        updateRosterItem(rosterItem.student.id, { ueLevel: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          ueLevel: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleLevelChange = useCallback(
@@ -97,9 +107,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { level: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          level: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleRelaationshipRankChange = useCallback(
@@ -108,9 +123,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { relationshipRank: newRank });
+        updateRosterItem(rosterItem.student.id, {
+          relationshipRank: newRank,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleEXLevelChange = useCallback(
@@ -119,9 +139,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { ex: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          ex: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleBasicLevelChange = useCallback(
@@ -130,9 +155,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { basic: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          basic: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleEnhancedLevelChange = useCallback(
@@ -141,9 +171,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { enhanced: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          enhanced: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleSubLevelChange = useCallback(
@@ -152,9 +187,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { sub: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          sub: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleEquipmentSlotTierChange = useCallback(
@@ -170,7 +210,10 @@ export const RosterItemEditor = React.memo(
           [`equipmentSlot${slot}`]: newTier,
         });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleAttackLevelChange = useCallback(
@@ -179,9 +222,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { attackLevel: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          attackLevel: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleHPLevelChange = useCallback(
@@ -190,9 +238,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { hpLevel: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          hpLevel: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleHealLevelChange = useCallback(
@@ -201,9 +254,14 @@ export const RosterItemEditor = React.memo(
           return;
         }
 
-        updateRosterItem(rosterItem.student.id, { healLevel: newLevel });
+        updateRosterItem(rosterItem.student.id, {
+          healLevel: newLevel,
+        });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const handleFeaturedBorrowSlotChange = useCallback(
@@ -212,7 +270,10 @@ export const RosterItemEditor = React.memo(
           featuredBorrowSlot: newMode,
         });
       },
-      [updateRosterItem, rosterItem.student.id],
+      [
+        updateRosterItem,
+        rosterItem.student.id,
+      ],
     );
 
     const hasBondItem = useMemo(() => {
@@ -225,7 +286,10 @@ export const RosterItemEditor = React.memo(
       }
 
       return rosterItem.student.hasBondGearGlobal;
-    }, [rosterItem.student, gameServer]);
+    }, [
+      rosterItem.student,
+      gameServer,
+    ]);
 
     const handleMaxButtonClick = useCallback(() => {
       updateRosterItem(rosterItem.student.id, {
@@ -245,11 +309,18 @@ export const RosterItemEditor = React.memo(
         hpLevel: 25,
         healLevel: 25,
       });
-    }, [updateRosterItem, rosterItem.student.id, hasBondItem]);
+    }, [
+      updateRosterItem,
+      rosterItem.student.id,
+      hasBondItem,
+    ]);
 
     const handleRemove = useCallback(() => {
       onRemove(rosterItem.student.id);
-    }, [onRemove, rosterItem.student.id]);
+    }, [
+      onRemove,
+      rosterItem.student.id,
+    ]);
 
     return (
       <div className="flex items-start gap-4 md:gap-6 bg-card border rounded-md p-4">

@@ -1,5 +1,10 @@
 "use client";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRef } from "react";
 import { PVPFormationEditorStrip } from "@/app/[locale]/pvp/_components/pvp-formation-editor-strip";
 import type { PVPFormationStudentItem } from "@/app/[locale]/pvp/_lib/types";
 import { EmptyCard } from "@/components/common/empty-card";
@@ -14,14 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TOUCH_DRAG_CLASS, preventTouchContextMenu } from "@/lib/dnd-mobile";
+import { preventTouchContextMenu, TOUCH_DRAG_CLASS } from "@/lib/dnd-mobile";
 import { PVP_COUNTER_RANGES } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useRef } from "react";
 import type { Student } from "~prisma";
 
 type PVPDefenseTeamStripProps = {
@@ -44,7 +44,10 @@ export function PVPDefenseTeamStrip({
       formation={formation}
       onMove={onMove}
       onClear={(index) =>
-        onUpdate(index, { student: undefined, counter: undefined })
+        onUpdate(index, {
+          student: undefined,
+          counter: undefined,
+        })
       }
       renderItem={(item, index, id, triggerId) => (
         <PVPDefenseTeamStripItem
@@ -116,7 +119,9 @@ function PVPDefenseTeamStripItem({
     criterion &&
     (criterion.kind === "tank"
       ? t("tools.pvp.stats.counterCardTank")
-      : t("tools.pvp.stats.counterCardRange", { range: criterion.value }));
+      : t("tools.pvp.stats.counterCardRange", {
+          range: criterion.value,
+        }));
 
   function focusIcon() {
     requestAnimationFrame(() => document.getElementById(triggerId)?.focus());
@@ -137,7 +142,9 @@ function PVPDefenseTeamStripItem({
       onContextMenu={preventTouchContextMenu}
       {...attributes}
       {...listeners}
-      aria-label={t("tools.pvp.stats.selectDefenseSlot", { slot })}
+      aria-label={t("tools.pvp.stats.selectDefenseSlot", {
+        slot,
+      })}
       onClick={criterion ? () => criterionTrigger.current?.click() : undefined}
     >
       {criterion ? (
@@ -156,7 +163,10 @@ function PVPDefenseTeamStripItem({
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
       className={cn(
         "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1 max-md:@max-[420px]/formation:w-[80px] max-md:@max-[380px]/formation:w-[68px]",
         isDragging && "opacity-45",
@@ -167,11 +177,15 @@ function PVPDefenseTeamStripItem({
           value={criterionValue}
           onValueChange={(value) => {
             if (value === "student") {
-              onUpdate(index, { counter: undefined });
+              onUpdate(index, {
+                counter: undefined,
+              });
             } else if (value === "tank") {
               onUpdate(index, {
                 student: undefined,
-                counter: { kind: "tank" },
+                counter: {
+                  kind: "tank",
+                },
               });
             } else {
               onUpdate(index, {
@@ -194,7 +208,9 @@ function PVPDefenseTeamStripItem({
             ref={criterionTrigger}
             id={`${triggerId}-criterion`}
             className="h-8 w-full gap-1 border-type-red/40 bg-background! bg-linear-to-b from-type-red/10 to-type-red/10 px-1 text-[10px]"
-            aria-label={t("tools.pvp.stats.selectDefenseSlot", { slot })}
+            aria-label={t("tools.pvp.stats.selectDefenseSlot", {
+              slot,
+            })}
           >
             <SelectValue className="min-w-0" />
           </SelectTrigger>
@@ -205,7 +221,9 @@ function PVPDefenseTeamStripItem({
               </SelectItem>
               {PVP_COUNTER_RANGES.map((range) => (
                 <SelectItem key={range} value={`range:${range}`}>
-                  {t("tools.pvp.stats.counterSlotRange", { range })}
+                  {t("tools.pvp.stats.counterSlotRange", {
+                    range,
+                  })}
                 </SelectItem>
               ))}
               <SelectItem value="tank">
@@ -228,7 +246,10 @@ function PVPDefenseTeamStripItem({
             <StudentPicker
               students={students}
               onStudentSelected={(student) =>
-                onUpdate(index, { student, counter: undefined })
+                onUpdate(index, {
+                  student,
+                  counter: undefined,
+                })
               }
               onCloseAutoFocus={(event) => {
                 event.preventDefault();
@@ -250,7 +271,10 @@ function PVPDefenseTeamStripItem({
               name: item.student?.name ?? criterionLabel ?? "criterion",
             })}
             onClick={() => {
-              onUpdate(index, { student: undefined, counter: undefined });
+              onUpdate(index, {
+                student: undefined,
+                counter: undefined,
+              });
               focusIcon();
             }}
           >

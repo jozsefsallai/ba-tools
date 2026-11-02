@@ -61,7 +61,12 @@ export async function rateLimit(
     const { success, limit, remaining, reset } =
       await limiter.limit(identifier);
 
-    return { success, limit, remaining, reset };
+    return {
+      success,
+      limit,
+      remaining,
+      reset,
+    };
   } catch (error) {
     console.error("[public-api] rate limiter unavailable", error);
     return undefined;

@@ -1,16 +1,39 @@
 import type { PvpPixelImage } from "@/lib/pvp";
 
-export const PVP_REPORT_SIZE = { width: 1920, height: 820 } as const;
+export const PVP_REPORT_SIZE = {
+  width: 1920,
+  height: 820,
+} as const;
 
 // Coordinates in the existing 1920px ROI coordinate system
 export const PVP_REPORT_RULES = [
-  { left: 51, right: 873, y: 275 },
-  { left: 1046, right: 1867, y: 275 },
-  { left: 51, right: 873, y: 673 },
-  { left: 1046, right: 1867, y: 673 },
+  {
+    left: 51,
+    right: 873,
+    y: 275,
+  },
+  {
+    left: 1046,
+    right: 1867,
+    y: 275,
+  },
+  {
+    left: 51,
+    right: 873,
+    y: 673,
+  },
+  {
+    left: 1046,
+    right: 1867,
+    y: 673,
+  },
 ] as const;
 
-export type PvpReportRule = { left: number; right: number; y: number };
+export type PvpReportRule = {
+  left: number;
+  right: number;
+  y: number;
+};
 
 export type PvpReportAlignment = {
   scale: number;
@@ -23,7 +46,10 @@ export type PvpReportAlignment = {
 export type PvpAlignmentDiagnostics = {
   rules: PvpReportRule[];
   candidates: PvpReportAlignment[];
-  imageSize?: { width: number; height: number };
+  imageSize?: {
+    width: number;
+    height: number;
+  };
   rejection?: string;
 };
 
@@ -75,7 +101,11 @@ export function findPvpReportRules(image: PvpPixelImage): PvpReportRule[] {
         last - start >= minimum &&
         count / (last - start + 1) > 0.65
       ) {
-        const line = { left: start, right: last + 1, y };
+        const line = {
+          left: start,
+          right: last + 1,
+          y,
+        };
 
         const previous = lines.find(
           (other) =>
@@ -163,13 +193,24 @@ function fit(rules: PvpReportRule[]): PvpReportAlignment {
     }, 0) / points.length,
   );
 
-  return { scale, offsetX, offsetY, rules, score: Math.max(0, 1 - error / 18) };
+  return {
+    scale,
+    offsetX,
+    offsetY,
+    rules,
+    score: Math.max(0, 1 - error / 18),
+  };
 }
 
 function foregroundArea(
   image: PvpPixelImage,
   alignment: PvpReportAlignment,
-  box: readonly [number, number, number, number],
+  box: readonly [
+    number,
+    number,
+    number,
+    number,
+  ],
 ) {
   const [x, y, width, height] = box;
 
@@ -209,18 +250,38 @@ function foregroundArea(
 function completeContent(image: PvpPixelImage, alignment: PvpReportAlignment) {
   // Full headers (including unknown-avatar portraits) must remain in frame
   for (const box of [
-    [45, 116, 830, 125],
-    [1044, 116, 830, 125],
+    [
+      45,
+      116,
+      830,
+      125,
+    ],
+    [
+      1044,
+      116,
+      830,
+      125,
+    ],
   ] as const) {
     if (foregroundArea(image, alignment, box) < 0.015) {
       return false;
     }
   }
 
-  for (const left of [46, 1044]) {
+  for (const left of [
+    46,
+    1044,
+  ]) {
     // Check every slot's complete portrait band is visible, but allow empty
     // slots. No dependency on damage bars, their heights, or team size.
-    if (foregroundArea(image, alignment, [left, 681, 830, 76]) < 0.025) {
+    if (
+      foregroundArea(image, alignment, [
+        left,
+        681,
+        830,
+        76,
+      ]) < 0.025
+    ) {
       return false;
     }
   }
@@ -250,7 +311,10 @@ export function detectPvpReportAlignment(image: PvpPixelImage): {
   const teamSpacing = PVP_REPORT_RULES[1].left - PVP_REPORT_RULES[0].left;
   const chartHeight = PVP_REPORT_RULES[2].y - PVP_REPORT_RULES[0].y;
 
-  const pairs: [PvpReportRule, PvpReportRule][] = [];
+  const pairs: [
+    PvpReportRule,
+    PvpReportRule,
+  ][] = [];
 
   for (const left of rules) {
     for (const right of rules) {
@@ -263,7 +327,10 @@ export function detectPvpReportAlignment(image: PvpPixelImage): {
         Math.abs((right.left - left.left) / width - teamSpacing / ruleWidth) <
           0.045
       ) {
-        pairs.push([left, right]);
+        pairs.push([
+          left,
+          right,
+        ]);
       }
     }
   }
@@ -278,7 +345,10 @@ export function detectPvpReportAlignment(image: PvpPixelImage): {
         continue;
       }
 
-      const candidate = fit([...upper, ...lower]);
+      const candidate = fit([
+        ...upper,
+        ...lower,
+      ]);
 
       if (candidate.score < 0.35) {
         continue;
@@ -302,7 +372,10 @@ export function detectPvpReportAlignment(image: PvpPixelImage): {
   const diagnostics: PvpAlignmentDiagnostics = {
     rules,
     candidates,
-    imageSize: { width: image.width, height: image.height },
+    imageSize: {
+      width: image.width,
+      height: image.height,
+    },
   };
 
   const supported = candidates.filter((candidate) =>
@@ -321,7 +394,10 @@ export function detectPvpReportAlignment(image: PvpPixelImage): {
     throw new PvpScreenshotAlignmentError(diagnostics);
   }
 
-  return { alignment: supported[0], diagnostics };
+  return {
+    alignment: supported[0],
+    diagnostics,
+  };
 }
 
 // Refine line endpoints in a small source-resoultion neighborhood
@@ -359,7 +435,11 @@ export function refinePvpReportAlignment(
 
       if (count > bestCount) {
         bestCount = count;
-        best = { left, right, y };
+        best = {
+          left,
+          right,
+          y,
+        };
       }
     }
 
@@ -370,9 +450,14 @@ export function refinePvpReportAlignment(
 
   if (alignment.score < 0.35 || !completeContent(image, alignment)) {
     throw new PvpScreenshotAlignmentError({
-      imageSize: { width: image.width, height: image.height },
+      imageSize: {
+        width: image.width,
+        height: image.height,
+      },
       rules: refined,
-      candidates: [alignment],
+      candidates: [
+        alignment,
+      ],
       rejection: "Source-resolution landmarks failed validation",
     });
   }

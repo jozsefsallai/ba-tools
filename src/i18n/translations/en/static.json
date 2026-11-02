@@ -172,7 +172,11 @@
       "timeline": "Timeline",
       "text": "Text"
     },
-    "timeZone": { "label": "Time zone", "utc": "UTC", "local": "Local time" },
+    "timeZone": {
+      "label": "Time zone",
+      "utc": "UTC",
+      "local": "Local time"
+    },
     "localTime": "Local time",
     "zoom": "Zoom",
     "utc": "UTC",

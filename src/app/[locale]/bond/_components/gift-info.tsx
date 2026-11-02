@@ -1,6 +1,12 @@
 "use client";
 
-import type { GiftWithStudents, StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
+import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
+import type {
+  GiftWithStudents,
+  StudentWithGifts,
+} from "@/app/[locale]/bond/_lib/types";
 import giftAdoredImage from "@/assets/images/gift_adored.png";
 import giftLikedImage from "@/assets/images/gift_liked.png";
 import giftLovedImage from "@/assets/images/gift_loved.png";
@@ -8,9 +14,6 @@ import giftNormalImage from "@/assets/images/gift_normal.png";
 import { ItemCard } from "@/components/common/item-card";
 import { StudentCard } from "@/components/common/student-card";
 import { cn } from "@/lib/utils";
-import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
-import { useMemo } from "react";
 
 export function GiftItemCard({ gift }: { gift: GiftWithStudents }) {
   const locale = useLocale();
@@ -22,7 +25,10 @@ export function GiftItemCard({ gift }: { gift: GiftWithStudents }) {
       case "ja":
         return gift.nameJP || gift.name;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   const giftDescription = useMemo(() => {
     switch (locale) {
@@ -31,7 +37,10 @@ export function GiftItemCard({ gift }: { gift: GiftWithStudents }) {
       case "ja":
         return gift.descriptionJP || gift.description;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   return (
     <ItemCard
@@ -56,7 +65,10 @@ export function GiftInfo({ gift }: { gift: GiftWithStudents }) {
       case "ja":
         return gift.nameJP || gift.name;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   const giftDescription = useMemo(() => {
     switch (locale) {
@@ -65,7 +77,10 @@ export function GiftInfo({ gift }: { gift: GiftWithStudents }) {
       case "ja":
         return gift.descriptionJP || gift.description;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   return (
     <div
@@ -107,12 +122,20 @@ export function GiftInfo({ gift }: { gift: GiftWithStudents }) {
               alt={t("tools.bond.item.adored")}
               className="size-6"
             />
-            {t("tools.bond.item.adoredBy", { exp: 4 * gift.expValue })}
+            {t("tools.bond.item.adoredBy", {
+              exp: 4 * gift.expValue,
+            })}
           </div>
 
           <div className="flex flex-wrap gap-2">
             {gift.adoredBy.map((student) => (
-              <div key={student.id} style={{ zoom: 0.6 }} title={student.name}>
+              <div
+                key={student.id}
+                style={{
+                  zoom: 0.6,
+                }}
+                title={student.name}
+              >
                 <StudentCard student={student} noDisplayRole />
               </div>
             ))}
@@ -128,12 +151,20 @@ export function GiftInfo({ gift }: { gift: GiftWithStudents }) {
               alt={t("tools.bond.item.loved")}
               className="size-6"
             />
-            {t("tools.bond.item.lovedBy", { exp: 3 * gift.expValue })}
+            {t("tools.bond.item.lovedBy", {
+              exp: 3 * gift.expValue,
+            })}
           </div>
 
           <div className="flex flex-wrap gap-2">
             {gift.lovedBy.map((student) => (
-              <div key={student.id} style={{ zoom: 0.6 }} title={student.name}>
+              <div
+                key={student.id}
+                style={{
+                  zoom: 0.6,
+                }}
+                title={student.name}
+              >
                 <StudentCard student={student} noDisplayRole />
               </div>
             ))}
@@ -149,12 +180,20 @@ export function GiftInfo({ gift }: { gift: GiftWithStudents }) {
               alt={t("tools.bond.item.liked")}
               className="size-6"
             />
-            {t("tools.bond.item.likedBy", { exp: 2 * gift.expValue })}
+            {t("tools.bond.item.likedBy", {
+              exp: 2 * gift.expValue,
+            })}
           </div>
 
           <div className="flex flex-wrap gap-2">
             {gift.likedBy.map((student) => (
-              <div key={student.id} style={{ zoom: 0.6 }} title={student.name}>
+              <div
+                key={student.id}
+                style={{
+                  zoom: 0.6,
+                }}
+                title={student.name}
+              >
                 <StudentCard student={student} noDisplayRole />
               </div>
             ))}

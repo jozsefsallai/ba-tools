@@ -1,22 +1,5 @@
 "use client";
 
-import { TimelineItemTargetPicker } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-target-picker";
-import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
-import { StudentPicker } from "@/components/common/student-picker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PopoverContent } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import {
   ChevronsUpDownIcon,
   CopyIcon,
@@ -34,6 +17,23 @@ import {
   useState,
 } from "react";
 import { v4 as uuid } from "uuid";
+import { TimelineItemTargetPicker } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-target-picker";
+import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
+import { StudentPicker } from "@/components/common/student-picker";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PopoverContent } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
 import type { Student } from "~prisma";
 
 const MAX_TIMELINE_TARGETS = 10;
@@ -86,18 +86,28 @@ export function TimelineItemPopover({
 
   const handleRemove = useCallback(() => {
     onWantsToRemove(item.id);
-  }, [onWantsToRemove, item.id]);
+  }, [
+    onWantsToRemove,
+    item.id,
+  ]);
 
   const handleTriggerUpdate = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.value === "") {
-        onWantsToUpdate(item.id, { trigger: undefined });
+        onWantsToUpdate(item.id, {
+          trigger: undefined,
+        });
         return;
       }
 
-      onWantsToUpdate(item.id, { trigger: event.target.value });
+      onWantsToUpdate(item.id, {
+        trigger: event.target.value,
+      });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleTargetUpdate = useCallback(
@@ -107,7 +117,9 @@ export function TimelineItemPopover({
       }
 
       if (!student || student.id === item.target?.id) {
-        onWantsToUpdate(item.id, { target: undefined });
+        onWantsToUpdate(item.id, {
+          target: undefined,
+        });
         return;
       }
 
@@ -115,9 +127,14 @@ export function TimelineItemPopover({
         return;
       }
 
-      onWantsToUpdate(item.id, { target: student });
+      onWantsToUpdate(item.id, {
+        target: student,
+      });
     },
-    [item, onWantsToUpdate],
+    [
+      item,
+      onWantsToUpdate,
+    ],
   );
 
   const handleExtraTargetUpdate = useCallback(
@@ -126,7 +143,9 @@ export function TimelineItemPopover({
         return;
       }
 
-      const extraTargets = [...(item.extraTargets ?? [])];
+      const extraTargets = [
+        ...(item.extraTargets ?? []),
+      ];
 
       if (
         student &&
@@ -139,9 +158,14 @@ export function TimelineItemPopover({
       }
 
       extraTargets[index] = student ?? undefined;
-      onWantsToUpdate(item.id, { extraTargets });
+      onWantsToUpdate(item.id, {
+        extraTargets,
+      });
     },
-    [item, onWantsToUpdate],
+    [
+      item,
+      onWantsToUpdate,
+    ],
   );
 
   const addExtraTarget = useCallback(() => {
@@ -150,10 +174,16 @@ export function TimelineItemPopover({
       (item.extraTargets?.length ?? 0) < MAX_TIMELINE_TARGETS - 1
     ) {
       onWantsToUpdate(item.id, {
-        extraTargets: [...(item.extraTargets ?? []), undefined],
+        extraTargets: [
+          ...(item.extraTargets ?? []),
+          undefined,
+        ],
       });
     }
-  }, [item, onWantsToUpdate]);
+  }, [
+    item,
+    onWantsToUpdate,
+  ]);
 
   const removeExtraTarget = useCallback(
     (index: number) => {
@@ -163,43 +193,70 @@ export function TimelineItemPopover({
         });
       }
     },
-    [item, onWantsToUpdate],
+    [
+      item,
+      onWantsToUpdate,
+    ],
   );
 
   const handleVariantUpdate = useCallback(
     (variantId: string) => {
       if (variantId === "default") {
-        onWantsToUpdate(item.id, { variantId: undefined });
+        onWantsToUpdate(item.id, {
+          variantId: undefined,
+        });
         return;
       }
-      onWantsToUpdate(item.id, { variantId });
+      onWantsToUpdate(item.id, {
+        variantId,
+      });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleCopyUpdate = useCallback(
     (checked: boolean) => {
-      onWantsToUpdate(item.id, { copy: checked });
+      onWantsToUpdate(item.id, {
+        copy: checked,
+      });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleNotesUpdate = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (event.target.value === "") {
-        onWantsToUpdate(item.id, { notes: undefined });
+        onWantsToUpdate(item.id, {
+          notes: undefined,
+        });
         return;
       }
-      onWantsToUpdate(item.id, { notes: event.target.value });
+      onWantsToUpdate(item.id, {
+        notes: event.target.value,
+      });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const handleTextUpdate = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      onWantsToUpdate(item.id, { text: event.target.value });
+      onWantsToUpdate(item.id, {
+        text: event.target.value,
+      });
     },
-    [onWantsToUpdate, item.id],
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
   );
 
   const duplicate = useCallback(() => {
@@ -207,21 +264,37 @@ export function TimelineItemPopover({
       ...item,
       id: uuid(),
     };
-    setItems((prev) => [...prev, newItem]);
-  }, [item, setItems]);
+    setItems((prev) => [
+      ...prev,
+      newItem,
+    ]);
+  }, [
+    item,
+    setItems,
+  ]);
 
   const skillVariants = useMemo(() => {
-    if (item.type !== "student") return [];
+    if (item.type !== "student") {
+      return [];
+    }
     const variants = skillCardVariantMap[item.student.id as SkillCardVariant];
-    if (!variants) return [];
+    if (!variants) {
+      return [];
+    }
     return variants;
-  }, [item]);
+  }, [
+    item,
+  ]);
 
   useLayoutEffect(() => {
-    if (item.type !== "student" || !autoFocusTrigger) return;
+    if (item.type !== "student" || !autoFocusTrigger) {
+      return;
+    }
     let consumed = false;
     const finish = () => {
-      if (consumed) return;
+      if (consumed) {
+        return;
+      }
       consumed = true;
       onAutoFocusTriggerConsumed?.();
     };
@@ -229,7 +302,9 @@ export function TimelineItemPopover({
       const el = document.getElementById(
         `pop-trigger-${item.id}`,
       ) as HTMLInputElement | null;
-      if (!el) return;
+      if (!el) {
+        return;
+      }
       el.focus();
       finish();
     };
@@ -243,7 +318,12 @@ export function TimelineItemPopover({
       cancelAnimationFrame(frame);
       clearTimeout(timeout);
     };
-  }, [item.id, item.type, autoFocusTrigger, onAutoFocusTriggerConsumed]);
+  }, [
+    item.id,
+    item.type,
+    autoFocusTrigger,
+    onAutoFocusTriggerConsumed,
+  ]);
 
   useLayoutEffect(() => {
     if (item.type !== "text" || !autoFocusText) {
@@ -287,26 +367,43 @@ export function TimelineItemPopover({
       cancelAnimationFrame(frame);
       clearTimeout(timeout);
     };
-  }, [item.id, item.type, autoFocusText, onAutoFocusTextConsumed]);
+  }, [
+    item.id,
+    item.type,
+    autoFocusText,
+    onAutoFocusTextConsumed,
+  ]);
 
   useEffect(() => {
     if (!separatorOverride) {
-      onWantsToUpdate(item.id, { size: undefined });
+      onWantsToUpdate(item.id, {
+        size: undefined,
+      });
     } else if (typeof separatorSizeStr === "string") {
       const value = Number.parseInt(separatorSizeStr, 10);
       if (!Number.isNaN(value)) {
-        onWantsToUpdate(item.id, { size: value });
+        onWantsToUpdate(item.id, {
+          size: value,
+        });
       }
     }
-  }, [separatorOverride]);
+  }, [
+    separatorOverride,
+  ]);
 
   useEffect(() => {
-    if (item.type !== "separator" || !separatorOverride) return;
+    if (item.type !== "separator" || !separatorOverride) {
+      return;
+    }
     const value = Number.parseInt(separatorSizeStr ?? "", 10);
     if (!Number.isNaN(value)) {
-      onWantsToUpdate(item.id, { size: value });
+      onWantsToUpdate(item.id, {
+        size: value,
+      });
     }
-  }, [separatorSizeStr]);
+  }, [
+    separatorSizeStr,
+  ]);
 
   return (
     <PopoverContent
@@ -316,10 +413,14 @@ export function TimelineItemPopover({
       }}
       onOpenAutoFocus={(e) => e.preventDefault()}
       onPointerDownOutside={(e) => {
-        if (isTimelinePreviewAnchorTarget(e.target)) e.preventDefault();
+        if (isTimelinePreviewAnchorTarget(e.target)) {
+          e.preventDefault();
+        }
       }}
       onFocusOutside={(e) => {
-        if (isTimelinePreviewAnchorTarget(e.target)) e.preventDefault();
+        if (isTimelinePreviewAnchorTarget(e.target)) {
+          e.preventDefault();
+        }
       }}
     >
       {item.type === "student" && (

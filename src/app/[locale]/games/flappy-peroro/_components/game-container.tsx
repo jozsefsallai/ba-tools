@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { FullscreenIcon, MinimizeIcon } from "lucide-react";
 import Script from "next/script";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function FlappyPeroroGameContainer() {
   const [fullscreen, setFullscreen] = useState(false);

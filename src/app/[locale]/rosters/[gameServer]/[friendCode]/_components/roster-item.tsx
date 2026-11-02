@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { RosterBondRank } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-bond-rank";
 import { RosterItemStudentIcon } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-item-student-icon";
 import { RosterStatBadge } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-stat-badge";
@@ -7,7 +8,6 @@ import { RosterStatRow } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/
 import type { RosterStudentData } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/types";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
 
 export type RosterItemProps = {
   item: RosterStudentData;

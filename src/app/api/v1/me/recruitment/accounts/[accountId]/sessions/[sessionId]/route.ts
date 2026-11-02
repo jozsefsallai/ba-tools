@@ -6,7 +6,10 @@ import {
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
 
-type Params = { accountId: string; sessionId: string };
+type Params = {
+  accountId: string;
+  sessionId: string;
+};
 
 export const GET = userRoute<Params>(
   async (_req, { accountId, sessionId }, userId) => {
@@ -35,6 +38,8 @@ export const PATCH = userRoute<Params>(
 export const DELETE = userRoute<Params>(
   async (_req, { accountId, sessionId }, userId) => {
     await deleteRecruitmentSession(userId, accountId, sessionId);
-    return new Response(null, { status: 204 });
+    return new Response(null, {
+      status: 204,
+    });
   },
 );

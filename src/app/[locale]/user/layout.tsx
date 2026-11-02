@@ -1,8 +1,8 @@
-import { SignedOutRedirect } from "@/components/auth/signed-out-redirect";
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
 import { getLocale } from "next-intl/server";
 import type { PropsWithChildren } from "react";
+import { SignedOutRedirect } from "@/components/auth/signed-out-redirect";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 
 export async function generateMetadata() {
   return getCardMetadata("user", await getLocale());

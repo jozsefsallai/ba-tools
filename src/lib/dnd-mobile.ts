@@ -1,8 +1,8 @@
 import type { Transform } from "@dnd-kit/utilities";
 import {
+  createContext,
   type MouseEvent,
   type RefObject,
-  createContext,
   useContext,
 } from "react";
 
@@ -31,5 +31,9 @@ export function useZoomCorrectedTransform(transform: Transform | null) {
     return transform;
   }
 
-  return { ...transform, x: transform.x / zoom, y: transform.y / zoom };
+  return {
+    ...transform,
+    x: transform.x / zoom,
+    y: transform.y / zoom,
+  };
 }

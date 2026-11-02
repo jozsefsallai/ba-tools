@@ -1,17 +1,26 @@
-import { makeOgImage } from "@/lib/og-image.server";
-import { getCardContent } from "@/lib/og-metadata.server";
 import { ToolOgCard } from "@/lib/og/card";
 import { isOgCardKey } from "@/lib/og/registry";
+import { makeOgImage } from "@/lib/og-image.server";
+import { getCardContent } from "@/lib/og-metadata.server";
 
 export const runtime = "nodejs";
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ locale: string; cardKey: string }> },
+  {
+    params,
+  }: {
+    params: Promise<{
+      locale: string;
+      cardKey: string;
+    }>;
+  },
 ) {
   const { locale, cardKey } = await params;
 
   if ((locale !== "en" && locale !== "ja") || !isOgCardKey(cardKey)) {
-    return new Response("Not found", { status: 404 });
+    return new Response("Not found", {
+      status: 404,
+    });
   }
 
   const card = await getCardContent(cardKey, locale);

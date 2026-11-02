@@ -1,9 +1,9 @@
 "use client";
 
-import { buildStudentIconUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo } from "react";
+import { buildStudentIconUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 import type { Student } from "~prisma";
 
 export type TimelineQuickAddProps = {
@@ -21,7 +21,9 @@ function StudentItem({
 }) {
   const image = useMemo(() => {
     return buildStudentIconUrl(student);
-  }, [student]);
+  }, [
+    student,
+  ]);
 
   return (
     <div
@@ -58,7 +60,9 @@ export function TimelineQuickAdd({
     (student: Student) => {
       onStudentClick(student);
     },
-    [onStudentClick],
+    [
+      onStudentClick,
+    ],
   );
 
   if (students.length === 0) {

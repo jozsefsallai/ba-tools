@@ -52,9 +52,16 @@ export const COMBAT_ROLES: CombatRole[] = [
   "Vehicle",
 ];
 
-export const COMBAT_CLASSES: CombatClass[] = ["Main", "Support"];
+export const COMBAT_CLASSES: CombatClass[] = [
+  "Main",
+  "Support",
+];
 
-export const COMBAT_POSITIONS: CombatPosition[] = ["Front", "Middle", "Back"];
+export const COMBAT_POSITIONS: CombatPosition[] = [
+  "Front",
+  "Middle",
+  "Back",
+];
 
 export const WEAPON_TYPES: WeaponType[] = [
   "AR",
@@ -70,9 +77,17 @@ export const WEAPON_TYPES: WeaponType[] = [
   "FT",
 ];
 
-export const RARITIES = [3, 2, 1] as const;
+export const RARITIES = [
+  3,
+  2,
+  1,
+] as const;
 
-export const GAME_SERVER_KEYS = ["jp", "global", "cn"] as const;
+export const GAME_SERVER_KEYS = [
+  "jp",
+  "global",
+  "cn",
+] as const;
 export type GameServerKey = (typeof GAME_SERVER_KEYS)[number];
 
 export const ACQUISITION_KINDS = [
@@ -128,9 +143,18 @@ export function getDefenseTypeColorClass(defenseType: DefenseType) {
 }
 
 export const TERRAINS = [
-  { key: "Street", field: "streetBattleAdaptation" },
-  { key: "Outdoor", field: "outdoorBattleAdaptation" },
-  { key: "Indoor", field: "indoorBattleAdaptation" },
+  {
+    key: "Street",
+    field: "streetBattleAdaptation",
+  },
+  {
+    key: "Outdoor",
+    field: "outdoorBattleAdaptation",
+  },
+  {
+    key: "Indoor",
+    field: "indoorBattleAdaptation",
+  },
 ] as const;
 
 export const EQUIPMENT_KINDS: Student["equipment"][number][] = [

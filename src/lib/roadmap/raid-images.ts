@@ -1,3 +1,4 @@
+import type { StaticImageData } from "next/image";
 import binahImage from "@/assets/images/raid/binah.png";
 import chesedImage from "@/assets/images/raid/chesed.png";
 import chokmahImage from "@/assets/images/raid/chokmah.png";
@@ -20,9 +21,7 @@ import timeAttackEscortImage from "@/assets/images/raid/timeattack_escort.webp";
 import timeAttackShootingImage from "@/assets/images/raid/timeattack_shooting.webp";
 import tipharethImage from "@/assets/images/raid/tiphareth.png";
 import yesodImage from "@/assets/images/raid/yesod.png";
-
 import type { RoadmapRaidItem } from "@/lib/roadmap/types";
-import type { StaticImageData } from "next/image";
 import type {
   MultiFloorRaidBoss,
   RaidBoss,
@@ -66,14 +65,18 @@ const TIME_ATTACK_DUNGEON_IMAGES: Record<
   Escort: timeAttackEscortImage,
 };
 
-export function getRaidImage(
-  item: RoadmapRaidItem,
-): { image: StaticImageData; shape: "wide" | "square" } | null {
+export function getRaidImage(item: RoadmapRaidItem): {
+  image: StaticImageData;
+  shape: "wide" | "square";
+} | null {
   switch (item.type) {
     case "Raid":
     case "EliminateRaid":
       return item.raidBoss
-        ? { image: RAID_BOSS_IMAGES[item.raidBoss], shape: "wide" }
+        ? {
+            image: RAID_BOSS_IMAGES[item.raidBoss],
+            shape: "wide",
+          }
         : null;
     case "MultiFloorRaid":
       return item.multiFloorRaidBoss

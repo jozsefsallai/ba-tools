@@ -1,5 +1,19 @@
 "use client";
 
+import { arrayMove } from "@dnd-kit/sortable";
+import { usePaginatedQuery, useQuery } from "convex/react";
+import {
+  CheckIcon,
+  ImagePlusIcon,
+  PlusIcon,
+  SearchIcon,
+  Share2Icon,
+  XIcon,
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { PvpCombatReportImportDialog } from "@/app/[locale]/pvp/_components/pvp-combat-report-import-dialog";
 import { PVPCounterVideos } from "@/app/[locale]/pvp/_components/pvp-counter-videos";
 import { PVPDefenseTeamStrip } from "@/app/[locale]/pvp/_components/pvp-defense-team-strip";
@@ -32,32 +46,25 @@ import {
   parsePvpCounterSearchParams,
 } from "@/lib/pvp/counter-link";
 import {
+  PVP_SEASONS,
   type PVPCounterDefenseSlot,
   type PVPCounterRange,
   type PVPSeasonNumber,
-  PVP_SEASONS,
 } from "@/lib/types";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { arrayMove } from "@dnd-kit/sortable";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import {
-  CheckIcon,
-  ImagePlusIcon,
-  PlusIcon,
-  SearchIcon,
-  Share2Icon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 import type { PVPFormationStudentItem } from "../_lib/types";
 
-const blankTeam = (): PVPFormationStudentItem[] => [{}, {}, {}, {}, {}, {}];
+const blankTeam = (): PVPFormationStudentItem[] => [
+  {},
+  {},
+  {},
+  {},
+  {},
+  {},
+];
 
 type SubmittedSearch = {
   seasonNumber: PVPSeasonNumber;
@@ -140,7 +147,9 @@ export function PVPStatsSearch() {
 
   function getDefenseChangeTooltips(
     criteria: PVPCounterDefenseSlot[],
-    observed: Array<{ studentId?: string }>,
+    observed: Array<{
+      studentId?: string;
+    }>,
   ) {
     return criteria.map((slot, index) => {
       // Special positions are interchangeable and cannot change a defense
@@ -196,7 +205,9 @@ export function PVPStatsSearch() {
       season: params.get("season") ?? undefined,
       defense: params.get("defense") ?? undefined,
     });
-  }, [searchParamsKey]);
+  }, [
+    searchParamsKey,
+  ]);
 
   const {
     seasonNumber,
@@ -275,7 +286,11 @@ export function PVPStatsSearch() {
         }
 
         if ("tank" in slot) {
-          return { counter: { kind: "tank" } };
+          return {
+            counter: {
+              kind: "tank",
+            },
+          };
         }
 
         return {
@@ -293,7 +308,9 @@ export function PVPStatsSearch() {
           const student = studentMap[slot.studentId];
 
           if (index >= 4) {
-            return { studentId: slot.studentId };
+            return {
+              studentId: slot.studentId,
+            };
           }
 
           return {
@@ -318,11 +335,20 @@ export function PVPStatsSearch() {
   const canSearch = defenseTeam
     .slice(0, 4)
     .some((item) => item.student || item.counter);
-  const queryArgs = useMemo(() => submittedSearch ?? "skip", [submittedSearch]);
+  const queryArgs = useMemo(
+    () => submittedSearch ?? "skip",
+    [
+      submittedSearch,
+    ],
+  );
 
   const summary = useQuery(
     api.pvpStats.getSummary,
-    excludedStudentsLoaded ? { seasonNumber } : "skip",
+    excludedStudentsLoaded
+      ? {
+          seasonNumber,
+        }
+      : "skip",
   );
 
   const traitsStatus = useQuery(api.pvpStats.getStatus);
@@ -353,7 +379,10 @@ export function PVPStatsSearch() {
       matchMode: "similar" as const,
       excludeDefenseTeam: submittedSearch.defenseTeam,
     };
-  }, [submittedSearch, traitsStatus]);
+  }, [
+    submittedSearch,
+    traitsStatus,
+  ]);
   const similarQuery = usePaginatedQuery(api.pvpStats.search, similarArgs, {
     initialNumItems: 20,
   });
@@ -363,11 +392,17 @@ export function PVPStatsSearch() {
 
   const filteredResults = useMemo(
     () => results.filter((result) => result.wins >= minimumWins),
-    [results, minimumWins],
+    [
+      results,
+      minimumWins,
+    ],
   );
   const filteredSimilarResults = useMemo(
     () => similarResults.filter((result) => result.wins >= minimumWins),
-    [similarResults, minimumWins],
+    [
+      similarResults,
+      minimumWins,
+    ],
   );
 
   const primaryResultTarget = useRef(1);
@@ -378,7 +413,10 @@ export function PVPStatsSearch() {
   useEffect(() => {
     primaryResultTarget.current = 1;
     similarResultTarget.current = 1;
-  }, [submittedSearch, minimumWins]);
+  }, [
+    submittedSearch,
+    minimumWins,
+  ]);
 
   useEffect(() => {
     if (
@@ -388,7 +426,13 @@ export function PVPStatsSearch() {
     ) {
       loadMore(20);
     }
-  }, [submittedSearch, status, filteredResults.length, loadMore, minimumWins]);
+  }, [
+    submittedSearch,
+    status,
+    filteredResults.length,
+    loadMore,
+    minimumWins,
+  ]);
 
   useEffect(() => {
     if (
@@ -423,15 +467,23 @@ export function PVPStatsSearch() {
         block: "start",
       });
     });
-  }, [submittedSearch, status]);
+  }, [
+    submittedSearch,
+    status,
+  ]);
 
   function updateDefense(
     index: number,
     item: Partial<PVPFormationStudentItem>,
   ) {
     setDefenseTeam((current) => {
-      const next = [...current];
-      next[index] = { ...next[index], ...item };
+      const next = [
+        ...current,
+      ];
+      next[index] = {
+        ...next[index],
+        ...item,
+      };
       return next;
     });
   }
@@ -439,7 +491,15 @@ export function PVPStatsSearch() {
   function handleReportImported(battle: PvpBattleInfo) {
     const team = resolvePvpReportTeam(battle.enemyUnits, students);
 
-    setDefenseTeam(team.map(({ student }) => (student ? { student } : {})));
+    setDefenseTeam(
+      team.map(({ student }) =>
+        student
+          ? {
+              student,
+            }
+          : {},
+      ),
+    );
 
     toast.success(t("tools.pvp.stats.reportImported"), {
       position: "top-right",
@@ -460,7 +520,12 @@ export function PVPStatsSearch() {
 
   function addExcludedStudent(student: { id: string }) {
     setExcludedStudentIds((current) =>
-      current.includes(student.id) ? current : [...current, student.id],
+      current.includes(student.id)
+        ? current
+        : [
+            ...current,
+            student.id,
+          ],
     );
   }
 
@@ -524,16 +589,22 @@ export function PVPStatsSearch() {
   function getDefenseTeamPayload() {
     return defenseTeam.map((item, index) => {
       if (item.counter?.kind === "range") {
-        return { range: item.counter.value };
+        return {
+          range: item.counter.value,
+        };
       }
 
       if (item.counter?.kind === "tank") {
-        return { tank: true as const };
+        return {
+          tank: true as const,
+        };
       }
 
       if (item.student) {
         if (index >= 4) {
-          return { studentId: item.student.id };
+          return {
+            studentId: item.student.id,
+          };
         }
 
         return {
@@ -542,7 +613,9 @@ export function PVPStatsSearch() {
           tank: item.student.combatRole === "Tanker",
         };
       }
-      return { studentId: undefined };
+      return {
+        studentId: undefined,
+      };
     });
   }
 

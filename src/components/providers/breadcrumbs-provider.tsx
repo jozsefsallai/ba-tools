@@ -1,14 +1,8 @@
 "use client";
 
-import { usePathname } from "@/i18n/navigation";
 import {
-  type BreadcrumbRegistration,
-  type PageBreadcrumb,
-  resolveBreadcrumbs,
-} from "@/lib/breadcrumbs";
-import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   useCallback,
   useContext,
   useId,
@@ -16,6 +10,12 @@ import {
   useMemo,
   useState,
 } from "react";
+import { usePathname } from "@/i18n/navigation";
+import {
+  type BreadcrumbRegistration,
+  type PageBreadcrumb,
+  resolveBreadcrumbs,
+} from "@/lib/breadcrumbs";
 
 const BreadcrumbsContext = createContext<PageBreadcrumb[]>([]);
 const BreadcrumbDepthContext = createContext(0);
@@ -26,7 +26,9 @@ const RegistrationContext = createContext<
 export function BreadcrumbsProvider({
   children,
   fallback,
-}: PropsWithChildren<{ fallback: PageBreadcrumb[] }>) {
+}: PropsWithChildren<{
+  fallback: PageBreadcrumb[];
+}>) {
   const pathname = usePathname();
 
   const [registrations, setRegistrations] = useState(
@@ -64,7 +66,9 @@ export function BreadcrumbsProvider({
 export function BreadcrumbScope({
   children,
   items,
-}: PropsWithChildren<{ items: PageBreadcrumb[] }>) {
+}: PropsWithChildren<{
+  items: PageBreadcrumb[];
+}>) {
   const pathname = usePathname();
 
   const parentDepth = useContext(BreadcrumbDepthContext);
@@ -76,7 +80,12 @@ export function BreadcrumbScope({
 
   // Only re-register when the items change in content. The items themselves
   // are kept (rather than the parsed JSON) so callbacks like `onClick` survive.
-  const stableItems = useMemo(() => items, [serialized]);
+  const stableItems = useMemo(
+    () => items,
+    [
+      serialized,
+    ],
+  );
 
   const depth = parentDepth + 1;
 
@@ -85,9 +94,19 @@ export function BreadcrumbScope({
       throw new Error("BreadcrumbScope requires BreadcrumbsProvider");
     }
 
-    register(id, { pathname, depth, items: stableItems });
+    register(id, {
+      pathname,
+      depth,
+      items: stableItems,
+    });
     return () => register(id);
-  }, [register, id, pathname, depth, stableItems]);
+  }, [
+    register,
+    id,
+    pathname,
+    depth,
+    stableItems,
+  ]);
 
   return (
     <BreadcrumbDepthContext.Provider value={depth}>

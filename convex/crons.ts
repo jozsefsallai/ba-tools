@@ -5,7 +5,9 @@ const crons = cronJobs();
 
 crons.interval(
   "refresh public PVP statistics",
-  { hours: 6 },
+  {
+    hours: 6,
+  },
   internal.pvpStats.start,
 );
 

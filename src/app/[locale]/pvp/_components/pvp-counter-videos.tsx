@@ -1,15 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import type { PVPSeasonNumber } from "@/lib/types";
-import { cn } from "@/lib/utils";
 import { usePaginatedQuery } from "convex/react";
 import { PlayIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { PVPSeasonNumber } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 
-type Team = Array<{ studentId?: string }>;
+type Team = Array<{
+  studentId?: string;
+}>;
 
 export function PVPCounterVideos({
   seasonNumber,
@@ -28,17 +30,35 @@ export function PVPCounterVideos({
 
   const { results, status, loadMore } = usePaginatedQuery(
     api.pvpStats.getMatchVideos,
-    { seasonNumber, attackTeam, defenseTeam },
-    { initialNumItems: 3 },
+    {
+      seasonNumber,
+      attackTeam,
+      defenseTeam,
+    },
+    {
+      initialNumItems: 3,
+    },
   );
 
-  const videos = useMemo(() => [...new Set(results)], [results]);
+  const videos = useMemo(
+    () => [
+      ...new Set(results),
+    ],
+    [
+      results,
+    ],
+  );
 
   useEffect(() => {
     if (videos.length <= visibleCount && status === "CanLoadMore") {
       loadMore(5);
     }
-  }, [videos.length, visibleCount, status, loadMore]);
+  }, [
+    videos.length,
+    visibleCount,
+    status,
+    loadMore,
+  ]);
 
   if (videos.length === 0) {
     return null;
@@ -59,7 +79,9 @@ export function PVPCounterVideos({
         <Button key={url} asChild variant="outline" size="xs">
           <a href={url} target="_blank" rel="noopener noreferrer">
             <PlayIcon data-icon="inline-start" />
-            {t("tools.pvp.stats.watchVideo", { number: index + 1 })}
+            {t("tools.pvp.stats.watchVideo", {
+              number: index + 1,
+            })}
           </a>
         </Button>
       ))}

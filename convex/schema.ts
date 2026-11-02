@@ -1,3 +1,5 @@
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
 import {
   BORROW_SLOT_GAMEMODES,
   GAME_SERVERS,
@@ -5,8 +7,6 @@ import {
   STAR_LEVELS,
   UE_LEVELS,
 } from "@/lib/types";
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
 
 export const formationStudentItem = v.object({
   studentId: v.optional(v.string()),
@@ -201,7 +201,9 @@ export default defineSchema({
     avatar: v.optional(v.string()),
     externalId: v.string(),
     isSuperUser: v.optional(v.boolean()),
-  }).index("by_externalId", ["externalId"]),
+  }).index("by_externalId", [
+    "externalId",
+  ]),
 
   userPreferences: defineTable({
     userId: v.id("users"),
@@ -239,7 +241,9 @@ export default defineSchema({
         includeMatchesInStatisticsByDefault: v.optional(v.boolean()),
       }),
     ),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   formation: defineTable({
     userId: v.id("users"),
@@ -258,7 +262,9 @@ export default defineSchema({
     displayOverline: v.optional(v.boolean()),
     noDisplayRole: v.optional(v.boolean()),
     groupsVertical: v.optional(v.boolean()),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   timeline: defineTable({
     userId: v.id("users"),
@@ -275,7 +281,9 @@ export default defineSchema({
     exportWithTransparentBackground: v.optional(v.boolean()),
     exportBackgroundColor: v.optional(v.string()),
     exportBackgroundOpacity: v.optional(v.number()),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   timelineGroup: defineTable({
     userId: v.id("users"),
@@ -284,7 +292,9 @@ export default defineSchema({
     visibility: v.union(v.literal("private"), v.literal("public")),
     showCreator: v.optional(v.boolean()),
     timelines: v.array(v.id("timeline")),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   roster: defineTable({
     userId: v.id("users"),
@@ -298,8 +308,13 @@ export default defineSchema({
     students: v.array(rosterItem),
     lastUpdated: v.number(),
   })
-    .index("by_userId", ["userId"])
-    .index("by_gameServerAndFriendCode", ["gameServer", "friendCode"]),
+    .index("by_userId", [
+      "userId",
+    ])
+    .index("by_gameServerAndFriendCode", [
+      "gameServer",
+      "friendCode",
+    ]),
 
   inventoryManagementGrid: defineTable({
     userId: v.id("users"),
@@ -308,7 +323,9 @@ export default defineSchema({
     second: inventoryManagementItem,
     third: inventoryManagementItem,
     blockedCells: v.array(inventoryManagementCoords),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   giftInventory: defineTable({
     userId: v.id("users"),
@@ -320,7 +337,9 @@ export default defineSchema({
       }),
     ),
     giftBoxes: v.optional(v.number()),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   giftTarget: defineTable({
     userId: v.id("users"),
@@ -338,9 +357,15 @@ export default defineSchema({
     useGiftBoxes: v.optional(v.boolean()),
     giftBoxCount: v.optional(v.number()),
   })
-    .index("by_userId", ["userId"])
-    .index("by_giftInventory", ["giftInventoryId"])
-    .index("by_studentId", ["studentId"]),
+    .index("by_userId", [
+      "userId",
+    ])
+    .index("by_giftInventory", [
+      "giftInventoryId",
+    ])
+    .index("by_studentId", [
+      "studentId",
+    ]),
 
   pvpSeason: defineTable({
     userId: v.id("users"),
@@ -351,7 +376,9 @@ export default defineSchema({
     seasonNumber: v.optional(
       v.union(...PVP_SEASONS.map((season) => v.literal(season))),
     ),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   pvpFormationPreset: defineTable({
     userId: v.id("users"),
@@ -364,9 +391,17 @@ export default defineSchema({
     teamKey: v.optional(v.string()),
     usedByMe: v.boolean(),
   })
-    .index("by_seasonId", ["seasonId"])
-    .index("by_seasonId_teamKey", ["seasonId", "teamKey"])
-    .index("by_userId_seasonId", ["userId", "seasonId"]),
+    .index("by_seasonId", [
+      "seasonId",
+    ])
+    .index("by_seasonId_teamKey", [
+      "seasonId",
+      "teamKey",
+    ])
+    .index("by_userId_seasonId", [
+      "userId",
+      "seasonId",
+    ]),
 
   pvpEnemyPreset: defineTable({
     userId: v.id("users"),
@@ -376,8 +411,13 @@ export default defineSchema({
     opponentStudentRepId: v.optional(v.string()),
     lastRecordedAt: v.optional(v.number()),
   })
-    .index("by_seasonId", ["seasonId"])
-    .index("by_userId_seasonId", ["userId", "seasonId"])
+    .index("by_seasonId", [
+      "seasonId",
+    ])
+    .index("by_userId_seasonId", [
+      "userId",
+      "seasonId",
+    ])
     .index("by_userId_seasonId_lastRecordedAt", [
       "userId",
       "seasonId",
@@ -388,7 +428,10 @@ export default defineSchema({
       "seasonId",
       "opponentStudentRepId",
     ])
-    .index("by_seasonId_opponentName", ["seasonId", "opponentName"]),
+    .index("by_seasonId_opponentName", [
+      "seasonId",
+      "opponentName",
+    ]),
 
   pvpEnemyTeam: defineTable({
     userId: v.id("users"),
@@ -403,10 +446,20 @@ export default defineSchema({
     ),
     updatedAt: v.number(),
   })
-    .index("by_enemyPresetId", ["enemyPresetId"])
-    .index("by_enemyPresetId_teamKey", ["enemyPresetId", "teamKey"])
-    .index("by_seasonId_enemyPresetId", ["seasonId", "enemyPresetId"])
-    .index("by_seasonId", ["seasonId"]),
+    .index("by_enemyPresetId", [
+      "enemyPresetId",
+    ])
+    .index("by_enemyPresetId_teamKey", [
+      "enemyPresetId",
+      "teamKey",
+    ])
+    .index("by_seasonId_enemyPresetId", [
+      "seasonId",
+      "enemyPresetId",
+    ])
+    .index("by_seasonId", [
+      "seasonId",
+    ]),
 
   pvpMatchRecord: defineTable({
     userId: v.id("users"),
@@ -426,12 +479,28 @@ export default defineSchema({
     videoUrl: v.optional(v.string()),
     includeInStatistics: v.optional(v.boolean()),
   })
-    .index("by_userId", ["userId"])
-    .index("by_seasonId", ["seasonId"])
-    .index("by_seasonId_date", ["seasonId", "date"])
-    .index("by_seasonId_ownTeamKey", ["seasonId", "ownTeamKey"])
-    .index("by_seasonId_opponentTeamKey", ["seasonId", "opponentTeamKey"])
-    .index("by_enemyPresetId_date", ["enemyPresetId", "date"])
+    .index("by_userId", [
+      "userId",
+    ])
+    .index("by_seasonId", [
+      "seasonId",
+    ])
+    .index("by_seasonId_date", [
+      "seasonId",
+      "date",
+    ])
+    .index("by_seasonId_ownTeamKey", [
+      "seasonId",
+      "ownTeamKey",
+    ])
+    .index("by_seasonId_opponentTeamKey", [
+      "seasonId",
+      "opponentTeamKey",
+    ])
+    .index("by_enemyPresetId_date", [
+      "enemyPresetId",
+      "date",
+    ])
     .index("by_seasonId_enemyPresetId_date", [
       "seasonId",
       "enemyPresetId",
@@ -448,15 +517,27 @@ export default defineSchema({
     attackTeamKey: v.optional(v.string()),
     defenseTeamKey: v.optional(v.string()),
     attackTeam: v.optional(
-      v.array(v.object({ studentId: v.optional(v.string()) })),
+      v.array(
+        v.object({
+          studentId: v.optional(v.string()),
+        }),
+      ),
     ),
     defenseTeam: v.optional(
-      v.array(v.object({ studentId: v.optional(v.string()) })),
+      v.array(
+        v.object({
+          studentId: v.optional(v.string()),
+        }),
+      ),
     ),
     attackWon: v.optional(v.boolean()),
   })
-    .index("by_matchId", ["matchId"])
-    .index("by_queuedAt", ["queuedAt"]),
+    .index("by_matchId", [
+      "matchId",
+    ])
+    .index("by_queuedAt", [
+      "queuedAt",
+    ]),
 
   pvpStatsContribution: defineTable({
     matchId: v.id("pvpMatchRecord"),
@@ -466,7 +547,9 @@ export default defineSchema({
     attackWon: v.boolean(),
     videoUrl: v.optional(v.string()),
   })
-    .index("by_matchId", ["matchId"])
+    .index("by_matchId", [
+      "matchId",
+    ])
     .index("by_matchup_videoUrl", [
       "seasonNumber",
       "defenseTeamKey",
@@ -479,10 +562,18 @@ export default defineSchema({
 
     // Optional compatibility fields for migration
     attackTeam: v.optional(
-      v.array(v.object({ studentId: v.optional(v.string()) })),
+      v.array(
+        v.object({
+          studentId: v.optional(v.string()),
+        }),
+      ),
     ),
     defenseTeam: v.optional(
-      v.array(v.object({ studentId: v.optional(v.string()) })),
+      v.array(
+        v.object({
+          studentId: v.optional(v.string()),
+        }),
+      ),
     ),
 
     attackTeamKey: v.string(),
@@ -523,8 +614,14 @@ export default defineSchema({
     total: v.number(),
     confidenceScore: v.number(),
   })
-    .index("by_matchup", ["seasonNumber", "defenseTeamKey", "attackTeamKey"])
-    .index("by_seasonNumber", ["seasonNumber"])
+    .index("by_matchup", [
+      "seasonNumber",
+      "defenseTeamKey",
+      "attackTeamKey",
+    ])
+    .index("by_seasonNumber", [
+      "seasonNumber",
+    ])
     .index("by_ranking", [
       "seasonNumber",
       "defenseTeamKey",
@@ -641,7 +738,11 @@ export default defineSchema({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
     role: v.union(v.literal("attack"), v.literal("defense")),
     formationKey: v.string(),
-    team: v.array(v.object({ studentId: v.optional(v.string()) })),
+    team: v.array(
+      v.object({
+        studentId: v.optional(v.string()),
+      }),
+    ),
     s1StudentId: v.optional(v.string()),
     s2StudentId: v.optional(v.string()),
     s3StudentId: v.optional(v.string()),
@@ -654,8 +755,15 @@ export default defineSchema({
     confidenceScore: v.number(),
     confidenceUpper: v.number(),
   })
-    .index("by_snapshot", ["snapshot"])
-    .index("by_identity", ["snapshot", "seasonNumber", "role", "formationKey"])
+    .index("by_snapshot", [
+      "snapshot",
+    ])
+    .index("by_identity", [
+      "snapshot",
+      "seasonNumber",
+      "role",
+      "formationKey",
+    ])
     .index("by_confidence", [
       "snapshot",
       "seasonNumber",
@@ -682,7 +790,9 @@ export default defineSchema({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
     totalMatches: v.number(),
     clears: v.number(),
-  }).index("by_seasonNumber", ["seasonNumber"]),
+  }).index("by_seasonNumber", [
+    "seasonNumber",
+  ]),
 
   pvpStatsStatus: defineTable({
     key: v.literal("global"),
@@ -698,12 +808,16 @@ export default defineSchema({
     ),
     rankingCursor: v.optional(v.string()),
     rankingsSnapshot: v.optional(v.string()),
-  }).index("by_key", ["key"]),
+  }).index("by_key", [
+    "key",
+  ]),
 
   pvpStatsRebuild: defineTable({
     seasonId: v.id("pvpSeason"),
     cursor: v.optional(v.string()),
-  }).index("by_seasonId", ["seasonId"]),
+  }).index("by_seasonId", [
+    "seasonId",
+  ]),
 
   recruitmentAccount: defineTable({
     userId: v.id("users"),
@@ -724,7 +838,9 @@ export default defineSchema({
     ),
     latestPermanentSessionId: v.optional(v.id("recruitmentSession")),
     latestLimitedSessionId: v.optional(v.id("recruitmentSession")),
-  }).index("by_userId", ["userId"]),
+  }).index("by_userId", [
+    "userId",
+  ]),
 
   recruitmentSession: defineTable({
     userId: v.id("users"),
@@ -773,9 +889,16 @@ export default defineSchema({
     threeStarCount: v.number(),
     computedStats: v.optional(recruitmentComputedStats),
   })
-    .index("by_userId", ["userId"])
-    .index("by_recruitmentAccountId", ["recruitmentAccountId"])
-    .index("by_recruitmentAccountId_date", ["recruitmentAccountId", "date"]),
+    .index("by_userId", [
+      "userId",
+    ])
+    .index("by_recruitmentAccountId", [
+      "recruitmentAccountId",
+    ])
+    .index("by_recruitmentAccountId_date", [
+      "recruitmentAccountId",
+      "date",
+    ]),
 
   donation: defineTable({
     supporterName: v.optional(v.string()),
@@ -787,14 +910,21 @@ export default defineSchema({
     bmcSupportId: v.optional(v.string()),
     rawEvent: v.string(),
   })
-    .index("by_supportCreatedOn", ["supportCreatedOn"])
-    .index("by_bmcSupportId", ["bmcSupportId"]),
+    .index("by_supportCreatedOn", [
+      "supportCreatedOn",
+    ])
+    .index("by_bmcSupportId", [
+      "bmcSupportId",
+    ]),
 
   planaChat: defineTable({
     userId: v.id("users"),
     title: v.string(),
     updatedAt: v.number(),
-  }).index("by_userId_updatedAt", ["userId", "updatedAt"]),
+  }).index("by_userId_updatedAt", [
+    "userId",
+    "updatedAt",
+  ]),
 
   planaTurn: defineTable({
     chatId: v.id("planaChat"),
@@ -804,5 +934,8 @@ export default defineSchema({
     userParts: v.array(planaMessagePart),
     selectedVariantIndex: v.number(),
     assistantVariants: v.array(planaAssistantVariant),
-  }).index("by_chatId_order", ["chatId", "order"]),
+  }).index("by_chatId_order", [
+    "chatId",
+    "order",
+  ]),
 });

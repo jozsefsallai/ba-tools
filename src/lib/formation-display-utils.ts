@@ -1,7 +1,7 @@
+import { v4 as uuid } from "uuid";
 import type { StudentItem } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { hexToRgba } from "@/lib/canvas";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
-import { v4 as uuid } from "uuid";
 
 /** Persisted formation slot shape (Convex / API). */
 export type PersistedFormationStudentSlot = {

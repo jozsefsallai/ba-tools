@@ -44,11 +44,19 @@ class StudentExpStorage extends Storage<StudentExpCalculatorData> {
     }
 
     if (fromLevel > toLevel) {
-      [fromLevel, toLevel] = [toLevel, fromLevel];
+      [fromLevel, toLevel] = [
+        toLevel,
+        fromLevel,
+      ];
     }
 
     return {
-      reports: data.reports ?? { N: "", R: "", SR: "", SSR: "" },
+      reports: data.reports ?? {
+        N: "",
+        R: "",
+        SR: "",
+        SSR: "",
+      },
       fromLevel,
       toLevel,
     };

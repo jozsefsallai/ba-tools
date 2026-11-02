@@ -1,6 +1,25 @@
-const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
-const ITXT_TYPE = new Uint8Array([105, 84, 88, 116]); // "iTXt"
-const IEND_TYPE = new Uint8Array([73, 69, 78, 68]); // "IEND"
+const PNG_SIGNATURE = new Uint8Array([
+  137,
+  80,
+  78,
+  71,
+  13,
+  10,
+  26,
+  10,
+]);
+const ITXT_TYPE = new Uint8Array([
+  105,
+  84,
+  88,
+  116,
+]); // "iTXt"
+const IEND_TYPE = new Uint8Array([
+  73,
+  69,
+  78,
+  68,
+]); // "IEND"
 
 function makeCrc32Table(): Uint32Array {
   const table = new Uint32Array(256);
@@ -27,8 +46,11 @@ function crc32(data: Uint8Array): number {
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("canvas.toBlob returned null"));
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("canvas.toBlob returned null"));
+      }
     }, "image/png");
   });
 }
@@ -46,8 +68,7 @@ function buildItxtChunk(keyword: string, text: string): Uint8Array {
   const textBytes = encodeUtf8(text);
 
   // keyword\0 + compressionFlag(0) + compressionMethod(0) + languageTag\0 + translatedKeyword\0 + text
-  const dataLength =
-    keywordBytes.length + 1 + 1 + 1 + 1 + 1 + textBytes.length;
+  const dataLength = keywordBytes.length + 1 + 1 + 1 + 1 + 1 + textBytes.length;
 
   // 4 (length) + 4 (type) + data + 4 (crc)
   const chunk = new Uint8Array(4 + 4 + dataLength + 4);
@@ -92,7 +113,14 @@ export async function encodePngWithItxt(
   result.set(itxtChunk, iendStart);
   result.set(original.subarray(iendStart), iendStart + itxtChunk.length);
 
-  return new Blob([result], { type: "image/png" });
+  return new Blob(
+    [
+      result,
+    ],
+    {
+      type: "image/png",
+    },
+  );
 }
 
 export function decodePngItxt(
@@ -102,7 +130,9 @@ export function decodePngItxt(
   const data = new Uint8Array(buffer);
 
   for (let i = 0; i < PNG_SIGNATURE.length; i++) {
-    if (data[i] !== PNG_SIGNATURE[i]) return null;
+    if (data[i] !== PNG_SIGNATURE[i]) {
+      return null;
+    }
   }
 
   let offset = 8;
@@ -121,7 +151,9 @@ export function decodePngItxt(
       data[typeStart + 3] === ITXT_TYPE[3]
     ) {
       let keyEnd = dataStart;
-      while (keyEnd < dataStart + chunkLength && data[keyEnd] !== 0) keyEnd++;
+      while (keyEnd < dataStart + chunkLength && data[keyEnd] !== 0) {
+        keyEnd++;
+      }
 
       const chunkKeyword = data.subarray(dataStart, keyEnd);
 
@@ -133,11 +165,15 @@ export function decodePngItxt(
         let pos = keyEnd + 1 + 1 + 1;
 
         // Skip language tag (null-terminated)
-        while (pos < dataStart + chunkLength && data[pos] !== 0) pos++;
+        while (pos < dataStart + chunkLength && data[pos] !== 0) {
+          pos++;
+        }
         pos++;
 
         // Skip translated keyword (null-terminated)
-        while (pos < dataStart + chunkLength && data[pos] !== 0) pos++;
+        while (pos < dataStart + chunkLength && data[pos] !== 0) {
+          pos++;
+        }
         pos++;
 
         const textBytes = data.subarray(pos, dataStart + chunkLength);

@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,12 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  timelineStorage,
   type TimelineStorageData,
+  timelineStorage,
 } from "@/lib/storage/timeline";
-import { useTranslations } from "next-intl";
-import { useRef, useState, type PropsWithChildren } from "react";
-import { toast } from "sonner";
 
 export type ImportTimelineDataDialogProps = PropsWithChildren<{
   onComplete?: () => void;
@@ -52,7 +52,9 @@ export function ImportTimelineDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.importTimelineData.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.importTimelineData.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.importTimelineData.description")}
           </DialogDescription>

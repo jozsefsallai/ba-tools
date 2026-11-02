@@ -1,8 +1,8 @@
+import { createContext, useContext } from "react";
 import {
   defaultUserPreferences,
   type UserPreferences,
 } from "@/lib/user-preferences";
-import { createContext, useContext } from "react";
 
 export type UserPreferencesContext = {
   preferences: UserPreferences;

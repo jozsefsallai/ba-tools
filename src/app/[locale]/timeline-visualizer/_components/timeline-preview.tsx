@@ -1,29 +1,5 @@
 "use client";
 
-import { StudentCard } from "@/components/common/student-card";
-import {
-  type ReactNode,
-  type RefObject,
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import type { Student } from "~prisma";
-
-import { TimelineItemPopover } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-popover";
-import { TimelinePreviewTrigger } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview-trigger";
-import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
-import { Popover, PopoverAnchor } from "@/components/ui/popover";
-import {
-  DndZoomContext,
-  TOUCH_DRAG_CLASS,
-  preventTouchContextMenu,
-  useZoomCorrectedTransform,
-} from "@/lib/dnd-mobile";
-import { buildSkillPortraitUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
 import {
   DndContext,
   type DragEndEvent,
@@ -36,15 +12,38 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
   rectSortingStrategy,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CornerRightDownIcon, MoveHorizontalIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import {
+  type ReactNode,
+  type RefObject,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { TimelineItemPopover } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-popover";
+import { TimelinePreviewTrigger } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview-trigger";
+import skillcardCopyGlow from "@/assets/images/skillcard_copy_glow.png";
+import { StudentCard } from "@/components/common/student-card";
+import { Popover, PopoverAnchor } from "@/components/ui/popover";
+import {
+  DndZoomContext,
+  preventTouchContextMenu,
+  TOUCH_DRAG_CLASS,
+  useZoomCorrectedTransform,
+} from "@/lib/dnd-mobile";
+import { buildSkillPortraitUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
+import type { Student } from "~prisma";
 
 type BaseItem = {
   type: "student" | "separator" | "text";
@@ -183,7 +182,10 @@ type SeparatorHandleProps = React.ComponentProps<"div"> & {
 };
 
 function useHorizontalOverflow(el: HTMLDivElement | null) {
-  const [overflow, setOverflow] = useState({ left: false, right: false });
+  const [overflow, setOverflow] = useState({
+    left: false,
+    right: false,
+  });
 
   useEffect(() => {
     if (!el) {
@@ -195,13 +197,20 @@ function useHorizontalOverflow(el: HTMLDivElement | null) {
       const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
 
       setOverflow((prev) =>
-        prev.left === left && prev.right === right ? prev : { left, right },
+        prev.left === left && prev.right === right
+          ? prev
+          : {
+              left,
+              right,
+            },
       );
     };
 
     update();
 
-    el.addEventListener("scroll", update, { passive: true });
+    el.addEventListener("scroll", update, {
+      passive: true,
+    });
 
     const observer = new ResizeObserver(update);
     observer.observe(el);
@@ -214,7 +223,9 @@ function useHorizontalOverflow(el: HTMLDivElement | null) {
       el.removeEventListener("scroll", update);
       observer.disconnect();
     };
-  }, [el]);
+  }, [
+    el,
+  ]);
 
   return overflow;
 }
@@ -305,7 +316,9 @@ function SortablePreviewItem({
             >
               <div
                 className="w-full shrink-0"
-                style={{ height: gapHeightPx }}
+                style={{
+                  height: gapHeightPx,
+                }}
                 aria-hidden
               />
             </div>
@@ -439,12 +452,22 @@ export function TimelinePreview({
         behavior: "smooth",
       });
     }
-  }, [items.length, scroller]);
+  }, [
+    items.length,
+    scroller,
+  ]);
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -454,14 +477,18 @@ export function TimelinePreview({
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       setActiveDragId(null);
-      if (!over || active.id === over.id || !editableConfig) return;
+      if (!over || active.id === over.id || !editableConfig) {
+        return;
+      }
       editableConfig.setItems((current) => {
         const oldIndex = current.findIndex((item) => item.id === active.id);
         const newIndex = current.findIndex((item) => item.id === over.id);
         return arrayMove(current, oldIndex, newIndex);
       });
     },
-    [editableConfig],
+    [
+      editableConfig,
+    ],
   );
 
   const handleDragCancel = useCallback(() => {
@@ -473,7 +500,9 @@ export function TimelinePreview({
       editableConfig?.onItemSelected(null);
       setActiveDragId(active.id as string);
     },
-    [editableConfig],
+    [
+      editableConfig,
+    ],
   );
 
   const activeDragItem = activeDragId
@@ -488,7 +517,9 @@ export function TimelinePreview({
         onItemClicked?.(item);
       };
     },
-    [onItemClicked],
+    [
+      onItemClicked,
+    ],
   );
 
   const handleItemKeyUp = useCallback(
@@ -499,7 +530,9 @@ export function TimelinePreview({
         }
       };
     },
-    [onItemClicked],
+    [
+      onItemClicked,
+    ],
   );
 
   if (items.length === 0) {
@@ -512,15 +545,21 @@ export function TimelinePreview({
 
   function renderItemContent(item: TimelineItem) {
     if (item.type === "student") {
-      const targets = [item.target, ...(item.extraTargets ?? [])].filter(
-        (target): target is Student => !!target,
-      );
+      const targets = [
+        item.target,
+        ...(item.extraTargets ?? []),
+      ].filter((target): target is Student => !!target);
 
       const targetGroups =
         targets.length > 4
-          ? [targets.slice(0, 4), targets.slice(4)]
+          ? [
+              targets.slice(0, 4),
+              targets.slice(4),
+            ]
           : targets.length > 0
-            ? [targets]
+            ? [
+                targets,
+              ]
             : [];
 
       const hasCompactTargetBox = targetGroups.some(
@@ -647,9 +686,10 @@ export function TimelinePreview({
 
       const previousTargetCount =
         previousItem?.type === "student"
-          ? [previousItem.target, ...(previousItem.extraTargets ?? [])].filter(
-              Boolean,
-            ).length
+          ? [
+              previousItem.target,
+              ...(previousItem.extraTargets ?? []),
+            ].filter(Boolean).length
           : 0;
 
       return {
@@ -714,7 +754,9 @@ export function TimelinePreview({
 
   const itemElements = items.flatMap((item, idx): ReactNode[] => {
     const content = renderItemContent(item);
-    if (content === null && item.type !== "separator") return [];
+    if (content === null && item.type !== "separator") {
+      return [];
+    }
 
     const itemStyle: React.CSSProperties = {
       ...getItemStyle(item, idx),
@@ -751,7 +793,9 @@ export function TimelinePreview({
             onItemSelected(selectedItemId === item.id ? null : item.id)
           }
           onOpenChange={(open) => {
-            if (!open) onItemSelected(null);
+            if (!open) {
+              onItemSelected(null);
+            }
           }}
           editorVerticalSeparator={
             isEditableVerticalSeparator && item.type === "separator"

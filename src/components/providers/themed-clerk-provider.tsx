@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, type PropsWithChildren } from "react";
-
-import { useTheme } from "next-themes";
+import { enUS, jaJP } from "@clerk/localizations";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark as clerkDark } from "@clerk/themes";
-import { enUS, jaJP } from "@clerk/localizations";
 import { useLocale } from "next-intl";
+import { useTheme } from "next-themes";
+import { type PropsWithChildren, useMemo } from "react";
 
 export function ThemedClerkProvider({ children }: PropsWithChildren) {
   const { resolvedTheme } = useTheme();
@@ -19,7 +18,9 @@ export function ThemedClerkProvider({ children }: PropsWithChildren) {
       case "ja":
         return jaJP;
     }
-  }, [locale]);
+  }, [
+    locale,
+  ]);
 
   return (
     <ClerkProvider

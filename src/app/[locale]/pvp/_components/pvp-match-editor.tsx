@@ -1,5 +1,16 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import type { FunctionArgs } from "convex/server";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  SaveIcon,
+  XIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { PvpCombatReportImportDialog } from "@/app/[locale]/pvp/_components/pvp-combat-report-import-dialog";
 import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
 import { PVPMatchFormationEditor } from "@/app/[locale]/pvp/_components/pvp-match-formation-editor";
@@ -49,22 +60,11 @@ import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
-  type PvpBattleInfo,
   correctPvpImportedItem,
+  type PvpBattleInfo,
   resolvePvpReportTeam,
 } from "@/lib/pvp";
 import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
-import { useMutation, useQuery } from "convex/react";
-import type { FunctionArgs } from "convex/server";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  SaveIcon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -166,7 +166,12 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
   } = usePVPEnemyPresetSearch(seasonId, enemyPresetSearch);
   const selectedEnemyPreset = useQuery(
     api.pvp.getEnemyPreset,
-    enemyPresetId ? { seasonId, presetId: enemyPresetId } : "skip",
+    enemyPresetId
+      ? {
+          seasonId,
+          presetId: enemyPresetId,
+        }
+      : "skip",
   );
   const matchingEnemyPreset = useQuery(
     api.pvp.getEnemyPresetByName,
@@ -184,7 +189,10 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
   const enemyTeams = useQuery(
     api.pvp.getEnemyPresetTeams,
     resolvedEnemyPresetId
-      ? { seasonId, presetId: resolvedEnemyPresetId }
+      ? {
+          seasonId,
+          presetId: resolvedEnemyPresetId,
+        }
       : "skip",
   );
   const defaults = usePVPSeasonDefaults();
@@ -207,7 +215,11 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     }
 
     setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
-  }, [current, review, preferences.pvp.includeMatchesInStatisticsByDefault]);
+  }, [
+    current,
+    review,
+    preferences.pvp.includeMatchesInStatisticsByDefault,
+  ]);
 
   const handleItemUpdate = useCallback(
     (
@@ -222,7 +234,9 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
         updatedItem.report = params.report;
       }
 
-      const updatedTeam = [...targetTeam];
+      const updatedTeam = [
+        ...targetTeam,
+      ];
       updatedTeam[idx] = updatedItem;
 
       if (kind === "own") {
@@ -231,21 +245,28 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
         setOpponentTeam(updatedTeam);
       }
     },
-    [ownTeam, opponentTeam],
+    [
+      ownTeam,
+      opponentTeam,
+    ],
   );
 
   const handleOwnItemUpdate = useCallback(
     (idx: number, params: Partial<PVPFormationStudentItem>) => {
       handleItemUpdate("own", idx, params);
     },
-    [handleItemUpdate],
+    [
+      handleItemUpdate,
+    ],
   );
 
   const handleOpponentItemUpdate = useCallback(
     (idx: number, params: Partial<PVPFormationStudentItem>) => {
       handleItemUpdate("enemy", idx, params);
     },
-    [handleItemUpdate],
+    [
+      handleItemUpdate,
+    ],
   );
 
   const handleItemMove = useCallback(
@@ -261,7 +282,9 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
           return team;
         }
 
-        const updated = [...team];
+        const updated = [
+          ...team,
+        ];
         const [item] = updated.splice(from, 1);
         updated.splice(to, 0, item);
 
@@ -293,7 +316,12 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
         };
       }),
     );
-  }, [current, review, defaults, studentMap]);
+  }, [
+    current,
+    review,
+    defaults,
+    studentMap,
+  ]);
 
   function applyFormationPreset(kind: "own" | "enemy", presetId: string) {
     const preset = (
@@ -614,7 +642,11 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     setResult(initial.result);
     setVideoUrl(initial.videoUrl ?? "");
     setIncludeInStatistics(initial.includeInStatistics ?? false);
-  }, [current, review, studentMap]);
+  }, [
+    current,
+    review,
+    studentMap,
+  ]);
 
   if (!defaults) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
@@ -627,7 +659,9 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
         <Button variant="outline" asChild>
           <Link href={`/pvp/${seasonId}`}>
-            {t("common.backTo", { destination: t("tools.pvp.title") })}
+            {t("common.backTo", {
+              destination: t("tools.pvp.title"),
+            })}
           </Link>
         </Button>
       </MessageBox>
@@ -1001,9 +1035,10 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
                 const preset =
                   value === selectedEnemyPreset?._id
                     ? selectedEnemyPreset
-                    : [...enemyPresets, ...enemyRepPresets].find(
-                        (item) => item._id === value,
-                      );
+                    : [
+                        ...enemyPresets,
+                        ...enemyRepPresets,
+                      ].find((item) => item._id === value);
 
                 if (!preset) {
                   return;

@@ -1,20 +1,20 @@
 "use client";
 
-import type { StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import {
-  GiftTargetAllocationGrid,
   buildGiftTargetGridItems,
+  GiftTargetAllocationGrid,
 } from "@/app/[locale]/bond/_components/gift-target-allocation-grid";
 import type { GiftTargetDoc } from "@/app/[locale]/bond/_lib/gift-utils";
 import { getRemainingBoxAllocatable } from "@/app/[locale]/bond/_lib/gift-utils";
+import type { StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
 import giftLovedImage from "@/assets/images/gift_loved.png";
 import { ItemCard } from "@/components/common/item-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { useMemo } from "react";
 import type { Id } from "~convex/dataModel";
 
 export type GiftChoiceBoxCardProps = {
@@ -41,12 +41,17 @@ export function GiftChoiceBoxCard({
   const t = useTranslations();
 
   const sortedTargets = useMemo(() => {
-    return [...targets].sort((a, b) => {
+    return [
+      ...targets,
+    ].sort((a, b) => {
       const nameA = studentMap.get(a.studentId)?.name ?? a.studentId;
       const nameB = studentMap.get(b.studentId)?.name ?? b.studentId;
       return nameA.localeCompare(nameB);
     });
-  }, [targets, studentMap]);
+  }, [
+    targets,
+    studentMap,
+  ]);
 
   const gridItems = useMemo(
     () =>

@@ -25,7 +25,11 @@ export function MaskIcon({
       aria-label={label}
       aria-hidden={label ? undefined : true}
       className={cn("inline-block shrink-0 bg-current", className)}
-      style={{ mask, WebkitMask: mask, ...style }}
+      style={{
+        mask,
+        WebkitMask: mask,
+        ...style,
+      }}
     />
   );
 }

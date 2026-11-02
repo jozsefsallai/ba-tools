@@ -1,20 +1,18 @@
 "use client";
 
-import type { PVPFormationStudentItem } from "@/app/[locale]/pvp/_lib/types";
-import { cn } from "@/lib/utils";
 import {
+  closestCenter,
   DndContext,
   KeyboardCode,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   horizontalListSortingStrategy,
+  SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { useTranslations } from "next-intl";
@@ -27,6 +25,8 @@ import {
   useId,
   useRef,
 } from "react";
+import type { PVPFormationStudentItem } from "@/app/[locale]/pvp/_lib/types";
+import { cn } from "@/lib/utils";
 
 type PVPFormationEditorStripProps = {
   formation: PVPFormationStudentItem[];
@@ -123,7 +123,10 @@ export function PVPFormationEditorStrip({
       }
     }
 
-    event.target.scrollIntoView({ block: "nearest", inline: "nearest" });
+    event.target.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -219,17 +222,30 @@ export function PVPFormationEditorStrip({
   });
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
 
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
       keyboardCodes: {
-        start: [KeyboardCode.Space],
-        end: [KeyboardCode.Space],
-        cancel: [KeyboardCode.Esc],
+        start: [
+          KeyboardCode.Space,
+        ],
+        end: [
+          KeyboardCode.Space,
+        ],
+        cancel: [
+          KeyboardCode.Esc,
+        ],
       },
     }),
   );
@@ -244,8 +260,14 @@ export function PVPFormationEditorStrip({
     >
       <div className="flex w-max min-w-full flex-col items-center justify-center gap-3 @min-[600px]/formation:flex-row @min-[600px]/formation:items-start">
         {[
-          { start: 0, end: 4 },
-          { start: 4, end: 6 },
+          {
+            start: 0,
+            end: 4,
+          },
+          {
+            start: 4,
+            end: 6,
+          },
         ].map(({ start, end }) => (
           <DndContext
             key={start}

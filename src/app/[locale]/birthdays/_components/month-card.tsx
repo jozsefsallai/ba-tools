@@ -1,11 +1,11 @@
 "use client";
 
+import { getDay, getDaysInMonth } from "date-fns";
 import { BirthdayCell } from "@/app/[locale]/birthdays/_components/birthday-cell";
 import type { BirthdayGiftPreference } from "@/app/[locale]/birthdays/_components/birthdays-view";
 import type { BirthdayStudent } from "@/lib/birthdays";
 import { birthdayKey, MONTH_ACCENTS } from "@/lib/birthdays";
 import { cn } from "@/lib/utils";
-import { getDay, getDaysInMonth } from "date-fns";
 
 type MonthCardProps = {
   month: number;
@@ -17,7 +17,15 @@ type MonthCardProps = {
   favoriteGiftsByStudentId: Record<string, BirthdayGiftPreference[]>;
 };
 
-const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"] as const;
+const WEEKDAYS = [
+  "S",
+  "M",
+  "T",
+  "W",
+  "T",
+  "F",
+  "S",
+] as const;
 
 export function MonthCard({
   month,
@@ -74,24 +82,34 @@ export function MonthCard({
             </div>
 
             <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: firstDayOffset }, (_, index) => (
-                <div key={`empty-${month}-${index}`} />
-              ))}
+              {Array.from(
+                {
+                  length: firstDayOffset,
+                },
+                (_, index) => (
+                  <div key={`empty-${month}-${index}`} />
+                ),
+              )}
 
-              {Array.from({ length: dayCount }, (_, index) => {
-                const day = index + 1;
-                const key = birthdayKey(month, day);
-                return (
-                  <BirthdayCell
-                    key={key}
-                    month={month}
-                    day={day}
-                    students={birthdaysByDate.get(key) ?? []}
-                    isToday={todayKey === key}
-                    favoriteGiftsByStudentId={favoriteGiftsByStudentId}
-                  />
-                );
-              })}
+              {Array.from(
+                {
+                  length: dayCount,
+                },
+                (_, index) => {
+                  const day = index + 1;
+                  const key = birthdayKey(month, day);
+                  return (
+                    <BirthdayCell
+                      key={key}
+                      month={month}
+                      day={day}
+                      students={birthdaysByDate.get(key) ?? []}
+                      isToday={todayKey === key}
+                      favoriteGiftsByStudentId={favoriteGiftsByStudentId}
+                    />
+                  );
+                },
+              )}
             </div>
           </div>
         </div>

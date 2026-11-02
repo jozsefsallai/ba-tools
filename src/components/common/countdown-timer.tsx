@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SlidingNumber } from "@/components/common/sliding-number";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
 
 export type CountdownTimerProps = {
   targetTime: Date;
@@ -48,7 +48,9 @@ export function CountdownTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetTime]);
+  }, [
+    targetTime,
+  ]);
 
   return (
     <div className={cn("flex items-center gap-1", className)}>

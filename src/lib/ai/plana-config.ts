@@ -3,7 +3,10 @@ import { z } from "zod";
 
 export const PLANA_CONFIG_COOKIE_KEY = "_ba_tools__plana_config";
 
-export const planaProviderSchema = z.enum(["openrouter", "gateway"]);
+export const planaProviderSchema = z.enum([
+  "openrouter",
+  "gateway",
+]);
 
 export const planaConfigSchema = z.object({
   provider: planaProviderSchema,

@@ -1,5 +1,17 @@
 "use client";
 
+import { useDraggable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  GripVerticalIcon,
+  PlusIcon,
+  SaveIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   deleteAdminBanner,
   updateAdminBanner,
@@ -19,18 +31,6 @@ import {
 } from "@/components/ui/tooltip";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import {
-  GripVerticalIcon,
-  PlusIcon,
-  SaveIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import type { Student } from "~prisma";
 
 export type AdminBannerItemProps = {
@@ -55,7 +55,10 @@ export function AdminBannerItem({
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: banner.id,
-      data: { type: "banner", banner },
+      data: {
+        type: "banner",
+        banner,
+      },
     });
 
   const [name, setName] = useState(banner.name ?? "");
@@ -73,7 +76,9 @@ export function AdminBannerItem({
     setFreePulls(banner.freePulls);
     setIsSelectablePickup(banner.isSelectablePickup);
     setPickupStudents(banner.pickupStudents);
-  }, [banner]);
+  }, [
+    banner,
+  ]);
 
   const isDirty = useMemo(() => {
     return (
@@ -82,7 +87,13 @@ export function AdminBannerItem({
       isSelectablePickup !== banner.isSelectablePickup ||
       studentIdsKey(pickupStudents) !== studentIdsKey(banner.pickupStudents)
     );
-  }, [banner, name, freePulls, isSelectablePickup, pickupStudents]);
+  }, [
+    banner,
+    name,
+    freePulls,
+    isSelectablePickup,
+    pickupStudents,
+  ]);
 
   const hasFestStudent = pickupStudents.some((student) => student.isFestGlobal);
 
@@ -304,7 +315,10 @@ export function AdminBannerItem({
                 if (prev.some((s) => s.id === student.id)) {
                   return prev;
                 }
-                return [...prev, student];
+                return [
+                  ...prev,
+                  student,
+                ];
               });
             }}
           >

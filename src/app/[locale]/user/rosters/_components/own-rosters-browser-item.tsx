@@ -1,11 +1,11 @@
 "use client";
 
+import { GlobeIcon, LockIcon } from "lucide-react";
+import { useMemo } from "react";
 import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
 import { useStudents } from "@/hooks/use-students";
 import { GAME_SERVER_NAMES } from "@/lib/types";
-import { GlobeIcon, LockIcon } from "lucide-react";
-import { useMemo } from "react";
 import type { Doc } from "~convex/dataModel";
 
 export type OwnRostersBrowserItemProps = {
@@ -21,7 +21,10 @@ export function OwnRostersBrowserItem({ roster }: OwnRostersBrowserItemProps) {
     }
 
     return students.find((s) => s.id === roster.studentRepId) ?? null;
-  }, [students, roster.studentRepId]);
+  }, [
+    students,
+    roster.studentRepId,
+  ]);
 
   return (
     <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between border rounded-md py-4 px-8 hover:bg-accent max-md:p-4">

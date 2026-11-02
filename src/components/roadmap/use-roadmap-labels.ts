@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { useRoadmapTimeZone } from "@/components/roadmap/roadmap-time-zone";
 import { isPermanent } from "@/lib/roadmap/constants";
 import { intlTimeZone } from "@/lib/roadmap/time-zone";
@@ -8,8 +10,6 @@ import type {
   RoadmapItem,
   RoadmapRaidItem,
 } from "@/lib/roadmap/types";
-import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
 import type { RaidBoss } from "~prisma";
 
 export type RoadmapLabels = ReturnType<typeof useRoadmapLabels>;
@@ -25,7 +25,9 @@ export function useRoadmapLabels() {
     const zoneName =
       tz === "utc"
         ? "UTC"
-        : (new Intl.DateTimeFormat(locale, { timeZoneName: "short" })
+        : (new Intl.DateTimeFormat(locale, {
+            timeZoneName: "short",
+          })
             .formatToParts(new Date())
             .find((part) => part.type === "timeZoneName")?.value ??
           t("static.roadmap.localTime"));
@@ -186,5 +188,9 @@ export function useRoadmapLabels() {
       formatWeekday: (date: string | Date) =>
         weekdayFormat.format(new Date(date)),
     };
-  }, [t, locale, tz]);
+  }, [
+    t,
+    locale,
+    tz,
+  ]);
 }

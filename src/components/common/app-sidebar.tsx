@@ -1,29 +1,5 @@
 "use client";
 
-import plana from "@/assets/plana-logo.png";
-import { UserPreferences } from "@/components/common/user-preferences";
-import { LocaleToggle } from "@/components/locale-toggle";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { Link, getPathname, usePathname } from "@/i18n/navigation";
-import { canAccessPlanaAi } from "@/lib/ai/plana-access";
-import { canManageContent } from "@/lib/auth/roles";
 import {
   SignInButton,
   UNSAFE_PortalProvider,
@@ -31,6 +7,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated, useQuery } from "convex/react";
+import type { LucideIcon } from "lucide-react";
 import {
   BookOpenTextIcon,
   CakeIcon,
@@ -58,10 +35,33 @@ import {
   TrainTrackIcon,
   UsersIcon,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
+import plana from "@/assets/plana-logo.png";
+import { UserPreferences } from "@/components/common/user-preferences";
+import { LocaleToggle } from "@/components/locale-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { getPathname, Link, usePathname } from "@/i18n/navigation";
+import { canAccessPlanaAi } from "@/lib/ai/plana-access";
+import { canManageContent } from "@/lib/auth/roles";
 import { api } from "~convex/api";
 
 function useCloseMobileSidebar() {
@@ -71,7 +71,10 @@ function useCloseMobileSidebar() {
     if (isMobile) {
       setOpenMobile(false);
     }
-  }, [isMobile, setOpenMobile]);
+  }, [
+    isMobile,
+    setOpenMobile,
+  ]);
 }
 
 type NavLink = {
@@ -96,7 +99,9 @@ function RecentTimelines() {
   const timelines = useQuery(api.timeline.getOwn, {});
   const recent = timelines?.slice(0, 5);
 
-  if (!recent || recent.length === 0) return null;
+  if (!recent || recent.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -140,7 +145,9 @@ function RecentFormations() {
   const formations = useQuery(api.formation.getOwn, {});
   const recent = formations?.slice(0, 5);
 
-  if (!recent || recent.length === 0) return null;
+  if (!recent || recent.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -183,13 +190,7 @@ const RECENT_ITEMS_COMPONENTS = {
   formation: RecentFormations,
 } as const;
 
-function NavItem({
-  link,
-  isActive,
-}: {
-  link: NavLink;
-  isActive: boolean;
-}) {
+function NavItem({ link, isActive }: { link: NavLink; isActive: boolean }) {
   const closeMobileSidebar = useCloseMobileSidebar();
   const RecentItemsComponent =
     isActive && link.recentItems
@@ -234,7 +235,10 @@ export function AppSidebar() {
       previousPathnameRef.current = pathname;
       setOpenMobile(false);
     }
-  }, [pathname, setOpenMobile]);
+  }, [
+    pathname,
+    setOpenMobile,
+  ]);
 
   // On mobile, the sidebar is a modal sheet that blocks pointer events outside
   // of itself, so Clerk's popovers must be portaled into the sheet in order to
@@ -246,7 +250,9 @@ export function AppSidebar() {
             '[data-mobile="true"]',
           ) ?? null)
         : null,
-    [isMobile],
+    [
+      isMobile,
+    ],
   );
 
   const GAMEPLAY_TOOLS: NavLink[] = [
@@ -474,12 +480,18 @@ export function AppSidebar() {
                 <UserButton>
                   <UserButton.MenuItems>
                     <UserButton.Link
-                      href={getPathname({ href: "/user/formations", locale })}
+                      href={getPathname({
+                        href: "/user/formations",
+                        locale,
+                      })}
                       label="My formations"
                       labelIcon={<UsersIcon className="size-4" />}
                     />
                     <UserButton.Link
-                      href={getPathname({ href: "/user/timelines", locale })}
+                      href={getPathname({
+                        href: "/user/timelines",
+                        locale,
+                      })}
                       label="My timelines"
                       labelIcon={<ChartNoAxesGanttIcon className="size-4" />}
                     />

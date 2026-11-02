@@ -1,19 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import type { PropsWithChildren } from "react";
 import type {
   Direction,
   RailType,
   TileState,
 } from "@/app/[locale]/railroad-puzzle-solver/_lib/types";
-import styles from "./hexagon.module.css";
-import { cn } from "@/lib/utils";
-import type { PropsWithChildren } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import styles from "./hexagon.module.css";
 
 export type HexagonProps = PropsWithChildren<{
   state: TileState;

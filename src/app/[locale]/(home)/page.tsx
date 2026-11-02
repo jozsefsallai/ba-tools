@@ -1,7 +1,6 @@
-import { getCardMetadata } from "@/lib/og-metadata.server";
+import checkMobile from "ismobilejs";
 import { headers } from "next/headers";
-
-import { Plana } from "@/components/plana";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { DonationBox } from "@/app/[locale]/(home)/_components/donation-box";
 import { ResetInfo } from "@/app/[locale]/(home)/_components/reset-info";
@@ -9,11 +8,11 @@ import { StudentOfTheDay } from "@/app/[locale]/(home)/_components/student-of-th
 import { ToolsAndResources } from "@/app/[locale]/(home)/_components/tools-and-resources";
 import { CHANGELOG } from "@/changelog";
 import { ChangelogItem } from "@/components/common/changelog-item";
+import { Plana } from "@/components/plana";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
-import checkMobile from "ismobilejs";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 
 export async function generateMetadata() {
   return getCardMetadata("home", await getLocale());

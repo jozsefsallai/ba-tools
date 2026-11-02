@@ -44,7 +44,9 @@ export type OgIconName =
   | "gamepad"
   | "shield";
 
-type OgText = { message: MessagePath<Messages> };
+type OgText = {
+  message: MessagePath<Messages>;
+};
 
 export type OgCardDefinition = {
   title: OgText;

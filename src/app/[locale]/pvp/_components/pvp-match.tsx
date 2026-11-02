@@ -1,11 +1,5 @@
 "use client";
 
-import { PVPFormation } from "@/app/[locale]/pvp/_components/pvp-formation";
-import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
-import { Button } from "@/components/ui/button";
-import { useStudents } from "@/hooks/use-students";
-import { Link } from "@/i18n/navigation";
-import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { useMutation } from "convex/react";
 import {
   ChevronDownIcon,
@@ -16,6 +10,12 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PVPFormation } from "@/app/[locale]/pvp/_components/pvp-formation";
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { useStudents } from "@/hooks/use-students";
+import { Link } from "@/i18n/navigation";
+import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -39,25 +39,36 @@ export function PVPMatch({ seasonId, match, seasonNumber }: PVPMatchProps) {
     }
 
     return studentMap[match.opponentStudentRepId] ?? null;
-  }, [match.opponentStudentRepId, studentMap]);
+  }, [
+    match.opponentStudentRepId,
+    studentMap,
+  ]);
 
   const hasDamageInputs = useMemo(() => {
-    return [...match.ownTeam, ...match.opponentTeam].some(
-      (item) => typeof item.damage === "number",
-    );
-  }, [match]);
+    return [
+      ...match.ownTeam,
+      ...match.opponentTeam,
+    ].some((item) => typeof item.damage === "number");
+  }, [
+    match,
+  ]);
 
   const highestDamage = useMemo(() => {
     let maxDamage = 0;
 
-    for (const item of [...match.ownTeam, ...match.opponentTeam]) {
+    for (const item of [
+      ...match.ownTeam,
+      ...match.opponentTeam,
+    ]) {
       if (typeof item.damage === "number" && item.damage > maxDamage) {
         maxDamage = item.damage;
       }
     }
 
     return maxDamage;
-  }, [match]);
+  }, [
+    match,
+  ]);
 
   const handleToggleDamageChart = useCallback(() => {
     setDisplayDamageChart((prev) => !prev);
@@ -65,13 +76,19 @@ export function PVPMatch({ seasonId, match, seasonNumber }: PVPMatchProps) {
 
   const handleDeleteMatch = useCallback(async () => {
     try {
-      await deleteMatchMutation({ matchId: match._id });
+      await deleteMatchMutation({
+        matchId: match._id,
+      });
       toast.success(t("tools.pvp.match.deleteSuccess"));
     } catch (err) {
       console.error(err);
       toast.error(t("tools.pvp.match.deleteFail"));
     }
-  }, [deleteMatchMutation, match._id, t]);
+  }, [
+    deleteMatchMutation,
+    match._id,
+    t,
+  ]);
 
   return (
     <article className="pvp-match-card group relative flex min-w-0 flex-col gap-4 rounded-md border p-6">

@@ -1,5 +1,5 @@
-import { DEFAULT_LOCALE } from "@/i18n/constants";
 import deepmerge from "deepmerge";
+import { DEFAULT_LOCALE } from "@/i18n/constants";
 import type {
   LocaleNamespace,
   LocaleNamespaceKey,

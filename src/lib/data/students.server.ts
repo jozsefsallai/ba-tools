@@ -58,17 +58,25 @@ export async function searchStudents(filters: StudentSearchFilters) {
 
   const structuralFilters = Object.entries(rest)
     .filter(([, value]) => value !== undefined)
-    .map(([key, value]) => ({ [key]: value }));
+    .map(([key, value]) => ({
+      [key]: value,
+    }));
 
   const where =
-    structuralFilters.length > 0 ? { AND: structuralFilters } : undefined;
+    structuralFilters.length > 0
+      ? {
+          AND: structuralFilters,
+        }
+      : undefined;
 
   const searchInput = query?.trim();
 
   if (!searchInput) {
     const students = await db.student.findMany({
       where,
-      orderBy: { defaultOrder: "asc" },
+      orderBy: {
+        defaultOrder: "asc",
+      },
       take: limit,
       select: studentSummarySelect,
     });
@@ -81,7 +89,9 @@ export async function searchStudents(filters: StudentSearchFilters) {
 
   const candidates = await db.student.findMany({
     where,
-    orderBy: { defaultOrder: "asc" },
+    orderBy: {
+      defaultOrder: "asc",
+    },
     select: studentSummarySelect,
   });
 
@@ -101,11 +111,25 @@ export async function getStudentDetails(identifier: string) {
     return null;
   }
 
-  const giftSelect = { select: { id: true, name: true, rarity: true } };
-  const variantSelect = { select: { id: true, name: true, devName: true } };
+  const giftSelect = {
+    select: {
+      id: true,
+      name: true,
+      rarity: true,
+    },
+  };
+  const variantSelect = {
+    select: {
+      id: true,
+      name: true,
+      devName: true,
+    },
+  };
 
   return await db.student.findUnique({
-    where: { id: resolved.id },
+    where: {
+      id: resolved.id,
+    },
     include: {
       giftsAdored: giftSelect,
       giftsLoved: giftSelect,

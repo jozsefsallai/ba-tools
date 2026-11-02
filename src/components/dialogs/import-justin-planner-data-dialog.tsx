@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,10 +19,7 @@ import {
   importJustinPlannerData,
   type JustinPlannerExportData,
 } from "@/lib/justin";
-import { useTranslations } from "next-intl";
 import type { Student } from "~prisma";
-import { useRef, useState, type PropsWithChildren } from "react";
-import { toast } from "sonner";
 
 export type ImportJustinPlannerDataDialogProps = PropsWithChildren & {
   students: Student[];
@@ -39,7 +39,9 @@ export function ImportJustinPlannerDataDialog({
       const data = JSON.parse(jsonImport) as JustinPlannerExportData;
 
       if (data.exportVersion !== 2) {
-        toast.error(t("common.dialogs.importJustinPlannerData.toasts.invalidJustinData"));
+        toast.error(
+          t("common.dialogs.importJustinPlannerData.toasts.invalidJustinData"),
+        );
       }
 
       importJustinPlannerData(students, data);
@@ -48,7 +50,9 @@ export function ImportJustinPlannerDataDialog({
       toast.success(t("common.dialogs.importJustinPlannerData.toasts.success"));
     } catch (err) {
       console.error(err);
-      toast.error(t("common.dialogs.importJustinPlannerData.toasts.invalidData"));
+      toast.error(
+        t("common.dialogs.importJustinPlannerData.toasts.invalidData"),
+      );
     }
   }
 
@@ -58,7 +62,9 @@ export function ImportJustinPlannerDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.importJustinPlannerData.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.importJustinPlannerData.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.importJustinPlannerData.description")}
           </DialogDescription>

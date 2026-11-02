@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   PvpCropPreview,
   PvpOcrReadings,
@@ -18,12 +20,12 @@ import {
   resolvePvpReportTeam,
 } from "@/lib/pvp";
 import {
-  type PvpDebugFieldStatus,
-  type PvpDebugIssue,
   collectPvpDebugIssues,
   getPvpDebugFieldStatus,
   getPvpDebugStudentReasons,
   getPvpDebugUnitId,
+  type PvpDebugFieldStatus,
+  type PvpDebugIssue,
 } from "@/lib/pvp/debug-issues";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { getScreenshotPreview, getScreenshotROIs } from "@/lib/pvp/screenshot";
@@ -37,8 +39,6 @@ import {
   type PvpScreenshotRegion,
 } from "@/lib/pvp/screenshot-types";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
 
 type Preview = {
   name: PvpScreenshotRegion;
@@ -78,7 +78,10 @@ export function PvpScreenshotDebugger() {
 
   const issues = useMemo(
     () => extraction && collectPvpDebugIssues(extraction, students),
-    [extraction, students],
+    [
+      extraction,
+      students,
+    ],
   );
 
   useEffect(
@@ -101,7 +104,10 @@ export function PvpScreenshotDebugger() {
     const selection = selectionRef.current;
 
     setError(undefined);
-    setOcrProgress({ stage: "loading", progress: 0 });
+    setOcrProgress({
+      stage: "loading",
+      progress: 0,
+    });
 
     try {
       const { PvpOcrClient } = await import("@/lib/pvp/ocr");
@@ -152,7 +158,9 @@ export function PvpScreenshotDebugger() {
     }
 
     return () => URL.revokeObjectURL(sourceUrl);
-  }, [sourceUrl]);
+  }, [
+    sourceUrl,
+  ]);
 
   useEffect(() => {
     if (!modalUrl) {
@@ -160,7 +168,9 @@ export function PvpScreenshotDebugger() {
     }
 
     return () => URL.revokeObjectURL(modalUrl);
-  }, [modalUrl]);
+  }, [
+    modalUrl,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -168,7 +178,9 @@ export function PvpScreenshotDebugger() {
         URL.revokeObjectURL(preview.url);
       }
     };
-  }, [previews]);
+  }, [
+    previews,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -176,7 +188,9 @@ export function PvpScreenshotDebugger() {
         URL.revokeObjectURL(overlayUrl);
       }
     };
-  }, [overlayUrl]);
+  }, [
+    overlayUrl,
+  ]);
 
   async function handleFile(file: File | undefined) {
     if (!file) {
@@ -219,7 +233,10 @@ export function PvpScreenshotDebugger() {
       setOverlayUrl(URL.createObjectURL(preview.overlay));
       setDiagnostics({
         ...preview.diagnostics,
-        candidates: [preview.alignment, ...preview.diagnostics.candidates],
+        candidates: [
+          preview.alignment,
+          ...preview.diagnostics.candidates,
+        ],
       });
       setPreviews(
         PVP_SCREENSHOT_REGIONS.map((name) => ({
@@ -415,7 +432,11 @@ export function PvpScreenshotDebugger() {
                       "Battle type",
                       extraction.battle.battleType,
                     ],
-                    ["debug-result", "Result", extraction.battle.result],
+                    [
+                      "debug-result",
+                      "Result",
+                      extraction.battle.result,
+                    ],
                   ] as const
                 ).map(([id, label, field]) => (
                   <FieldPanel key={id} id={id} label={label} field={field}>
@@ -490,7 +511,12 @@ export function PvpScreenshotDebugger() {
                   />
                 </FieldPanel>
 
-                {(["myUnits", "enemyUnits"] as const).map((side) => {
+                {(
+                  [
+                    "myUnits",
+                    "enemyUnits",
+                  ] as const
+                ).map((side) => {
                   const units = extraction.battle?.[side] ?? [];
                   const resolved = resolvePvpReportTeam(units, students);
 
@@ -717,7 +743,10 @@ function CandidateList({
   candidates,
   studentName,
 }: {
-  candidates: { studentId: string; distance: number }[];
+  candidates: {
+    studentId: string;
+    distance: number;
+  }[];
   studentName: (id: string) => string;
 }) {
   if (!candidates.length) {
@@ -751,12 +780,24 @@ function IssueSummary({
   const blocking = issues.some((issue) => issue.blocking);
 
   const [verdict, tone] = blocking
-    ? ["Bulk import would reject this screenshot", "missing" as const]
+    ? [
+        "Bulk import would reject this screenshot",
+        "missing" as const,
+      ]
     : errors
-      ? ["Imports, but with missing data", "missing" as const]
+      ? [
+          "Imports, but with missing data",
+          "missing" as const,
+        ]
       : warnings
-        ? ["Imports, but review the uncertain fields", "uncertain" as const]
-        : ["No issues detected", "ok" as const];
+        ? [
+            "Imports, but review the uncertain fields",
+            "uncertain" as const,
+          ]
+        : [
+            "No issues detected",
+            "ok" as const,
+          ];
 
   return (
     <section
@@ -857,13 +898,17 @@ function AlignmentSummary({
   );
 }
 
-function getImageDimensions(
-  url: string,
-): Promise<{ height: number; width: number }> {
+function getImageDimensions(url: string): Promise<{
+  height: number;
+  width: number;
+}> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () =>
-      resolve({ height: image.naturalHeight, width: image.naturalWidth });
+      resolve({
+        height: image.naturalHeight,
+        width: image.naturalWidth,
+      });
     image.onerror = () => reject(new Error("Unable to read image dimensions"));
     image.src = url;
   });

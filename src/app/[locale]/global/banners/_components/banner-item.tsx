@@ -1,10 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { BannerPickupList } from "@/app/[locale]/global/banners/_components/banner-pickup-list";
 import type {
   BannerStudent,
   PublicGameBanner,
 } from "@/app/[locale]/global/banners/types";
 import { cn } from "@/lib/utils";
-import { getTranslations } from "next-intl/server";
 
 const PICKUP_STUDENTS_COLLAPSED_COUNT = 3;
 

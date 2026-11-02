@@ -1,5 +1,5 @@
-import bondImage from "@/assets/images/bond.png";
 import Image from "next/image";
+import bondImage from "@/assets/images/bond.png";
 
 type RosterBondRankProps = {
   rank: number;

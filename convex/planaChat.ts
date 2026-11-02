@@ -8,7 +8,12 @@ import { planaMessagePart } from "./schema";
 const DEFAULT_LLM_CONTEXT_TURNS = 50;
 const CHAT_TITLE_MAX_LENGTH = 60;
 
-function deriveChatTitle(parts: { type: "text"; text: string }[]) {
+function deriveChatTitle(
+  parts: {
+    type: "text";
+    text: string;
+  }[],
+) {
   const text = parts
     .filter((part) => part.type === "text")
     .map((part) => part.text)
@@ -62,7 +67,9 @@ async function getOwnedTurn(
 }
 
 export const listChatsPaginated = authenticatedQuery({
-  args: { paginationOpts: paginationOptsValidator },
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
   handler: async (ctx, args) => {
     const result = await ctx.db
       .query("planaChat")
@@ -140,7 +147,10 @@ export const getLlmContext = authenticatedQuery({
 
     const messages: {
       role: "user" | "assistant";
-      parts: { type: "text"; text: string }[];
+      parts: {
+        type: "text";
+        text: string;
+      }[];
     }[] = [];
 
     for (const turn of turns) {
@@ -217,7 +227,9 @@ export const appendTurn = authenticatedMutation({
       assistantVariants: [],
     });
 
-    await ctx.db.patch(chatId, { updatedAt: Date.now() });
+    await ctx.db.patch(chatId, {
+      updatedAt: Date.now(),
+    });
 
     return nextOrder;
   },
@@ -237,7 +249,10 @@ export const completeAssistantVariant = authenticatedMutation({
       parts,
       createdAt: Date.now(),
     };
-    const assistantVariants = [...turn.assistantVariants, nextVariant];
+    const assistantVariants = [
+      ...turn.assistantVariants,
+      nextVariant,
+    ];
     const selectedVariantIndex = assistantVariants.length - 1;
 
     await ctx.db.patch(turn._id, {
@@ -245,7 +260,9 @@ export const completeAssistantVariant = authenticatedMutation({
       selectedVariantIndex,
     });
 
-    await ctx.db.patch(chatId, { updatedAt: Date.now() });
+    await ctx.db.patch(chatId, {
+      updatedAt: Date.now(),
+    });
   },
 });
 
@@ -265,7 +282,9 @@ export const selectVariant = authenticatedMutation({
       throw new Error("Invalid variant index");
     }
 
-    await ctx.db.patch(turn._id, { selectedVariantIndex });
+    await ctx.db.patch(turn._id, {
+      selectedVariantIndex,
+    });
   },
 });
 
@@ -297,7 +316,9 @@ export const rewindFromTurn = authenticatedMutation({
       assistantVariants: trimmedVariants,
     });
 
-    await ctx.db.patch(chatId, { updatedAt: Date.now() });
+    await ctx.db.patch(chatId, {
+      updatedAt: Date.now(),
+    });
   },
 });
 
@@ -340,6 +361,8 @@ export const renameChat = authenticatedMutation({
         ? trimmed
         : `${trimmed.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}...`;
 
-    await ctx.db.patch(chatId, { title: nextTitle });
+    await ctx.db.patch(chatId, {
+      title: nextTitle,
+    });
   },
 });

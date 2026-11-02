@@ -1,9 +1,9 @@
 "use client";
 
+import { useConvexAuth } from "convex/react";
+import { createContext, type PropsWithChildren, useContext } from "react";
 import { PVPBreadcrumbs } from "@/app/[locale]/pvp/_components/pvp-breadcrumbs";
 import { useQueryWithStatus } from "@/lib/convex";
-import { useConvexAuth } from "convex/react";
-import { type PropsWithChildren, createContext, useContext } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -12,7 +12,11 @@ function useSeasonDefaultsQuery(seasonId: Id<"pvpSeason">) {
 
   return useQueryWithStatus(
     api.pvp.getSeasonDefaults,
-    isAuthenticated ? { seasonId } : "skip",
+    isAuthenticated
+      ? {
+          seasonId,
+        }
+      : "skip",
   );
 }
 
@@ -23,7 +27,9 @@ const SeasonContext = createContext<ReturnType<
 export function PVPSeasonProvider({
   children,
   seasonId,
-}: PropsWithChildren<{ seasonId: Id<"pvpSeason"> }>) {
+}: PropsWithChildren<{
+  seasonId: Id<"pvpSeason">;
+}>) {
   const query = useSeasonDefaultsQuery(seasonId);
 
   return (
@@ -47,7 +53,10 @@ function useSeasonContext() {
 
 export function usePVPSeasonQuery() {
   const query = useSeasonContext();
-  return { ...query, data: query.data?.season };
+  return {
+    ...query,
+    data: query.data?.season,
+  };
 }
 
 export function usePVPSeasonDefaults() {

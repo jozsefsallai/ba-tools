@@ -1,8 +1,8 @@
 "use client";
 
-import { Storage } from "@/lib/storage";
 import { format, isValid, parseISO } from "date-fns";
 import { useEffect, useState } from "react";
+import { Storage } from "@/lib/storage";
 
 const lastDateStorage = new Storage<string>("pvp_last_match_date");
 const dateModeStorage = new Storage<"today" | "last">("pvp_date_mode");
@@ -28,7 +28,9 @@ export function usePvpMatchDate(editing = false) {
     } catch {
       // Date preferences are optional when browser storage is unavailable
     }
-  }, [editing]);
+  }, [
+    editing,
+  ]);
 
   function rememberDate(savedDate: Date) {
     setLastDate(savedDate);

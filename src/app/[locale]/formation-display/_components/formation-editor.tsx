@@ -1,24 +1,9 @@
 "use client";
 
-import {
-  FormationPreview,
-  type StudentItem,
-} from "@/app/[locale]/formation-display/_components/formation-preview";
-import { FormationRowsStack } from "@/app/[locale]/formation-display/_components/formation-row-label";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
-import type { Student } from "@/lib/types";
+import { Authenticated, useMutation } from "convex/react";
 import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon, ImportIcon, PlusIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   type SetStateAction,
@@ -28,19 +13,33 @@ import {
   useRef,
   useState,
 } from "react";
-
-import { StudentPicker } from "@/components/common/student-picker";
-import { sleep } from "@/lib/sleep";
-
+import { toast } from "sonner";
+import { v4 as uuid } from "uuid";
 import type { EditableConfig } from "@/app/[locale]/formation-display/_components/formation-preview";
+import {
+  FormationPreview,
+  type StudentItem,
+} from "@/app/[locale]/formation-display/_components/formation-preview";
+import { FormationRowsStack } from "@/app/[locale]/formation-display/_components/formation-row-label";
 import { StarterOrderPanel } from "@/app/[locale]/formation-display/_components/starter-order-panel";
 import { MessageBox } from "@/components/common/message-box";
 import { SaveStatus } from "@/components/common/save-status";
+import { StudentPicker } from "@/components/common/student-picker";
 import { ParseEchelonDataDialog } from "@/components/dialogs/parse-echelon-data-dialog";
 import { SaveDialog } from "@/components/dialogs/save-dialog";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
@@ -53,25 +52,24 @@ import { useQueryWithStatus } from "@/lib/convex";
 import { DndZoomContext } from "@/lib/dnd-mobile";
 import type { EchelonData } from "@/lib/echelon-parser";
 import {
+  createDefaultFormationRowLabel,
   DEFAULT_FORMATIONATION_ROW_LABEL,
   DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
   type FormationRowLabel,
   type FormationRowLabelSide,
-  createDefaultFormationRowLabel,
   persistedSlotsToStudentItems,
   studentItemsToPersistedSlots,
 } from "@/lib/formation-display-utils";
 import {
   type FormationType,
-  TACTICAL_RELAY_STRIKER_MAX,
   inferFormationType,
   resolveStarterOrders,
+  TACTICAL_RELAY_STRIKER_MAX,
 } from "@/lib/formation-type";
+import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
+import { sleep } from "@/lib/sleep";
+import type { Student } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Authenticated, useMutation } from "convex/react";
-import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -197,7 +195,14 @@ export function FormationEditor() {
   const [rows, setRows, setRowsUnchecked] = useSaveableState<
     FormationEditorRow[]
   >(
-    () => [{ id: uuid(), strikers: [], specials: [], tcs: [] }],
+    () => [
+      {
+        id: uuid(),
+        strikers: [],
+        specials: [],
+        tcs: [],
+      },
+    ],
     compareFormationRows,
   );
 
@@ -252,10 +257,14 @@ export function FormationEditor() {
       id: uuid(),
       student,
       ...(preferences.formationDisplay.defaultLevelEnabled
-        ? { level: preferences.formationDisplay.defaultLevel }
+        ? {
+            level: preferences.formationDisplay.defaultLevel,
+          }
         : {}),
       ...(!formationId
-        ? { starLevel: DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL }
+        ? {
+            starLevel: DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
+          }
         : {}),
     };
 
@@ -275,12 +284,28 @@ export function FormationEditor() {
 
         if (strikersOverflowToTcs(row)) {
           return prev.map((r, i) =>
-            i === activeRowIndex ? { ...r, tcs: [...r.tcs, item] } : r,
+            i === activeRowIndex
+              ? {
+                  ...r,
+                  tcs: [
+                    ...r.tcs,
+                    item,
+                  ],
+                }
+              : r,
           );
         }
 
         return prev.map((r, i) =>
-          i === activeRowIndex ? { ...r, strikers: [...r.strikers, item] } : r,
+          i === activeRowIndex
+            ? {
+                ...r,
+                strikers: [
+                  ...r.strikers,
+                  item,
+                ],
+              }
+            : r,
         );
       }
 
@@ -290,7 +315,15 @@ export function FormationEditor() {
         }
 
         return prev.map((r, i) =>
-          i === activeRowIndex ? { ...r, specials: [...r.specials, item] } : r,
+          i === activeRowIndex
+            ? {
+                ...r,
+                specials: [
+                  ...r.specials,
+                  item,
+                ],
+              }
+            : r,
         );
       }
 
@@ -310,7 +343,9 @@ export function FormationEditor() {
         })),
       );
     },
-    [setRows],
+    [
+      setRows,
+    ],
   );
 
   const updateItem = useCallback(
@@ -328,13 +363,19 @@ export function FormationEditor() {
               ...row,
               tcs: row.tcs.map((candidate) =>
                 candidate.id === itemId
-                  ? { ...candidate, ...tcsData }
+                  ? {
+                      ...candidate,
+                      ...tcsData,
+                    }
                   : candidate,
               ),
             };
           }
 
-          const rowItems = [...row.strikers, ...row.specials];
+          const rowItems = [
+            ...row.strikers,
+            ...row.specials,
+          ];
           const item = rowItems.find((candidate) => candidate.id === itemId);
 
           if (!item) {
@@ -357,7 +398,10 @@ export function FormationEditor() {
 
           const updatedItems = rowItems.map((candidate) =>
             candidate.id === itemId
-              ? { ...candidate, ...effectiveData }
+              ? {
+                  ...candidate,
+                  ...effectiveData,
+                }
               : candidate,
           );
 
@@ -401,7 +445,9 @@ export function FormationEditor() {
         }),
       );
     },
-    [setRows],
+    [
+      setRows,
+    ],
   );
 
   function addEmptyCard(combatClass: "striker" | "special") {
@@ -417,13 +463,31 @@ export function FormationEditor() {
 
         if (combatClass === "striker") {
           if (strikersOverflowToTcs(row)) {
-            return { ...row, tcs: [...row.tcs, item] };
+            return {
+              ...row,
+              tcs: [
+                ...row.tcs,
+                item,
+              ],
+            };
           }
 
-          return { ...row, strikers: [...row.strikers, item] };
+          return {
+            ...row,
+            strikers: [
+              ...row.strikers,
+              item,
+            ],
+          };
         }
 
-        return { ...row, specials: [...row.specials, item] };
+        return {
+          ...row,
+          specials: [
+            ...row.specials,
+            item,
+          ],
+        };
       }),
     );
   }
@@ -432,7 +496,12 @@ export function FormationEditor() {
     const newIndex = rows.length;
     setRows((prev) => [
       ...prev,
-      { id: uuid(), strikers: [], specials: [], tcs: [] },
+      {
+        id: uuid(),
+        strikers: [],
+        specials: [],
+        tcs: [],
+      },
     ]);
     setActiveRowIndex(newIndex);
   }
@@ -523,7 +592,9 @@ export function FormationEditor() {
       strikers: studentItemsToPersistedSlots(row.strikers),
       specials: studentItemsToPersistedSlots(row.specials),
       ...(formationType === "tacticalRelay" && row.tcs.length > 0
-        ? { tcs: studentItemsToPersistedSlots(row.tcs) }
+        ? {
+            tcs: studentItemsToPersistedSlots(row.tcs),
+          }
         : {}),
       ...(row.label?.text
         ? {
@@ -545,11 +616,18 @@ export function FormationEditor() {
         : {}),
     }));
 
-    const firstRow = rowsPayload[0] ?? { strikers: [], specials: [] };
+    const firstRow = rowsPayload[0] ?? {
+      strikers: [],
+      specials: [],
+    };
 
     const data = {
       name: name.length > 0 ? name : undefined,
-      ...(formationType !== undefined ? { type: formationType } : {}),
+      ...(formationType !== undefined
+        ? {
+            type: formationType,
+          }
+        : {}),
       strikers: firstRow.strikers,
       specials: firstRow.specials,
       rows: rowsPayload,
@@ -650,7 +728,11 @@ export function FormationEditor() {
     setRows((prev) =>
       prev.map((row, i) =>
         i === activeRowIndex
-          ? { ...row, strikers: newStrikers, specials: newSpecials }
+          ? {
+              ...row,
+              strikers: newStrikers,
+              specials: newSpecials,
+            }
           : row,
       ),
     );
@@ -660,7 +742,14 @@ export function FormationEditor() {
     if (!formationId) {
       // reset
       setNameUnchecked("");
-      setRowsUnchecked([{ id: uuid(), strikers: [], specials: [], tcs: [] }]);
+      setRowsUnchecked([
+        {
+          id: uuid(),
+          strikers: [],
+          specials: [],
+          tcs: [],
+        },
+      ]);
       setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
       setFormationTypeUnchecked(undefined);
       setActiveRowIndex(0);
@@ -708,7 +797,11 @@ export function FormationEditor() {
             "tcs" in row ? (row.tcs ?? []) : [],
             allStudents,
           ),
-          ...(label ? { label } : {}),
+          ...(label
+            ? {
+                label,
+              }
+            : {}),
         };
       });
 
@@ -726,7 +819,10 @@ export function FormationEditor() {
       toast.error("Echelon load fail");
       router.push("/formation-display");
     }
-  }, [formationId, query.status]);
+  }, [
+    formationId,
+    query.status,
+  ]);
 
   useEffect(() => {
     if (scaleTouchedRef.current) {
@@ -734,7 +830,9 @@ export function FormationEditor() {
     }
 
     setScale(preferences.formationDisplay.defaultScale);
-  }, [preferences.formationDisplay.defaultScale]);
+  }, [
+    preferences.formationDisplay.defaultScale,
+  ]);
 
   useEffect(() => {
     const rosterEmpty = rows.every(
@@ -755,7 +853,10 @@ export function FormationEditor() {
       preferences.formationDisplay.defaultGroupsVertical,
     );
     setRowGapUnchecked(preferences.formationDisplay.defaultRowGap ?? 8);
-  }, [preferences, rows]);
+  }, [
+    preferences,
+    rows,
+  ]);
 
   const editableConfigByRow = useMemo((): EditableConfig[] => {
     return rows.map((_, rowIndex) => ({
@@ -772,7 +873,12 @@ export function FormationEditor() {
             typeof action === "function" ? action(row.strikers) : action;
 
           return prev.map((r, i) =>
-            i === rowIndex ? { ...r, strikers: nextStrikers } : r,
+            i === rowIndex
+              ? {
+                  ...r,
+                  strikers: nextStrikers,
+                }
+              : r,
           );
         });
       },
@@ -787,7 +893,12 @@ export function FormationEditor() {
             typeof action === "function" ? action(row.specials) : action;
 
           return prev.map((r, i) =>
-            i === rowIndex ? { ...r, specials: nextSpecials } : r,
+            i === rowIndex
+              ? {
+                  ...r,
+                  specials: nextSpecials,
+                }
+              : r,
           );
         });
       },
@@ -802,14 +913,25 @@ export function FormationEditor() {
             typeof action === "function" ? action(row.tcs) : action;
 
           return prev.map((r, i) =>
-            i === rowIndex ? { ...r, tcs: nextTcs } : r,
+            i === rowIndex
+              ? {
+                  ...r,
+                  tcs: nextTcs,
+                }
+              : r,
           );
         });
       },
       onWantsToRemove: removeItem,
       onWantsToUpdate: updateItem,
     }));
-  }, [rows, selectedItemId, removeItem, updateItem, setRows]);
+  }, [
+    rows,
+    selectedItemId,
+    removeItem,
+    updateItem,
+    setRows,
+  ]);
 
   const totalSlotCount = useMemo(
     () =>
@@ -821,13 +943,19 @@ export function FormationEditor() {
           (formationType === "tacticalRelay" ? row.tcs.length : 0),
         0,
       ),
-    [rows, formationType],
+    [
+      rows,
+      formationType,
+    ],
   );
 
   const hasAnyCard = totalSlotCount > 0;
   const effectiveType = useMemo(
     () => formationType ?? inferFormationType(rows),
-    [formationType, rows],
+    [
+      formationType,
+      rows,
+    ],
   );
 
   if (formationId && query.status === "pending") {
@@ -1081,7 +1209,9 @@ export function FormationEditor() {
                         value={labelControls.text}
                         disabled={!labelEnabled}
                         onChange={(e) =>
-                          updateActiveRowLabel({ text: e.target.value })
+                          updateActiveRowLabel({
+                            text: e.target.value,
+                          })
                         }
                         placeholder={t(
                           "tools.formationDisplay.rowLabel.textPlaceholder",
@@ -1160,7 +1290,9 @@ export function FormationEditor() {
                             DEFAULT_FORMATIONATION_ROW_LABEL.color
                           }
                           onChange={(e) =>
-                            updateActiveRowLabel({ color: e.target.value })
+                            updateActiveRowLabel({
+                              color: e.target.value,
+                            })
                           }
                           className="w-12 h-9 p-1 cursor-pointer"
                         />
@@ -1206,7 +1338,9 @@ export function FormationEditor() {
                           }
                           disabled={!labelEnabled}
                           onCheckedChange={(checked) =>
-                            updateActiveRowLabel({ shadowEnabled: checked })
+                            updateActiveRowLabel({
+                              shadowEnabled: checked,
+                            })
                           }
                         />
                         <Label htmlFor="row-label-shadow">
@@ -1279,7 +1413,9 @@ export function FormationEditor() {
                                 DEFAULT_FORMATIONATION_ROW_LABEL.shadowOpacity,
                             ]}
                             onValueChange={([value]) =>
-                              updateActiveRowLabel({ shadowOpacity: value })
+                              updateActiveRowLabel({
+                                shadowOpacity: value,
+                              })
                             }
                           />
                           <span className="text-sm text-muted-foreground w-10 tabular-nums">

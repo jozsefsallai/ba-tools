@@ -1,14 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { PropsWithChildren } from "react";
-
-import FormationDisplay from "@/how-to-use/formation-display.mdx";
-import InventoryManagement from "@/how-to-use/inventory-management.mdx";
-import Bond from "@/how-to-use/bond.mdx";
-import ScenarioImageGenerator from "@/how-to-use/scenario-image-generator.mdx";
-import TimelineVisualizer from "@/how-to-use/timeline-visualizer.mdx";
-import RailoadPuzzleSolver from "@/how-to-use/railroad-puzzle-solver.mdx";
-
 import {
   Sheet,
   SheetContent,
@@ -16,7 +9,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useTranslations } from "next-intl";
+import Bond from "@/how-to-use/bond.mdx";
+import FormationDisplay from "@/how-to-use/formation-display.mdx";
+import InventoryManagement from "@/how-to-use/inventory-management.mdx";
+import RailoadPuzzleSolver from "@/how-to-use/railroad-puzzle-solver.mdx";
+import ScenarioImageGenerator from "@/how-to-use/scenario-image-generator.mdx";
+import TimelineVisualizer from "@/how-to-use/timeline-visualizer.mdx";
 
 export type HelpSheetProps = PropsWithChildren<{
   document:

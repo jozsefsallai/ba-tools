@@ -87,7 +87,9 @@ export function StudentCard({
           {!isSkillCard && (
             <div
               className="flex w-full h-full bg-cover rounded-[11%]"
-              style={{ backgroundImage: `url(${charBg.src})` }}
+              style={{
+                backgroundImage: `url(${charBg.src})`,
+              }}
             />
           )}
 

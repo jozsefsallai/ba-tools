@@ -7,17 +7,24 @@ import type {
 import { maskPvpIconCard } from "@/lib/pvp/icon-card";
 import { findPvpReportRules } from "@/lib/pvp/screenshot-layout";
 import {
-  type PVPScreenshotROIs,
   PVP_SCREENSHOT_ROI_BOUNDS,
+  type PVPScreenshotROIs,
 } from "@/lib/pvp/screenshot-types";
 import {
-  type PvpStatusTemplates,
   matchPvpStatusTemplate,
+  type PvpStatusTemplates,
 } from "@/lib/pvp/status-match";
 
-type Box = { x: number; y: number; width: number; height: number };
+type Box = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
-type Component = Box & { count: number };
+type Component = Box & {
+  count: number;
+};
 
 export type PvpUnitCrops = PvpUnitPosition & {
   icon: PvpPixelImage;
@@ -51,7 +58,11 @@ export function cropPvpImage(image: PvpPixelImage, box: Box): PvpPixelImage {
     );
   }
 
-  return { width, height, pixels };
+  return {
+    width,
+    height,
+    pixels,
+  };
 }
 
 function components(
@@ -213,17 +224,25 @@ function segmentTeam(image: PvpPixelImage): PvpUnitCrops[] {
     return high - low > 35 && low < 210;
   }).filter((box) => box.width > 35 && box.height > 30);
 
-  const centers: { x: number; combatClass: PvpUnitPosition["combatClass"] }[] =
-    bars.map((bar) => ({
-      x: bar.x + bar.width / 2,
-      combatClass: bar.combatClass,
-    }));
+  const centers: {
+    x: number;
+    combatClass: PvpUnitPosition["combatClass"];
+  }[] = bars.map((bar) => ({
+    x: bar.x + bar.width / 2,
+    combatClass: bar.combatClass,
+  }));
 
-  for (const box of [...badges, ...frames]) {
+  for (const box of [
+    ...badges,
+    ...frames,
+  ]) {
     const x = box.x + box.width / 2;
 
     if (!centers.some((center) => Math.abs(center.x - x) < 48)) {
-      centers.push({ x, combatClass: null });
+      centers.push({
+        x,
+        combatClass: null,
+      });
     }
   }
 
@@ -273,7 +292,11 @@ export function preparePvpReport(
       throw new Error("Invalid screenshot region dimensions");
     }
 
-    return { width, height, pixels: rois[region] };
+    return {
+      width,
+      height,
+      pixels: rois[region],
+    };
   };
 
   const status = image("battleTypeAndResult");
@@ -283,8 +306,16 @@ export function preparePvpReport(
   return {
     valid: myUnits.length > 0 && enemyUnits.length > 0,
     battleType: matchPvpStatusTemplate(
-      cropPvpImage(status, { x: 0, y: 0, width: 135, height: status.height }),
-      { ATTACK: templates.attack, DEFENSE: templates.defense },
+      cropPvpImage(status, {
+        x: 0,
+        y: 0,
+        width: 135,
+        height: status.height,
+      }),
+      {
+        ATTACK: templates.attack,
+        DEFENSE: templates.defense,
+      },
     ),
     result: matchPvpStatusTemplate(
       cropPvpImage(status, {
@@ -293,7 +324,10 @@ export function preparePvpReport(
         width: 213,
         height: status.height,
       }),
-      { WIN: templates.win, LOSE: templates.lose },
+      {
+        WIN: templates.win,
+        LOSE: templates.lose,
+      },
     ),
     enemyStudentRep: maskPvpIconCard(
       image("enemyStudentRep"),
@@ -330,7 +364,11 @@ export function preprocessPvpText(
     pixels[i + 3] = 255;
   }
 
-  const processed = { width: image.width, height: image.height, pixels };
+  const processed = {
+    width: image.width,
+    height: image.height,
+    pixels,
+  };
 
   if (mode === "text") {
     let left = image.width;

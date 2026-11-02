@@ -1,13 +1,25 @@
 "use client";
 
-import { useState, useEffect, type CSSProperties, useMemo } from "react";
+import { Howl } from "howler";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { puzzles, type RailroadPuzzlePreset } from "../_lib/presets";
-
-import { Hexagon } from "./hexagon";
-import { cn } from "@/lib/utils";
-import styles from "./hexagon.module.css";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { useInterval } from "usehooks-ts";
+import { ResultTileArrow } from "@/app/[locale]/railroad-puzzle-solver/_components/result-tile-arrow";
+import {
+  findShortestRailPaths,
+  solveRailroadPuzzle,
+} from "@/app/[locale]/railroad-puzzle-solver/_lib/solver";
+import type {
+  RailPieceCountMap,
+  RailType,
+  Tile,
+} from "@/app/[locale]/railroad-puzzle-solver/_lib/types";
+import { getNeighbor } from "@/app/[locale]/railroad-puzzle-solver/_lib/utils";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -16,32 +28,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import type {
-  RailPieceCountMap,
-  RailType,
-  Tile,
-} from "@/app/[locale]/railroad-puzzle-solver/_lib/types";
-import {
-  findShortestRailPaths,
-  solveRailroadPuzzle,
-} from "@/app/[locale]/railroad-puzzle-solver/_lib/solver";
-import { ResultTileArrow } from "@/app/[locale]/railroad-puzzle-solver/_components/result-tile-arrow";
-import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import minigameCurrencyIcon from "../_assets/minigame-currency-icon.png";
+import { cn } from "@/lib/utils";
 import aobahuh from "../_assets/aobahuh.png";
-import Image from "next/image";
-import { getNeighbor } from "@/app/[locale]/railroad-puzzle-solver/_lib/utils";
-import { useInterval } from "usehooks-ts";
-import { Howl } from "howler";
+import minigameCurrencyIcon from "../_assets/minigame-currency-icon.png";
+import { puzzles, type RailroadPuzzlePreset } from "../_lib/presets";
+import { Hexagon } from "./hexagon";
+import styles from "./hexagon.module.css";
 
 type HexagonMapStyles = CSSProperties & {
   "--railroad-cell-height": string;
@@ -56,7 +55,9 @@ export function RailroadPuzzleView() {
       SLIGHTLY_CURVED: t("tools.railroad.railTypes.slightlyCurved"),
       VERY_CURVED: t("tools.railroad.railTypes.veryCurved"),
     }),
-    [t],
+    [
+      t,
+    ],
   );
 
   const [selectedPreset, setSelectedPreset] = useState<RailroadPuzzlePreset>(
@@ -83,7 +84,9 @@ export function RailroadPuzzleView() {
     setRailInventory(selectedPreset.defaultAvailableRails);
     setResultMap(new Map());
     setMinRailConfigs([]);
-  }, [selectedPreset]);
+  }, [
+    selectedPreset,
+  ]);
 
   const railsUsed = useMemo(() => {
     if (resultMap.size === 0) {
@@ -95,7 +98,9 @@ export function RailroadPuzzleView() {
     }, 0);
 
     return count;
-  }, [resultMap]);
+  }, [
+    resultMap,
+  ]);
 
   function handleRailCountChange(railType: RailType, count: number): void {
     setRailInventory((prev) => ({
@@ -143,7 +148,10 @@ export function RailroadPuzzleView() {
     }
 
     solve();
-  }, [railInventory, solveInstantly]);
+  }, [
+    railInventory,
+    solveInstantly,
+  ]);
 
   function handleGetMinimalConfigsClick() {
     setMinRailConfigs([]);
@@ -185,7 +193,9 @@ export function RailroadPuzzleView() {
 
   const flatTiles = useMemo(
     () => selectedPreset.grid.tiles.flat(),
-    [selectedPreset],
+    [
+      selectedPreset,
+    ],
   );
 
   useInterval(
@@ -195,7 +205,12 @@ export function RailroadPuzzleView() {
         return;
       }
 
-      let nextCoords: [number, number] | null = null;
+      let nextCoords:
+        | [
+            number,
+            number,
+          ]
+        | null = null;
 
       switch (aobaRail.state.type) {
         case "START":
@@ -278,18 +293,28 @@ export function RailroadPuzzleView() {
     }
 
     const aobaHowl = new Howl({
-      src: ["/assets/audio/Aoba_Minigame_Train_Start.ogg"],
+      src: [
+        "/assets/audio/Aoba_Minigame_Train_Start.ogg",
+      ],
     });
 
     const hikariHowl = new Howl({
-      src: ["/assets/audio/Hikari_Minigame_Train_Start.ogg"],
+      src: [
+        "/assets/audio/Hikari_Minigame_Train_Start.ogg",
+      ],
     });
 
     const nozomiHowl = new Howl({
-      src: ["/assets/audio/Nozomi_Minigame_Train_Start.ogg"],
+      src: [
+        "/assets/audio/Nozomi_Minigame_Train_Start.ogg",
+      ],
     });
 
-    setHowls([aobaHowl, hikariHowl, nozomiHowl]);
+    setHowls([
+      aobaHowl,
+      hikariHowl,
+      nozomiHowl,
+    ]);
 
     return () => {
       aobaHowl.unload();
@@ -303,7 +328,11 @@ export function RailroadPuzzleView() {
     <div className="flex flex-col gap-8 items-center justify-center">
       <div
         className={cn(styles.railroadMap, "max-w-full overflow-x-auto")}
-        style={{ "--railroad-cell-height": "75px" } as HexagonMapStyles}
+        style={
+          {
+            "--railroad-cell-height": "75px",
+          } as HexagonMapStyles
+        }
       >
         <TooltipProvider>
           {selectedPreset.grid.tiles.map((row, rowIndex) => (

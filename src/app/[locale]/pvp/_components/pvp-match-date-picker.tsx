@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
@@ -10,9 +13,6 @@ import {
 } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
-import { ChevronDownIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
 
 export function PvpMatchDatePicker({
   value,
@@ -69,8 +69,9 @@ export function PvpMatchDatePicker({
             className="gap-1 rounded-lg border bg-muted/40 p-1 shadow-sm"
             aria-label={t("date")}
             onValueChange={(mode) => {
-              if (mode === "today" || mode === "last")
+              if (mode === "today" || mode === "last") {
                 value.setDateModeAndDefault(mode);
+              }
             }}
           >
             <ToggleGroupItem

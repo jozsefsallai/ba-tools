@@ -2,5 +2,7 @@
   "version": "tesseract-7.0.0-eng-87416418",
   "runtimeVersion": "7.0.0",
   "languageRevision": "87416418657359cb625c412a48b6e1d6d41c29bd",
-  "languages": ["eng"]
+  "languages": [
+    "eng"
+  ]
 }

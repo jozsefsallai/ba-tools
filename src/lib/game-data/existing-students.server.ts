@@ -3,7 +3,11 @@ import type { ExistingStudents, ImageStudent } from "./contract";
 
 export async function getExistingStudents(): Promise<ExistingStudents> {
   const rows = await db.student.findMany({
-    select: { devName: true, schaleDbId: true, defaultOrder: true },
+    select: {
+      devName: true,
+      schaleDbId: true,
+      defaultOrder: true,
+    },
   });
 
   return {
@@ -15,8 +19,14 @@ export async function getExistingStudents(): Promise<ExistingStudents> {
 
 export async function resolveAllImageStudents(): Promise<ImageStudent[]> {
   const rows = await db.student.findMany({
-    select: { id: true, devName: true, schaleDbId: true },
-    orderBy: { defaultOrder: "asc" },
+    select: {
+      id: true,
+      devName: true,
+      schaleDbId: true,
+    },
+    orderBy: {
+      defaultOrder: "asc",
+    },
   });
 
   return rows.map((row) => ({
@@ -30,11 +40,25 @@ export async function resolveImageStudents(
   devNames: string[],
 ): Promise<ImageStudent[]> {
   const rows = await db.student.findMany({
-    where: { devName: { in: devNames, mode: "insensitive" } },
-    select: { id: true, devName: true, schaleDbId: true },
+    where: {
+      devName: {
+        in: devNames,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      id: true,
+      devName: true,
+      schaleDbId: true,
+    },
   });
 
-  const byDevName = new Map(rows.map((r) => [r.devName.toLowerCase(), r]));
+  const byDevName = new Map(
+    rows.map((r) => [
+      r.devName.toLowerCase(),
+      r,
+    ]),
+  );
 
   const unknown = devNames.filter((n) => !byDevName.has(n.toLowerCase()));
 

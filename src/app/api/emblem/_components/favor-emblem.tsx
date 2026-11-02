@@ -3,8 +3,8 @@ import { DEVNAME_OVERRIDE } from "@/lib/devname";
 import {
   buildFavorEmblemBackgroundUrl,
   buildFavorEmblemIconUrl,
-  fitFont,
   type FavorEmblemParams,
+  fitFont,
 } from "@/lib/emblems";
 import { cn } from "@/lib/utils";
 

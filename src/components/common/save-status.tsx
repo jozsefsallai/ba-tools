@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { CheckIcon, LoaderCircleIcon, PencilLineIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 export type SaveStatusProps = {
   isDirty: boolean;
@@ -24,7 +24,10 @@ export function SaveStatus({ isDirty, isSaving }: SaveStatusProps) {
     }
 
     return <CheckIcon className="size-4" />;
-  }, [isDirty, isSaving]);
+  }, [
+    isDirty,
+    isSaving,
+  ]);
 
   const label = useMemo(() => {
     if (isSaving) {
@@ -36,7 +39,11 @@ export function SaveStatus({ isDirty, isSaving }: SaveStatusProps) {
     }
 
     return t("common.saveStatus.ok");
-  }, [isDirty, isSaving, locale]);
+  }, [
+    isDirty,
+    isSaving,
+    locale,
+  ]);
 
   return (
     <div

@@ -60,7 +60,10 @@ export async function listRecruitmentAccounts(userId: string) {
 
 export async function getRecruitmentAccount(userId: string, accountId: string) {
   const { account, sessions } = await findAccount(userId, accountId);
-  return toResource({ ...account, sessions });
+  return toResource({
+    ...account,
+    sessions,
+  });
 }
 
 export async function createRecruitmentAccount(
@@ -127,7 +130,9 @@ export async function createRecruitmentSession(
   } as UserArgs<typeof api.recruitment.createSession>);
 
   return toResource(
-    await userQuery(userId, api.recruitment.getSession, { sessionId }),
+    await userQuery(userId, api.recruitment.getSession, {
+      sessionId,
+    }),
   );
 }
 

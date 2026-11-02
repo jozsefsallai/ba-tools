@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,15 +25,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  GAME_SERVERS,
   GAME_SERVER_NAMES,
+  GAME_SERVERS,
   type GameServer,
   PVP_SEASONS,
 } from "@/lib/types";
-import { useMutation } from "convex/react";
-import { useTranslations } from "next-intl";
-import { type PropsWithChildren, useRef, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 

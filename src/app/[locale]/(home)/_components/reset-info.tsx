@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { CountdownTimer } from "@/components/common/countdown-timer";
 import {
   currentClosestCafeBreakpointJST,
@@ -7,8 +9,6 @@ import {
   currentTimeJST,
   resetTimeForDateJST,
 } from "@/lib/date";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 
 function getResetDate(): Date {
   const now = currentTimeJST();
@@ -70,7 +70,9 @@ export function ResetInfo() {
       <div className="flex flex-col items-center gap-4 px-6 py-4 border rounded-md bg-card">
         {resetDate && (
           <div className="flex flex-col items-center">
-            <div className="text-sm text-muted-foreground">{t("tools.resetInfo.nextReset")}</div>
+            <div className="text-sm text-muted-foreground">
+              {t("tools.resetInfo.nextReset")}
+            </div>
 
             <CountdownTimer
               targetTime={resetDate}

@@ -1,10 +1,10 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   type BirthdayGiftPreference,
   BirthdaysView,
 } from "@/app/[locale]/birthdays/_components/birthdays-view";
 import { db } from "@/lib/db";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("birthdays", await getLocale());

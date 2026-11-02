@@ -1,6 +1,6 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { GachaRateStatsView } from "@/app/[locale]/gacha-rate-stats/_components/gacha-rate-stats-view";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("gacha-rate-stats", await getLocale());

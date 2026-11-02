@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,11 +23,21 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "~convex/*": ["./convex/_generated/*"],
-      "~convex-lib/*": ["./convex/lib/*"],
-      "~fonts/*": ["./public/assets/fonts/*"],
-      "~prisma": ["./src/lib/db/client.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "~convex/*": [
+        "./convex/_generated/*"
+      ],
+      "~convex-lib/*": [
+        "./convex/lib/*"
+      ],
+      "~fonts/*": [
+        "./public/assets/fonts/*"
+      ],
+      "~prisma": [
+        "./src/lib/db/client.ts"
+      ]
     }
   },
   "include": [
@@ -33,5 +47,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "vendor"]
+  "exclude": [
+    "node_modules",
+    "vendor"
+  ]
 }

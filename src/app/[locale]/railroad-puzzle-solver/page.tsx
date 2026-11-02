@@ -1,9 +1,9 @@
+import { HelpCircleIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { RailroadPuzzleView } from "@/app/[locale]/railroad-puzzle-solver/_components/railroad-puzzle-view";
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { HelpCircleIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("railroad-puzzle-solver", await getLocale());

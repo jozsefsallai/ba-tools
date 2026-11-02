@@ -2,6 +2,10 @@ import { getPublicTimeline } from "@/lib/public-api/resources/shared-content.ser
 import { ok } from "@/lib/public-api/response";
 import { publicRoute } from "@/lib/public-api/route";
 
-export const GET = publicRoute<{ id: string }>(async (_req, { id }) => {
-  return ok(await getPublicTimeline(id), { cache: "shared" });
+export const GET = publicRoute<{
+  id: string;
+}>(async (_req, { id }) => {
+  return ok(await getPublicTimeline(id), {
+    cache: "shared",
+  });
 });

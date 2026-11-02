@@ -1,5 +1,5 @@
 import { Storage } from "@/lib/storage";
-import { type PVPSeasonNumber, PVP_SEASONS } from "@/lib/types";
+import { PVP_SEASONS, type PVPSeasonNumber } from "@/lib/types";
 
 const seasonStorage = new Storage<unknown>("pvp_stats_season");
 const exclusionsStorage = new Storage<unknown>("pvp_stats_excluded_students");
@@ -34,7 +34,10 @@ export function readPvpStatsFilters() {
     // ignore
   }
 
-  return { seasonNumber, excludedStudentIds };
+  return {
+    seasonNumber,
+    excludedStudentIds,
+  };
 }
 
 export function writePvpStatsFilters(

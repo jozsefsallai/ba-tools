@@ -1,10 +1,10 @@
+import { NextResponse } from "next/server";
 import { offsetBannerDate } from "@/lib/admin/game-banner-dates";
 import { offsetGameBannersSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import { invalidateGameBannersCache } from "@/lib/game-banners.server";
-import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -18,14 +18,26 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Invalid JSON",
+      },
+      {
+        status: 400,
+      },
+    );
   }
 
   const parsed = offsetGameBannersSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid payload", details: parsed.error.flatten() },
-      { status: 400 },
+      {
+        error: "Invalid payload",
+        details: parsed.error.flatten(),
+      },
+      {
+        status: 400,
+      },
     );
   }
 
@@ -59,12 +71,16 @@ export async function POST(req: Request) {
     const newEndDate = offsetBannerDate(banner.endDate, offsetDays);
 
     const next = await db.gameBanner.update({
-      where: { id: banner.id },
+      where: {
+        id: banner.id,
+      },
       data: {
         startDate: newStartDate,
         endDate: newEndDate,
       },
-      include: { pickupStudents: true },
+      include: {
+        pickupStudents: true,
+      },
     });
 
     updated.push(serializeGameBanner(next));

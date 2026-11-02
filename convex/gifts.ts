@@ -7,7 +7,12 @@ import {
   giftTargetUpdateArgs,
 } from "./lib/validators";
 
-function normalizeTargetGifts(gifts: { id: number; count: number }[]) {
+function normalizeTargetGifts(
+  gifts: {
+    id: number;
+    count: number;
+  }[],
+) {
   return gifts.map(({ id, count }) => ({
     id,
     count,
@@ -70,7 +75,10 @@ export const createInventory = authenticatedMutation({
 });
 
 export const createTarget = authenticatedMutation({
-  args: { giftInventoryId: v.id("giftInventory"), ...giftTargetCreateArgs },
+  args: {
+    giftInventoryId: v.id("giftInventory"),
+    ...giftTargetCreateArgs,
+  },
   handler: async (
     ctx,
     { giftInventoryId, studentId, currentExp, targetExp, gifts, giftBoxCount },
@@ -107,7 +115,10 @@ export const createTarget = authenticatedMutation({
 });
 
 export const updateInventory = authenticatedMutation({
-  args: { id: v.id("giftInventory"), ...giftInventoryArgs },
+  args: {
+    id: v.id("giftInventory"),
+    ...giftInventoryArgs,
+  },
   handler: async (ctx, { id, name, gifts, giftBoxes }) => {
     const giftInventory = await ctx.db.get(id);
 
@@ -124,7 +135,10 @@ export const updateInventory = authenticatedMutation({
 });
 
 export const updateTarget = authenticatedMutation({
-  args: { id: v.id("giftTarget"), ...giftTargetUpdateArgs },
+  args: {
+    id: v.id("giftTarget"),
+    ...giftTargetUpdateArgs,
+  },
   handler: async (
     ctx,
     { id, studentId, currentExp, targetExp, gifts, giftBoxCount },

@@ -1,8 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import type { ChatStatus } from "ai";
 import { SendIcon, SquareIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,6 +10,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 type ChatInputProps = {
   onSend: (message: string) => void;

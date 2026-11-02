@@ -1,9 +1,9 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { StudentCard } from "@/components/common/student-card";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useSyncExternalStore } from "react";
 
 type RosterItemStudentIconProps = {
   student: Student;
@@ -50,7 +50,13 @@ export function RosterItemStudentIcon({
     >
       <div
         className="origin-top-left max-sm:absolute max-sm:top-0 max-sm:left-0 max-sm:scale-[0.7] sm:static sm:scale-100"
-        style={zoom === 1 ? undefined : { zoom }}
+        style={
+          zoom === 1
+            ? undefined
+            : {
+                zoom,
+              }
+        }
       >
         <StudentCard
           student={student}

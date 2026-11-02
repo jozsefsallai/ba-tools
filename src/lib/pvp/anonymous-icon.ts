@@ -1,9 +1,9 @@
 import type { PvpPixelImage, PvpStudentField } from "@/lib/pvp";
 import descriptor from "@/lib/pvp/anonymous-icon.json";
 import {
+  matchPvpIcon,
   PVP_ICON_CATALOG_FORMAT,
   type PvpIconCatalog,
-  matchPvpIcon,
 } from "@/lib/pvp/icon-match";
 
 // 12x12 RGBA samples from the question-mark representative in the supplied
@@ -13,14 +13,22 @@ const templates = Uint8Array.from(descriptor);
 const catalog: PvpIconCatalog = {
   format: PVP_ICON_CATALOG_FORMAT,
   asset: "anonymous",
-  students: [{ id: "anonymous", name: "Anonymous" }],
+  students: [
+    {
+      id: "anonymous",
+      name: "Anonymous",
+    },
+  ],
 };
 
 export function recognizePvpAnonymousOpponent(
   image: PvpPixelImage,
 ): PvpStudentField | null {
   const match = matchPvpIcon(
-    { ...image, iconCard: undefined },
+    {
+      ...image,
+      iconCard: undefined,
+    },
     catalog,
     templates,
   );

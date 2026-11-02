@@ -16,10 +16,18 @@ import {
 
 const { values } = parseArgs({
   options: {
-    "sqlcipher-key": { type: "string" },
-    "global-sqlcipher-key": { type: "string" },
-    "dev-names": { type: "string" },
-    out: { type: "string" },
+    "sqlcipher-key": {
+      type: "string",
+    },
+    "global-sqlcipher-key": {
+      type: "string",
+    },
+    "dev-names": {
+      type: "string",
+    },
+    out: {
+      type: "string",
+    },
   },
 });
 
@@ -39,11 +47,15 @@ const result = await extractStudentSkills({
   students: await resolveSkillStudents(devNames),
   cacheDir,
   logger,
-  effectNames: { en: localizeTable.EN.buffName },
+  effectNames: {
+    en: localizeTable.EN.buffName,
+  },
 });
 
 if (values.out) {
-  await mkdir(dirname(values.out), { recursive: true });
+  await mkdir(dirname(values.out), {
+    recursive: true,
+  });
   await writeFile(values.out, `${JSON.stringify(result, null, 2)}\n`);
   logger.info(`Wrote ${result.skills.length} skills to ${values.out}`);
 } else {

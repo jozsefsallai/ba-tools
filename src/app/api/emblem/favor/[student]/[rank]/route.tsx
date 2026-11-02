@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { FavorEmblem } from "@/app/api/emblem/_components/favor-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import { db } from "@/lib/db";
@@ -13,7 +14,6 @@ import {
   makeEmblem,
   processTrailingPart,
 } from "@/lib/emblems.server";
-import { NextResponse } from "next/server";
 
 type RouteParams = {
   student: string;
@@ -22,16 +22,32 @@ type RouteParams = {
 
 export async function generateStaticParams(): Promise<RouteParams[]> {
   const students = await db.student.findMany();
-  const ranks: FavorEmblemRank[] = [20, 50, 100];
+  const ranks: FavorEmblemRank[] = [
+    20,
+    50,
+    100,
+  ];
 
   const combinations: RouteParams[] = [];
 
   for (const student of students) {
     for (const rank of ranks) {
-      combinations.push({ student: student.devName, rank: rank.toString() });
-      combinations.push({ student: student.devName, rank: `${rank}.png` });
-      combinations.push({ student: student.id, rank: rank.toString() });
-      combinations.push({ student: student.id, rank: `${rank}.png` });
+      combinations.push({
+        student: student.devName,
+        rank: rank.toString(),
+      });
+      combinations.push({
+        student: student.devName,
+        rank: `${rank}.png`,
+      });
+      combinations.push({
+        student: student.id,
+        rank: rank.toString(),
+      });
+      combinations.push({
+        student: student.id,
+        rank: `${rank}.png`,
+      });
       combinations.push({
         student: student.schaleDbId.toString(),
         rank: rank.toString(),
@@ -59,8 +75,14 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
   }
 
   for (const rank of ranks) {
-    combinations.push({ student: "hoshino_battle", rank: rank.toString() });
-    combinations.push({ student: "hoshino_battle", rank: `${rank}.png` });
+    combinations.push({
+      student: "hoshino_battle",
+      rank: rank.toString(),
+    });
+    combinations.push({
+      student: "hoshino_battle",
+      rank: `${rank}.png`,
+    });
 
     for (const size of DEFAULT_SIZES) {
       combinations.push({
@@ -75,8 +97,14 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
     FAVOR_EMBLEM_EXTRA_PLANA,
   ]) {
     for (const rank of ranks) {
-      combinations.push({ student: extraStudent.id, rank: rank.toString() });
-      combinations.push({ student: extraStudent.id, rank: `${rank}.png` });
+      combinations.push({
+        student: extraStudent.id,
+        rank: rank.toString(),
+      });
+      combinations.push({
+        student: extraStudent.id,
+        rank: `${rank}.png`,
+      });
 
       for (const size of DEFAULT_SIZES) {
         combinations.push({
@@ -135,7 +163,13 @@ export async function GET(
 
   const rank = Number.parseInt(rawRankWithoutPng, 10) as FavorEmblemRank;
 
-  if (![20, 50, 100].includes(rank)) {
+  if (
+    ![
+      20,
+      50,
+      100,
+    ].includes(rank)
+  ) {
     return NextResponse.json(
       {
         error: "Invalid favor emblem rank.",

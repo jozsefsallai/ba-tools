@@ -80,7 +80,10 @@ export type RoadmapEventItem = RoadmapItemBase & {
   name: string;
   internalId: string;
   type: EventRunType;
-  eventStudent: { id: string; name: string } | null;
+  eventStudent: {
+    id: string;
+    name: string;
+  } | null;
 };
 
 export type RoadmapStoryItem = RoadmapItemBase & {

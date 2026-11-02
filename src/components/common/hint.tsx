@@ -1,9 +1,9 @@
+import type { ReactNode } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ReactNode } from "react";
 
 type HintProps = {
   label: ReactNode;

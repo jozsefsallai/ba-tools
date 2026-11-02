@@ -105,17 +105,50 @@ export const VALID_BOSS_EMBLEM_COMBINATIONS: {
   name: BossEmblemName;
   terrain: BossEmblemTerrain;
 }[] = [
-  { name: "Binah", terrain: "Outdoor" },
-  { name: "Binah", terrain: "Street" },
-  { name: "Chesed", terrain: "Outdoor" },
-  { name: "Goz", terrain: "Outdoor" },
-  { name: "Hieronymus", terrain: "Street" },
-  { name: "HOD", terrain: "Indoor" },
-  { name: "HoverCraft", terrain: "Outdoor" },
-  { name: "Kaitenger", terrain: "Street" },
-  { name: "Perorozilla", terrain: "Outdoor" },
-  { name: "Shirokuro", terrain: "Indoor" },
-  { name: "Shirokuro", terrain: "Street" },
+  {
+    name: "Binah",
+    terrain: "Outdoor",
+  },
+  {
+    name: "Binah",
+    terrain: "Street",
+  },
+  {
+    name: "Chesed",
+    terrain: "Outdoor",
+  },
+  {
+    name: "Goz",
+    terrain: "Outdoor",
+  },
+  {
+    name: "Hieronymus",
+    terrain: "Street",
+  },
+  {
+    name: "HOD",
+    terrain: "Indoor",
+  },
+  {
+    name: "HoverCraft",
+    terrain: "Outdoor",
+  },
+  {
+    name: "Kaitenger",
+    terrain: "Street",
+  },
+  {
+    name: "Perorozilla",
+    terrain: "Outdoor",
+  },
+  {
+    name: "Shirokuro",
+    terrain: "Indoor",
+  },
+  {
+    name: "Shirokuro",
+    terrain: "Street",
+  },
 ];
 
 export const FAVOR_EMBLEM_RANKS: EmblemConfigItem<FavorEmblemRank>[] = [
@@ -185,115 +218,412 @@ export const GROUP_EMBLEM_SCHOOLS: EmblemConfigItem<School>[] = [
 ];
 
 export const GROUP_EMBLEM_CLUBS: EmblemConfigItem<Club>[] = [
-  { id: "Kohshinjo68", name: "Problem Solver 68" },
-  { id: "Justice", name: "Justice Task Force" },
-  { id: "CleanNClearing", name: "Cleaning & Clearing" },
-  { id: "BookClub", name: "Library Committee" },
-  { id: "Countermeasure", name: "Foreclosure Task Force" },
-  { id: "Engineer", name: "Engineering Department" },
-  { id: "FoodService", name: "School Lunch Club" },
-  { id: "Fuuki", name: "Prefect Team" },
-  { id: "GourmetClub", name: "Gourmet Research Society" },
-  { id: "HoukagoDessert", name: "After-School Sweets Club" },
-  { id: "KnightsHospitaller", name: "Remedial Knights" },
-  { id: "MatsuriOffice", name: "Festival Operations Department" },
-  { id: "Meihuayuan", name: "Plum Blossom Garden" },
-  { id: "Onmyobu", name: "Yin-Yang Club" },
-  { id: "RemedialClass", name: "Make-Up Work Club" },
-  { id: "SPTF", name: "Super Phenomenon Task Force" },
-  { id: "Shugyobu", name: "Inner Discipline Club" },
-  { id: "Endanbou", name: "Eastern Alchemy Society" },
-  { id: "TheSeminar", name: "Seminar" },
-  { id: "TrainingClub", name: "Athletics Training Club" },
-  { id: "TrinityVigilance", name: "Trinity's Vigilante Crew" },
-  { id: "Veritas", name: "Veritas" },
-  { id: "NinpoKenkyubu", name: "Ninjutsu Research Club" },
-  { id: "GameDev", name: "Game Development Department" },
-  { id: "RedwinterSecretary", name: "Red Winter Office" },
-  { id: "anzenkyoku", name: "Public Safety Bureau" },
-  { id: "SisterHood", name: "The Sisterhood" },
-  { id: "Class227", name: "Spec Ops No. 227" },
-  { id: "Emergentology", name: "Medical Emergency Club" },
-  { id: "RabbitPlatoon", name: "RABBIT Squad" },
-  { id: "PandemoniumSociety", name: "Pandemonium Society" },
-  { id: "HotSpringsDepartment", name: "Hot Springs Department" },
-  { id: "TeaParty", name: "Tea Party" },
-  { id: "PublicPeaceBureau", name: "Public Peace Bureau" },
-  { id: "BlackTortoisePromenade", name: "Black Tortoise Promenade" },
-  { id: "Genryumon", name: "Genryumon" },
-  { id: "LaborParty", name: "Labor Party" },
-  { id: "KnowledgeLiberationFront", name: "Knowledge Liberation Front" },
-  { id: "Hyakkayouran", name: "Hyakkaryouran Resolution Council" },
-  { id: "ShinySparkleSociety", name: "Sparkle Club" },
-  { id: "AbydosStudentCouncil", name: "Abydos Student Council" },
-  { id: "CentralControlCenter", name: "Central Control Center" },
-  { id: "FreightLogisticsDepartment", name: "Freight Logistics Department" },
-  { id: "OccultClub", name: "Occult Research Society" },
-  { id: "FreeTradeCartel", name: "Special Trade Department" },
-  { id: "NicomediasTroop", name: "Nicomedia Troop" },
-  { id: "PublishingDepartment", name: "Publishing Department" },
-  { id: "FoxSquad", name: "FOX Squad" },
-  { id: "DivingClub", name: "Diving Club" },
-  { id: "Class183", name: "Spec Ops No. 183" },
+  {
+    id: "Kohshinjo68",
+    name: "Problem Solver 68",
+  },
+  {
+    id: "Justice",
+    name: "Justice Task Force",
+  },
+  {
+    id: "CleanNClearing",
+    name: "Cleaning & Clearing",
+  },
+  {
+    id: "BookClub",
+    name: "Library Committee",
+  },
+  {
+    id: "Countermeasure",
+    name: "Foreclosure Task Force",
+  },
+  {
+    id: "Engineer",
+    name: "Engineering Department",
+  },
+  {
+    id: "FoodService",
+    name: "School Lunch Club",
+  },
+  {
+    id: "Fuuki",
+    name: "Prefect Team",
+  },
+  {
+    id: "GourmetClub",
+    name: "Gourmet Research Society",
+  },
+  {
+    id: "HoukagoDessert",
+    name: "After-School Sweets Club",
+  },
+  {
+    id: "KnightsHospitaller",
+    name: "Remedial Knights",
+  },
+  {
+    id: "MatsuriOffice",
+    name: "Festival Operations Department",
+  },
+  {
+    id: "Meihuayuan",
+    name: "Plum Blossom Garden",
+  },
+  {
+    id: "Onmyobu",
+    name: "Yin-Yang Club",
+  },
+  {
+    id: "RemedialClass",
+    name: "Make-Up Work Club",
+  },
+  {
+    id: "SPTF",
+    name: "Super Phenomenon Task Force",
+  },
+  {
+    id: "Shugyobu",
+    name: "Inner Discipline Club",
+  },
+  {
+    id: "Endanbou",
+    name: "Eastern Alchemy Society",
+  },
+  {
+    id: "TheSeminar",
+    name: "Seminar",
+  },
+  {
+    id: "TrainingClub",
+    name: "Athletics Training Club",
+  },
+  {
+    id: "TrinityVigilance",
+    name: "Trinity's Vigilante Crew",
+  },
+  {
+    id: "Veritas",
+    name: "Veritas",
+  },
+  {
+    id: "NinpoKenkyubu",
+    name: "Ninjutsu Research Club",
+  },
+  {
+    id: "GameDev",
+    name: "Game Development Department",
+  },
+  {
+    id: "RedwinterSecretary",
+    name: "Red Winter Office",
+  },
+  {
+    id: "anzenkyoku",
+    name: "Public Safety Bureau",
+  },
+  {
+    id: "SisterHood",
+    name: "The Sisterhood",
+  },
+  {
+    id: "Class227",
+    name: "Spec Ops No. 227",
+  },
+  {
+    id: "Emergentology",
+    name: "Medical Emergency Club",
+  },
+  {
+    id: "RabbitPlatoon",
+    name: "RABBIT Squad",
+  },
+  {
+    id: "PandemoniumSociety",
+    name: "Pandemonium Society",
+  },
+  {
+    id: "HotSpringsDepartment",
+    name: "Hot Springs Department",
+  },
+  {
+    id: "TeaParty",
+    name: "Tea Party",
+  },
+  {
+    id: "PublicPeaceBureau",
+    name: "Public Peace Bureau",
+  },
+  {
+    id: "BlackTortoisePromenade",
+    name: "Black Tortoise Promenade",
+  },
+  {
+    id: "Genryumon",
+    name: "Genryumon",
+  },
+  {
+    id: "LaborParty",
+    name: "Labor Party",
+  },
+  {
+    id: "KnowledgeLiberationFront",
+    name: "Knowledge Liberation Front",
+  },
+  {
+    id: "Hyakkayouran",
+    name: "Hyakkaryouran Resolution Council",
+  },
+  {
+    id: "ShinySparkleSociety",
+    name: "Sparkle Club",
+  },
+  {
+    id: "AbydosStudentCouncil",
+    name: "Abydos Student Council",
+  },
+  {
+    id: "CentralControlCenter",
+    name: "Central Control Center",
+  },
+  {
+    id: "FreightLogisticsDepartment",
+    name: "Freight Logistics Department",
+  },
+  {
+    id: "OccultClub",
+    name: "Occult Research Society",
+  },
+  {
+    id: "FreeTradeCartel",
+    name: "Special Trade Department",
+  },
+  {
+    id: "NicomediasTroop",
+    name: "Nicomedia Troop",
+  },
+  {
+    id: "PublishingDepartment",
+    name: "Publishing Department",
+  },
+  {
+    id: "FoxSquad",
+    name: "FOX Squad",
+  },
+  {
+    id: "DivingClub",
+    name: "Diving Club",
+  },
+  {
+    id: "Class183",
+    name: "Spec Ops No. 183",
+  },
 ];
 
 export const GROUP_EMBLEM_VALID_COMBINATIONS: {
   school: School;
   club: Club;
 }[] = [
-  { club: "Kohshinjo68", school: "Gehenna" },
-  { club: "Justice", school: "Trinity" },
-  { club: "CleanNClearing", school: "Millennium" },
-  { club: "BookClub", school: "Trinity" },
-  { club: "Countermeasure", school: "Abydos" },
-  { club: "Engineer", school: "Millennium" },
-  { club: "FoodService", school: "Gehenna" },
-  { club: "Fuuki", school: "Gehenna" },
-  { club: "GourmetClub", school: "Gehenna" },
-  { club: "HoukagoDessert", school: "Trinity" },
-  { club: "KnightsHospitaller", school: "Trinity" },
-  { club: "MatsuriOffice", school: "Hyakkiyako" },
-  { club: "Meihuayuan", school: "Shanhaijing" },
-  { club: "Onmyobu", school: "Hyakkiyako" },
-  { club: "RemedialClass", school: "Trinity" },
-  { club: "SPTF", school: "Millennium" },
-  { club: "Shugyobu", school: "Hyakkiyako" },
-  { club: "Endanbou", school: "Shanhaijing" },
-  { club: "TheSeminar", school: "Millennium" },
-  { club: "TrainingClub", school: "Millennium" },
-  { club: "TrinityVigilance", school: "Trinity" },
-  { club: "Veritas", school: "Millennium" },
-  { club: "NinpoKenkyubu", school: "Hyakkiyako" },
-  { club: "GameDev", school: "Millennium" },
-  { club: "RedwinterSecretary", school: "RedWinter" },
-  { club: "anzenkyoku", school: "Valkyrie" },
-  { club: "SisterHood", school: "Trinity" },
-  { club: "Class227", school: "RedWinter" },
-  { club: "Emergentology", school: "Gehenna" },
-  { club: "RabbitPlatoon", school: "SRT" },
-  { club: "PandemoniumSociety", school: "Gehenna" },
-  { club: "HotSpringsDepartment", school: "Gehenna" },
-  { club: "TeaParty", school: "Trinity" },
-  { club: "PublicPeaceBureau", school: "Valkyrie" },
-  { club: "BlackTortoisePromenade", school: "Shanhaijing" },
-  { club: "Genryumon", school: "Shanhaijing" },
-  { club: "LaborParty", school: "RedWinter" },
-  { club: "KnowledgeLiberationFront", school: "RedWinter" },
-  { club: "Hyakkayouran", school: "Hyakkiyako" },
-  { club: "ShinySparkleSociety", school: "Gehenna" },
-  { club: "AbydosStudentCouncil", school: "Abydos" },
-  { club: "CentralControlCenter", school: "Highlander" },
+  {
+    club: "Kohshinjo68",
+    school: "Gehenna",
+  },
+  {
+    club: "Justice",
+    school: "Trinity",
+  },
+  {
+    club: "CleanNClearing",
+    school: "Millennium",
+  },
+  {
+    club: "BookClub",
+    school: "Trinity",
+  },
+  {
+    club: "Countermeasure",
+    school: "Abydos",
+  },
+  {
+    club: "Engineer",
+    school: "Millennium",
+  },
+  {
+    club: "FoodService",
+    school: "Gehenna",
+  },
+  {
+    club: "Fuuki",
+    school: "Gehenna",
+  },
+  {
+    club: "GourmetClub",
+    school: "Gehenna",
+  },
+  {
+    club: "HoukagoDessert",
+    school: "Trinity",
+  },
+  {
+    club: "KnightsHospitaller",
+    school: "Trinity",
+  },
+  {
+    club: "MatsuriOffice",
+    school: "Hyakkiyako",
+  },
+  {
+    club: "Meihuayuan",
+    school: "Shanhaijing",
+  },
+  {
+    club: "Onmyobu",
+    school: "Hyakkiyako",
+  },
+  {
+    club: "RemedialClass",
+    school: "Trinity",
+  },
+  {
+    club: "SPTF",
+    school: "Millennium",
+  },
+  {
+    club: "Shugyobu",
+    school: "Hyakkiyako",
+  },
+  {
+    club: "Endanbou",
+    school: "Shanhaijing",
+  },
+  {
+    club: "TheSeminar",
+    school: "Millennium",
+  },
+  {
+    club: "TrainingClub",
+    school: "Millennium",
+  },
+  {
+    club: "TrinityVigilance",
+    school: "Trinity",
+  },
+  {
+    club: "Veritas",
+    school: "Millennium",
+  },
+  {
+    club: "NinpoKenkyubu",
+    school: "Hyakkiyako",
+  },
+  {
+    club: "GameDev",
+    school: "Millennium",
+  },
+  {
+    club: "RedwinterSecretary",
+    school: "RedWinter",
+  },
+  {
+    club: "anzenkyoku",
+    school: "Valkyrie",
+  },
+  {
+    club: "SisterHood",
+    school: "Trinity",
+  },
+  {
+    club: "Class227",
+    school: "RedWinter",
+  },
+  {
+    club: "Emergentology",
+    school: "Gehenna",
+  },
+  {
+    club: "RabbitPlatoon",
+    school: "SRT",
+  },
+  {
+    club: "PandemoniumSociety",
+    school: "Gehenna",
+  },
+  {
+    club: "HotSpringsDepartment",
+    school: "Gehenna",
+  },
+  {
+    club: "TeaParty",
+    school: "Trinity",
+  },
+  {
+    club: "PublicPeaceBureau",
+    school: "Valkyrie",
+  },
+  {
+    club: "BlackTortoisePromenade",
+    school: "Shanhaijing",
+  },
+  {
+    club: "Genryumon",
+    school: "Shanhaijing",
+  },
+  {
+    club: "LaborParty",
+    school: "RedWinter",
+  },
+  {
+    club: "KnowledgeLiberationFront",
+    school: "RedWinter",
+  },
+  {
+    club: "Hyakkayouran",
+    school: "Hyakkiyako",
+  },
+  {
+    club: "ShinySparkleSociety",
+    school: "Gehenna",
+  },
+  {
+    club: "AbydosStudentCouncil",
+    school: "Abydos",
+  },
+  {
+    club: "CentralControlCenter",
+    school: "Highlander",
+  },
   {
     club: "FreightLogisticsDepartment",
     school: "Highlander",
   },
-  { club: "OccultClub", school: "WildHunt" },
-  { club: "FreeTradeCartel", school: "WildHunt" },
-  { club: "NicomediasTroop", school: "Arius" },
-  { club: "PublishingDepartment", school: "RedWinter" },
-  { club: "FoxSquad", school: "SRT" },
-  { club: "DivingClub", school: "Odyssey" },
-  { club: "Class183", school: "RedWinter" },
+  {
+    club: "OccultClub",
+    school: "WildHunt",
+  },
+  {
+    club: "FreeTradeCartel",
+    school: "WildHunt",
+  },
+  {
+    club: "NicomediasTroop",
+    school: "Arius",
+  },
+  {
+    club: "PublishingDepartment",
+    school: "RedWinter",
+  },
+  {
+    club: "FoxSquad",
+    school: "SRT",
+  },
+  {
+    club: "DivingClub",
+    school: "Odyssey",
+  },
+  {
+    club: "Class183",
+    school: "RedWinter",
+  },
 ];
 
 export const DEFAULT_BASIC_EMBLEM_TEXTS = [

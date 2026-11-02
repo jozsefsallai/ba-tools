@@ -1,8 +1,8 @@
 "use server";
 
+import { revalidatePath, updateTag } from "next/cache";
 import { rosterCacheTag, rosterPublicPath } from "@/lib/roster-cache.server";
 import type { GameServer } from "@/lib/types";
-import { revalidatePath, updateTag } from "next/cache";
 
 export async function clearCache(path?: string) {
   try {
@@ -19,11 +19,20 @@ export async function clearCache(path?: string) {
 export async function revalidateRosterPublicCache(
   gameServer: GameServer,
   friendCode: string,
-  previous?: { gameServer: GameServer; friendCode: string },
+  previous?: {
+    gameServer: GameServer;
+    friendCode: string;
+  },
 ) {
   try {
-    const entries: Array<{ gameServer: GameServer; friendCode: string }> = [
-      { gameServer, friendCode },
+    const entries: Array<{
+      gameServer: GameServer;
+      friendCode: string;
+    }> = [
+      {
+        gameServer,
+        friendCode,
+      },
     ];
 
     if (previous) {

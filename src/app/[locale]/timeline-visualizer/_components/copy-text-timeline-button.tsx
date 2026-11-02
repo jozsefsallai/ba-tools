@@ -1,10 +1,10 @@
-import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
-import { Button } from "@/components/ui/button";
-import { serializeTimelineToText } from "@/lib/timeline-text-format";
 import { CopyIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
+import { Button } from "@/components/ui/button";
+import { serializeTimelineToText } from "@/lib/timeline-text-format";
 
 export type CopyTextTimelineButtonProps = {
   items: TimelineItem[];

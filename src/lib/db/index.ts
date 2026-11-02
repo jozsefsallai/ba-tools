@@ -1,9 +1,8 @@
-import { PrismaClient } from "~prisma";
-
-import { PrismaNeon } from "@prisma/adapter-neon";
 import { neonConfig } from "@neondatabase/serverless";
 
+import { PrismaNeon } from "@prisma/adapter-neon";
 import ws from "ws";
+import { PrismaClient } from "~prisma";
 
 neonConfig.webSocketConstructor = ws;
 neonConfig.pipelineConnect = false;
@@ -14,7 +13,9 @@ const prismaClientSingleton = () => {
     connectionString: process.env.DATABASE_URL as string,
   });
 
-  return new PrismaClient({ adapter });
+  return new PrismaClient({
+    adapter,
+  });
 };
 
 declare global {

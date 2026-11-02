@@ -1,10 +1,10 @@
 "use client";
 
+import { SignInButton, useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { PVPSeasonsView } from "@/app/[locale]/pvp/_components/pvp-seasons-view";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
-import { SignInButton, useUser } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
 
 export function PVPView({
   showArchived,

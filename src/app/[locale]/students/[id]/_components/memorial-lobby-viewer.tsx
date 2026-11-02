@@ -1,5 +1,18 @@
 "use client";
 
+import {
+  CameraIcon,
+  CheckIcon,
+  LoaderCircleIcon,
+  MaximizeIcon,
+  // MessageCircleIcon,
+  MinimizeIcon,
+  PlayIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { type PointerEvent, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,19 +28,6 @@ import type {
   TouchMode,
 } from "@/lib/memorial-lobby/renderer";
 import { cn } from "@/lib/utils";
-import {
-  CameraIcon,
-  CheckIcon,
-  LoaderCircleIcon,
-  MaximizeIcon,
-  // MessageCircleIcon,
-  MinimizeIcon,
-  PlayIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { type PointerEvent, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 type Status = "idle" | "loading" | "ready" | "error";
 
@@ -37,9 +37,18 @@ const SCREENSHOT_KEY = "s";
 const OVERLAY_BUTTON_CLASS = "bg-background/80 rounded-full backdrop-blur";
 
 export const ZONE_LEGEND = [
-  { label: "Headpat", color: "#ff0080" },
-  { label: "Cheek", color: "#ff9900" },
-  { label: "Hand", color: "#00d0ff" },
+  {
+    label: "Headpat",
+    color: "#ff0080",
+  },
+  {
+    label: "Cheek",
+    color: "#ff9900",
+  },
+  {
+    label: "Hand",
+    color: "#00d0ff",
+  },
 ];
 
 type MemorialLobbyViewerProps = {
@@ -98,7 +107,10 @@ export function MemorialLobbyViewer({
         scrollBeforeFullscreenRef.current = null;
 
         requestAnimationFrame(() => {
-          window.scrollTo({ top: scrollY, behavior: "instant" });
+          window.scrollTo({
+            top: scrollY,
+            behavior: "instant",
+          });
         });
       }
     }
@@ -174,13 +186,19 @@ export function MemorialLobbyViewer({
         rendererRef.current = null;
       }
     };
-  }, [status === "idle", lobby]);
+  }, [
+    status === "idle",
+    lobby,
+  ]);
 
   useEffect(() => {
     if (status === "ready") {
       rendererRef.current?.setShowZones(showZones);
     }
-  }, [showZones, status]);
+  }, [
+    showZones,
+    status,
+  ]);
 
   // Screenshot key is used while interacting with the student in the memorial
   // lobby because you can't click the screenshot button.
@@ -213,7 +231,9 @@ export function MemorialLobbyViewer({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [status]);
+  }, [
+    status,
+  ]);
 
   function toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -236,7 +256,9 @@ export function MemorialLobbyViewer({
     try {
       await navigator.clipboard.write([
         new ClipboardItem({
-          "image/png": renderer.screenshot({ native: !isFullscreen }),
+          "image/png": renderer.screenshot({
+            native: !isFullscreen,
+          }),
         }),
       ]);
     } catch (err) {
@@ -321,7 +343,9 @@ export function MemorialLobbyViewer({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onLostPointerCapture={handlePointerUp}
-        style={{ cursor: cursor === "default" ? undefined : cursor }}
+        style={{
+          cursor: cursor === "default" ? undefined : cursor,
+        }}
         className={cn(
           "bg-muted group relative aspect-[4/3] w-full overflow-hidden rounded-lg border",
           "[&:fullscreen]:rounded-none [&:fullscreen]:border-0 [&:fullscreen]:bg-black",
@@ -447,7 +471,9 @@ export function MemorialLobbyViewer({
                 <span key={label} className="inline-flex items-center gap-1">
                   <span
                     className="size-2.5 rounded-full"
-                    style={{ backgroundColor: color }}
+                    style={{
+                      backgroundColor: color,
+                    }}
                   />
                   {label}
                 </span>

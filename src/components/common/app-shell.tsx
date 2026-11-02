@@ -1,5 +1,6 @@
 "use client";
 
+import type { PropsWithChildren } from "react";
 import { AppMain } from "@/components/common/app-main";
 import { AppSidebar } from "@/components/common/app-sidebar";
 import { TheFooter } from "@/components/common/the-footer";
@@ -8,7 +9,6 @@ import { AppBreadcrumbsProvider } from "@/components/providers/app-breadcrumbs-p
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import type { PropsWithChildren } from "react";
 
 type AppShellProps = PropsWithChildren<{
   commitHash: string;

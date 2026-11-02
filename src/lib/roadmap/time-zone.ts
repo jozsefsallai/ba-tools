@@ -4,7 +4,11 @@ export function intlTimeZone(tz: RoadmapTimeZone): string | undefined {
   return tz === "utc" ? "UTC" : undefined;
 }
 
-type CalendarDate = { year: number; month: number; day: number };
+type CalendarDate = {
+  year: number;
+  month: number;
+  day: number;
+};
 
 export function calendarDate(
   date: Date | string | number,
@@ -12,8 +16,16 @@ export function calendarDate(
 ): CalendarDate {
   const d = new Date(date);
   return tz === "utc"
-    ? { year: d.getUTCFullYear(), month: d.getUTCMonth(), day: d.getUTCDate() }
-    : { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+    ? {
+        year: d.getUTCFullYear(),
+        month: d.getUTCMonth(),
+        day: d.getUTCDate(),
+      }
+    : {
+        year: d.getFullYear(),
+        month: d.getMonth(),
+        day: d.getDate(),
+      };
 }
 
 export function fromCalendarDate(
@@ -38,7 +50,14 @@ export function addCalendarDays(
   tz: RoadmapTimeZone,
 ): Date {
   const { year, month, day } = calendarDate(date, tz);
-  return fromCalendarDate({ year, month, day: day + days }, tz);
+  return fromCalendarDate(
+    {
+      year,
+      month,
+      day: day + days,
+    },
+    tz,
+  );
 }
 
 export function startOfMonth(
@@ -47,7 +66,14 @@ export function startOfMonth(
   months = 0,
 ): Date {
   const { year, month } = calendarDate(date, tz);
-  return fromCalendarDate({ year, month: month + months, day: 1 }, tz);
+  return fromCalendarDate(
+    {
+      year,
+      month: month + months,
+      day: 1,
+    },
+    tz,
+  );
 }
 
 export function dayOfWeek(date: Date, tz: RoadmapTimeZone): number {

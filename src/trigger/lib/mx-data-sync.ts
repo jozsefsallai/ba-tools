@@ -13,5 +13,9 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     );
   }
 
-  return { listNewStudents, extractImageAssets, extractStudentSkills };
+  return {
+    listNewStudents,
+    extractImageAssets,
+    extractStudentSkills,
+  };
 }

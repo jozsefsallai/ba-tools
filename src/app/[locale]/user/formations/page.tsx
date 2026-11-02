@@ -1,10 +1,10 @@
+import { auth } from "@clerk/nextjs/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { FormationsBrowser } from "@/app/[locale]/user/formations/_components/formations-browser";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { auth } from "@clerk/nextjs/server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("user-formations", await getLocale());

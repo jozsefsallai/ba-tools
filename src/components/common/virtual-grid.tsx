@@ -30,10 +30,18 @@ type ScrollSnapshot = {
   cache: CacheSnapshot;
 };
 
-type NavigationLike = { currentEntry: { key: string } | null }; // welp
+type NavigationLike = {
+  currentEntry: {
+    key: string;
+  } | null;
+}; // welp
 
 function historyEntryKey() {
-  const navigation = (window as { navigation?: NavigationLike }).navigation;
+  const navigation = (
+    window as {
+      navigation?: NavigationLike;
+    }
+  ).navigation;
   return navigation?.currentEntry?.key ?? null;
 }
 
@@ -62,7 +70,10 @@ function readStoredSnapshot(restoreKey: string, entryKey: string) {
 
 function readSnapshot(restoreKey: string | undefined) {
   if (!restoreKey) {
-    return { snapshot: null, requested: false };
+    return {
+      snapshot: null,
+      requested: false,
+    };
   }
 
   try {
@@ -75,9 +86,15 @@ function readSnapshot(restoreKey: string | undefined) {
       (entryKey && readStoredSnapshot(restoreKey, entryKey)) ||
       (requested ? readStoredSnapshot(restoreKey, LATEST_ENTRY) : null);
 
-    return { snapshot, requested };
+    return {
+      snapshot,
+      requested,
+    };
   } catch {
-    return { snapshot: null, requested: false };
+    return {
+      snapshot: null,
+      requested: false,
+    };
   }
 }
 
@@ -118,7 +135,10 @@ export function VirtualGrid<T>({
 
   const [{ snapshot, requested }] = useState(() =>
     typeof window === "undefined"
-      ? { snapshot: null, requested: false }
+      ? {
+          snapshot: null,
+          requested: false,
+        }
       : readSnapshot(restoreKey),
   );
 
@@ -149,8 +169,14 @@ export function VirtualGrid<T>({
       ? snapshot.cache
       : undefined;
 
-  const latest = useRef({ columns, rowCount: rows.length });
-  latest.current = { columns, rowCount: rows.length };
+  const latest = useRef({
+    columns,
+    rowCount: rows.length,
+  });
+  latest.current = {
+    columns,
+    rowCount: rows.length,
+  };
 
   const ready = width > 0;
 
@@ -160,10 +186,16 @@ export function VirtualGrid<T>({
     }
 
     if (snapshot) {
-      window.scrollTo({ top: snapshot.scrollY, behavior: "instant" });
+      window.scrollTo({
+        top: snapshot.scrollY,
+        behavior: "instant",
+      });
     } else if (requested) {
       // The link that asked for a restore left scrolling to us.
-      window.scrollTo({ top: 0, behavior: "instant" });
+      window.scrollTo({
+        top: 0,
+        behavior: "instant",
+      });
     }
 
     let scrollY = window.scrollY;
@@ -175,7 +207,9 @@ export function VirtualGrid<T>({
       entryKey = historyEntryKey();
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -190,7 +224,12 @@ export function VirtualGrid<T>({
         });
       }
     };
-  }, [ready, restoreKey, snapshot, requested]);
+  }, [
+    ready,
+    restoreKey,
+    snapshot,
+    requested,
+  ]);
 
   return (
     <div ref={containerRef} className="w-full">

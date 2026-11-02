@@ -1,5 +1,35 @@
 "use client";
 
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { useMutation } from "convex/react";
+import { format } from "date-fns";
+import {
+  ChevronLeftIcon,
+  ImagePlusIcon,
+  InfoIcon,
+  LoaderCircleIcon,
+  TriangleAlertIcon,
+  UploadIcon,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { v4 as uuid } from "uuid";
 import { PvpMatchDatePicker } from "@/app/[locale]/pvp/_components/pvp-match-date-picker";
 import type {
   PvpMatchReview,
@@ -38,36 +68,6 @@ import {
 } from "@/lib/pvp/screenshot-types";
 import { Storage } from "@/lib/storage";
 import { cn } from "@/lib/utils";
-import {
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
-import { useMutation } from "convex/react";
-import { format } from "date-fns";
-import {
-  ChevronLeftIcon,
-  ImagePlusIcon,
-  InfoIcon,
-  LoaderCircleIcon,
-  TriangleAlertIcon,
-  UploadIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import dynamic from "next/dynamic";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -92,7 +92,10 @@ type Stage =
   | "imported"
   | "failed";
 
-type ImportError = { stage: Stage | "cache"; message: string };
+type ImportError = {
+  stage: Stage | "cache";
+  message: string;
+};
 
 type Screenshot = {
   id: string;
@@ -109,7 +112,9 @@ function errorMessage(error: unknown, fallback: string) {
 
 export function PvpScreenshotImport({
   seasonId,
-}: { seasonId: Id<"pvpSeason"> }) {
+}: {
+  seasonId: Id<"pvpSeason">;
+}) {
   const t = useTranslations();
 
   const router = useRouter();
@@ -129,7 +134,10 @@ export function PvpScreenshotImport({
   const [assistedMode, setAssistedMode] = useState(false);
   const [preferenceLoaded, setPreferenceLoaded] = useState(false);
   const [review, setReview] = useState<
-    (PvpMatchReview & { index: number }) | null
+    | (PvpMatchReview & {
+        index: number;
+      })
+    | null
   >(null);
   const [stopConfirm, setStopConfirm] = useState(false);
   const [stopped, setStopped] = useState(false);
@@ -161,9 +169,16 @@ export function PvpScreenshotImport({
   const selection = useRef<Screenshot[]>([]);
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -214,7 +229,10 @@ export function PvpScreenshotImport({
     }
 
     setIncludeInStatistics(preferences.pvp.includeMatchesInStatisticsByDefault);
-  }, [locked, preferences.pvp.includeMatchesInStatisticsByDefault]);
+  }, [
+    locked,
+    preferences.pvp.includeMatchesInStatisticsByDefault,
+  ]);
 
   const imported = screenshots.filter(
     (item) => item.stage === "imported",
@@ -241,7 +259,9 @@ export function PvpScreenshotImport({
         file.size > PVP_SCREENSHOT_MAX_INPUT_SIZE
       ) {
         rejected.push(
-          t("tools.pvp.screenshotImport.invalidFile", { name: file.name }),
+          t("tools.pvp.screenshotImport.invalidFile", {
+            name: file.name,
+          }),
         );
 
         return false;
@@ -275,7 +295,10 @@ export function PvpScreenshotImport({
       };
     });
 
-    selection.current = [...selection.current, ...added];
+    selection.current = [
+      ...selection.current,
+      ...added,
+    ];
 
     setScreenshots(selection.current);
     setSelectionErrors(rejected);
@@ -409,10 +432,15 @@ export function PvpScreenshotImport({
     setScreenshots(batch);
 
     function update(index: number, changes: Partial<Screenshot>) {
-      batch[index] = { ...batch[index], ...changes };
+      batch[index] = {
+        ...batch[index],
+        ...changes,
+      };
 
       if (mounted.current && !signal.aborted) {
-        setScreenshots([...batch]);
+        setScreenshots([
+          ...batch,
+        ]);
       }
     }
 
@@ -447,7 +475,9 @@ export function PvpScreenshotImport({
         count: batch.length,
         signal,
         extract: async (index, lane) => {
-          update(index, { stage: "reading" });
+          update(index, {
+            stage: "reading",
+          });
 
           const [rois, { PvpOcrClient }] = await Promise.all([
             getScreenshotROIs(batch[index].file),
@@ -457,7 +487,9 @@ export function PvpScreenshotImport({
           signal.throwIfAborted();
           clients.current[lane] ??= new PvpOcrClient();
 
-          update(index, { stage: "extracting" });
+          update(index, {
+            stage: "extracting",
+          });
 
           const result = await clients.current[lane].extract(rois, {
             signal,
@@ -474,7 +506,9 @@ export function PvpScreenshotImport({
             throw new Error(t("tools.pvp.screenshotImport.missingRequired"));
           }
 
-          update(index, { stage: "ready" });
+          update(index, {
+            stage: "ready",
+          });
 
           return result.battle;
         },
@@ -521,7 +555,9 @@ export function PvpScreenshotImport({
           async function persist(values: PvpMatchValues) {
             signal.throwIfAborted();
 
-            update(index, { stage: "saving" });
+            update(index, {
+              stage: "saving",
+            });
 
             const name = values.opponentName?.trim() || undefined;
 
@@ -534,7 +570,9 @@ export function PvpScreenshotImport({
               autoCreateEnemyPreset: true,
             });
 
-            update(index, { matchId });
+            update(index, {
+              matchId,
+            });
             if (!signal.aborted && mounted.current) {
               matchDate.rememberDate(selectedDate);
             }
@@ -549,7 +587,9 @@ export function PvpScreenshotImport({
               }
             }
 
-            update(index, { stage: "imported" });
+            update(index, {
+              stage: "imported",
+            });
           }
 
           if (!batchAssistedMode) {
@@ -557,7 +597,9 @@ export function PvpScreenshotImport({
             return;
           }
 
-          update(index, { stage: "reviewing" });
+          update(index, {
+            stage: "reviewing",
+          });
 
           await new Promise<void>((resolve) => {
             let settled = false;
@@ -572,7 +614,12 @@ export function PvpScreenshotImport({
 
               if (mounted.current) {
                 setReview((current) =>
-                  current ? { ...current, pending: true } : current,
+                  current
+                    ? {
+                        ...current,
+                        pending: true,
+                      }
+                    : current,
                 );
               }
 
@@ -597,7 +644,9 @@ export function PvpScreenshotImport({
                   await persist(values);
                   finish();
                 } catch (error) {
-                  update(index, { stage: "reviewing" });
+                  update(index, {
+                    stage: "reviewing",
+                  });
                   throw error;
                 } finally {
                   reviewSaving.current = false;
@@ -608,7 +657,9 @@ export function PvpScreenshotImport({
                   return;
                 }
 
-                update(index, { stage: "skipped" });
+                update(index, {
+                  stage: "skipped",
+                });
                 finish();
               },
               onStop: () => {
@@ -626,7 +677,9 @@ export function PvpScreenshotImport({
             error,
           );
 
-          update(index, { stage: "failed" });
+          update(index, {
+            stage: "failed",
+          });
         },
       });
 
@@ -783,7 +836,9 @@ export function PvpScreenshotImport({
         onClick={() => input.current?.click()}
         onDragOver={(event) => {
           event.preventDefault();
-          if (!locked) setDragging(true);
+          if (!locked) {
+            setDragging(true);
+          }
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => {
@@ -828,7 +883,9 @@ export function PvpScreenshotImport({
       </button>
 
       <p className="max-w-3xl text-xs leading-relaxed text-muted-foreground">
-        {t("tools.pvp.screenshotImport.formats", { limit: MAX_SCREENSHOTS })}
+        {t("tools.pvp.screenshotImport.formats", {
+          limit: MAX_SCREENSHOTS,
+        })}
       </p>
 
       <input
@@ -934,9 +991,12 @@ export function PvpScreenshotImport({
 
           {screenshots
             .filter((item) =>
-              ["reading", "extracting", "reviewing", "saving"].includes(
-                item.stage,
-              ),
+              [
+                "reading",
+                "extracting",
+                "reviewing",
+                "saving",
+              ].includes(item.stage),
             )
             .map((item) => (
               <p className="truncate text-sm" key={item.id}>
@@ -1045,7 +1105,9 @@ export function PvpScreenshotImport({
       <Dialog
         open={!!review}
         onOpenChange={(open) => {
-          if (!open && !reviewSaving.current) setStopConfirm(true);
+          if (!open && !reviewSaving.current) {
+            setStopConfirm(true);
+          }
         }}
       >
         <DialogContent
@@ -1053,7 +1115,9 @@ export function PvpScreenshotImport({
           onInteractOutside={(event) => event.preventDefault()}
           onEscapeKeyDown={(event) => {
             event.preventDefault();
-            if (!reviewSaving.current) setStopConfirm(true);
+            if (!reviewSaving.current) {
+              setStopConfirm(true);
+            }
           }}
         >
           <DialogHeader>
@@ -1116,15 +1180,24 @@ export function PvpScreenshotImport({
             <Button
               variant="destructive"
               onClick={() => {
-                if (reviewSaving.current) return;
+                if (reviewSaving.current) {
+                  return;
+                }
                 stopExtraction();
                 setStopConfirm(false);
                 setStopped(true);
                 setScreenshots((items) =>
                   items.map((item) =>
-                    ["imported", "failed", "skipped"].includes(item.stage)
+                    [
+                      "imported",
+                      "failed",
+                      "skipped",
+                    ].includes(item.stage)
                       ? item
-                      : { ...item, stage: "stopped" },
+                      : {
+                          ...item,
+                          stage: "stopped",
+                        },
                   ),
                 );
                 setCompleted(true);
@@ -1139,7 +1212,9 @@ export function PvpScreenshotImport({
       <Dialog
         open={!!preview}
         onOpenChange={(open) => {
-          if (!open) setPreviewId(null);
+          if (!open) {
+            setPreviewId(null);
+          }
         }}
       >
         <DialogContent className="sm:max-w-5xl">
@@ -1166,7 +1241,9 @@ export function PvpScreenshotImport({
       <Dialog
         open={navigationGuard.active}
         onOpenChange={(open) => {
-          if (!open) navigationGuard.reject();
+          if (!open) {
+            navigationGuard.reject();
+          }
         }}
       >
         <DialogContent>

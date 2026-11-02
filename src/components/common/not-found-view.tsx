@@ -1,9 +1,9 @@
 "use client";
 
-import { Plana } from "@/components/plana";
-import { Button } from "@/components/ui/button";
 import { HomeIcon } from "lucide-react";
 import type { ElementType } from "react";
+import { Plana } from "@/components/plana";
+import { Button } from "@/components/ui/button";
 
 export type NotFoundViewProps = {
   code: string;

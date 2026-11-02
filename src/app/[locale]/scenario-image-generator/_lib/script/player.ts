@@ -1,6 +1,7 @@
+import { Assets } from "pixi.js";
 import {
-  type ScenarioRenderer,
   getActiveScenarioRenderer,
+  type ScenarioRenderer,
 } from "@/app/[locale]/scenario-image-generator/_lib/renderer/scenario-renderer";
 import type {
   ScenarioScriptCommand,
@@ -8,7 +9,6 @@ import type {
 } from "@/app/[locale]/scenario-image-generator/_lib/script/parser";
 import { scenarioStore } from "@/app/[locale]/scenario-image-generator/_lib/store";
 import type { ScenarioCharacterData } from "@/app/[locale]/scenario-image-generator/_lib/types";
-import { Assets } from "pixi.js";
 
 export class ScenarioScriptPlayer {
   private runId = 0;
@@ -49,7 +49,10 @@ export class ScenarioScriptPlayer {
       }
     } finally {
       if (!isCancelled()) {
-        scenarioStore.set({ animate: false, scriptPlaying: false });
+        scenarioStore.set({
+          animate: false,
+          scriptPlaying: false,
+        });
       }
     }
   }
@@ -65,7 +68,10 @@ export class ScenarioScriptPlayer {
     }
 
     if (scenarioStore.getState().scriptPlaying) {
-      scenarioStore.set({ animate: false, scriptPlaying: false });
+      scenarioStore.set({
+        animate: false,
+        scriptPlaying: false,
+      });
     }
   }
 
@@ -187,22 +193,30 @@ export class ScenarioScriptPlayer {
       }
 
       case "NAME": {
-        scenarioStore.set({ name: command.name });
+        scenarioStore.set({
+          name: command.name,
+        });
         break;
       }
 
       case "AFFILIATION": {
-        scenarioStore.set({ affiliation: command.affiliation });
+        scenarioStore.set({
+          affiliation: command.affiliation,
+        });
         break;
       }
 
       case "CLEAR_NAME": {
-        scenarioStore.set({ name: "" });
+        scenarioStore.set({
+          name: "",
+        });
         break;
       }
 
       case "CLEAR_AFFILIATION": {
-        scenarioStore.set({ affiliation: "" });
+        scenarioStore.set({
+          affiliation: "",
+        });
         break;
       }
 
@@ -213,7 +227,10 @@ export class ScenarioScriptPlayer {
         const url = character?.expressions?.[command.expression];
 
         if (url) {
-          this.updateCharacter(command.id, (c) => ({ ...c, spriteUrl: url }));
+          this.updateCharacter(command.id, (c) => ({
+            ...c,
+            spriteUrl: url,
+          }));
         }
         break;
       }
@@ -230,7 +247,11 @@ export class ScenarioScriptPlayer {
         const toX = command.x ?? fromX;
         const toY = command.y ?? fromY;
 
-        this.updateCharacter(command.id, (c) => ({ ...c, x: toX, y: toY }));
+        this.updateCharacter(command.id, (c) => ({
+          ...c,
+          x: toX,
+          y: toY,
+        }));
 
         if (command.time && command.time > 0) {
           await renderer.moveCharacter(
@@ -259,7 +280,9 @@ export class ScenarioScriptPlayer {
       }
 
       case "MESSAGE": {
-        scenarioStore.set({ content: command.message });
+        scenarioStore.set({
+          content: command.message,
+        });
 
         // Block until the typewriter finishes so the script respects the
         // scroll speed setting even without a following INPUT.
@@ -268,7 +291,9 @@ export class ScenarioScriptPlayer {
       }
 
       case "CLEAR_MESSAGE": {
-        scenarioStore.set({ content: "" });
+        scenarioStore.set({
+          content: "",
+        });
         break;
       }
     }

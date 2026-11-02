@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronDown, ChevronUp, InfoIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Fragment, useState } from "react";
 import type { BannerStudent } from "@/app/[locale]/global/banners/types";
 import { StudentCard } from "@/components/common/student-card";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +13,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp, InfoIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Fragment, useState } from "react";
 
 export function BannerPickupList({
   students,
@@ -38,7 +38,11 @@ export function BannerPickupList({
           <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between relative">
             <div className="flex items-center gap-4 md:gap-6">
               <div className="relative">
-                <div style={{ zoom: 0.85 }}>
+                <div
+                  style={{
+                    zoom: 0.85,
+                  }}
+                >
                   <StudentCard student={student} />
                 </div>
 

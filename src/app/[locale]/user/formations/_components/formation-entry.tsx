@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { FormationPreview } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { FormationRowsStack } from "@/app/[locale]/formation-display/_components/formation-row-label";
 import { Button } from "@/components/ui/button";
@@ -10,10 +14,6 @@ import {
   persistedSlotsToStudentItems,
 } from "@/lib/formation-display-utils";
 import { inferFormationType } from "@/lib/formation-type";
-import { useMutation } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 
 export type FormationEntryProps = {
@@ -32,7 +32,12 @@ export function FormationEntry({ entry }: FormationEntryProps) {
     const sources =
       entry.rows && entry.rows.length > 0
         ? entry.rows
-        : [{ strikers: entry.strikers, specials: entry.specials }];
+        : [
+            {
+              strikers: entry.strikers,
+              specials: entry.specials,
+            },
+          ];
 
     return sources.map((row) => {
       const label =
@@ -63,7 +68,12 @@ export function FormationEntry({ entry }: FormationEntryProps) {
         label,
       };
     });
-  }, [entry.rows, entry.strikers, entry.specials, allStudents]);
+  }, [
+    entry.rows,
+    entry.strikers,
+    entry.specials,
+    allStudents,
+  ]);
 
   const rowGapPx = entry.rowGap ?? 8;
   const effectiveType = useMemo(
@@ -75,7 +85,10 @@ export function FormationEntry({ entry }: FormationEntryProps) {
           specials: row.specials,
         })),
       ),
-    [entry.type, previewRows],
+    [
+      entry.type,
+      previewRows,
+    ],
   );
 
   async function handleDelete() {
@@ -109,7 +122,12 @@ export function FormationEntry({ entry }: FormationEntryProps) {
           )}
         </div>
 
-        <div className="max-md:overflow-x-auto" style={{ zoom: 0.8 }}>
+        <div
+          className="max-md:overflow-x-auto"
+          style={{
+            zoom: 0.8,
+          }}
+        >
           <FormationRowsStack
             className="max-md:max-w-none"
             rowGap={rowGapPx}

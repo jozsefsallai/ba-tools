@@ -33,11 +33,17 @@
         "groups": [
           {
             "group": "Getting Started",
-            "pages": ["index"]
+            "pages": [
+              "index"
+            ]
           },
           {
             "group": "Guides",
-            "pages": ["authentication", "errors", "mcp"]
+            "pages": [
+              "authentication",
+              "errors",
+              "mcp"
+            ]
           }
         ]
       },
@@ -49,7 +55,9 @@
       {
         "tab": "Changelog",
         "icon": "history",
-        "pages": ["changelog"]
+        "pages": [
+          "changelog"
+        ]
       }
     ]
   },

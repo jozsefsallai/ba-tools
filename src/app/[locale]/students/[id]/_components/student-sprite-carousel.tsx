@@ -1,10 +1,5 @@
 "use client";
 
-import { FallbackImage } from "@/components/common/fallback-image";
-import { Button } from "@/components/ui/button";
-import { fetchStudentSprites } from "@/lib/student-spine";
-import { buildStudentDefaultSpriteUrl } from "@/lib/url";
-import { cn } from "@/lib/utils";
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -26,6 +21,11 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import { FallbackImage } from "@/components/common/fallback-image";
+import { Button } from "@/components/ui/button";
+import { fetchStudentSprites } from "@/lib/student-spine";
+import { buildStudentDefaultSpriteUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 
 export type StudentSprite = {
   key: string;
@@ -42,7 +42,10 @@ const DEFAULT_SPRITE_KEY = "00";
 
 function getDefaultSprites(studentId: string): StudentSprite[] {
   return [
-    { key: DEFAULT_SPRITE_KEY, url: buildStudentDefaultSpriteUrl(studentId) },
+    {
+      key: DEFAULT_SPRITE_KEY,
+      url: buildStudentDefaultSpriteUrl(studentId),
+    },
   ];
 }
 
@@ -60,7 +63,10 @@ async function fetchSprites(studentId: string): Promise<{
 }> {
   const manifest = await fetchStudentSprites(studentId);
   if (!manifest || manifest.sprites.length === 0) {
-    return { sprites: getDefaultSprites(studentId), framing: null };
+    return {
+      sprites: getDefaultSprites(studentId),
+      framing: null,
+    };
   }
 
   const keys = [
@@ -69,7 +75,10 @@ async function fetchSprites(studentId: string): Promise<{
   ];
 
   return {
-    sprites: keys.map((key) => ({ key, url: manifest.urls[key] })),
+    sprites: keys.map((key) => ({
+      key,
+      url: manifest.urls[key],
+    })),
     framing: manifest.face
       ? {
           focusX: manifest.face.x / manifest.width,
@@ -96,7 +105,9 @@ const OVERLAY_BUTTON_CLASS = "bg-background/80 rounded-full backdrop-blur";
 const OVERLAY_ENTER_CLASS = "animate-in fade-in zoom-in-75 duration-300";
 
 async function fetchSpriteAsPng(url: string) {
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, {
+    cache: "no-store",
+  });
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status}`);
   }
@@ -149,10 +160,15 @@ export function StudentSpriteCarousel({
     return () => {
       cancelled = true;
     };
-  }, [studentId]);
+  }, [
+    studentId,
+  ]);
 
   const scrollerRef = useRef<HTMLElement>(null);
-  const dragRef = useRef<{ startX: number; startScroll: number } | null>(null);
+  const dragRef = useRef<{
+    startX: number;
+    startScroll: number;
+  } | null>(null);
 
   const [index, setIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -176,7 +192,9 @@ export function StudentSpriteCarousel({
         behavior,
       });
     },
-    [total],
+    [
+      total,
+    ],
   );
 
   function toggleGallery() {
@@ -199,7 +217,9 @@ export function StudentSpriteCarousel({
   async function copyToClipboard() {
     try {
       await navigator.clipboard.write([
-        new ClipboardItem({ "image/png": fetchSpriteAsPng(current.url) }),
+        new ClipboardItem({
+          "image/png": fetchSpriteAsPng(current.url),
+        }),
       ]);
     } catch (err) {
       console.error("Failed to copy sprite", err);

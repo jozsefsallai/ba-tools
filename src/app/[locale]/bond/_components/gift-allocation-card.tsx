@@ -1,23 +1,25 @@
 "use client";
 
-import type {
-  GiftWithStudents,
-  StudentWithGifts,
-} from "@/app/[locale]/bond/_lib/types";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import {
   GiftAffinityIcon,
   GiftInfo,
   GiftItemCard,
 } from "@/app/[locale]/bond/_components/gift-info";
 import {
-  GiftTargetAllocationGrid,
   buildGiftTargetGridItems,
+  GiftTargetAllocationGrid,
 } from "@/app/[locale]/bond/_components/gift-target-allocation-grid";
 import {
   type GiftTargetDoc,
   getRemainingAllocatable,
   sortTargetsByGiftAffinity,
 } from "@/app/[locale]/bond/_lib/gift-utils";
+import type {
+  GiftWithStudents,
+  StudentWithGifts,
+} from "@/app/[locale]/bond/_lib/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -26,8 +28,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
 import type { Id } from "~convex/dataModel";
 
 export type GiftAllocationCardProps = {
@@ -69,11 +69,18 @@ export function GiftAllocationCard({
       case "ja":
         return gift.nameJP || gift.name;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   const sortedTargets = useMemo(
     () => sortTargetsByGiftAffinity(gift, targets, studentMap),
-    [gift, targets, studentMap],
+    [
+      gift,
+      targets,
+      studentMap,
+    ],
   );
 
   const gridItems = useMemo(

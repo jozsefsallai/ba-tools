@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useEffect, useId, useState } from "react";
 import { useRoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EditableRoadmapItem } from "@/lib/roadmap/types";
-import { useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
 
 export function ShiftDialog({
   item,
@@ -34,7 +34,9 @@ export function ShiftDialog({
     if (item) {
       setDays("7");
     }
-  }, [item]);
+  }, [
+    item,
+  ]);
 
   if (!item) {
     return null;

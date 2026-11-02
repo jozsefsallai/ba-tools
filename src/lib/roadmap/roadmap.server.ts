@@ -1,8 +1,9 @@
 import "server-only";
 
+import { revalidateTag, unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { GAME_BANNERS_CACHE_TAG } from "@/lib/game-banners.server";
-import { PERMANENT_END_DATE, isPermanent } from "@/lib/roadmap/constants";
+import { isPermanent, PERMANENT_END_DATE } from "@/lib/roadmap/constants";
 import { startOfUTCDay } from "@/lib/roadmap/layout";
 import type { AnyRoadmapInput, RoadmapInput } from "@/lib/roadmap/schemas";
 import type {
@@ -12,7 +13,6 @@ import type {
   RoadmapItem,
   RoadmapRaidItem,
 } from "@/lib/roadmap/types";
-import { revalidateTag, unstable_cache } from "next/cache";
 import type {
   BattlePassCampaign,
   BonusCampaign,
@@ -29,7 +29,9 @@ import type {
 export const ROADMAP_CACHE_TAG = "roadmap";
 
 export function invalidateRoadmapCache() {
-  revalidateTag(ROADMAP_CACHE_TAG, { expire: 0 });
+  revalidateTag(ROADMAP_CACHE_TAG, {
+    expire: 0,
+  });
 }
 
 export class RoadmapError extends Error {
@@ -42,11 +44,20 @@ export class RoadmapError extends Error {
 }
 
 const RAID_INCLUDE = {
-  eliminateRaidRooms: { orderBy: { id: "asc" } },
+  eliminateRaidRooms: {
+    orderBy: {
+      id: "asc",
+    },
+  },
 } as const;
 
 const EVENT_INCLUDE = {
-  eventStudent: { select: { id: true, name: true } },
+  eventStudent: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
 } as const;
 
 function serializeDates(row: {
@@ -64,7 +75,9 @@ function serializeDates(row: {
 }
 
 function serializeRaid(
-  raid: Raid & { eliminateRaidRooms: EliminateRaidRoom[] },
+  raid: Raid & {
+    eliminateRaidRooms: EliminateRaidRoom[];
+  },
 ): RoadmapRaidItem {
   return {
     ...serializeDates(raid),
@@ -88,7 +101,9 @@ function serializeRaid(
 }
 
 function serializeEvent(
-  event: Event & { eventStudent: Pick<Student, "id" | "name"> | null },
+  event: Event & {
+    eventStudent: Pick<Student, "id" | "name"> | null;
+  },
 ): EditableRoadmapItem {
   return {
     ...serializeDates(event),
@@ -121,7 +136,11 @@ function serializeBonus(campaign: BonusCampaign): EditableRoadmapItem {
 }
 
 function serializeWorkLog(campaign: WorkLogCampaign): EditableRoadmapItem {
-  return { ...serializeDates(campaign), kind: "workLog", name: campaign.name };
+  return {
+    ...serializeDates(campaign),
+    kind: "workLog",
+    name: campaign.name,
+  };
 }
 
 function serializeBattlePass(
@@ -160,18 +179,34 @@ function upcomingWhere() {
   const today = startOfUTCDay(now);
 
   return {
-    endDate: { gt: now },
+    endDate: {
+      gt: now,
+    },
     OR: [
-      { startDate: { gte: today } },
-      { endDate: { lt: FOUR_YEARS_FROM(now) } },
+      {
+        startDate: {
+          gte: today,
+        },
+      },
+      {
+        endDate: {
+          lt: FOUR_YEARS_FROM(now),
+        },
+      },
     ],
   };
 }
 
 async function fetchBanners(): Promise<RoadmapBannerItem[]> {
   const banners = await db.gameBanner.findMany({
-    where: { endDate: { gt: new Date() } },
-    orderBy: { startDate: "asc" },
+    where: {
+      endDate: {
+        gt: new Date(),
+      },
+    },
+    orderBy: {
+      startDate: "asc",
+    },
     select: {
       id: true,
       name: true,
@@ -204,7 +239,9 @@ async function fetchBanners(): Promise<RoadmapBannerItem[]> {
 
 export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
   const where = upcomingWhere();
-  const orderBy = { startDate: "asc" } as const;
+  const orderBy = {
+    startDate: "asc",
+  } as const;
 
   const [banners, raids, events, scenarios, bonuses, workLogs, passes, etcs] =
     await Promise.all([
@@ -214,18 +251,42 @@ export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
         where: {
           OR: [
             where,
-            { type: "EliminateRaid", endDate: { gt: GA_TICKET_LOOKBACK() } },
+            {
+              type: "EliminateRaid",
+              endDate: {
+                gt: GA_TICKET_LOOKBACK(),
+              },
+            },
           ],
         },
         orderBy,
         include: RAID_INCLUDE,
       }),
-      db.event.findMany({ where, orderBy, include: EVENT_INCLUDE }),
-      db.scenario.findMany({ where, orderBy }),
-      db.bonusCampaign.findMany({ where, orderBy }),
-      db.workLogCampaign.findMany({ where, orderBy }),
-      db.battlePassCampaign.findMany({ where, orderBy }),
-      db.roadmapETC.findMany({ where, orderBy }),
+      db.event.findMany({
+        where,
+        orderBy,
+        include: EVENT_INCLUDE,
+      }),
+      db.scenario.findMany({
+        where,
+        orderBy,
+      }),
+      db.bonusCampaign.findMany({
+        where,
+        orderBy,
+      }),
+      db.workLogCampaign.findMany({
+        where,
+        orderBy,
+      }),
+      db.battlePassCampaign.findMany({
+        where,
+        orderBy,
+      }),
+      db.roadmapETC.findMany({
+        where,
+        orderBy,
+      }),
     ]);
 
   return [
@@ -242,14 +303,23 @@ export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
 
 export const getCachedRoadmapItems = unstable_cache(
   fetchRoadmapItems,
-  ["public-roadmap"],
+  [
+    "public-roadmap",
+  ],
   {
     revalidate: 3_600,
-    tags: [ROADMAP_CACHE_TAG, GAME_BANNERS_CACHE_TAG],
+    tags: [
+      ROADMAP_CACHE_TAG,
+      GAME_BANNERS_CACHE_TAG,
+    ],
   },
 );
 
-type DatedRow = { id: string; startDate: Date; endDate: Date };
+type DatedRow = {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+};
 
 type RoadmapDelegate = {
   create(args: {
@@ -257,16 +327,33 @@ type RoadmapDelegate = {
     include?: object;
   }): Prisma.PrismaPromise<unknown>;
   update(args: {
-    where: { id: string };
+    where: {
+      id: string;
+    };
     data: object;
     include?: object;
   }): Prisma.PrismaPromise<unknown>;
-  delete(args: { where: { id: string } }): Prisma.PrismaPromise<unknown>;
+  delete(args: {
+    where: {
+      id: string;
+    };
+  }): Prisma.PrismaPromise<unknown>;
   findUnique(args: {
-    where: { id: string };
-  }): Prisma.PrismaPromise<(DatedRow & { type?: string }) | null>;
+    where: {
+      id: string;
+    };
+  }): Prisma.PrismaPromise<
+    | (DatedRow & {
+        type?: string;
+      })
+    | null
+  >;
   findMany(args: {
-    where: { id: { in: string[] } };
+    where: {
+      id: {
+        in: string[];
+      };
+    };
     include?: object;
   }): Prisma.PrismaPromise<DatedRow[]>;
 };
@@ -295,7 +382,10 @@ const MODELS: Record<EditableRoadmapKind, RoadmapModel> = {
     include: EVENT_INCLUDE,
     serialize: serializeEvent,
   },
-  story: { delegate: () => delegate(db.scenario), serialize: serializeStory },
+  story: {
+    delegate: () => delegate(db.scenario),
+    serialize: serializeStory,
+  },
   bonus: {
     delegate: () => delegate(db.bonusCampaign),
     serialize: serializeBonus,
@@ -308,7 +398,10 @@ const MODELS: Record<EditableRoadmapKind, RoadmapModel> = {
     delegate: () => delegate(db.battlePassCampaign),
     serialize: serializeBattlePass,
   },
-  etc: { delegate: () => delegate(db.roadmapETC), serialize: serializeEtc },
+  etc: {
+    delegate: () => delegate(db.roadmapETC),
+    serialize: serializeEtc,
+  },
 };
 
 function serialize(kind: EditableRoadmapKind, row: unknown) {
@@ -370,8 +463,13 @@ function toData(
     ...rest,
     eliminateRaidRooms:
       mode === "create"
-        ? { create: nextRooms }
-        : { deleteMany: {}, create: nextRooms },
+        ? {
+            create: nextRooms,
+          }
+        : {
+            deleteMany: {},
+            create: nextRooms,
+          },
   };
 }
 
@@ -397,7 +495,11 @@ export async function createRoadmapItem(
 }
 
 async function findExisting(kind: EditableRoadmapKind, id: string) {
-  const existing = await MODELS[kind].delegate().findUnique({ where: { id } });
+  const existing = await MODELS[kind].delegate().findUnique({
+    where: {
+      id,
+    },
+  });
 
   if (
     !existing ||
@@ -424,7 +526,9 @@ export async function updateRoadmapItem(
 
   const model = MODELS[kind];
   const row = await model.delegate().update({
-    where: { id },
+    where: {
+      id,
+    },
     data: toData(kind, input, "update"),
     include: model.include,
   });
@@ -440,13 +544,25 @@ export async function deleteRoadmapItem(
 
   if (isRaidKind(kind)) {
     await db.$transaction([
-      db.eliminateRaidRoom.deleteMany({ where: { eliminateRaidId: id } }),
-      db.raid.delete({ where: { id } }),
+      db.eliminateRaidRoom.deleteMany({
+        where: {
+          eliminateRaidId: id,
+        },
+      }),
+      db.raid.delete({
+        where: {
+          id,
+        },
+      }),
     ]);
     return;
   }
 
-  await MODELS[kind].delegate().delete({ where: { id } });
+  await MODELS[kind].delegate().delete({
+    where: {
+      id,
+    },
+  });
 }
 
 export async function offsetRoadmapItems(
@@ -459,13 +575,21 @@ export async function offsetRoadmapItems(
   }
 
   const model = MODELS[kind];
-  const where = { id: { in: ids } };
-  const rows = await model.delegate().findMany({ where });
+  const where = {
+    id: {
+      in: ids,
+    },
+  };
+  const rows = await model.delegate().findMany({
+    where,
+  });
 
   await db.$transaction(
     rows.map((row) =>
       model.delegate().update({
-        where: { id: row.id },
+        where: {
+          id: row.id,
+        },
         data: {
           startDate: new Date(row.startDate.getTime() + offsetMs),
           // permanent items keep their 2099 end date
@@ -477,9 +601,10 @@ export async function offsetRoadmapItems(
     ),
   );
 
-  const updated = await model
-    .delegate()
-    .findMany({ where, include: model.include });
+  const updated = await model.delegate().findMany({
+    where,
+    include: model.include,
+  });
 
   return updated.map((row) => serialize(kind, row));
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import type { PvpOcrReading, PvpPixelImage } from "@/lib/pvp";
-import { drawPvpPixels } from "@/lib/pvp/canvas";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
+import type { PvpOcrReading, PvpPixelImage } from "@/lib/pvp";
+import { drawPvpPixels } from "@/lib/pvp/canvas";
 
 export function PvpCropPreview({ image }: { image: PvpPixelImage }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -14,7 +14,9 @@ export function PvpCropPreview({ image }: { image: PvpPixelImage }) {
     if (canvas) {
       drawPvpPixels(canvas, image);
     }
-  }, [image]);
+  }, [
+    image,
+  ]);
 
   return (
     <canvas

@@ -56,7 +56,11 @@ export function parseRubyMarkup(content: string): ParsedRubyText {
     text += content.slice(lastIndex, match.index);
 
     if (ruby.trim() && base) {
-      annotations.push({ start: text.length, base, ruby: ruby.trim() });
+      annotations.push({
+        start: text.length,
+        base,
+        ruby: ruby.trim(),
+      });
     }
 
     text += base;
@@ -65,7 +69,10 @@ export function parseRubyMarkup(content: string): ParsedRubyText {
 
   text += content.slice(lastIndex);
 
-  return { text, annotations };
+  return {
+    text,
+    annotations,
+  };
 }
 
 function measureWidth(text: string, style: TextStyle): number {

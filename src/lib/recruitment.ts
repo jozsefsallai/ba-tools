@@ -1,5 +1,12 @@
 export const REBATE_MILESTONES = [
-  70, 130, 150, 170, 270, 330, 350, 370,
+  70,
+  130,
+  150,
+  170,
+  270,
+  330,
+  350,
+  370,
 ] as const;
 export const SOFT_PITY = 100;
 export const HARD_PITY = 200;
@@ -119,14 +126,22 @@ export function deriveSessionKind(
   permanentPulls: number,
   limitedPulls: number,
 ): RecruitmentSessionKind {
-  if (permanentPulls > 0 && limitedPulls > 0) return "mixed";
-  if (limitedPulls > 0) return "limited";
+  if (permanentPulls > 0 && limitedPulls > 0) {
+    return "mixed";
+  }
+  if (limitedPulls > 0) {
+    return "limited";
+  }
   return "permanent";
 }
 
 export function legacyStartCharge(input: RecruitmentSessionInput): number {
-  if (input.permanentPulls > 0) return input.permanentStartCharge;
-  if (input.limitedPulls > 0) return input.limitedStartCharge;
+  if (input.permanentPulls > 0) {
+    return input.permanentStartCharge;
+  }
+  if (input.limitedPulls > 0) {
+    return input.limitedStartCharge;
+  }
   return input.permanentStartCharge;
 }
 
@@ -137,8 +152,12 @@ export function totalPullsOf(input: RecruitmentSessionInput): number {
 export function fallbackPickupKind(
   sessionKind: RecruitmentSessionKind | undefined,
 ): RecruitmentKind | undefined {
-  if (sessionKind === "limited") return "limited";
-  if (sessionKind === "permanent") return "permanent";
+  if (sessionKind === "limited") {
+    return "limited";
+  }
+  if (sessionKind === "permanent") {
+    return "permanent";
+  }
   return undefined;
 }
 
@@ -200,7 +219,10 @@ export function normalizeRecruitmentSession(
       if (!kind) {
         throw new Error("Each pickup must have a valid student and charge.");
       }
-      return { ...pickup, kind };
+      return {
+        ...pickup,
+        kind,
+      };
     }),
   };
 }
@@ -314,7 +336,10 @@ export function calculateRecruitmentStats(
     }),
     permanentEndCharge: permanent.endCharge,
     limitedEndCharge: limited.endCharge,
-    pools: { permanent, limited },
+    pools: {
+      permanent,
+      limited,
+    },
     pickupCount: input.pickupsObtained.length,
     softPityWins: permanent.softPityWins + limited.softPityWins,
     softPityLosses: permanent.softPityLosses + limited.softPityLosses,
@@ -344,9 +369,15 @@ export function calculateRecruitmentStats(
 }
 
 export function classifyPickup(charge: number): PickupClassification {
-  if (charge === HARD_PITY) return "hardPity";
-  if (charge === SOFT_PITY) return "softWin";
-  if (charge > SOFT_PITY) return "afterSoftPity";
+  if (charge === HARD_PITY) {
+    return "hardPity";
+  }
+  if (charge === SOFT_PITY) {
+    return "softWin";
+  }
+  if (charge > SOFT_PITY) {
+    return "afterSoftPity";
+  }
   return "beforeSoftPity";
 }
 
@@ -390,7 +421,12 @@ export function emptyAggregateBucket(): AggregateBucket {
     softWinPickups: 0,
     softLossPickups: 0,
     hardPityPickups: 0,
-    pickupChargeHistogram: Array.from({ length: HARD_PITY + 1 }, () => 0),
+    pickupChargeHistogram: Array.from(
+      {
+        length: HARD_PITY + 1,
+      },
+      () => 0,
+    ),
   };
 }
 
@@ -406,7 +442,9 @@ export function getAggregateBucket(
   kind: RecruitmentKind,
   isFestBanner = false,
 ): keyof AccountAggregates {
-  if (kind === "limited" && isFestBanner) return "fest";
+  if (kind === "limited" && isFestBanner) {
+    return "fest";
+  }
   return kind;
 }
 
@@ -414,15 +452,21 @@ function cloneAggregates(aggregates: AccountAggregates): AccountAggregates {
   return {
     permanent: {
       ...aggregates.permanent,
-      pickupChargeHistogram: [...aggregates.permanent.pickupChargeHistogram],
+      pickupChargeHistogram: [
+        ...aggregates.permanent.pickupChargeHistogram,
+      ],
     },
     limited: {
       ...aggregates.limited,
-      pickupChargeHistogram: [...aggregates.limited.pickupChargeHistogram],
+      pickupChargeHistogram: [
+        ...aggregates.limited.pickupChargeHistogram,
+      ],
     },
     fest: {
       ...aggregates.fest,
-      pickupChargeHistogram: [...aggregates.fest.pickupChargeHistogram],
+      pickupChargeHistogram: [
+        ...aggregates.fest.pickupChargeHistogram,
+      ],
     },
   };
 }
@@ -431,13 +475,34 @@ function splitByPullShare(
   total: number,
   permanentPulls: number,
   limitedPulls: number,
-): { permanent: number; limited: number } {
+): {
+  permanent: number;
+  limited: number;
+} {
   const pulls = permanentPulls + limitedPulls;
-  if (pulls === 0 || total === 0) return { permanent: 0, limited: 0 };
-  if (limitedPulls === 0) return { permanent: total, limited: 0 };
-  if (permanentPulls === 0) return { permanent: 0, limited: total };
+  if (pulls === 0 || total === 0) {
+    return {
+      permanent: 0,
+      limited: 0,
+    };
+  }
+  if (limitedPulls === 0) {
+    return {
+      permanent: total,
+      limited: 0,
+    };
+  }
+  if (permanentPulls === 0) {
+    return {
+      permanent: 0,
+      limited: total,
+    };
+  }
   const permanent = Math.round((total * permanentPulls) / pulls);
-  return { permanent, limited: total - permanent };
+  return {
+    permanent,
+    limited: total - permanent,
+  };
 }
 
 function applyPoolToBucket(
@@ -467,11 +532,15 @@ function applyPoolToBucket(
     if (pickup.classification === "beforeSoftPity") {
       bucket.naturalPickups += factor;
     }
-    if (pickup.classification === "softWin") bucket.softWinPickups += factor;
+    if (pickup.classification === "softWin") {
+      bucket.softWinPickups += factor;
+    }
     if (pickup.classification === "afterSoftPity") {
       bucket.softLossPickups += factor;
     }
-    if (pickup.classification === "hardPity") bucket.hardPityPickups += factor;
+    if (pickup.classification === "hardPity") {
+      bucket.hardPityPickups += factor;
+    }
   }
 }
 

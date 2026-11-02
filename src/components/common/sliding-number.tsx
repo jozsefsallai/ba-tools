@@ -2,15 +2,15 @@
 
 "use client";
 
-import { useEffect, useId } from "react";
 import {
   type MotionValue,
   motion,
-  useSpring,
-  useTransform,
   motionValue,
   type Transition,
+  useSpring,
+  useTransform,
 } from "motion/react";
+import { useEffect, useId } from "react";
 import useMeasure from "react-use-measure";
 
 const TRANSITION = {
@@ -27,14 +27,22 @@ function Digit({ value, place }: { value: number; place: number }) {
 
   useEffect(() => {
     animatedValue.set(valueRoundedToPlace);
-  }, [animatedValue, valueRoundedToPlace]);
+  }, [
+    animatedValue,
+    valueRoundedToPlace,
+  ]);
 
   return (
     <div className="relative inline-block w-[1ch] overflow-x-visible overflow-y-clip leading-none tabular-nums">
       <div className="invisible">0</div>
-      {Array.from({ length: 10 }, (_, i) => (
-        <NumberItem key={i} mv={animatedValue} number={i} />
-      ))}
+      {Array.from(
+        {
+          length: 10,
+        },
+        (_, i) => (
+          <NumberItem key={i} mv={animatedValue} number={i} />
+        ),
+      )}
     </div>
   );
 }
@@ -42,12 +50,17 @@ function Digit({ value, place }: { value: number; place: number }) {
 function NumberItem({
   mv,
   number,
-}: { mv: MotionValue<number>; number: number }) {
+}: {
+  mv: MotionValue<number>;
+  number: number;
+}) {
   const uniqueId = useId();
   const [ref, bounds] = useMeasure();
 
   const y = useTransform(mv, (latest) => {
-    if (!bounds.height) return 0;
+    if (!bounds.height) {
+      return 0;
+    }
     const placeValue = latest % 10;
     const offset = (10 + number - placeValue) % 10;
     let memo = offset * bounds.height;
@@ -70,7 +83,9 @@ function NumberItem({
 
   return (
     <motion.span
-      style={{ y }}
+      style={{
+        y,
+      }}
       layoutId={`${uniqueId}-${number}`}
       className="absolute inset-0 flex items-center justify-center"
       transition={TRANSITION}

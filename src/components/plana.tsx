@@ -1,11 +1,13 @@
 "use client";
 
-import type { PlanaExpression } from "@/lib/plana-expressions";
 import dynamic from "next/dynamic";
+import type { PlanaExpression } from "@/lib/plana-expressions";
 
 const PlanaCanvas = dynamic(
   () => import("@/components/plana-canvas").then((m) => m.PlanaCanvas),
-  { ssr: false },
+  {
+    ssr: false,
+  },
 );
 
 export function Plana(props: {

@@ -5,7 +5,10 @@ import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 
 const http = httpRouter();
-const BMC_COFFEE_EVENTS = new Set(["donation.created", "coffee-purchase"]);
+const BMC_COFFEE_EVENTS = new Set([
+  "donation.created",
+  "coffee-purchase",
+]);
 
 async function validateRequest(req: Request): Promise<WebhookEvent | null> {
   const payloadString = await req.text();
@@ -61,9 +64,14 @@ async function verifyBmcSignature(
   const key = await crypto.subtle.importKey(
     "raw",
     encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
+    {
+      name: "HMAC",
+      hash: "SHA-256",
+    },
     false,
-    ["verify"],
+    [
+      "verify",
+    ],
   );
 
   return await crypto.subtle.verify("HMAC", key, signatureBytes, payloadBytes);
@@ -203,7 +211,9 @@ http.route({
   handler: httpAction(async (ctx, req) => {
     const event = await validateRequest(req);
     if (!event) {
-      return new Response("Invalid webhook event", { status: 400 });
+      return new Response("Invalid webhook event", {
+        status: 400,
+      });
     }
 
     switch (event.type) {
@@ -216,14 +226,18 @@ http.route({
 
       case "user.deleted": {
         const externalId = event.data.id as string;
-        await ctx.runMutation(internal.users.deleteFromClerk, { externalId });
+        await ctx.runMutation(internal.users.deleteFromClerk, {
+          externalId,
+        });
         break;
       }
       default:
         console.log("Ignored Clerk webhook event", event.type);
     }
 
-    return new Response(null, { status: 200 });
+    return new Response(null, {
+      status: 200,
+    });
   }),
 });
 
@@ -234,7 +248,9 @@ http.route({
     const secret = process.env.BUY_ME_A_COFFEE_WEBHOOK_SECRET;
     if (!secret) {
       console.error("Missing BUY_ME_A_COFFEE_WEBHOOK_SECRET in Convex env");
-      return new Response("Webhook not configured", { status: 500 });
+      return new Response("Webhook not configured", {
+        status: 500,
+      });
     }
 
     const payload = await req.text();
@@ -245,23 +261,31 @@ http.route({
 
     const isValid = await verifyBmcSignature(payload, signature, secret);
     if (!isValid) {
-      return new Response("Invalid signature", { status: 400 });
+      return new Response("Invalid signature", {
+        status: 400,
+      });
     }
 
     const event = parseBmcEventType(payload);
 
     if (!BMC_COFFEE_EVENTS.has(event)) {
       console.log("Ignored BMAC webhook event", event);
-      return new Response(null, { status: 200 });
+      return new Response(null, {
+        status: 200,
+      });
     }
 
     const donation = parseCoffeePurchase(payload, event);
     if (!donation) {
-      return new Response("Invalid payload", { status: 400 });
+      return new Response("Invalid payload", {
+        status: 400,
+      });
     }
 
     await ctx.runMutation(internal.donations.recordDonation, donation);
-    return new Response(null, { status: 200 });
+    return new Response(null, {
+      status: 200,
+    });
   }),
 });
 

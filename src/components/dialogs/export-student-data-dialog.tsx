@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import type { PropsWithChildren } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { studentStorage } from "@/lib/storage/students";
-import { useTranslations } from "next-intl";
-import type { PropsWithChildren } from "react";
 
 export type ExportStudentDataDialogProps = PropsWithChildren;
 
@@ -26,7 +26,9 @@ export function ExportStudentDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.exportStudentData.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.exportStudentData.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.exportStudentData.description")}
           </DialogDescription>

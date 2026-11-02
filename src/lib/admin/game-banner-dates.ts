@@ -44,9 +44,15 @@ export function bannerGroupKey(
   return `${new Date(start).getTime()},${new Date(end).getTime()}`;
 }
 
-export function parseBannerGroupKey(key: string): [number, number] {
+export function parseBannerGroupKey(key: string): [
+  number,
+  number,
+] {
   const [start, end] = key.split(",").map((part) => Number.parseInt(part, 10));
-  return [start, end];
+  return [
+    start,
+    end,
+  ];
 }
 
 export function offsetBannerDate(date: Date, offsetDays: number): Date {

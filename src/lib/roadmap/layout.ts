@@ -2,13 +2,13 @@ import { parseBirthday } from "@/lib/birthdays";
 import {
   DAY_MS,
   GA_TICKET_HOUR_UTC,
-  SHOP_RESET_HOUR_UTC,
   isPermanent,
+  SHOP_RESET_HOUR_UTC,
 } from "@/lib/roadmap/constants";
 import {
-  type RoadmapTimeZone,
   calendarDate,
   fromCalendarDate,
+  type RoadmapTimeZone,
 } from "@/lib/roadmap/time-zone";
 import type {
   RoadmapBannerStudent,
@@ -117,7 +117,9 @@ export function generateGaTickets(items: RoadmapItem[]): RoadmapGaTicketItem[] {
     .sort((a, b) => a.startDate.localeCompare(b.startDate));
 }
 
-export type BirthdaySource = RoadmapBannerStudent & { birthday: string };
+export type BirthdaySource = RoadmapBannerStudent & {
+  birthday: string;
+};
 
 export function generateBirthdays(
   from: Date,
@@ -127,7 +129,11 @@ export function generateBirthdays(
 ): RoadmapBirthdayItem[] {
   const byDate = new Map<
     string,
-    { month: number; day: number; students: RoadmapBannerStudent[] }
+    {
+      month: number;
+      day: number;
+      students: RoadmapBannerStudent[];
+    }
   >();
 
   for (const { birthday, ...student } of students) {
@@ -137,7 +143,10 @@ export function generateBirthdays(
     }
 
     const key = `${parsed.month}-${parsed.day}`;
-    const entry = byDate.get(key) ?? { ...parsed, students: [] };
+    const entry = byDate.get(key) ?? {
+      ...parsed,
+      students: [],
+    };
     entry.students.push(student);
     byDate.set(key, entry);
   }
@@ -147,7 +156,14 @@ export function generateBirthdays(
   const lastYear = calendarDate(to, tz).year;
   for (let year = firstYear; year <= lastYear; year++) {
     for (const { month, day, students: dayStudents } of byDate.values()) {
-      const date = fromCalendarDate({ year, month: month - 1, day }, tz);
+      const date = fromCalendarDate(
+        {
+          year,
+          month: month - 1,
+          day,
+        },
+        tz,
+      );
 
       if (calendarDate(date, tz).day !== day || date < from || date >= to) {
         continue;
@@ -180,10 +196,16 @@ export type LaneAssignment = {
   laneCount: number;
 };
 
-type Interval = { start: number; end: number };
+type Interval = {
+  start: number;
+  end: number;
+};
 
 function packIntoLanes(
-  entries: { id: string; interval: Interval }[],
+  entries: {
+    id: string;
+    interval: Interval;
+  }[],
   lanes: Map<string, number>,
   laneOffset: number,
 ): number {
@@ -210,7 +232,11 @@ function packIntoLanes(
 export function assignLanes(
   items: RoadmapItem[],
   getDotWidthMs: (item: RoadmapItem) => number,
-  { longestFirst = false }: { longestFirst?: boolean } = {},
+  {
+    longestFirst = false,
+  }: {
+    longestFirst?: boolean;
+  } = {},
 ): LaneAssignment {
   const toEntry = (item: RoadmapItem) => {
     const start = new Date(item.startDate).getTime();
@@ -219,7 +245,10 @@ export function assignLanes(
       : new Date(item.endDate).getTime();
     return {
       id: item.id,
-      interval: { start, end },
+      interval: {
+        start,
+        end,
+      },
       createdAt: item.createdAt
         ? new Date(item.createdAt).getTime()
         : Number.POSITIVE_INFINITY,
@@ -253,5 +282,8 @@ export function assignLanes(
   const timedLaneCount = packIntoLanes(timed, lanes, 0);
   const dotLaneCount = packIntoLanes(dots, lanes, timedLaneCount);
 
-  return { lanes, laneCount: Math.max(1, timedLaneCount + dotLaneCount) };
+  return {
+    lanes,
+    laneCount: Math.max(1, timedLaneCount + dotLaneCount),
+  };
 }

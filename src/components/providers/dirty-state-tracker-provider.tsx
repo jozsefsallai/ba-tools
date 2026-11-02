@@ -1,11 +1,11 @@
 "use client";
 
+import { type PropsWithChildren, useCallback, useRef, useState } from "react";
 import {
   type DirtyStateTrackerProviderOptions,
   type DirtyStateTrackerRegistryEntry,
   dirtyStateTrackerContext,
 } from "@/hooks/use-dirty-state-tracker";
-import { type PropsWithChildren, useCallback, useRef, useState } from "react";
 
 export function DirtyStateTrackerProvider({
   children,
@@ -39,7 +39,10 @@ export function DirtyStateTrackerProvider({
         tickForceUpdate();
       }
     },
-    [stateRegistry, tickForceUpdate],
+    [
+      stateRegistry,
+      tickForceUpdate,
+    ],
   );
 
   return (

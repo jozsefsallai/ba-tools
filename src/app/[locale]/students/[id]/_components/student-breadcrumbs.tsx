@@ -10,19 +10,28 @@ export function StudentBreadcrumbs({
   name,
   iconUrl,
   children,
-}: PropsWithChildren<{ name: string; iconUrl: string }>) {
+}: PropsWithChildren<{
+  name: string;
+  iconUrl: string;
+}>) {
   const t = useTranslations();
   const studentListLink = useStudentListLink();
 
   return (
     <BreadcrumbScope
       items={[
-        { label: t("common.header.nav.resouces.title"), href: "/" },
+        {
+          label: t("common.header.nav.resouces.title"),
+          href: "/",
+        },
         {
           label: t("common.header.nav.resouces.students"),
           ...studentListLink,
         },
-        { label: name, icon: iconUrl },
+        {
+          label: name,
+          icon: iconUrl,
+        },
       ]}
     >
       {children}

@@ -6,10 +6,14 @@ import {
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
 
-type Params = { id: string };
+type Params = {
+  id: string;
+};
 
 export const GET = userRoute<Params>(async (_req, { id }, userId) => {
-  return ok(await getGiftInventory(userId, id), { cache: "private" });
+  return ok(await getGiftInventory(userId, id), {
+    cache: "private",
+  });
 });
 
 export const PATCH = userRoute<Params>(async (req, { id }, userId) => {
@@ -20,5 +24,7 @@ export const PATCH = userRoute<Params>(async (req, { id }, userId) => {
 
 export const DELETE = userRoute<Params>(async (_req, { id }, userId) => {
   await deleteGiftInventory(userId, id);
-  return new Response(null, { status: 204 });
+  return new Response(null, {
+    status: 204,
+  });
 });

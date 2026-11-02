@@ -1,5 +1,17 @@
 "use client";
 
+import { formatDistanceToNow } from "date-fns";
+import {
+  CheckIcon,
+  CopyIcon,
+  LightbulbIcon,
+  MoveIcon,
+  XIcon,
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { type SetStateAction, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   type BlockedCoords,
   type DisplayedItem,
@@ -37,18 +49,6 @@ import type {
   SimulateInventoryManagementEvent,
   WorkerResponse,
 } from "@/workers/types";
-import { formatDistanceToNow } from "date-fns";
-import {
-  CheckIcon,
-  CopyIcon,
-  LightbulbIcon,
-  MoveIcon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { type SetStateAction, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 function ItemSetup({
   title,
@@ -321,7 +321,9 @@ export function InventoryManagementSimulatorView({
     }
 
     setBlockedCells((oldBlockedCells) => {
-      const newBlockedCells = [...oldBlockedCells];
+      const newBlockedCells = [
+        ...oldBlockedCells,
+      ];
 
       for (let x = coords.x; x <= endX; x++) {
         for (let y = coords.y; y <= endY; y++) {
@@ -329,7 +331,10 @@ export function InventoryManagementSimulatorView({
             continue;
           }
 
-          newBlockedCells.push({ x, y });
+          newBlockedCells.push({
+            x,
+            y,
+          });
         }
       }
 
@@ -357,7 +362,10 @@ export function InventoryManagementSimulatorView({
       }));
     }
 
-    setSelectRegion({ width: 1, height: 1 });
+    setSelectRegion({
+      width: 1,
+      height: 1,
+    });
     setPlacingItem(null);
   }
 
@@ -379,7 +387,11 @@ export function InventoryManagementSimulatorView({
     workerRef.current.postMessage({
       type: "simulate_inventory_management",
       payload: {
-        items: [firstItem, secondItem, thirdItem],
+        items: [
+          firstItem,
+          secondItem,
+          thirdItem,
+        ],
         blockedCells,
       },
     } satisfies SimulateInventoryManagementEvent);
@@ -531,7 +543,10 @@ export function InventoryManagementSimulatorView({
   function onPlacingToggled(item: InventoryManagementItem, rotated: boolean) {
     if (placingItem === item) {
       setPlacingItem(null);
-      setSelectRegion({ width: 1, height: 1 });
+      setSelectRegion({
+        width: 1,
+        height: 1,
+      });
       return;
     }
 
@@ -539,7 +554,10 @@ export function InventoryManagementSimulatorView({
     const height = rotated ? item.width : item.height;
 
     setPlacingItem(item);
-    setSelectRegion({ width, height });
+    setSelectRegion({
+      width,
+      height,
+    });
   }
 
   function handleNextRound() {
@@ -624,7 +642,11 @@ export function InventoryManagementSimulatorView({
     if (preset) {
       handlePresetLoaded(preset.id, roundIndex);
     }
-  }, [presetParam, roundParam, slotParam]);
+  }, [
+    presetParam,
+    roundParam,
+    slotParam,
+  ]);
 
   if (initError) {
     return (
@@ -682,7 +704,9 @@ export function InventoryManagementSimulatorView({
                         addSuffix: true,
                       }),
                     })
-                  : t("tools.inventoryManagement.slotEmpty", { number: 1 })}
+                  : t("tools.inventoryManagement.slotEmpty", {
+                      number: 1,
+                    })}
               </SelectItem>
 
               <SelectItem value="slot2" disabled={!saveData?.slot2}>
@@ -693,7 +717,9 @@ export function InventoryManagementSimulatorView({
                         addSuffix: true,
                       }),
                     })
-                  : t("tools.inventoryManagement.slotEmpty", { number: 2 })}
+                  : t("tools.inventoryManagement.slotEmpty", {
+                      number: 2,
+                    })}
               </SelectItem>
 
               <SelectItem value="slot3" disabled={!saveData?.slot3}>
@@ -704,7 +730,9 @@ export function InventoryManagementSimulatorView({
                         addSuffix: true,
                       }),
                     })
-                  : t("tools.inventoryManagement.slotEmpty", { number: 3 })}
+                  : t("tools.inventoryManagement.slotEmpty", {
+                      number: 3,
+                    })}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -724,7 +752,9 @@ export function InventoryManagementSimulatorView({
                         addSuffix: true,
                       }),
                     })
-                  : t("tools.inventoryManagement.slotEmpty", { number: 1 })}
+                  : t("tools.inventoryManagement.slotEmpty", {
+                      number: 1,
+                    })}
               </SelectItem>
 
               <SelectItem value="slot2">
@@ -735,7 +765,9 @@ export function InventoryManagementSimulatorView({
                         addSuffix: true,
                       }),
                     })
-                  : t("tools.inventoryManagement.slotEmpty", { number: 2 })}
+                  : t("tools.inventoryManagement.slotEmpty", {
+                      number: 2,
+                    })}
               </SelectItem>
 
               <SelectItem value="slot3">
@@ -746,7 +778,9 @@ export function InventoryManagementSimulatorView({
                         addSuffix: true,
                       }),
                     })
-                  : t("tools.inventoryManagement.slotEmpty", { number: 3 })}
+                  : t("tools.inventoryManagement.slotEmpty", {
+                      number: 3,
+                    })}
               </SelectItem>
             </SelectContent>
           </Select>

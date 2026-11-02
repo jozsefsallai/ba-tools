@@ -1,8 +1,8 @@
-import { DetailSection } from "@/app/[locale]/students/[id]/_components/detail-section";
-import type { StudentDetail } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
-import { StudentGridCard } from "@/app/[locale]/students/_components/student-grid-card";
 import { Layers2Icon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
+import { StudentGridCard } from "@/app/[locale]/students/_components/student-grid-card";
+import { DetailSection } from "@/app/[locale]/students/[id]/_components/detail-section";
+import type { StudentDetail } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
 
 export async function StudentVariantsSection({
   student,
@@ -14,7 +14,10 @@ export async function StudentVariantsSection({
 
   const base = student.baseVariant;
   const relatives = base
-    ? [base, ...base.variants.filter((v) => v.id !== student.id)]
+    ? [
+        base,
+        ...base.variants.filter((v) => v.id !== student.id),
+      ]
     : student.variants;
 
   if (relatives.length === 0) {

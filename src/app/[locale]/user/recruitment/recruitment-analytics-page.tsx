@@ -1,14 +1,14 @@
 "use client";
 
-import { AccountAnalytics } from "@/app/[locale]/user/recruitment/_components/account-analytics";
-import { MessageBox } from "@/components/common/message-box";
-import { Button } from "@/components/ui/button";
 import { useQuery } from "convex/react";
 import { ChevronLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AccountAnalytics } from "@/app/[locale]/user/recruitment/_components/account-analytics";
+import { MessageBox } from "@/components/common/message-box";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export function RecruitmentAnalyticsPage({ accountId }: { accountId: string }) {
   const t = useTranslations();

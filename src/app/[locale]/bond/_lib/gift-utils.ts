@@ -1,4 +1,7 @@
-import type { GiftWithStudents, StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
+import type {
+  GiftWithStudents,
+  StudentWithGifts,
+} from "@/app/[locale]/bond/_lib/types";
 import type { Doc, Id } from "~convex/dataModel";
 
 export type GiftAffinity = "adored" | "loved" | "liked" | "normal";
@@ -132,7 +135,12 @@ export function sortGiftsByStudentPreference(
     .filter((gift) => !ids.has(gift.id))
     .sort((a, b) => b.expValue - a.expValue);
 
-  return [...adored, ...loved, ...liked, ...normal];
+  return [
+    ...adored,
+    ...loved,
+    ...liked,
+    ...normal,
+  ];
 }
 
 export function sortTargetsByGiftAffinity(
@@ -140,7 +148,9 @@ export function sortTargetsByGiftAffinity(
   targets: GiftTargetDoc[],
   studentMap: Map<string, StudentWithGifts>,
 ) {
-  return [...targets].sort((a, b) => {
+  return [
+    ...targets,
+  ].sort((a, b) => {
     const studentA = studentMap.get(a.studentId);
     const studentB = studentMap.get(b.studentId);
 
@@ -187,7 +197,12 @@ export function buildTargetAllocationsFromDoc(
   giftIds: number[],
   inventoryCounts: Record<number, number>,
 ) {
-  const giftMap = new Map(target.gifts.map((gift) => [gift.id, gift]));
+  const giftMap = new Map(
+    target.gifts.map((gift) => [
+      gift.id,
+      gift,
+    ]),
+  );
   const allocations: Record<number, number> = {};
 
   for (const giftId of giftIds) {

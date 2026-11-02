@@ -1,13 +1,13 @@
+import { paginationOptsValidator } from "convex/server";
+import { v } from "convex/values";
+import { stream } from "convex-helpers/server/stream";
 import {
+  PVP_SEASONS,
   type PVPFormationPresetType,
   type PVPMatchType,
-  PVP_SEASONS,
   type StarLevel,
   type UELevel,
 } from "@/lib/types";
-import { stream } from "convex-helpers/server/stream";
-import { paginationOptsValidator } from "convex/server";
-import { v } from "convex/values";
 import type { Doc, Id } from "~convex/dataModel";
 import type { MutationCtx, QueryCtx } from "~convex/server";
 import {
@@ -37,7 +37,14 @@ import {
 } from "./pvpStats";
 import schema from "./schema";
 
-const emptyTeam = () => [{}, {}, {}, {}, {}, {}];
+const emptyTeam = () => [
+  {},
+  {},
+  {},
+  {},
+  {},
+  {},
+];
 
 async function findEnemyPresetByName(
   ctx: QueryCtx,
@@ -97,7 +104,9 @@ async function updateEnemyPresetRecency(ctx: any, presetId: any) {
   );
 
   if (preset.lastRecordedAt !== lastRecordedAt) {
-    await ctx.db.patch(presetId, { lastRecordedAt });
+    await ctx.db.patch(presetId, {
+      lastRecordedAt,
+    });
   }
 }
 
@@ -200,7 +209,10 @@ function roleFromSet(roles: Set<"attack" | "defense">): PVPFormationPresetType {
 
 async function getUniqueEnemyTeamsForPreset(
   ctx: QueryCtx,
-  preset: { seasonId: Id<"pvpSeason">; _id?: Id<"pvpEnemyPreset"> },
+  preset: {
+    seasonId: Id<"pvpSeason">;
+    _id?: Id<"pvpEnemyPreset">;
+  },
 ) {
   const [matches, manualTeams] = await Promise.all([
     getOpponentMatches(ctx, preset.seasonId, preset._id),
@@ -229,7 +241,11 @@ async function getUniqueEnemyTeamsForPreset(
 
       mergeEnemyRoles(roles, role);
 
-      const encounterCounts = { attack: 0, defense: 0, total: 0 };
+      const encounterCounts = {
+        attack: 0,
+        defense: 0,
+        total: 0,
+      };
 
       if (countEncounter) {
         encounterCounts.total = 1;
@@ -285,7 +301,9 @@ async function getUniqueEnemyTeamsForPreset(
     add(manual.team, manual.matchType, manual.updatedAt, manual._id);
   }
 
-  return [...byKey.values()]
+  return [
+    ...byKey.values(),
+  ]
     .sort((a, b) => b.updatedAt - a.updatedAt)
     .map((item) => ({
       ...item,
@@ -329,7 +347,9 @@ export const getOwnSeasons = authenticatedQuery({
 });
 
 export const getSeason = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason") },
+  args: {
+    seasonId: v.id("pvpSeason"),
+  },
   handler: async (ctx, { seasonId }) => {
     return await getSeasonForUser(ctx, seasonId);
   },
@@ -361,7 +381,9 @@ export const createSeason = authenticatedMutation({
 });
 
 export const reorderSeasons = authenticatedMutation({
-  args: { seasonIds: v.array(v.id("pvpSeason")) },
+  args: {
+    seasonIds: v.array(v.id("pvpSeason")),
+  },
   handler: async (ctx, { seasonIds }) => {
     const seasons = await ctx.db
       .query("pvpSeason")
@@ -379,7 +401,9 @@ export const reorderSeasons = authenticatedMutation({
     }
 
     for (const [sortOrder, seasonId] of seasonIds.entries()) {
-      await ctx.db.patch(seasonId, { sortOrder });
+      await ctx.db.patch(seasonId, {
+        sortOrder,
+      });
     }
   },
 });
@@ -393,7 +417,9 @@ export const setSeasonArchived = authenticatedMutation({
     await getSeasonForUser(ctx, seasonId);
 
     if (archived) {
-      await ctx.db.patch(seasonId, { archived: true });
+      await ctx.db.patch(seasonId, {
+        archived: true,
+      });
       return;
     }
 
@@ -410,7 +436,10 @@ export const setSeasonArchived = authenticatedMutation({
       ? Math.min(...activeSeasons.map(getSeasonSortOrder)) - 1
       : 0;
 
-    await ctx.db.patch(seasonId, { archived: false, sortOrder });
+    await ctx.db.patch(seasonId, {
+      archived: false,
+      sortOrder,
+    });
   },
 });
 
@@ -421,13 +450,18 @@ export const updateSeasonNumber = authenticatedMutation({
   },
   handler: async (ctx, { seasonId, seasonNumber }) => {
     await getSeasonForUser(ctx, seasonId);
-    await ctx.db.patch(seasonId, { seasonNumber });
+    await ctx.db.patch(seasonId, {
+      seasonNumber,
+    });
     await queueSeasonRebuild(ctx, seasonId);
   },
 });
 
 export const updateSeason = authenticatedMutation({
-  args: { seasonId: v.id("pvpSeason"), ...pvpSeasonArgs },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    ...pvpSeasonArgs,
+  },
   handler: async (ctx, { seasonId, name, gameServer, seasonNumber }) => {
     const season = await getSeasonForUser(ctx, seasonId);
 
@@ -449,7 +483,9 @@ export const updateSeason = authenticatedMutation({
 });
 
 export const getMatchesForSeason = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason") },
+  args: {
+    seasonId: v.id("pvpSeason"),
+  },
   handler: async (ctx, { seasonId }) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
@@ -469,7 +505,9 @@ export const getMatchesForSeason = authenticatedQuery({
 });
 
 export const getSeasonDefaults = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason") },
+  args: {
+    seasonId: v.id("pvpSeason"),
+  },
   handler: async (ctx, { seasonId }) => {
     await getSeasonForUser(ctx, seasonId);
 
@@ -564,15 +602,24 @@ export const getDayStats = authenticatedQuery({
         return stats;
       },
       {
-        attack: { wins: 0, losses: 0 },
-        defense: { wins: 0, losses: 0 },
+        attack: {
+          wins: 0,
+          losses: 0,
+        },
+        defense: {
+          wins: 0,
+          losses: 0,
+        },
       },
     );
   },
 });
 
 export const listFormationPresets = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason"), search: v.optional(v.string()) },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    search: v.optional(v.string()),
+  },
   handler: async (ctx, { seasonId, search }) => {
     await getSeasonForUser(ctx, seasonId);
 
@@ -682,7 +729,10 @@ export const listEnemyPresetsByStudentRep = authenticatedQuery({
 });
 
 export const getEnemyPreset = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason"), presetId: v.id("pvpEnemyPreset") },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    presetId: v.id("pvpEnemyPreset"),
+  },
   handler: async (ctx, { seasonId, presetId }) => {
     const preset = await ctx.db.get(presetId);
 
@@ -776,7 +826,10 @@ export const getMatchById = authenticatedQuery({
 });
 
 export const recordMatch = authenticatedMutation({
-  args: { seasonId: v.id("pvpSeason"), ...pvpMatchCreateArgs },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    ...pvpMatchCreateArgs,
+  },
   handler: async (
     ctx,
     {
@@ -864,8 +917,16 @@ export const bulkImportMatches = staffMutation({
     seasonId: v.id("pvpSeason"),
     matches: v.array(
       v.object({
-        attackTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
-        defenseTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+        attackTeam: v.array(
+          v.object({
+            studentId: v.optional(v.string()),
+          }),
+        ),
+        defenseTeam: v.array(
+          v.object({
+            studentId: v.optional(v.string()),
+          }),
+        ),
         attackWins: v.boolean(),
         videoUrl: v.optional(v.string()),
       }),
@@ -921,7 +982,10 @@ export const clearSeasonMatches = staffMutation({
     const page = await ctx.db
       .query("pvpMatchRecord")
       .withIndex("by_seasonId", (q) => q.eq("seasonId", seasonId))
-      .paginate({ numItems: 100, cursor: cursor ?? null });
+      .paginate({
+        numItems: 100,
+        cursor: cursor ?? null,
+      });
 
     for (const match of page.page) {
       const presetId = match.enemyPresetId;
@@ -942,7 +1006,10 @@ export const clearSeasonMatches = staffMutation({
 });
 
 export const updateMatch = authenticatedMutation({
-  args: { matchId: v.id("pvpMatchRecord"), ...pvpMatchUpdateArgs },
+  args: {
+    matchId: v.id("pvpMatchRecord"),
+    ...pvpMatchUpdateArgs,
+  },
   handler: async (
     ctx,
     {
@@ -1026,7 +1093,9 @@ export const updateMatch = authenticatedMutation({
 });
 
 export const deleteMatch = authenticatedMutation({
-  args: { matchId: v.id("pvpMatchRecord") },
+  args: {
+    matchId: v.id("pvpMatchRecord"),
+  },
   handler: async (ctx, { matchId }) => {
     const match = await ctx.db.get(matchId);
     if (!match || match.userId !== ctx.user._id) {
@@ -1044,7 +1113,9 @@ export const deleteMatch = authenticatedMutation({
 });
 
 export const deleteSeason = authenticatedMutation({
-  args: { seasonId: v.id("pvpSeason") },
+  args: {
+    seasonId: v.id("pvpSeason"),
+  },
   handler: async (ctx, { seasonId }) => {
     const season = await ctx.db.get(seasonId);
     if (!season || season.userId !== ctx.user._id) {
@@ -1102,7 +1173,10 @@ export const deleteSeason = authenticatedMutation({
 });
 
 export const createFormationPreset = authenticatedMutation({
-  args: { seasonId: v.id("pvpSeason"), ...pvpFormationPresetCreateArgs },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    ...pvpFormationPresetCreateArgs,
+  },
   handler: async (ctx, { seasonId, name, matchType, team, usedByMe }) => {
     await getSeasonForUser(ctx, seasonId);
 
@@ -1141,7 +1215,9 @@ export const updateFormationPreset = authenticatedMutation({
 });
 
 export const deleteFormationPreset = authenticatedMutation({
-  args: { presetId: v.id("pvpFormationPreset") },
+  args: {
+    presetId: v.id("pvpFormationPreset"),
+  },
   handler: async (ctx, { presetId }) => {
     const preset = await ctx.db.get(presetId);
 
@@ -1154,7 +1230,10 @@ export const deleteFormationPreset = authenticatedMutation({
 });
 
 export const createEnemyPreset = authenticatedMutation({
-  args: { seasonId: v.id("pvpSeason"), ...pvpEnemyPresetCreateArgs },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    ...pvpEnemyPresetCreateArgs,
+  },
   handler: async (ctx, args) => {
     await getSeasonForUser(ctx, args.seasonId);
 
@@ -1169,7 +1248,10 @@ export const createEnemyPreset = authenticatedMutation({
 });
 
 export const updateEnemyPreset = authenticatedMutation({
-  args: { presetId: v.id("pvpEnemyPreset"), ...pvpEnemyPresetUpdateArgs },
+  args: {
+    presetId: v.id("pvpEnemyPreset"),
+    ...pvpEnemyPresetUpdateArgs,
+  },
   handler: async (ctx, { presetId, ...changes }) => {
     const preset = await ctx.db.get(presetId);
 
@@ -1263,7 +1345,9 @@ export const mergeEnemyPresets = authenticatedMutation({
     );
 
     for (const match of matches) {
-      await ctx.db.patch(match._id, { enemyPresetId: targetPresetId });
+      await ctx.db.patch(match._id, {
+        enemyPresetId: targetPresetId,
+      });
     }
 
     await mergeManualEnemyTeams(
@@ -1281,7 +1365,9 @@ export const mergeEnemyPresets = authenticatedMutation({
 });
 
 export const anonymizeEnemyPreset = authenticatedMutation({
-  args: { presetId: v.id("pvpEnemyPreset") },
+  args: {
+    presetId: v.id("pvpEnemyPreset"),
+  },
   handler: async (ctx, { presetId }) => {
     const preset = await ctx.db.get(presetId);
     if (!preset || preset.userId !== ctx.user._id) {
@@ -1306,7 +1392,9 @@ export const anonymizeEnemyPreset = authenticatedMutation({
 });
 
 export const deleteEnemyPreset = authenticatedMutation({
-  args: { presetId: v.id("pvpEnemyPreset") },
+  args: {
+    presetId: v.id("pvpEnemyPreset"),
+  },
   handler: async (ctx, { presetId }) => {
     const preset = await ctx.db.get(presetId);
 
@@ -1322,7 +1410,9 @@ export const deleteEnemyPreset = authenticatedMutation({
       .collect();
 
     for (const match of matches) {
-      await ctx.db.patch(match._id, { enemyPresetId: undefined });
+      await ctx.db.patch(match._id, {
+        enemyPresetId: undefined,
+      });
     }
 
     const teams = await ctx.db
@@ -1339,7 +1429,10 @@ export const deleteEnemyPreset = authenticatedMutation({
 });
 
 export const getEnemyTeam = authenticatedQuery({
-  args: { seasonId: v.id("pvpSeason"), teamId: v.id("pvpEnemyTeam") },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    teamId: v.id("pvpEnemyTeam"),
+  },
   handler: async (ctx, { seasonId, teamId }) => {
     const team = await ctx.db.get(teamId);
 
@@ -1352,7 +1445,10 @@ export const getEnemyTeam = authenticatedQuery({
 });
 
 export const createEnemyTeam = authenticatedMutation({
-  args: { seasonId: v.id("pvpSeason"), ...pvpEnemyTeamCreateArgs },
+  args: {
+    seasonId: v.id("pvpSeason"),
+    ...pvpEnemyTeamCreateArgs,
+  },
   handler: async (ctx, args) => {
     await getSeasonForUser(ctx, args.seasonId);
     await validateEnemyPresetForMatch(ctx, args.enemyPresetId, args.seasonId);
@@ -1399,7 +1495,10 @@ export const createEnemyTeam = authenticatedMutation({
 });
 
 export const updateEnemyTeam = authenticatedMutation({
-  args: { teamId: v.id("pvpEnemyTeam"), ...pvpEnemyTeamUpdateArgs },
+  args: {
+    teamId: v.id("pvpEnemyTeam"),
+    ...pvpEnemyTeamUpdateArgs,
+  },
   handler: async (ctx, args) => {
     const current = await ctx.db.get(args.teamId);
 
@@ -1451,7 +1550,9 @@ export const updateEnemyTeam = authenticatedMutation({
 });
 
 export const deleteEnemyTeam = authenticatedMutation({
-  args: { teamId: v.id("pvpEnemyTeam") },
+  args: {
+    teamId: v.id("pvpEnemyTeam"),
+  },
   handler: async (ctx, { teamId }) => {
     const team = await ctx.db.get(teamId);
 

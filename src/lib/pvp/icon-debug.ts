@@ -3,10 +3,10 @@ import template from "@/assets/images/pvp-template.png";
 import { recognizePvpAnonymousOpponent } from "@/lib/pvp/anonymous-icon";
 import {
   type Cutout,
+  findTemplateCutouts,
   type IconDebugCase,
   type IconDebugResult,
   type IconDebugStudent,
-  findTemplateCutouts,
   iconDebugSlotIndices,
 } from "@/lib/pvp/icon-debug-results";
 import { PvpIconMatcher } from "@/lib/pvp/icon-matcher";
@@ -51,7 +51,9 @@ function loadImage(
       );
     };
 
-    signal.addEventListener("abort", cancel, { once: true });
+    signal.addEventListener("abort", cancel, {
+      once: true,
+    });
 
     image.src = url;
   });
@@ -105,7 +107,12 @@ export class PvpIconDebugRunner {
   };
 
   async warmup(signal: AbortSignal, students: readonly IconDebugStudent[]) {
-    this.students = new Map(students.map((student) => [student.id, student]));
+    this.students = new Map(
+      students.map((student) => [
+        student.id,
+        student,
+      ]),
+    );
 
     const filler = (
       combatClass: IconDebugStudent["combatClass"],
@@ -152,7 +159,10 @@ export class PvpIconDebugRunner {
       template: report,
       background,
       cutouts,
-      fillers: { Main: main, Support: support },
+      fillers: {
+        Main: main,
+        Support: support,
+      },
     };
   }
 
@@ -207,7 +217,15 @@ export class PvpIconDebugRunner {
 
     signal.throwIfAborted();
 
-    return new File([blob], `${studentId}.png`, { type: "image/png" });
+    return new File(
+      [
+        blob,
+      ],
+      `${studentId}.png`,
+      {
+        type: "image/png",
+      },
+    );
   }
 
   async test(
@@ -256,7 +274,9 @@ export class PvpIconDebugRunner {
         reject(new Error(event.message));
       };
 
-      signal.addEventListener("abort", cancel, { once: true });
+      signal.addEventListener("abort", cancel, {
+        once: true,
+      });
       worker.postMessage(rois);
     });
 
@@ -279,12 +299,19 @@ export class PvpIconDebugRunner {
       slots.includes(unit.sourceIndex),
     );
 
-    const units = [...myUnits, ...enemyUnits];
+    const units = [
+      ...myUnits,
+      ...enemyUnits,
+    ];
 
     const matches = await this.matcher.match(
       [
         ...units.map((unit) => unit.icon),
-        ...(anonymous ? [] : [prepared.enemyStudentRep]),
+        ...(anonymous
+          ? []
+          : [
+              prepared.enemyStudentRep,
+            ]),
       ],
       allowedIds,
     );
@@ -296,24 +323,33 @@ export class PvpIconDebugRunner {
       matched: typeof prepared.myUnits,
       offset: number,
     ): IconDebugCase[] =>
-      Array.from({ length: 6 }, (_, index) => {
-        if (!slots.includes(index)) {
-          return { skipped: true };
-        }
+      Array.from(
+        {
+          length: 6,
+        },
+        (_, index) => {
+          if (!slots.includes(index)) {
+            return {
+              skipped: true,
+            };
+          }
 
-        const unit = side.find((item) => item.sourceIndex === index);
+          const unit = side.find((item) => item.sourceIndex === index);
 
-        return unit
-          ? {
-              crop: unit.icon,
-              match: matches[offset + matched.indexOf(unit)],
-              error:
-                side.length !== 6
-                  ? `Segmentation found ${side.length} slots; expected 6.`
-                  : undefined,
-            }
-          : { error: "Missing slot" };
-      });
+          return unit
+            ? {
+                crop: unit.icon,
+                match: matches[offset + matched.indexOf(unit)],
+                error:
+                  side.length !== 6
+                    ? `Segmentation found ${side.length} slots; expected 6.`
+                    : undefined,
+              }
+            : {
+                error: "Missing slot",
+              };
+        },
+      );
 
     return {
       studentId,

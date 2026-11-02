@@ -1,16 +1,16 @@
 "use client";
 
+import { PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { TimelineGroupEntry } from "@/app/[locale]/timelines/g/_components/timeline-group-entry";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { useQueryWithStatus } from "@/lib/convex";
-import { PencilIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export type TimelineGroupViewProps = {
   id: Id<"timelineGroup">;
@@ -18,7 +18,9 @@ export type TimelineGroupViewProps = {
 
 export function TimelineGroupView({ id }: TimelineGroupViewProps) {
   const t = useTranslations();
-  const query = useQueryWithStatus(api.timelineGroup.getById, { id });
+  const query = useQueryWithStatus(api.timelineGroup.getById, {
+    id,
+  });
 
   if (query.status === "pending") {
     return <MessageBox>{t("tools.timelineGroupView.loadingGroup")}</MessageBox>;
@@ -77,7 +79,9 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
       </div>
 
       <div className="flex flex-col gap-6">
-        <h2 className="text-2xl font-bold">{t("tools.timelineGroupView.timelines")}</h2>
+        <h2 className="text-2xl font-bold">
+          {t("tools.timelineGroupView.timelines")}
+        </h2>
 
         {query.data.timelines.length === 0 ? (
           <MessageBox>{t("tools.timelineGroupView.noTimelines")}</MessageBox>

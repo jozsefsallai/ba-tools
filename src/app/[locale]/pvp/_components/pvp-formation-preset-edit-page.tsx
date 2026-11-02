@@ -1,9 +1,9 @@
 "use client";
 
-import { PVPFormationPresetForm } from "@/app/[locale]/pvp/_components/pvp-formation-preset-form";
-import { MessageBox } from "@/components/common/message-box";
 import { useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
+import { PVPFormationPresetForm } from "@/app/[locale]/pvp/_components/pvp-formation-preset-form";
+import { MessageBox } from "@/components/common/message-box";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -16,7 +16,9 @@ export function PVPFormationPresetEditPage({
 }) {
   const t = useTranslations();
 
-  const presets = useQuery(api.pvp.listFormationPresets, { seasonId });
+  const presets = useQuery(api.pvp.listFormationPresets, {
+    seasonId,
+  });
   const preset = presets?.find((item) => item._id === presetId);
 
   if (presets === undefined) {

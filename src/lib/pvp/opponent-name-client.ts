@@ -1,3 +1,4 @@
+import { startTransition } from "react";
 import {
   cachePvpOpponentName,
   recognizePvpOpponentName,
@@ -5,7 +6,6 @@ import {
 import type { PvpPixelImage } from "@/lib/pvp";
 import { drawPvpPixels } from "@/lib/pvp/canvas";
 import type { PvpOpponentNameRecognition } from "@/lib/pvp/opponent-name-types";
-import { startTransition } from "react";
 
 function runNameAction<T>(
   action: () => Promise<T>,
@@ -16,7 +16,9 @@ function runNameAction<T>(
   return new Promise<T>((resolve, reject) => {
     const cancel = () => reject(signal.reason);
 
-    signal.addEventListener("abort", cancel, { once: true });
+    signal.addEventListener("abort", cancel, {
+      once: true,
+    });
 
     startTransition(async () => {
       try {
@@ -49,8 +51,15 @@ export async function recognizeRemoteOpponentName(
     const image = canvas.toDataURL("image/png").split(",")[1];
 
     const result = await runNameAction(
-      () => recognizePvpOpponentName({ image, levelEnd }),
-      AbortSignal.any([signal, AbortSignal.timeout(25000)]),
+      () =>
+        recognizePvpOpponentName({
+          image,
+          levelEnd,
+        }),
+      AbortSignal.any([
+        signal,
+        AbortSignal.timeout(25000),
+      ]),
     );
 
     if (!result) {
@@ -83,7 +92,12 @@ export async function saveOpponentNameCache(
   seasonId: string,
 ) {
   const saved = await runNameAction(
-    () => cachePvpOpponentName({ receipt, matchId, seasonId }),
+    () =>
+      cachePvpOpponentName({
+        receipt,
+        matchId,
+        seasonId,
+      }),
     AbortSignal.timeout(4000),
   );
 

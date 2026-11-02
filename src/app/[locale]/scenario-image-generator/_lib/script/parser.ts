@@ -1,8 +1,22 @@
 export type ScenarioScriptCommand =
-  | { type: "CHARA_CREATE"; id: string }
-  | { type: "CHARA_SPRITE"; id: string; expression: string; url: string }
-  | { type: "FADE_IN"; time: number }
-  | { type: "FADE_OUT"; time: number }
+  | {
+      type: "CHARA_CREATE";
+      id: string;
+    }
+  | {
+      type: "CHARA_SPRITE";
+      id: string;
+      expression: string;
+      url: string;
+    }
+  | {
+      type: "FADE_IN";
+      time: number;
+    }
+  | {
+      type: "FADE_OUT";
+      time: number;
+    }
   | {
       type: "CHARA_SET";
       id: string;
@@ -12,17 +26,51 @@ export type ScenarioScriptCommand =
       darken?: boolean;
       hologram?: boolean;
     }
-  | { type: "CHARA_FADE_IN"; id: string; time: number }
-  | { type: "WAIT"; time: number }
-  | { type: "NAME"; name: string }
-  | { type: "AFFILIATION"; affiliation: string }
-  | { type: "CLEAR_NAME" }
-  | { type: "CLEAR_AFFILIATION" }
-  | { type: "CHARA_EXPR"; id: string; expression: string }
-  | { type: "CHARA_MOVE"; id: string; x?: number; y?: number; time?: number }
-  | { type: "INPUT" }
-  | { type: "CLEAR_MESSAGE" }
-  | { type: "MESSAGE"; message: string };
+  | {
+      type: "CHARA_FADE_IN";
+      id: string;
+      time: number;
+    }
+  | {
+      type: "WAIT";
+      time: number;
+    }
+  | {
+      type: "NAME";
+      name: string;
+    }
+  | {
+      type: "AFFILIATION";
+      affiliation: string;
+    }
+  | {
+      type: "CLEAR_NAME";
+    }
+  | {
+      type: "CLEAR_AFFILIATION";
+    }
+  | {
+      type: "CHARA_EXPR";
+      id: string;
+      expression: string;
+    }
+  | {
+      type: "CHARA_MOVE";
+      id: string;
+      x?: number;
+      y?: number;
+      time?: number;
+    }
+  | {
+      type: "INPUT";
+    }
+  | {
+      type: "CLEAR_MESSAGE";
+    }
+  | {
+      type: "MESSAGE";
+      message: string;
+    };
 
 export type ScenarioScriptEvent = {
   id: string;
@@ -108,7 +156,10 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        current.commands.push({ type: "CHARA_CREATE", id });
+        current.commands.push({
+          type: "CHARA_CREATE",
+          id,
+        });
         break;
       }
 
@@ -126,7 +177,12 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        current.commands.push({ type: "CHARA_SPRITE", id, expression, url });
+        current.commands.push({
+          type: "CHARA_SPRITE",
+          id,
+          expression,
+          url,
+        });
         break;
       }
 
@@ -150,7 +206,10 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        const command: ScenarioScriptCommand = { type: "CHARA_SET", id };
+        const command: ScenarioScriptCommand = {
+          type: "CHARA_SET",
+          id,
+        };
 
         for (let i = 2; i < parts.length; i++) {
           const part = parts[i];
@@ -202,7 +261,10 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        current.commands.push({ type: "WAIT", time });
+        current.commands.push({
+          type: "WAIT",
+          time,
+        });
         break;
       }
 
@@ -217,7 +279,10 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        current.commands.push({ type: "NAME", name });
+        current.commands.push({
+          type: "NAME",
+          name,
+        });
         break;
       }
 
@@ -232,17 +297,24 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        current.commands.push({ type: "AFFILIATION", affiliation });
+        current.commands.push({
+          type: "AFFILIATION",
+          affiliation,
+        });
         break;
       }
 
       case "CLEAR_NAME": {
-        current.commands.push({ type: "CLEAR_NAME" });
+        current.commands.push({
+          type: "CLEAR_NAME",
+        });
         break;
       }
 
       case "CLEAR_AFFILIATION": {
-        current.commands.push({ type: "CLEAR_AFFILIATION" });
+        current.commands.push({
+          type: "CLEAR_AFFILIATION",
+        });
         break;
       }
 
@@ -258,7 +330,11 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        current.commands.push({ type: "CHARA_EXPR", id, expression });
+        current.commands.push({
+          type: "CHARA_EXPR",
+          id,
+          expression,
+        });
         break;
       }
 
@@ -273,7 +349,10 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
           break;
         }
 
-        const command: ScenarioScriptCommand = { type: "CHARA_MOVE", id };
+        const command: ScenarioScriptCommand = {
+          type: "CHARA_MOVE",
+          id,
+        };
 
         for (let i = 2; i < parts.length; i++) {
           const part = parts[i];
@@ -291,18 +370,25 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
       }
 
       case "INPUT": {
-        current.commands.push({ type: "INPUT" });
+        current.commands.push({
+          type: "INPUT",
+        });
         break;
       }
 
       case "CLEAR_MESSAGE": {
-        current.commands.push({ type: "CLEAR_MESSAGE" });
+        current.commands.push({
+          type: "CLEAR_MESSAGE",
+        });
         break;
       }
 
       default: {
         // any non-command line is treated as dialogue
-        current.commands.push({ type: "MESSAGE", message: trimmedLine });
+        current.commands.push({
+          type: "MESSAGE",
+          message: trimmedLine,
+        });
         break;
       }
     }
@@ -312,5 +398,8 @@ export function parseScenarioScript(script: string): ScenarioScriptParseResult {
     events.push(current);
   }
 
-  return { events, errors };
+  return {
+    events,
+    errors,
+  };
 }

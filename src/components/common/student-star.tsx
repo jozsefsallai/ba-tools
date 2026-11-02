@@ -1,7 +1,7 @@
-import yellowStar from "@/assets/images/yellow_star.png";
 import blueStar from "@/assets/images/blue_star.png";
-import { cn } from "@/lib/utils";
+import yellowStar from "@/assets/images/yellow_star.png";
 import type { StarLevel, UELevel } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export type StudentStarProps = {
   starLevel?: StarLevel;

@@ -1,6 +1,16 @@
 "use client";
 
 import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import useMeasure from "react-use-measure";
+import {
   BannerStudents,
   RaidChips,
   RoadmapItemDetails,
@@ -23,12 +33,12 @@ import {
 } from "@/components/ui/tooltip";
 import {
   DAY_MS,
-  LANE_HEIGHTS,
   getCategorySwatch,
   getItemSwatch,
   isEditableKind,
   isFestBanner,
   isLimitedBanner,
+  LANE_HEIGHTS,
 } from "@/lib/roadmap/constants";
 import {
   addUTCDays,
@@ -55,16 +65,6 @@ import type {
 } from "@/lib/roadmap/types";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import useMeasure from "react-use-measure";
 
 const INITIAL_DAYS = 120;
 const EXTEND_DAYS = 90;
@@ -105,8 +105,15 @@ type DragState = {
 };
 
 type MenuTarget =
-  | { type: "item"; item: RoadmapItem }
-  | { type: "empty"; category: RoadmapCategory; date: Date };
+  | {
+      type: "item";
+      item: RoadmapItem;
+    }
+  | {
+      type: "empty";
+      category: RoadmapCategory;
+      date: Date;
+    };
 
 function stickyOffset(left: number, max: number): string {
   return `clamp(0px, calc(var(--roadmap-scroll, 0px) - ${left}px), ${Math.max(0, max)}px)`;
@@ -214,7 +221,11 @@ export function RoadmapTimeline({
 
   const rangeEnd = useMemo(
     () => addCalendarDays(rangeStart, loadedDays, tz),
-    [rangeStart, loadedDays, tz],
+    [
+      rangeStart,
+      loadedDays,
+      tz,
+    ],
   );
   const totalWidth = loadedDays * dayWidth;
   const viewportWidth = bounds.width || 1200;
@@ -230,7 +241,14 @@ export function RoadmapTimeline({
         ? generateShopResets(rangeStart, rangeEnd)
         : []),
     ],
-    [items, categories, rangeStart, rangeEnd, birthdaySources, tz],
+    [
+      items,
+      categories,
+      rangeStart,
+      rangeEnd,
+      birthdaySources,
+      tz,
+    ],
   );
 
   const rows = useMemo(() => {
@@ -260,7 +278,14 @@ export function RoadmapTimeline({
         };
       })
       .filter((row) => showEmptyCategories || row.items.length > 0);
-  }, [allItems, categories, dayWidth, labels, rangeStart, showEmptyCategories]);
+  }, [
+    allItems,
+    categories,
+    dayWidth,
+    labels,
+    rangeStart,
+    showEmptyCategories,
+  ]);
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -296,13 +321,20 @@ export function RoadmapTimeline({
     prevDayWidth.current = dayWidth;
     el.scrollLeft = Math.max(0, centerDays * dayWidth - el.clientWidth / 2);
     handleScroll();
-  }, [dayWidth, handleScroll]);
+  }, [
+    dayWidth,
+    handleScroll,
+  ]);
 
   useEffect(() => {
     if (bounds.width && loadedDays * dayWidth < bounds.width * 3) {
       setLoadedDays(Math.ceil((bounds.width * 3) / dayWidth));
     }
-  }, [bounds.width, dayWidth, loadedDays]);
+  }, [
+    bounds.width,
+    dayWidth,
+    loadedDays,
+  ]);
 
   const windowStart = scrollAnchor - viewportWidth;
   const windowEnd = scrollAnchor + viewportWidth * 2;
@@ -310,18 +342,35 @@ export function RoadmapTimeline({
   const days = useMemo(() => {
     const first = Math.max(0, Math.floor(windowStart / dayWidth));
     const last = Math.min(loadedDays, Math.ceil(windowEnd / dayWidth));
-    const result: { index: number; date: Date }[] = [];
+    const result: {
+      index: number;
+      date: Date;
+    }[] = [];
 
     for (let i = first; i < last; i++) {
-      result.push({ index: i, date: addCalendarDays(rangeStart, i, tz) });
+      result.push({
+        index: i,
+        date: addCalendarDays(rangeStart, i, tz),
+      });
     }
 
     return result;
-  }, [windowStart, windowEnd, dayWidth, loadedDays, rangeStart, tz]);
+  }, [
+    windowStart,
+    windowEnd,
+    dayWidth,
+    loadedDays,
+    rangeStart,
+    tz,
+  ]);
 
   const months = useMemo(() => {
-    const result: { key: string; left: number; width: number; date: Date }[] =
-      [];
+    const result: {
+      key: string;
+      left: number;
+      width: number;
+      date: Date;
+    }[] = [];
     const cursor = startOfMonth(rangeStart, tz);
 
     while (cursor < rangeEnd) {
@@ -343,7 +392,15 @@ export function RoadmapTimeline({
     }
 
     return result;
-  }, [rangeStart, rangeEnd, dayWidth, totalWidth, windowStart, windowEnd, tz]);
+  }, [
+    rangeStart,
+    rangeEnd,
+    dayWidth,
+    totalWidth,
+    windowStart,
+    windowEnd,
+    tz,
+  ]);
 
   const [now, setNow] = useState<number | null>(null);
 
@@ -399,7 +456,11 @@ export function RoadmapTimeline({
     );
 
     if (!state.active || deltaDays !== state.deltaDays) {
-      const next = { ...state, active: true, deltaDays };
+      const next = {
+        ...state,
+        active: true,
+        deltaDays,
+      };
       dragRef.current = next;
       setDrag(next);
     }
@@ -485,7 +546,10 @@ export function RoadmapTimeline({
         (candidate) => candidate.id === itemEl.dataset.roadmapItem,
       );
       if (item) {
-        setMenuTarget({ type: "item", item });
+        setMenuTarget({
+          type: "item",
+          item,
+        });
         return;
       }
     }
@@ -514,21 +578,30 @@ export function RoadmapTimeline({
     <div
       ref={contentRef}
       className="relative shrink-0"
-      style={{ width: totalWidth }}
+      style={{
+        width: totalWidth,
+      }}
     >
       <div
         className="relative border-b bg-card"
-        style={{ height: HEADER_HEIGHT }}
+        style={{
+          height: HEADER_HEIGHT,
+        }}
       >
         {months.map((month) => (
           <div
             key={month.key}
             className="absolute top-0 h-5 border-l border-foreground/20 overflow-hidden"
-            style={{ left: month.left, width: month.width }}
+            style={{
+              left: month.left,
+              width: month.width,
+            }}
           >
             <span
               className="absolute top-0.5 text-xs font-bold whitespace-nowrap px-1.5"
-              style={{ left: stickyOffset(month.left, month.width - 90) }}
+              style={{
+                left: stickyOffset(month.left, month.width - 90),
+              }}
             >
               {labels.formatMonth(month.date)}
             </span>
@@ -543,7 +616,9 @@ export function RoadmapTimeline({
               key={index}
               className={cn(
                 "absolute bottom-0 h-6 flex flex-col items-center justify-end pb-0.5 text-[10px] leading-none tabular-nums border-l border-border/60",
-                { "text-muted-foreground": isWeekend },
+                {
+                  "text-muted-foreground": isWeekend,
+                },
               )}
               style={{
                 left: dateToX(date, rangeStart, dayWidth),
@@ -578,7 +653,10 @@ export function RoadmapTimeline({
             const top = 4 + lane * row.laneHeight;
             const isDragging = drag?.active && drag.item.id === item.id;
             const display = isDragging
-              ? { ...item, ...applyDragDelta(item, drag.mode, drag.deltaDays) }
+              ? {
+                  ...item,
+                  ...applyDragDelta(item, drag.mode, drag.deltaDays),
+                }
               : item;
 
             const dot = isDotItem(item);
@@ -638,21 +716,27 @@ export function RoadmapTimeline({
 
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{ top: HEADER_HEIGHT }}
+        style={{
+          top: HEADER_HEIGHT,
+        }}
       >
         {months.map((month) =>
           month.left > 0 ? (
             <div
               key={month.key}
               className="absolute inset-y-0 border-l border-foreground/20"
-              style={{ left: month.left }}
+              style={{
+                left: month.left,
+              }}
             />
           ) : null,
         )}
         {nowX !== null && (
           <div
             className="absolute inset-y-0 border-l-2 border-red-500/80"
-            style={{ left: nowX }}
+            style={{
+              left: nowX,
+            }}
           />
         )}
       </div>
@@ -689,7 +773,9 @@ export function RoadmapTimeline({
           <div className="sticky left-0 z-20 shrink-0 w-24 md:w-40 bg-card border-r shadow-[2px_0_6px_-4px_rgba(0,0,0,0.3)]">
             <div
               className="flex items-end px-2 pb-1 text-[10px] font-semibold text-muted-foreground border-b"
-              style={{ height: HEADER_HEIGHT }}
+              style={{
+                height: HEADER_HEIGHT,
+              }}
             >
               {labels.zoneName}
             </div>
@@ -698,7 +784,9 @@ export function RoadmapTimeline({
               <div
                 key={row.category}
                 className="flex items-start gap-1.5 px-2 pt-2 border-b text-xs md:text-sm font-semibold"
-                style={{ height: row.height }}
+                style={{
+                  height: row.height,
+                }}
               >
                 <span
                   className={cn(
@@ -800,7 +888,10 @@ function ItemTooltip({
 function BarContent({
   item,
   labels,
-}: { item: RoadmapItem; labels: RoadmapLabels }) {
+}: {
+  item: RoadmapItem;
+  labels: RoadmapLabels;
+}) {
   const subtitle = labels.subtitle(item);
   const fest = isFestBanner(item);
   const limited = isLimitedBanner(item);
@@ -980,7 +1071,12 @@ function RoadmapBar({
             "cursor-grabbing z-10 shadow-lg ring-2 ring-primary": dragging,
           },
         )}
-        style={{ top, height, left, width }}
+        style={{
+          top,
+          height,
+          left,
+          width,
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -1057,7 +1153,11 @@ function RoadmapDot({
           "cursor-grab touch-none": editable,
           "cursor-grabbing z-10": dragging,
         })}
-        style={{ top, height, left: left - 5 }}
+        style={{
+          top,
+          height,
+          left: left - 5,
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -1069,13 +1169,17 @@ function RoadmapDot({
           className={cn(
             "mt-1 size-2.5 shrink-0 rounded-full ring-2 ring-card",
             swatch.dot,
-            { "ring-primary": dragging },
+            {
+              "ring-primary": dragging,
+            },
           )}
         />
 
         <div
           className="flex flex-col min-w-0"
-          style={{ maxWidth: DOT_LABEL_MAX_WIDTH }}
+          style={{
+            maxWidth: DOT_LABEL_MAX_WIDTH,
+          }}
         >
           {subtitle && (
             <div className="truncate text-[9px] leading-3 font-bold uppercase text-muted-foreground">

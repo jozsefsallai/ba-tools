@@ -1,5 +1,7 @@
 "use client";
 
+import { EllipsisIcon } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { RoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { DAY_MS } from "@/lib/roadmap/constants";
 import { isDotItem, isInstantItem } from "@/lib/roadmap/layout";
@@ -13,8 +15,6 @@ import type {
 import { TERRAIN_ICONS } from "@/lib/terrain";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { EllipsisIcon } from "lucide-react";
-import { useLayoutEffect, useRef, useState } from "react";
 import type { AttackType, DefenseType, Terrain } from "~prisma";
 
 const ATTACK_COLORS: Partial<Record<AttackType, string>> = {
@@ -197,7 +197,10 @@ function BannerStudent({
           "border-primary": student.isFestGlobal,
           "border-amber-500": !student.isFestGlobal && student.isLimitedGlobal,
         })}
-        style={{ width: size, height: size }}
+        style={{
+          width: size,
+          height: size,
+        }}
       />
       {showName && (
         <span className="text-xs font-medium whitespace-nowrap">
@@ -253,7 +256,12 @@ export function BannerStudents({
     const observer = new ResizeObserver(update);
     observer.observe(container);
     return () => observer.disconnect();
-  }, [fit, students, size, showNames]);
+  }, [
+    fit,
+    students,
+    size,
+    showNames,
+  ]);
 
   if (!fit) {
     return (
@@ -314,7 +322,10 @@ export function BannerStudents({
         <span
           title={hidden.map((student) => student.name).join(", ")}
           className="flex shrink-0 items-center justify-center rounded-full border bg-background/70"
-          style={{ width: size, height: size }}
+          style={{
+            width: size,
+            height: size,
+          }}
         >
           <EllipsisIcon className="size-3.5" />
         </span>
@@ -393,7 +404,11 @@ export function RoadmapItemDetails({
         {duration !== null && (
           <span className="opacity-70">
             {" "}
-            ({labels.t("static.roadmap.duration", { count: duration })})
+            (
+            {labels.t("static.roadmap.duration", {
+              count: duration,
+            })}
+            )
           </span>
         )}
         {duration === null && !isInstantItem(item) && (
@@ -406,7 +421,13 @@ export function RoadmapItemDetails({
 
       {(item.kind === "raid" || item.kind === "frr") && (
         <>
-          <RaidChips item={{ ...item, rooms: [] }} labels={labels} />
+          <RaidChips
+            item={{
+              ...item,
+              rooms: [],
+            }}
+            labels={labels}
+          />
 
           {item.attackTypes.length > 0 && (
             <div className="flex items-center gap-1 text-xs">
@@ -498,7 +519,9 @@ export function RoadmapItemDetails({
 
       {item.kind === "story" && item.episodeCount > 0 && (
         <div className="text-xs">
-          {labels.t("static.roadmap.episodes", { count: item.episodeCount })}
+          {labels.t("static.roadmap.episodes", {
+            count: item.episodeCount,
+          })}
         </div>
       )}
 

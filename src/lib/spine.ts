@@ -1,8 +1,7 @@
 import "pixi-spine";
 
-import { Spine as PixiSpine } from "pixi-spine";
-
 import * as PIXI from "pixi.js-v7";
+import { Spine as PixiSpine } from "pixi-spine";
 
 const CHARA_BASE_PATH = "/assets/{charaId}/";
 const CHARA_SKEL_PATH = `${CHARA_BASE_PATH}/{charaId}_spr.skel`;
@@ -48,12 +47,12 @@ export class SpineRenderer {
   }) {
     const skelPath = CHARA_SKEL_PATH.replace(/{charaId}/g, charaId);
 
-    // biome-ignore lint/style/noNonNullAssertion:
+    // biome-ignore lint/style/noNonNullAssertion: pixi-spine always registers its .skel and .atlas loader parsers
     const oldSkelParser = PIXI.Assets.loader.parsers.find((p) =>
       p.test?.("a.skel"),
     )!;
 
-    // biome-ignore lint/style/noNonNullAssertion:
+    // biome-ignore lint/style/noNonNullAssertion: pixi-spine always registers its .skel and .atlas loader parsers
     const oldAtlasParser = PIXI.Assets.loader.parsers.find((p) =>
       p.test?.("a.atlas"),
     )!;

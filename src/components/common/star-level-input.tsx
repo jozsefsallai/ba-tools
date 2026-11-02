@@ -1,11 +1,10 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import blueStar from "@/assets/images/blue_star.png";
 import yellowStar from "@/assets/images/yellow_star.png";
-
 import type { StarLevel, UELevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
 
 export type StarLevelInputValue = {
   starLevel?: StarLevel;
@@ -39,7 +38,9 @@ function getValueFromIndex(index: number): StarLevelInputValue {
   }
 
   if (index <= TOTAL_YELLOW_STARS) {
-    return { starLevel: index as StarLevel };
+    return {
+      starLevel: index as StarLevel,
+    };
   }
 
   return {
@@ -58,7 +59,12 @@ export function StarLevelInput({
 }: StarLevelInputProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const activeIndex = useMemo(() => getActiveIndex(value), [value]);
+  const activeIndex = useMemo(
+    () => getActiveIndex(value),
+    [
+      value,
+    ],
+  );
   const displayIndex = hoverIndex ?? activeIndex;
 
   return (
@@ -66,46 +72,51 @@ export function StarLevelInput({
       className={cn("flex flex-wrap items-center gap-1", className)}
       onPointerLeave={() => setHoverIndex(null)}
     >
-      {Array.from({ length: TOTAL_STARS }, (_, i) => {
-        const index = i + 1;
-        const isBlue = index > TOTAL_YELLOW_STARS;
-        const isSelected = index <= displayIndex;
-        const isPressed = index === activeIndex;
+      {Array.from(
+        {
+          length: TOTAL_STARS,
+        },
+        (_, i) => {
+          const index = i + 1;
+          const isBlue = index > TOTAL_YELLOW_STARS;
+          const isSelected = index <= displayIndex;
+          const isPressed = index === activeIndex;
 
-        return (
-          <button
-            key={index}
-            type="button"
-            disabled={disabled}
-            tabIndex={
-              tabIndexStart === undefined ? undefined : tabIndexStart + i
-            }
-            aria-pressed={isPressed}
-            aria-label={
-              isBlue ? `UE ${index - TOTAL_YELLOW_STARS}` : `${index} stars`
-            }
-            className={cn(
-              "relative shrink-0 transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-sm disabled:cursor-not-allowed",
-              isSelected ? "opacity-100" : "opacity-30",
-            )}
-            onPointerEnter={() => setHoverIndex(index)}
-            onClick={() => {
-              const nextValue =
-                index === activeIndex ? {} : getValueFromIndex(index);
-              onValueChanged(nextValue);
-            }}
-          >
-            <img
-              src={(isBlue ? blueStar : yellowStar).src}
-              alt=""
+          return (
+            <button
+              key={index}
+              type="button"
+              disabled={disabled}
+              tabIndex={
+                tabIndexStart === undefined ? undefined : tabIndexStart + i
+              }
+              aria-pressed={isPressed}
+              aria-label={
+                isBlue ? `UE ${index - TOTAL_YELLOW_STARS}` : `${index} stars`
+              }
               className={cn(
-                "size-7 object-contain select-none",
-                imageClassName,
+                "relative shrink-0 transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 rounded-sm disabled:cursor-not-allowed",
+                isSelected ? "opacity-100" : "opacity-30",
               )}
-            />
-          </button>
-        );
-      })}
+              onPointerEnter={() => setHoverIndex(index)}
+              onClick={() => {
+                const nextValue =
+                  index === activeIndex ? {} : getValueFromIndex(index);
+                onValueChanged(nextValue);
+              }}
+            >
+              <img
+                src={(isBlue ? blueStar : yellowStar).src}
+                alt=""
+                className={cn(
+                  "size-7 object-contain select-none",
+                  imageClassName,
+                )}
+              />
+            </button>
+          );
+        },
+      )}
     </div>
   );
 }

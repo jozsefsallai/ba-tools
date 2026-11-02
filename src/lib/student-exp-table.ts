@@ -477,7 +477,12 @@ export type StudentExpCapacityResult = {
 };
 
 // Smallest first so large reports aren't split across students via pooled EXP.
-const REPORT_RARITIES_ASC: ReportRarity[] = ["N", "R", "SR", "SSR"];
+const REPORT_RARITIES_ASC: ReportRarity[] = [
+  "N",
+  "R",
+  "SR",
+  "SSR",
+];
 
 export function getExpToReachLevel(level: number): number {
   if (level <= 1) {
@@ -516,10 +521,14 @@ export function tryFundStudent(
   expNeeded: number,
 ): ReportCounts | null {
   if (expNeeded <= 0) {
-    return { ...reports };
+    return {
+      ...reports,
+    };
   }
 
-  const remaining: ReportCounts = { ...reports };
+  const remaining: ReportCounts = {
+    ...reports,
+  };
   let accumulated = 0;
 
   for (const rarity of REPORT_RARITIES_ASC) {
@@ -552,12 +561,16 @@ export function calculateStudentExpCapacity(
       expPerStudent: 0,
       totalExp,
       leftoverExp: totalExp,
-      leftoverReports: { ...reports },
+      leftoverReports: {
+        ...reports,
+      },
     };
   }
 
   let students = 0;
-  let remaining: ReportCounts = { ...reports };
+  let remaining: ReportCounts = {
+    ...reports,
+  };
 
   while (true) {
     const next = tryFundStudent(remaining, expPerStudent);

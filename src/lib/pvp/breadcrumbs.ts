@@ -1,6 +1,6 @@
+import type { useTranslations } from "next-intl";
 import type { Messages } from "@/i18n/types";
 import type { PageBreadcrumb } from "@/lib/breadcrumbs";
-import type { useTranslations } from "next-intl";
 
 type RankingLabel = keyof Messages["tools"]["pvp"]["rankings"];
 type Translate = ReturnType<typeof useTranslations<never>>;
@@ -20,13 +20,19 @@ function pvpBreadcrumbRoute(pathname: string) {
   }
 
   const seasonId = parts[1] && !publicPages[parts[1]] ? parts[1] : undefined;
-  return { parts, seasonId };
+  return {
+    parts,
+    seasonId,
+  };
 }
 
 export function buildPvpBreadcrumbs(
   pathname: string,
   t: Translate,
-  names?: { seasonName: string | null; opponentName: string | null },
+  names?: {
+    seasonName: string | null;
+    opponentName: string | null;
+  },
 ): PageBreadcrumb[] | null {
   const route = pvpBreadcrumbRoute(pathname);
 
@@ -37,14 +43,22 @@ export function buildPvpBreadcrumbs(
   const { parts, seasonId } = route;
 
   const crumbs: PageBreadcrumb[] = [
-    { label: t("common.header.nav.gameplay.title"), href: "/" },
-    { label: t("tools.pvp.rankings.breadCrumb"), href: "/pvp" },
+    {
+      label: t("common.header.nav.gameplay.title"),
+      href: "/",
+    },
+    {
+      label: t("tools.pvp.rankings.breadCrumb"),
+      href: "/pvp",
+    },
   ];
 
   const rankLabel = (key: RankingLabel) => t(`tools.pvp.rankings.${key}`);
 
   if (parts[1] && publicPages[parts[1]]) {
-    crumbs.push({ label: rankLabel(publicPages[parts[1]]) });
+    crumbs.push({
+      label: rankLabel(publicPages[parts[1]]),
+    });
   } else if (seasonId) {
     const seasonPath = `/pvp/${seasonId}`;
 
@@ -85,7 +99,9 @@ export function buildPvpBreadcrumbs(
           }
         }
       } else {
-        crumbs.push({ label: rankLabel("presetsBreadcrumb") });
+        crumbs.push({
+          label: rankLabel("presetsBreadcrumb"),
+        });
       }
     } else if (parts[2] === "match") {
       crumbs.push({
@@ -101,6 +117,10 @@ export function buildPvpBreadcrumbs(
   }
 
   return crumbs.map((crumb, index) =>
-    index === crumbs.length - 1 ? { label: crumb.label } : crumb,
+    index === crumbs.length - 1
+      ? {
+          label: crumb.label,
+        }
+      : crumb,
   );
 }

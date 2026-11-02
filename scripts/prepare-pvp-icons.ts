@@ -28,14 +28,28 @@ if (!base) {
 }
 
 await Promise.all([
-  mkdir(target, { recursive: true }),
-  mkdir(cache, { recursive: true }),
+  mkdir(target, {
+    recursive: true,
+  }),
+  mkdir(cache, {
+    recursive: true,
+  }),
 ]);
 
 try {
   const students = await db.student.findMany({
-    select: { id: true, name: true },
-    orderBy: [{ defaultOrder: "asc" }, { id: "asc" }],
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: [
+      {
+        defaultOrder: "asc",
+      },
+      {
+        id: "asc",
+      },
+    ],
   });
 
   const descriptors = new Uint8Array(students.length * PVP_ICON_TEMPLATE_BYTES);
@@ -43,69 +57,80 @@ try {
   let next = 0;
 
   await Promise.all(
-    Array.from({ length: 6 }, async () => {
-      for (;;) {
-        const index = next++;
-        const student = students[index];
+    Array.from(
+      {
+        length: 6,
+      },
+      async () => {
+        for (;;) {
+          const index = next++;
+          const student = students[index];
 
-        if (!student) {
-          return;
-        }
+          if (!student) {
+            return;
+          }
 
-        const url = buildStudentIconUrlFromId(encodeURIComponent(student.id));
-        const key = pvpIconDescriptorCacheKey(url, background);
-        const path = `${cache}/${key}.json`;
+          const url = buildStudentIconUrlFromId(encodeURIComponent(student.id));
+          const key = pvpIconDescriptorCacheKey(url, background);
+          const path = `${cache}/${key}.json`;
 
-        const cachedValue: { etag?: string; descriptor: number[] } | null =
-          await readFile(path, "utf8")
+          const cachedValue: {
+            etag?: string;
+            descriptor: number[];
+          } | null = await readFile(path, "utf8")
             .then(JSON.parse)
             .catch(() => null);
 
-        const cached =
-          cachedValue?.descriptor?.length === PVP_ICON_TEMPLATE_BYTES
-            ? cachedValue
-            : null;
+          const cached =
+            cachedValue?.descriptor?.length === PVP_ICON_TEMPLATE_BYTES
+              ? cachedValue
+              : null;
 
-        const freshUrl = new URL(url);
-        freshUrl.searchParams.set("pvp-icon-refresh", refresh);
+          const freshUrl = new URL(url);
+          freshUrl.searchParams.set("pvp-icon-refresh", refresh);
 
-        const response = await fetch(freshUrl, {
-          headers: cached?.etag ? { "If-None-Match": cached.etag } : {},
-          signal: AbortSignal.timeout(60_000),
-        });
+          const response = await fetch(freshUrl, {
+            headers: cached?.etag
+              ? {
+                  "If-None-Match": cached.etag,
+                }
+              : {},
+            signal: AbortSignal.timeout(60_000),
+          });
 
-        let descriptor: Uint8Array;
+          let descriptor: Uint8Array;
 
-        if (
-          response.status === 304 &&
-          cached &&
-          cached.descriptor.length === PVP_ICON_TEMPLATE_BYTES
-        ) {
-          descriptor = Uint8Array.from(cached.descriptor);
-        } else {
-          if (!response.ok) {
-            throw new Error(
-              `Student icon ${student.id}: HTTP ${response.status}`,
+          if (
+            response.status === 304 &&
+            cached &&
+            cached.descriptor.length === PVP_ICON_TEMPLATE_BYTES
+          ) {
+            descriptor = Uint8Array.from(cached.descriptor);
+          } else {
+            if (!response.ok) {
+              throw new Error(
+                `Student icon ${student.id}: HTTP ${response.status}`,
+              );
+            }
+
+            descriptor = describePvpIconReference(
+              Buffer.from(await response.arrayBuffer()),
+              background,
+            );
+
+            await writeFile(
+              path,
+              JSON.stringify({
+                etag: response.headers.get("etag"),
+                descriptor: Array.from(descriptor),
+              }),
             );
           }
 
-          descriptor = describePvpIconReference(
-            Buffer.from(await response.arrayBuffer()),
-            background,
-          );
-
-          await writeFile(
-            path,
-            JSON.stringify({
-              etag: response.headers.get("etag"),
-              descriptor: Array.from(descriptor),
-            }),
-          );
+          descriptors.set(descriptor, index * PVP_ICON_TEMPLATE_BYTES);
         }
-
-        descriptors.set(descriptor, index * PVP_ICON_TEMPLATE_BYTES);
-      }
-    }),
+      },
+    ),
   );
 
   const version = createHash("sha256")

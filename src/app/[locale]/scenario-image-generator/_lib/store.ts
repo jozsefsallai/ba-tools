@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import {
   SCENARIO_TEXT_FONT_SIZE,
   SCENARIO_TEXT_SCROLL_SPEED,
@@ -10,7 +11,6 @@ import type {
   ScenarioCharacterData,
   ScenarioFontData,
 } from "@/app/[locale]/scenario-image-generator/_lib/types";
-import { useSyncExternalStore } from "react";
 
 export type ScenarioState = {
   backgroundMode: BackgroundMode;
@@ -82,7 +82,10 @@ export class ScenarioStore {
       | ((state: ScenarioState) => Partial<ScenarioState>),
   ): void => {
     const patch = typeof partial === "function" ? partial(this.state) : partial;
-    this.state = { ...this.state, ...patch };
+    this.state = {
+      ...this.state,
+      ...patch,
+    };
 
     for (const listener of this.listeners) {
       listener();

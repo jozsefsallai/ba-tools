@@ -1,5 +1,7 @@
 "use client";
 
+import { PartyPopperIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import birthdayHat from "@/app/[locale]/birthdays/_assets/Icon_Momotalk_BirthdayHat.png";
 import birthdayDeco from "@/app/[locale]/birthdays/_assets/Momotalk_Birthday_Deco.png";
 import type { BirthdayGiftPreference } from "@/app/[locale]/birthdays/_components/birthdays-view";
@@ -8,8 +10,6 @@ import giftLikedImage from "@/assets/images/gift_liked.png";
 import giftLovedImage from "@/assets/images/gift_loved.png";
 import type { BirthdayStudent } from "@/lib/birthdays";
 import { buildItemIconUrl, buildStudentPortraitUrlFromId } from "@/lib/url";
-import { PartyPopperIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 
 type TodaySpotlightProps = {
   todayBirthdays: BirthdayStudent[];

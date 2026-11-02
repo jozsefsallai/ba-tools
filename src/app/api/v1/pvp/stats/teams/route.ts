@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   listPvpTeams,
   pvpTeamsSchema,
@@ -8,7 +9,6 @@ import {
   parseQuery,
   publicRoute,
 } from "@/lib/public-api/route";
-import { z } from "zod";
 
 const querySchema = pvpTeamsSchema.extend({
   exclude: z
@@ -27,6 +27,8 @@ const querySchema = pvpTeamsSchema.extend({
 export const GET = publicRoute(async (req) => {
   return okPage(
     await listPvpTeams(parseQuery(req, querySchema), parsePagination(req)),
-    { cache: "public" },
+    {
+      cache: "public",
+    },
   );
 });

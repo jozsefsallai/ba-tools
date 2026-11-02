@@ -1,10 +1,16 @@
 "use client";
 
+import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
+import { type PropsWithChildren, useMemo } from "react";
+import {
+  getGiftAffinity,
+  getGiftExpValue,
+} from "@/app/[locale]/bond/_lib/gift-utils";
 import type {
   GiftWithStudents,
   StudentWithGifts,
 } from "@/app/[locale]/bond/_lib/types";
-import { getGiftAffinity, getGiftExpValue } from "@/app/[locale]/bond/_lib/gift-utils";
 import giftAdoredImage from "@/assets/images/gift_adored.png";
 import giftLikedImage from "@/assets/images/gift_liked.png";
 import giftLovedImage from "@/assets/images/gift_loved.png";
@@ -30,9 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
-import { type PropsWithChildren, useMemo } from "react";
 
 export type GiftBreakdownProps = PropsWithChildren<{
   gifts: GiftWithStudents[];
@@ -64,7 +67,10 @@ function GiftRow({
       case "ja":
         return gift.nameJP;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   const giftDescription = useMemo(() => {
     switch (locale) {
@@ -73,7 +79,10 @@ function GiftRow({
       case "ja":
         return gift.descriptionJP;
     }
-  }, [gift, locale]);
+  }, [
+    gift,
+    locale,
+  ]);
 
   return (
     <TableRow className="table table-fixed w-full">
@@ -144,7 +153,10 @@ export function GiftBreakdown({
 
   const giftsWithCounts = useMemo(() => {
     return gifts.filter((gift) => (allocatedCounts[gift.id] ?? 0) > 0);
-  }, [gifts, allocatedCounts]);
+  }, [
+    gifts,
+    allocatedCounts,
+  ]);
 
   return (
     <Dialog>

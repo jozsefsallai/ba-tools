@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,22 +19,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RECRUITMENT_COLORS } from "@/lib/recruitment";
-import { GAME_SERVERS, GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
-import { useMutation, useQuery } from "convex/react";
-import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
-import { toast } from "sonner";
-import { api } from "~convex/api";
 import { Link } from "@/i18n/navigation";
+import { RECRUITMENT_COLORS } from "@/lib/recruitment";
+import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
+import { api } from "~convex/api";
 
-function ChargeBar({
-  value,
-  limited,
-}: {
-  value: number;
-  limited: boolean;
-}) {
+function ChargeBar({ value, limited }: { value: number; limited: boolean }) {
   const colors = limited ? RECRUITMENT_COLORS.limited : RECRUITMENT_COLORS.base;
   return (
     <div className="relative h-3 overflow-visible rounded-full bg-[#d4d4d4]/45 dark:bg-[#d4d4d4]/20">
@@ -43,7 +37,9 @@ function ChargeBar({
       />
       <div
         className="absolute left-1/2 top-[-2px] h-4 w-px"
-        style={{ backgroundColor: RECRUITMENT_COLORS.labelBorder }}
+        style={{
+          backgroundColor: RECRUITMENT_COLORS.labelBorder,
+        }}
       />
     </div>
   );
@@ -60,7 +56,9 @@ export function RecruitmentAccounts() {
   const [limitedCharge, setLimitedCharge] = useState<NumericInputValue>(0);
 
   async function handleCreate() {
-    if (!name.trim() || permanentCharge === "" || limitedCharge === "") return;
+    if (!name.trim() || permanentCharge === "" || limitedCharge === "") {
+      return;
+    }
     try {
       await createAccount({
         name: name.trim(),
@@ -77,8 +75,9 @@ export function RecruitmentAccounts() {
     }
   }
 
-  if (accounts === undefined)
+  if (accounts === undefined) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
+  }
 
   return (
     <div className="flex flex-col gap-6">

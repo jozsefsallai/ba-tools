@@ -1,9 +1,9 @@
-import { PVP_COUNTER_RANGES, PVP_SEASONS } from "@/lib/types";
 import {
   paginationOptsValidator,
   paginationResultValidator,
 } from "convex/server";
 import { type Infer, v } from "convex/values";
+import { PVP_COUNTER_RANGES, PVP_SEASONS } from "@/lib/types";
 import { internal } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 import { internalAction, internalMutation, query } from "~convex/server";
@@ -16,7 +16,9 @@ import {
   getTeamKey,
 } from "./lib/teamKey";
 
-type Team = Array<{ studentId?: string }>;
+type Team = Array<{
+  studentId?: string;
+}>;
 
 const searchSlotValidator = v.object({
   studentId: v.optional(v.string()),
@@ -51,7 +53,13 @@ function hasStrikerStudent(team: Team) {
 }
 
 function getStudentIds(team: Team) {
-  return team.flatMap((item) => (item.studentId ? [item.studentId] : []));
+  return team.flatMap((item) =>
+    item.studentId
+      ? [
+          item.studentId,
+        ]
+      : [],
+  );
 }
 
 function hasDuplicateStudentIds(team: Team) {
@@ -148,8 +156,14 @@ function hasDuplicateStudentApiRecordIds(records: StudentApiRecord[]) {
   return ids.length !== new Set(ids).size;
 }
 
-function toStudentIdTeam<T extends { studentId?: string }>(team: T[]): Team {
-  return team.map((item) => ({ studentId: item.studentId }));
+function toStudentIdTeam<
+  T extends {
+    studentId?: string;
+  },
+>(team: T[]): Team {
+  return team.map((item) => ({
+    studentId: item.studentId,
+  }));
 }
 
 function getSpecialTeamKey(team: Team) {
@@ -216,12 +230,24 @@ function getStoredTeam(item: any, side: "attack" | "defense"): Team {
   const specialPrefix = side === "attack" ? "attack" : "defense";
 
   const projected = [
-    { studentId: item[`${prefix}1StudentId`] },
-    { studentId: item[`${prefix}2StudentId`] },
-    { studentId: item[`${prefix}3StudentId`] },
-    { studentId: item[`${prefix}4StudentId`] },
-    { studentId: item[`${specialPrefix}S1StudentId`] },
-    { studentId: item[`${specialPrefix}S2StudentId`] },
+    {
+      studentId: item[`${prefix}1StudentId`],
+    },
+    {
+      studentId: item[`${prefix}2StudentId`],
+    },
+    {
+      studentId: item[`${prefix}3StudentId`],
+    },
+    {
+      studentId: item[`${prefix}4StudentId`],
+    },
+    {
+      studentId: item[`${specialPrefix}S1StudentId`],
+    },
+    {
+      studentId: item[`${specialPrefix}S2StudentId`],
+    },
   ];
 
   const legacy: Team | undefined = item[`${side}Team`];
@@ -232,10 +258,26 @@ function getStoredTeam(item: any, side: "attack" | "defense"): Team {
 }
 
 const defenseTraitFields = [
-  { studentId: "d1StudentId", range: "d1Range", tank: "d1Tank" },
-  { studentId: "d2StudentId", range: "d2Range", tank: "d2Tank" },
-  { studentId: "d3StudentId", range: "d3Range", tank: "d3Tank" },
-  { studentId: "d4StudentId", range: "d4Range", tank: "d4Tank" },
+  {
+    studentId: "d1StudentId",
+    range: "d1Range",
+    tank: "d1Tank",
+  },
+  {
+    studentId: "d2StudentId",
+    range: "d2Range",
+    tank: "d2Tank",
+  },
+  {
+    studentId: "d3StudentId",
+    range: "d3Range",
+    tank: "d3Tank",
+  },
+  {
+    studentId: "d4StudentId",
+    range: "d4Range",
+    tank: "d4Tank",
+  },
 ] as const;
 
 function validSearchTeam(team: SearchSlot[]) {
@@ -301,21 +343,33 @@ function getSearchAnchor(team: SearchSlot[]) {
   for (let index = 0; index < 4; index += 1) {
     const slot = team[index];
     if (slot.studentId) {
-      return { index, kind: "student_id", value: slot.studentId } as const;
+      return {
+        index,
+        kind: "student_id",
+        value: slot.studentId,
+      } as const;
     }
   }
 
   for (let index = 0; index < 4; index += 1) {
     const slot = team[index];
     if (!slot.studentId && slot.range !== undefined) {
-      return { index, kind: "range", value: slot.range } as const;
+      return {
+        index,
+        kind: "range",
+        value: slot.range,
+      } as const;
     }
   }
 
   for (let index = 0; index < 4; index += 1) {
     const slot = team[index];
     if (!slot.studentId && slot.tank === true) {
-      return { index, kind: "tank", value: true } as const;
+      return {
+        index,
+        kind: "tank",
+        value: true,
+      } as const;
     }
   }
 
@@ -434,7 +488,11 @@ export async function queueMatchRemoval(ctx: any, matchId: any) {
     .query("pvpStatsPending")
     .withIndex("by_matchId", (q: any) => q.eq("matchId", matchId))
     .unique();
-  const value = { matchId, queuedAt: Date.now(), remove: true };
+  const value = {
+    matchId,
+    queuedAt: Date.now(),
+    remove: true,
+  };
 
   if (existing) {
     await ctx.db.patch(existing._id, value);
@@ -450,9 +508,13 @@ export async function queueSeasonRebuild(ctx: any, seasonId: any) {
     .unique();
 
   if (existing) {
-    await ctx.db.patch(existing._id, { cursor: undefined });
+    await ctx.db.patch(existing._id, {
+      cursor: undefined,
+    });
   } else {
-    await ctx.db.insert("pvpStatsRebuild", { seasonId });
+    await ctx.db.insert("pvpStatsRebuild", {
+      seasonId,
+    });
   }
 }
 
@@ -543,7 +605,10 @@ async function adjustSummary(
     return;
   }
 
-  await ctx.db.patch(existing._id, { totalMatches, clears });
+  await ctx.db.patch(existing._id, {
+    totalMatches,
+    clears,
+  });
 }
 
 async function getAggregateSummary(ctx: any, seasonNumber: any) {
@@ -666,7 +731,10 @@ async function processRebuild(ctx: any, rebuild: any) {
   const page = await ctx.db
     .query("pvpMatchRecord")
     .withIndex("by_seasonId", (q: any) => q.eq("seasonId", rebuild.seasonId))
-    .paginate({ numItems: 100, cursor: rebuild.cursor ?? null });
+    .paginate({
+      numItems: 100,
+      cursor: rebuild.cursor ?? null,
+    });
 
   for (const match of page.page) {
     await upsertPending(ctx, match, season);
@@ -677,7 +745,9 @@ async function processRebuild(ctx: any, rebuild: any) {
     return false;
   }
 
-  await ctx.db.patch(rebuild._id, { cursor: page.continueCursor });
+  await ctx.db.patch(rebuild._id, {
+    cursor: page.continueCursor,
+  });
   return true;
 }
 
@@ -736,7 +806,10 @@ export const processStatsBatch = internalMutation({
   },
   handler: async (ctx, { students, aggregateCursor, refreshRunId }) => {
     const metadata = new Map(
-      students.map((student) => [student.studentId, student]),
+      students.map((student) => [
+        student.studentId,
+        student,
+      ]),
     );
 
     const status = await ctx.db
@@ -749,15 +822,21 @@ export const processStatsBatch = internalMutation({
       status?.refreshRunId !== refreshRunId ||
       status.refreshPhase !== "stats"
     ) {
-      return { hasMore: false, aggregateCursor: undefined };
+      return {
+        hasMore: false,
+        aggregateCursor: undefined,
+      };
     }
 
-    await ctx.db.patch(status._id, { refreshHeartbeatAt: Date.now() });
+    await ctx.db.patch(status._id, {
+      refreshHeartbeatAt: Date.now(),
+    });
 
     if (students.length > 0 && !status?.traitsReady) {
-      const page = await ctx.db
-        .query("pvpStatsAggregate")
-        .paginate({ numItems: 100, cursor: aggregateCursor ?? null });
+      const page = await ctx.db.query("pvpStatsAggregate").paginate({
+        numItems: 100,
+        cursor: aggregateCursor ?? null,
+      });
 
       for (const aggregate of page.page) {
         await ctx.db.patch(
@@ -816,14 +895,20 @@ export const processStatsBatch = internalMutation({
         anotherRebuild: Boolean(anotherRebuild),
       });
 
-      return { hasMore: true, aggregateCursor: undefined };
+      return {
+        hasMore: true,
+        aggregateCursor: undefined,
+      };
     }
 
     await ctx.db.patch(status._id, {
       refreshPhase: "rankings",
       rankingCursor: undefined,
       ...(students.length > 0
-        ? { traitsReady: true, traitsUpdatedAt: Date.now() }
+        ? {
+            traitsReady: true,
+            traitsUpdatedAt: Date.now(),
+          }
         : {}),
     });
 
@@ -831,7 +916,10 @@ export const processStatsBatch = internalMutation({
       refreshRunId,
     });
 
-    return { hasMore: false, aggregateCursor: undefined };
+    return {
+      hasMore: false,
+      aggregateCursor: undefined,
+    };
   },
 });
 
@@ -935,11 +1023,17 @@ export const search = query({
       );
     }
 
-    const excluded = [...new Set(excludedStudentIds.filter(Boolean))];
+    const excluded = [
+      ...new Set(excludedStudentIds.filter(Boolean)),
+    ];
     const similarMetadataComplete = hasCompleteSimilarityMetadata(defenseTeam);
 
     const concreteTeam = defenseTeam.map((slot) =>
-      slot.studentId !== undefined ? { studentId: slot.studentId } : {},
+      slot.studentId !== undefined
+        ? {
+            studentId: slot.studentId,
+          }
+        : {},
     );
 
     const exact = matchMode === "primary" && isExactDefenseSearch(defenseTeam);
@@ -1067,8 +1161,16 @@ export const search = query({
 export const getMatchVideos = query({
   args: {
     seasonNumber: seasonNumberValidator,
-    attackTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
-    defenseTeam: v.array(v.object({ studentId: v.optional(v.string()) })),
+    attackTeam: v.array(
+      v.object({
+        studentId: v.optional(v.string()),
+      }),
+    ),
+    defenseTeam: v.array(
+      v.object({
+        studentId: v.optional(v.string()),
+      }),
+    ),
     paginationOpts: paginationOptsValidator,
   },
   returns: paginationResultValidator(v.string()),
@@ -1148,7 +1250,9 @@ export const getStatus = query({
 });
 
 export const getSummary = query({
-  args: { seasonNumber: seasonNumberValidator },
+  args: {
+    seasonNumber: seasonNumberValidator,
+  },
   handler: async (ctx, { seasonNumber }) => {
     const summary = await ctx.db
       .query("pvpStatsSummary")
@@ -1160,7 +1264,10 @@ export const getSummary = query({
 });
 
 export const processRankingBatch = internalMutation({
-  args: { refreshRunId: v.string(), cursor: v.optional(v.string()) },
+  args: {
+    refreshRunId: v.string(),
+    cursor: v.optional(v.string()),
+  },
   handler: async (ctx, { refreshRunId, cursor }) => {
     const status = await ctx.db
       .query("pvpStatsStatus")
@@ -1176,9 +1283,10 @@ export const processRankingBatch = internalMutation({
       return;
     }
 
-    const page = await ctx.db
-      .query("pvpStatsAggregate")
-      .paginate({ numItems: 50, cursor: cursor ?? null });
+    const page = await ctx.db.query("pvpStatsAggregate").paginate({
+      numItems: 50,
+      cursor: cursor ?? null,
+    });
 
     const totals = new Map<
       string,
@@ -1186,14 +1294,19 @@ export const processRankingBatch = internalMutation({
         seasonNumber: Doc<"pvpStatsAggregate">["seasonNumber"];
         role: "attack" | "defense";
         formationKey: string;
-        team: Array<{ studentId?: string }>;
+        team: Array<{
+          studentId?: string;
+        }>;
         wins: number;
         total: number;
       }
     >();
 
     for (const aggregate of page.page) {
-      for (const role of ["attack", "defense"] as const) {
+      for (const role of [
+        "attack",
+        "defense",
+      ] as const) {
         const identity = rankingIdentity(getStoredTeam(aggregate, role));
         const key = `${aggregate.seasonNumber}:${role}:${identity.formationKey}`;
 
@@ -1359,7 +1472,11 @@ export const listEffectiveTeams = query({
       .unique();
 
     if (args.snapshot !== status?.rankingsSnapshot) {
-      return { page: [], isDone: true, continueCursor: "" };
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
     }
 
     const index =
@@ -1369,7 +1486,9 @@ export const listEffectiveTeams = query({
           ? "by_total"
           : "by_rate";
 
-    const excluded = [...new Set(args.excludedStudentIds.filter(Boolean))];
+    const excluded = [
+      ...new Set(args.excludedStudentIds.filter(Boolean)),
+    ];
 
     const page = await ctx.db
       .query("pvpStatsFormation")

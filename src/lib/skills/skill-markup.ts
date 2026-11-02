@@ -3,17 +3,37 @@
 // `{s:ID}…{/s}` stats, `{d:ID:N}` effect suffixes and `{{` for a literal `{`.
 
 export type SkillMarkupNode =
-  | { kind: "text"; text: string }
-  | { kind: "param"; index: number }
-  | { kind: "effect"; id: string; children: SkillMarkupNode[] }
-  | { kind: "stat"; id: string; children: SkillMarkupNode[] }
-  | { kind: "suffix"; id: string; index: number };
+  | {
+      kind: "text";
+      text: string;
+    }
+  | {
+      kind: "param";
+      index: number;
+    }
+  | {
+      kind: "effect";
+      id: string;
+      children: SkillMarkupNode[];
+    }
+  | {
+      kind: "stat";
+      id: string;
+      children: SkillMarkupNode[];
+    }
+  | {
+      kind: "suffix";
+      id: string;
+      index: number;
+    };
 
 const TAG = /^\{(p|d|e|s|\/e|\/s)(?::([^}:]+))?(?::(\d+))?\}/;
 
 export function parseSkillMarkup(template: string): SkillMarkupNode[] {
   const root: SkillMarkupNode[] = [];
-  const stack: SkillMarkupNode[][] = [root];
+  const stack: SkillMarkupNode[][] = [
+    root,
+  ];
 
   let text = "";
 
@@ -21,7 +41,10 @@ export function parseSkillMarkup(template: string): SkillMarkupNode[] {
 
   const flush = () => {
     if (text) {
-      current().push({ kind: "text", text });
+      current().push({
+        kind: "text",
+        text,
+      });
     }
 
     text = "";
@@ -52,10 +75,17 @@ export function parseSkillMarkup(template: string): SkillMarkupNode[] {
 
     switch (tag) {
       case "p":
-        current().push({ kind: "param", index: Number(id) });
+        current().push({
+          kind: "param",
+          index: Number(id),
+        });
         break;
       case "d":
-        current().push({ kind: "suffix", id, index: Number(index) });
+        current().push({
+          kind: "suffix",
+          id,
+          index: Number(index),
+        });
         break;
       case "e":
       case "s": {

@@ -1,8 +1,8 @@
+import type { ReactNode } from "react";
 import { planaArt, planaMark } from "@/lib/og/assets.server";
-import { VARIANT_ICONS, lucideOgIcon } from "@/lib/og/lucide.server";
+import { lucideOgIcon, VARIANT_ICONS } from "@/lib/og/lucide.server";
 import type { OgIconName, OgVariant } from "@/lib/og/registry";
 import { boundedText, isJapaneseText } from "@/lib/og/text";
-import type { ReactNode } from "react";
 
 export const ogColors = {
   background: "#24252B",
@@ -17,7 +17,10 @@ export { boundedText } from "@/lib/og/text";
 export function OgFrame({
   children,
   plana = false,
-}: { children: ReactNode; plana?: boolean }) {
+}: {
+  children: ReactNode;
+  plana?: boolean;
+}) {
   return (
     <div
       style={{
@@ -64,12 +67,19 @@ export function OgFrame({
           alt=""
           width={34}
           height={34}
-          style={{ objectFit: "contain" }}
+          style={{
+            objectFit: "contain",
+          }}
         />
 
         <span>Joe's Blue Archive Tools</span>
 
-        <span style={{ marginLeft: "auto", fontSize: 18 }}>
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: 18,
+          }}
+        >
           ba.joexyz.online
         </span>
       </div>
@@ -81,7 +91,11 @@ export function OgHeading({
   children,
   small = false,
   fontSize = small ? 48 : 60,
-}: { children: string; small?: boolean; fontSize?: number }) {
+}: {
+  children: string;
+  small?: boolean;
+  fontSize?: number;
+}) {
   return (
     <div
       style={{
@@ -123,7 +137,11 @@ export function PlanaCrop() {
         alt=""
         width={600}
         height={1152}
-        style={{ position: "absolute", left: -100, top: -32 }}
+        style={{
+          position: "absolute",
+          left: -100,
+          top: -32,
+        }}
       />
     </div>
   );
@@ -132,7 +150,10 @@ export function PlanaCrop() {
 export function ToolVisual({
   variant,
   icon,
-}: { variant: OgVariant; icon?: OgIconName }) {
+}: {
+  variant: OgVariant;
+  icon?: OgIconName;
+}) {
   const iconName = icon ?? VARIANT_ICONS[variant];
 
   if (!iconName) {
@@ -157,11 +178,19 @@ export function ToolVisual({
 export function NotFoundOgCard({
   title,
   description,
-}: { title: string; description: string }) {
+}: {
+  title: string;
+  description: string;
+}) {
   return (
     <OgFrame plana>
       <div
-        style={{ display: "flex", alignItems: "center", gap: 40, height: 458 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 40,
+          height: 458,
+        }}
       >
         <div
           style={{
@@ -221,7 +250,12 @@ export function ToolOgCard({
   return (
     <OgFrame plana={!(icon ?? VARIANT_ICONS[variant])}>
       <div
-        style={{ display: "flex", alignItems: "center", gap: 40, height: 458 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 40,
+          height: 458,
+        }}
       >
         <div
           style={{

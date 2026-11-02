@@ -1,10 +1,10 @@
+import type { CSSProperties, ReactNode, Ref } from "react";
 import {
   DEFAULT_FORMATIONATION_ROW_LABEL,
   type FormationRowLabel,
   formationRowLabelTextShadow,
 } from "@/lib/formation-display-utils";
 import { cn } from "@/lib/utils";
-import type { CSSProperties, ReactNode, Ref } from "react";
 
 export type FormationRowLabelViewProps = {
   label: FormationRowLabel;
@@ -79,7 +79,9 @@ export function FormationRowsStack({
           <div key={item.key} className="contents">
             <div
               className="justify-self-end"
-              style={{ marginRight: leftLabel ? distance : 0 }}
+              style={{
+                marginRight: leftLabel ? distance : 0,
+              }}
             >
               {leftLabel ? <FormationRowLabelView label={leftLabel} /> : null}
             </div>
@@ -88,7 +90,9 @@ export function FormationRowsStack({
 
             <div
               className="justify-self-start"
-              style={{ marginLeft: rightLabel ? distance : 0 }}
+              style={{
+                marginLeft: rightLabel ? distance : 0,
+              }}
             >
               {rightLabel ? <FormationRowLabelView label={rightLabel} /> : null}
             </div>

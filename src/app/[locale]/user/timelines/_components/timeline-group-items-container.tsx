@@ -1,25 +1,27 @@
 "use client";
 
-import { OwnTimelineEntry } from "@/app/[locale]/user/timelines/_components/own-timeline-entry";
 import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { OwnTimelineEntry } from "@/app/[locale]/user/timelines/_components/own-timeline-entry";
 import type { Doc, Id } from "~convex/dataModel";
 
-export type TimelineDocWithId = Doc<"timeline"> & { id: Id<"timeline"> };
+export type TimelineDocWithId = Doc<"timeline"> & {
+  id: Id<"timeline">;
+};
 
 export type TimelineGroupItemsContainerProps = {
   items: TimelineDocWithId[];
@@ -33,9 +35,16 @@ export function TimelineGroupItemsContainer({
   onWantsToRemove,
 }: TimelineGroupItemsContainerProps) {
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,

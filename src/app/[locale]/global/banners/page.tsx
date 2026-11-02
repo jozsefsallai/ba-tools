@@ -1,3 +1,5 @@
+import { CalendarRangeIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { BannerList } from "@/app/[locale]/global/banners/_components/banner-list";
 import type { BannerGroups } from "@/app/[locale]/global/banners/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -5,8 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 import { getCachedGameBanners } from "@/lib/game-banners.server";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { CalendarRangeIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("global-banners", await getLocale());
@@ -18,9 +18,10 @@ async function getBannerGroups(): Promise<BannerGroups> {
   const groups: BannerGroups = new Map();
 
   for (const banner of banners) {
-    const key = [banner.startDate.getTime(), banner.endDate.getTime()].join(
-      ",",
-    );
+    const key = [
+      banner.startDate.getTime(),
+      banner.endDate.getTime(),
+    ].join(",");
 
     if (!groups.has(key)) {
       groups.set(key, []);

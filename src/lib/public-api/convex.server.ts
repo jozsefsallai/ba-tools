@@ -1,6 +1,5 @@
 import "server-only";
 
-import { ApiError, type ApiErrorCode } from "@/lib/public-api/response";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import type {
   FunctionArgs,
@@ -8,8 +7,12 @@ import type {
   FunctionReturnType,
 } from "convex/server";
 import { ConvexError } from "convex/values";
+import { ApiError, type ApiErrorCode } from "@/lib/public-api/response";
 
-type ApiCredentials = { apiSecret?: string; apiUserExternalId?: string };
+type ApiCredentials = {
+  apiSecret?: string;
+  apiUserExternalId?: string;
+};
 
 export type UserArgs<F extends FunctionReference<"query" | "mutation">> = Omit<
   FunctionArgs<F>,
@@ -30,7 +33,10 @@ function credentials(userId: string): Required<ApiCredentials> {
     throw new ApiError("INTERNAL_ERROR", "The API is not configured.");
   }
 
-  return { apiSecret, apiUserExternalId: userId };
+  return {
+    apiSecret,
+    apiUserExternalId: userId,
+  };
 }
 
 export function toApiError(error: unknown): ApiError {
@@ -39,7 +45,12 @@ export function toApiError(error: unknown): ApiError {
   }
 
   if (error instanceof ConvexError) {
-    const data = error.data as { code?: string; message?: string } | string;
+    const data = error.data as
+      | {
+          code?: string;
+          message?: string;
+        }
+      | string;
 
     if (
       typeof data === "object" &&

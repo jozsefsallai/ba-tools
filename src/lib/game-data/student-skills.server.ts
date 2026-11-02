@@ -19,7 +19,10 @@ export async function resolveSkillStudents(
 }
 
 const entries = <T>(record: Partial<Record<SkillLocale, T>>) =>
-  Object.entries(record) as [DbSkillLocale, T][];
+  Object.entries(record) as [
+    DbSkillLocale,
+    T,
+  ][];
 
 export interface SaveStudentSkillsResult {
   effects: number;
@@ -39,8 +42,13 @@ export async function saveStudentSkills(
     };
 
     await db.skillEffect.upsert({
-      where: { id: effect.id },
-      create: { id: effect.id, ...fields },
+      where: {
+        id: effect.id,
+      },
+      create: {
+        id: effect.id,
+        ...fields,
+      },
       update: fields,
     });
   }
@@ -48,7 +56,13 @@ export async function saveStudentSkills(
   const effectIds = result.effects.map((e) => e.id);
 
   await db.$transaction([
-    db.skillEffectText.deleteMany({ where: { effectId: { in: effectIds } } }),
+    db.skillEffectText.deleteMany({
+      where: {
+        effectId: {
+          in: effectIds,
+        },
+      },
+    }),
     db.skillEffectText.createMany({
       data: result.effects.flatMap((effect) =>
         entries(effect.texts).map(([locale, text]) => ({
@@ -60,10 +74,18 @@ export async function saveStudentSkills(
     }),
   ]);
 
-  const studentIds = [...new Set(result.skills.map((s) => s.studentId))];
+  const studentIds = [
+    ...new Set(result.skills.map((s) => s.studentId)),
+  ];
 
   await db.$transaction([
-    db.studentSkill.deleteMany({ where: { studentId: { in: studentIds } } }),
+    db.studentSkill.deleteMany({
+      where: {
+        studentId: {
+          in: studentIds,
+        },
+      },
+    }),
 
     db.studentSkill.createMany({
       data: result.skills.map((skill) => ({
@@ -98,7 +120,10 @@ export async function saveStudentSkills(
 
     db.studentSkillEffect.createMany({
       data: result.skills.flatMap((skill) =>
-        skill.effectIds.map((effectId) => ({ skillId: skill.id, effectId })),
+        skill.effectIds.map((effectId) => ({
+          skillId: skill.id,
+          effectId,
+        })),
       ),
     }),
   ]);

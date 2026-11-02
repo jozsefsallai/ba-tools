@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { PaginationOptions } from "convex/server";
 import {
   type UserArgs,
   userMutation,
@@ -7,7 +8,6 @@ import {
 } from "@/lib/public-api/convex.server";
 import { mergeForUpdate } from "@/lib/public-api/route";
 import { toPage, toResource } from "@/lib/public-api/serialize";
-import type { PaginationOptions } from "convex/server";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -36,7 +36,9 @@ export async function listTimelines(
   paginationOpts: PaginationOptions,
 ) {
   return toPage(
-    await userQuery(userId, api.timeline.getOwnPaginated, { paginationOpts }),
+    await userQuery(userId, api.timeline.getOwnPaginated, {
+      paginationOpts,
+    }),
   );
 }
 

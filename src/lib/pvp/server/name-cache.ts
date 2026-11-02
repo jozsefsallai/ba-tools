@@ -1,15 +1,15 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { createClient } from "redis";
+import { z } from "zod";
 import {
+  decodeNameMask,
   NAME_FINGERPRINT_VERSION,
   NAME_MASK_HEIGHT,
   NAME_MASK_MAX_WIDTH,
   type NameDescriptor,
-  decodeNameMask,
   nameBuckets,
   verifyNameSimilarity,
 } from "@/lib/pvp/server/name-fingerprint";
-import { createClient } from "redis";
-import { z } from "zod";
 
 const descriptorSchema = z
   .object({
@@ -40,7 +40,10 @@ const variantSchema = z.object({
   descriptor: descriptorSchema,
 });
 
-const storedSchema = z.union([entrySchema, variantSchema]);
+const storedSchema = z.union([
+  entrySchema,
+  variantSchema,
+]);
 
 const receiptSchema = z.object({
   userId: z.string(),
@@ -59,7 +62,10 @@ async function connectNameRedis() {
   const client = createClient({
     url: process.env.REDIS_URL,
     disableOfflineQueue: true,
-    socket: { connectTimeout: 1500, reconnectStrategy: false },
+    socket: {
+      connectTimeout: 1500,
+      reconnectStrategy: false,
+    },
   });
 
   client.on("error", () => {});
@@ -138,21 +144,33 @@ export async function lookupName(descriptor: NameDescriptor) {
     (exact.descriptor.hash === descriptor.hash ||
       verifyNameSimilarity(descriptor, exact.descriptor))
   ) {
-    return { entry: exact, match: "exact" as const, candidates: 1 };
+    return {
+      entry: exact,
+      match: "exact" as const,
+      candidates: 1,
+    };
   }
 
   const buckets = await Promise.all(
     nameBuckets(descriptor).map((key) => redis.zRange(key, -65, -1)),
   );
 
-  const hashes = [...new Set(buckets.flat())];
+  const hashes = [
+    ...new Set(buckets.flat()),
+  ];
 
   if (buckets.some((b) => b.length > 64) || hashes.length > 128) {
-    return { match: "ambiguous" as const, candidates: hashes.length };
+    return {
+      match: "ambiguous" as const,
+      candidates: hashes.length,
+    };
   }
 
   if (!hashes.length) {
-    return { match: "miss" as const, candidates: 0 };
+    return {
+      match: "miss" as const,
+      candidates: 0,
+    };
   }
 
   const values = await redis.mGet(hashes.map(nameCacheKey));
@@ -163,7 +181,9 @@ export async function lookupName(descriptor: NameDescriptor) {
 
       return stored.success &&
         verifyNameSimilarity(descriptor, stored.data.descriptor)
-        ? [stored.data]
+        ? [
+            stored.data,
+          ]
         : [];
     } catch {
       return [];
@@ -173,7 +193,11 @@ export async function lookupName(descriptor: NameDescriptor) {
   const canonicalHashes = [
     ...new Set(
       parsed.flatMap((stored) =>
-        "canonicalHash" in stored ? [stored.canonicalHash] : [],
+        "canonicalHash" in stored
+          ? [
+              stored.canonicalHash,
+            ]
+          : [],
       ),
     ),
   ];
@@ -183,12 +207,17 @@ export async function lookupName(descriptor: NameDescriptor) {
     : [];
 
   const canonical = new Map(
-    canonicalHashes.map((hash, index) => [hash, canonicalValues[index]]),
+    canonicalHashes.map((hash, index) => [
+      hash,
+      canonicalValues[index],
+    ]),
   );
 
   const matches = parsed.flatMap((stored) => {
     if ("name" in stored) {
-      return [stored];
+      return [
+        stored,
+      ];
     }
 
     try {
@@ -199,7 +228,9 @@ export async function lookupName(descriptor: NameDescriptor) {
       return entry.success &&
         entry.data.descriptor.hash === stored.canonicalHash &&
         verifyNameSimilarity(descriptor, entry.data.descriptor)
-        ? [entry.data]
+        ? [
+            entry.data,
+          ]
         : [];
     } catch {
       return [];
@@ -207,7 +238,10 @@ export async function lookupName(descriptor: NameDescriptor) {
   });
 
   if (new Set(matches.map((entry) => entry.name)).size > 1) {
-    return { match: "ambiguous" as const, candidates: hashes.length };
+    return {
+      match: "ambiguous" as const,
+      candidates: hashes.length,
+    };
   }
 
   return {
@@ -296,7 +330,10 @@ export async function saveNameReceipt(
 
   transaction.set(
     nameCacheKey(canonical.hash),
-    JSON.stringify({ name, descriptor: canonical }),
+    JSON.stringify({
+      name,
+      descriptor: canonical,
+    }),
   );
 
   if (canonical.hash !== data.descriptor.hash) {
@@ -309,11 +346,18 @@ export async function saveNameReceipt(
     );
   }
 
-  for (const descriptor of [canonical, data.descriptor]) {
-    if (descriptor.reliable)
+  for (const descriptor of [
+    canonical,
+    data.descriptor,
+  ]) {
+    if (descriptor.reliable) {
       for (const key of nameBuckets(descriptor)) {
-        transaction.zAdd(key, { score: Date.now(), value: descriptor.hash });
+        transaction.zAdd(key, {
+          score: Date.now(),
+          value: descriptor.hash,
+        });
       }
+    }
   }
 
   await transaction.exec();

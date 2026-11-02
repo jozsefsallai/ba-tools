@@ -1,5 +1,11 @@
 "use client";
 
+import html2canvas from "html2canvas-pro";
+import { DownloadIcon, PencilIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import slugify from "slugify";
+import { v4 as uuid } from "uuid";
 import { CopyTextTimelineButton } from "@/app/[locale]/timeline-visualizer/_components/copy-text-timeline-button";
 import {
   type TimelineItem,
@@ -30,12 +36,6 @@ import {
   DEFAULT_EXPORT_BACKGROUND_OPACITY,
   DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
 } from "@/lib/storage/timeline";
-import html2canvas from "html2canvas-pro";
-import { DownloadIcon, PencilIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState } from "react";
-import slugify from "slugify";
-import { v4 as uuid } from "uuid";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -101,7 +101,7 @@ export function TimelineView({ id }: TimelineViewProps) {
           continue;
         }
 
-        let target: Student | undefined = undefined;
+        let target: Student | undefined;
         if (item.targetId) {
           target = allStudents.find((s) => s.id === item.targetId);
         }
@@ -130,7 +130,9 @@ export function TimelineView({ id }: TimelineViewProps) {
     }
 
     return items;
-  }, [query.data]);
+  }, [
+    query.data,
+  ]);
 
   async function getTimelineImage() {
     if (!containerRef.current || generationInProgress || !query.data) {

@@ -31,7 +31,9 @@ export function PlanaCanvas({
     }
 
     initPlana();
-  }, [canvasRef]);
+  }, [
+    canvasRef,
+  ]);
 
   useEffect(() => {
     if (!expression) {
@@ -41,7 +43,9 @@ export function PlanaCanvas({
     if (planaRef.current) {
       planaRef.current.setExpression(expression);
     }
-  }, [expression]);
+  }, [
+    expression,
+  ]);
 
   useEffect(() => {
     return () => {

@@ -1,15 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import type { BirthdayGiftPreference } from "@/app/[locale]/birthdays/_components/birthdays-view";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { BirthdayGiftPreference } from "@/app/[locale]/birthdays/_components/birthdays-view";
 import type { BirthdayStudent } from "@/lib/birthdays";
 import { buildItemIconUrl, buildStudentIconUrlFromId } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
 
 type BirthdayCellProps = {
   month: number;
@@ -137,7 +137,10 @@ export function BirthdayCell({
 
       <PopoverContent className="w-72 p-3" align="start">
         <div className="mb-2 text-sm font-semibold">
-          {t("tools.birthdays.cell.popoverHeader", { month, day })}
+          {t("tools.birthdays.cell.popoverHeader", {
+            month,
+            day,
+          })}
         </div>
         <div className="space-y-2">
           {students.map((row) => (

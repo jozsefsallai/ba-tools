@@ -1,5 +1,10 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { RefreshCwIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useMemo, useState } from "react";
+import seedrandom from "seedrandom";
 import { FlippableCard } from "@/components/common/flippable-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,11 +16,6 @@ import {
 import { useStudents } from "@/hooks/use-students";
 import { currentTimeJST, resetTimeForDateJST } from "@/lib/date";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { useUser } from "@clerk/nextjs";
-import { RefreshCwIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
-import seedrandom from "seedrandom";
 
 type SOTDView = "global" | "user";
 
@@ -40,11 +40,16 @@ export function StudentOfTheDay() {
     const rng = seedrandom(globalSeed);
 
     return students[Math.floor(rng() * students.length)];
-  }, [dateTimestamp, students]);
+  }, [
+    dateTimestamp,
+    students,
+  ]);
 
   const globalSOTDPortrait = useMemo(() => {
     return buildStudentPortraitUrl(globalSOTD);
-  }, [globalSOTD]);
+  }, [
+    globalSOTD,
+  ]);
 
   const userSOTD = useMemo(() => {
     if (!user) {
@@ -58,7 +63,11 @@ export function StudentOfTheDay() {
     const rng = seedrandom(userSeed);
 
     return students[Math.floor(rng() * students.length)];
-  }, [dateTimestamp, user, students]);
+  }, [
+    dateTimestamp,
+    user,
+    students,
+  ]);
 
   const userSOTDPortrait = useMemo(() => {
     if (!userSOTD) {
@@ -66,7 +75,9 @@ export function StudentOfTheDay() {
     }
 
     return buildStudentPortraitUrl(userSOTD);
-  }, [userSOTD]);
+  }, [
+    userSOTD,
+  ]);
 
   const toggleView = useCallback(() => {
     setView((prev) => (prev === "global" ? "user" : "global"));
@@ -78,7 +89,9 @@ export function StudentOfTheDay() {
     }
 
     return user.fullName ?? user.username;
-  }, [user]);
+  }, [
+    user,
+  ]);
 
   return (
     <section className="flex flex-col gap-4">
@@ -118,7 +131,11 @@ export function StudentOfTheDay() {
                 </div>
 
                 <div className="absolute top-2 left-2 border bg-background rounded-md px-2 py-0.5 text-xs text-muted-foreground font-medium uppercase">
-                  {userName ? t("tools.studentOfTheDay.userStudent", { name: userName }) : t("tools.studentOfTheDay.yourStudent")}
+                  {userName
+                    ? t("tools.studentOfTheDay.userStudent", {
+                        name: userName,
+                      })
+                    : t("tools.studentOfTheDay.yourStudent")}
                 </div>
               </div>
             ) : null

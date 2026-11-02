@@ -33,7 +33,10 @@ export class PvpIconMatcher {
     const generation = this.generation;
 
     this.loading = (async () => {
-      onProgress?.({ stage: "loading", progress: 0 });
+      onProgress?.({
+        stage: "loading",
+        progress: 0,
+      });
 
       const base = getPvpIconAssetBaseUrl();
       const manifest = await fetch(getPvpIconCatalogUrl());
@@ -70,7 +73,10 @@ export class PvpIconMatcher {
       }
 
       this.names = new Map(
-        catalog.students.map((student) => [student.id, student.name]),
+        catalog.students.map((student) => [
+          student.id,
+          student.name,
+        ]),
       );
 
       this.worker = new Worker(
@@ -95,11 +101,21 @@ export class PvpIconMatcher {
         this.pending = undefined;
       };
 
-      await this.request({ kind: "init", catalog, templates }, [
-        templates.buffer,
-      ]);
+      await this.request(
+        {
+          kind: "init",
+          catalog,
+          templates,
+        },
+        [
+          templates.buffer,
+        ],
+      );
 
-      onProgress?.({ stage: "loading", progress: 1 });
+      onProgress?.({
+        stage: "loading",
+        progress: 1,
+      });
     })().catch((error) => {
       if (generation === this.generation) {
         this.dispose();
@@ -121,7 +137,10 @@ export class PvpIconMatcher {
         return;
       }
 
-      this.pending = { resolve, reject };
+      this.pending = {
+        resolve,
+        reject,
+      };
       this.worker.postMessage(message, transfer);
     });
   }
@@ -135,7 +154,11 @@ export class PvpIconMatcher {
     }));
 
     return this.request(
-      { kind: "match", images: copies, allowedIds },
+      {
+        kind: "match",
+        images: copies,
+        allowedIds,
+      },
       copies.map((image) => image.pixels.buffer),
     );
   }

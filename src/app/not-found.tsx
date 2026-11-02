@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-
-import outfit from "@/app/_fonts/outfit";
 import localFont from "next/font/local";
+import outfit from "@/app/_fonts/outfit";
 
 import { NotFoundView } from "@/components/common/not-found-view";
 

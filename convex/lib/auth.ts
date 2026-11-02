@@ -1,9 +1,9 @@
+import { v } from "convex/values";
 import {
   customCtx,
   customMutation,
   customQuery,
 } from "convex-helpers/server/customFunctions";
-import { v } from "convex/values";
 import type { QueryCtx } from "../_generated/server";
 import { mutation, query } from "../_generated/server";
 import { forbidden, notFound, unauthorized } from "./errors";
@@ -30,7 +30,10 @@ function timingSafeEqual(a: string, b: string) {
 
 async function resolveExternalId(
   ctx: QueryCtx,
-  credentials: { apiSecret?: string; apiUserExternalId?: string },
+  credentials: {
+    apiSecret?: string;
+    apiUserExternalId?: string;
+  },
 ) {
   if (credentials.apiSecret === undefined) {
     const identity = await ctx.auth.getUserIdentity();
@@ -56,7 +59,10 @@ async function resolveExternalId(
 
 async function getAuthenticatedUser(
   ctx: QueryCtx,
-  credentials: { apiSecret?: string; apiUserExternalId?: string },
+  credentials: {
+    apiSecret?: string;
+    apiUserExternalId?: string;
+  },
 ) {
   const externalId = await resolveExternalId(ctx, credentials);
 
@@ -76,7 +82,13 @@ export const authenticatedQuery = customQuery(query, {
   args: apiCredentialArgs,
   input: async (ctx, credentials) => {
     const user = await getAuthenticatedUser(ctx, credentials);
-    return { ctx: { ...ctx, user }, args: {} };
+    return {
+      ctx: {
+        ...ctx,
+        user,
+      },
+      args: {},
+    };
   },
 });
 
@@ -84,7 +96,13 @@ export const authenticatedMutation = customMutation(mutation, {
   args: apiCredentialArgs,
   input: async (ctx, credentials) => {
     const user = await getAuthenticatedUser(ctx, credentials);
-    return { ctx: { ...ctx, user }, args: {} };
+    return {
+      ctx: {
+        ...ctx,
+        user,
+      },
+      args: {},
+    };
   },
 });
 

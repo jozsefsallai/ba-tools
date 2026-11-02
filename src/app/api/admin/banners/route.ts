@@ -1,9 +1,9 @@
+import { NextResponse } from "next/server";
 import { createGameBannerSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import { invalidateGameBannersCache } from "@/lib/game-banners.server";
-import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -17,14 +17,26 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Invalid JSON",
+      },
+      {
+        status: 400,
+      },
+    );
   }
 
   const parsed = createGameBannerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid payload", details: parsed.error.flatten() },
-      { status: 400 },
+      {
+        error: "Invalid payload",
+        details: parsed.error.flatten(),
+      },
+      {
+        status: 400,
+      },
     );
   }
 
@@ -34,19 +46,31 @@ export async function POST(req: Request) {
 
   if (endDate <= startDate) {
     return NextResponse.json(
-      { error: "endDate must be after startDate" },
-      { status: 400 },
+      {
+        error: "endDate must be after startDate",
+      },
+      {
+        status: 400,
+      },
     );
   }
 
   const students = await db.student.findMany({
-    where: { id: { in: data.pickupStudentIds } },
+    where: {
+      id: {
+        in: data.pickupStudentIds,
+      },
+    },
   });
 
   if (students.length !== data.pickupStudentIds.length) {
     return NextResponse.json(
-      { error: "One or more pickup students were not found" },
-      { status: 400 },
+      {
+        error: "One or more pickup students were not found",
+      },
+      {
+        status: 400,
+      },
     );
   }
 
@@ -58,12 +82,18 @@ export async function POST(req: Request) {
       freePulls: data.freePulls,
       isSelectablePickup: data.isSelectablePickup,
       pickupStudents: {
-        connect: data.pickupStudentIds.map((id) => ({ id })),
+        connect: data.pickupStudentIds.map((id) => ({
+          id,
+        })),
       },
     },
-    include: { pickupStudents: true },
+    include: {
+      pickupStudents: true,
+    },
   });
 
   invalidateGameBannersCache();
-  return NextResponse.json(serializeGameBanner(banner), { status: 201 });
+  return NextResponse.json(serializeGameBanner(banner), {
+    status: 201,
+  });
 }

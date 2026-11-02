@@ -1,6 +1,6 @@
+import { v } from "convex/values";
 import { isValidFriendCode } from "@/lib/friend-code";
 import { GAME_SERVERS } from "@/lib/types";
-import { v } from "convex/values";
 import { query } from "~convex/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { conflict, invalid, notFound } from "./lib/errors";
@@ -127,7 +127,10 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: { id: v.id("roster"), ...rosterUpdateArgs },
+  args: {
+    id: v.id("roster"),
+    ...rosterUpdateArgs,
+  },
   handler: async (
     ctx,
     {

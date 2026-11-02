@@ -34,11 +34,19 @@ async function decode(src: string): Promise<PvpPixelImage> {
 
 export function loadPvpStatusTemplates(): Promise<PvpStatusTemplates> {
   loading ??= Promise.all(
-    [attackIcon, defenseIcon, winText, loseText].map((asset) =>
-      decode(asset.src),
-    ),
+    [
+      attackIcon,
+      defenseIcon,
+      winText,
+      loseText,
+    ].map((asset) => decode(asset.src)),
   )
-    .then(([attack, defense, win, lose]) => ({ attack, defense, win, lose }))
+    .then(([attack, defense, win, lose]) => ({
+      attack,
+      defense,
+      win,
+      lose,
+    }))
     .catch((error) => {
       loading = null;
       throw error;

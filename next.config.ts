@@ -1,20 +1,25 @@
 import { readFileSync } from "node:fs";
-import { PVP_ICON_CATALOG_FORMAT } from "@/lib/pvp/icon-catalog-format";
 import createMDX from "@next/mdx";
 import withSerwistInit from "@serwist/next";
 import { createNextYaakdoc } from "@yaakdoc/next";
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 import {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
 } from "next/constants";
+import createNextIntlPlugin from "next-intl/plugin";
+import { PVP_ICON_CATALOG_FORMAT } from "@/lib/pvp/icon-catalog-format";
 
 const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
-  globPublicPatterns: ["icons/*", "apple-touch-icon.png"],
-  exclude: [/./],
+  globPublicPatterns: [
+    "icons/*",
+    "apple-touch-icon.png",
+  ],
+  exclude: [
+    /./,
+  ],
   disable: process.env.NODE_ENV === "development",
 });
 
@@ -38,12 +43,18 @@ const nextConfig: NextConfig = {
   turbopack: {
     rules: {
       "*": {
-        condition: { query: /[?&]og-asset(?:&|$)/ },
-        loaders: ["./scripts/loaders/og-asset.cjs"],
+        condition: {
+          query: /[?&]og-asset(?:&|$)/,
+        },
+        loaders: [
+          "./scripts/loaders/og-asset.cjs",
+        ],
         as: "*.js",
       },
       "*.glsl": {
-        loaders: ["./scripts/loaders/glsl.cjs"],
+        loaders: [
+          "./scripts/loaders/glsl.cjs",
+        ],
         as: "*.js",
       },
     },
@@ -61,13 +72,17 @@ const nextConfig: NextConfig = {
     config.module.rules.push({
       resourceQuery: assetQuery,
       type: "javascript/auto",
-      use: ["./scripts/loaders/og-asset.cjs"],
+      use: [
+        "./scripts/loaders/og-asset.cjs",
+      ],
     });
 
     config.module.rules.push({
       test: /\.glsl$/,
       type: "javascript/auto",
-      use: ["./scripts/loaders/glsl.cjs"],
+      use: [
+        "./scripts/loaders/glsl.cjs",
+      ],
     });
 
     return config;
@@ -81,7 +96,14 @@ const nextConfig: NextConfig = {
   // strict mode messes with the Spine renderer
   reactStrictMode: false,
 
-  pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
+  pageExtensions: [
+    "js",
+    "jsx",
+    "md",
+    "mdx",
+    "ts",
+    "tsx",
+  ],
 
   images: {
     remotePatterns: [
@@ -93,7 +115,11 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  serverExternalPackages: ["@resvg/resvg-js", "@napi-rs/image", "chromadb"],
+  serverExternalPackages: [
+    "@resvg/resvg-js",
+    "@napi-rs/image",
+    "chromadb",
+  ],
 
   async redirects() {
     return [
@@ -125,8 +151,14 @@ const nextConfig: NextConfig = {
       {
         source: "/api/students",
         headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
+          {
+            key: "Access-Control-Allow-Credentials",
+            value: "true",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
           {
             key: "Access-Control-Allow-Methods",
             value: "GET,OPTIONS",
@@ -141,7 +173,10 @@ const nextConfig: NextConfig = {
       {
         source: "/api/v1/:path*",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: "*" },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
           {
             key: "Access-Control-Allow-Methods",
             value: "GET,POST,PATCH,DELETE,OPTIONS",
@@ -150,7 +185,10 @@ const nextConfig: NextConfig = {
             key: "Access-Control-Allow-Headers",
             value: "Authorization, Content-Type",
           },
-          { key: "Access-Control-Max-Age", value: "86400" },
+          {
+            key: "Access-Control-Max-Age",
+            value: "86400",
+          },
         ],
       },
     ];
@@ -161,9 +199,15 @@ const withMDX = createMDX({});
 
 export default async function configuration(
   phase: string,
-  { defaultConfig }: { defaultConfig: NextConfig },
+  {
+    defaultConfig,
+  }: {
+    defaultConfig: NextConfig;
+  },
 ) {
-  const config = { ...nextConfig };
+  const config = {
+    ...nextConfig,
+  };
 
   if (phase === PHASE_PRODUCTION_BUILD || phase === PHASE_DEVELOPMENT_SERVER) {
     const iconCatalog = JSON.parse(

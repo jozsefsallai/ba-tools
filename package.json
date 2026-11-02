@@ -13,7 +13,7 @@
     "ocr:assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-ocr.ts && pnpm run pvp:icon-assets",
     "ocr:upload": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/upload-pvp-ocr.ts",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "biome lint",
     "lint:fix": "biome lint . --write",
     "format": "biome format . --write",
     "db:pull": "prisma db pull",
@@ -132,7 +132,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1146.0",
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.6.4",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/typography": "^0.5.20",
     "@trigger.dev/build": "^4.6.3",

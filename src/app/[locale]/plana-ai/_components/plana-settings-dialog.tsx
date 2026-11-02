@@ -1,5 +1,14 @@
 "use client";
 
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  type PropsWithChildren,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
+import { toast } from "sonner";
 import {
   clearPlanaConfig,
   getPlanaConfigStatus,
@@ -24,15 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import {
-  type PropsWithChildren,
-  useEffect,
-  useState,
-  useTransition,
-} from "react";
-import { toast } from "sonner";
 
 type Provider = "openrouter" | "gateway";
 
@@ -64,7 +64,9 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
       setHasSavedKey(status.hasKey);
       setApiKey("");
     });
-  }, [open]);
+  }, [
+    open,
+  ]);
 
   function handleSave() {
     startTransition(async () => {

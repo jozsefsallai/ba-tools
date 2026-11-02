@@ -1,13 +1,15 @@
 import "server-only";
 
+import { revalidateTag, unstable_cache } from "next/cache";
 import type { PublicGameBanner } from "@/app/[locale]/global/banners/types";
 import { db } from "@/lib/db";
-import { revalidateTag, unstable_cache } from "next/cache";
 
 export const GAME_BANNERS_CACHE_TAG = "game-banners";
 
 export function invalidateGameBannersCache() {
-  revalidateTag(GAME_BANNERS_CACHE_TAG, { expire: 0 });
+  revalidateTag(GAME_BANNERS_CACHE_TAG, {
+    expire: 0,
+  });
 }
 
 const getCachedGameBannersData = unstable_cache(
@@ -48,10 +50,14 @@ const getCachedGameBannersData = unstable_cache(
       },
     });
   },
-  ["public-game-banners"],
+  [
+    "public-game-banners",
+  ],
   {
     revalidate: 86_400,
-    tags: [GAME_BANNERS_CACHE_TAG],
+    tags: [
+      GAME_BANNERS_CACHE_TAG,
+    ],
   },
 );
 

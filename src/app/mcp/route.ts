@@ -1,9 +1,9 @@
+import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import {
   MCP_RESOURCE_METADATA_PATH,
   verifyMcpToken,
 } from "@/lib/mcp/auth.server";
 import { registerMcpTools } from "@/lib/mcp/register-tools";
-import { createMcpHandler, withMcpAuth } from "mcp-handler";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

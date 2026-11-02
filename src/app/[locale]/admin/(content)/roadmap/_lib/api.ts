@@ -6,7 +6,9 @@ import type {
 
 async function parseError(res: Response) {
   try {
-    const data = (await res.json()) as { error?: string };
+    const data = (await res.json()) as {
+      error?: string;
+    };
     return data.error ?? res.statusText;
   } catch {
     return res.statusText;
@@ -16,7 +18,9 @@ async function parseError(res: Response) {
 async function request<T>(url: string, init: RequestInit): Promise<T> {
   const res = await fetch(url, {
     ...init,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
   if (!res.ok) {
@@ -51,17 +55,26 @@ export async function deleteRoadmapItem(
   kind: EditableRoadmapKind,
   id: string,
 ): Promise<void> {
-  await request(`/api/admin/roadmap/${kind}/${id}`, { method: "DELETE" });
+  await request(`/api/admin/roadmap/${kind}/${id}`, {
+    method: "DELETE",
+  });
 }
 
 export function offsetRoadmapItems(
   kind: EditableRoadmapKind,
   ids: string[],
   offsetMs: number,
-): Promise<{ updatedCount: number; items: EditableRoadmapItem[] }> {
+): Promise<{
+  updatedCount: number;
+  items: EditableRoadmapItem[];
+}> {
   return request("/api/admin/roadmap/offset", {
     method: "POST",
-    body: JSON.stringify({ kind, ids, offsetMs }),
+    body: JSON.stringify({
+      kind,
+      ids,
+      offsetMs,
+    }),
   });
 }
 

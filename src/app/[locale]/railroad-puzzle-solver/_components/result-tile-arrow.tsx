@@ -1,5 +1,3 @@
-import type { Tile } from "@/app/[locale]/railroad-puzzle-solver/_lib/types";
-
 import {
   MoveDownLeftIcon,
   MoveDownRightIcon,
@@ -12,6 +10,7 @@ import {
   Undo2Icon,
   UndoIcon,
 } from "lucide-react";
+import type { Tile } from "@/app/[locale]/railroad-puzzle-solver/_lib/types";
 
 export type ResultTileArrowProps = {
   tile: Tile;

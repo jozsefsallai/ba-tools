@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { ChevronDownIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
@@ -14,21 +19,16 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
+import { useRouter } from "@/i18n/navigation";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import {
   FRIEND_CODE_LENGTH,
   isValidFriendCode,
   sanitizeFriendCodeInput,
 } from "@/lib/friend-code";
-import { GAME_SERVERS, GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
-import { useMutation } from "convex/react";
-import { ChevronDownIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { toast } from "sonner";
+import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
 import { api } from "~convex/api";
 import type { Student } from "~prisma";
-import { useRouter } from "@/i18n/navigation";
 
 export function CreateRoster() {
   const t = useTranslations();

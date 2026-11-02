@@ -1,20 +1,16 @@
-import { SITE_ORIGIN, getCardMetadata } from "@/lib/og-metadata.server";
 import type { Metadata } from "next";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getLocale } from "next-intl/server";
-import { NavigationGuardProvider } from "@/components/providers/navigation-guard-provider";
-
 import localFont from "next/font/local";
+import { notFound } from "next/navigation";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
+import NextTopLoader from "nextjs-toploader";
 import notoSans from "@/app/_fonts/noto-sans";
 import notoSansJP from "@/app/_fonts/noto-sans-jp";
 import outfit from "@/app/_fonts/outfit";
 import sono from "@/app/_fonts/sono";
-
-import { notFound } from "next/navigation";
-import NextTopLoader from "nextjs-toploader";
-
 import { AppShell } from "@/components/common/app-shell";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
+import { NavigationGuardProvider } from "@/components/providers/navigation-guard-provider";
 import { StudentsProvider } from "@/components/providers/students-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provider";
@@ -22,6 +18,7 @@ import { UserPreferencesProvider } from "@/components/providers/user-preferences
 import { Toaster } from "@/components/ui/sonner";
 import { routing } from "@/i18n/routing";
 import { db } from "@/lib/db";
+import { getCardMetadata, SITE_ORIGIN } from "@/lib/og-metadata.server";
 
 import "../globals.css";
 
@@ -55,7 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+  return routing.locales.map((locale) => ({
+    locale,
+  }));
 }
 
 export default async function LocaleLayout({
@@ -63,7 +62,9 @@ export default async function LocaleLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: Promise<{
+    locale: string;
+  }>;
 }>) {
   const { locale: localeParam } = await params;
 

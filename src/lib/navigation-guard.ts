@@ -9,7 +9,10 @@ export function createNavigationGuardController() {
   const listeners = new Set<() => void>();
 
   let pending: {
-    guards: [string, NavigationGuardRegistration][];
+    guards: [
+      string,
+      NavigationGuardRegistration,
+    ][];
     index: number;
     resolve: (accepted: boolean) => void;
   } | null = null;
@@ -73,7 +76,11 @@ export function createNavigationGuardController() {
     }
 
     return new Promise<boolean>((resolve) => {
-      pending = { guards, index: 0, resolve };
+      pending = {
+        guards,
+        index: 0,
+        resolve,
+      };
       advance();
       notify();
     });

@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getLocalizedStudentNames } from "@/app/[locale]/students/_lib/student-display";
 import { MemorialLobbySection } from "@/app/[locale]/students/[id]/_components/memorial-lobby-section";
 import { StudentBreadcrumbs } from "@/app/[locale]/students/[id]/_components/student-breadcrumbs";
 import {
@@ -16,15 +20,11 @@ import {
   getStudentDetail,
   resolveStudent,
 } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
-import { getLocalizedStudentNames } from "@/app/[locale]/students/_lib/student-display";
 import { permanentRedirect } from "@/i18n/navigation";
 import { db } from "@/lib/db";
-import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
 import { OG_DESIGN_VERSION } from "@/lib/og/registry";
+import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
 import { buildStudentIconUrl, buildStudentPortraitUrl } from "@/lib/url";
-import type { Metadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
 
 export const revalidate = 86_400;
 
@@ -33,8 +33,14 @@ type PageParams = {
 };
 
 export async function generateStaticParams(): Promise<PageParams[]> {
-  const students = await db.student.findMany({ select: { id: true } });
-  return students.map((student) => ({ id: student.id }));
+  const students = await db.student.findMany({
+    select: {
+      id: true,
+    },
+  });
+  return students.map((student) => ({
+    id: student.id,
+  }));
 }
 
 export async function generateMetadata({
@@ -61,7 +67,9 @@ export async function generateMetadata({
       title: name,
       appName: t("common.appName"),
     }),
-    description: t("tools.students.detail.metaDescription", { name }),
+    description: t("tools.students.detail.metaDescription", {
+      name,
+    }),
     image: `${localizedPath(`/students/${student.id}/opengraph-image`, locale)}?v=${OG_DESIGN_VERSION}`,
     locale,
     alt: name,
@@ -82,7 +90,10 @@ export default async function StudentPage({
   }
 
   if (!resolved.canonical) {
-    permanentRedirect({ href: `/students/${resolved.id}`, locale });
+    permanentRedirect({
+      href: `/students/${resolved.id}`,
+      locale,
+    });
   }
 
   const student = await getStudentDetail(resolved.id);

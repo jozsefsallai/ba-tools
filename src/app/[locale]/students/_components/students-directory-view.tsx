@@ -1,10 +1,19 @@
 "use client";
 
+import {
+  ArrowDownWideNarrowIcon,
+  ArrowUpNarrowWideIcon,
+  SearchIcon,
+  XIcon,
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import { StudentGridCard } from "@/app/[locale]/students/_components/student-grid-card";
 import {
   ACQUISITION_KINDS,
-  ATTACK_TYPES,
   type AcquisitionKind,
+  ATTACK_TYPES,
   COMBAT_CLASSES,
   COMBAT_POSITIONS,
   COMBAT_ROLES,
@@ -12,27 +21,27 @@ import {
   EQUIPMENT_KINDS,
   GAME_SERVER_KEYS,
   type GameServerKey,
-  RARITIES,
-  SCHOOLS,
-  TERRAINS,
-  WEAPON_TYPES,
   getAcquisitionKind,
   getAttackTypeColorClass,
   getDefenseTypeColorClass,
   hasBondGearOn,
   isReleasedOn,
+  RARITIES,
+  SCHOOLS,
+  TERRAINS,
+  WEAPON_TYPES,
 } from "@/app/[locale]/students/_lib/student-display";
 import {
   STUDENT_LIST_RESTORE_KEY,
   saveStudentListQuery,
 } from "@/app/[locale]/students/_lib/student-list-state";
 import {
+  getDefaultSortDirection,
+  getSortDisplayValue,
   SORT_KEYS,
   type SortDirection,
   type SortDisplayValue,
   type SortKey,
-  getDefaultSortDirection,
-  getSortDisplayValue,
   sortStudents,
 } from "@/app/[locale]/students/_lib/student-sort";
 import {
@@ -64,22 +73,13 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useStudents } from "@/hooks/use-students";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import {
+  getTerrainGrade,
   TERRAIN_GRADES_DESC,
   TERRAIN_ICONS,
   TERRAIN_MOOD_ICONS,
   type TerrainGrade,
-  getTerrainGrade,
 } from "@/lib/terrain";
 import { cn } from "@/lib/utils";
-import {
-  ArrowDownWideNarrowIcon,
-  ArrowUpNarrowWideIcon,
-  SearchIcon,
-  XIcon,
-} from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 import type {
   AttackType,
   CombatClass,
@@ -90,7 +90,10 @@ import type {
   WeaponType,
 } from "~prisma";
 
-const YES_NO = ["yes", "no"] as const;
+const YES_NO = [
+  "yes",
+  "no",
+] as const;
 type YesNo = (typeof YES_NO)[number];
 
 type Filters = {
@@ -135,7 +138,10 @@ const FILTER_PARAM_NAMES: Record<ListFilterKey, string> = {
   range: "range",
 };
 
-const NUMERIC_FILTERS: ListFilterKey[] = ["rarity", "range"];
+const NUMERIC_FILTERS: ListFilterKey[] = [
+  "rarity",
+  "range",
+];
 
 const TERRAIN_FILTER_KEYS = {
   Street: "terrainStreet",
@@ -194,7 +200,9 @@ const EMPTY_FILTERS: Filters = {
 };
 
 function parseFilters(searchParams: URLSearchParams): Filters {
-  const filters = { ...EMPTY_FILTERS };
+  const filters = {
+    ...EMPTY_FILTERS,
+  };
 
   for (const key of Object.keys(FILTER_PARAM_NAMES) as ListFilterKey[]) {
     const raw = searchParams.get(FILTER_PARAM_NAMES[key]);
@@ -284,7 +292,13 @@ export function StudentsDirectoryView() {
     const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
     window.history.replaceState(null, "", url);
     saveStudentListQuery(query);
-  }, [debouncedSearch, filters, server, sort, sortDirection]);
+  }, [
+    debouncedSearch,
+    filters,
+    server,
+    sort,
+    sortDirection,
+  ]);
 
   function changeSort(next: SortKey) {
     setSort(next);
@@ -292,7 +306,10 @@ export function StudentsDirectoryView() {
   }
 
   function setFilter<K extends ListFilterKey>(key: K, value: Filters[K]) {
-    setFilters((previous) => ({ ...previous, [key]: value }));
+    setFilters((previous) => ({
+      ...previous,
+      [key]: value,
+    }));
   }
 
   const hasActiveFilters =
@@ -314,16 +331,46 @@ export function StudentsDirectoryView() {
         return false;
       }
 
-      const checks: [unknown[], unknown][] = [
-        [filters.school, student.school],
-        [filters.attackType, student.attackType],
-        [filters.defenseType, student.defenseType],
-        [filters.role, student.combatRole],
-        [filters.combatClass, student.combatClass],
-        [filters.position, student.combatPosition],
-        [filters.weapon, student.weaponType],
-        [filters.rarity, student.rarity],
-        [filters.acquisition, getAcquisitionKind(student, acquisitionServer)],
+      const checks: [
+        unknown[],
+        unknown,
+      ][] = [
+        [
+          filters.school,
+          student.school,
+        ],
+        [
+          filters.attackType,
+          student.attackType,
+        ],
+        [
+          filters.defenseType,
+          student.defenseType,
+        ],
+        [
+          filters.role,
+          student.combatRole,
+        ],
+        [
+          filters.combatClass,
+          student.combatClass,
+        ],
+        [
+          filters.position,
+          student.combatPosition,
+        ],
+        [
+          filters.weapon,
+          student.weaponType,
+        ],
+        [
+          filters.rarity,
+          student.rarity,
+        ],
+        [
+          filters.acquisition,
+          getAcquisitionKind(student, acquisitionServer),
+        ],
         [
           filters.terrainStreet,
           getTerrainGrade(student.streetBattleAdaptation),
@@ -336,14 +383,26 @@ export function StudentsDirectoryView() {
           filters.terrainIndoor,
           getTerrainGrade(student.indoorBattleAdaptation),
         ],
-        [filters.equipment1, student.equipment[0]],
-        [filters.equipment2, student.equipment[1]],
-        [filters.equipment3, student.equipment[2]],
+        [
+          filters.equipment1,
+          student.equipment[0],
+        ],
+        [
+          filters.equipment2,
+          student.equipment[1],
+        ],
+        [
+          filters.equipment3,
+          student.equipment[2],
+        ],
         [
           filters.bondGear,
           hasBondGearOn(student, acquisitionServer) ? "yes" : "no",
         ],
-        [filters.range, student.range],
+        [
+          filters.range,
+          student.range,
+        ],
       ];
 
       return checks.every(
@@ -357,17 +416,33 @@ export function StudentsDirectoryView() {
     }
 
     return sortStudents(filtered, sort, sortDirection);
-  }, [students, filters, server, sort, sortDirection, debouncedSearch]);
+  }, [
+    students,
+    filters,
+    server,
+    sort,
+    sortDirection,
+    debouncedSearch,
+  ]);
 
   const isSearching = debouncedSearch.trim().length > 0;
-  const numberFormat = useMemo(() => new Intl.NumberFormat(locale), [locale]);
+  const numberFormat = useMemo(
+    () => new Intl.NumberFormat(locale),
+    [
+      locale,
+    ],
+  );
 
   const rangeValues = useMemo(
     () =>
-      [...new Set(students.map((student) => student.range))]
+      [
+        ...new Set(students.map((student) => student.range)),
+      ]
         .filter((range) => range > 0)
         .sort((a, b) => a - b),
-    [students],
+    [
+      students,
+    ],
   );
 
   const schoolOptions: MultiSelectFilterOption<School>[] = SCHOOLS.map(
@@ -405,7 +480,12 @@ export function StudentsDirectoryView() {
       value: role,
       label: t(`common.combatRole.${role}`),
       icon: (
-        <StudentRoleIcon student={{ combatRole: role }} className="size-5" />
+        <StudentRoleIcon
+          student={{
+            combatRole: role,
+          }}
+          className="size-5"
+        />
       ),
     }),
   );
@@ -430,7 +510,10 @@ export function StudentsDirectoryView() {
   );
 
   const rarityOptions: MultiSelectFilterOption<number>[] = RARITIES.map(
-    (rarity) => ({ value: rarity, label: "★".repeat(rarity) }),
+    (rarity) => ({
+      value: rarity,
+      label: "★".repeat(rarity),
+    }),
   );
 
   const terrainGroups: GroupedToggleGroup<
@@ -471,7 +554,9 @@ export function StudentsDirectoryView() {
 
           return {
             key,
-            label: t("tools.students.filters.equipmentSlot", { slot: idx + 1 }),
+            label: t("tools.students.filters.equipmentSlot", {
+              slot: idx + 1,
+            }),
             options: EQUIPMENT_KINDS.filter((kind) => kinds.has(kind)).map(
               (equipment) => ({
                 value: equipment,
@@ -484,15 +569,24 @@ export function StudentsDirectoryView() {
           };
         },
       ),
-    [students, t],
+    [
+      students,
+      t,
+    ],
   );
 
   const bondGearOptions: MultiSelectFilterOption<YesNo>[] = YES_NO.map(
-    (value) => ({ value, label: t(`common.${value}`) }),
+    (value) => ({
+      value,
+      label: t(`common.${value}`),
+    }),
   );
 
   const rangeOptions: MultiSelectFilterOption<number>[] = rangeValues.map(
-    (range) => ({ value: range, label: numberFormat.format(range) }),
+    (range) => ({
+      value: range,
+      label: numberFormat.format(range),
+    }),
   );
 
   const acquisitionOptions: MultiSelectFilterOption<AcquisitionKind>[] =
@@ -701,7 +795,9 @@ export function StudentsDirectoryView() {
       </div>
 
       <div className="text-muted-foreground text-sm">
-        {t("tools.students.filters.results", { count: results.length })}
+        {t("tools.students.filters.results", {
+          count: results.length,
+        })}
       </div>
 
       {results.length > 0 ? (

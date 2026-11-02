@@ -1,9 +1,9 @@
+import { getLocale } from "next-intl/server";
+import { Fragment } from "react";
 import { CHANGELOG } from "@/changelog";
 import { ChangelogItem } from "@/components/common/changelog-item";
 import { Separator } from "@/components/ui/separator";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale } from "next-intl/server";
-import { Fragment } from "react";
 
 export async function generateMetadata() {
   return getCardMetadata("changelog", await getLocale());

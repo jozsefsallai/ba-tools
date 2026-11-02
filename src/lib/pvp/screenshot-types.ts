@@ -1,9 +1,34 @@
 export const PVP_SCREENSHOT_ROI_BOUNDS = {
-  enemyStudentRep: [1348, 116, 150, 125],
-  battleTypeAndResult: [0, 122, 350, 125],
-  enemyName: [1500, 100, 370, 80],
-  myUnits: [46, 280, 830, 540],
-  enemyUnits: [1044, 280, 830, 540],
+  enemyStudentRep: [
+    1348,
+    116,
+    150,
+    125,
+  ],
+  battleTypeAndResult: [
+    0,
+    122,
+    350,
+    125,
+  ],
+  enemyName: [
+    1500,
+    100,
+    370,
+    80,
+  ],
+  myUnits: [
+    46,
+    280,
+    830,
+    540,
+  ],
+  enemyUnits: [
+    1044,
+    280,
+    830,
+    540,
+  ],
 } as const;
 
 export type PvpScreenshotRegion = keyof typeof PVP_SCREENSHOT_ROI_BOUNDS;

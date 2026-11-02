@@ -1,11 +1,11 @@
 import { v } from "convex/values";
 import {
-  type RecruitmentKind,
-  type RecruitmentSessionKind,
   applySessionToAggregates,
   calculateRecruitmentStats,
   emptyAccountAggregates,
   normalizeRecruitmentSession,
+  type RecruitmentKind,
+  type RecruitmentSessionKind,
   toStoredSessionFields,
   validateRecruitmentSession,
 } from "../src/lib/recruitment";
@@ -53,7 +53,9 @@ function sessionTouchesKind(
 }
 
 async function getLatestSession(
-  ctx: { db: any },
+  ctx: {
+    db: any;
+  },
   accountId: any,
   kind?: RecruitmentKind,
 ) {
@@ -68,12 +70,19 @@ async function getLatestSession(
   ).sort(
     (a: any, b: any) => b.date - a.date || b._creationTime - a._creationTime,
   );
-  if (!kind) return sessions[0];
+  if (!kind) {
+    return sessions[0];
+  }
   return sessions.find((session: any) => sessionTouchesKind(session, kind));
 }
 
 async function assertAccount(
-  ctx: { db: any; user: { _id: any } },
+  ctx: {
+    db: any;
+    user: {
+      _id: any;
+    };
+  },
   accountId: any,
 ) {
   const account = await ctx.db.get(accountId);
@@ -84,7 +93,12 @@ async function assertAccount(
 }
 
 async function assertSession(
-  ctx: { db: any; user: { _id: any } },
+  ctx: {
+    db: any;
+    user: {
+      _id: any;
+    };
+  },
   sessionId: any,
 ) {
   const session = await ctx.db.get(sessionId);
@@ -117,13 +131,19 @@ function poolStartCharge(
   preserve: boolean,
 ): number {
   const stored = storedStartCharge(session, kind);
-  if (preserve) return stored ?? previousEndCharge ?? 0;
-  if (previousEndCharge != null) return previousEndCharge;
+  if (preserve) {
+    return stored ?? previousEndCharge ?? 0;
+  }
+  if (previousEndCharge != null) {
+    return previousEndCharge;
+  }
   return stored ?? 0;
 }
 
 async function rebuildAccountAnalytics(
-  ctx: { db: any },
+  ctx: {
+    db: any;
+  },
   account: any,
   preserveStartChargeFor?: any,
 ) {
@@ -142,7 +162,10 @@ async function rebuildAccountAnalytics(
   let aggregates = emptyAccountAggregates();
   const previousByKind: Record<
     RecruitmentKind,
-    { endCharge: number } | undefined
+    | {
+        endCharge: number;
+      }
+    | undefined
   > = {
     permanent: undefined,
     limited: undefined,
@@ -225,11 +248,15 @@ async function rebuildAccountAnalytics(
 
     aggregates = applySessionToAggregates(aggregates, input, stats, 1);
     if (input.permanentPulls > 0) {
-      previousByKind.permanent = { endCharge: stats.permanentEndCharge };
+      previousByKind.permanent = {
+        endCharge: stats.permanentEndCharge,
+      };
       latest.permanent = session;
     }
     if (input.limitedPulls > 0) {
-      previousByKind.limited = { endCharge: stats.limitedEndCharge };
+      previousByKind.limited = {
+        endCharge: stats.limitedEndCharge,
+      };
       latest.limited = session;
     }
     previousRebateTickets = stats.remainingRebateTickets;
@@ -256,7 +283,9 @@ export const getOwnAccounts = authenticatedQuery({
 });
 
 export const getAccount = authenticatedQuery({
-  args: { accountId: v.id("recruitmentAccount") },
+  args: {
+    accountId: v.id("recruitmentAccount"),
+  },
   handler: async (ctx, { accountId }) => {
     const account = await assertAccount(ctx, accountId);
     const sessions = await ctx.db
@@ -291,10 +320,14 @@ export const getAccount = authenticatedQuery({
 });
 
 export const getSession = authenticatedQuery({
-  args: { sessionId: v.id("recruitmentSession") },
+  args: {
+    sessionId: v.id("recruitmentSession"),
+  },
   handler: async (ctx, { sessionId }) => {
     const session = await ctx.db.get(sessionId);
-    if (!session) return null;
+    if (!session) {
+      return null;
+    }
     if (session.userId !== ctx.user._id) {
       throw notFound("Recruitment session not found.");
     }
@@ -346,7 +379,10 @@ export const createAccount = authenticatedMutation({
 });
 
 export const updateAccount = authenticatedMutation({
-  args: { accountId: v.id("recruitmentAccount"), ...recruitmentAccountArgs },
+  args: {
+    accountId: v.id("recruitmentAccount"),
+    ...recruitmentAccountArgs,
+  },
   handler: async (
     ctx,
     { accountId, name, gameServer, permanentCharge, limitedCharge },
@@ -425,7 +461,10 @@ export const createSession = authenticatedMutation({
 });
 
 export const updateSession = authenticatedMutation({
-  args: { sessionId: v.id("recruitmentSession"), ...recruitmentSessionArgs },
+  args: {
+    sessionId: v.id("recruitmentSession"),
+    ...recruitmentSessionArgs,
+  },
   handler: async (ctx, args) => {
     const session = await assertSession(ctx, args.sessionId);
     const input = normalizeRecruitmentSession({
@@ -454,7 +493,9 @@ export const updateSession = authenticatedMutation({
 });
 
 export const deleteSession = authenticatedMutation({
-  args: { sessionId: v.id("recruitmentSession") },
+  args: {
+    sessionId: v.id("recruitmentSession"),
+  },
   handler: async (ctx, { sessionId }) => {
     const session = await assertSession(ctx, sessionId);
     const account = await assertAccount(ctx, session.recruitmentAccountId);
@@ -464,7 +505,9 @@ export const deleteSession = authenticatedMutation({
 });
 
 export const deleteAccount = authenticatedMutation({
-  args: { accountId: v.id("recruitmentAccount") },
+  args: {
+    accountId: v.id("recruitmentAccount"),
+  },
   handler: async (ctx, { accountId }) => {
     await assertAccount(ctx, accountId);
     const sessions = await ctx.db
@@ -473,7 +516,9 @@ export const deleteAccount = authenticatedMutation({
         q.eq("recruitmentAccountId", accountId),
       )
       .collect();
-    for (const session of sessions) await ctx.db.delete(session._id);
+    for (const session of sessions) {
+      await ctx.db.delete(session._id);
+    }
     await ctx.db.delete(accountId);
   },
 });

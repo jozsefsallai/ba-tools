@@ -1,10 +1,16 @@
 "use client";
 
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { PlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat";
 import { PlanaChatSidebar } from "@/app/[locale]/plana-ai/_components/plana-chat-sidebar";
 import { usePlanaChatUrl } from "@/app/[locale]/plana-ai/_hooks/use-plana-chat-url";
 import { cn } from "@/lib/utils";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { Id } from "~convex/dataModel";
 
 type PlanaChatLayoutProps = {
@@ -30,7 +36,9 @@ export function useActivePlanaChat() {
   return useContext(ActivePlanaChatContext);
 }
 
-export function PlanaChatLayout({ chatId: initialChatId }: PlanaChatLayoutProps) {
+export function PlanaChatLayout({
+  chatId: initialChatId,
+}: PlanaChatLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activityTimestamps, setActivityTimestamps] = useState<
     Record<string, number>

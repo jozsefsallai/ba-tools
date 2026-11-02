@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { getTranslations } from "next-intl/server";
 import { BannerItem } from "@/app/[locale]/global/banners/_components/banner-item";
 import type {
   BannerStudent,
@@ -11,11 +13,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { getTranslations } from "next-intl/server";
 
 export type BannerGroupProps = {
-  dates: [number, number];
+  dates: [
+    number,
+    number,
+  ];
   banners: Array<
     Omit<PublicGameBanner, "pickupStudents"> & {
       pickupStudents: BannerStudent[];
@@ -34,7 +37,9 @@ export async function BannerGroup({ dates, banners }: BannerGroupProps) {
   );
   let distanceDays: string;
   if (distanceDaysVal > 1) {
-    distanceDays = t("static.banners.group.inDays", { count: distanceDaysVal });
+    distanceDays = t("static.banners.group.inDays", {
+      count: distanceDaysVal,
+    });
   } else if (distanceDaysVal === 1) {
     distanceDays = t("static.banners.group.tomorrow");
   } else if (distanceDaysVal === 0) {
@@ -57,7 +62,9 @@ export async function BannerGroup({ dates, banners }: BannerGroupProps) {
     count: durationDays,
   });
 
-  const sortedBanners = [...banners].sort(
+  const sortedBanners = [
+    ...banners,
+  ].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 

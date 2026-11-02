@@ -1,3 +1,5 @@
+import { ShieldIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import {
   getAttackTypeColorClass,
   getDefenseTypeColorClass,
@@ -7,8 +9,6 @@ import { StudentRoleIcon } from "@/components/common/student-role-icon";
 import { Link } from "@/i18n/navigation";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ShieldIcon } from "lucide-react";
-import type { ReactNode } from "react";
 import type { Student } from "~prisma";
 
 export type StudentGridCardProps = {

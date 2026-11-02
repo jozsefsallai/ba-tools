@@ -1,5 +1,17 @@
 "use client";
 
+import { usePaginatedQuery, useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { InfoIcon, PlusIcon, ShieldIcon, SwordIcon, XIcon } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
+import {
+  Component,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { PVPFormation } from "@/app/[locale]/pvp/_components/pvp-formation";
 import { PVPStatsStatus } from "@/app/[locale]/pvp/_components/pvp-stats-status";
 import { MessageBox } from "@/components/common/message-box";
@@ -33,19 +45,7 @@ import {
 } from "@/components/ui/tooltip";
 import { usePvpStatsFilters } from "@/hooks/use-pvp-stats-filters";
 import { useStudents } from "@/hooks/use-students";
-import { type PVPSeasonNumber, PVP_SEASONS } from "@/lib/types";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { InfoIcon, PlusIcon, ShieldIcon, SwordIcon, XIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
-import {
-  Component,
-  type ReactNode,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { PVP_SEASONS, type PVPSeasonNumber } from "@/lib/types";
 import { api } from "~convex/api";
 
 type RankingSort = "confidence" | "winRateDesc" | "winRateAsc" | "battles";
@@ -62,14 +62,22 @@ class RankingBoundary extends Component<
     failed: string;
     retry: string;
   },
-  { failed: boolean; attempt: number }
+  {
+    failed: boolean;
+    attempt: number;
+  }
 > {
-  state = { failed: false, attempt: 0 };
+  state = {
+    failed: false,
+    attempt: 0,
+  };
   static getDerivedStateFromError() {
-    return { failed: true };
+    return {
+      failed: true,
+    };
   }
   render() {
-    if (this.state.failed)
+    if (this.state.failed) {
       return (
         <Alert variant="destructive">
           <AlertTitle>{this.props.failed}</AlertTitle>
@@ -88,6 +96,7 @@ class RankingBoundary extends Component<
           </AlertDescription>
         </Alert>
       );
+    }
     return <div key={this.state.attempt}>{this.props.children}</div>;
   }
 }
@@ -96,12 +105,19 @@ function TeamCard({
   team,
   role,
   number,
-}: { team: TeamResult; role: Role; number: number }) {
+}: {
+  team: TeamResult;
+  role: Role;
+  number: number;
+}) {
   const t = useTranslations("tools.pvp.rankings");
   const formatter = useFormatter();
   const titleId = useId();
   const percent = (value: number) =>
-    formatter.number(value, { style: "percent", maximumFractionDigits: 1 });
+    formatter.number(value, {
+      style: "percent",
+      maximumFractionDigits: 1,
+    });
   const range = t("intervalValue", {
     lower: percent(team.confidenceScore),
     upper: percent(team.confidenceUpper),
@@ -117,12 +133,21 @@ function TeamCard({
             ) : (
               <ShieldIcon className="size-4" />
             )}
-            {t("formation", { role: t(role), number })}
+            {t("formation", {
+              role: t(role),
+              number,
+            })}
           </span>
-          <Badge variant="secondary">{t("total", { count: team.total })}</Badge>
+          <Badge variant="secondary">
+            {t("total", {
+              count: team.total,
+            })}
+          </Badge>
         </CardTitle>
         <CardDescription>
-          {t("scoreValue", { score: percent(team.confidenceScore) })}
+          {t("scoreValue", {
+            score: percent(team.confidenceScore),
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
@@ -155,17 +180,23 @@ function TeamCard({
           >
             <div
               className="h-full bg-[var(--chart-1)]"
-              style={{ width: `${team.successRate * 100}%` }}
+              style={{
+                width: `${team.successRate * 100}%`,
+              }}
             />
             <div className="h-full flex-1 bg-[var(--chart-3)]" />
           </div>
           <div className="flex justify-between gap-4 text-sm tabular-nums">
             <span className="flex items-center gap-2">
               <span className="size-2 rounded-full bg-[var(--chart-1)]" />
-              {t("wins", { count: team.wins })}
+              {t("wins", {
+                count: team.wins,
+              })}
             </span>
             <span className="flex items-center gap-2">
-              {t("losses", { count: team.losses })}
+              {t("losses", {
+                count: team.losses,
+              })}
               <span className="size-2 rounded-full bg-[var(--chart-3)]" />
             </span>
           </div>
@@ -219,7 +250,11 @@ function TeamCard({
               stroke="var(--card)"
               strokeWidth="2"
             />
-            {[0, 0.5, 1].map((value) => (
+            {[
+              0,
+              0.5,
+              1,
+            ].map((value) => (
               <text
                 key={value}
                 x={10 + 300 * value}
@@ -258,8 +293,17 @@ function TeamResults({
   const t = useTranslations();
   const { results, status, loadMore } = usePaginatedQuery(
     api.pvpStats.listEffectiveTeams,
-    { snapshot, seasonNumber, excludedStudentIds, role, sort, minimumBattles },
-    { initialNumItems: 20 },
+    {
+      snapshot,
+      seasonNumber,
+      excludedStudentIds,
+      role,
+      sort,
+      minimumBattles,
+    },
+    {
+      initialNumItems: 20,
+    },
   );
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -268,23 +312,37 @@ function TeamResults({
       !node ||
       status !== "CanLoadMore" ||
       typeof IntersectionObserver === "undefined"
-    )
+    ) {
       return;
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) loadMore(20);
+        if (entry.isIntersecting) {
+          loadMore(20);
+        }
       },
-      { rootMargin: "300px" },
+      {
+        rootMargin: "300px",
+      },
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [status, loadMore]);
+  }, [
+    status,
+    loadMore,
+  ]);
 
   // Bounded server scans can return empty pages. Keep following the cursor until
   // there are visible results or the indexed range is genuinely exhausted.
   useEffect(() => {
-    if (results.length === 0 && status === "CanLoadMore") loadMore(20);
-  }, [results.length, status, loadMore]);
+    if (results.length === 0 && status === "CanLoadMore") {
+      loadMore(20);
+    }
+  }, [
+    results.length,
+    status,
+    loadMore,
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -426,8 +484,9 @@ function RankingsContent() {
                 value={minimumBattles}
                 onChange={(event) => {
                   const value = Number(event.target.value);
-                  if (Number.isSafeInteger(value) && value >= 1)
+                  if (Number.isSafeInteger(value) && value >= 1) {
                     setMinimumBattles(value);
+                  }
                 }}
               />
             </div>
@@ -463,7 +522,10 @@ function RankingsContent() {
                 )}
                 onStudentSelected={(student) =>
                   filters.setExcludedStudentIds((ids) => [
-                    ...new Set([...ids, student.id]),
+                    ...new Set([
+                      ...ids,
+                      student.id,
+                    ]),
                   ])
                 }
               >
@@ -486,7 +548,12 @@ function RankingsContent() {
               {t("tools.pvp.rankings.defense")}
             </TabsTrigger>
           </TabsList>
-          {(["attack", "defense"] as const).map((tab) => (
+          {(
+            [
+              "attack",
+              "defense",
+            ] as const
+          ).map((tab) => (
             <TabsContent key={tab} value={tab} className="mt-4">
               {snapshot === undefined || !filters.loaded ? (
                 <MessageBox>{t("common.loading")}</MessageBox>

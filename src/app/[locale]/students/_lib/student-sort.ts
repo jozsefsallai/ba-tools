@@ -1,5 +1,5 @@
-import { STUDENT_MAX_LEVEL, getStudentStatsAtLevel } from "@/lib/student-stats";
-import { type TerrainGrade, getTerrainGrade } from "@/lib/terrain";
+import { getStudentStatsAtLevel, STUDENT_MAX_LEVEL } from "@/lib/student-stats";
+import { getTerrainGrade, type TerrainGrade } from "@/lib/terrain";
 import type { Student } from "~prisma";
 
 export type SortDirection = "asc" | "desc";
@@ -40,10 +40,22 @@ function getLv90Stats(student: Student) {
   if (!stats) {
     stats = getStudentStatsAtLevel(
       {
-        maxHP: [student.maxHPLevel1, student.maxHPLevel100],
-        atk: [student.atkLevel1, student.atkLevel100],
-        def: [student.defLevel1, student.defLevel100],
-        heal: [student.healLevel1, student.healLevel100],
+        maxHP: [
+          student.maxHPLevel1,
+          student.maxHPLevel100,
+        ],
+        atk: [
+          student.atkLevel1,
+          student.atkLevel100,
+        ],
+        def: [
+          student.defLevel1,
+          student.defLevel100,
+        ],
+        heal: [
+          student.healLevel1,
+          student.healLevel100,
+        ],
       },
       STUDENT_MAX_LEVEL,
       student.rarity,
@@ -195,8 +207,14 @@ export function sortStudents(
 }
 
 export type SortDisplayValue =
-  | { kind: "text"; text: string }
-  | { kind: "terrain"; grade: TerrainGrade };
+  | {
+      kind: "text";
+      text: string;
+    }
+  | {
+      kind: "terrain";
+      grade: TerrainGrade;
+    };
 
 export function getSortDisplayValue(
   student: Student,
@@ -218,14 +236,23 @@ export function getSortDisplayValue(
       const value = definition.value(student);
 
       if (definition.format === "rarity") {
-        return { kind: "text", text: "★".repeat(value) };
+        return {
+          kind: "text",
+          text: "★".repeat(value),
+        };
       }
 
       if (definition.format === "percent") {
-        return { kind: "text", text: `${numberFormat.format(value / 100)}%` };
+        return {
+          kind: "text",
+          text: `${numberFormat.format(value / 100)}%`,
+        };
       }
 
-      return { kind: "text", text: numberFormat.format(value) };
+      return {
+        kind: "text",
+        text: numberFormat.format(value),
+      };
     }
   }
 }

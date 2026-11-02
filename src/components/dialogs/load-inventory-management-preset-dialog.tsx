@@ -1,5 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import {
+  Fragment,
+  type PropsWithChildren,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   type InventoryManagementPreset,
   inventoryManagementPresets,
@@ -23,14 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslations } from "next-intl";
-import {
-  Fragment,
-  type PropsWithChildren,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 
 export type LoadInventoryManagementPresetDialogProps = PropsWithChildren<{
   onFinish: (id: string, roundIndex: number) => void;
@@ -124,7 +124,10 @@ export function LoadInventoryPresetDialog({
     }
 
     return url.toString();
-  }, [selectedPreset, selectedRound]);
+  }, [
+    selectedPreset,
+    selectedRound,
+  ]);
 
   async function handleCopyPermalink() {
     if (!permalink || copiedPermalink) {
@@ -142,7 +145,9 @@ export function LoadInventoryPresetDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("tools.inventoryManagement.presetDialog.title")}</DialogTitle>
+          <DialogTitle>
+            {t("tools.inventoryManagement.presetDialog.title")}
+          </DialogTitle>
 
           <DialogDescription>
             {t("tools.inventoryManagement.presetDialog.description")}
@@ -156,14 +161,18 @@ export function LoadInventoryPresetDialog({
           >
             <SelectTrigger>
               <SelectValue
-                placeholder={t("tools.inventoryManagement.presetDialog.selectEvent")}
+                placeholder={t(
+                  "tools.inventoryManagement.presetDialog.selectEvent",
+                )}
                 className="text-ellipsis"
               />
             </SelectTrigger>
 
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="_null">{t("tools.inventoryManagement.presetDialog.none")}</SelectItem>
+                <SelectItem value="_null">
+                  {t("tools.inventoryManagement.presetDialog.none")}
+                </SelectItem>
 
                 {inventoryManagementPresets.map((preset, idx) => (
                   <SelectItem value={preset.name} key={idx}>
@@ -179,12 +188,18 @@ export function LoadInventoryPresetDialog({
             onValueChange={handleRoundSelected}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t("tools.inventoryManagement.presetDialog.selectRound")} />
+              <SelectValue
+                placeholder={t(
+                  "tools.inventoryManagement.presetDialog.selectRound",
+                )}
+              />
             </SelectTrigger>
 
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="_null">{t("tools.inventoryManagement.presetDialog.none")}</SelectItem>
+                <SelectItem value="_null">
+                  {t("tools.inventoryManagement.presetDialog.none")}
+                </SelectItem>
 
                 {selectedPreset?.rounds.map((round, idx) => (
                   <SelectItem value={String(idx)} key={idx}>
@@ -206,7 +221,9 @@ export function LoadInventoryPresetDialog({
             disabled={!permalink || copiedPermalink}
             onClick={handleCopyPermalink}
           >
-            {copiedPermalink ? t("tools.inventoryManagement.presetDialog.copied") : t("tools.inventoryManagement.presetDialog.copyPermalink")}
+            {copiedPermalink
+              ? t("tools.inventoryManagement.presetDialog.copied")
+              : t("tools.inventoryManagement.presetDialog.copyPermalink")}
           </Button>
 
           <Button

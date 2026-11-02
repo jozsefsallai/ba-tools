@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronsUpDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -16,16 +19,15 @@ import {
 } from "@/components/ui/popover";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ChevronsUpDownIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
 import type { Student } from "~prisma";
 
 type PresetOption = {
   _id: string;
   name: string;
   opponentStudentRepId?: string;
-  team?: Array<{ studentId?: string }>;
+  team?: Array<{
+    studentId?: string;
+  }>;
 };
 
 export function PVPPresetPicker({
@@ -64,7 +66,9 @@ export function PVPPresetPicker({
 
   useEffect(() => {
     loadingMoreRef.current = paginationStatus === "LoadingMore";
-  }, [paginationStatus]);
+  }, [
+    paginationStatus,
+  ]);
 
   useEffect(() => {
     if (!open) {
@@ -78,7 +82,10 @@ export function PVPPresetPicker({
     if (list) {
       list.scrollTop = 0;
     }
-  }, [open, search]);
+  }, [
+    open,
+    search,
+  ]);
 
   useEffect(() => {
     if (!open || paginationStatus !== "CanLoadMore" || !loadMore) {
@@ -97,7 +104,12 @@ export function PVPPresetPicker({
       loadingMoreRef.current = true;
       loadMore(30);
     }
-  }, [loadMore, open, paginationStatus, presets?.length]);
+  }, [
+    loadMore,
+    open,
+    paginationStatus,
+    presets?.length,
+  ]);
 
   const renderItem = (preset: PresetOption) => (
     <CommandItem

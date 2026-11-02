@@ -1,21 +1,23 @@
-import { FormationEditor } from "@/app/[locale]/formation-display/_components/formation-editor";
-import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
-import { HelpSheet } from "@/components/sheets/help-sheet";
-import { Button } from "@/components/ui/button";
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 import { HelpCircleIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { FormationEditor } from "@/app/[locale]/formation-display/_components/formation-editor";
+import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tracker-provider";
+import { HelpSheet } from "@/components/sheets/help-sheet";
+import { Button } from "@/components/ui/button";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string | string[] }>;
+  searchParams: Promise<{
+    id?: string | string[];
+  }>;
 }): Promise<Metadata> {
   const locale = await getLocale();
 
@@ -28,18 +30,26 @@ export async function generateMetadata({
   }
 
   try {
-    const token = await (await auth()).getToken({ template: "convex" });
+    const token = await (await auth()).getToken({
+      template: "convex",
+    });
 
     if (!token) {
       return fallback;
     }
     const formation = await fetchQuery(
       api.formation.getById,
-      { id: id as Id<"formation"> },
-      { token },
+      {
+        id: id as Id<"formation">,
+      },
+      {
+        token,
+      },
     );
 
-    const t = await getTranslations({ locale });
+    const t = await getTranslations({
+      locale,
+    });
 
     return {
       ...fallback,

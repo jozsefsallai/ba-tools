@@ -1,11 +1,11 @@
 import "server-only";
 
+import { NextResponse } from "next/server";
+import type { z } from "zod";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { isEditableKind } from "@/lib/roadmap/constants";
 import { RoadmapError } from "@/lib/roadmap/roadmap.server";
 import type { EditableRoadmapKind } from "@/lib/roadmap/types";
-import { NextResponse } from "next/server";
-import type { z } from "zod";
 
 type Handler = (ctx: {
   kind: EditableRoadmapKind | null;
@@ -24,8 +24,12 @@ export async function handleRoadmapRequest(
 
   if (kindParam !== null && !isEditableKind(kindParam)) {
     return NextResponse.json(
-      { error: "Unknown roadmap kind" },
-      { status: 404 },
+      {
+        error: "Unknown roadmap kind",
+      },
+      {
+        status: 404,
+      },
     );
   }
 
@@ -34,7 +38,14 @@ export async function handleRoadmapRequest(
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Invalid JSON",
+        },
+        {
+          status: 400,
+        },
+      );
     }
   }
 
@@ -45,7 +56,14 @@ export async function handleRoadmapRequest(
     });
   } catch (err) {
     if (err instanceof RoadmapError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
+      return NextResponse.json(
+        {
+          error: err.message,
+        },
+        {
+          status: err.status,
+        },
+      );
     }
 
     throw err;

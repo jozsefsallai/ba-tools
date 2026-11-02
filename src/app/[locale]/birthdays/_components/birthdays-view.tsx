@@ -1,9 +1,13 @@
 "use client";
 
+import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { FilterBar } from "@/app/[locale]/birthdays/_components/filter-bar";
 import { MonthCard } from "@/app/[locale]/birthdays/_components/month-card";
 import { TodaySpotlight } from "@/app/[locale]/birthdays/_components/today-spotlight";
 import { UpcomingStrip } from "@/app/[locale]/birthdays/_components/upcoming-strip";
+import { useStudents } from "@/hooks/use-students";
 import {
   birthdayKey,
   daysUntilNextBirthday,
@@ -11,14 +15,15 @@ import {
   groupStudentsByDate,
   MONTH_TRANSLATION_KEYS,
 } from "@/lib/birthdays";
-import { useStudents } from "@/hooks/use-students";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import type { ItemRarity } from "~prisma";
-import { useTranslations } from "next-intl";
-import { motion } from "motion/react";
-import { useMemo, useState } from "react";
 
-const MONTH_NUMBERS = Array.from({ length: 12 }, (_, index) => index + 1);
+const MONTH_NUMBERS = Array.from(
+  {
+    length: 12,
+  },
+  (_, index) => index + 1,
+);
 
 export type BirthdayGiftPreference = {
   id: number;
@@ -49,7 +54,9 @@ export function BirthdaysView({
       extractBirthdayStudents(
         students.filter((student) => student.baseVariantId === null),
       ),
-    [students],
+    [
+      students,
+    ],
   );
 
   const searchResults = useMemo(() => {
@@ -61,11 +68,16 @@ export function BirthdaysView({
         row.student.name.toLowerCase().includes(normalizedSearch),
       )
       .slice(0, 12);
-  }, [birthdayStudents, normalizedSearch]);
+  }, [
+    birthdayStudents,
+    normalizedSearch,
+  ]);
 
   const birthdaysByDate = useMemo(
     () => groupStudentsByDate(birthdayStudents),
-    [birthdayStudents],
+    [
+      birthdayStudents,
+    ],
   );
 
   const todayKey = birthdayKey(today.getMonth() + 1, today.getDate());
@@ -83,7 +95,10 @@ export function BirthdaysView({
         return a.student.name.localeCompare(b.student.name);
       })
       .slice(0, 10);
-  }, [birthdayStudents, today]);
+  }, [
+    birthdayStudents,
+    today,
+  ]);
 
   if (students.length === 0) {
     return <div className="h-56 animate-pulse rounded-xl border bg-muted/30" />;
@@ -159,9 +174,18 @@ export function BirthdaysView({
           {MONTH_NUMBERS.map((month, index) => (
             <motion.div
               key={month}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.02, duration: 0.25 }}
+              initial={{
+                opacity: 0,
+                y: 8,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                delay: index * 0.02,
+                duration: 0.25,
+              }}
             >
               <MonthCard
                 month={month}

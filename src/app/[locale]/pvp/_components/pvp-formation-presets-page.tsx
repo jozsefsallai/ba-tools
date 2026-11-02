@@ -1,5 +1,9 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { usePVPSeasonDefaults } from "@/app/[locale]/pvp/_components/pvp-season-provider";
 import { EmptyCard } from "@/components/common/empty-card";
 import { StudentCard } from "@/components/common/student-card";
@@ -18,20 +22,20 @@ import { Link } from "@/i18n/navigation";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import type { PVPFormationPresetType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useMutation, useQuery } from "convex/react";
-import { ChevronLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
 export function PVPFormationPresetsPage({
   seasonId,
-}: { seasonId: Id<"pvpSeason"> }) {
+}: {
+  seasonId: Id<"pvpSeason">;
+}) {
   const t = useTranslations();
   const { studentMap } = useStudents();
 
-  const presets = useQuery(api.pvp.listFormationPresets, { seasonId });
+  const presets = useQuery(api.pvp.listFormationPresets, {
+    seasonId,
+  });
   const seasonResult = usePVPSeasonDefaults();
   const remove = useMutation(api.pvp.deleteFormationPreset);
 
@@ -46,7 +50,10 @@ export function PVPFormationPresetsPage({
           preset.matchType === "both" ||
           preset.matchType === filter,
       ),
-    [filter, presets],
+    [
+      filter,
+      presets,
+    ],
   );
 
   return (
@@ -159,7 +166,11 @@ export function PVPFormationPresetsPage({
                       "tools.pvp.presets.deleteFormationDescription",
                     )}
                     confirmVariant="destructive"
-                    onConfirm={() => remove({ presetId: preset._id })}
+                    onConfirm={() =>
+                      remove({
+                        presetId: preset._id,
+                      })
+                    }
                   >
                     <Button size="sm" variant="destructive">
                       {t("tools.pvp.presets.delete")}
@@ -170,7 +181,9 @@ export function PVPFormationPresetsPage({
 
               <div
                 className="flex gap-4 overflow-x-auto px-3 py-1"
-                style={{ zoom: 0.65 }}
+                style={{
+                  zoom: 0.65,
+                }}
               >
                 {preset.team.map((item, index) => {
                   const student = item.studentId

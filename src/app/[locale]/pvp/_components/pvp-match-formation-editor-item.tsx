@@ -1,5 +1,10 @@
 "use client";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 import type { PVPFormationStudentItem } from "@/app/[locale]/pvp/_lib/types";
 import { EmptyCard } from "@/components/common/empty-card";
 import { StarLevelInput } from "@/components/common/star-level-input";
@@ -13,13 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { TOUCH_DRAG_CLASS, preventTouchContextMenu } from "@/lib/dnd-mobile";
+import { preventTouchContextMenu, TOUCH_DRAG_CLASS } from "@/lib/dnd-mobile";
 import { cn } from "@/lib/utils";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
 import type { Student } from "~prisma";
 
 export type PVPMatchFormationEditorItemProps = {
@@ -68,8 +68,18 @@ export function PVPMatchFormationEditorItem({
   const slot =
     index < 4 ? `${strikerPrefix ?? "F"}${index + 1}` : `S${index + 1}`;
 
-  useEffect(() => setLevelStr(item.level?.toString() ?? ""), [item.level]);
-  useEffect(() => setDamageStr(item.damage?.toString() ?? ""), [item.damage]);
+  useEffect(
+    () => setLevelStr(item.level?.toString() ?? ""),
+    [
+      item.level,
+    ],
+  );
+  useEffect(
+    () => setDamageStr(item.damage?.toString() ?? ""),
+    [
+      item.damage,
+    ],
+  );
 
   function focusIcon() {
     requestAnimationFrame(() => document.getElementById(triggerId)?.focus());
@@ -96,7 +106,9 @@ export function PVPMatchFormationEditorItem({
               name: item.student.name,
               slot,
             })
-          : t("tools.pvp.formationEditorItem.selectSlot", { slot })
+          : t("tools.pvp.formationEditorItem.selectSlot", {
+              slot,
+            })
       }
     >
       {item.student ? (
@@ -115,7 +127,10 @@ export function PVPMatchFormationEditorItem({
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
       className={cn(
         "group relative flex w-[88px] shrink-0 flex-col items-center gap-1 rounded-xl p-1 max-md:@max-[420px]/formation:w-[80px] max-md:@max-[380px]/formation:w-[68px]",
         isDragging && "opacity-45",
@@ -157,9 +172,13 @@ export function PVPMatchFormationEditorItem({
                       setLevelStr(value);
 
                       if (value === "") {
-                        onUpdate(index, { level: undefined });
+                        onUpdate(index, {
+                          level: undefined,
+                        });
                       } else if (!Number.isNaN(Number.parseInt(value, 10))) {
-                        onUpdate(index, { level: Number.parseInt(value, 10) });
+                        onUpdate(index, {
+                          level: Number.parseInt(value, 10),
+                        });
                       }
                     }}
                   />
@@ -170,7 +189,10 @@ export function PVPMatchFormationEditorItem({
                   </legend>
 
                   <StarLevelInput
-                    value={{ starLevel: item.starLevel, ueLevel: item.ueLevel }}
+                    value={{
+                      starLevel: item.starLevel,
+                      ueLevel: item.ueLevel,
+                    }}
                     onValueChanged={(value) =>
                       onUpdate(index, {
                         starLevel: value.starLevel,
@@ -184,7 +206,9 @@ export function PVPMatchFormationEditorItem({
                   students={students}
                   onStudentSelected={(student) => {
                     replacingStudent.current = true;
-                    onUpdate(index, { student });
+                    onUpdate(index, {
+                      student,
+                    });
                     setOpen(false);
                   }}
                   onCloseAutoFocus={(event) => {
@@ -204,7 +228,11 @@ export function PVPMatchFormationEditorItem({
           ) : (
             <StudentPicker
               students={students}
-              onStudentSelected={(student) => onUpdate(index, { student })}
+              onStudentSelected={(student) =>
+                onUpdate(index, {
+                  student,
+                })
+              }
               onCloseAutoFocus={(event) => {
                 event.preventDefault();
                 focusIcon();
@@ -276,7 +304,9 @@ export function PVPMatchFormationEditorItem({
                     name: item.student.name,
                     slot,
                   })
-                : t("tools.pvp.formationEditorItem.slotDamage", { slot })
+                : t("tools.pvp.formationEditorItem.slotDamage", {
+                    slot,
+                  })
             }
             aria-invalid={item.report?.damage.uncertain || undefined}
             className={cn(
@@ -290,9 +320,13 @@ export function PVPMatchFormationEditorItem({
               setDamageStr(value);
 
               if (value === "") {
-                onUpdate(index, { damage: undefined });
+                onUpdate(index, {
+                  damage: undefined,
+                });
               } else if (!Number.isNaN(Number.parseInt(value, 10))) {
-                onUpdate(index, { damage: Number.parseInt(value, 10) });
+                onUpdate(index, {
+                  damage: Number.parseInt(value, 10),
+                });
               }
             }}
           />

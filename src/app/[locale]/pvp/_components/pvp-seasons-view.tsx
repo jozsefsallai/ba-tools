@@ -1,31 +1,19 @@
 "use client";
 
-import { MessageBox } from "@/components/common/message-box";
-import { NewPVPSeasonDialog } from "@/components/dialogs/new-pvp-season-dialog";
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Link } from "@/i18n/navigation";
-import { useQueryWithStatus } from "@/lib/convex";
-import { cn } from "@/lib/utils";
-import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
   rectSortingStrategy,
+  SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
@@ -41,6 +29,18 @@ import {
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { MessageBox } from "@/components/common/message-box";
+import { NewPVPSeasonDialog } from "@/components/dialogs/new-pvp-season-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Link } from "@/i18n/navigation";
+import { useQueryWithStatus } from "@/lib/convex";
+import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -54,7 +54,10 @@ type SeasonCardProps = {
 
 function SeasonCard({ season, archived, onArchiveChange }: SeasonCardProps) {
   const t = useTranslations();
-  const sortable = useSortable({ id: season._id, disabled: archived });
+  const sortable = useSortable({
+    id: season._id,
+    disabled: archived,
+  });
   const style: React.CSSProperties = {
     transform: CSS.Translate.toString(sortable.transform),
     transition: sortable.transition,
@@ -86,13 +89,17 @@ function SeasonCard({ season, archived, onArchiveChange }: SeasonCardProps) {
         </p>
 
         <p className="text-sm text-muted-foreground">
-          {t("tools.pvp.seasons.server", { server: season.gameServer })}
+          {t("tools.pvp.seasons.server", {
+            server: season.gameServer,
+          })}
         </p>
       </Link>
 
       {!archived && (
         <Button
-          aria-label={t("tools.pvp.seasons.reorder", { name: season.name })}
+          aria-label={t("tools.pvp.seasons.reorder", {
+            name: season.name,
+          })}
           className="absolute top-2 left-2 z-10 cursor-grab touch-manipulation text-muted-foreground hover:text-foreground active:cursor-grabbing"
           type="button"
           variant="ghost"
@@ -106,7 +113,9 @@ function SeasonCard({ season, archived, onArchiveChange }: SeasonCardProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            aria-label={t("tools.pvp.seasons.actions", { name: season.name })}
+            aria-label={t("tools.pvp.seasons.actions", {
+              name: season.name,
+            })}
             className="absolute top-2 right-2 z-10"
             size="icon-sm"
             type="button"
@@ -149,11 +158,18 @@ export function PVPSeasonsView({
       return;
     }
 
-    const order = new Map(seasonIds.map((id, index) => [id, index]));
+    const order = new Map(
+      seasonIds.map((id, index) => [
+        id,
+        index,
+      ]),
+    );
     store.setQuery(
       api.pvp.getOwnSeasons,
       {},
-      [...seasons].sort((a, b) => {
+      [
+        ...seasons,
+      ].sort((a, b) => {
         const aOrder = order.get(a._id);
         const bOrder = order.get(b._id);
 
@@ -178,15 +194,27 @@ export function PVPSeasonsView({
       api.pvp.getOwnSeasons,
       {},
       seasons.map((season) =>
-        season._id === seasonId ? { ...season, archived } : season,
+        season._id === seasonId
+          ? {
+              ...season,
+              archived,
+            }
+          : season,
       ),
     );
   });
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -195,12 +223,16 @@ export function PVPSeasonsView({
 
   const activeSeasons = useMemo(
     () => query.data?.filter((season) => !season.archived) ?? [],
-    [query.data],
+    [
+      query.data,
+    ],
   );
 
   const archivedSeasons = useMemo(
     () => query.data?.filter((season) => season.archived) ?? [],
-    [query.data],
+    [
+      query.data,
+    ],
   );
 
   if (query.status === "pending") {
@@ -220,7 +252,10 @@ export function PVPSeasonsView({
     archived: boolean,
   ) {
     try {
-      await setSeasonArchived({ seasonId, archived });
+      await setSeasonArchived({
+        seasonId,
+        archived,
+      });
       toast.success(
         t(
           archived

@@ -1,5 +1,16 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import React, {
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { VList } from "virtua";
 import {
   Command,
   CommandEmpty,
@@ -17,17 +28,6 @@ import { useStudents } from "@/hooks/use-students";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import React, {
-  type PropsWithChildren,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { VList } from "virtua";
 import type { Student } from "~prisma";
 
 export type StudentPickerHandle = {
@@ -55,7 +55,9 @@ function StudentItem({
 }) {
   const iconUrl = useMemo(() => {
     return buildStudentIconUrl(student);
-  }, [student]);
+  }, [
+    student,
+  ]);
 
   return (
     <CommandItem
@@ -101,7 +103,10 @@ export const StudentPicker = React.memo(
 
       return orderStudentsByFuzzyNameQuery(students, searchInput.trim())
         .ordered;
-    }, [students, searchInput]);
+    }, [
+      students,
+      searchInput,
+    ]);
 
     const handleInputChange = useCallback((value: string) => {
       setTimeout(() => {
@@ -122,7 +127,9 @@ export const StudentPicker = React.memo(
           setSearchInput(e.key);
         }
       },
-      [studentPopoverOpen],
+      [
+        studentPopoverOpen,
+      ],
     );
 
     const handleStudentSelected = useCallback(
@@ -130,7 +137,9 @@ export const StudentPicker = React.memo(
         onStudentSelected?.(student);
         setStudentPopoverOpen(false);
       },
-      [onStudentSelected],
+      [
+        onStudentSelected,
+      ],
     );
 
     useImperativeHandle(
@@ -147,7 +156,9 @@ export const StudentPicker = React.memo(
       if (!studentPopoverOpen) {
         setSearchInput("");
       }
-    }, [studentPopoverOpen]);
+    }, [
+      studentPopoverOpen,
+    ]);
 
     return (
       <Popover open={studentPopoverOpen} onOpenChange={setStudentPopoverOpen}>
@@ -171,7 +182,11 @@ export const StudentPicker = React.memo(
 
               <CommandEmpty>{finalNoStudentText}</CommandEmpty>
               <CommandGroup>
-                <VList style={{ height: 290 }}>
+                <VList
+                  style={{
+                    height: 290,
+                  }}
+                >
                   {filteredStudents.map((student) => (
                     <StudentItem
                       key={student.id}

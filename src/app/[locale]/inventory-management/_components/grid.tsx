@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Tile } from "@/app/[locale]/inventory-management/_components/tile";
 import type { InventoryManagementResult } from "@/workers/types";
-import { useEffect, useState } from "react";
 
 export type DisplayedItem = 1 | 2 | 3 | "1+2" | "1+3" | "2+3";
 
@@ -41,7 +41,9 @@ function generateInitialGrid() {
   for (let i = 0; i < height; i++) {
     const row = [];
     for (let j = 0; j < width; j++) {
-      row.push({ blocked: false });
+      row.push({
+        blocked: false,
+      });
     }
     grid.push(row);
   }
@@ -55,7 +57,10 @@ export function Grid({
   blockedCells,
   onWantsToBlockCell,
   onWantsToUnblockCell,
-  selectRegion = { width: 1, height: 1 },
+  selectRegion = {
+    width: 1,
+    height: 1,
+  },
 }: GridProps) {
   const [grid, setGrid] = useState<GridConfig>([]);
   const [maxValue, setMaxValue] = useState<number | null>(null);
@@ -66,7 +71,9 @@ export function Grid({
         return generateInitialGrid();
       }
 
-      const newGrid = oldGrid.map((row) => [...row]);
+      const newGrid = oldGrid.map((row) => [
+        ...row,
+      ]);
 
       for (let y = 0; y < probabilities.length; y++) {
         for (let x = 0; x < probabilities[y].length; x++) {
@@ -79,7 +86,9 @@ export function Grid({
               newGrid[y][x].value =
                 probabilities[y][x].itemTypes[displayedItem - 1];
             } else {
-              const indexes = displayedItem.split("+").map((v) => Number(v) - 1);
+              const indexes = displayedItem
+                .split("+")
+                .map((v) => Number(v) - 1);
               newGrid[y][x].value = indexes.reduce(
                 (acc, idx) => acc + probabilities[y][x].itemTypes[idx],
                 0,
@@ -93,7 +102,10 @@ export function Grid({
 
       return newGrid;
     });
-  }, [probabilities, displayedItem]);
+  }, [
+    probabilities,
+    displayedItem,
+  ]);
 
   useEffect(() => {
     setMaxValue(() => {
@@ -111,11 +123,15 @@ export function Grid({
 
       return max === 0 ? null : max;
     });
-  }, [grid]);
+  }, [
+    grid,
+  ]);
 
   useEffect(() => {
     setGrid((oldGrid) => {
-      const newGrid = oldGrid.map((row) => [...row]);
+      const newGrid = oldGrid.map((row) => [
+        ...row,
+      ]);
 
       for (let y = 0; y < newGrid.length; y++) {
         for (let x = 0; x < newGrid[y].length; x++) {
@@ -127,7 +143,9 @@ export function Grid({
 
       return newGrid;
     });
-  }, [blockedCells]);
+  }, [
+    blockedCells,
+  ]);
 
   function is1x1Region() {
     return selectRegion.width === 1 && selectRegion.height === 1;
@@ -135,15 +153,23 @@ export function Grid({
 
   function toggleGridItem(x: number, y: number) {
     if (grid[y][x].blocked && is1x1Region()) {
-      onWantsToUnblockCell?.({ x, y });
+      onWantsToUnblockCell?.({
+        x,
+        y,
+      });
     } else {
-      onWantsToBlockCell?.({ x, y });
+      onWantsToBlockCell?.({
+        x,
+        y,
+      });
     }
   }
 
   function onHover(fromX: number, fromY: number) {
     setGrid((oldGrid) => {
-      const newGrid = oldGrid.map((row) => [...row]);
+      const newGrid = oldGrid.map((row) => [
+        ...row,
+      ]);
 
       for (let y = 0; y < newGrid.length; y++) {
         for (let x = 0; x < newGrid[y].length; x++) {
@@ -165,7 +191,9 @@ export function Grid({
 
   function onUnhover() {
     setGrid((oldGrid) => {
-      const newGrid = oldGrid.map((row) => [...row]);
+      const newGrid = oldGrid.map((row) => [
+        ...row,
+      ]);
 
       for (let y = 0; y < newGrid.length; y++) {
         for (let x = 0; x < newGrid[y].length; x++) {
@@ -180,7 +208,10 @@ export function Grid({
   return (
     <div className="flex flex-col gap-1 max-md:mx-[calc(50%_-_50vw)] max-md:w-screen max-md:gap-0.5 max-md:px-0.5">
       {grid.map((row, y) => (
-        <div key={y} className="flex gap-1 max-md:justify-center max-md:gap-0.5">
+        <div
+          key={y}
+          className="flex gap-1 max-md:justify-center max-md:gap-0.5"
+        >
           {row.map((item, x) => (
             <Tile
               key={x}

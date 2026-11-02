@@ -1,5 +1,8 @@
 "use client";
 
+import { useMutation } from "convex/react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,9 +16,6 @@ import { Input } from "@/components/ui/input";
 import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { useStudents } from "@/hooks/use-students";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { useMutation } from "convex/react";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -58,7 +58,10 @@ export function PVPEnemyPresetMergeDialog({
     setFailed(false);
 
     try {
-      await merge({ sourcePresetId: source._id, targetPresetId: target.id });
+      await merge({
+        sourcePresetId: source._id,
+        targetPresetId: target.id,
+      });
       onClose();
     } catch {
       setFailed(true);
@@ -79,7 +82,10 @@ export function PVPEnemyPresetMergeDialog({
         aria-pressed={target?.id === preset._id}
         disabled={isSaving}
         onClick={() => {
-          setTarget({ id: preset._id, name: preset.name });
+          setTarget({
+            id: preset._id,
+            name: preset.name,
+          });
           setFailed(false);
         }}
       >
@@ -103,7 +109,9 @@ export function PVPEnemyPresetMergeDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {t("tools.pvp.presets.mergeTitle", { name: source.name })}
+            {t("tools.pvp.presets.mergeTitle", {
+              name: source.name,
+            })}
           </DialogTitle>
 
           <DialogDescription>

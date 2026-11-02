@@ -16,16 +16,43 @@ const root = new URL("../", import.meta.url).pathname;
 
 const { values } = parseArgs({
   options: {
-    "sqlcipher-key": { type: "string" },
-    "dev-names": { type: "string" },
-    all: { type: "boolean", default: false },
-    "dry-run": { type: "boolean", default: false },
-    "no-overwrite": { type: "boolean", default: false },
-    "no-spine-sprites": { type: "boolean", default: false },
-    "no-memorial-lobbies": { type: "boolean", default: false },
-    "render-threads": { type: "string" },
-    fresh: { type: "boolean", default: false },
-    out: { type: "string", default: `${root}.cache/game-data/images` },
+    "sqlcipher-key": {
+      type: "string",
+    },
+    "dev-names": {
+      type: "string",
+    },
+    all: {
+      type: "boolean",
+      default: false,
+    },
+    "dry-run": {
+      type: "boolean",
+      default: false,
+    },
+    "no-overwrite": {
+      type: "boolean",
+      default: false,
+    },
+    "no-spine-sprites": {
+      type: "boolean",
+      default: false,
+    },
+    "no-memorial-lobbies": {
+      type: "boolean",
+      default: false,
+    },
+    "render-threads": {
+      type: "string",
+    },
+    fresh: {
+      type: "boolean",
+      default: false,
+    },
+    out: {
+      type: "string",
+      default: `${root}.cache/game-data/images`,
+    },
   },
 });
 

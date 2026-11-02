@@ -1,3 +1,4 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import {
   defineTool,
@@ -12,7 +13,6 @@ import {
   listTimelineGroups,
   updateTimelineGroup,
 } from "@/lib/public-api/resources/timeline-groups.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   timelineGroupCreateArgs,
   timelineGroupUpdateArgs,
@@ -40,7 +40,9 @@ export function registerTimelineGroupTools(server: McpServer) {
       title: "Get timeline group",
       description: "One of the user's timeline groups, with its timelines.",
       kind: "read",
-      input: { timelineGroupId },
+      input: {
+        timelineGroupId,
+      },
     },
     ({ timelineGroupId }, userId) => getTimelineGroup(userId, timelineGroupId),
   );
@@ -83,7 +85,9 @@ export function registerTimelineGroupTools(server: McpServer) {
       description:
         "Permanently delete a timeline group. Its timelines are kept.",
       kind: "delete",
-      input: { timelineGroupId },
+      input: {
+        timelineGroupId,
+      },
     },
     ({ timelineGroupId }, userId) =>
       deleteTimelineGroup(userId, timelineGroupId),

@@ -74,7 +74,10 @@ export function getPvpDebugStudentReasons(
   return reasons;
 }
 
-const SIDE_LABELS = { myUnits: "My team", enemyUnits: "Enemy team" } as const;
+const SIDE_LABELS = {
+  myUnits: "My team",
+  enemyUnits: "Enemy team",
+} as const;
 
 export function collectPvpDebugIssues(
   extraction: PvpExtractionResult,
@@ -97,8 +100,16 @@ export function collectPvpDebugIssues(
   }
 
   const required = [
-    ["debug-battle-type", "Battle type", battle.battleType],
-    ["debug-result", "Result", battle.result],
+    [
+      "debug-battle-type",
+      "Battle type",
+      battle.battleType,
+    ],
+    [
+      "debug-result",
+      "Result",
+      battle.result,
+    ],
   ] as const;
 
   for (const [target, label, field] of required) {
@@ -160,7 +171,10 @@ export function collectPvpDebugIssues(
     }
   }
 
-  for (const side of ["myUnits", "enemyUnits"] as const) {
+  for (const side of [
+    "myUnits",
+    "enemyUnits",
+  ] as const) {
     const units = battle[side];
     const team = resolvePvpReportTeam(units, students);
     const placed = team.filter((item) => item.report).length;

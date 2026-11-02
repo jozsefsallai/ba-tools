@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { buildStudentIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
 import type { Student } from "~prisma";
 
 export type TimelineItemTargetPickerProps = {
@@ -14,7 +14,9 @@ export type TimelineItemTargetPickerProps = {
 function StudentItem({ student }: { student: Student }) {
   const image = useMemo(() => {
     return buildStudentIconUrl(student);
-  }, [student]);
+  }, [
+    student,
+  ]);
 
   return (
     <div

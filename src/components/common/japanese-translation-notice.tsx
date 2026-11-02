@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { XIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 

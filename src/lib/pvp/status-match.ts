@@ -7,8 +7,17 @@ export type PvpStatusTemplates = {
   lose: PvpPixelImage;
 };
 
-type Box = { x: number; y: number; width: number; height: number };
-type Rgb = readonly [number, number, number];
+type Box = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+type Rgb = readonly [
+  number,
+  number,
+  number,
+];
 
 const GRID = 32;
 
@@ -20,7 +29,15 @@ function median(values: number[]) {
 // The report panel behind the status row is a flat fill (grey on the player's
 // side, pink on the opponent's), so the crop border tells us what it is
 function backgroundOf(image: PvpPixelImage): Rgb {
-  const channels: [number[], number[], number[]] = [[], [], []];
+  const channels: [
+    number[],
+    number[],
+    number[],
+  ] = [
+    [],
+    [],
+    [],
+  ];
 
   for (let y = 0; y < image.height; y++) {
     for (let x = 0; x < image.width; x++) {
@@ -36,7 +53,11 @@ function backgroundOf(image: PvpPixelImage): Rgb {
     }
   }
 
-  return [median(channels[0]), median(channels[1]), median(channels[2])];
+  return [
+    median(channels[0]),
+    median(channels[1]),
+    median(channels[2]),
+  ];
 }
 
 function bounds(
@@ -60,10 +81,19 @@ function bounds(
     let start = 0;
     let end = counts.length - 1;
 
-    while (start <= end && counts[start] < minimum) start++;
-    while (end >= start && counts[end] < minimum) end--;
+    while (start <= end && counts[start] < minimum) {
+      start++;
+    }
+    while (end >= start && counts[end] < minimum) {
+      end--;
+    }
 
-    return end >= start ? ([start, end] as const) : null;
+    return end >= start
+      ? ([
+          start,
+          end,
+        ] as const)
+      : null;
   };
 
   const vertical = span(rows, 2);
@@ -117,7 +147,11 @@ function sample(
       const left = box.x + (column / GRID) * box.width;
       const right = box.x + ((column + 1) / GRID) * box.width;
 
-      const sum = [0, 0, 0];
+      const sum = [
+        0,
+        0,
+        0,
+      ];
       let count = 0;
 
       for (let y = Math.floor(top); y < Math.max(top + 1, bottom); y++) {
@@ -169,9 +203,21 @@ function similarity(
 
   // Soft shadows and resampling blur can shift the detected edges by a pixel
   // or two; try small nudges and keep the best alignment
-  for (const dx of [-2, 0, 2]) {
-    for (const dy of [-2, 0, 2]) {
-      for (const grow of [-2, 0, 2]) {
+  for (const dx of [
+    -2,
+    0,
+    2,
+  ]) {
+    for (const dy of [
+      -2,
+      0,
+      2,
+    ]) {
+      for (const grow of [
+        -2,
+        0,
+        2,
+      ]) {
         const actual = sample(
           area,
           {
@@ -219,7 +265,12 @@ export function matchPvpStatusTemplate<T extends string>(
     };
   }
 
-  const scores = (Object.entries(templates) as [T, PvpPixelImage][])
+  const scores = (
+    Object.entries(templates) as [
+      T,
+      PvpPixelImage,
+    ][]
+  )
     .map(([value, template]) => ({
       value,
       score: similarity(area, found, background, template),

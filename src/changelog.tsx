@@ -1,5 +1,5 @@
-import { Link } from "@/i18n/navigation";
 import type { ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
 
 export const CHANGELOG_SCOPES = {
   website: "Website",

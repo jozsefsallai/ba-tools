@@ -87,7 +87,10 @@ export function defaultInput(
 
 /** The editable fields of an existing item. */
 export function itemToInput(item: EditableRoadmapItem): AnyRoadmapInput {
-  const dates = { startDate: item.startDate, endDate: item.endDate };
+  const dates = {
+    startDate: item.startDate,
+    endDate: item.endDate,
+  };
 
   switch (item.kind) {
     case "raid":
@@ -121,11 +124,22 @@ export function itemToInput(item: EditableRoadmapItem): AnyRoadmapInput {
         episodeCount: item.episodeCount,
       };
     case "bonus":
-      return { ...dates, type: item.type, bonusMultiply: item.bonusMultiply };
+      return {
+        ...dates,
+        type: item.type,
+        bonusMultiply: item.bonusMultiply,
+      };
     case "workLog":
     case "battlePass":
-      return { ...dates, name: item.name };
+      return {
+        ...dates,
+        name: item.name,
+      };
     case "etc":
-      return { ...dates, label: item.label, description: item.description };
+      return {
+        ...dates,
+        label: item.label,
+        description: item.description,
+      };
   }
 }

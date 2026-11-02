@@ -1,10 +1,15 @@
-import { EMBLEM_HEIGHT, EMBLEM_WIDTH } from "@/lib/emblems";
-import { loadNotoSansFonts } from "@/lib/og-image.server";
 import { Resvg } from "@resvg/resvg-js";
 import type { ReactNode } from "react";
 import satori from "satori";
+import { EMBLEM_HEIGHT, EMBLEM_WIDTH } from "@/lib/emblems";
+import { loadNotoSansFonts } from "@/lib/og-image.server";
 
-export const DEFAULT_SIZES = [100, 140, 280, 420];
+export const DEFAULT_SIZES = [
+  100,
+  140,
+  280,
+  420,
+];
 
 export function processTrailingPart(trailing: string) {
   const parts = trailing.split(".");

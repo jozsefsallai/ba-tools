@@ -1,5 +1,5 @@
-import { StudentSpriteCarousel } from "@/app/[locale]/students/[id]/_components/student-sprite-carousel";
-import type { StudentDetail } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
+import { ShieldIcon, SwordIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import {
   GAME_SERVER_KEYS,
   getAcquisitionKind,
@@ -8,6 +8,8 @@ import {
   getLocalizedStudentNames,
   isReleasedOn,
 } from "@/app/[locale]/students/_lib/student-display";
+import { StudentSpriteCarousel } from "@/app/[locale]/students/[id]/_components/student-sprite-carousel";
+import type { StudentDetail } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
 import charBg from "@/assets/images/char-bg.png";
 import yellowStar from "@/assets/images/yellow_star.png";
 import { FallbackImage } from "@/components/common/fallback-image";
@@ -17,8 +19,6 @@ import { SchoolLogo } from "@/components/common/school-logo";
 import { StudentRoleIcon } from "@/components/common/student-role-icon";
 import { buildStudentIconUrl, buildStudentPortraitUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ShieldIcon, SwordIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function StudentSpritePanel({
   student,
@@ -66,7 +66,9 @@ export async function StudentHeader({ student }: { student: StudentDetail }) {
               >
                 <div
                   className="h-full w-full rounded-[11%] bg-cover"
-                  style={{ backgroundImage: `url(${charBg.src})` }}
+                  style={{
+                    backgroundImage: `url(${charBg.src})`,
+                  }}
                 />
 
                 <div className="absolute top-0.5 right-0.5 bottom-2.5 left-0.5 overflow-hidden rounded-[11%]">
@@ -87,15 +89,20 @@ export async function StudentHeader({ student }: { student: StudentDetail }) {
                   role="img"
                   aria-label={"★".repeat(student.rarity)}
                 >
-                  {Array.from({ length: student.rarity }, (_, idx) => (
-                    <img
-                      key={idx}
-                      src={yellowStar.src}
-                      alt=""
-                      aria-hidden
-                      className="w-7"
-                    />
-                  ))}
+                  {Array.from(
+                    {
+                      length: student.rarity,
+                    },
+                    (_, idx) => (
+                      <img
+                        key={idx}
+                        src={yellowStar.src}
+                        alt=""
+                        aria-hidden
+                        className="w-7"
+                      />
+                    ),
+                  )}
                 </div>
 
                 <span

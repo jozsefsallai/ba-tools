@@ -1,5 +1,9 @@
 "use client";
 
+import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { type ReactNode, useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 import { StudentPicker } from "@/components/common/student-picker";
 import { useRoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { Button } from "@/components/ui/button";
@@ -30,6 +34,7 @@ import {
   DAY_MS,
   DEFENSE_TYPES,
   EVENT_RUN_TYPES,
+  isPermanent,
   MULTI_FLOOR_RAID_BOSSES,
   PERMANENT_END_DATE,
   RAID_BOSSES,
@@ -38,7 +43,6 @@ import {
   TERRAINS,
   TIME_ATTACK_DUNGEON_TYPES,
   WORLD_RAID_BOSSES,
-  isPermanent,
 } from "@/lib/roadmap/constants";
 import {
   type AnyRoadmapInput,
@@ -46,10 +50,6 @@ import {
   roadmapInputSchemas,
 } from "@/lib/roadmap/schemas";
 import type { EditableRoadmapKind, RoadmapRaidRoom } from "@/lib/roadmap/types";
-import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useId, useState } from "react";
-import { toast } from "sonner";
 
 export type ItemFormState = {
   mode: "create" | "edit";
@@ -190,7 +190,9 @@ export function ItemFormDialog({
   useEffect(() => {
     setInput(state?.input ?? null);
     setDurationDraft(null);
-  }, [state]);
+  }, [
+    state,
+  ]);
 
   if (!state || !input) {
     return null;
@@ -199,7 +201,12 @@ export function ItemFormDialog({
   const { kind } = state;
   const update = (patch: object) =>
     setInput((prev) =>
-      prev ? ({ ...prev, ...patch } as AnyRoadmapInput) : prev,
+      prev
+        ? ({
+            ...prev,
+            ...patch,
+          } as AnyRoadmapInput)
+        : prev,
     );
 
   const permanent = isPermanent(input.startDate, input.endDate);
@@ -256,7 +263,12 @@ export function ItemFormDialog({
 
     update({
       rooms: raid.rooms.map((room, idx) =>
-        idx === index ? { ...room, ...patch } : room,
+        idx === index
+          ? {
+              ...room,
+              ...patch,
+            }
+          : room,
       ),
     });
   };
@@ -268,8 +280,12 @@ export function ItemFormDialog({
           <DialogHeader>
             <DialogTitle>
               {state.mode === "create"
-                ? t("tools.admin.roadmap.form.createTitle", { category })
-                : t("tools.admin.roadmap.form.editTitle", { category })}
+                ? t("tools.admin.roadmap.form.createTitle", {
+                    category,
+                  })
+                : t("tools.admin.roadmap.form.editTitle", {
+                    category,
+                  })}
             </DialogTitle>
 
             <DialogDescription>
@@ -290,7 +306,9 @@ export function ItemFormDialog({
                 onChange={(e) => {
                   const startDate = fromInputValue(e.target.value);
                   if (startDate) {
-                    update({ startDate });
+                    update({
+                      startDate,
+                    });
                   }
                 }}
               />
@@ -309,7 +327,9 @@ export function ItemFormDialog({
                 onChange={(e) => {
                   const endDate = fromInputValue(e.target.value);
                   if (endDate) {
-                    update({ endDate });
+                    update({
+                      endDate,
+                    });
                   }
                 }}
               />
@@ -337,7 +357,9 @@ export function ItemFormDialog({
                   setDurationDraft(e.target.value);
                   const days = Number(e.target.value);
                   if (e.target.value !== "" && days > 0) {
-                    update({ endDate: endFromDuration(input.startDate, days) });
+                    update({
+                      endDate: endFromDuration(input.startDate, days),
+                    });
                   }
                 }}
               />
@@ -372,7 +394,12 @@ export function ItemFormDialog({
                       options={RAID_TYPES.filter(
                         (type) => type !== "MultiFloorRaid",
                       )}
-                      onChange={(type) => type && update({ type })}
+                      onChange={(type) =>
+                        type &&
+                        update({
+                          type,
+                        })
+                      }
                       getLabel={(type) =>
                         labels.t(`static.roadmap.raidTypes.${type}`)
                       }
@@ -387,7 +414,11 @@ export function ItemFormDialog({
                       options={RAID_BOSSES}
                       nullable
                       noneLabel={t("tools.admin.roadmap.form.none")}
-                      onChange={(raidBoss) => update({ raidBoss })}
+                      onChange={(raidBoss) =>
+                        update({
+                          raidBoss,
+                        })
+                      }
                       getLabel={(boss) =>
                         labels.t(
                           `common.raids.${boss.toLowerCase() as Lowercase<typeof boss>}`,
@@ -405,7 +436,9 @@ export function ItemFormDialog({
                       nullable
                       noneLabel={t("tools.admin.roadmap.form.none")}
                       onChange={(multiFloorRaidBoss) =>
-                        update({ multiFloorRaidBoss })
+                        update({
+                          multiFloorRaidBoss,
+                        })
                       }
                       getLabel={(boss) =>
                         labels.t(`static.roadmap.multiFloorRaidBosses.${boss}`)
@@ -421,7 +454,11 @@ export function ItemFormDialog({
                       options={WORLD_RAID_BOSSES}
                       nullable
                       noneLabel={t("tools.admin.roadmap.form.none")}
-                      onChange={(worldRaidBoss) => update({ worldRaidBoss })}
+                      onChange={(worldRaidBoss) =>
+                        update({
+                          worldRaidBoss,
+                        })
+                      }
                       getLabel={(boss) =>
                         labels.t(`static.roadmap.worldRaidBosses.${boss}`)
                       }
@@ -437,7 +474,9 @@ export function ItemFormDialog({
                       nullable
                       noneLabel={t("tools.admin.roadmap.form.none")}
                       onChange={(timeAttackDungeonType) =>
-                        update({ timeAttackDungeonType })
+                        update({
+                          timeAttackDungeonType,
+                        })
                       }
                       getLabel={(type) =>
                         labels.t(
@@ -453,7 +492,11 @@ export function ItemFormDialog({
                 <MultiToggle
                   value={raid.attackTypes}
                   options={ATTACK_TYPES}
-                  onChange={(attackTypes) => update({ attackTypes })}
+                  onChange={(attackTypes) =>
+                    update({
+                      attackTypes,
+                    })
+                  }
                   getLabel={(type) => labels.t(`common.attackType.${type}`)}
                 />
               </Field>
@@ -462,7 +505,11 @@ export function ItemFormDialog({
                 <MultiToggle
                   value={raid.defenseTypes}
                   options={DEFENSE_TYPES}
-                  onChange={(defenseTypes) => update({ defenseTypes })}
+                  onChange={(defenseTypes) =>
+                    update({
+                      defenseTypes,
+                    })
+                  }
                   getLabel={(type) => labels.t(`common.defenseType.${type}`)}
                 />
               </Field>
@@ -471,7 +518,11 @@ export function ItemFormDialog({
                 <MultiToggle
                   value={raid.terrains}
                   options={TERRAINS}
-                  onChange={(terrains) => update({ terrains })}
+                  onChange={(terrains) =>
+                    update({
+                      terrains,
+                    })
+                  }
                   getLabel={(terrain) => labels.t(`common.terrain.${terrain}`)}
                 />
               </Field>
@@ -487,7 +538,9 @@ export function ItemFormDialog({
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold">
-                          {labels.t("static.roadmap.room", { index: idx + 1 })}
+                          {labels.t("static.roadmap.room", {
+                            index: idx + 1,
+                          })}
                         </span>
                         <Button
                           type="button"
@@ -508,7 +561,9 @@ export function ItemFormDialog({
                         value={room.defenseTypes}
                         options={DEFENSE_TYPES}
                         onChange={(defenseTypes) =>
-                          setRoom(idx, { defenseTypes })
+                          setRoom(idx, {
+                            defenseTypes,
+                          })
                         }
                         getLabel={(type) =>
                           labels.t(`common.defenseType.${type}`)
@@ -518,7 +573,9 @@ export function ItemFormDialog({
                         value={room.attackTypes}
                         options={ATTACK_TYPES}
                         onChange={(attackTypes) =>
-                          setRoom(idx, { attackTypes })
+                          setRoom(idx, {
+                            attackTypes,
+                          })
                         }
                         getLabel={(type) =>
                           labels.t(`common.attackType.${type}`)
@@ -527,7 +584,11 @@ export function ItemFormDialog({
                       <MultiToggle
                         value={room.terrains}
                         options={TERRAINS}
-                        onChange={(terrains) => setRoom(idx, { terrains })}
+                        onChange={(terrains) =>
+                          setRoom(idx, {
+                            terrains,
+                          })
+                        }
                         getLabel={(terrain) =>
                           labels.t(`common.terrain.${terrain}`)
                         }
@@ -539,7 +600,9 @@ export function ItemFormDialog({
                             id={`${id}-room-${idx}-torment`}
                             checked={room.hasTorment}
                             onCheckedChange={(checked) =>
-                              setRoom(idx, { hasTorment: !!checked })
+                              setRoom(idx, {
+                                hasTorment: !!checked,
+                              })
                             }
                           />
                           <Label htmlFor={`${id}-room-${idx}-torment`}>
@@ -551,7 +614,9 @@ export function ItemFormDialog({
                             id={`${id}-room-${idx}-lunatic`}
                             checked={room.hasLunatic}
                             onCheckedChange={(checked) =>
-                              setRoom(idx, { hasLunatic: !!checked })
+                              setRoom(idx, {
+                                hasLunatic: !!checked,
+                              })
                             }
                           />
                           <Label htmlFor={`${id}-room-${idx}-lunatic`}>
@@ -601,7 +666,11 @@ export function ItemFormDialog({
                 <Input
                   id={`${id}-name`}
                   value={(event ?? story)?.name ?? ""}
-                  onChange={(e) => update({ name: e.target.value })}
+                  onChange={(e) =>
+                    update({
+                      name: e.target.value,
+                    })
+                  }
                   required
                 />
               </Field>
@@ -613,7 +682,11 @@ export function ItemFormDialog({
                 <Input
                   id={`${id}-internal-id`}
                   value={(event ?? story)?.internalId ?? ""}
-                  onChange={(e) => update({ internalId: e.target.value })}
+                  onChange={(e) =>
+                    update({
+                      internalId: e.target.value,
+                    })
+                  }
                 />
               </Field>
 
@@ -622,7 +695,12 @@ export function ItemFormDialog({
                   <EnumSelect
                     value={event.type}
                     options={EVENT_RUN_TYPES}
-                    onChange={(type) => type && update({ type })}
+                    onChange={(type) =>
+                      type &&
+                      update({
+                        type,
+                      })
+                    }
                     getLabel={(type) =>
                       labels.t(`static.roadmap.eventTypes.${type}`)
                     }
@@ -635,7 +713,9 @@ export function ItemFormDialog({
                   <div className="flex items-center gap-2">
                     <StudentPicker
                       onStudentSelected={(student) =>
-                        update({ eventStudentId: student.id })
+                        update({
+                          eventStudentId: student.id,
+                        })
                       }
                     >
                       <Button
@@ -653,7 +733,11 @@ export function ItemFormDialog({
                         variant="ghost"
                         size="icon"
                         aria-label={t("tools.admin.roadmap.form.clearStudent")}
-                        onClick={() => update({ eventStudentId: null })}
+                        onClick={() =>
+                          update({
+                            eventStudentId: null,
+                          })
+                        }
                       >
                         <XIcon />
                       </Button>
@@ -667,7 +751,12 @@ export function ItemFormDialog({
                   <EnumSelect
                     value={story.type}
                     options={SCENARIO_TYPES}
-                    onChange={(type) => type && update({ type })}
+                    onChange={(type) =>
+                      type &&
+                      update({
+                        type,
+                      })
+                    }
                     getLabel={(type) =>
                       labels.t(`static.roadmap.scenarioTypes.${type}`)
                     }
@@ -686,7 +775,9 @@ export function ItemFormDialog({
                     min={0}
                     value={story.episodeCount}
                     onChange={(e) =>
-                      update({ episodeCount: Number(e.target.value) || 0 })
+                      update({
+                        episodeCount: Number(e.target.value) || 0,
+                      })
                     }
                   />
                 </Field>
@@ -700,7 +791,12 @@ export function ItemFormDialog({
                 <EnumSelect
                   value={bonus.type}
                   options={BONUS_CAMPAIGN_TYPES}
-                  onChange={(type) => type && update({ type })}
+                  onChange={(type) =>
+                    type &&
+                    update({
+                      type,
+                    })
+                  }
                   getLabel={(type) =>
                     labels.t(`static.roadmap.bonusTypes.${type}`)
                   }
@@ -716,7 +812,9 @@ export function ItemFormDialog({
                   min={1}
                   value={bonus.bonusMultiply}
                   onChange={(e) =>
-                    update({ bonusMultiply: Number(e.target.value) || 1 })
+                    update({
+                      bonusMultiply: Number(e.target.value) || 1,
+                    })
                   }
                 />
               </Field>
@@ -731,7 +829,11 @@ export function ItemFormDialog({
               <Input
                 id={`${id}-name`}
                 value={named.name}
-                onChange={(e) => update({ name: e.target.value })}
+                onChange={(e) =>
+                  update({
+                    name: e.target.value,
+                  })
+                }
                 required
               />
             </Field>
@@ -746,7 +848,11 @@ export function ItemFormDialog({
                 <Input
                   id={`${id}-label`}
                   value={etc.label}
-                  onChange={(e) => update({ label: e.target.value })}
+                  onChange={(e) =>
+                    update({
+                      label: e.target.value,
+                    })
+                  }
                   required
                 />
               </Field>
@@ -758,7 +864,9 @@ export function ItemFormDialog({
                   id={`${id}-description`}
                   value={etc.description ?? ""}
                   onChange={(e) =>
-                    update({ description: e.target.value || null })
+                    update({
+                      description: e.target.value || null,
+                    })
                   }
                   rows={4}
                 />

@@ -1,17 +1,11 @@
-import type { Change, ChangelogItemData } from "@/changelog";
 import { ChevronRightIcon } from "lucide-react";
+import type { Change, ChangelogItemData } from "@/changelog";
 
 export type ChangelogItem = {
   data: ChangelogItemData;
 };
 
-function ChangelogGroup({
-  title,
-  items,
-}: {
-  title: string;
-  items: Change[];
-}) {
+function ChangelogGroup({ title, items }: { title: string; items: Change[] }) {
   return (
     <div>
       <h3 className="text-lg font-semibold mb-2">{title}</h3>

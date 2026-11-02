@@ -1,17 +1,17 @@
 "use client";
 
+import { PlusIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   clearTimeToRaidScore,
-  secsToTimeString,
   type RaidDifficultyData,
   type RaidDuration,
+  secsToTimeString,
 } from "@/lib/raids";
-import { PlusIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
 
 export type MultiTeamCalculatorProps = {
   duration: RaidDuration;
@@ -24,16 +24,23 @@ export function MultiTeamCalculator({
 }: MultiTeamCalculatorProps) {
   const t = useTranslations();
 
-  const [clearTimes, setClearTimes] = useState<string[]>([""]);
+  const [clearTimes, setClearTimes] = useState<string[]>([
+    "",
+  ]);
 
   const handleAddClearTime = useCallback(() => {
-    setClearTimes((prev) => [...prev, ""]);
+    setClearTimes((prev) => [
+      ...prev,
+      "",
+    ]);
   }, []);
 
   const handleClearTimeChange = useCallback(
     (index: number, newClearTime: string) => {
       setClearTimes((prev) => {
-        const newClearTimes = [...prev];
+        const newClearTimes = [
+          ...prev,
+        ];
         newClearTimes[index] = newClearTime;
         return newClearTimes;
       });
@@ -43,7 +50,9 @@ export function MultiTeamCalculator({
 
   const handleRemoveClearTime = useCallback((index: number) => {
     setClearTimes((prev) => {
-      const newClearTimes = [...prev];
+      const newClearTimes = [
+        ...prev,
+      ];
       newClearTimes.splice(index, 1);
       return newClearTimes;
     });
@@ -73,16 +82,24 @@ export function MultiTeamCalculator({
     }
 
     return clearTimeSecs;
-  }, [clearTimes]);
+  }, [
+    clearTimes,
+  ]);
 
   const formattedTotalTime = useMemo(() => {
     return secsToTimeString(totalSecs);
-  }, [totalSecs]);
+  }, [
+    totalSecs,
+  ]);
 
   const score = useMemo(() => {
     const raidScore = clearTimeToRaidScore(totalSecs, duration, difficulty);
     return raidScore ?? 0;
-  }, [totalSecs, duration, difficulty]);
+  }, [
+    totalSecs,
+    duration,
+    difficulty,
+  ]);
 
   return (
     <div className="flex flex-col gap-4">

@@ -1,5 +1,10 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import { ChevronLeftIcon, PlusIcon, SaveIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,18 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Link } from "@/i18n/navigation";
 import { RECRUITMENT_COLORS } from "@/lib/recruitment";
-import { GAME_SERVERS, GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
+import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
 import { buildStudentIconUrlFromId } from "@/lib/url";
-import { useQuery } from "convex/react";
-import { useMutation } from "convex/react";
-import { ChevronLeftIcon, PlusIcon, SaveIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link } from "@/i18n/navigation";
 
 export function RecruitmentAccountView({ accountId }: { accountId: string }) {
   const t = useTranslations();
@@ -47,12 +46,16 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
       setPermanentCharge(result.account.permanentCharge);
       setLimitedCharge(result.account.limitedCharge);
     }
-  }, [result]);
+  }, [
+    result,
+  ]);
 
-  if (result === undefined)
+  if (result === undefined) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
-  if (!result)
+  }
+  if (!result) {
     return <MessageBox>{t("tools.recruitment.failedToLoad")}</MessageBox>;
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -147,7 +150,9 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
         </div>
         <Button
           onClick={async () => {
-            if (permanentCharge === "" || limitedCharge === "") return;
+            if (permanentCharge === "" || limitedCharge === "") {
+              return;
+            }
             try {
               await updateAccount({
                 accountId: accountId as Id<"recruitmentAccount">,
@@ -343,7 +348,12 @@ function Stat({
   return (
     <div>
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="font-semibold" style={{ color }}>
+      <div
+        className="font-semibold"
+        style={{
+          color,
+        }}
+      >
         {value}
       </div>
     </div>

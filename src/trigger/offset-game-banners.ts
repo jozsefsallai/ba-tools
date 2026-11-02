@@ -1,9 +1,9 @@
-import { logger, task, type Task } from "@trigger.dev/sdk";
-import {
-  offsetGameBannersPayload,
-  type OffsetGameBannersPayload,
-} from "./schemas";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import { db } from "../lib/db";
+import {
+  type OffsetGameBannersPayload,
+  offsetGameBannersPayload,
+} from "./schemas";
 
 export const offsetGameBanners: Task<
   "offset-game-banners",

@@ -1,12 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function PvpScreenshotImportItem({
   item,
@@ -15,7 +15,11 @@ export function PvpScreenshotImportItem({
   onPreview,
   onRemove,
 }: {
-  item: { id: string; file: File; url: string };
+  item: {
+    id: string;
+    file: File;
+    url: string;
+  };
   locked: boolean;
   status?: string;
   onPreview: (id: string) => void;
@@ -31,14 +35,20 @@ export function PvpScreenshotImportItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.id, disabled: locked });
+  } = useSortable({
+    id: item.id,
+    disabled: locked,
+  });
 
   const setRefs = useCallback(
     (node: HTMLDivElement | null) => {
       setNodeRef(node);
       setActivatorNodeRef(node);
     },
-    [setNodeRef, setActivatorNodeRef],
+    [
+      setNodeRef,
+      setActivatorNodeRef,
+    ],
   );
 
   return (
@@ -87,7 +97,9 @@ export function PvpScreenshotImportItem({
         aria-label={t("tools.pvp.screenshotImport.remove", {
           name: item.file.name,
         })}
-        title={t("tools.pvp.screenshotImport.remove", { name: item.file.name })}
+        title={t("tools.pvp.screenshotImport.remove", {
+          name: item.file.name,
+        })}
         onPointerDown={(event) => event.stopPropagation()}
         onMouseDown={(event) => event.stopPropagation()}
         onTouchStart={(event) => event.stopPropagation()}

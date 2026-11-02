@@ -1,5 +1,9 @@
 "use client";
 
+import type { StaticImageData } from "next/image";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import expNImage from "@/app/[locale]/student-exp-calculator/_assets/exp_n.webp";
 import expRImage from "@/app/[locale]/student-exp-calculator/_assets/exp_r.webp";
 import expSrImage from "@/app/[locale]/student-exp-calculator/_assets/exp_sr.webp";
@@ -9,23 +13,35 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { studentExpStorage } from "@/lib/storage/student-exp";
 import {
+  calculateStudentExpCapacity,
   type ReportCounts,
   type ReportRarity,
-  calculateStudentExpCapacity,
 } from "@/lib/student-exp-table";
-import { useTranslations } from "next-intl";
-import type { StaticImageData } from "next/image";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
 
 const MIN_LEVEL = 1;
 const MAX_LEVEL = 90;
 
 const REPORT_INPUTS = [
-  { rarity: "N", labelKey: "n", image: expNImage },
-  { rarity: "R", labelKey: "r", image: expRImage },
-  { rarity: "SR", labelKey: "sr", image: expSrImage },
-  { rarity: "SSR", labelKey: "ssr", image: expSsrImage },
+  {
+    rarity: "N",
+    labelKey: "n",
+    image: expNImage,
+  },
+  {
+    rarity: "R",
+    labelKey: "r",
+    image: expRImage,
+  },
+  {
+    rarity: "SR",
+    labelKey: "sr",
+    image: expSrImage,
+  },
+  {
+    rarity: "SSR",
+    labelKey: "ssr",
+    image: expSsrImage,
+  },
 ] as const satisfies {
   rarity: ReportRarity;
   labelKey: string;
@@ -65,7 +81,12 @@ export function StudentExpCalculator() {
 
   const [reports, setReports] =
     useState<Record<ReportRarity, string>>(DEFAULT_REPORTS);
-  const [levelRange, setLevelRange] = useState<[number, number]>([
+  const [levelRange, setLevelRange] = useState<
+    [
+      number,
+      number,
+    ]
+  >([
     MIN_LEVEL,
     MAX_LEVEL,
   ]);
@@ -79,7 +100,10 @@ export function StudentExpCalculator() {
       if (isReportCountsRecord(saved.reports)) {
         setReports(saved.reports);
       }
-      setLevelRange([saved.fromLevel, saved.toLevel]);
+      setLevelRange([
+        saved.fromLevel,
+        saved.toLevel,
+      ]);
     }
     setHydrated(true);
   }, []);
@@ -94,7 +118,12 @@ export function StudentExpCalculator() {
       fromLevel,
       toLevel,
     });
-  }, [reports, fromLevel, toLevel, hydrated]);
+  }, [
+    reports,
+    fromLevel,
+    toLevel,
+    hydrated,
+  ]);
 
   const result = useMemo(() => {
     const counts: ReportCounts = {
@@ -105,7 +134,11 @@ export function StudentExpCalculator() {
     };
 
     return calculateStudentExpCapacity(counts, fromLevel, toLevel);
-  }, [reports, fromLevel, toLevel]);
+  }, [
+    reports,
+    fromLevel,
+    toLevel,
+  ]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,22rem)_1fr] gap-8 lg:gap-10 items-start">
@@ -145,10 +178,14 @@ export function StudentExpCalculator() {
           <Label>{t("tools.studentExp.levelRange.label")}</Label>
           <div className="flex justify-between text-sm tabular-nums">
             <span>
-              {t("tools.studentExp.levelRange.from", { level: fromLevel })}
+              {t("tools.studentExp.levelRange.from", {
+                level: fromLevel,
+              })}
             </span>
             <span>
-              {t("tools.studentExp.levelRange.to", { level: toLevel })}
+              {t("tools.studentExp.levelRange.to", {
+                level: toLevel,
+              })}
             </span>
           </div>
           <Slider
@@ -161,7 +198,10 @@ export function StudentExpCalculator() {
               if (nextFrom === undefined || nextTo === undefined) {
                 return;
               }
-              setLevelRange([nextFrom, nextTo]);
+              setLevelRange([
+                nextFrom,
+                nextTo,
+              ]);
             }}
           />
         </div>

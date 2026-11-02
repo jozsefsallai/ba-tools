@@ -1,3 +1,5 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import {
   defineTool,
@@ -21,8 +23,8 @@ import {
   getPvpFormationPreset,
   getPvpMatch,
   getPvpSeason,
-  listPvpEnemyPresetTeams,
   listPvpEnemyPresets,
+  listPvpEnemyPresetTeams,
   listPvpFormationPresets,
   listPvpMatches,
   listPvpSeasons,
@@ -32,8 +34,6 @@ import {
   updatePvpMatch,
   updatePvpSeason,
 } from "@/lib/public-api/resources/pvp.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import {
   pvpEnemyPresetCreateArgs,
   pvpEnemyPresetUpdateArgs,
@@ -73,7 +73,9 @@ function registerSeasonTools(server: McpServer) {
       title: "Get PvP season",
       description: "One tracked PvP season.",
       kind: "read",
-      input: { seasonId },
+      input: {
+        seasonId,
+      },
     },
     ({ seasonId }, userId) => getPvpSeason(userId, seasonId),
   );
@@ -116,7 +118,9 @@ function registerSeasonTools(server: McpServer) {
       description:
         "Permanently delete a PvP season with all of its matches, presets, and enemy teams.",
       kind: "delete",
-      input: { seasonId },
+      input: {
+        seasonId,
+      },
     },
     ({ seasonId }, userId) => deletePvpSeason(userId, seasonId),
   );
@@ -147,7 +151,10 @@ function registerMatchTools(server: McpServer) {
       title: "Get PvP match",
       description: "One recorded match.",
       kind: "read",
-      input: { seasonId, matchId },
+      input: {
+        seasonId,
+        matchId,
+      },
     },
     ({ seasonId, matchId }, userId) => getPvpMatch(userId, seasonId, matchId),
   );
@@ -160,7 +167,10 @@ function registerMatchTools(server: McpServer) {
       description:
         "Record a match. `date` is Unix ms. `ownTeam` and `opponentTeam` hold six slots in order (four strikers, then two specials); student ids come from `search_students`. `autoCreateEnemyPreset` files the opponent under a new enemy preset.",
       kind: "create",
-      input: { seasonId, ...convexToZodShape(pvpMatchCreateArgs) },
+      input: {
+        seasonId,
+        ...convexToZodShape(pvpMatchCreateArgs),
+      },
     },
     ({ seasonId, ...input }, userId) => createPvpMatch(userId, seasonId, input),
   );
@@ -173,7 +183,11 @@ function registerMatchTools(server: McpServer) {
       description:
         "Change a recorded match. Only the fields sent change; teams sent replace the whole team.",
       kind: "update",
-      input: { seasonId, matchId, ...convexToZodShape(pvpMatchUpdateArgs) },
+      input: {
+        seasonId,
+        matchId,
+        ...convexToZodShape(pvpMatchUpdateArgs),
+      },
     },
     ({ seasonId, matchId, ...patch }, userId) =>
       updatePvpMatch(userId, seasonId, matchId, patch),
@@ -186,7 +200,10 @@ function registerMatchTools(server: McpServer) {
       title: "Delete PvP match",
       description: "Permanently delete a recorded match.",
       kind: "delete",
-      input: { seasonId, matchId },
+      input: {
+        seasonId,
+        matchId,
+      },
     },
     ({ seasonId, matchId }, userId) =>
       deletePvpMatch(userId, seasonId, matchId),
@@ -201,10 +218,15 @@ function registerFormationPresetTools(server: McpServer) {
       title: "List PvP formation presets",
       description: "The user's saved teams in a season.",
       kind: "read",
-      input: { seasonId, search },
+      input: {
+        seasonId,
+        search,
+      },
     },
     ({ seasonId, search }, userId) =>
-      listPvpFormationPresets(userId, seasonId, { search }),
+      listPvpFormationPresets(userId, seasonId, {
+        search,
+      }),
   );
 
   defineTool(
@@ -214,7 +236,10 @@ function registerFormationPresetTools(server: McpServer) {
       title: "Get PvP formation preset",
       description: "One saved team.",
       kind: "read",
-      input: { seasonId, presetId },
+      input: {
+        seasonId,
+        presetId,
+      },
     },
     ({ seasonId, presetId }, userId) =>
       getPvpFormationPreset(userId, seasonId, presetId),
@@ -228,7 +253,10 @@ function registerFormationPresetTools(server: McpServer) {
       description:
         "Save one of the user's teams for attack, defense, or both. `team` holds six slots in order (four strikers, then two specials).",
       kind: "create",
-      input: { seasonId, ...convexToZodShape(pvpFormationPresetCreateArgs) },
+      input: {
+        seasonId,
+        ...convexToZodShape(pvpFormationPresetCreateArgs),
+      },
     },
     ({ seasonId, ...input }, userId) =>
       createPvpFormationPreset(userId, seasonId, input),
@@ -258,7 +286,10 @@ function registerFormationPresetTools(server: McpServer) {
       title: "Delete PvP formation preset",
       description: "Permanently delete a saved team.",
       kind: "delete",
-      input: { seasonId, presetId },
+      input: {
+        seasonId,
+        presetId,
+      },
     },
     ({ seasonId, presetId }, userId) =>
       deletePvpFormationPreset(userId, seasonId, presetId),
@@ -274,10 +305,21 @@ function registerEnemyTools(server: McpServer) {
       description:
         "Opponents the user tracks in a season, each grouping that opponent's teams. Paginated.",
       kind: "read",
-      input: { seasonId, search, ...paginationInput },
+      input: {
+        seasonId,
+        search,
+        ...paginationInput,
+      },
     },
     ({ seasonId, search, ...page }, userId) =>
-      listPvpEnemyPresets(userId, seasonId, { search }, paginationOpts(page)),
+      listPvpEnemyPresets(
+        userId,
+        seasonId,
+        {
+          search,
+        },
+        paginationOpts(page),
+      ),
   );
 
   defineTool(
@@ -287,7 +329,10 @@ function registerEnemyTools(server: McpServer) {
       title: "Get PvP enemy preset",
       description: "One tracked opponent.",
       kind: "read",
-      input: { seasonId, presetId },
+      input: {
+        seasonId,
+        presetId,
+      },
     },
     ({ seasonId, presetId }, userId) =>
       getPvpEnemyPreset(userId, seasonId, presetId),
@@ -300,7 +345,10 @@ function registerEnemyTools(server: McpServer) {
       title: "List PvP enemy preset teams",
       description: "The teams recorded for a tracked opponent.",
       kind: "read",
-      input: { seasonId, presetId },
+      input: {
+        seasonId,
+        presetId,
+      },
     },
     ({ seasonId, presetId }, userId) =>
       listPvpEnemyPresetTeams(userId, seasonId, presetId),
@@ -313,7 +361,10 @@ function registerEnemyTools(server: McpServer) {
       title: "Create PvP enemy preset",
       description: "Start tracking an opponent in a season.",
       kind: "create",
-      input: { seasonId, ...convexToZodShape(pvpEnemyPresetCreateArgs) },
+      input: {
+        seasonId,
+        ...convexToZodShape(pvpEnemyPresetCreateArgs),
+      },
     },
     ({ seasonId, ...input }, userId) =>
       createPvpEnemyPreset(userId, seasonId, input),
@@ -343,7 +394,10 @@ function registerEnemyTools(server: McpServer) {
       title: "Delete PvP enemy preset",
       description: "Permanently delete a tracked opponent.",
       kind: "delete",
-      input: { seasonId, presetId },
+      input: {
+        seasonId,
+        presetId,
+      },
     },
     ({ seasonId, presetId }, userId) =>
       deletePvpEnemyPreset(userId, seasonId, presetId),
@@ -356,7 +410,10 @@ function registerEnemyTools(server: McpServer) {
       title: "Get PvP enemy team",
       description: "One recorded enemy team.",
       kind: "read",
-      input: { seasonId, teamId },
+      input: {
+        seasonId,
+        teamId,
+      },
     },
     ({ seasonId, teamId }, userId) => getPvpEnemyTeam(userId, seasonId, teamId),
   );
@@ -369,7 +426,10 @@ function registerEnemyTools(server: McpServer) {
       description:
         "Record a team an opponent used, optionally under an enemy preset. `team` holds six slots in order (four strikers, then two specials).",
       kind: "create",
-      input: { seasonId, ...convexToZodShape(pvpEnemyTeamCreateArgs) },
+      input: {
+        seasonId,
+        ...convexToZodShape(pvpEnemyTeamCreateArgs),
+      },
     },
     ({ seasonId, ...input }, userId) =>
       createPvpEnemyTeam(userId, seasonId, input),
@@ -383,7 +443,11 @@ function registerEnemyTools(server: McpServer) {
       description:
         "Change a recorded enemy team. Only the fields sent change. The id can change if the team merges with an identical one.",
       kind: "update",
-      input: { seasonId, teamId, ...convexToZodShape(pvpEnemyTeamUpdateArgs) },
+      input: {
+        seasonId,
+        teamId,
+        ...convexToZodShape(pvpEnemyTeamUpdateArgs),
+      },
     },
     ({ seasonId, teamId, ...patch }, userId) =>
       updatePvpEnemyTeam(userId, seasonId, teamId, patch),
@@ -396,7 +460,10 @@ function registerEnemyTools(server: McpServer) {
       title: "Delete PvP enemy team",
       description: "Permanently delete a recorded enemy team.",
       kind: "delete",
-      input: { seasonId, teamId },
+      input: {
+        seasonId,
+        teamId,
+      },
     },
     ({ seasonId, teamId }, userId) =>
       deletePvpEnemyTeam(userId, seasonId, teamId),

@@ -1,7 +1,7 @@
-import { PVPEnemyPresetEditPage } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-edit-page";
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
 import { getLocale } from "next-intl/server";
+import { PVPEnemyPresetEditPage } from "@/app/[locale]/pvp/_components/pvp-enemy-preset-edit-page";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import type { Id } from "~convex/dataModel";
 
 export async function generateMetadata() {
@@ -14,7 +14,10 @@ export async function generateMetadata() {
 export default async function EditOpponentPresetRoute({
   params,
 }: {
-  params: Promise<{ seasonId: string; presetId: string }>;
+  params: Promise<{
+    seasonId: string;
+    presetId: string;
+  }>;
 }) {
   await auth.protect();
   const resolved = await params;

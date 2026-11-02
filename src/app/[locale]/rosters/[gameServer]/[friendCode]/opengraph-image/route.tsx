@@ -1,22 +1,22 @@
+import { notFound } from "next/navigation";
+import removeMd from "remove-markdown";
 import { RosterOgImage } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-og-image";
 import { db } from "@/lib/db";
 import { isValidFriendCode } from "@/lib/friend-code";
+import { fetchOgArtwork } from "@/lib/og/artwork.server";
 import { getOgAssetUrls } from "@/lib/og-assets.server";
 import { makeOgImage } from "@/lib/og-image.server";
-import { fetchOgArtwork } from "@/lib/og/artwork.server";
 import { getCachedPublicRoster } from "@/lib/roster-cache.server";
 import {
-  BORROW_SLOT_GAMEMODES,
   BORROW_SLOT_GAMEMODE_SHORT_NAMES,
-  GAME_SERVERS,
+  BORROW_SLOT_GAMEMODES,
   GAME_SERVER_NAMES,
+  GAME_SERVERS,
   type GameServer,
   type StarLevel,
   type UELevel,
 } from "@/lib/types";
 import { buildCDNAbsoluteUrl } from "@/lib/url";
-import { notFound } from "next/navigation";
-import removeMd from "remove-markdown";
 
 export const runtime = "nodejs";
 export const revalidate = 86_400;
@@ -29,7 +29,11 @@ type PageParams = {
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<PageParams> },
+  {
+    params,
+  }: {
+    params: Promise<PageParams>;
+  },
 ) {
   const { gameServer, friendCode } = await params;
 
@@ -65,7 +69,10 @@ export async function GET(
   });
 
   const studentMap = new Map(
-    prismaStudents.map((student) => [student.id, student]),
+    prismaStudents.map((student) => [
+      student.id,
+      student,
+    ]),
   );
 
   const featuredBorrowCategories = BORROW_SLOT_GAMEMODES.map((mode) => ({

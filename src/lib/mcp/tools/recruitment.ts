@@ -1,3 +1,5 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import {
@@ -12,8 +14,6 @@ import {
   updateRecruitmentAccount,
   updateRecruitmentSession,
 } from "@/lib/public-api/resources/recruitment.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 import {
   recruitmentAccountArgs,
   recruitmentSessionArgs,
@@ -44,7 +44,9 @@ export function registerRecruitmentTools(server: McpServer) {
       title: "Get recruitment account",
       description: "One recruitment account, with all of its sessions.",
       kind: "read",
-      input: { accountId },
+      input: {
+        accountId,
+      },
     },
     ({ accountId }, userId) => getRecruitmentAccount(userId, accountId),
   );
@@ -69,7 +71,10 @@ export function registerRecruitmentTools(server: McpServer) {
       title: "Update recruitment account",
       description: "Change a recruitment account. Only the fields sent change.",
       kind: "update",
-      input: { accountId, ...z.object(accountFields).partial().shape },
+      input: {
+        accountId,
+        ...z.object(accountFields).partial().shape,
+      },
     },
     ({ accountId, ...patch }, userId) =>
       updateRecruitmentAccount(userId, accountId, patch),
@@ -83,7 +88,9 @@ export function registerRecruitmentTools(server: McpServer) {
       description:
         "Permanently delete a recruitment account and all of its sessions.",
       kind: "delete",
-      input: { accountId },
+      input: {
+        accountId,
+      },
     },
     ({ accountId }, userId) => deleteRecruitmentAccount(userId, accountId),
   );
@@ -96,7 +103,9 @@ export function registerRecruitmentTools(server: McpServer) {
       description:
         "The pull sessions of a recruitment account, with computed statistics.",
       kind: "read",
-      input: { accountId },
+      input: {
+        accountId,
+      },
     },
     ({ accountId }, userId) => listRecruitmentSessions(userId, accountId),
   );
@@ -108,7 +117,10 @@ export function registerRecruitmentTools(server: McpServer) {
       title: "Get recruitment session",
       description: "One pull session, with computed statistics.",
       kind: "read",
-      input: { accountId, sessionId },
+      input: {
+        accountId,
+        sessionId,
+      },
     },
     ({ accountId, sessionId }, userId) =>
       getRecruitmentSession(userId, accountId, sessionId),
@@ -122,7 +134,10 @@ export function registerRecruitmentTools(server: McpServer) {
       description:
         "Record a pull session on a banner. `date` is a Unix timestamp in milliseconds. `pickupsObtained` lists each pickup student and the charge it came at.",
       kind: "create",
-      input: { accountId, ...sessionFields },
+      input: {
+        accountId,
+        ...sessionFields,
+      },
     },
     ({ accountId, ...input }, userId) =>
       createRecruitmentSession(userId, accountId, input),
@@ -153,7 +168,10 @@ export function registerRecruitmentTools(server: McpServer) {
       title: "Delete recruitment session",
       description: "Permanently delete a pull session.",
       kind: "delete",
-      input: { accountId, sessionId },
+      input: {
+        accountId,
+        sessionId,
+      },
     },
     ({ accountId, sessionId }, userId) =>
       deleteRecruitmentSession(userId, accountId, sessionId),

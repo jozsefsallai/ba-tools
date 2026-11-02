@@ -1,5 +1,6 @@
 "use client";
 
+import { type PropsWithChildren, Suspense } from "react";
 import {
   BreadcrumbScope,
   BreadcrumbsProvider,
@@ -8,7 +9,6 @@ import {
   useDefaultBreadcrumbs,
   useEditingBreadcrumbs,
 } from "@/hooks/use-default-breadcrumbs";
-import { type PropsWithChildren, Suspense } from "react";
 
 function EditingBreadcrumbs() {
   const items = useEditingBreadcrumbs();

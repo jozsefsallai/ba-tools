@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { timelineStorage } from "@/lib/storage/timeline";
-import { useTranslations } from "next-intl";
-import { useState, type PropsWithChildren } from "react";
 
 export type ExportTimelineDataDialogProps = PropsWithChildren & {
   onBeforeLoad?: () => void;
@@ -38,7 +38,9 @@ export function ExportTimelineDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.exportTimelineData.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.exportTimelineData.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.exportTimelineData.description")}
           </DialogDescription>

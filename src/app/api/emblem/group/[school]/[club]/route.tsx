@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { GroupEmblem } from "@/app/api/emblem/_components/group-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import {
@@ -10,7 +11,6 @@ import {
   makeEmblem,
   processTrailingPart,
 } from "@/lib/emblems.server";
-import { NextResponse } from "next/server";
 
 type RouteParams = {
   school: string;

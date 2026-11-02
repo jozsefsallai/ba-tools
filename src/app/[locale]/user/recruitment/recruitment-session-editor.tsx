@@ -1,5 +1,18 @@
 "use client";
 
+import { useMutation, useQuery } from "convex/react";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  InfoIcon,
+  PlusIcon,
+  SaveIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { SessionAnalytics } from "@/app/[locale]/user/recruitment/_components/session-analytics";
 import { MessageBox } from "@/components/common/message-box";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -26,34 +39,24 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useStudents } from "@/hooks/use-students";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   type CanonicalPickup,
-  RECRUITMENT_COLORS,
-  type RecruitmentKind,
-  type RecruitmentSessionInput,
   calculateRecruitmentStats,
   normalizeRecruitmentSession,
   pickupPoolKind,
+  RECRUITMENT_COLORS,
+  type RecruitmentKind,
+  type RecruitmentSessionInput,
 } from "@/lib/recruitment";
 import { buildStudentIconUrl } from "@/lib/url";
-import { useMutation, useQuery } from "convex/react";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  InfoIcon,
-  PlusIcon,
-  SaveIcon,
-  Trash2Icon,
-  XIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-import { Link, useRouter } from "@/i18n/navigation";
 
-type Props = { accountId: string; sessionId?: string };
+type Props = {
+  accountId: string;
+  sessionId?: string;
+};
 type RecruitmentPickupDraft = Omit<CanonicalPickup, "charge" | "kind"> & {
   charge: NumericInputValue;
   kind?: RecruitmentKind;
@@ -68,7 +71,11 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
   });
   const sessionResult = useQuery(
     api.recruitment.getSession,
-    sessionId ? { sessionId: sessionId as Id<"recruitmentSession"> } : "skip",
+    sessionId
+      ? {
+          sessionId: sessionId as Id<"recruitmentSession">,
+        }
+      : "skip",
   );
   const createSession = useMutation(api.recruitment.createSession);
   const updateSession = useMutation(api.recruitment.updateSession);
@@ -112,7 +119,11 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
       );
       setRebateTicketsUsed(undefined);
     }
-  }, [sessionResult, accountResult, sessionId]);
+  }, [
+    sessionResult,
+    accountResult,
+    sessionId,
+  ]);
 
   const input = useMemo<RecruitmentSessionInput | null>(() => {
     if (
@@ -172,9 +183,17 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
     pickups,
   ]);
   const stats = useMemo(() => {
-    if (!input) return { value: null, error: null };
+    if (!input) {
+      return {
+        value: null,
+        error: null,
+      };
+    }
     try {
-      return { value: calculateRecruitmentStats(input), error: null };
+      return {
+        value: calculateRecruitmentStats(input),
+        error: null,
+      };
     } catch (error) {
       return {
         value: null,
@@ -226,13 +245,20 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
     }
     return t("tools.recruitment.toasts.sessionSaveFail");
   }
-  if (accountResult === undefined || (sessionId && sessionResult === undefined))
+  if (
+    accountResult === undefined ||
+    (sessionId && sessionResult === undefined)
+  ) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
-  if (sessionId && !sessionResult)
+  }
+  if (sessionId && !sessionResult) {
     return <MessageBox>{t("tools.recruitment.failedToLoad")}</MessageBox>;
+  }
 
   async function save() {
-    if (!stats.value || !input || !name.trim()) return;
+    if (!stats.value || !input || !name.trim()) {
+      return;
+    }
     try {
       if (sessionId) {
         await updateSession({
@@ -271,7 +297,9 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
   }
 
   async function remove() {
-    if (!sessionId) return;
+    if (!sessionId) {
+      return;
+    }
     try {
       await deleteSession({
         sessionId: sessionId as Id<"recruitmentSession">,
@@ -342,7 +370,9 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
                   selected={date}
                   captionLayout="dropdown"
                   onSelect={(selectedDate) => {
-                    if (selectedDate) setDate(selectedDate);
+                    if (selectedDate) {
+                      setDate(selectedDate);
+                    }
                     setDatePopoverOpen(false);
                   }}
                 />
@@ -436,7 +466,13 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
               variant="outline"
               size="sm"
               onClick={() =>
-                setPickups([...pickups, { charge: 1, studentId: "" }])
+                setPickups([
+                  ...pickups,
+                  {
+                    charge: 1,
+                    studentId: "",
+                  },
+                ])
               }
             >
               <PlusIcon />
@@ -505,7 +541,12 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
                   onValueChange={(charge) =>
                     setPickups(
                       pickups.map((item, i) =>
-                        i === index ? { ...item, charge } : item,
+                        i === index
+                          ? {
+                              ...item,
+                              charge,
+                            }
+                          : item,
                       ),
                     )
                   }
@@ -529,13 +570,21 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
       <div className="grid gap-3 rounded-md border p-4 text-sm sm:grid-cols-3">
         <div>
           {t("tools.recruitment.permanentEndCharge")}:{" "}
-          <strong style={{ color: RECRUITMENT_COLORS.base.labelTextActive }}>
+          <strong
+            style={{
+              color: RECRUITMENT_COLORS.base.labelTextActive,
+            }}
+          >
             {stats.value?.permanentEndCharge ?? "—"}
           </strong>
         </div>
         <div>
           {t("tools.recruitment.limitedEndCharge")}:{" "}
-          <strong style={{ color: RECRUITMENT_COLORS.limited.labelTextActive }}>
+          <strong
+            style={{
+              color: RECRUITMENT_COLORS.limited.labelTextActive,
+            }}
+          >
             {stats.value?.limitedEndCharge ?? "—"}
           </strong>
         </div>

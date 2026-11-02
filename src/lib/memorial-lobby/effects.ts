@@ -1,9 +1,5 @@
 import type { Spine } from "@esotericsoftware/spine-pixi-v7";
 import * as PIXI from "pixi.js-v7";
-
-import FRAGMENT from "./shaders/effect.frag.glsl";
-import VERTEX from "./shaders/effect.vert.glsl";
-
 import type {
   MemorialLobbyColorValue,
   MemorialLobbyCurve,
@@ -14,6 +10,8 @@ import type {
   MemorialLobbyMesh,
   MemorialLobbyParticleSystem,
 } from "@/lib/game-data/contract";
+import FRAGMENT from "./shaders/effect.frag.glsl";
+import VERTEX from "./shaders/effect.vert.glsl";
 
 /**
  * The effects of a memorial lobby: Unity particle systems simulated here and
@@ -22,7 +20,12 @@ import type {
  * distorted by scrolling textures, tinted by an HDR color.
  */
 
-type Color = [number, number, number, number];
+type Color = [
+  number,
+  number,
+  number,
+  number,
+];
 
 // Curve slopes at or beyond this are steps.
 const STEP = 1e8;
@@ -163,15 +166,28 @@ function colorAt(value: MemorialLobbyColorValue, t: number, r: number): Color {
   return gradientAt(value.randomGradient, r);
 }
 
-type Vec3 = [number, number, number];
+type Vec3 = [
+  number,
+  number,
+  number,
+];
 
 /** Rotation by Euler angles in degrees, in Unity's order (z, then x, then y). */
 function eulerMatrix([x, y, z]: Vec3): number[] {
   const rad = Math.PI / 180;
 
-  const [cx, sx] = [Math.cos(x * rad), Math.sin(x * rad)];
-  const [cy, sy] = [Math.cos(y * rad), Math.sin(y * rad)];
-  const [cz, sz] = [Math.cos(z * rad), Math.sin(z * rad)];
+  const [cx, sx] = [
+    Math.cos(x * rad),
+    Math.sin(x * rad),
+  ];
+  const [cy, sy] = [
+    Math.cos(y * rad),
+    Math.sin(y * rad),
+  ];
+  const [cz, sz] = [
+    Math.cos(z * rad),
+    Math.sin(z * rad),
+  ];
 
   return [
     cy * cz + sy * sx * sz,
@@ -196,7 +212,11 @@ const length3 = (v: Vec3) => Math.hypot(v[0], v[1], v[2]);
 
 const normalize3 = (v: Vec3): Vec3 => {
   const l = length3(v) || 1;
-  return [v[0] / l, v[1] / l, v[2] / l];
+  return [
+    v[0] / l,
+    v[1] / l,
+    v[2] / l,
+  ];
 };
 
 function randomUnit(): Vec3 {
@@ -204,7 +224,11 @@ function randomUnit(): Vec3 {
   const a = Math.random() * Math.PI * 2;
   const r = Math.sqrt(1 - z * z);
 
-  return [r * Math.cos(a), r * Math.sin(a), z];
+  return [
+    r * Math.cos(a),
+    r * Math.sin(a),
+    z,
+  ];
 }
 
 // Unity's default gravity, in world units per second squared.
@@ -233,10 +257,18 @@ type Particle = {
   velocity: Vec3;
   age: number;
   lifetime: number;
-  size: [number, number];
+  size: [
+    number,
+    number,
+  ];
   rotation: number;
   /** Rotations around x and y, for 3D particles (radians). */
-  tilt: [number, number] | null;
+  tilt:
+    | [
+        number,
+        number,
+      ]
+    | null;
   /** -1 for particles that turn the other way. */
   spin: number;
   color: Color;
@@ -255,7 +287,16 @@ class ParticleSystem {
   private playing = false;
 
   /** The effect's current space → scene transform, for world-space emission. */
-  current: number[] = [1, 0, 0, 0, 0, 1, 0, 0];
+  current: number[] = [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+  ];
 
   constructor(readonly ps: MemorialLobbyParticleSystem) {}
 
@@ -453,15 +494,33 @@ class ParticleSystem {
       spin: flipped ? -1 : 1,
       color: colorAt(ps.start.color, t, random[R.Color]),
       random,
-      frozen: ps.worldSpace ? [...this.current] : null,
+      frozen: ps.worldSpace
+        ? [
+            ...this.current,
+          ]
+        : null,
     };
   }
 
   /** A point on the emitter shape and the direction particles leave it in. */
-  private shapePoint(): { position: Vec3; direction: Vec3 } {
+  private shapePoint(): {
+    position: Vec3;
+    direction: Vec3;
+  } {
     const shape = this.ps.shape;
     if (!shape) {
-      return { position: [0, 0, 0], direction: [0, 0, 1] };
+      return {
+        position: [
+          0,
+          0,
+          0,
+        ],
+        direction: [
+          0,
+          0,
+          1,
+        ],
+      };
     }
 
     const radius = shape.radius;
@@ -484,7 +543,11 @@ class ParticleSystem {
 
         const r = radius * (inner + (1 - inner) * Math.cbrt(Math.random()));
 
-        position = [dir[0] * r, dir[1] * r, dir[2] * r];
+        position = [
+          dir[0] * r,
+          dir[1] * r,
+          dir[2] * r,
+        ];
         direction = dir;
 
         break;
@@ -497,7 +560,10 @@ class ParticleSystem {
           inner * inner + (1 - inner * inner) * Math.random(),
         );
 
-        const [cx, cy] = [Math.cos(arc), Math.sin(arc)];
+        const [cx, cy] = [
+          Math.cos(arc),
+          Math.sin(arc),
+        ];
 
         const spread = Math.sin((shape.angle * Math.PI) / 180) * r;
 
@@ -507,7 +573,11 @@ class ParticleSystem {
           Math.cos((shape.angle * Math.PI) / 180),
         ]);
 
-        position = [cx * r * radius, cy * r * radius, 0];
+        position = [
+          cx * r * radius,
+          cy * r * radius,
+          0,
+        ];
 
         if (shape.type === 8 || shape.type === 9) {
           const along = Math.random() * shape.length;
@@ -530,18 +600,42 @@ class ParticleSystem {
             ? 1
             : Math.sqrt(inner * inner + (1 - inner * inner) * Math.random()));
 
-        direction = [Math.cos(arc), Math.sin(arc), 0];
-        position = [direction[0] * r, direction[1] * r, 0];
+        direction = [
+          Math.cos(arc),
+          Math.sin(arc),
+          0,
+        ];
+        position = [
+          direction[0] * r,
+          direction[1] * r,
+          0,
+        ];
 
         break;
       }
       case 12:
-        position = [(Math.random() * 2 - 1) * radius, 0, 0];
-        direction = [0, 1, 0];
+        position = [
+          (Math.random() * 2 - 1) * radius,
+          0,
+          0,
+        ];
+        direction = [
+          0,
+          1,
+          0,
+        ];
         break;
       case 18:
-        position = [Math.random() - 0.5, Math.random() - 0.5, 0];
-        direction = [0, 0, 1];
+        position = [
+          Math.random() - 0.5,
+          Math.random() - 0.5,
+          0,
+        ];
+        direction = [
+          0,
+          0,
+          1,
+        ];
         break;
       default:
         // Boxes (5, 15, 16) and anything else: inside the unit box.
@@ -550,7 +644,11 @@ class ParticleSystem {
           Math.random() - 0.5,
           Math.random() - 0.5,
         ];
-        direction = [0, 0, 1];
+        direction = [
+          0,
+          0,
+          1,
+        ];
     }
 
     if (shape.sphericalDirection > 0) {
@@ -620,7 +718,14 @@ class ParticleSystem {
 
     const gravity = valueAt(ps.start.gravity, t, r[R.Force]);
     if (gravity) {
-      const g = this.toLocal([0, GRAVITY * gravity, 0], true);
+      const g = this.toLocal(
+        [
+          0,
+          GRAVITY * gravity,
+          0,
+        ],
+        true,
+      );
 
       p.velocity = [
         p.velocity[0] + g[0] * dt,
@@ -646,7 +751,9 @@ class ParticleSystem {
       ];
     }
 
-    let velocity: Vec3 = [...p.velocity];
+    let velocity: Vec3 = [
+      ...p.velocity,
+    ];
     let speedModifier = 1;
 
     const v = ps.velocity;
@@ -751,7 +858,11 @@ class ParticleSystem {
       p.rotation += valueAt(ps.rotation, t, r[R.RotationSpeed]) * p.spin * dt;
     }
 
-    (p as Particle & { lastVelocity?: Vec3 }).lastVelocity = velocity;
+    (
+      p as Particle & {
+        lastVelocity?: Vec3;
+      }
+    ).lastVelocity = velocity;
   }
 }
 
@@ -772,7 +883,10 @@ type MaterialSetup = {
   redShading: boolean;
   /** The particles' alpha counts (`_Vertex_Alpha_Use`, on unless a material says). */
   vertexAlpha: boolean;
-  distortPower: [number, number];
+  distortPower: [
+    number,
+    number,
+  ];
   distortMain: boolean;
   distortMask: boolean;
   customData: CustomDataUse;
@@ -822,8 +936,16 @@ enum CustomDataUse {
 
 type TextureSlot = {
   texture: PIXI.Texture;
-  st: [number, number, number, number];
-  speed: [number, number];
+  st: [
+    number,
+    number,
+    number,
+    number,
+  ];
+  speed: [
+    number,
+    number,
+  ];
   /** Data (noise, masks) rather than sRGB color. */
   linear: boolean;
   /** No alpha channel: brightness is opacity (most effect textures). */
@@ -840,7 +962,10 @@ const MAIN_TEXTURES = [
   "_FX_TEX_FocusLine",
 ];
 
-const MASK_TEXTURES = ["_Tex_Mask", "_B"];
+const MASK_TEXTURES = [
+  "_Tex_Mask",
+  "_B",
+];
 
 const DISTORT_TEXTURES = [
   "_Tex_Distort",
@@ -867,13 +992,24 @@ function materialSetup(
     const t = material.textures[name];
 
     // Shaders that don't tile their main texture leave its scale at 0.
-    const [sx, sy] = t.scale[0] === 0 && t.scale[1] === 0 ? [1, 1] : t.scale;
+    const [sx, sy] =
+      t.scale[0] === 0 && t.scale[1] === 0
+        ? [
+            1,
+            1,
+          ]
+        : t.scale;
 
     return {
       texture: textures.get(t.texture) as PIXI.Texture,
       linear: !!t.linear,
       opaque: !!t.opaque,
-      st: [sx, sy, t.offset[0], t.offset[1]],
+      st: [
+        sx,
+        sy,
+        t.offset[0],
+        t.offset[1],
+      ],
       speed: [
         material.floats[`_${speed}_Speed_X`] ?? 0,
         material.floats[`_${speed}_Speed_Y`] ?? 0,
@@ -896,7 +1032,12 @@ function materialSetup(
 
   const base = colors._Color ??
     colors._TintColor ??
-    colors._MainColor ?? [1, 1, 1, 1];
+    colors._MainColor ?? [
+      1,
+      1,
+      1,
+      1,
+    ];
 
   const multiply = floats._Multiply ?? 1;
 
@@ -1005,12 +1146,36 @@ class EffectDisplay {
       uMain: tex(material.main),
       uMask: tex(material.mask),
       uDistort: tex(material.distort),
-      uMainST: material.main?.st ?? [1, 1, 0, 0],
-      uMaskST: material.mask?.st ?? [1, 1, 0, 0],
-      uDistortST: material.distort?.st ?? [1, 1, 0, 0],
-      uMainSpeed: material.main?.speed ?? [0, 0],
-      uMaskSpeed: material.mask?.speed ?? [0, 0],
-      uDistortSpeed: material.distort?.speed ?? [0, 0],
+      uMainST: material.main?.st ?? [
+        1,
+        1,
+        0,
+        0,
+      ],
+      uMaskST: material.mask?.st ?? [
+        1,
+        1,
+        0,
+        0,
+      ],
+      uDistortST: material.distort?.st ?? [
+        1,
+        1,
+        0,
+        0,
+      ],
+      uMainSpeed: material.main?.speed ?? [
+        0,
+        0,
+      ],
+      uMaskSpeed: material.mask?.speed ?? [
+        0,
+        0,
+      ],
+      uDistortSpeed: material.distort?.speed ?? [
+        0,
+        0,
+      ],
       uDistortPower: material.distortPower,
       uTint: material.tint,
       uFamily: material.family,
@@ -1104,8 +1269,14 @@ function linear(
   x: number,
   y: number,
   z: number,
-): [number, number] {
-  return [m[0] * x + m[1] * y + m[2] * z, m[4] * x + m[5] * y + m[6] * z];
+): [
+  number,
+  number,
+] {
+  return [
+    m[0] * x + m[1] * y + m[2] * z,
+    m[4] * x + m[5] * y + m[6] * z,
+  ];
 }
 
 function project(
@@ -1113,14 +1284,20 @@ function project(
   x: number,
   y: number,
   z: number,
-): [number, number] {
+): [
+  number,
+  number,
+] {
   return [
     m[0] * x + m[1] * y + m[2] * z + m[3],
     m[4] * x + m[5] * y + m[6] * z + m[7],
   ];
 }
 
-export type EffectAnchor = { spine: Spine; display: PIXI.Container };
+export type EffectAnchor = {
+  spine: Spine;
+  display: PIXI.Container;
+};
 
 type LiveEffect = {
   effect: MemorialLobbyEffect;
@@ -1200,7 +1377,9 @@ export class MemorialLobbyEffectPlayer {
     const textures = new Map<string, PIXI.Texture>();
 
     await Promise.all(
-      [...files].map(async ([file, clamp]) => {
+      [
+        ...files,
+      ].map(async ([file, clamp]) => {
         try {
           const image = await new Promise<HTMLImageElement>(
             (resolve, reject) => {
@@ -1248,7 +1427,9 @@ export class MemorialLobbyEffectPlayer {
 
   /** Shows the effects active from the start and starts their particles. */
   start() {
-    this.live.forEach((_, i) => this.setActive(i, this.live[i].effect.active));
+    this.live.forEach((_, i) => {
+      this.setActive(i, this.live[i].effect.active);
+    });
   }
 
   /**
@@ -1485,12 +1666,22 @@ export class MemorialLobbyEffectPlayer {
           ]
         : p.color;
 
-      let custom = [0, 0, 0, 0];
+      let custom = [
+        0,
+        0,
+        0,
+        0,
+      ];
 
       const stream = ps.customData?.[0];
 
       if (stream && "vector" in stream) {
-        custom = [0, 1, 2, 3].map((k) =>
+        custom = [
+          0,
+          1,
+          2,
+          3,
+        ].map((k) =>
           stream.vector[k] === undefined
             ? 0
             : valueAt(stream.vector[k], t, p.random[R.Custom]),
@@ -1565,8 +1756,16 @@ export class MemorialLobbyEffectPlayer {
             const lz = mesh.positions[i * 3 + 2] * rx;
 
             const turned = turn
-              ? transform3(turn, [lx, ly, lz])
-              : [lx * cos + ly * sin, ly * cos - lx * sin, lz];
+              ? transform3(turn, [
+                  lx,
+                  ly,
+                  lz,
+                ])
+              : [
+                  lx * cos + ly * sin,
+                  ly * cos - lx * sin,
+                  lz,
+                ];
 
             [x, y] = linear(m, turned[0], turned[1], turned[2]);
           } else {
@@ -1601,7 +1800,11 @@ export class MemorialLobbyEffectPlayer {
 
       if (renderer.mode === "stretched") {
         const velocity =
-          (p as Particle & { lastVelocity?: Vec3 }).lastVelocity ?? p.velocity;
+          (
+            p as Particle & {
+              lastVelocity?: Vec3;
+            }
+          ).lastVelocity ?? p.velocity;
 
         const [ex, ey] = project(
           m,
@@ -1647,10 +1850,30 @@ export class MemorialLobbyEffectPlayer {
         cy - (ay + by) / 2 + renderer.pivot[0] * ay - renderer.pivot[1] * by;
 
       const corners = [
-        [px, py, u0, v0],
-        [px + ax, py + ay, u0 + du, v0],
-        [px + bx, py + by, u0, v0 + dv],
-        [px + ax + bx, py + ay + by, u0 + du, v0 + dv],
+        [
+          px,
+          py,
+          u0,
+          v0,
+        ],
+        [
+          px + ax,
+          py + ay,
+          u0 + du,
+          v0,
+        ],
+        [
+          px + bx,
+          py + by,
+          u0,
+          v0 + dv,
+        ],
+        [
+          px + ax + bx,
+          py + ay + by,
+          u0 + du,
+          v0 + dv,
+        ],
       ];
 
       for (const [x, y, u, w] of corners) {
@@ -1665,7 +1888,14 @@ export class MemorialLobbyEffectPlayer {
       }
 
       buf.indices.set(
-        [first, first + 1, first + 2, first + 2, first + 1, first + 3],
+        [
+          first,
+          first + 1,
+          first + 2,
+          first + 2,
+          first + 1,
+          first + 3,
+        ],
         n,
       );
 

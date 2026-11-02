@@ -53,7 +53,9 @@ export const backfillPvpEnemyPresetRecency = migrations.define({
       undefined,
     );
 
-    return { lastRecordedAt };
+    return {
+      lastRecordedAt,
+    };
   },
 });
 
@@ -78,13 +80,18 @@ export const runPvpVideoBackfill = migrations.runner([
   internal.migrations.backfillPvpStatsVideos,
 ]);
 
-const legacyPvpAggregateTraitFields = ["attackTeam", "defenseTeam"] as const;
+const legacyPvpAggregateTraitFields = [
+  "attackTeam",
+  "defenseTeam",
+] as const;
 
 export const compactPvpStatsAggregateTraits = migrations.define({
   table: "pvpStatsAggregate",
   migrateOne: async (ctx, doc) => {
     const source = doc as Record<string, unknown>;
-    const next = { ...source };
+    const next = {
+      ...source,
+    };
 
     let changed = false;
 
@@ -102,7 +109,11 @@ export const compactPvpStatsAggregateTraits = migrations.define({
       for (let index = 0; index < 4; index += 1) {
         const position = index + 1;
         const teamStudentId = (
-          team[index] as { studentId?: unknown } | undefined
+          team[index] as
+            | {
+                studentId?: unknown;
+              }
+            | undefined
         )?.studentId;
 
         const studentId =
@@ -119,11 +130,22 @@ export const compactPvpStatsAggregateTraits = migrations.define({
       }
 
       for (const [offset, field] of [
-        [4, `${specialPrefix}S1StudentId`],
-        [5, `${specialPrefix}S2StudentId`],
+        [
+          4,
+          `${specialPrefix}S1StudentId`,
+        ],
+        [
+          5,
+          `${specialPrefix}S2StudentId`,
+        ],
       ] as const) {
-        const studentId = (team[offset] as { studentId?: unknown } | undefined)
-          ?.studentId;
+        const studentId = (
+          team[offset] as
+            | {
+                studentId?: unknown;
+              }
+            | undefined
+        )?.studentId;
 
         if (typeof studentId === "string" && source[field] === undefined) {
           next[field] = studentId;
@@ -135,7 +157,9 @@ export const compactPvpStatsAggregateTraits = migrations.define({
 
       if (source[specialKeyField] === undefined && team.length >= 6) {
         next[specialKeyField] = getTeamKey(
-          team.slice(4) as Array<{ studentId?: string }>,
+          team.slice(4) as Array<{
+            studentId?: string;
+          }>,
         );
 
         changed = true;

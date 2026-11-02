@@ -1,7 +1,7 @@
-import { logger, task, type Task } from "@trigger.dev/sdk";
-import type { RawBanner, SetBannersPayload } from "./schemas";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import { db } from "../lib/db";
 import type { BannerKind } from "../lib/db/client";
+import type { RawBanner, SetBannersPayload } from "./schemas";
 
 async function getBannerListText(
   banners: RawBanner[],
@@ -148,7 +148,10 @@ export const setBannersTask: Task<
     await db.banner.deleteMany({
       where: {
         id: {
-          notIn: ["regular", "regular_jp"],
+          notIn: [
+            "regular",
+            "regular_jp",
+          ],
         },
       },
     });
@@ -185,10 +188,21 @@ export const setBannersTask: Task<
       if (banner.isFest) {
         const otherFests = await db.student.findMany({
           where: {
-            ...(banner.kind === "Global" ? { isFestGlobal: true } : {}),
-            ...(banner.kind === "JP" ? { isFestJP: true } : {}),
+            ...(banner.kind === "Global"
+              ? {
+                  isFestGlobal: true,
+                }
+              : {}),
+            ...(banner.kind === "JP"
+              ? {
+                  isFestJP: true,
+                }
+              : {}),
             id: {
-              notIn: ["hoshino_battle_tank", ...(banner.pickupStudents ?? [])],
+              notIn: [
+                "hoshino_battle_tank",
+                ...(banner.pickupStudents ?? []),
+              ],
             },
           },
         });
@@ -235,7 +249,9 @@ export const setBannersTask: Task<
           additionalThreeStarStudents: banner.additionalThreeStarStudents
             ? {
                 connect: banner.additionalThreeStarStudents.map(
-                  (studentId) => ({ id: studentId }),
+                  (studentId) => ({
+                    id: studentId,
+                  }),
                 ),
               }
             : undefined,

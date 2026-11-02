@@ -1,3 +1,10 @@
+import { BarChart3Icon, GiftIcon, IdCardIcon, SwordsIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+import {
+  GAME_SERVER_KEYS,
+  getLocalizedStudentNames,
+  TERRAINS,
+} from "@/app/[locale]/students/_lib/student-display";
 import {
   DetailField,
   DetailSection,
@@ -7,28 +14,26 @@ import type {
   StudentDetail,
   StudentDetailGift,
 } from "@/app/[locale]/students/[id]/_lib/student-detail.server";
-import {
-  GAME_SERVER_KEYS,
-  TERRAINS,
-  getLocalizedStudentNames,
-} from "@/app/[locale]/students/_lib/student-display";
 import giftAdoredImage from "@/assets/images/gift_adored.png";
 import giftLikedImage from "@/assets/images/gift_liked.png";
 import giftLovedImage from "@/assets/images/gift_loved.png";
 import { EquipmentIcon } from "@/components/common/equipment-icon";
 import { ItemCard } from "@/components/common/item-card";
 import {
+  getTerrainGrade,
   TERRAIN_ICONS,
   TERRAIN_MOOD_ICONS,
-  getTerrainGrade,
 } from "@/lib/terrain";
 import { cn } from "@/lib/utils";
-import { BarChart3Icon, GiftIcon, IdCardIcon, SwordsIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
 
-type SectionProps = { student: StudentDetail };
+type SectionProps = {
+  student: StudentDetail;
+};
 
-type Field = [label: string, value: string | null | undefined];
+type Field = [
+  label: string,
+  value: string | null | undefined,
+];
 
 const FIELD_BOX_CLASS = "bg-background rounded-lg border px-3 py-2";
 
@@ -54,15 +59,33 @@ export async function StudentProfileSection({ student }: SectionProps) {
       : `${student.lastNameJP} ${student.firstNameJP}`.trim();
 
   const basicFields: Field[] = [
-    [t("tools.students.detail.fields.age"), student.age],
-    [t("tools.students.detail.fields.birthday"), student.birthday],
-    [t("tools.students.detail.fields.height"), student.height],
+    [
+      t("tools.students.detail.fields.age"),
+      student.age,
+    ],
+    [
+      t("tools.students.detail.fields.birthday"),
+      student.birthday,
+    ],
+    [
+      t("tools.students.detail.fields.height"),
+      student.height,
+    ],
   ];
 
   const creditFields: Field[] = [
-    [t("tools.students.detail.fields.voiceActor"), student.voiceActor],
-    [t("tools.students.detail.fields.illustrator"), student.illustrator],
-    [t("tools.students.detail.fields.designer"), student.designer],
+    [
+      t("tools.students.detail.fields.voiceActor"),
+      student.voiceActor,
+    ],
+    [
+      t("tools.students.detail.fields.illustrator"),
+      student.illustrator,
+    ],
+    [
+      t("tools.students.detail.fields.designer"),
+      student.designer,
+    ],
   ];
 
   return (
@@ -230,16 +253,46 @@ export async function StudentStatsSection({ student }: SectionProps) {
   const numberFormat = new Intl.NumberFormat(await getLocale());
 
   const flatStats = [
-    ["accuracy", student.accuracy],
-    ["evasion", student.evasion],
-    ["crit", student.crit],
-    ["critDamage", `${student.critDamagePercent / 100}%`],
-    ["stability", student.stability],
-    ["range", student.range],
-    ["ammoCount", student.ammoCount],
-    ["ammoCost", student.ammoCost],
-    ["regenCost", student.regenCost],
-    ["sightRange", student.sightRange],
+    [
+      "accuracy",
+      student.accuracy,
+    ],
+    [
+      "evasion",
+      student.evasion,
+    ],
+    [
+      "crit",
+      student.crit,
+    ],
+    [
+      "critDamage",
+      `${student.critDamagePercent / 100}%`,
+    ],
+    [
+      "stability",
+      student.stability,
+    ],
+    [
+      "range",
+      student.range,
+    ],
+    [
+      "ammoCount",
+      student.ammoCount,
+    ],
+    [
+      "ammoCost",
+      student.ammoCost,
+    ],
+    [
+      "regenCost",
+      student.regenCost,
+    ],
+    [
+      "sightRange",
+      student.sightRange,
+    ],
   ] as const;
 
   return (
@@ -251,10 +304,22 @@ export async function StudentStatsSection({ student }: SectionProps) {
         <StudentGrowthStats
           rarity={student.rarity}
           stats={{
-            maxHP: [student.maxHPLevel1, student.maxHPLevel100],
-            atk: [student.atkLevel1, student.atkLevel100],
-            def: [student.defLevel1, student.defLevel100],
-            heal: [student.healLevel1, student.healLevel100],
+            maxHP: [
+              student.maxHPLevel1,
+              student.maxHPLevel100,
+            ],
+            atk: [
+              student.atkLevel1,
+              student.atkLevel100,
+            ],
+            def: [
+              student.defLevel1,
+              student.defLevel100,
+            ],
+            heal: [
+              student.healLevel1,
+              student.healLevel100,
+            ],
           }}
         />
 
@@ -278,12 +343,29 @@ export async function StudentStatsSection({ student }: SectionProps) {
   );
 }
 
-const GIFT_RARITY_ORDER = { SSR: 0, SR: 1, R: 2, N: 3 } as const;
+const GIFT_RARITY_ORDER = {
+  SSR: 0,
+  SR: 1,
+  R: 2,
+  N: 3,
+} as const;
 
 const GIFT_PREFERENCES = [
-  { key: "adored", icon: giftAdoredImage, field: "giftsAdored" },
-  { key: "loved", icon: giftLovedImage, field: "giftsLoved" },
-  { key: "liked", icon: giftLikedImage, field: "giftsLiked" },
+  {
+    key: "adored",
+    icon: giftAdoredImage,
+    field: "giftsAdored",
+  },
+  {
+    key: "loved",
+    icon: giftLovedImage,
+    field: "giftsLoved",
+  },
+  {
+    key: "liked",
+    icon: giftLikedImage,
+    field: "giftsLiked",
+  },
 ] as const;
 
 function sortGifts(gifts: StudentDetailGift[]) {

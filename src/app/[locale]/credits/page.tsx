@@ -1,11 +1,10 @@
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { getLocale, getTranslations } from "next-intl/server";
+import { LicensesContent } from "@/app/[locale]/credits/_components/licenses-content";
 
 import { StackContainer } from "@/app/[locale]/credits/_components/stack-container";
 import { Separator } from "@/components/ui/separator";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import { MainContent } from "./_components/main-content";
-
-import { LicensesContent } from "@/app/[locale]/credits/_components/licenses-content";
 
 export async function generateMetadata() {
   return getCardMetadata("credits", await getLocale());

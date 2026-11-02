@@ -1,7 +1,7 @@
-import { PVPMatchEditView } from "@/app/[locale]/pvp/_components/pvp-match-edit-view";
-import { getCardMetadata } from "@/lib/og-metadata.server";
 import { auth } from "@clerk/nextjs/server";
 import { getLocale } from "next-intl/server";
+import { PVPMatchEditView } from "@/app/[locale]/pvp/_components/pvp-match-edit-view";
+import { getCardMetadata } from "@/lib/og-metadata.server";
 import type { Id } from "~convex/dataModel";
 
 export async function generateMetadata() {

@@ -1,19 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import headpatImage from "@/assets/images/headpat.png";
-import giftAdoredImage from "@/assets/images/gift_adored.png";
-import giftLovedImage from "@/assets/images/gift_loved.png";
-import giftLikedImage from "@/assets/images/gift_liked.png";
-import giftNormalImage from "@/assets/images/gift_normal.png";
-
 import Image, { type StaticImageData } from "next/image";
-import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { LessonsTable } from "@/app/[locale]/bond/_components/lessons-table";
+import giftAdoredImage from "@/assets/images/gift_adored.png";
+import giftLikedImage from "@/assets/images/gift_liked.png";
+import giftLovedImage from "@/assets/images/gift_loved.png";
+import giftNormalImage from "@/assets/images/gift_normal.png";
+import headpatImage from "@/assets/images/headpat.png";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { LessonsTable } from "@/app/[locale]/bond/_components/lessons-table";
-import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 export type RemainingExpBreakdown = {
   headpats: number;
@@ -92,7 +90,9 @@ function BreakdownItem({
       <span className="text-lg font-bold">{count || "N/A"}</span>
       {wasted > 0 && (
         <span className="text-xs text-muted-foreground">
-          {t("tools.bond.remaining.wasted", { wasted })}
+          {t("tools.bond.remaining.wasted", {
+            wasted,
+          })}
         </span>
       )}
     </div>
@@ -136,13 +136,18 @@ export function RemainingExpBreakdownCard({
     });
 
     return result;
-  }, [expNeeded, breakdown]);
+  }, [
+    expNeeded,
+    breakdown,
+  ]);
 
   const paddedExp = useMemo(() => {
     return expNeeded % 15 === 0
       ? expNeeded
       : expNeeded + (15 - (expNeeded % 15));
-  }, [expNeeded]);
+  }, [
+    expNeeded,
+  ]);
 
   const optimalBreakdown = useMemo<RemainingExpBreakdown>(() => {
     const result: RemainingExpBreakdown = {
@@ -194,7 +199,11 @@ export function RemainingExpBreakdownCard({
     }
 
     return result;
-  }, [breakdown, expNeeded, excludeSSRGifts]);
+  }, [
+    breakdown,
+    expNeeded,
+    excludeSSRGifts,
+  ]);
 
   return (
     <Card className="w-full">
@@ -354,7 +363,9 @@ export function RemainingExpBreakdownCard({
 
             {paddedExp > expNeeded && (
               <div className="text-xs text-muted-foreground">
-                {t("tools.bond.remaining.optimalNote", { paddedExp })}
+                {t("tools.bond.remaining.optimalNote", {
+                  paddedExp,
+                })}
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
-import { GAME_SERVERS, PVP_SEASONS } from "@/lib/types";
 import { v } from "convex/values";
+import { GAME_SERVERS, PVP_SEASONS } from "@/lib/types";
 import {
   formationRow,
   formationStudentItem,

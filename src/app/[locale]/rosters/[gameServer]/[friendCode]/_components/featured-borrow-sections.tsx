@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { RosterItem } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-item";
 import type { RosterStudentData } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BORROW_SLOT_GAMEMODES, type BorrowSlotGameMode } from "@/lib/types";
-import { useTranslations } from "next-intl";
 
 export type FeaturedBorrowSectionsProps = {
   featuredStudents: Record<BorrowSlotGameMode, RosterStudentData[]>;

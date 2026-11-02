@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { CoffeeIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Button } from "@/components/ui/button";
 import { DonationList } from "./donation-list";
 
 export async function DonationBox() {

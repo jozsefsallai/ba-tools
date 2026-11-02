@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { SignInButton } from "@clerk/nextjs";
 import { Authenticated, Unauthenticated } from "convex/react";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
 export function UserCorner() {

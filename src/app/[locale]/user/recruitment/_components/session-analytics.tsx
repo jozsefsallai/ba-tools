@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStudents } from "@/hooks/use-students";
 import {
@@ -8,7 +9,6 @@ import {
   type RecruitmentStats,
 } from "@/lib/recruitment";
 import { buildStudentIconUrl } from "@/lib/url";
-import { useTranslations } from "next-intl";
 
 export function SessionAnalytics({
   stats,

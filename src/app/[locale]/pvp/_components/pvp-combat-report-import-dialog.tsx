@@ -1,5 +1,16 @@
 "use client";
 
+import { CheckIcon, LoaderCircleIcon, TriangleAlertIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  type ClipboardEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,17 +31,6 @@ import {
   PVP_SCREENSHOT_INPUT_TYPES,
   PVP_SCREENSHOT_MAX_INPUT_SIZE,
 } from "@/lib/pvp/screenshot-types";
-import { CheckIcon, LoaderCircleIcon, TriangleAlertIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import {
-  type ClipboardEvent,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { toast } from "sonner";
 
 export function PvpCombatReportImportDialog({
   children,
@@ -250,7 +250,9 @@ export function PvpCombatReportImportDialog({
             onDrop={(event) => {
               event.preventDefault();
               const file = event.dataTransfer.files[0];
-              if (file) void handleCombatReport(file);
+              if (file) {
+                void handleCombatReport(file);
+              }
             }}
             disabled={status !== "idle"}
           >
@@ -283,7 +285,9 @@ export function PvpCombatReportImportDialog({
             className="hidden"
             onChange={(event) => {
               const file = event.target.files?.[0];
-              if (file) void handleCombatReport(file);
+              if (file) {
+                void handleCombatReport(file);
+              }
               event.target.value = "";
             }}
           />

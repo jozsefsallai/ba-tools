@@ -1,11 +1,11 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import {
   getPlanaChatIdFromPath,
   pushPlanaChatPath,
   replacePlanaChatPath,
 } from "@/app/[locale]/plana-ai/_lib/chat-url";
-import { useCallback, useEffect, useState } from "react";
 import type { Id } from "~convex/dataModel";
 
 export function usePlanaChatUrl(initialChatId?: Id<"planaChat">) {
@@ -15,7 +15,9 @@ export function usePlanaChatUrl(initialChatId?: Id<"planaChat">) {
 
   useEffect(() => {
     setUrlChatId(initialChatId);
-  }, [initialChatId]);
+  }, [
+    initialChatId,
+  ]);
 
   useEffect(() => {
     function syncFromPathname() {

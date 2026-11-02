@@ -43,7 +43,9 @@ function displayFont(text: string) {
 }
 
 function nameFontSize(name: string, maxWidth = 690) {
-  const ems = [...name].reduce(
+  const ems = [
+    ...name,
+  ].reduce(
     (width, char) =>
       width + (/[\u3000-\uffef\u4e00-\u9fff]/.test(char) ? 1 : 0.56),
     0,
@@ -61,10 +63,18 @@ function barcodeBars(seed: string, count = 54) {
     hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
   }
 
-  return Array.from({ length: count }, () => {
-    hash = Math.imul(hash ^ (hash >>> 15), 2246822507) >>> 0;
-    return { width: 2 + (hash % 3), gap: 2 + ((hash >>> 4) % 3) };
-  });
+  return Array.from(
+    {
+      length: count,
+    },
+    () => {
+      hash = Math.imul(hash ^ (hash >>> 15), 2246822507) >>> 0;
+      return {
+        width: 2 + (hash % 3),
+        gap: 2 + ((hash >>> 4) % 3),
+      };
+    },
+  );
 }
 
 export function StudentOgImage({
@@ -125,7 +135,9 @@ export function StudentOgImage({
           alt=""
           width={46}
           height={46}
-          style={{ objectFit: "contain" }}
+          style={{
+            objectFit: "contain",
+          }}
         />
 
         <div
@@ -192,15 +204,28 @@ export function StudentOgImage({
                 alt=""
                 width={PORTRAIT_WIDTH - 10}
                 height={PORTRAIT_HEIGHT - 10}
-                style={{ objectFit: "cover", objectPosition: "top" }}
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "top",
+                }}
               />
             ) : null}
           </div>
 
-          <div style={{ display: "flex", gap: 6 }}>
-            {Array.from({ length: rarity }, (_, index) => (
-              <img key={index} src={starUrl} alt="" width={36} height={36} />
-            ))}
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+            }}
+          >
+            {Array.from(
+              {
+                length: rarity,
+              },
+              (_, index) => (
+                <img key={index} src={starUrl} alt="" width={36} height={36} />
+              ),
+            )}
           </div>
         </div>
 
@@ -305,7 +330,9 @@ export function StudentOgImage({
                           alt=""
                           width={MARKER_WIDTH}
                           height={29}
-                          style={{ objectFit: "contain" }}
+                          style={{
+                            objectFit: "contain",
+                          }}
                         />
                       ) : (
                         <div

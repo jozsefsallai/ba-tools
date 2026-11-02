@@ -27,7 +27,12 @@ export function getTextFromParts(parts: PlanaMessagePart[]) {
 export function messageToParts(message: PlanaChatMessage): PlanaMessagePart[] {
   return message.parts
     .filter(
-      (part): part is { type: "text"; text: string } => part.type === "text",
+      (
+        part,
+      ): part is {
+        type: "text";
+        text: string;
+      } => part.type === "text",
     )
     .map((part) => ({
       type: "text" as const,
@@ -78,9 +83,9 @@ export function turnsToMessagesAndBranches(turns: PlanaTurnDoc[]): {
   messages: PlanaChatMessage[];
   turnOrderByUserClientId: Record<string, number>;
 } {
-  const sortedTurns = [...turns].sort(
-    (left, right) => left.order - right.order,
-  );
+  const sortedTurns = [
+    ...turns,
+  ].sort((left, right) => left.order - right.order);
   const messages: PlanaChatMessage[] = [];
   const branches: PlanaBranches = {};
   const turnOrderByUserClientId: Record<string, number> = {};
@@ -133,9 +138,14 @@ export function mergeTurnPages(
 ) {
   const byId = new Map<string, PlanaTurnDoc>();
 
-  for (const turn of [...existingTurns, ...newPage]) {
+  for (const turn of [
+    ...existingTurns,
+    ...newPage,
+  ]) {
     byId.set(turn._id, turn);
   }
 
-  return [...byId.values()].sort((left, right) => left.order - right.order);
+  return [
+    ...byId.values(),
+  ].sort((left, right) => left.order - right.order);
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { GlobeIcon, InfoIcon } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,8 +17,6 @@ import {
 } from "@/components/ui/tooltip";
 import type { SupportedLocale } from "@/i18n/constants";
 import { usePathname, useRouter } from "@/i18n/navigation";
-import { GlobeIcon, InfoIcon } from "lucide-react";
-import { useLocale } from "next-intl";
 
 export function LocaleToggle() {
   const locale = useLocale();
@@ -28,7 +28,9 @@ export function LocaleToggle() {
       return;
     }
 
-    router.replace(pathname, { locale: newLocale });
+    router.replace(pathname, {
+      locale: newLocale,
+    });
   }
 
   return (

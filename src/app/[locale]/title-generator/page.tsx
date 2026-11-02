@@ -1,6 +1,6 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { TitleGeneratorView } from "@/app/[locale]/title-generator/_components/title-generator-view";
 import { getCardMetadata } from "@/lib/og-metadata.server";
-import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
   return getCardMetadata("title-generator", await getLocale());

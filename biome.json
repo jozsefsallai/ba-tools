@@ -1,16 +1,36 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!!**/public",
+      "!!**/vendor",
+      "!!**/convex/_generated",
+      "!!**/src/lib/db/generated",
+      "!**/src/components/ui",
+      "!**/docs/api/yaak.json",
+      "!**/next-env.d.ts"
+    ]
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 2,
+    "expand": "always"
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "a11y": {
-        "noSvgWithoutTitle": "off"
+        "noSvgWithoutTitle": "off",
+        "noStaticElementInteractions": "warn",
+        "useAriaPropsSupportedByRole": "warn"
       },
       "suspicious": {
         "noExplicitAny": "off",
@@ -23,22 +43,27 @@
         "useExhaustiveDependencies": "off",
         "noUnusedImports": "error"
       },
+      "style": {
+        "useBlockStatements": {
+          "level": "error",
+          "fix": "safe"
+        }
+      },
       "nursery": {
-        "useSortedClasses": "off"
+        "useTailwindSortedClasses": "off"
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
-  "files": {
-    "ignore": [
-      ".react-email",
-      ".next",
-      "node_modules/*",
-      "convex/_generated/*",
-      "public/developers/*",
-      "vendor/*"
-    ]
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
   }
 }

@@ -1,12 +1,12 @@
 import "server-only";
 
+import type { PaginationOptions } from "convex/server";
 import {
   type UserArgs,
   userMutation,
   userQuery,
 } from "@/lib/public-api/convex.server";
 import { toPage, toResource } from "@/lib/public-api/serialize";
-import type { PaginationOptions } from "convex/server";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 

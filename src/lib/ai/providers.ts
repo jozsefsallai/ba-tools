@@ -1,7 +1,7 @@
-import { type PlanaProviderId, readPlanaConfig } from "@/lib/ai/plana-config";
 import { createGateway } from "@ai-sdk/gateway";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import type { LanguageModel } from "ai";
+import { type PlanaProviderId, readPlanaConfig } from "@/lib/ai/plana-config";
 
 const DEFAULT_OPENROUTER_CHAT_MODEL = "deepseek/deepseek-v4-flash";
 const DEFAULT_GATEWAY_CHAT_MODEL = "deepseek/deepseek-v3.1";
@@ -28,7 +28,9 @@ export async function getPlanaProvider(): Promise<PlanaProvider> {
   }
 
   if (config.provider === "gateway") {
-    const gateway = createGateway({ apiKey: config.apiKey });
+    const gateway = createGateway({
+      apiKey: config.apiKey,
+    });
 
     return {
       chatModel: gateway(config?.chatModel || DEFAULT_GATEWAY_CHAT_MODEL),
@@ -37,7 +39,9 @@ export async function getPlanaProvider(): Promise<PlanaProvider> {
     };
   }
 
-  const openrouter = createOpenRouter({ apiKey: config.apiKey });
+  const openrouter = createOpenRouter({
+    apiKey: config.apiKey,
+  });
 
   return {
     chatModel: openrouter(config?.chatModel || DEFAULT_OPENROUTER_CHAT_MODEL),

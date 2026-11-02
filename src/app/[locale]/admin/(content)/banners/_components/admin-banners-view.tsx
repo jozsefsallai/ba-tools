@@ -1,9 +1,22 @@
 "use client";
 
+import {
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { CalendarClockIcon, PlusIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { AdminBannerGroup } from "@/app/[locale]/admin/(content)/banners/_components/admin-banner-group";
 import {
-  NewBannerDialog,
   groupOptionsFromEntries,
+  NewBannerDialog,
 } from "@/app/[locale]/admin/(content)/banners/_components/new-banner-dialog";
 import { NewDateRangeDialog } from "@/app/[locale]/admin/(content)/banners/_components/new-date-range-dialog";
 import { OffsetBannersDialog } from "@/app/[locale]/admin/(content)/banners/_components/offset-banners-dialog";
@@ -19,19 +32,6 @@ import {
   offsetBannerDate,
   parseBannerGroupKey,
 } from "@/lib/admin/game-banner-dates";
-import {
-  DndContext,
-  type DragEndEvent,
-  DragOverlay,
-  type DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { CalendarClockIcon, PlusIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
 
 export type AdminBannersViewProps = {
   initialBanners: AdminBanner[];
@@ -45,14 +45,20 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 },
+      activationConstraint: {
+        distance: 8,
+      },
     }),
   );
 
   const groups = useMemo(() => {
     const map = new Map<
       string,
-      { startDate: string; endDate: string; banners: AdminBanner[] }
+      {
+        startDate: string;
+        endDate: string;
+        banners: AdminBanner[];
+      }
     >();
 
     for (const banner of banners) {
@@ -78,12 +84,18 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
     }
 
     return Array.from(map.entries())
-      .map(([key, value]) => ({ key, ...value }))
+      .map(([key, value]) => ({
+        key,
+        ...value,
+      }))
       .sort(
         (a, b) =>
           new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
       );
-  }, [banners, emptyGroups]);
+  }, [
+    banners,
+    emptyGroups,
+  ]);
 
   const groupOptions = useMemo(
     () =>
@@ -94,7 +106,10 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
           endDate: g.endDate,
         })),
       ]),
-    [banners, emptyGroups],
+    [
+      banners,
+      emptyGroups,
+    ],
   );
 
   function handleBannerUpdated(updated: AdminBanner) {
@@ -114,7 +129,10 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
   }
 
   function handleBannerCreated(banner: AdminBanner) {
-    setBanners((prev) => [...prev, banner]);
+    setBanners((prev) => [
+      ...prev,
+      banner,
+    ]);
     setEmptyGroups((prev) =>
       prev.filter(
         (group) =>
@@ -134,7 +152,14 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
       return;
     }
 
-    setEmptyGroups((prev) => [...prev, { key, startDate, endDate }]);
+    setEmptyGroups((prev) => [
+      ...prev,
+      {
+        key,
+        startDate,
+        endDate,
+      },
+    ]);
     toast.success(t("tools.admin.banners.toasts.groupCreateSuccess"));
   }
 
@@ -167,7 +192,11 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
       if (wasEmpty) {
         return [
           ...without,
-          { key: newKey, startDate: newStartDate, endDate: newEndDate },
+          {
+            key: newKey,
+            startDate: newStartDate,
+            endDate: newEndDate,
+          },
         ];
       }
 
@@ -186,7 +215,10 @@ export function AdminBannersView({ initialBanners }: AdminBannersViewProps) {
   ) {
     const fromMs = new Date(fromStart).getTime();
     const updatedById = new Map(
-      updatedBanners.map((banner) => [banner.id, banner]),
+      updatedBanners.map((banner) => [
+        banner.id,
+        banner,
+      ]),
     );
     const now = Date.now();
 

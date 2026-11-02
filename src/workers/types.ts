@@ -18,7 +18,11 @@ export type InventoryManagementResult = {
   result: Array<
     Array<{
       total: number;
-      itemTypes: [number, number, number];
+      itemTypes: [
+        number,
+        number,
+        number,
+      ];
     }>
   > | null;
   error: string | null;

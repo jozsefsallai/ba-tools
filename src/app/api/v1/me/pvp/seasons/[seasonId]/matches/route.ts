@@ -1,12 +1,14 @@
+import { z } from "zod";
 import {
   createPvpMatch,
   listPvpMatches,
 } from "@/lib/public-api/resources/pvp.server";
 import { ok } from "@/lib/public-api/response";
 import { parseQuery, readJsonObject, userRoute } from "@/lib/public-api/route";
-import { z } from "zod";
 
-type Params = { seasonId: string };
+type Params = {
+  seasonId: string;
+};
 
 const querySchema = z.object({
   from: z.coerce.number().int().optional(),
@@ -16,7 +18,9 @@ const querySchema = z.object({
 export const GET = userRoute<Params>(async (req, { seasonId }, userId) => {
   return ok(
     await listPvpMatches(userId, seasonId, parseQuery(req, querySchema)),
-    { cache: "private" },
+    {
+      cache: "private",
+    },
   );
 });
 

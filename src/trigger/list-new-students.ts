@@ -1,7 +1,7 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { type Task, logger, task } from "@trigger.dev/sdk";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import type { NewStudent } from "../lib/game-data/contract";
 import { getExistingStudents } from "../lib/game-data/existing-students.server";
 import { loadMxDataSync } from "./lib/mx-data-sync";

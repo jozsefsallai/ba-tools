@@ -1,11 +1,11 @@
+import { usePaginatedQuery, useQuery } from "convex/react";
+import { useMemo } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useStudents } from "@/hooks/use-students";
 import {
   normalizeStudentSearchQuery,
   orderStudentsByFuzzyNameQuery,
 } from "@/lib/student-search-query";
-import { usePaginatedQuery, useQuery } from "convex/react";
-import { useMemo } from "react";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -20,8 +20,13 @@ export function usePVPEnemyPresetSearch(
 
   const nameResults = usePaginatedQuery(
     api.pvp.listEnemyPresets,
-    { seasonId, search: debouncedSearch },
-    { initialNumItems: 30 },
+    {
+      seasonId,
+      search: debouncedSearch,
+    },
+    {
+      initialNumItems: 30,
+    },
   );
 
   const repStudentIds = useMemo(() => {
@@ -32,12 +37,19 @@ export function usePVPEnemyPresetSearch(
     return orderStudentsByFuzzyNameQuery(students, debouncedSearch.trim())
       .ordered.slice(0, MAX_REP_STUDENTS)
       .map((student) => student.id);
-  }, [students, debouncedSearch]);
+  }, [
+    students,
+    debouncedSearch,
+  ]);
 
   const repResults = useQuery(
     api.pvp.listEnemyPresetsByStudentRep,
     repStudentIds.length > 0
-      ? { seasonId, search: debouncedSearch, studentIds: repStudentIds }
+      ? {
+          seasonId,
+          search: debouncedSearch,
+          studentIds: repStudentIds,
+        }
       : "skip",
   );
 

@@ -1,5 +1,11 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
+import { format, subDays } from "date-fns";
+import { CalendarDaysIcon, PlusIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { PVPBulkImportDialog } from "@/app/[locale]/pvp/_components/pvp-bulk-import-dialog";
 import {
   PVPMatchesList,
@@ -14,12 +20,6 @@ import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { Link } from "@/i18n/navigation";
 import { isSuperUser } from "@/lib/auth/roles";
-import { useUser } from "@clerk/nextjs";
-import { format, subDays } from "date-fns";
-import { CalendarDaysIcon, PlusIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 import type { Id } from "~convex/dataModel";
 
 export type PVPSeasonViewProps = {
@@ -40,7 +40,10 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
     try {
       await savePreferences({
         ...preferences,
-        pvp: { ...preferences.pvp, hideEmptyAgendaDays: checked },
+        pvp: {
+          ...preferences.pvp,
+          hideEmptyAgendaDays: checked,
+        },
       });
     } catch (error) {
       console.error(error);
@@ -102,14 +105,19 @@ export function PVPSeasonView({ seasonId }: PVPSeasonViewProps) {
           <div className="flex items-center gap-3 max-md:w-full max-md:flex-col max-md:items-start">
             <div>
               <h1 className="text-xl font-bold">
-                {t("tools.pvp.season.title", { name: season.name })}
+                {t("tools.pvp.season.title", {
+                  name: season.name,
+                })}
               </h1>
 
               <p className="text-sm text-muted-foreground">
                 {t("tools.pvp.seasons.number", {
                   number: season.seasonNumber,
                 })}{" "}
-                · {t("tools.pvp.seasons.server", { server: season.gameServer })}
+                ·{" "}
+                {t("tools.pvp.seasons.server", {
+                  server: season.gameServer,
+                })}
               </p>
             </div>
 

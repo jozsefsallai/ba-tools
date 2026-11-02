@@ -1,13 +1,13 @@
 "use client";
 
+import { useConvexAuth, useMutation } from "convex/react";
+import { type PropsWithChildren, useMemo } from "react";
 import { userPreferencesContext } from "@/hooks/use-preferences";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
-  type UserPreferences,
   defaultUserPreferences,
+  type UserPreferences,
 } from "@/lib/user-preferences";
-import { useConvexAuth, useMutation } from "convex/react";
-import { type PropsWithChildren, useMemo } from "react";
 import { api } from "~convex/api";
 
 export function UserPreferencesProvider({ children }: PropsWithChildren) {
@@ -48,7 +48,9 @@ export function UserPreferencesProvider({ children }: PropsWithChildren) {
     }
 
     return defaultUserPreferences;
-  }, [getPreferencesQuery]);
+  }, [
+    getPreferencesQuery,
+  ]);
 
   return (
     <userPreferencesContext.Provider

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { Fragment } from "react";
 import { useBreadcrumbs } from "@/components/providers/breadcrumbs-provider";
 import {
   Breadcrumb,
@@ -22,8 +24,6 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
-import { Fragment } from "react";
 
 export type InsetHeaderProps = {
   sticky?: boolean;

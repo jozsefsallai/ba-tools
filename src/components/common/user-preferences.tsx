@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { toast } from "sonner";
 import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import type { UserPreferences as UserPreferencesType } from "@/lib/user-preferences";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export function UserPreferences() {
   const t = useTranslations();

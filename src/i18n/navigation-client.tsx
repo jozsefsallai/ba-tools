@@ -1,15 +1,8 @@
 "use client";
 
-import { useNavigationGuardController } from "@/hooks/use-navigation-guard";
-import {
-  Link as LocaleLink,
-  getPathname,
-  useRouter as useLocaleRouter,
-} from "@/i18n/navigation-base";
-import { isHashOnlyNavigation } from "@/lib/navigation-guard";
-import { useLocale } from "next-intl";
 import NextLink from "next/link";
 import { useRouter as useNextRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import {
   type ComponentPropsWithoutRef,
   forwardRef,
@@ -17,6 +10,13 @@ import {
   useMemo,
   useRef,
 } from "react";
+import { useNavigationGuardController } from "@/hooks/use-navigation-guard";
+import {
+  getPathname,
+  Link as LocaleLink,
+  useRouter as useLocaleRouter,
+} from "@/i18n/navigation-base";
+import { isHashOnlyNavigation } from "@/lib/navigation-guard";
 
 type LinkProps = ComponentPropsWithoutRef<typeof LocaleLink>;
 
@@ -29,7 +29,11 @@ function linkHref(href: LinkProps["href"]) {
 
   if (href.query && typeof href.query === "object") {
     for (const [key, value] of Object.entries(href.query)) {
-      for (const item of Array.isArray(value) ? value : [value]) {
+      for (const item of Array.isArray(value)
+        ? value
+        : [
+            value,
+          ]) {
         query.append(key, item == null ? "" : String(item));
       }
     }
@@ -54,7 +58,11 @@ function localizeLinkPathname(
   locale: NonNullable<LinkProps["locale"]>,
 ) {
   return pathname.startsWith("/") && !pathname.startsWith("//")
-    ? getPathname({ href: pathname, locale, forcePrefix: true })
+    ? getPathname({
+        href: pathname,
+        locale,
+        forcePrefix: true,
+      })
     : pathname;
 }
 
@@ -89,7 +97,9 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
         ref.current = element;
       }
     },
-    [ref],
+    [
+      ref,
+    ],
   );
 
   const handleNavigate: NonNullable<LinkProps["onNavigate"]> = (event) => {
@@ -123,11 +133,17 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     event.preventDefault();
 
     const navigate = () => {
-      const options = { scroll, transitionTypes };
+      const options = {
+        scroll,
+        transitionTypes,
+      };
 
       if (locale != null) {
         const method = replace ? localeRouter.replace : localeRouter.push;
-        method(linkHref(href), { ...options, locale });
+        method(linkHref(href), {
+          ...options,
+          locale,
+        });
       } else {
         const method = replace ? nextRouter.replace : nextRouter.push;
         method(destination, options);
@@ -206,5 +222,9 @@ export function useRouter(): ReturnType<typeof useLocaleRouter> {
         }
       },
     };
-  }, [controller, locale, router]);
+  }, [
+    controller,
+    locale,
+    router,
+  ]);
 }

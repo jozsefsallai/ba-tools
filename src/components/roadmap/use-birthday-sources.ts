@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useStudents } from "@/hooks/use-students";
 import type { BirthdaySource } from "@/lib/roadmap/layout";
-import { useMemo } from "react";
 
 export function useBirthdaySources(): BirthdaySource[] {
   const { students } = useStudents();
@@ -19,6 +19,8 @@ export function useBirthdaySources(): BirthdaySource[] {
           isLimitedGlobal: student.isLimitedGlobal,
           birthday: student.birthday,
         })),
-    [students],
+    [
+      students,
+    ],
   );
 }

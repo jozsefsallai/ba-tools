@@ -1,3 +1,4 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import {
@@ -11,7 +12,6 @@ import {
   updateGiftInventory,
   updateGiftTarget,
 } from "@/lib/public-api/resources/gift-inventories.server";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   giftInventoryArgs,
   giftTargetCreateArgs,
@@ -43,7 +43,9 @@ export function registerGiftInventoryTools(server: McpServer) {
       title: "Get gift inventory",
       description: `One gift inventory, with its targets (students the gifts are planned for). ${GIFT_NAMES}`,
       kind: "read",
-      input: { inventoryId },
+      input: {
+        inventoryId,
+      },
     },
     ({ inventoryId }, userId) => getGiftInventory(userId, inventoryId),
   );
@@ -69,7 +71,10 @@ export function registerGiftInventoryTools(server: McpServer) {
       description:
         "Change a gift inventory. Only the fields sent change; `gifts` replaces the whole list.",
       kind: "update",
-      input: { inventoryId, ...convexToZodShape(giftInventoryArgs) },
+      input: {
+        inventoryId,
+        ...convexToZodShape(giftInventoryArgs),
+      },
     },
     ({ inventoryId, ...patch }, userId) =>
       updateGiftInventory(userId, inventoryId, patch),
@@ -82,7 +87,9 @@ export function registerGiftInventoryTools(server: McpServer) {
       title: "Delete gift inventory",
       description: "Permanently delete a gift inventory and its targets.",
       kind: "delete",
-      input: { inventoryId },
+      input: {
+        inventoryId,
+      },
     },
     ({ inventoryId }, userId) => deleteGiftInventory(userId, inventoryId),
   );
@@ -94,7 +101,10 @@ export function registerGiftInventoryTools(server: McpServer) {
       title: "Get gift target",
       description: `One target of a gift inventory. ${GIFT_NAMES}`,
       kind: "read",
-      input: { inventoryId, targetId },
+      input: {
+        inventoryId,
+        targetId,
+      },
     },
     ({ inventoryId, targetId }, userId) =>
       getGiftTarget(userId, inventoryId, targetId),
@@ -108,7 +118,10 @@ export function registerGiftInventoryTools(server: McpServer) {
       description:
         "Plan gifts for a student: their current and target bond EXP, and the gifts and gift boxes to give.",
       kind: "create",
-      input: { inventoryId, ...convexToZodShape(giftTargetCreateArgs) },
+      input: {
+        inventoryId,
+        ...convexToZodShape(giftTargetCreateArgs),
+      },
     },
     ({ inventoryId, ...input }, userId) =>
       createGiftTarget(userId, inventoryId, input),
@@ -139,7 +152,10 @@ export function registerGiftInventoryTools(server: McpServer) {
       title: "Delete gift target",
       description: "Permanently delete a gift target.",
       kind: "delete",
-      input: { inventoryId, targetId },
+      input: {
+        inventoryId,
+        targetId,
+      },
     },
     ({ inventoryId, targetId }, userId) =>
       deleteGiftTarget(userId, inventoryId, targetId),

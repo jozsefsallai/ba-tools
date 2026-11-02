@@ -1,16 +1,46 @@
 export const STUDENT_MAX_LEVEL = 90;
 
 const TRANSCENDENCE_TABLE = {
-  atk: [0, 1000, 1200, 1400, 1700],
-  maxHP: [0, 500, 700, 900, 1400],
-  heal: [0, 750, 1000, 1200, 1500],
+  atk: [
+    0,
+    1000,
+    1200,
+    1400,
+    1700,
+  ],
+  maxHP: [
+    0,
+    500,
+    700,
+    900,
+    1400,
+  ],
+  heal: [
+    0,
+    750,
+    1000,
+    1200,
+    1500,
+  ],
 } as const;
 
 export type StudentGrowthStats = {
-  maxHP: [level1: number, level100: number];
-  atk: [level1: number, level100: number];
-  def: [level1: number, level100: number];
-  heal: [level1: number, level100: number];
+  maxHP: [
+    level1: number,
+    level100: number,
+  ];
+  atk: [
+    level1: number,
+    level100: number,
+  ];
+  def: [
+    level1: number,
+    level100: number,
+  ];
+  heal: [
+    level1: number,
+    level100: number,
+  ];
 };
 
 export type StudentStatValues = Record<keyof StudentGrowthStats, number>;
@@ -30,7 +60,10 @@ function getTranscendence(
 
 function getStatForLevel(
   level: number,
-  [level1, level100]: [number, number],
+  [level1, level100]: [
+    number,
+    number,
+  ],
   transcendence = 1,
 ) {
   const scale = (level - 1) / 99;

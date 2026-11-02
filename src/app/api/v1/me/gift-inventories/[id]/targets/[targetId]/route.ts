@@ -6,10 +6,15 @@ import {
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
 
-type Params = { id: string; targetId: string };
+type Params = {
+  id: string;
+  targetId: string;
+};
 
 export const GET = userRoute<Params>(async (_req, { id, targetId }, userId) => {
-  return ok(await getGiftTarget(userId, id, targetId), { cache: "private" });
+  return ok(await getGiftTarget(userId, id, targetId), {
+    cache: "private",
+  });
 });
 
 export const PATCH = userRoute<Params>(
@@ -26,6 +31,8 @@ export const PATCH = userRoute<Params>(
 export const DELETE = userRoute<Params>(
   async (_req, { id, targetId }, userId) => {
     await deleteGiftTarget(userId, id, targetId);
-    return new Response(null, { status: 204 });
+    return new Response(null, {
+      status: 204,
+    });
   },
 );

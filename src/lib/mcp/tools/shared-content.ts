@@ -1,3 +1,5 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import {
   getPublicRoster,
@@ -5,8 +7,6 @@ import {
   getPublicTimelineGroup,
 } from "@/lib/public-api/resources/shared-content.server";
 import { GAME_SERVERS } from "@/lib/types";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
 
 export function registerSharedContentTools(server: McpServer) {
   defineTool(
@@ -34,7 +34,9 @@ export function registerSharedContentTools(server: McpServer) {
       title: "Get public timeline",
       description: "A timeline (skill rotation) that its owner made public.",
       kind: "read",
-      input: { timelineId: idInput("Timeline id.") },
+      input: {
+        timelineId: idInput("Timeline id."),
+      },
     },
     ({ timelineId }) => getPublicTimeline(timelineId),
   );
@@ -46,7 +48,9 @@ export function registerSharedContentTools(server: McpServer) {
       title: "Get public timeline group",
       description: "A group of timelines that its owner made public.",
       kind: "read",
-      input: { timelineGroupId: idInput("Timeline group id.") },
+      input: {
+        timelineGroupId: idInput("Timeline group id."),
+      },
     },
     ({ timelineGroupId }) => getPublicTimelineGroup(timelineGroupId),
   );

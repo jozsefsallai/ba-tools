@@ -36,7 +36,13 @@ function toRequiredZod(validator: GenericValidator): z.ZodType {
       return z.record(z.string(), toZod(validator.value));
     case "union": {
       const [first, second, ...rest] = validator.members.map(toZod);
-      return second ? z.union([first, second, ...rest]) : first;
+      return second
+        ? z.union([
+            first,
+            second,
+            ...rest,
+          ])
+        : first;
     }
     default:
       throw new Error(`Unsupported Convex validator: ${validator.kind}`);
@@ -47,6 +53,9 @@ export function convexToZodShape<C extends PropertyValidators>(
   fields: C,
 ): { [K in keyof C]: z.ZodType<Infer<C[K]>> } {
   return Object.fromEntries(
-    Object.entries(fields).map(([key, validator]) => [key, toZod(validator)]),
+    Object.entries(fields).map(([key, validator]) => [
+      key,
+      toZod(validator),
+    ]),
   ) as { [K in keyof C]: z.ZodType<Infer<C[K]>> };
 }

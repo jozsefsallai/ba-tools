@@ -1,18 +1,18 @@
-import { type Task, logger, task } from "@trigger.dev/sdk";
+import { logger, type Task, task } from "@trigger.dev/sdk";
 import { db } from "../lib/db";
 import type { SkillType } from "../lib/db/client";
 import {
+  fetchStudentsData,
+  fetchStudentsDataJP,
+  fetchStudentsDataKR,
+  fetchStudentsDataTH,
+  fetchStudentsDataTW,
   type NameOverride,
   type RawEffect,
   type RawStudentData,
   type RawStudentSkillsData,
   type SeedStudentInput,
   StudentLimitedType,
-  fetchStudentsData,
-  fetchStudentsDataJP,
-  fetchStudentsDataKR,
-  fetchStudentsDataTH,
-  fetchStudentsDataTW,
 } from "./lib/common";
 import { type SeedStudentsPayload, seedStudentsPayload } from "./schemas";
 
@@ -341,7 +341,11 @@ type StudentNames = {
   lastNameTH: string;
 };
 
-const EMPTY_NAME: NameOverride = { name: "", firstName: "", lastName: "" };
+const EMPTY_NAME: NameOverride = {
+  name: "",
+  firstName: "",
+  lastName: "",
+};
 
 function namesFromOverrides(data: SeedStudentInput): StudentNames {
   const fallback: NameOverride = {
@@ -565,7 +569,12 @@ async function seedStudents(provided?: SeedStudentInput[]) {
             id: data.PathName,
           },
           data:
-            provided && baseVariantId ? { ...fields, baseVariantId } : fields,
+            provided && baseVariantId
+              ? {
+                  ...fields,
+                  baseVariantId,
+                }
+              : fields,
         })
       : await db.student.create({
           data: {

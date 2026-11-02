@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { useRoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +14,15 @@ import {
 } from "@/components/ui/dialog";
 import { DAY_MS } from "@/lib/roadmap/constants";
 import type { EditableRoadmapItem } from "@/lib/roadmap/types";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 export type PushPrompt = {
   item: EditableRoadmapItem;
   offsetMs: number;
   categoryItems: EditableRoadmapItem[];
-  subtype: { label: string; items: EditableRoadmapItem[] } | null;
+  subtype: {
+    label: string;
+    items: EditableRoadmapItem[];
+  } | null;
 };
 
 export function PushLaterDialog({
@@ -42,7 +45,9 @@ export function PushLaterDialog({
   const days = prompt.offsetMs / DAY_MS;
   const sign = prompt.offsetMs > 0 ? "+" : "−";
   const offset = Number.isInteger(days)
-    ? `${sign}${labels.t("static.roadmap.duration", { count: Math.abs(days) })}`
+    ? `${sign}${labels.t("static.roadmap.duration", {
+        count: Math.abs(days),
+      })}`
     : `${sign}${Math.round(Math.abs(prompt.offsetMs) / 3_600_000)}h`;
 
   const confirm = async (items: EditableRoadmapItem[]) => {

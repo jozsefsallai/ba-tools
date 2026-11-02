@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { type PropsWithChildren, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,12 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  studentStorage,
   type StudentStorageItem,
+  studentStorage,
 } from "@/lib/storage/students";
-import { useTranslations } from "next-intl";
-import { useRef, useState, type PropsWithChildren } from "react";
-import { toast } from "sonner";
 
 export type ImportStudentDataDialogProps = PropsWithChildren;
 
@@ -54,7 +54,9 @@ export function ImportStudentDataDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("common.dialogs.importStudentData.title")}</DialogTitle>
+          <DialogTitle>
+            {t("common.dialogs.importStudentData.title")}
+          </DialogTitle>
           <DialogDescription>
             {t("common.dialogs.importStudentData.description")}
           </DialogDescription>

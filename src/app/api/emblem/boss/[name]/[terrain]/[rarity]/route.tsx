@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { BossEmblem } from "@/app/api/emblem/_components/boss-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import {
@@ -9,7 +10,6 @@ import {
   makeEmblem,
   processTrailingPart,
 } from "@/lib/emblems.server";
-import { NextResponse } from "next/server";
 
 type RouteParams = {
   name: string;
@@ -49,7 +49,11 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<RouteParams> },
+  {
+    params,
+  }: {
+    params: Promise<RouteParams>;
+  },
 ) {
   const {
     name: rawName,

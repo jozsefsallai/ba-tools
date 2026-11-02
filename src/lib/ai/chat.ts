@@ -1,26 +1,29 @@
-import { PLANA_CHARACTER_BIBLE } from "./plana";
+import type { LanguageModel } from "ai";
 
 import {
-  Output,
-  type UIMessage,
   convertToModelMessages,
   generateText,
+  Output,
   streamText,
+  type UIMessage,
 } from "ai";
 import { z } from "zod";
+import { getPlanaProvider } from "@/lib/ai/providers";
 import { dialogueCollection, summaryCollection } from "./chroma";
 import { LORE_CLASSIFIER_PROMPT } from "./lore-classifier";
-
-import { getPlanaProvider } from "@/lib/ai/providers";
-import type { LanguageModel } from "ai";
+import { PLANA_CHARACTER_BIBLE } from "./plana";
 
 async function queryVectorStores(query: string) {
   const summaryContext = await summaryCollection.query({
-    queryTexts: [query],
+    queryTexts: [
+      query,
+    ],
   });
 
   const dialogueContext = await dialogueCollection.query({
-    queryTexts: [query],
+    queryTexts: [
+      query,
+    ],
   });
 
   return {
@@ -90,7 +93,11 @@ function getTextFromMessage(message: UIMessage) {
 }
 
 function getLatestUserMessage(messages: UIMessage[]) {
-  return [...messages].reverse().find((message) => message.role === "user");
+  return [
+    ...messages,
+  ]
+    .reverse()
+    .find((message) => message.role === "user");
 }
 
 function toTextOnlyMessages(messages: UIMessage[]) {
@@ -116,7 +123,9 @@ function getSafeTimeZone(timeZone: string | undefined) {
   }
 
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone }).format();
+    new Intl.DateTimeFormat("en-US", {
+      timeZone,
+    }).format();
     return timeZone;
   } catch {
     return "UTC";
@@ -175,7 +184,7 @@ export async function streamPlanaResponse(
   );
 
   const context =
-    needsLoreContext && !!question ? await queryVectorStores(question) : null;
+    needsLoreContext && question ? await queryVectorStores(question) : null;
   const formattedContext = context ? formatContextForPrompt(context) : "";
 
   const modelMessages = await convertToModelMessages(
@@ -185,7 +194,9 @@ export async function streamPlanaResponse(
   const system = [
     PLANA_CHARACTER_BIBLE,
     formatSenseiIdentityPrompt(options.senseiName),
-    formatCurrentDateTimePrompt({ timeZone: options.timeZone }),
+    formatCurrentDateTimePrompt({
+      timeZone: options.timeZone,
+    }),
     formattedContext,
   ]
     .filter(Boolean)

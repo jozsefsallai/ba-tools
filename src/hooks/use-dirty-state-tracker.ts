@@ -1,7 +1,8 @@
 import { useAuth } from "@clerk/nextjs";
+import type React from "react";
 import {
-  type SetStateAction,
   createContext,
+  type SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -9,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import type React from "react";
 
 export type DirtyStateTrackerProviderOptions = {
   loggedInOnly?: boolean;
@@ -88,7 +88,7 @@ function equals<T>(a: T, b: T): boolean {
 
     for (let i = 0; i < keysA.length; i++) {
       const key = keysA[i];
-      if (!Object.prototype.hasOwnProperty.call(b, key)) {
+      if (!Object.hasOwn(b, key)) {
         return false;
       }
 
@@ -151,8 +151,15 @@ export function useDirtyStateTracker(
       state.lastSavedValue = state.currentValue;
       markDirty(key, false);
     }
-  }, [enabled, isSignedIn, markDirty, options.loggedInOnly, stateRegistry]);
+  }, [
+    enabled,
+    isSignedIn,
+    markDirty,
+    options.loggedInOnly,
+    stateRegistry,
+  ]);
 
+  // biome-ignore-start lint/correctness/useHookAtTopLevel: useSaveableState is a hook factory; its hooks run when the returned hook is called from a component.
   const useSaveableState = useCallback(
     <T>(
       initialState: T | (() => T),
@@ -216,7 +223,12 @@ export function useDirtyStateTracker(
             return resolvedValue;
           });
         },
-        [stateKey, equalityFn, markDirty, stateRegistry],
+        [
+          stateKey,
+          equalityFn,
+          markDirty,
+          stateRegistry,
+        ],
       );
 
       const setValueUnchecked = useCallback(
@@ -238,13 +250,27 @@ export function useDirtyStateTracker(
             return resolvedValue;
           });
         },
-        [stateKey, markDirty, stateRegistry],
+        [
+          stateKey,
+          markDirty,
+          stateRegistry,
+        ],
       );
 
-      return [value, setSaveableValue, setValueUnchecked];
+      return [
+        value,
+        setSaveableValue,
+        setValueUnchecked,
+      ];
     },
-    [stateRegistry, markDirty, tickForceUpdate, mounted],
+    [
+      stateRegistry,
+      markDirty,
+      tickForceUpdate,
+      mounted,
+    ],
   );
+  // biome-ignore-end lint/correctness/useHookAtTopLevel: see above
 
   useEffect(() => {
     setMounted(true);

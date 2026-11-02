@@ -1,5 +1,10 @@
 "use client";
 
+import { format } from "date-fns";
+import { CheckIcon, CopyIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { FeaturedBorrowSections } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/featured-borrow-sections";
 import { RosterItem } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-item";
 import { RosterOwnerActions } from "@/app/[locale]/rosters/[gameServer]/[friendCode]/_components/roster-owner-actions";
@@ -38,11 +43,6 @@ import {
   type UELevel,
 } from "@/lib/types";
 import { buildStudentPortraitUrl } from "@/lib/url";
-import { format } from "date-fns";
-import { CheckIcon, CopyIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { api } from "~convex/api";
 
 export type RosterViewProps = {
@@ -108,7 +108,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
     }
 
     return map;
-  }, [students]);
+  }, [
+    students,
+  ]);
 
   const studentRep = useMemo(() => {
     if (query.status !== "success" || !query.data || !query.data.studentRepId) {
@@ -116,7 +118,10 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
     }
 
     return studentMap[query.data.studentRepId];
-  }, [query.status, studentMap]);
+  }, [
+    query.status,
+    studentMap,
+  ]);
 
   const rosterStudents = useMemo<RosterStudentData[]>(() => {
     if (query.status !== "success" || !query.data) {
@@ -129,7 +134,10 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
         student: studentMap[rs.studentId],
       }))
       .filter((rs) => rs.student !== undefined);
-  }, [query.status, studentMap]);
+  }, [
+    query.status,
+    studentMap,
+  ]);
 
   const filteredRosterStudents = useMemo(() => {
     return rosterStudents.filter((rs) => {
@@ -240,7 +248,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return filteredRosterStudents;
     }
 
-    const students = [...filteredRosterStudents];
+    const students = [
+      ...filteredRosterStudents,
+    ];
 
     switch (sortOption) {
       case "nameAsc":
@@ -282,7 +292,10 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
     }
 
     return students;
-  }, [filteredRosterStudents, sortOption]);
+  }, [
+    filteredRosterStudents,
+    sortOption,
+  ]);
 
   const featuredStudents = useMemo<
     Record<BorrowSlotGameMode, RosterStudentData[]>
@@ -297,7 +310,9 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
     };
 
     return featured;
-  }, [rosterStudents]);
+  }, [
+    rosterStudents,
+  ]);
 
   async function copyFriendCodeToClipboard() {
     try {

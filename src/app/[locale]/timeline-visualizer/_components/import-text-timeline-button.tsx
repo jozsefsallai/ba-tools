@@ -1,5 +1,10 @@
 "use client";
 
+import { CircleHelpIcon, UploadIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
+import { v4 as uuid } from "uuid";
 import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,11 +20,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { parseTimelineFromText } from "@/lib/timeline-text-format";
-import { CircleHelpIcon, UploadIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import { toast } from "sonner";
-import { v4 as uuid } from "uuid";
 
 export type ImportTextTimelineButtonProps = {
   onImport: (items: TimelineItem[]) => void;

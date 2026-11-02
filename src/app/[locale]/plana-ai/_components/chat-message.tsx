@@ -1,13 +1,5 @@
 "use client";
 
-import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import {
   ChevronLeftIcon,
@@ -17,6 +9,14 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import ReactMarkdown from "react-markdown";
+import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { stripPlanaMetadata } from "./message-utils";
 
 type PlanaChatMessage = UIMessage<unknown, Record<string, never>>;

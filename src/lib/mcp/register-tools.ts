@@ -1,3 +1,4 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerAccountTools } from "@/lib/mcp/tools/account";
 import { registerFormationTools } from "@/lib/mcp/tools/formations";
 import { registerGameDataTools } from "@/lib/mcp/tools/game-data";
@@ -9,7 +10,6 @@ import { registerRosterTools } from "@/lib/mcp/tools/rosters";
 import { registerSharedContentTools } from "@/lib/mcp/tools/shared-content";
 import { registerTimelineGroupTools } from "@/lib/mcp/tools/timeline-groups";
 import { registerTimelineTools } from "@/lib/mcp/tools/timelines";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 export function registerMcpTools(server: McpServer) {
   registerGameDataTools(server);
