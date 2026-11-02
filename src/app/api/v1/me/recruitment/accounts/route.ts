@@ -1,36 +1,16 @@
 import {
-  type UserArgs,
-  userMutation,
-  userQuery,
-} from "@/lib/public-api/convex.server";
+  createRecruitmentAccount,
+  listRecruitmentAccounts,
+} from "@/lib/public-api/resources/recruitment.server";
 import { ok } from "@/lib/public-api/response";
 import { readJsonObject, userRoute } from "@/lib/public-api/route";
-import { toResource } from "@/lib/public-api/serialize";
-import { api } from "~convex/api";
 
 export const GET = userRoute(async (_req, _params, userId) => {
-  return ok(
-    toResource(await userQuery(userId, api.recruitment.getOwnAccounts, {})),
-    { cache: "private" },
-  );
+  return ok(await listRecruitmentAccounts(userId), { cache: "private" });
 });
 
 export const POST = userRoute(async (req, _params, userId) => {
-  const body = await readJsonObject(req);
-
-  const accountId = await userMutation(
-    userId,
-    api.recruitment.createAccount,
-    body as UserArgs<typeof api.recruitment.createAccount>,
-  );
-
-  const { account, sessions } = await userQuery(
-    userId,
-    api.recruitment.getAccount,
-    { accountId },
-  );
-
-  return ok(toResource({ ...account, sessions }), {
+  return ok(await createRecruitmentAccount(userId, await readJsonObject(req)), {
     cache: "private",
     status: 201,
   });

@@ -31,8 +31,8 @@ export const config = {
     // - /api, /mcp, /developers (yaakdoc API docs), /_next, /_vercel
     // - any path with a dot (static files in public/, favicon, etc.)
     "/((?!api|mcp|developers|_next|_vercel|.*\\..*).*)",
-    // Always run Clerk for API routes
-    "/(api|trpc)(.*)",
+    // Always run Clerk for API routes and the MCP server
+    "/(api|trpc|mcp)(.*)",
     "/__clerk/(.*)",
   ],
 };

@@ -2,7 +2,7 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { invalid, notFound } from "./lib/errors";
-import { formationRow, formationStudentItem } from "./schema";
+import { formationArgs } from "./lib/validators";
 
 export const getOwn = authenticatedQuery({
   args: {},
@@ -40,23 +40,7 @@ export const searchOwn = authenticatedQuery({
 });
 
 export const create = authenticatedMutation({
-  args: {
-    name: v.optional(v.string()),
-    type: v.optional(
-      v.union(
-        v.literal("normal"),
-        v.literal("finalRestrictionRelease"),
-        v.literal("tacticalRelay"),
-      ),
-    ),
-    strikers: v.array(formationStudentItem),
-    specials: v.array(formationStudentItem),
-    rows: v.optional(v.array(formationRow)),
-    rowGap: v.optional(v.number()),
-    displayOverline: v.optional(v.boolean()),
-    noDisplayRole: v.optional(v.boolean()),
-    groupsVertical: v.optional(v.boolean()),
-  },
+  args: formationArgs,
   handler: async (ctx, args) => {
     if (args.name && (args.name.length < 1 || args.name.length > 100)) {
       throw invalid("Echelon name must be between 1 and 100 characters");
@@ -81,24 +65,7 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: {
-    id: v.id("formation"),
-    name: v.optional(v.string()),
-    type: v.optional(
-      v.union(
-        v.literal("normal"),
-        v.literal("finalRestrictionRelease"),
-        v.literal("tacticalRelay"),
-      ),
-    ),
-    strikers: v.array(formationStudentItem),
-    specials: v.array(formationStudentItem),
-    rows: v.optional(v.array(formationRow)),
-    rowGap: v.optional(v.number()),
-    displayOverline: v.optional(v.boolean()),
-    noDisplayRole: v.optional(v.boolean()),
-    groupsVertical: v.optional(v.boolean()),
-  },
+  args: { id: v.id("formation"), ...formationArgs },
   handler: async (ctx, args) => {
     if (args.name && (args.name.length < 1 || args.name.length > 100)) {
       throw invalid("Echelon name must be between 1 and 100 characters");

@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "works.nimblebun/ba-tools-mcp",
-  "description": "MCP server for Joe's Blue Archive tools. Search students, gifts, and banners.",
-  "version": "0.1.0",
+  "description": "Blue Archive game data, PvP stats, and your own saved tool data. Requires signing in.",
+  "version": "0.2.0",
   "remotes": [
     {
       "type": "streamable-http",

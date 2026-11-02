@@ -1,11 +1,11 @@
 import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { conflict, notFound } from "./lib/errors";
-
-const targetGiftValidator = v.object({
-  id: v.number(),
-  count: v.number(),
-});
+import {
+  giftInventoryArgs,
+  giftTargetCreateArgs,
+  giftTargetUpdateArgs,
+} from "./lib/validators";
 
 function normalizeTargetGifts(gifts: { id: number; count: number }[]) {
   return gifts.map(({ id, count }) => ({
@@ -56,18 +56,7 @@ export const getOwnById = authenticatedQuery({
 });
 
 export const createInventory = authenticatedMutation({
-  args: {
-    name: v.optional(v.string()),
-    gifts: v.optional(
-      v.array(
-        v.object({
-          id: v.number(),
-          count: v.number(),
-        }),
-      ),
-    ),
-    giftBoxes: v.optional(v.number()),
-  },
+  args: giftInventoryArgs,
   handler: async (ctx, { name, gifts, giftBoxes }) => {
     const giftInventoryId = await ctx.db.insert("giftInventory", {
       userId: ctx.user._id,
@@ -81,14 +70,7 @@ export const createInventory = authenticatedMutation({
 });
 
 export const createTarget = authenticatedMutation({
-  args: {
-    giftInventoryId: v.id("giftInventory"),
-    studentId: v.string(),
-    currentExp: v.optional(v.number()),
-    targetExp: v.optional(v.number()),
-    gifts: v.optional(v.array(targetGiftValidator)),
-    giftBoxCount: v.optional(v.number()),
-  },
+  args: { giftInventoryId: v.id("giftInventory"), ...giftTargetCreateArgs },
   handler: async (
     ctx,
     { giftInventoryId, studentId, currentExp, targetExp, gifts, giftBoxCount },
@@ -125,19 +107,7 @@ export const createTarget = authenticatedMutation({
 });
 
 export const updateInventory = authenticatedMutation({
-  args: {
-    id: v.id("giftInventory"),
-    name: v.optional(v.string()),
-    gifts: v.optional(
-      v.array(
-        v.object({
-          id: v.number(),
-          count: v.number(),
-        }),
-      ),
-    ),
-    giftBoxes: v.optional(v.number()),
-  },
+  args: { id: v.id("giftInventory"), ...giftInventoryArgs },
   handler: async (ctx, { id, name, gifts, giftBoxes }) => {
     const giftInventory = await ctx.db.get(id);
 
@@ -154,14 +124,7 @@ export const updateInventory = authenticatedMutation({
 });
 
 export const updateTarget = authenticatedMutation({
-  args: {
-    id: v.id("giftTarget"),
-    studentId: v.optional(v.string()),
-    currentExp: v.optional(v.number()),
-    targetExp: v.optional(v.number()),
-    gifts: v.optional(v.array(targetGiftValidator)),
-    giftBoxCount: v.optional(v.number()),
-  },
+  args: { id: v.id("giftTarget"), ...giftTargetUpdateArgs },
   handler: async (
     ctx,
     { id, studentId, currentExp, targetExp, gifts, giftBoxCount },

@@ -3,11 +3,7 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { notFound } from "./lib/errors";
-import {
-  timelineSeparatorItem,
-  timelineStudentItem,
-  timelineTextItem,
-} from "./schema";
+import { timelineArgs } from "./lib/validators";
 
 export const getOwn = authenticatedQuery({
   args: {},
@@ -45,21 +41,7 @@ export const searchOwn = authenticatedQuery({
 });
 
 export const create = authenticatedMutation({
-  args: {
-    name: v.optional(v.string()),
-    description: v.optional(v.string()),
-    visibility: v.optional(v.union(v.literal("private"), v.literal("public"))),
-    showCreator: v.optional(v.boolean()),
-    items: v.array(
-      v.union(timelineStudentItem, timelineSeparatorItem, timelineTextItem),
-    ),
-    itemSpacing: v.optional(v.number()),
-    verticalSeparatorSize: v.optional(v.number()),
-    horizontalSeparatorSize: v.optional(v.number()),
-    exportWithTransparentBackground: v.optional(v.boolean()),
-    exportBackgroundColor: v.optional(v.string()),
-    exportBackgroundOpacity: v.optional(v.number()),
-  },
+  args: timelineArgs,
   handler: async (ctx, args) => {
     const timeline = {
       userId: ctx.user._id,
@@ -82,22 +64,7 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: {
-    id: v.id("timeline"),
-    name: v.optional(v.string()),
-    description: v.optional(v.string()),
-    visibility: v.optional(v.union(v.literal("private"), v.literal("public"))),
-    showCreator: v.optional(v.boolean()),
-    items: v.array(
-      v.union(timelineStudentItem, timelineSeparatorItem, timelineTextItem),
-    ),
-    itemSpacing: v.optional(v.number()),
-    verticalSeparatorSize: v.optional(v.number()),
-    horizontalSeparatorSize: v.optional(v.number()),
-    exportWithTransparentBackground: v.optional(v.boolean()),
-    exportBackgroundColor: v.optional(v.string()),
-    exportBackgroundOpacity: v.optional(v.number()),
-  },
+  args: { id: v.id("timeline"), ...timelineArgs },
   handler: async (ctx, args) => {
     const timeline = {
       name: args.name,

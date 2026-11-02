@@ -2,7 +2,6 @@
 title: Introduction
 description: Read Blue Archive game data and manage your user data on Joe's Blue Archive Tools over HTTP.
 icon: book-open
-order: 1
 ---
 
 The Joe's Blue Archive Tools API gives programs the same data the site uses:
@@ -78,6 +77,8 @@ Requests are rate limited per minute, using a sliding window:
 | `POST`, `PATCH` and `DELETE /api/v1/me/...` | 60 per minute | API key owner |
 
 Requests with a missing or invalid API key count towards the public limit of your IP address. Responses served from our cache don't count at all.
+
+[MCP server](./mcp.md) tool calls count per signed-in user: read tools towards the `GET` limit, write tools towards the write limit, and `search_pvp_stats` towards the search limit.
 
 Responses to `/api/v1/me/...` include your current standing:
 

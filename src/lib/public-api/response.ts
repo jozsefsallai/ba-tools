@@ -1,4 +1,4 @@
-import { toPage } from "@/lib/public-api/serialize";
+import type { toPage } from "@/lib/public-api/serialize";
 import { NextResponse } from "next/server";
 
 export type ApiErrorCode =
@@ -61,10 +61,9 @@ export function ok(
 }
 
 export function okPage(
-  result: Parameters<typeof toPage>[0],
+  { data, pagination }: ReturnType<typeof toPage>,
   { cache }: { cache: CachePolicy },
 ) {
-  const { data, pagination } = toPage(result);
   return ok(data, { cache, extra: { pagination } });
 }
 

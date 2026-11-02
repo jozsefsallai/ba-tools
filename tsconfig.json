@@ -21,6 +21,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "~convex/*": ["./convex/_generated/*"],
+      "~convex-lib/*": ["./convex/lib/*"],
       "~fonts/*": ["./public/assets/fonts/*"],
       "~prisma": ["./src/lib/db/client.ts"]
     }

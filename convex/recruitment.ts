@@ -1,4 +1,3 @@
-import { GAME_SERVERS } from "@/lib/types";
 import { v } from "convex/values";
 import {
   type RecruitmentKind,
@@ -13,25 +12,10 @@ import {
 import { internalMutation } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { invalid, notFound } from "./lib/errors";
-
-const pickupValidator = v.object({
-  charge: v.number(),
-  studentId: v.string(),
-  kind: v.optional(v.union(v.literal("permanent"), v.literal("limited"))),
-});
-
-const sessionArgs = {
-  name: v.string(),
-  date: v.number(),
-  isFestBanner: v.boolean(),
-  permanentStartCharge: v.number(),
-  limitedStartCharge: v.number(),
-  permanentPulls: v.number(),
-  limitedPulls: v.number(),
-  pickupsObtained: v.array(pickupValidator),
-  threeStarCount: v.number(),
-  rebateTicketsUsed: v.number(),
-};
+import {
+  recruitmentAccountArgs,
+  recruitmentSessionArgs,
+} from "./lib/validators";
 
 function statsFor(session: Parameters<typeof normalizeRecruitmentSession>[0]) {
   return calculateRecruitmentStats(session);
@@ -335,12 +319,7 @@ export const getSession = authenticatedQuery({
 });
 
 export const createAccount = authenticatedMutation({
-  args: {
-    name: v.string(),
-    gameServer: v.union(...GAME_SERVERS.map((server) => v.literal(server))),
-    permanentCharge: v.number(),
-    limitedCharge: v.number(),
-  },
+  args: recruitmentAccountArgs,
   handler: async (
     ctx,
     { name, gameServer, permanentCharge, limitedCharge },
@@ -367,13 +346,7 @@ export const createAccount = authenticatedMutation({
 });
 
 export const updateAccount = authenticatedMutation({
-  args: {
-    accountId: v.id("recruitmentAccount"),
-    name: v.string(),
-    gameServer: v.union(...GAME_SERVERS.map((server) => v.literal(server))),
-    permanentCharge: v.number(),
-    limitedCharge: v.number(),
-  },
+  args: { accountId: v.id("recruitmentAccount"), ...recruitmentAccountArgs },
   handler: async (
     ctx,
     { accountId, name, gameServer, permanentCharge, limitedCharge },
@@ -401,7 +374,7 @@ export const updateAccount = authenticatedMutation({
 export const createSession = authenticatedMutation({
   args: {
     recruitmentAccountId: v.id("recruitmentAccount"),
-    ...sessionArgs,
+    ...recruitmentSessionArgs,
   },
   handler: async (ctx, args) => {
     const account = await assertAccount(ctx, args.recruitmentAccountId);
@@ -452,10 +425,7 @@ export const createSession = authenticatedMutation({
 });
 
 export const updateSession = authenticatedMutation({
-  args: {
-    sessionId: v.id("recruitmentSession"),
-    ...sessionArgs,
-  },
+  args: { sessionId: v.id("recruitmentSession"), ...recruitmentSessionArgs },
   handler: async (ctx, args) => {
     const session = await assertSession(ctx, args.sessionId);
     const input = normalizeRecruitmentSession({

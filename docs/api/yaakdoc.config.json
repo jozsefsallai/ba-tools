@@ -37,7 +37,7 @@
           },
           {
             "group": "Guides",
-            "pages": ["authentication", "errors"]
+            "pages": ["authentication", "errors", "mcp"]
           }
         ]
       },

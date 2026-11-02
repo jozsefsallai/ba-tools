@@ -26,6 +26,7 @@ pnpm run db:generate          # prisma generate (regenerates client)
 | `@/*` | `src/*` |
 | `~convex/*` | `convex/_generated/*` |
 | `~prisma` | `src/lib/db/client.ts` (re-exports generated Prisma client) |
+| `~convex-lib/*` | `convex/lib/*` (shared Convex validators, e.g. for MCP input schemas) |
 
 Always use these aliases. Never import from the raw generated paths.
 
@@ -81,7 +82,12 @@ Route handlers in `src/app/api/v1/` (`/api/students` is the legacy endpoint; kee
 
 ## MCP Server
 
-Exposed at `/mcp` (streamable-http, Node.js runtime, SSE disabled). Tools: `searchStudents`, `getStudent`, `listBanners`, `searchGifts`. Published at `https://ba.joexyz.online/mcp`.
+Exposed at `/mcp` (streamable-http, Node.js runtime, SSE disabled). Published at `https://ba.joexyz.online/mcp`; user docs in `docs/api/pages/mcp.md`.
+
+- **Tools mirror the public API 1:1** (`search_students`, `list_formations`, `update_pvp_match`, …). Route handlers and tools both call the services in `src/lib/public-api/resources/`, so put any new logic there, not in a route or a tool, and add the tool alongside the endpoint.
+- **Every request needs OAuth.** `withMcpAuth(..., { required: true })` accepts only Clerk OAuth access tokens (`auth({ acceptsToken: "oauth_token" })`, in `src/lib/mcp/auth.server.ts`), never API keys. Clerk is the authorization server, with dynamic client registration on; `/.well-known/oauth-protected-resource/mcp` and `/.well-known/oauth-authorization-server` point clients to it.
+- **Register tools with `defineTool`** (`src/lib/mcp/define-tool.ts`). It passes the signed-in user id, applies the per-user rate limits by `kind`, sets annotations, and turns `ApiError`s into tool errors.
+- **Write-tool inputs come from Convex validators.** Mutation args live in `convex/lib/validators.ts` and are converted with `convexToZodFields`, so changing a mutation's args changes the tool schema too.
 
 ## Production Deployment
 

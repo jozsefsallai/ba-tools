@@ -65,6 +65,11 @@ export const CHANGELOG: ChangelogItemData[] = [
           </>
         ),
       },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description:
+          "Completely revamped the MCP server of the site. Please note that the new MCP server requires authenication via OAuth.",
+      },
     ],
     changes: [],
     fixes: [],

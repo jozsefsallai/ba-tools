@@ -2,7 +2,6 @@
 title: Authentication
 description: Create an API key and use it to access your own data.
 icon: key-round
-order: 2
 ---
 
 Endpoints under `/api/v1/me` act on your account, so they need an API key. Other endpoints need no authentication.

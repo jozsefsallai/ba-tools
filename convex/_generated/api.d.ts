@@ -18,6 +18,7 @@ import type * as lib_errors from "../lib/errors.js";
 import type * as lib_pvpRankings from "../lib/pvpRankings.js";
 import type * as lib_pvpVideo from "../lib/pvpVideo.js";
 import type * as lib_teamKey from "../lib/teamKey.js";
+import type * as lib_validators from "../lib/validators.js";
 import type * as migrations from "../migrations.js";
 import type * as planaChat from "../planaChat.js";
 import type * as pvp from "../pvp.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   "lib/pvpRankings": typeof lib_pvpRankings;
   "lib/pvpVideo": typeof lib_pvpVideo;
   "lib/teamKey": typeof lib_teamKey;
+  "lib/validators": typeof lib_validators;
   migrations: typeof migrations;
   planaChat: typeof planaChat;
   pvp: typeof pvp;

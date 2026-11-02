@@ -1,6 +1,6 @@
 import { defaultUserPreferences } from "@/lib/user-preferences";
-import { v } from "convex/values";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
+import { userPreferencesArgs } from "./lib/validators";
 
 export const get = authenticatedQuery({
   args: {},
@@ -19,46 +19,7 @@ export const get = authenticatedQuery({
 });
 
 export const update = authenticatedMutation({
-  args: {
-    timelineVisualizer: v.optional(
-      v.object({
-        triggerAutoFocus: v.optional(v.boolean()),
-        defaultScale: v.optional(v.number()),
-        defaultItemSpacing: v.optional(v.number()),
-        defaultVerticalSeparatorSize: v.optional(v.number()),
-        defaultHorizontalSeparatorSize: v.optional(v.number()),
-        defaultExportWithTransparentBackground: v.optional(v.boolean()),
-        defaultExportBackgroundColor: v.optional(v.string()),
-        defaultExportBackgroundOpacity: v.optional(v.number()),
-        defaultVisibility: v.optional(
-          v.union(v.literal("private"), v.literal("public")),
-        ),
-        defaultShowCreator: v.optional(v.boolean()),
-      }),
-    ),
-    formationDisplay: v.optional(
-      v.object({
-        defaultScale: v.optional(v.number()),
-        defaultDisplayOverline: v.optional(v.boolean()),
-        defaultNoDisplayRole: v.optional(v.boolean()),
-        defaultGroupsVertical: v.optional(v.boolean()),
-        defaultRowGap: v.optional(v.number()),
-        defaultLevelEnabled: v.optional(v.boolean()),
-        defaultLevel: v.optional(v.number()),
-      }),
-    ),
-    bond: v.optional(
-      v.object({
-        autoPopulateSingleTargetGifts: v.optional(v.boolean()),
-      }),
-    ),
-    pvp: v.optional(
-      v.object({
-        hideEmptyAgendaDays: v.optional(v.boolean()),
-        includeMatchesInStatisticsByDefault: v.optional(v.boolean()),
-      }),
-    ),
-  },
+  args: userPreferencesArgs,
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("userPreferences")

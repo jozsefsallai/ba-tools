@@ -4,7 +4,7 @@ import { v } from "convex/values";
 import { query } from "~convex/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { conflict, invalid, notFound } from "./lib/errors";
-import { rosterItem } from "./schema";
+import { rosterCreateArgs, rosterUpdateArgs } from "./lib/validators";
 
 function assertValidFriendCode(friendCode: string) {
   if (!isValidFriendCode(friendCode)) {
@@ -81,15 +81,7 @@ export const getByGameServerAndFriendCode = query({
 });
 
 export const create = authenticatedMutation({
-  args: {
-    name: v.optional(v.string()),
-    introduction: v.optional(v.string()),
-    accountLevel: v.number(),
-    studentRepId: v.optional(v.string()),
-    visibility: v.union(v.literal("private"), v.literal("public")),
-    gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
-    friendCode: v.string(),
-  },
+  args: rosterCreateArgs,
   handler: async (
     ctx,
     {
@@ -135,19 +127,7 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: {
-    id: v.id("roster"),
-    name: v.optional(v.string()),
-    introduction: v.optional(v.string()),
-    accountLevel: v.optional(v.number()),
-    studentRepId: v.optional(v.string()),
-    visibility: v.optional(v.union(v.literal("private"), v.literal("public"))),
-    gameServer: v.optional(
-      v.union(...GAME_SERVERS.map((level) => v.literal(level))),
-    ),
-    friendCode: v.optional(v.string()),
-    students: v.optional(v.array(rosterItem)),
-  },
+  args: { id: v.id("roster"), ...rosterUpdateArgs },
   handler: async (
     ctx,
     {

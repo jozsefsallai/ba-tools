@@ -1,5 +1,4 @@
 import {
-  GAME_SERVERS,
   type PVPFormationPresetType,
   type PVPMatchType,
   PVP_SEASONS,
@@ -19,13 +18,24 @@ import {
 import { invalid, notFound } from "./lib/errors";
 import { getTeamKey } from "./lib/teamKey";
 import {
+  pvpEnemyPresetCreateArgs,
+  pvpEnemyPresetUpdateArgs,
+  pvpEnemyTeamCreateArgs,
+  pvpEnemyTeamUpdateArgs,
+  pvpFormationPresetCreateArgs,
+  pvpFormationPresetUpdateArgs,
+  pvpMatchCreateArgs,
+  pvpMatchUpdateArgs,
+  pvpSeasonArgs,
+} from "./lib/validators";
+import {
   queueMatchRemoval,
   queueMatchStats,
   queueMatchStatsForSeason,
   queueSeasonRebuild,
   validatePvpTeam,
 } from "./pvpStats";
-import schema, { pvpFormationStudentItem } from "./schema";
+import schema from "./schema";
 
 const emptyTeam = () => [{}, {}, {}, {}, {}, {}];
 
@@ -326,11 +336,7 @@ export const getSeason = authenticatedQuery({
 });
 
 export const createSeason = authenticatedMutation({
-  args: {
-    name: v.string(),
-    gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
-    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
-  },
+  args: pvpSeasonArgs,
   handler: async (ctx, { name, gameServer, seasonNumber }) => {
     const seasons = await ctx.db
       .query("pvpSeason")
@@ -421,12 +427,7 @@ export const updateSeasonNumber = authenticatedMutation({
 });
 
 export const updateSeason = authenticatedMutation({
-  args: {
-    seasonId: v.id("pvpSeason"),
-    name: v.string(),
-    gameServer: v.union(...GAME_SERVERS.map((server) => v.literal(server))),
-    seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
-  },
+  args: { seasonId: v.id("pvpSeason"), ...pvpSeasonArgs },
   handler: async (ctx, { seasonId, name, gameServer, seasonNumber }) => {
     const season = await getSeasonForUser(ctx, seasonId);
 
@@ -775,22 +776,7 @@ export const getMatchById = authenticatedQuery({
 });
 
 export const recordMatch = authenticatedMutation({
-  args: {
-    seasonId: v.id("pvpSeason"),
-    date: v.number(),
-    ownRank: v.optional(v.number()),
-    opponentName: v.optional(v.string()),
-    opponentStudentRepId: v.optional(v.string()),
-    enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
-    autoCreateEnemyPreset: v.optional(v.boolean()),
-    opponentRank: v.optional(v.number()),
-    matchType: v.union(v.literal("attack"), v.literal("defense")),
-    ownTeam: v.array(pvpFormationStudentItem),
-    opponentTeam: v.array(pvpFormationStudentItem),
-    result: v.union(v.literal("win"), v.literal("loss")),
-    videoUrl: v.optional(v.string()),
-    includeInStatistics: v.boolean(),
-  },
+  args: { seasonId: v.id("pvpSeason"), ...pvpMatchCreateArgs },
   handler: async (
     ctx,
     {
@@ -956,21 +942,7 @@ export const clearSeasonMatches = staffMutation({
 });
 
 export const updateMatch = authenticatedMutation({
-  args: {
-    matchId: v.id("pvpMatchRecord"),
-    date: v.optional(v.number()),
-    ownRank: v.optional(v.number()),
-    opponentName: v.optional(v.string()),
-    opponentStudentRepId: v.optional(v.string()),
-    enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
-    opponentRank: v.optional(v.number()),
-    matchType: v.optional(v.union(v.literal("attack"), v.literal("defense"))),
-    ownTeam: v.optional(v.array(pvpFormationStudentItem)),
-    opponentTeam: v.optional(v.array(pvpFormationStudentItem)),
-    result: v.optional(v.union(v.literal("win"), v.literal("loss"))),
-    videoUrl: v.optional(v.string()),
-    includeInStatistics: v.optional(v.boolean()),
-  },
+  args: { matchId: v.id("pvpMatchRecord"), ...pvpMatchUpdateArgs },
   handler: async (
     ctx,
     {
@@ -1130,17 +1102,7 @@ export const deleteSeason = authenticatedMutation({
 });
 
 export const createFormationPreset = authenticatedMutation({
-  args: {
-    seasonId: v.id("pvpSeason"),
-    name: v.string(),
-    matchType: v.union(
-      v.literal("attack"),
-      v.literal("defense"),
-      v.literal("both"),
-    ),
-    team: v.array(pvpFormationStudentItem),
-    usedByMe: v.boolean(),
-  },
+  args: { seasonId: v.id("pvpSeason"), ...pvpFormationPresetCreateArgs },
   handler: async (ctx, { seasonId, name, matchType, team, usedByMe }) => {
     await getSeasonForUser(ctx, seasonId);
 
@@ -1159,12 +1121,7 @@ export const createFormationPreset = authenticatedMutation({
 export const updateFormationPreset = authenticatedMutation({
   args: {
     presetId: v.id("pvpFormationPreset"),
-    name: v.optional(v.string()),
-    matchType: v.optional(
-      v.union(v.literal("attack"), v.literal("defense"), v.literal("both")),
-    ),
-    team: v.optional(v.array(pvpFormationStudentItem)),
-    usedByMe: v.optional(v.boolean()),
+    ...pvpFormationPresetUpdateArgs,
   },
   handler: async (ctx, { presetId, name, matchType, team, usedByMe }) => {
     const preset = await ctx.db.get(presetId);
@@ -1197,12 +1154,7 @@ export const deleteFormationPreset = authenticatedMutation({
 });
 
 export const createEnemyPreset = authenticatedMutation({
-  args: {
-    seasonId: v.id("pvpSeason"),
-    name: v.string(),
-    opponentName: v.optional(v.string()),
-    opponentStudentRepId: v.optional(v.string()),
-  },
+  args: { seasonId: v.id("pvpSeason"), ...pvpEnemyPresetCreateArgs },
   handler: async (ctx, args) => {
     await getSeasonForUser(ctx, args.seasonId);
 
@@ -1217,12 +1169,7 @@ export const createEnemyPreset = authenticatedMutation({
 });
 
 export const updateEnemyPreset = authenticatedMutation({
-  args: {
-    presetId: v.id("pvpEnemyPreset"),
-    name: v.optional(v.string()),
-    opponentName: v.optional(v.string()),
-    opponentStudentRepId: v.optional(v.string()),
-  },
+  args: { presetId: v.id("pvpEnemyPreset"), ...pvpEnemyPresetUpdateArgs },
   handler: async (ctx, { presetId, ...changes }) => {
     const preset = await ctx.db.get(presetId);
 
@@ -1405,16 +1352,7 @@ export const getEnemyTeam = authenticatedQuery({
 });
 
 export const createEnemyTeam = authenticatedMutation({
-  args: {
-    seasonId: v.id("pvpSeason"),
-    enemyPresetId: v.optional(v.id("pvpEnemyPreset")),
-    matchType: v.union(
-      v.literal("attack"),
-      v.literal("defense"),
-      v.literal("both"),
-    ),
-    team: v.array(pvpFormationStudentItem),
-  },
+  args: { seasonId: v.id("pvpSeason"), ...pvpEnemyTeamCreateArgs },
   handler: async (ctx, args) => {
     await getSeasonForUser(ctx, args.seasonId);
     await validateEnemyPresetForMatch(ctx, args.enemyPresetId, args.seasonId);
@@ -1461,13 +1399,7 @@ export const createEnemyTeam = authenticatedMutation({
 });
 
 export const updateEnemyTeam = authenticatedMutation({
-  args: {
-    teamId: v.id("pvpEnemyTeam"),
-    matchType: v.optional(
-      v.union(v.literal("attack"), v.literal("defense"), v.literal("both")),
-    ),
-    team: v.optional(v.array(pvpFormationStudentItem)),
-  },
+  args: { teamId: v.id("pvpEnemyTeam"), ...pvpEnemyTeamUpdateArgs },
   handler: async (ctx, args) => {
     const current = await ctx.db.get(args.teamId);
 

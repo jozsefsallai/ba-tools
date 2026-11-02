@@ -3,6 +3,10 @@ import { v } from "convex/values";
 import { query } from "~convex/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { notFound } from "./lib/errors";
+import {
+  timelineGroupCreateArgs,
+  timelineGroupUpdateArgs,
+} from "./lib/validators";
 
 export const getOwn = authenticatedQuery({
   args: {},
@@ -134,12 +138,7 @@ export const getById = query({
 });
 
 export const create = authenticatedMutation({
-  args: {
-    name: v.string(),
-    description: v.optional(v.string()),
-    visibility: v.union(v.literal("private"), v.literal("public")),
-    showCreator: v.optional(v.boolean()),
-  },
+  args: timelineGroupCreateArgs,
   handler: async (ctx, { name, description, visibility, showCreator }) => {
     const id = await ctx.db.insert("timelineGroup", {
       userId: ctx.user._id,
@@ -155,14 +154,7 @@ export const create = authenticatedMutation({
 });
 
 export const update = authenticatedMutation({
-  args: {
-    id: v.id("timelineGroup"),
-    name: v.optional(v.string()),
-    description: v.optional(v.string()),
-    visibility: v.optional(v.union(v.literal("private"), v.literal("public"))),
-    showCreator: v.optional(v.boolean()),
-    timelines: v.optional(v.array(v.id("timeline"))),
-  },
+  args: { id: v.id("timelineGroup"), ...timelineGroupUpdateArgs },
   handler: async (
     ctx,
     { id, name, description, visibility, showCreator, timelines },

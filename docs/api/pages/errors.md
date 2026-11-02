@@ -2,7 +2,6 @@
 title: Errors
 description: Error responses and what they mean.
 icon: triangle-alert
-order: 3
 ---
 
 Errors return an HTTP status code and a JSON body with a machine-readable `code` and a readable `message`:
