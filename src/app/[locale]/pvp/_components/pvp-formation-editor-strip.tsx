@@ -253,6 +253,7 @@ export function PVPFormationEditorStrip({
   const itemId = (index: number) => ids[index];
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: keyboard and focus events bubble up from the focusable controls inside
     <div
       className="@container/formation -mx-2 min-w-0 overflow-x-auto px-2 pt-2 pb-2"
       onFocusCapture={handleFocus}

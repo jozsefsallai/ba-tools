@@ -52,6 +52,7 @@ export function PvpScreenshotImportItem({
   );
 
   return (
+    // biome-ignore lint/a11y/useAriaPropsSupportedByRole: dnd-kit's spread `attributes` give this sortable role="button" and tabIndex at runtime
     <div
       ref={setRefs}
       {...attributes}

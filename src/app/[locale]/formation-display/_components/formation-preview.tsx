@@ -132,6 +132,7 @@ function SortablePreviewItem({
   return (
     <Popover open={isSelected} onOpenChange={onOpenChange}>
       <PopoverAnchor asChild>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: dnd-kit's spread `attributes` give this sortable role="button" and tabIndex at runtime */}
         <div
           ref={setNodeRef}
           data-formation-preview-anchor=""

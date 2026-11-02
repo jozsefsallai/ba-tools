@@ -46,7 +46,7 @@ export function OwnTimelineGroupsBrowser() {
       showCreator: false,
       userId: "system" as any,
       timelines: [],
-      _creationTime: new Date().getTime(),
+      _creationTime: Date.now(),
     }),
     [
       t,

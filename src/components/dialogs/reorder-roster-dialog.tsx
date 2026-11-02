@@ -129,6 +129,8 @@ const SortableRosterRow = memo(function SortableRosterRow({
   );
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: dnd-kit's spread `attributes` give this sortable role="button" and tabIndex at runtime
+    // biome-ignore lint/a11y/useAriaPropsSupportedByRole: dnd-kit's spread `attributes` give this sortable role="button" and tabIndex at runtime
     <div
       ref={setNodeRef}
       style={style}

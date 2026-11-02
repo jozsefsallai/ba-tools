@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import {
@@ -32,7 +31,6 @@ import type { Student } from "~prisma";
 
 export function CreateRoster() {
   const t = useTranslations();
-  const { students } = useStudents();
 
   const [name, setName] = useState("");
   const [introduction, setIntroduction] = useState("");

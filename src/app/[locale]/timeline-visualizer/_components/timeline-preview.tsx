@@ -292,6 +292,7 @@ function SortablePreviewItem({
       return (
         <Popover open={isSelected} onOpenChange={onOpenChange}>
           <PopoverAnchor asChild>
+            {/* biome-ignore lint/a11y/noStaticElementInteractions: wrapper catches clicks and Enter bubbling up from the focusable drag handle inside */}
             <div
               ref={setNodeRef}
               data-timeline-preview-anchor=""
@@ -331,6 +332,7 @@ function SortablePreviewItem({
     return (
       <Popover open={isSelected} onOpenChange={onOpenChange}>
         <PopoverAnchor asChild>
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: wrapper catches clicks and Enter bubbling up from the focusable drag handle inside */}
           <div
             ref={setNodeRef}
             data-timeline-preview-anchor=""
@@ -375,6 +377,7 @@ function SortablePreviewItem({
   return (
     <Popover open={isSelected} onOpenChange={onOpenChange}>
       <PopoverAnchor asChild>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: dnd-kit's spread `attributes` give this sortable role="button" and tabIndex at runtime */}
         <div
           ref={setNodeRef}
           data-timeline-preview-anchor=""
@@ -845,6 +848,7 @@ export function TimelinePreview({
     }
 
     return [
+      // biome-ignore lint/a11y/noStaticElementInteractions: read-only preview items are clicked with the pointer; Enter is handled for parents that make them focusable
       <div
         key={item.id}
         className={cn("shrink-0", itemClassName)}

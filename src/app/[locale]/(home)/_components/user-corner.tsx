@@ -14,15 +14,13 @@ export function UserCorner() {
       <h2 className="text-2xl">{t("static.home.userCorner.title")}</h2>
 
       <Unauthenticated>
-        <>
-          <p>{t("static.home.userCorner.description")}</p>
+        <p>{t("static.home.userCorner.description")}</p>
 
-          <div>
-            <Button asChild>
-              <SignInButton mode="modal" oauthFlow="popup" />
-            </Button>
-          </div>
-        </>
+        <div>
+          <Button asChild>
+            <SignInButton mode="modal" oauthFlow="popup" />
+          </Button>
+        </div>
       </Unauthenticated>
 
       <Authenticated>

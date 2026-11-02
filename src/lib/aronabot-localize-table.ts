@@ -386,7 +386,7 @@ export function t(
         return defaultValue;
       }
     }
-  } catch (err) {
+  } catch {
     return defaultValue;
   }
 

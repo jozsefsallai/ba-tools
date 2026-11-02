@@ -1060,6 +1060,7 @@ function RoadmapBar({
       labels={labels}
       disabled={dragging || !!tooltipsDisabled}
     >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer-only drag target for the roadmap editor; the tooltip trigger carries the item's details */}
       <div
         data-roadmap-item={item.id}
         className={cn(
@@ -1147,6 +1148,7 @@ function RoadmapDot({
       labels={labels}
       disabled={dragging || !!tooltipsDisabled}
     >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer-only drag target for the roadmap editor; the tooltip trigger carries the item's details */}
       <div
         data-roadmap-item={item.id}
         className={cn("absolute flex items-start gap-1.5 select-none", {

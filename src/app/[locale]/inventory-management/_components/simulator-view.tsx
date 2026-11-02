@@ -437,7 +437,7 @@ export function InventoryManagementSimulatorView({
 
   function handleLoad(slot: AoiInventorySlot) {
     const data = aoiInventoryStorage.get();
-    if (!data || !data[slot]) {
+    if (!data?.[slot]) {
       toast.warning(t("tools.inventoryManagement.toasts.noSavedData"));
       return;
     }

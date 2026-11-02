@@ -43,7 +43,7 @@ export async function generateStaticParams(): Promise<RouteParams[]> {
 }
 
 export async function GET(
-  req: Request,
+  _req: Request,
   {
     params,
   }: {

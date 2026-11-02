@@ -306,6 +306,7 @@ export function StudentSpriteCarousel({
   }
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: Escape closes the gallery while focus is anywhere inside the carousel
     <div
       className="group bg-card relative h-[60svh] overflow-hidden rounded-2xl border lg:sticky lg:top-16 lg:h-[calc(100svh-5rem)]"
       onKeyDown={(event) => {

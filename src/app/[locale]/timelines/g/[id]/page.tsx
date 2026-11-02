@@ -22,7 +22,7 @@ export async function generateMetadata({
       id,
       await getLocale(),
     );
-  } catch (err) {
+  } catch {
     return redirect({
       href: "/404",
       locale: await getLocale(),

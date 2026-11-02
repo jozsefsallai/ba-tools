@@ -82,7 +82,7 @@ export function SingleTeamCalculator({
 
       let remainingTimeSecs = 0;
 
-      const components = newRemainingTime.split(":");
+      const components = normalizedRemainingTime.split(":");
 
       if (components.length === 1) {
         remainingTimeSecs = Number.parseFloat(components[0]);

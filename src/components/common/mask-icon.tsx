@@ -21,9 +21,14 @@ export function MaskIcon({
   return (
     <span
       {...props}
-      role={label ? "img" : undefined}
-      aria-label={label}
-      aria-hidden={label ? undefined : true}
+      {...(label
+        ? {
+            role: "img",
+            "aria-label": label,
+          }
+        : {
+            "aria-hidden": true,
+          })}
       className={cn("inline-block shrink-0 bg-current", className)}
       style={{
         mask,

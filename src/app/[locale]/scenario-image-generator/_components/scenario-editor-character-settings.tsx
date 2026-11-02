@@ -64,9 +64,7 @@ export function ScenarioEditorCharacterSettings({
   const t = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [spriteMode, setSpriteMode] = useState<SpriteMode>(
-    filename ? "image" : "url",
-  );
+  const [spriteMode] = useState<SpriteMode>(filename ? "image" : "url");
 
   const [xStr, setXStr] = useState(x.toString());
   const [yStr, setYStr] = useState(y.toString());

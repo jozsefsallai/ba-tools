@@ -355,7 +355,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const level = Number.parseInt(val);
+    const level = Number.parseInt(val, 10);
     if (Number.isNaN(level)) {
       return;
     }
@@ -369,7 +369,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const level = Number.parseInt(val);
+    const level = Number.parseInt(val, 10);
     if (Number.isNaN(level)) {
       return;
     }
@@ -383,7 +383,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const rank = Number.parseInt(val);
+    const rank = Number.parseInt(val, 10);
     if (Number.isNaN(rank)) {
       return;
     }
@@ -397,7 +397,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const level = Number.parseInt(val);
+    const level = Number.parseInt(val, 10);
     if (Number.isNaN(level)) {
       return;
     }
@@ -411,7 +411,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const level = Number.parseInt(val);
+    const level = Number.parseInt(val, 10);
     if (Number.isNaN(level)) {
       return;
     }
@@ -425,7 +425,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const level = Number.parseInt(val);
+    const level = Number.parseInt(val, 10);
     if (Number.isNaN(level)) {
       return;
     }
@@ -439,7 +439,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const tier = Number.parseInt(val);
+    const tier = Number.parseInt(val, 10);
     if (Number.isNaN(tier)) {
       return;
     }
@@ -453,7 +453,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const tier = Number.parseInt(val);
+    const tier = Number.parseInt(val, 10);
     if (Number.isNaN(tier)) {
       return;
     }
@@ -467,7 +467,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const tier = Number.parseInt(val);
+    const tier = Number.parseInt(val, 10);
     if (Number.isNaN(tier)) {
       return;
     }
@@ -481,7 +481,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
       return;
     }
 
-    const tier = Number.parseInt(val);
+    const tier = Number.parseInt(val, 10);
     if (Number.isNaN(tier)) {
       return;
     }
@@ -581,7 +581,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                     <Input
                       id="filter-name"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={handleNameFilterChange}
                       placeholder={t("tools.roster.view.searchByName")}
                     />
 
@@ -597,7 +597,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                             handleMinStarLevelFilterChange(
                               value === "_"
                                 ? undefined
-                                : (Number.parseInt(value) as StarLevel),
+                                : (Number.parseInt(value, 10) as StarLevel),
                             )
                           }
                         >
@@ -630,7 +630,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
                             handleMinUELevelFilterChange(
                               value === "_"
                                 ? undefined
-                                : (Number.parseInt(value) as UELevel),
+                                : (Number.parseInt(value, 10) as UELevel),
                             )
                           }
                         >
