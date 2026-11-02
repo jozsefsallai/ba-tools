@@ -17,6 +17,12 @@ const handler = createMcpHandler(
       name: "ba-tools",
       version: "0.2.0",
     },
+    instructions: [
+      "Blue Archive Tools (ba.joexyz.online): game data, PvP stats, and the signed-in user's saved formations, timelines, rosters, gift inventories, PvP logs and recruitment logs.",
+      "Enum values in results are internal names. Each comes with a `…Label` field holding the in-game name (e.g. `defenseType: Unarmed` is Special armor, `combatClass: Main` is Striker); always use the label when talking to the user.",
+      "Refer to gifts and students by name rather than id. Gift entries already include `name`; look students up with `get_student` or `search_students` when only an id is present.",
+      "When building timelines, follow the layout rules in `create_timeline`: break long rotations into rows with vertical separators and keep notes short.",
+    ].join("\n\n"),
   },
   {
     basePath: "",

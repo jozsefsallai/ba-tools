@@ -17,6 +17,9 @@ import { z } from "zod";
 import { timelineArgs } from "~convex-lib/validators";
 
 const fields = convexToZodShape(timelineArgs);
+
+const LAYOUT_GUIDE =
+  'Layout: items flow left to right in one row until a `separator` with `orientation: "vertical"`, which starts a new row; `horizontal` separators only add a gap inside a row. Without vertical separators the whole rotation renders as one very long row, so break rows at natural points (a new phase, wave, or cost cycle), but don\'t put one after every skill. Keep `notes` to a few words (e.g. "after boss shield"), notes support new lines; long notes push the following cards far apart. Put longer explanations in `description` or a `text` item.';
 const timelineId = idInput("Timeline id.");
 
 export function registerTimelineTools(server: McpServer) {
@@ -50,8 +53,7 @@ export function registerTimelineTools(server: McpServer) {
     "create_timeline",
     {
       title: "Create timeline",
-      description:
-        "Save a timeline. `items` run in order: `student` items are EX skill uses (with optional `targetId` and `notes`), `separator` items break lines, and `text` items add labels. Student ids come from `search_students`.",
+      description: `Save a timeline. \`items\` run in order: \`student\` items are EX skill uses (with optional \`targetId\` and \`notes\`), \`separator\` items space or break rows, and \`text\` items add labels. Student ids come from \`search_students\`. ${LAYOUT_GUIDE}`,
       kind: "create",
       input: fields,
     },
@@ -63,8 +65,7 @@ export function registerTimelineTools(server: McpServer) {
     "update_timeline",
     {
       title: "Update timeline",
-      description:
-        "Change a timeline. Only the fields sent change; `items` sent replaces the whole list.",
+      description: `Change a timeline. Only the fields sent change; \`items\` sent replaces the whole list. ${LAYOUT_GUIDE}`,
       kind: "update",
       input: { timelineId, ...z.object(fields).partial().shape },
     },

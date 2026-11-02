@@ -1,6 +1,7 @@
 import "server-only";
 
 import { mcpUserId } from "@/lib/mcp/auth.server";
+import { withEnumLabels, withGiftNames } from "@/lib/mcp/enrich.server";
 import { toApiError } from "@/lib/public-api/convex.server";
 import {
   type RateLimitTier,
@@ -98,10 +99,13 @@ export function defineTool<S extends z.ZodRawShape = z.ZodRawShape>(
       }
 
       const result = await run(args, userId);
+      if (result === undefined) {
+        return textResult("Done.");
+      }
 
-      return textResult(
-        result === undefined ? "Done." : JSON.stringify(result, null, 2),
-      );
+      const enriched = withEnumLabels(await withGiftNames(result));
+
+      return textResult(JSON.stringify(enriched, null, 2));
     } catch (error) {
       const apiError = toApiError(error);
 

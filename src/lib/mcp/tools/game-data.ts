@@ -1,4 +1,5 @@
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
+import { type EnumSection, describeEnumLabels } from "@/lib/mcp/enrich.server";
 import {
   getGift,
   getRoadmap,
@@ -17,6 +18,28 @@ const studentIdentifier = idInput(
   "Student id, or a name to resolve (e.g. `Hoshino`, `Shiroko (Swimsuit)`).",
 );
 
+const enumFilters = [
+  "school",
+  "club",
+  "attackType",
+  "defenseType",
+  "combatClass",
+  "combatRole",
+  "weaponType",
+] as const satisfies (keyof typeof studentSearchSchema.shape & EnumSection)[];
+
+const studentSearchInput = {
+  ...studentSearchSchema.shape,
+  ...Object.fromEntries(
+    enumFilters.map((key) => [
+      key,
+      studentSearchSchema.shape[key].describe(
+        `Internal value = in-game name: ${describeEnumLabels(key)}.`,
+      ),
+    ]),
+  ),
+} as typeof studentSearchSchema.shape;
+
 export function registerGameDataTools(server: McpServer) {
   defineTool(
     server,
@@ -24,9 +47,9 @@ export function registerGameDataTools(server: McpServer) {
     {
       title: "Search students",
       description:
-        "Search Blue Archive students by fuzzy name (`q`) and combat filters. With `q`, results are best match first and include `matchScore`. Each student has `iconUrl` and `portraitUrl`.",
+        "Search Blue Archive students by fuzzy name (`q`) and combat filters. With `q`, results are best match first and include `matchScore`. Each student has `iconUrl` and `portraitUrl`. Enum fields are internal names; use the `…Label` field beside each (e.g. `defenseType: Unarmed`, `defenseTypeLabel: Special`) when talking to the user.",
       kind: "read",
-      input: studentSearchSchema.shape,
+      input: studentSearchInput,
     },
     (input) => listStudents(input),
   );
@@ -37,7 +60,7 @@ export function registerGameDataTools(server: McpServer) {
     {
       title: "Get student",
       description:
-        "One student's full profile: stats, gift preferences (adored/loved/liked gifts), and variants.",
+        "One student's full profile: stats, terrain adaptation (`…Grade`: D to SS; street = Urban, outdoor = Field, indoor = Indoor), gift preferences (adored/loved/liked gifts), and variants. Use the `…Label` fields, not the internal enum names, when talking to the user.",
       kind: "read",
       input: { student: studentIdentifier },
     },

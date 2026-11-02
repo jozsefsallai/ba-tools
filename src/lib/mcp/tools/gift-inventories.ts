@@ -21,14 +21,16 @@ import {
 const inventoryId = idInput("Gift inventory id.");
 const targetId = idInput("Gift target id.");
 
+const GIFT_NAMES =
+  "Each entry in `gifts` comes with the gift's `name`; refer to gifts by name, not id.";
+
 export function registerGiftInventoryTools(server: McpServer) {
   defineTool(
     server,
     "list_gift_inventories",
     {
       title: "List my gift inventories",
-      description:
-        "The user's gift inventories for the bond calculator: gifts owned and gift boxes.",
+      description: `The user's gift inventories for the bond calculator: gifts owned and gift boxes. ${GIFT_NAMES}`,
       kind: "read",
     },
     (_input, userId) => listGiftInventories(userId),
@@ -39,8 +41,7 @@ export function registerGiftInventoryTools(server: McpServer) {
     "get_gift_inventory",
     {
       title: "Get gift inventory",
-      description:
-        "One gift inventory, with its targets (students the gifts are planned for).",
+      description: `One gift inventory, with its targets (students the gifts are planned for). ${GIFT_NAMES}`,
       kind: "read",
       input: { inventoryId },
     },
@@ -91,7 +92,7 @@ export function registerGiftInventoryTools(server: McpServer) {
     "get_gift_target",
     {
       title: "Get gift target",
-      description: "One target of a gift inventory.",
+      description: `One target of a gift inventory. ${GIFT_NAMES}`,
       kind: "read",
       input: { inventoryId, targetId },
     },
