@@ -39,7 +39,7 @@ function resolveStudent(
   raw: string,
 ): Student | null {
   const normalized = raw.trim().toLowerCase();
-  if (!normalized) {
+  if (!/\p{L}/u.test(normalized)) {
     return null;
   }
 

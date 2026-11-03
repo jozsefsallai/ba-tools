@@ -49,6 +49,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 2, 2026",
+    features: [],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "ONCE AGAIN fixed a bug where the text to visual timeline would randomly add Swimsuit Irohas everywhere.",
+      },
+    ],
+  },
+  {
     date: "November 1, 2026",
     features: [
       {
