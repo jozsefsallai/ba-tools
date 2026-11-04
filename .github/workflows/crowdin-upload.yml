@@ -56,6 +56,7 @@ jobs:
           upload_sources: true
           upload_translations: ${{ steps.changes.outputs.upload_translations }}
           auto_approve_imported: true
+          import_eq_suggestions: true
           download_translations: false
           push_translations: false
           create_pull_request: false
