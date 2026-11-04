@@ -1,10 +1,14 @@
 name: Crowdin pull
 
 on:
-  repository_dispatch:
-    types:
-      - crowdin-project-built
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
+    inputs:
+      force:
+        description: Apply the latest build even if it's older than the last translation commit
+        type: boolean
+        default: false
 
 concurrency:
   group: crowdin
@@ -21,27 +25,37 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: master
-
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
+          fetch-depth: 0
+          filter: blob:none
 
       - name: Download the latest build
+        id: pull
         run: bash scripts/crowdin-pull.sh
         env:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          CROWDIN_FORCE: ${{ inputs.force }}
 
-      - run: pnpm exec biome format --write src/i18n/translations
+      - uses: pnpm/action-setup@v6
+        if: steps.pull.outputs.downloaded == 'true'
 
-      - run: pnpm run translations:check
+      - uses: actions/setup-node@v7
+        if: steps.pull.outputs.downloaded == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - if: steps.pull.outputs.downloaded == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - if: steps.pull.outputs.downloaded == 'true'
+        run: pnpm exec biome format --write src/i18n/translations
+
+      - if: steps.pull.outputs.downloaded == 'true'
+        run: pnpm run translations:check
 
       - name: Commit changes
+        if: steps.pull.outputs.downloaded == 'true'
         run: |
           if [[ -z "$(git status --porcelain -- src/i18n/translations)" ]]; then
             echo "No translation changes."

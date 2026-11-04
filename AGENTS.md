@@ -67,8 +67,9 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 `src/i18n/translations/en/` is the source; everything else syncs with [Crowdin](https://crowdin.com/project/joexyz-ba-tools). Setup is in `crowdin.yml` and `.github/workflows/crowdin-*.yml`.
 
 - **Repo to Crowdin:** pushing locale changes to `master` uploads the English sources. If a push changes other locales, those are uploaded too and auto-approved. Renaming a key counts as deleting it, so its translations are lost on Crowdin.
-- **Crowdin to repo:** building the project on Crowdin fires a webhook that commits the new translations to `master`, which deploys to production. Only approved strings are exported; the rest fall back to English.
-- **Don't use `crowdin download translations` in the pull workflow.** It creates a build, which fires the webhook again and loops forever. `scripts/crowdin-pull.sh` reads the latest existing build instead.
+- **Crowdin to repo:** after a project build on Crowdin, an hourly workflow commits the new translations to `master`, which deploys to production. Only approved strings are exported; the rest fall back to English. Run the `Crowdin pull` workflow manually to skip the wait.
+- **Stale builds are skipped.** A build older than the last commit touching `src/i18n/translations` is ignored, because applying it would undo repo edits made since. After a locale push, wait for `Crowdin upload` to finish, then build again to pick up Crowdin changes.
+- **Don't use `crowdin download translations` in the pull workflow.** It creates a new build on every run, so translations would ship without anyone building the project. `scripts/crowdin-pull.sh` reads the latest existing build instead.
 - **`pnpm run translations:check`** validates locale files against English (unknown keys, ICU syntax, placeholders, large key losses). The pull workflow won't commit if it fails.
 
 ## Go/WASM Native Module
