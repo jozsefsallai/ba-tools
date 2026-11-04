@@ -49,6 +49,63 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 4, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to specify formations in a timeline. These formations will populate the Quick Student Add menu, will appear on public pages, and can be downloaded with the timeline image. Existing formations from the Formation Display tool can also be used. If a formation is created from scratch, it can be saved as a formation in the Formation Display tool as well.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to select multiple items by dragging and performing actions on them, such as rearranging, deletion, duplication, copying and pasting, etc.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Added undo/redo with keyboard shortcuts.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added ability to specify a raid (Total Assault, Grand Assault, Joint Firing Drill, Final Restriction Release, Allied Operation) for a timeline or timeline group. You can specify details such as defense type, terrain, and difficulty. Raid details will appear on public timelines/groups.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Added filters for raid and raid details.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Untitled timelines can now autofill from raid details.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Improved the appearance of item cards in the timeline editor.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Improved UX for rearranging timeline items.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Made the action button section of the timeline editor less cluttered.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Improved UI and UX of timeline and timeline group list.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Improved UX for adding timelines to a timeline group.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "November 2, 2026",
     features: [],
     changes: [],
