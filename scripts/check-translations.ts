@@ -122,6 +122,11 @@ function checkFile(locale: string, file: string) {
       continue;
     }
 
+    if (message === "") {
+      errors.push(`${path}: "${key}" is empty`);
+      continue;
+    }
+
     let actual: string[];
 
     try {

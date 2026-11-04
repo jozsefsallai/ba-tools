@@ -48,9 +48,14 @@ unzip -o -W "${workdir}/build.zip" \
   "${translations_dir}/*/*.json" \
   -x "${translations_dir}/en/*"
 
+remove_empty='walk(if type == "object" then with_entries(select(.value != "" and .value != {})) else . end)'
 changed=false
 
 while IFS= read -r file; do
+  if jq "${remove_empty}" "${file}" > "${workdir}/cleaned.json" 2> /dev/null; then
+    cp "${workdir}/cleaned.json" "${file}"
+  fi
+
   if [[ "$(jq -c . "${file}" 2> /dev/null)" == "$(git show "HEAD:${file}" 2> /dev/null | jq -c . 2> /dev/null)" ]]; then
     git checkout -- "${file}"
   else
