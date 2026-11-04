@@ -5,6 +5,7 @@ import {
   formationStudentItem,
   pvpFormationStudentItem,
   rosterItem,
+  timelineFormation,
   timelineSeparatorItem,
   timelineStudentItem,
   timelineTextItem,
@@ -60,6 +61,9 @@ export const timelineArgs = {
   exportWithTransparentBackground: v.optional(v.boolean()),
   exportBackgroundColor: v.optional(v.string()),
   exportBackgroundOpacity: v.optional(v.number()),
+  formation: v.optional(timelineFormation),
+  formationId: v.optional(v.id("formation")),
+  exportIncludeFormation: v.optional(v.boolean()),
 };
 
 export const timelineGroupCreateArgs = {

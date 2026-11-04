@@ -42,6 +42,22 @@ export const formationRow = v.object({
   label: v.optional(formationRowLabel),
 });
 
+export const timelineFormation = v.object({
+  name: v.optional(v.string()),
+  type: v.optional(
+    v.union(
+      v.literal("normal"),
+      v.literal("finalRestrictionRelease"),
+      v.literal("tacticalRelay"),
+    ),
+  ),
+  rows: v.array(formationRow),
+  rowGap: v.optional(v.number()),
+  displayOverline: v.optional(v.boolean()),
+  noDisplayRole: v.optional(v.boolean()),
+  groupsVertical: v.optional(v.boolean()),
+});
+
 export const timelineStudentItem = v.object({
   type: v.literal("student"),
   studentId: v.string(),
@@ -281,6 +297,9 @@ export default defineSchema({
     exportWithTransparentBackground: v.optional(v.boolean()),
     exportBackgroundColor: v.optional(v.string()),
     exportBackgroundOpacity: v.optional(v.number()),
+    formation: v.optional(timelineFormation),
+    formationId: v.optional(v.id("formation")),
+    exportIncludeFormation: v.optional(v.boolean()),
   }).index("by_userId", [
     "userId",
   ]),

@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import type { StudentItem } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { hexToRgba } from "@/lib/canvas";
+import type { FormationType } from "@/lib/formation-type";
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 
 /** Persisted formation slot shape (Convex / API). */
@@ -142,5 +143,175 @@ export function studentItemsToPersistedSlots(items: StudentItem[]) {
     ueLevel: item.ueLevel,
     borrowed: item.borrowed,
     level: item.level,
+  }));
+}
+
+export type FormationEditorRow = {
+  id: string;
+  strikers: StudentItem[];
+  specials: StudentItem[];
+  tcs: StudentItem[];
+  label?: FormationRowLabel;
+};
+
+function compareFormationRowLabels(
+  a: FormationRowLabel | undefined,
+  b: FormationRowLabel | undefined,
+): boolean {
+  if (!a && !b) {
+    return true;
+  }
+
+  if (!a || !b) {
+    return false;
+  }
+
+  return (
+    a.text === b.text &&
+    a.side === b.side &&
+    a.fontSize === b.fontSize &&
+    a.color === b.color &&
+    a.shadowEnabled === b.shadowEnabled &&
+    a.shadowColor === b.shadowColor &&
+    a.shadowOpacity === b.shadowOpacity &&
+    a.shadowOffsetX === b.shadowOffsetX &&
+    a.shadowOffsetY === b.shadowOffsetY &&
+    a.shadowBlur === b.shadowBlur &&
+    a.shadowSpread === b.shadowSpread &&
+    a.distance === b.distance
+  );
+}
+
+function compareStudentItems(a: StudentItem[], b: StudentItem[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; ++i) {
+    const itemA = a[i];
+    const itemB = b[i];
+
+    if (itemA.student?.id !== itemB.student?.id) {
+      return false;
+    }
+
+    if (itemA.starter !== itemB.starter) {
+      return false;
+    }
+
+    if (itemA.starterOrder !== itemB.starterOrder) {
+      return false;
+    }
+
+    if (itemA.starLevel !== itemB.starLevel) {
+      return false;
+    }
+
+    if (itemA.ueLevel !== itemB.ueLevel) {
+      return false;
+    }
+
+    if (itemA.borrowed !== itemB.borrowed) {
+      return false;
+    }
+
+    if (itemA.level !== itemB.level) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function compareFormationRows(
+  a: FormationEditorRow[],
+  b: FormationEditorRow[],
+): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  for (let i = 0; i < a.length; ++i) {
+    if (
+      !compareStudentItems(a[i].strikers, b[i].strikers) ||
+      !compareStudentItems(a[i].specials, b[i].specials) ||
+      !compareStudentItems(a[i].tcs, b[i].tcs) ||
+      !compareFormationRowLabels(a[i].label, b[i].label)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export type PersistedFormationRow = {
+  strikers: PersistedFormationStudentSlot[];
+  specials: PersistedFormationStudentSlot[];
+  tcs?: PersistedFormationStudentSlot[];
+  label?: FormationRowLabel;
+};
+
+export function formationDocToRows(
+  doc: {
+    strikers?: PersistedFormationStudentSlot[];
+    specials?: PersistedFormationStudentSlot[];
+    rows?: PersistedFormationRow[];
+  },
+  allStudents: Student[],
+): FormationEditorRow[] {
+  const sources: PersistedFormationRow[] =
+    doc.rows && doc.rows.length > 0
+      ? doc.rows
+      : [
+          {
+            strikers: doc.strikers ?? [],
+            specials: doc.specials ?? [],
+          },
+        ];
+
+  return sources.map((row) => ({
+    id: uuid(),
+    strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
+    specials: persistedSlotsToStudentItems(row.specials, allStudents),
+    tcs: persistedSlotsToStudentItems(row.tcs ?? [], allStudents),
+    ...(row.label
+      ? {
+          label: createDefaultFormationRowLabel(row.label),
+        }
+      : {}),
+  }));
+}
+
+export function formationRowsToPayload(
+  rows: FormationEditorRow[],
+  formationType: FormationType | undefined,
+) {
+  return rows.map((row) => ({
+    strikers: studentItemsToPersistedSlots(row.strikers),
+    specials: studentItemsToPersistedSlots(row.specials),
+    ...(formationType === "tacticalRelay" && row.tcs.length > 0
+      ? {
+          tcs: studentItemsToPersistedSlots(row.tcs),
+        }
+      : {}),
+    ...(row.label?.text
+      ? {
+          label: {
+            text: row.label.text,
+            side: row.label.side,
+            fontSize: row.label.fontSize,
+            color: row.label.color,
+            shadowEnabled: row.label.shadowEnabled,
+            shadowColor: row.label.shadowColor,
+            shadowOpacity: row.label.shadowOpacity,
+            shadowOffsetX: row.label.shadowOffsetX,
+            shadowOffsetY: row.label.shadowOffsetY,
+            shadowBlur: row.label.shadowBlur,
+            shadowSpread: row.label.shadowSpread,
+            distance: row.label.distance,
+          },
+        }
+      : {}),
   }));
 }

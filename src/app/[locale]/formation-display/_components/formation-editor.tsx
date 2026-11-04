@@ -5,23 +5,16 @@ import html2canvas from "html2canvas-pro";
 import { ChevronsUpDownIcon, ImportIcon, PlusIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import {
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
-import type { EditableConfig } from "@/app/[locale]/formation-display/_components/formation-preview";
 import {
   FormationPreview,
   type StudentItem,
 } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { FormationRowsStack } from "@/app/[locale]/formation-display/_components/formation-row-label";
 import { StarterOrderPanel } from "@/app/[locale]/formation-display/_components/starter-order-panel";
+import { useFormationRowsEditor } from "@/app/[locale]/formation-display/_hooks/use-formation-rows-editor";
 import { MessageBox } from "@/components/common/message-box";
 import { SaveStatus } from "@/components/common/save-status";
 import { StudentPicker } from "@/components/common/student-picker";
@@ -52,125 +45,21 @@ import { useQueryWithStatus } from "@/lib/convex";
 import { DndZoomContext } from "@/lib/dnd-mobile";
 import type { EchelonData } from "@/lib/echelon-parser";
 import {
+  compareFormationRows,
   createDefaultFormationRowLabel,
   DEFAULT_FORMATIONATION_ROW_LABEL,
-  DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
+  type FormationEditorRow,
   type FormationRowLabel,
   type FormationRowLabelSide,
-  persistedSlotsToStudentItems,
-  studentItemsToPersistedSlots,
+  formationDocToRows,
+  formationRowsToPayload,
 } from "@/lib/formation-display-utils";
-import {
-  type FormationType,
-  inferFormationType,
-  resolveStarterOrders,
-  TACTICAL_RELAY_STRIKER_MAX,
-} from "@/lib/formation-type";
+import { type FormationType, inferFormationType } from "@/lib/formation-type";
 import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
 import { sleep } from "@/lib/sleep";
-import type { Student } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
-
-type FormationEditorRow = {
-  id: string;
-  strikers: StudentItem[];
-  specials: StudentItem[];
-  tcs: StudentItem[];
-  label?: FormationRowLabel;
-};
-
-function compareFormationRowLabels(
-  a: FormationRowLabel | undefined,
-  b: FormationRowLabel | undefined,
-): boolean {
-  if (!a && !b) {
-    return true;
-  }
-
-  if (!a || !b) {
-    return false;
-  }
-
-  return (
-    a.text === b.text &&
-    a.side === b.side &&
-    a.fontSize === b.fontSize &&
-    a.color === b.color &&
-    a.shadowEnabled === b.shadowEnabled &&
-    a.shadowColor === b.shadowColor &&
-    a.shadowOpacity === b.shadowOpacity &&
-    a.shadowOffsetX === b.shadowOffsetX &&
-    a.shadowOffsetY === b.shadowOffsetY &&
-    a.shadowBlur === b.shadowBlur &&
-    a.shadowSpread === b.shadowSpread &&
-    a.distance === b.distance
-  );
-}
-
-function compareStudentItems(a: StudentItem[], b: StudentItem[]): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  for (let i = 0; i < a.length; ++i) {
-    const itemA = a[i];
-    const itemB = b[i];
-
-    if (itemA.student?.id !== itemB.student?.id) {
-      return false;
-    }
-
-    if (itemA.starter !== itemB.starter) {
-      return false;
-    }
-
-    if (itemA.starterOrder !== itemB.starterOrder) {
-      return false;
-    }
-
-    if (itemA.starLevel !== itemB.starLevel) {
-      return false;
-    }
-
-    if (itemA.ueLevel !== itemB.ueLevel) {
-      return false;
-    }
-
-    if (itemA.borrowed !== itemB.borrowed) {
-      return false;
-    }
-
-    if (itemA.level !== itemB.level) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function compareFormationRows(
-  a: FormationEditorRow[],
-  b: FormationEditorRow[],
-): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-
-  for (let i = 0; i < a.length; ++i) {
-    if (
-      !compareStudentItems(a[i].strikers, b[i].strikers) ||
-      !compareStudentItems(a[i].specials, b[i].specials) ||
-      !compareStudentItems(a[i].tcs, b[i].tcs) ||
-      !compareFormationRowLabels(a[i].label, b[i].label)
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 export function FormationEditor() {
   const t = useTranslations();
@@ -212,8 +101,6 @@ export function FormationEditor() {
   const [formationType, setFormationType, setFormationTypeUnchecked] =
     useSaveableState<FormationType | undefined>(undefined);
 
-  const [activeRowIndex, setActiveRowIndex] = useState(0);
-
   const [scale, setScale] = useState(preferences.formationDisplay.defaultScale);
   const scaleTouchedRef = useRef(false);
   const [displayOverline, setDisplayOverline, setDisplayOverlineUnchecked] =
@@ -222,8 +109,6 @@ export function FormationEditor() {
     useSaveableState(!preferences.formationDisplay.defaultNoDisplayRole);
   const [groupsVertical, setGroupsVertical, setGroupsVerticalUnchecked] =
     useSaveableState(preferences.formationDisplay.defaultGroupsVertical);
-
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
@@ -244,278 +129,21 @@ export function FormationEditor() {
   const createMutation = useMutation(api.formation.create);
   const updateMutation = useMutation(api.formation.update);
 
-  // TCS is only ever chosen manually, so the explicit type is enough here.
-  function strikersOverflowToTcs(row: FormationEditorRow) {
-    return (
-      formationType === "tacticalRelay" &&
-      row.strikers.length >= TACTICAL_RELAY_STRIKER_MAX
-    );
-  }
-
-  function addStudent(student: Student) {
-    const item: StudentItem = {
-      id: uuid(),
-      student,
-      ...(preferences.formationDisplay.defaultLevelEnabled
-        ? {
-            level: preferences.formationDisplay.defaultLevel,
-          }
-        : {}),
-      ...(!formationId
-        ? {
-            starLevel: DEFAULT_NEW_FORMATION_STUDENT_STAR_LEVEL,
-          }
-        : {}),
-    };
-
-    setRows((prev) => {
-      const row = prev[activeRowIndex];
-      if (!row) {
-        return prev;
-      }
-
-      if (student.combatClass === "Main") {
-        if (
-          row.strikers.find((i) => i.student?.id === student.id) ||
-          row.tcs.find((i) => i.student?.id === student.id)
-        ) {
-          return prev;
-        }
-
-        if (strikersOverflowToTcs(row)) {
-          return prev.map((r, i) =>
-            i === activeRowIndex
-              ? {
-                  ...r,
-                  tcs: [
-                    ...r.tcs,
-                    item,
-                  ],
-                }
-              : r,
-          );
-        }
-
-        return prev.map((r, i) =>
-          i === activeRowIndex
-            ? {
-                ...r,
-                strikers: [
-                  ...r.strikers,
-                  item,
-                ],
-              }
-            : r,
-        );
-      }
-
-      if (student.combatClass === "Support") {
-        if (row.specials.find((i) => i.student?.id === student.id)) {
-          return prev;
-        }
-
-        return prev.map((r, i) =>
-          i === activeRowIndex
-            ? {
-                ...r,
-                specials: [
-                  ...r.specials,
-                  item,
-                ],
-              }
-            : r,
-        );
-      }
-
-      return prev;
-    });
-  }
-
-  const removeItem = useCallback(
-    (itemId: string) => {
-      setSelectedItemId((prev) => (prev === itemId ? null : prev));
-      setRows((prev) =>
-        prev.map((row) => ({
-          ...row,
-          strikers: row.strikers.filter((item) => item.id !== itemId),
-          specials: row.specials.filter((item) => item.id !== itemId),
-          tcs: row.tcs.filter((item) => item.id !== itemId),
-        })),
-      );
-    },
-    [
-      setRows,
-    ],
-  );
-
-  const updateItem = useCallback(
-    (itemId: string, newData: Partial<Omit<StudentItem, "student" | "id">>) => {
-      setRows((prev) =>
-        prev.map((row) => {
-          if (row.tcs.some((candidate) => candidate.id === itemId)) {
-            const {
-              starter: _starter,
-              starterOrder: _order,
-              ...tcsData
-            } = newData;
-
-            return {
-              ...row,
-              tcs: row.tcs.map((candidate) =>
-                candidate.id === itemId
-                  ? {
-                      ...candidate,
-                      ...tcsData,
-                    }
-                  : candidate,
-              ),
-            };
-          }
-
-          const rowItems = [
-            ...row.strikers,
-            ...row.specials,
-          ];
-          const item = rowItems.find((candidate) => candidate.id === itemId);
-
-          if (!item) {
-            return row;
-          }
-
-          const isEnablingStarter = newData.starter === true && !item.starter;
-          const isDisablingStarter = newData.starter === false && item.starter;
-          let effectiveData = newData;
-          if (isEnablingStarter) {
-            const starterCount = rowItems.filter(
-              (candidate) => candidate.starter,
-            ).length;
-
-            effectiveData = {
-              ...newData,
-              starterOrder: starterCount + 1,
-            };
-          }
-
-          const updatedItems = rowItems.map((candidate) =>
-            candidate.id === itemId
-              ? {
-                  ...candidate,
-                  ...effectiveData,
-                }
-              : candidate,
-          );
-
-          if (isEnablingStarter || isDisablingStarter) {
-            const resolvedOrders = isEnablingStarter
-              ? resolveStarterOrders(rowItems)
-              : resolveStarterOrders(updatedItems);
-            const nextStarterOrder = new Map(resolvedOrders);
-
-            if (isEnablingStarter) {
-              nextStarterOrder.set(
-                itemId,
-                rowItems.filter((candidate) => candidate.starter).length + 1,
-              );
-            }
-
-            for (let i = 0; i < updatedItems.length; i++) {
-              const candidate = updatedItems[i];
-              if (!candidate) {
-                continue;
-              }
-
-              updatedItems[i] = candidate.starter
-                ? {
-                    ...candidate,
-                    starterOrder: nextStarterOrder.get(candidate.id),
-                  }
-                : candidate;
-            }
-          }
-
-          return {
-            ...row,
-            strikers: updatedItems.filter((candidate) =>
-              row.strikers.some((item) => item.id === candidate.id),
-            ),
-            specials: updatedItems.filter((candidate) =>
-              row.specials.some((item) => item.id === candidate.id),
-            ),
-          };
-        }),
-      );
-    },
-    [
-      setRows,
-    ],
-  );
-
-  function addEmptyCard(combatClass: "striker" | "special") {
-    const item: StudentItem = {
-      id: uuid(),
-    };
-
-    setRows((prev) =>
-      prev.map((row, i) => {
-        if (i !== activeRowIndex) {
-          return row;
-        }
-
-        if (combatClass === "striker") {
-          if (strikersOverflowToTcs(row)) {
-            return {
-              ...row,
-              tcs: [
-                ...row.tcs,
-                item,
-              ],
-            };
-          }
-
-          return {
-            ...row,
-            strikers: [
-              ...row.strikers,
-              item,
-            ],
-          };
-        }
-
-        return {
-          ...row,
-          specials: [
-            ...row.specials,
-            item,
-          ],
-        };
-      }),
-    );
-  }
-
-  function addFormationRow() {
-    const newIndex = rows.length;
-    setRows((prev) => [
-      ...prev,
-      {
-        id: uuid(),
-        strikers: [],
-        specials: [],
-        tcs: [],
-      },
-    ]);
-    setActiveRowIndex(newIndex);
-  }
-
-  function removeFormationRow() {
-    if (rows.length <= 1) {
-      return;
-    }
-
-    const idx = activeRowIndex;
-    const next = rows.filter((_, i) => i !== idx);
-    setRows(next);
-    setActiveRowIndex(Math.min(idx, next.length - 1));
-  }
+  const {
+    activeRowIndex,
+    setActiveRowIndex,
+    addStudent,
+    updateItem,
+    addEmptyCard,
+    addFormationRow,
+    removeFormationRow,
+    editableConfigByRow,
+  } = useFormationRowsEditor({
+    rows,
+    setRows,
+    formationType,
+    formationId,
+  });
 
   function updateActiveRowLabel(patch: Partial<FormationRowLabel> | null) {
     setRows((prev) =>
@@ -588,33 +216,7 @@ export function FormationEditor() {
 
     setRequestInProgress(true);
 
-    const rowsPayload = rows.map((row) => ({
-      strikers: studentItemsToPersistedSlots(row.strikers),
-      specials: studentItemsToPersistedSlots(row.specials),
-      ...(formationType === "tacticalRelay" && row.tcs.length > 0
-        ? {
-            tcs: studentItemsToPersistedSlots(row.tcs),
-          }
-        : {}),
-      ...(row.label?.text
-        ? {
-            label: {
-              text: row.label.text,
-              side: row.label.side,
-              fontSize: row.label.fontSize,
-              color: row.label.color,
-              shadowEnabled: row.label.shadowEnabled,
-              shadowColor: row.label.shadowColor,
-              shadowOpacity: row.label.shadowOpacity,
-              shadowOffsetX: row.label.shadowOffsetX,
-              shadowOffsetY: row.label.shadowOffsetY,
-              shadowBlur: row.label.shadowBlur,
-              shadowSpread: row.label.shadowSpread,
-              distance: row.label.distance,
-            },
-          }
-        : {}),
-    }));
+    const rowsPayload = formationRowsToPayload(rows, formationType);
 
     const firstRow = rowsPayload[0] ?? {
       strikers: [],
@@ -760,50 +362,7 @@ export function FormationEditor() {
     }
 
     if (query.status === "success") {
-      const sourceRows =
-        query.data.rows && query.data.rows.length > 0
-          ? query.data.rows
-          : [
-              {
-                strikers: query.data.strikers,
-                specials: query.data.specials,
-              },
-            ];
-
-      const loadedRows: FormationEditorRow[] = sourceRows.map((row) => {
-        const label =
-          "label" in row && row.label
-            ? createDefaultFormationRowLabel({
-                text: row.label.text,
-                side: row.label.side,
-                fontSize: row.label.fontSize,
-                color: row.label.color,
-                shadowEnabled: row.label.shadowEnabled,
-                shadowColor: row.label.shadowColor,
-                shadowOpacity: row.label.shadowOpacity,
-                shadowOffsetX: row.label.shadowOffsetX,
-                shadowOffsetY: row.label.shadowOffsetY,
-                shadowBlur: row.label.shadowBlur,
-                shadowSpread: row.label.shadowSpread,
-                distance: row.label.distance,
-              })
-            : undefined;
-
-        return {
-          id: uuid(),
-          strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
-          specials: persistedSlotsToStudentItems(row.specials, allStudents),
-          tcs: persistedSlotsToStudentItems(
-            "tcs" in row ? (row.tcs ?? []) : [],
-            allStudents,
-          ),
-          ...(label
-            ? {
-                label,
-              }
-            : {}),
-        };
-      });
+      const loadedRows = formationDocToRows(query.data, allStudents);
 
       setNameUnchecked(query.data.name || "");
       setRowsUnchecked(loadedRows);
@@ -856,81 +415,6 @@ export function FormationEditor() {
   }, [
     preferences,
     rows,
-  ]);
-
-  const editableConfigByRow = useMemo((): EditableConfig[] => {
-    return rows.map((_, rowIndex) => ({
-      selectedItemId,
-      onItemSelected: setSelectedItemId,
-      setStrikers: (action: SetStateAction<StudentItem[]>) => {
-        setRows((prev) => {
-          const row = prev[rowIndex];
-          if (!row) {
-            return prev;
-          }
-
-          const nextStrikers =
-            typeof action === "function" ? action(row.strikers) : action;
-
-          return prev.map((r, i) =>
-            i === rowIndex
-              ? {
-                  ...r,
-                  strikers: nextStrikers,
-                }
-              : r,
-          );
-        });
-      },
-      setSpecials: (action: SetStateAction<StudentItem[]>) => {
-        setRows((prev) => {
-          const row = prev[rowIndex];
-          if (!row) {
-            return prev;
-          }
-
-          const nextSpecials =
-            typeof action === "function" ? action(row.specials) : action;
-
-          return prev.map((r, i) =>
-            i === rowIndex
-              ? {
-                  ...r,
-                  specials: nextSpecials,
-                }
-              : r,
-          );
-        });
-      },
-      setTcs: (action: SetStateAction<StudentItem[]>) => {
-        setRows((prev) => {
-          const row = prev[rowIndex];
-          if (!row) {
-            return prev;
-          }
-
-          const nextTcs =
-            typeof action === "function" ? action(row.tcs) : action;
-
-          return prev.map((r, i) =>
-            i === rowIndex
-              ? {
-                  ...r,
-                  tcs: nextTcs,
-                }
-              : r,
-          );
-        });
-      },
-      onWantsToRemove: removeItem,
-      onWantsToUpdate: updateItem,
-    }));
-  }, [
-    rows,
-    selectedItemId,
-    removeItem,
-    updateItem,
-    setRows,
   ]);
 
   const totalSlotCount = useMemo(

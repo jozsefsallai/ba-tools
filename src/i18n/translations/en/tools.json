@@ -53,7 +53,9 @@
     "actions": {
       "share": "Share Timeline",
       "cloudSave": "Save to Cloud",
-      "download": "Download Image"
+      "download": "Download Image",
+      "downloadOptions": "Download options",
+      "textTimeline": "Text Timeline"
     },
 
     "confirmExit": {
@@ -104,6 +106,44 @@
       "title": "Quick Add Student"
     },
 
+    "exportFailed": "Couldn't generate the image.",
+
+    "formation": {
+      "title": "Formation",
+      "emptyDescription": "Set the team for this rotation. Its students appear in Quick Add and as target shortcuts, and it can be included in the exported image.",
+      "choose": "Choose a saved formation",
+      "buildFromScratch": "Build from scratch",
+      "namePlaceholder": "Formation name",
+      "noStudents": "Add students to build this formation.",
+      "signInToSave": "Sign in to save this formation to your formations.",
+      "saveNew": "Save to my formations",
+      "saveFailed": "Couldn't save the formation.",
+      "update": "Update saved formation",
+      "useSaved": "Use saved version",
+      "openInEditor": "Open in Formation Display",
+      "change": "Change",
+      "clear": "Clear",
+      "includeInExport": "Include formation",
+
+      "status": {
+        "saved": "Saved",
+        "differs": "Differs from saved",
+        "deleted": "Saved formation was deleted"
+      },
+
+      "picker": {
+        "search": "Search formations...",
+        "loading": "Loading formations...",
+        "empty": "No formations found."
+      },
+
+      "confirmReplace": {
+        "title": "Discard this formation?",
+        "description": "Your changes to this formation haven't been saved to your formations and will be lost.",
+        "confirm": "Discard"
+      }
+    },
+
     "editor": {
       "student": {
         "variant": {
@@ -146,7 +186,22 @@
         }
       },
 
+      "fields": {
+        "trigger": "Trigger",
+        "variant": "Variant",
+        "targets": "Targets",
+        "copy": "Copy",
+        "copyDescription": "Marks this skill card as a copied skill",
+        "notes": "Notes",
+        "size": "Size"
+      },
+
+      "insert": {
+        "title": "Add after"
+      },
+
       "text": {
+        "title": "Text",
         "placeholder": "Enter text"
       },
 

@@ -1,15 +1,14 @@
 "use client";
 
-import { CircleHelpIcon, UploadIcon } from "lucide-react";
+import { CircleHelpIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -21,17 +20,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
 import { parseTimelineFromText } from "@/lib/timeline-text-format";
 
-export type ImportTextTimelineButtonProps = {
+export type ImportTextTimelineDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onImport: (items: TimelineItem[]) => void;
 };
 
-export function ImportTextTimelineButton({
+export function ImportTextTimelineDialog({
+  open,
+  onOpenChange,
   onImport,
-}: ImportTextTimelineButtonProps) {
+}: ImportTextTimelineDialogProps) {
   const t = useTranslations();
   const { students } = useStudents();
-
-  const closeRef = useRef<HTMLButtonElement>(null);
 
   const [rawTimeline, setRawTimeline] = useState("");
 
@@ -55,7 +56,7 @@ export function ImportTextTimelineButton({
     }
 
     onImport(importedItems);
-    closeRef.current?.click();
+    onOpenChange(false);
 
     toast.success(
       t("tools.timeline.import.toasts.success", {
@@ -76,14 +77,7 @@ export function ImportTextTimelineButton({
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <UploadIcon />
-          {t("tools.timeline.import.button")}
-        </Button>
-      </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("tools.timeline.import.dialog.title")}</DialogTitle>
@@ -142,8 +136,6 @@ export function ImportTextTimelineButton({
             {t("tools.timeline.import.dialog.submit")}
           </Button>
         </DialogFooter>
-
-        <DialogClose ref={closeRef} />
       </DialogContent>
     </Dialog>
   );

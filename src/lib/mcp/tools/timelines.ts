@@ -55,7 +55,7 @@ export function registerTimelineTools(server: McpServer) {
     "create_timeline",
     {
       title: "Create timeline",
-      description: `Save a timeline. \`items\` run in order: \`student\` items are EX skill uses (with optional \`targetId\` and \`notes\`), \`separator\` items space or break rows, and \`text\` items add labels. Student ids come from \`search_students\`. ${LAYOUT_GUIDE}`,
+      description: `Save a timeline. \`items\` run in order: \`student\` items are EX skill uses (with optional \`targetId\` and \`notes\`), \`separator\` items space or break rows, and \`text\` items add labels. Student ids come from \`search_students\`. To attach a team, send \`formation\`, the timeline's own copy, which is public whenever the timeline is; \`formationId\` optionally links it to a saved formation. ${LAYOUT_GUIDE}`,
       kind: "create",
       input: fields,
     },

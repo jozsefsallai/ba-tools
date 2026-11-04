@@ -17,9 +17,9 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVerticalIcon, XIcon } from "lucide-react";
+import { ChevronDownIcon, GripVerticalIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { StudentItem } from "@/app/[locale]/formation-display/_components/formation-preview";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,7 @@ type StarterOrderPanelProps = {
     itemId: string,
     data: Partial<Omit<StudentItem, "student" | "id">>,
   ) => void;
+  defaultCollapsed?: boolean;
 };
 
 type SortableStarterEntryProps = {
@@ -82,8 +83,10 @@ export function StarterOrderPanel({
   row,
   formationType,
   onUpdateItem,
+  defaultCollapsed = false,
 }: StarterOrderPanelProps) {
   const t = useTranslations();
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const starterThreshold = starterThresholdFor(formationType);
   const starterMax = starterMaxFor(formationType);
 
@@ -159,19 +162,48 @@ export function StarterOrderPanel({
 
   return (
     <div className="mx-auto w-full max-w-2xl rounded-md border p-3 flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="font-medium">
+      <button
+        type="button"
+        className="flex w-full cursor-pointer items-center gap-2 text-left"
+        aria-expanded={!collapsed}
+        onClick={() => setCollapsed((prev) => !prev)}
+      >
+        <span className="font-medium">
           {t("tools.formationDisplay.starterOrder.title")}
-        </div>
-        <div className="text-sm text-muted-foreground">
+        </span>
+
+        {collapsed && (
+          <span className="flex min-w-0 items-center gap-1 overflow-hidden">
+            {starterEntries.map(
+              (item) =>
+                item.student && (
+                  <img
+                    key={item.id}
+                    src={buildStudentIconUrl(item.student)}
+                    alt={item.student.name}
+                    className="size-6 shrink-0 rounded-md"
+                  />
+                ),
+            )}
+          </span>
+        )}
+
+        <span className="ml-auto shrink-0 text-sm text-muted-foreground">
           {t("tools.formationDisplay.starterOrder.count", {
             count: starterEntries.length,
             max: starterMax,
           })}
-        </div>
-      </div>
+        </span>
 
-      {starterEntries.length === 0 ? (
+        <ChevronDownIcon
+          className={cn(
+            "size-4 shrink-0 text-muted-foreground transition-transform",
+            collapsed && "-rotate-90",
+          )}
+        />
+      </button>
+
+      {collapsed ? null : starterEntries.length === 0 ? (
         <div className="text-sm text-muted-foreground">
           {t("tools.formationDisplay.starterOrder.empty")}
         </div>

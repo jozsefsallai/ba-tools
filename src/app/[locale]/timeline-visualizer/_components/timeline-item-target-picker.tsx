@@ -7,11 +7,17 @@ import type { Student } from "~prisma";
 
 export type TimelineItemTargetPickerProps = {
   uniqueStudents: Student[];
-  currentTarget?: Student;
+  selectedIds: string[];
   onToggle: (student: Student) => void;
 };
 
-function StudentItem({ student }: { student: Student }) {
+export function StudentTile({
+  student,
+  className,
+}: {
+  student: Student;
+  className?: string;
+}) {
   const image = useMemo(() => {
     return buildStudentIconUrl(student);
   }, [
@@ -21,7 +27,7 @@ function StudentItem({ student }: { student: Student }) {
   return (
     <div
       className={cn(
-        "w-8 h-8 border border-black dark:border-white overflow-hidden skew-x-[-11deg] rounded-sm",
+        "size-8 shrink-0 overflow-hidden rounded-sm border border-black skew-x-[-11deg] dark:border-white",
         {
           "bg-type-red": student.attackType === "Explosion",
           "bg-type-yellow": student.attackType === "Pierce",
@@ -29,12 +35,13 @@ function StudentItem({ student }: { student: Student }) {
           "bg-type-purple": student.attackType === "Sonic",
           "bg-type-green": student.attackType === "Chemical",
         },
+        className,
       )}
     >
       <img
         src={image}
-        alt={student.name}
-        className="w-full h-full object-cover skew-x-[11deg]"
+        alt=""
+        className="h-full w-full object-cover skew-x-[11deg]"
       />
     </div>
   );
@@ -42,23 +49,38 @@ function StudentItem({ student }: { student: Student }) {
 
 export function TimelineItemTargetPicker({
   uniqueStudents,
-  currentTarget,
+  selectedIds,
   onToggle,
 }: TimelineItemTargetPickerProps) {
   return (
-    <div className="px-1 flex flex-wrap gap-1">
-      {uniqueStudents.map((student) => (
-        <button
-          key={student.id}
-          type="button"
-          className={cn("cursor-pointer", {
-            "opacity-40": !!currentTarget && currentTarget.id !== student.id,
-          })}
-          onClick={() => onToggle(student)}
-        >
-          <StudentItem student={student} />
-        </button>
-      ))}
+    <div
+      className="flex min-w-0 gap-1 overflow-x-auto p-1 [scrollbar-width:none]"
+      onWheel={(event) => {
+        event.currentTarget.scrollLeft += event.deltaY;
+      }}
+    >
+      {uniqueStudents.map((student) => {
+        const isSelected = selectedIds.includes(student.id);
+
+        return (
+          <button
+            key={student.id}
+            type="button"
+            title={student.name}
+            aria-label={student.name}
+            aria-pressed={isSelected}
+            className={cn(
+              "shrink-0 cursor-pointer rounded-sm outline-offset-1 transition-opacity",
+              isSelected
+                ? "outline-2 outline-primary"
+                : "opacity-50 hover:opacity-100 focus-visible:opacity-100",
+            )}
+            onClick={() => onToggle(student)}
+          >
+            <StudentTile student={student} className="size-7" />
+          </button>
+        );
+      })}
     </div>
   );
 }

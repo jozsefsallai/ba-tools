@@ -471,7 +471,13 @@ export function TimelineItem({
                       {uniqueStudents.length > 0 && (
                         <TimelineItemTargetPicker
                           uniqueStudents={uniqueStudents}
-                          currentTarget={item.target}
+                          selectedIds={
+                            item.target?.id
+                              ? [
+                                  item.target.id,
+                                ]
+                              : []
+                          }
                           onToggle={handleTargetUpdate}
                         />
                       )}
@@ -535,7 +541,13 @@ export function TimelineItem({
                         {uniqueStudents.length > 0 && (
                           <TimelineItemTargetPicker
                             uniqueStudents={uniqueStudents}
-                            currentTarget={extraTarget}
+                            selectedIds={
+                              extraTarget?.id
+                                ? [
+                                    extraTarget.id,
+                                  ]
+                                : []
+                            }
                             onToggle={(student) =>
                               handleExtraTargetUpdate(index, student)
                             }

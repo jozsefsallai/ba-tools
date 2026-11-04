@@ -1,12 +1,15 @@
 "use client";
 
 import html2canvas from "html2canvas-pro";
-import { DownloadIcon, PencilIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import slugify from "slugify";
+import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
+import { FormationRowsReadonly } from "@/app/[locale]/formation-display/_components/formation-rows-readonly";
 import { CopyTextTimelineButton } from "@/app/[locale]/timeline-visualizer/_components/copy-text-timeline-button";
+import { TimelineDownloadButton } from "@/app/[locale]/timeline-visualizer/_components/timeline-download-button";
 import {
   type TimelineItem,
   TimelinePreview,
@@ -36,6 +39,10 @@ import {
   DEFAULT_EXPORT_BACKGROUND_OPACITY,
   DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND,
 } from "@/lib/storage/timeline";
+import {
+  formationSourceToState,
+  hasFormationSlots,
+} from "@/lib/timeline-formation";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -60,6 +67,7 @@ export function TimelineView({ id }: TimelineViewProps) {
   const [exportBackgroundOpacity, setExportBackgroundOpacity] = useState(
     DEFAULT_EXPORT_BACKGROUND_OPACITY,
   );
+  const [exportIncludeFormation, setExportIncludeFormation] = useState(true);
 
   const query = useQueryWithStatus(api.timeline.getById, {
     id: id as Id<"timeline">,
@@ -80,12 +88,25 @@ export function TimelineView({ id }: TimelineViewProps) {
     setExportBackgroundOpacity(
       query.data.exportBackgroundOpacity ?? DEFAULT_EXPORT_BACKGROUND_OPACITY,
     );
+    setExportIncludeFormation(query.data.exportIncludeFormation ?? true);
   }, [
     query.status,
     query.data?.exportWithTransparentBackground,
     query.data?.exportBackgroundColor,
     query.data?.exportBackgroundOpacity,
+    query.data?.exportIncludeFormation,
   ]);
+
+  const formation = useMemo(
+    () =>
+      query.data?.formation
+        ? formationSourceToState(query.data.formation, allStudents)
+        : null,
+    [
+      query.data?.formation,
+      allStudents,
+    ],
+  );
 
   const items = useMemo<TimelineItem[]>(() => {
     if (!query.data) {
@@ -141,60 +162,67 @@ export function TimelineView({ id }: TimelineViewProps) {
 
     setGenerationInProgress(true);
 
-    await sleep(50);
+    try {
+      await sleep(50);
 
-    const canvas = await html2canvas(containerRef.current, {
-      scale,
-      backgroundColor: null,
-      useCORS: true,
-      onclone: prepareCdnImagesForScreenshot,
-    });
+      const canvas = await html2canvas(containerRef.current, {
+        scale,
+        backgroundColor: null,
+        useCORS: true,
+        onclone: prepareCdnImagesForScreenshot,
+      });
 
-    let trimmedCanvas = trimTransparentPixels(canvas);
+      let trimmedCanvas = trimTransparentPixels(canvas);
 
-    if (!exportWithTransparentBackground) {
-      trimmedCanvas = compositeCanvasBackground(
-        trimmedCanvas,
+      if (!exportWithTransparentBackground) {
+        trimmedCanvas = compositeCanvasBackground(
+          trimmedCanvas,
+          exportBackgroundColor,
+          exportBackgroundOpacity,
+        );
+      }
+
+      const trimmedName = (query.data.name ?? "").trim();
+      const filename =
+        trimmedName.length > 0
+          ? slugify(trimmedName, {
+              lower: true,
+            })
+          : "timeline";
+
+      const timelineData = {
+        items: query.data.items,
+        scale,
+        itemSpacing: query.data.itemSpacing,
+        verticalSeparatorSize: query.data.verticalSeparatorSize,
+        horizontalSeparatorSize: query.data.horizontalSeparatorSize,
+        exportWithTransparentBackground,
         exportBackgroundColor,
         exportBackgroundOpacity,
+        name: query.data.name ?? undefined,
+        description: query.data.description ?? undefined,
+        formation: query.data.formation,
+        exportIncludeFormation,
+      };
+
+      const blob = await encodePngWithItxt(
+        trimmedCanvas,
+        "ba-tools:timeline",
+        JSON.stringify(timelineData),
       );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${filename}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      toast.error(t("tools.timeline.exportFailed"));
+    } finally {
+      setGenerationInProgress(false);
     }
-
-    const trimmedName = (query.data.name ?? "").trim();
-    const filename =
-      trimmedName.length > 0
-        ? slugify(trimmedName, {
-            lower: true,
-          })
-        : "timeline";
-
-    const timelineData = {
-      items: query.data.items,
-      scale,
-      itemSpacing: query.data.itemSpacing,
-      verticalSeparatorSize: query.data.verticalSeparatorSize,
-      horizontalSeparatorSize: query.data.horizontalSeparatorSize,
-      exportWithTransparentBackground,
-      exportBackgroundColor,
-      exportBackgroundOpacity,
-      name: query.data.name ?? undefined,
-      description: query.data.description ?? undefined,
-    };
-
-    const blob = await encodePngWithItxt(
-      trimmedCanvas,
-      "ba-tools:timeline",
-      JSON.stringify(timelineData),
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${filename}.png`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setGenerationInProgress(false);
   }
 
   if (query.status === "pending") {
@@ -255,6 +283,28 @@ export function TimelineView({ id }: TimelineViewProps) {
         )}
       </div>
 
+      {formation && hasFormationSlots(formation) && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold">
+            {t("tools.timeline.formation.title")}
+          </h2>
+
+          <div className="flex w-full justify-start max-md:overflow-x-auto">
+            <div className="max-md:shrink-0 md:[zoom:0.8] max-md:[zoom:0.75]">
+              <FormationRowsReadonly
+                className="max-md:w-max max-md:max-w-none max-md:shrink-0"
+                rows={formation.rows}
+                type={formation.type}
+                rowGap={formation.rowGap}
+                displayOverline={formation.displayOverline}
+                noDisplayRole={formation.noDisplayRole}
+                groupsVertical={formation.groupsVertical}
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
       <TimelinePreview
         containerRef={containerRef}
         items={items}
@@ -262,6 +312,21 @@ export function TimelineView({ id }: TimelineViewProps) {
         verticalSeparatorSize={query.data.verticalSeparatorSize}
         horizontalSeparatorSize={query.data.horizontalSeparatorSize}
         busy={generationInProgress}
+        exportHeader={
+          formation &&
+          hasFormationSlots(formation) &&
+          exportIncludeFormation ? (
+            <FormationRowsReadonly
+              className="w-max max-w-none"
+              rows={formation.rows}
+              type={formation.type}
+              rowGap={formation.rowGap}
+              displayOverline={formation.displayOverline}
+              noDisplayRole={formation.noDisplayRole}
+              groupsVertical={formation.groupsVertical}
+            />
+          ) : null
+        }
       />
 
       <div className="flex flex-col gap-4 items-center">
@@ -290,13 +355,17 @@ export function TimelineView({ id }: TimelineViewProps) {
           <div className="flex gap-4 items-center justify-center">
             <CopyTextTimelineButton items={items} />
 
-            <Button
-              onClick={getTimelineImage}
+            <TimelineDownloadButton
+              label={t("common.downloadImage")}
               disabled={items.length === 0 || generationInProgress}
-            >
-              <DownloadIcon />
-              {t("common.downloadImage")}
-            </Button>
+              onDownload={getTimelineImage}
+              includeFormation={
+                formation && hasFormationSlots(formation)
+                  ? exportIncludeFormation
+                  : undefined
+              }
+              onIncludeFormationChange={setExportIncludeFormation}
+            />
           </div>
         </div>
 

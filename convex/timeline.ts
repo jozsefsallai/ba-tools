@@ -1,9 +1,26 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import type { Id } from "~convex/dataModel";
+import type { MutationCtx } from "~convex/server";
 import { query } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { notFound } from "./lib/errors";
 import { timelineArgs } from "./lib/validators";
+
+async function assertFormationLinkAllowed(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  formationId: Id<"formation"> | undefined,
+) {
+  if (!formationId) {
+    return;
+  }
+
+  const formation = await ctx.db.get(formationId);
+  if (formation && formation.userId !== userId) {
+    throw notFound("Formation not found");
+  }
+}
 
 export const getOwn = authenticatedQuery({
   args: {},
@@ -47,6 +64,8 @@ export const searchOwn = authenticatedQuery({
 export const create = authenticatedMutation({
   args: timelineArgs,
   handler: async (ctx, args) => {
+    await assertFormationLinkAllowed(ctx, ctx.user._id, args.formationId);
+
     const timeline = {
       userId: ctx.user._id,
       name: args.name,
@@ -60,6 +79,9 @@ export const create = authenticatedMutation({
       exportWithTransparentBackground: args.exportWithTransparentBackground,
       exportBackgroundColor: args.exportBackgroundColor,
       exportBackgroundOpacity: args.exportBackgroundOpacity,
+      formation: args.formation,
+      formationId: args.formationId,
+      exportIncludeFormation: args.exportIncludeFormation,
     };
 
     const id = await ctx.db.insert("timeline", timeline);
@@ -73,6 +95,8 @@ export const update = authenticatedMutation({
     ...timelineArgs,
   },
   handler: async (ctx, args) => {
+    await assertFormationLinkAllowed(ctx, ctx.user._id, args.formationId);
+
     const timeline = {
       name: args.name,
       description: args.description,
@@ -85,6 +109,9 @@ export const update = authenticatedMutation({
       exportWithTransparentBackground: args.exportWithTransparentBackground,
       exportBackgroundColor: args.exportBackgroundColor,
       exportBackgroundOpacity: args.exportBackgroundOpacity,
+      formation: args.formation,
+      formationId: args.formationId,
+      exportIncludeFormation: args.exportIncludeFormation,
     };
 
     const current = await ctx.db.get(args.id);
@@ -141,21 +168,27 @@ export const getById = query({
     const identity = await ctx.auth.getUserIdentity();
 
     if (timeline.visibility === "public") {
+      const isOwn = identity?.subject === owner?.externalId;
+
+      // The link points at a private formation, so only the owner gets it.
+      const { formationId, ...publicTimeline } = timeline;
+      const visibleTimeline = isOwn ? timeline : publicTimeline;
+
       if (timeline.showCreator && owner) {
         return {
-          ...timeline,
+          ...visibleTimeline,
           user: {
             name: owner.name,
             username: owner.username,
             avatar: owner.avatar,
           },
-          isOwn: identity?.subject === owner.externalId,
+          isOwn,
         };
       }
 
       return {
-        ...timeline,
-        isOwn: identity?.subject === owner?.externalId,
+        ...visibleTimeline,
+        isOwn,
       };
     }
 

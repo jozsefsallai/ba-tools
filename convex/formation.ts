@@ -1,8 +1,10 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { stream } from "convex-helpers/server/stream";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { invalid, notFound } from "./lib/errors";
 import { formationArgs } from "./lib/validators";
+import schema from "./schema";
 
 export const getOwn = authenticatedQuery({
   args: {},
@@ -40,6 +42,28 @@ export const searchOwn = authenticatedQuery({
       .collect();
     const term = args.search.toLowerCase();
     return all.filter((item) => (item.name ?? "").toLowerCase().includes(term));
+  },
+});
+
+export const searchOwnPaginated = authenticatedQuery({
+  args: {
+    search: v.optional(v.string()),
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, { search, paginationOpts }) => {
+    const term = search?.trim().toLowerCase();
+
+    return await stream(ctx.db, schema)
+      .query("formation")
+      .withIndex("by_userId", (q: any) => q.eq("userId", ctx.user._id))
+      .order("desc")
+      .filterWith(async (formation: any) =>
+        term ? (formation.name ?? "").toLowerCase().includes(term) : true,
+      )
+      .paginate({
+        ...paginationOpts,
+        numItems: Math.min(Math.max(paginationOpts.numItems, 1), 30),
+      });
   },
 });
 

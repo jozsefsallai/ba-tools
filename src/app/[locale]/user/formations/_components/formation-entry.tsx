@@ -4,16 +4,11 @@ import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { FormationPreview } from "@/app/[locale]/formation-display/_components/formation-preview";
-import { FormationRowsStack } from "@/app/[locale]/formation-display/_components/formation-row-label";
+import { FormationRowsReadonly } from "@/app/[locale]/formation-display/_components/formation-rows-readonly";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import {
-  createDefaultFormationRowLabel,
-  persistedSlotsToStudentItems,
-} from "@/lib/formation-display-utils";
-import { inferFormationType } from "@/lib/formation-type";
+import { formationDocToRows } from "@/lib/formation-display-utils";
 import { api } from "~convex/api";
 
 export type FormationEntryProps = {
@@ -28,66 +23,11 @@ export function FormationEntry({ entry }: FormationEntryProps) {
 
   const destroyMutation = useMutation(api.formation.destroy);
 
-  const previewRows = useMemo(() => {
-    const sources =
-      entry.rows && entry.rows.length > 0
-        ? entry.rows
-        : [
-            {
-              strikers: entry.strikers,
-              specials: entry.specials,
-            },
-          ];
-
-    return sources.map((row) => {
-      const label =
-        "label" in row && row.label
-          ? createDefaultFormationRowLabel({
-              text: row.label.text,
-              side: row.label.side,
-              fontSize: row.label.fontSize,
-              color: row.label.color,
-              shadowEnabled: row.label.shadowEnabled,
-              shadowColor: row.label.shadowColor,
-              shadowOpacity: row.label.shadowOpacity,
-              shadowOffsetX: row.label.shadowOffsetX,
-              shadowOffsetY: row.label.shadowOffsetY,
-              shadowBlur: row.label.shadowBlur,
-              shadowSpread: row.label.shadowSpread,
-              distance: row.label.distance,
-            })
-          : undefined;
-
-      return {
-        strikers: persistedSlotsToStudentItems(row.strikers, allStudents),
-        specials: persistedSlotsToStudentItems(row.specials, allStudents),
-        tcs: persistedSlotsToStudentItems(
-          "tcs" in row ? (row.tcs ?? []) : [],
-          allStudents,
-        ),
-        label,
-      };
-    });
-  }, [
-    entry.rows,
-    entry.strikers,
-    entry.specials,
-    allStudents,
-  ]);
-
-  const rowGapPx = entry.rowGap ?? 8;
-  const effectiveType = useMemo(
-    () =>
-      entry.type ??
-      inferFormationType(
-        previewRows.map((row) => ({
-          strikers: row.strikers,
-          specials: row.specials,
-        })),
-      ),
+  const previewRows = useMemo(
+    () => formationDocToRows(entry, allStudents),
     [
-      entry.type,
-      previewRows,
+      entry,
+      allStudents,
     ],
   );
 
@@ -128,24 +68,14 @@ export function FormationEntry({ entry }: FormationEntryProps) {
             zoom: 0.8,
           }}
         >
-          <FormationRowsStack
+          <FormationRowsReadonly
             className="max-md:max-w-none"
-            rowGap={rowGapPx}
-            items={previewRows.map((row, rowIndex) => ({
-              key: `${entry._id}-row-${rowIndex}`,
-              label: row.label,
-              children: (
-                <FormationPreview
-                  strikers={row.strikers}
-                  specials={row.specials}
-                  tcs={row.tcs}
-                  displayOverline={entry.displayOverline}
-                  noDisplayRole={entry.noDisplayRole}
-                  groupsVertical={entry.groupsVertical}
-                  formationType={effectiveType}
-                />
-              ),
-            }))}
+            rows={previewRows}
+            type={entry.type}
+            rowGap={entry.rowGap}
+            displayOverline={entry.displayOverline}
+            noDisplayRole={entry.noDisplayRole}
+            groupsVertical={entry.groupsVertical}
           />
         </div>
       </div>

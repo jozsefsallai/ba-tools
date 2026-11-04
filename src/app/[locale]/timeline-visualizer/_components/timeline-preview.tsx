@@ -74,6 +74,8 @@ export type TextItem = BaseItem & {
 
 export type TimelineItem = StudentItem | SeparatorItem | TextItem;
 
+export type TimelineInsertKind = "horizontal" | "vertical" | "text";
+
 export type EditableConfig = {
   selectedItemId: string | null;
   onItemSelected: (itemId: string | null) => void;
@@ -83,6 +85,7 @@ export type EditableConfig = {
     itemId: string,
     data: Omit<TimelineItem, "type" | "student" | "id">,
   ) => void;
+  onWantsToInsertAfter: (itemId: string, kind: TimelineInsertKind) => void;
   uniqueStudents: Student[];
   onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   /** When set, student popover should focus the trigger field once then clear via callback */
@@ -100,6 +103,7 @@ export type TimelinePreviewProps = {
   verticalSeparatorSize?: number;
   horizontalSeparatorSize?: number;
   busy?: boolean;
+  exportHeader?: ReactNode;
   onItemClicked?: (item: TimelineItem) => void;
   editableConfig?: EditableConfig;
 };
@@ -412,6 +416,7 @@ export function TimelinePreview({
   verticalSeparatorSize = 20,
   horizontalSeparatorSize = 20,
   busy = false,
+  exportHeader,
   onItemClicked,
   editableConfig,
 }: TimelinePreviewProps) {
@@ -424,10 +429,15 @@ export function TimelinePreview({
   const overflow = useHorizontalOverflow(scroller);
 
   const previousItemCount = useRef(items.length);
+  const previousLastItemId = useRef(items.at(-1)?.id);
+  const lastItemId = items.at(-1)?.id;
 
   useEffect(() => {
-    const added = items.length === previousItemCount.current + 1;
+    const added =
+      items.length === previousItemCount.current + 1 &&
+      lastItemId !== previousLastItemId.current;
     previousItemCount.current = items.length;
+    previousLastItemId.current = lastItemId;
 
     const last = Array.from(
       scroller?.querySelectorAll("[data-timeline-preview-anchor]") ?? [],
@@ -457,6 +467,7 @@ export function TimelinePreview({
     }
   }, [
     items.length,
+    lastItemId,
     scroller,
   ]);
 
@@ -774,6 +785,7 @@ export function TimelinePreview({
         setItems,
         onWantsToRemove,
         onWantsToUpdate,
+        onWantsToInsertAfter,
         uniqueStudents,
         onTriggerKeyDown,
         focusTriggerFieldItemId,
@@ -815,6 +827,7 @@ export function TimelinePreview({
               setItems={setItems}
               onWantsToRemove={onWantsToRemove}
               onWantsToUpdate={onWantsToUpdate}
+              onWantsToInsertAfter={onWantsToInsertAfter}
               uniqueStudents={uniqueStudents}
               onTriggerKeyDown={onTriggerKeyDown}
               autoFocusTrigger={focusTriggerFieldItemId === item.id}
@@ -873,6 +886,10 @@ export function TimelinePreview({
             ref={containerRef}
           >
             <div className="flex flex-col gap-1">
+              {busy && exportHeader && (
+                <div className="mb-8 self-start">{exportHeader}</div>
+              )}
+
               <div className="relative flex flex-wrap items-start max-md:block max-md:w-max max-md:whitespace-nowrap">
                 {itemElements}
               </div>

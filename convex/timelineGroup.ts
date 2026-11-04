@@ -93,7 +93,9 @@ export const getById = query({
     for (const timeline of timelineGroup.timelines) {
       const t = await ctx.db.get(timeline);
       if (t && t.visibility === "public") {
-        timelines.push(t);
+        // The link points at a private formation, so it isn't shared here.
+        const { formationId: _formationId, ...publicTimeline } = t;
+        timelines.push(publicTimeline);
       }
     }
 

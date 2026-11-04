@@ -3,6 +3,7 @@ import type {
   TextItem,
 } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { Storage } from "@/lib/storage";
+import type { TimelineFormationData } from "@/lib/timeline-formation";
 
 type RawBaseItem = {
   type: "student" | "separator" | "text";
@@ -32,6 +33,8 @@ export type TimelineStorageData = {
   exportWithTransparentBackground?: boolean;
   exportBackgroundColor?: string;
   exportBackgroundOpacity?: number;
+  formation?: TimelineFormationData;
+  exportIncludeFormation?: boolean;
 };
 
 export const DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND = true;

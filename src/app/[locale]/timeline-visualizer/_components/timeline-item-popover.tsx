@@ -1,24 +1,31 @@
 "use client";
 
 import {
-  ChevronsUpDownIcon,
-  CopyIcon,
+  CircleLetterCIcon,
+  CopyPlusIcon,
+  CornerRightDownIcon,
+  MoveHorizontalIcon,
   PlusIcon,
   Trash2Icon,
-  XIcon,
+  TypeIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
+  type ReactNode,
   type SetStateAction,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
-  useState,
 } from "react";
 import { v4 as uuid } from "uuid";
-import { TimelineItemTargetPicker } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-target-picker";
-import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
+import {
+  StudentTile,
+  TimelineItemTargetPicker,
+} from "@/app/[locale]/timeline-visualizer/_components/timeline-item-target-picker";
+import type {
+  TimelineInsertKind,
+  TimelineItem,
+} from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +37,16 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Toggle } from "@/components/ui/toggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
+import { cn } from "@/lib/utils";
 import type { Student } from "~prisma";
 
 const MAX_TIMELINE_TARGETS = 10;
@@ -45,6 +58,69 @@ function isTimelinePreviewAnchorTarget(target: EventTarget | null) {
   );
 }
 
+function WithTooltip({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function IconAction({
+  label,
+  className,
+  onClick,
+  children,
+}: {
+  label: string;
+  className?: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <WithTooltip label={label}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn("size-7 text-muted-foreground", className)}
+        aria-label={label}
+        onClick={onClick}
+      >
+        {children}
+      </Button>
+    </WithTooltip>
+  );
+}
+
+function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  children: ReactNode;
+}) {
+  return (
+    <>
+      <Label
+        htmlFor={htmlFor}
+        className="h-8 text-xs font-normal text-muted-foreground"
+      >
+        {label}
+      </Label>
+      <div className="min-w-0">{children}</div>
+    </>
+  );
+}
+
 export type TimelineItemPopoverProps = {
   item: TimelineItem;
   setItems: React.Dispatch<SetStateAction<TimelineItem[]>>;
@@ -53,6 +129,7 @@ export type TimelineItemPopoverProps = {
     itemId: string,
     data: Omit<TimelineItem, "type" | "student" | "id">,
   ): void;
+  onWantsToInsertAfter(itemId: string, kind: TimelineInsertKind): void;
   uniqueStudents?: Student[];
   onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   /** Focus trigger input after open (e.g. new student with auto-focus preference) */
@@ -68,6 +145,7 @@ export function TimelineItemPopover({
   setItems,
   onWantsToRemove,
   onWantsToUpdate,
+  onWantsToInsertAfter,
   uniqueStudents = [],
   onTriggerKeyDown,
   autoFocusTrigger = false,
@@ -76,13 +154,6 @@ export function TimelineItemPopover({
   onAutoFocusTextConsumed,
 }: TimelineItemPopoverProps) {
   const t = useTranslations();
-
-  const [separatorOverride, setSeparatorOverride] = useState(
-    item.type === "separator" && typeof item.size === "number",
-  );
-  const [separatorSizeStr, setSeparatorSizeStr] = useState<string | undefined>(
-    item.type === "separator" ? item.size?.toString() : undefined,
-  );
 
   const handleRemove = useCallback(() => {
     onWantsToRemove(item.id);
@@ -110,92 +181,60 @@ export function TimelineItemPopover({
     ],
   );
 
-  const handleTargetUpdate = useCallback(
-    (student: Student | null) => {
-      if (item.type !== "student") {
-        return;
-      }
-
-      if (!student || student.id === item.target?.id) {
-        onWantsToUpdate(item.id, {
-          target: undefined,
-        });
-        return;
-      }
-
-      if (item.extraTargets?.some((target) => target?.id === student.id)) {
-        return;
-      }
-
-      onWantsToUpdate(item.id, {
-        target: student,
-      });
-    },
-    [
-      item,
-      onWantsToUpdate,
-    ],
-  );
-
-  const handleExtraTargetUpdate = useCallback(
-    (index: number, student: Student | null) => {
-      if (item.type !== "student") {
-        return;
-      }
-
-      const extraTargets = [
-        ...(item.extraTargets ?? []),
-      ];
-
-      if (
-        student &&
-        (student.id === item.target?.id ||
-          extraTargets.some(
-            (target, i) => i !== index && target?.id === student.id,
-          ))
-      ) {
-        return;
-      }
-
-      extraTargets[index] = student ?? undefined;
-      onWantsToUpdate(item.id, {
-        extraTargets,
-      });
-    },
-    [
-      item,
-      onWantsToUpdate,
-    ],
-  );
-
-  const addExtraTarget = useCallback(() => {
-    if (
-      item.type === "student" &&
-      (item.extraTargets?.length ?? 0) < MAX_TIMELINE_TARGETS - 1
-    ) {
-      onWantsToUpdate(item.id, {
-        extraTargets: [
-          ...(item.extraTargets ?? []),
-          undefined,
-        ],
-      });
+  const selectedTargets = useMemo(() => {
+    if (item.type !== "student") {
+      return [];
     }
+
+    return [
+      item.target,
+      ...(item.extraTargets ?? []),
+    ].filter((target): target is Student => !!target);
   }, [
     item,
-    onWantsToUpdate,
   ]);
 
-  const removeExtraTarget = useCallback(
-    (index: number) => {
-      if (item.type === "student") {
-        onWantsToUpdate(item.id, {
-          extraTargets: (item.extraTargets ?? []).filter((_, i) => i !== index),
-        });
+  // Targets from outside the team stay visible so they can be deselected.
+  const targetOptions = useMemo(
+    () => [
+      ...selectedTargets.filter(
+        (target) => !uniqueStudents.some((student) => student.id === target.id),
+      ),
+      ...uniqueStudents,
+    ],
+    [
+      selectedTargets,
+      uniqueStudents,
+    ],
+  );
+
+  const toggleTarget = useCallback(
+    (student: Student) => {
+      const isSelected = selectedTargets.some(
+        (target) => target.id === student.id,
+      );
+
+      if (!isSelected && selectedTargets.length >= MAX_TIMELINE_TARGETS) {
+        return;
       }
+
+      const next = isSelected
+        ? selectedTargets.filter((target) => target.id !== student.id)
+        : [
+            ...selectedTargets,
+            student,
+          ];
+
+      // The first target is `target`; removing it promotes the next one.
+      onWantsToUpdate(item.id, {
+        target: next[0],
+        extraTargets: next.slice(1),
+      });
     },
     [
-      item,
+      selectedTargets,
       onWantsToUpdate,
+      item.id,
     ],
   );
 
@@ -247,6 +286,19 @@ export function TimelineItemPopover({
     ],
   );
 
+  const handleSizeUpdate = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = Number.parseInt(event.target.value, 10);
+      onWantsToUpdate(item.id, {
+        size: Number.isNaN(value) ? undefined : value,
+      });
+    },
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
+  );
+
   const handleTextUpdate = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       onWantsToUpdate(item.id, {
@@ -264,10 +316,16 @@ export function TimelineItemPopover({
       ...item,
       id: uuid(),
     };
-    setItems((prev) => [
-      ...prev,
-      newItem,
-    ]);
+    setItems((prev) => {
+      const index = prev.findIndex((other) => other.id === item.id);
+
+      return index === -1
+        ? [
+            ...prev,
+            newItem,
+          ]
+        : prev.toSpliced(index + 1, 0, newItem);
+    });
   }, [
     item,
     setItems,
@@ -374,40 +432,9 @@ export function TimelineItemPopover({
     onAutoFocusTextConsumed,
   ]);
 
-  useEffect(() => {
-    if (!separatorOverride) {
-      onWantsToUpdate(item.id, {
-        size: undefined,
-      });
-    } else if (typeof separatorSizeStr === "string") {
-      const value = Number.parseInt(separatorSizeStr, 10);
-      if (!Number.isNaN(value)) {
-        onWantsToUpdate(item.id, {
-          size: value,
-        });
-      }
-    }
-  }, [
-    separatorOverride,
-  ]);
-
-  useEffect(() => {
-    if (item.type !== "separator" || !separatorOverride) {
-      return;
-    }
-    const value = Number.parseInt(separatorSizeStr ?? "", 10);
-    if (!Number.isNaN(value)) {
-      onWantsToUpdate(item.id, {
-        size: value,
-      });
-    }
-  }, [
-    separatorSizeStr,
-  ]);
-
   return (
     <PopoverContent
-      className="w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-1rem)] flex flex-col gap-3 overflow-x-hidden overflow-y-auto"
+      className="flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-0 overflow-hidden p-0"
       style={{
         maxHeight: "calc(var(--radix-popover-content-available-height) - 1rem)",
       }}
@@ -423,247 +450,213 @@ export function TimelineItemPopover({
         }
       }}
     >
-      {item.type === "student" && (
-        <>
-          <div className="font-semibold text-base">{item.student.name}</div>
-
-          {skillVariants.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Label className="shrink-0" htmlFor={`pop-variant-${item.id}`}>
-                {t("tools.timeline.editor.student.variant.label")}
-              </Label>
-              <Select
-                value={item.variantId ?? "default"}
-                onValueChange={handleVariantUpdate}
-              >
-                <SelectTrigger className="flex-1">
-                  {skillVariants.find((v) => v.id === item.variantId)?.name ??
-                    t("tools.timeline.editor.student.variant.default")}
-                </SelectTrigger>
-                <SelectContent>
-                  {skillVariants.map((variant) => (
-                    <SelectItem key={variant.id} value={variant.id}>
-                      {variant.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      <TooltipProvider delayDuration={300}>
+        <header className="flex shrink-0 items-center gap-2 py-2 pl-3 pr-2">
+          {item.type === "student" ? (
+            <StudentTile student={item.student} className="size-6" />
+          ) : (
+            <span className="flex size-6 shrink-0 items-center justify-center text-muted-foreground [&_svg]:size-4">
+              {item.type === "text" && <TypeIcon />}
+              {item.type === "separator" &&
+                (item.orientation === "horizontal" ? (
+                  <MoveHorizontalIcon />
+                ) : (
+                  <CornerRightDownIcon />
+                ))}
+            </span>
           )}
 
-          <div className="flex items-center gap-2">
-            <Label className="shrink-0" htmlFor={`pop-trigger-${item.id}`}>
-              {t("tools.timeline.editor.student.trigger.label")}
-            </Label>
-            <Input
-              id={`pop-trigger-${item.id}`}
-              value={item.trigger ?? ""}
-              placeholder={t(
-                "tools.timeline.editor.student.trigger.placeholder",
-              )}
-              onChange={handleTriggerUpdate}
-              onKeyDown={onTriggerKeyDown}
-              className="flex-1"
-            />
-          </div>
+          <h3 className="min-w-0 flex-1 truncate text-sm font-semibold">
+            {item.type === "student" && item.student.name}
+            {item.type === "separator" &&
+              t(`tools.timeline.editor.separator.title.${item.orientation}`)}
+            {item.type === "text" && t("tools.timeline.editor.text.title")}
+          </h3>
 
-          <Separator />
-          <div className="flex min-w-0 flex-col gap-2">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <Label className="shrink-0" htmlFor={`pop-target-${item.id}`}>
-                {t("tools.timeline.editor.student.target.label")}
-              </Label>
-              <StudentPicker
-                onStudentSelected={handleTargetUpdate}
-                className="w-full z-[60]"
+          {item.type === "student" && (
+            <WithTooltip
+              label={t("tools.timeline.editor.fields.copyDescription")}
+            >
+              <Toggle
+                size="sm"
+                pressed={!!item.copy}
+                onPressedChange={handleCopyUpdate}
+                aria-label={t("tools.timeline.editor.fields.copy")}
+                className="size-7 min-w-0 p-0 text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground"
               >
-                <Button
-                  variant="outline"
-                  className="min-w-0 flex-1 justify-between"
-                >
-                  <span className="truncate">
-                    {item.target
-                      ? item.target.name
-                      : t("tools.timeline.editor.student.target.select")}
-                  </span>
-                  <ChevronsUpDownIcon />
-                </Button>
-              </StudentPicker>
-              {item.target && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="shrink-0"
-                  onClick={() => handleTargetUpdate(null)}
-                >
-                  <XIcon />
-                </Button>
-              )}
-            </div>
-            {uniqueStudents.length > 0 && (
-              <div className="max-w-full overflow-x-auto">
-                <TimelineItemTargetPicker
-                  uniqueStudents={uniqueStudents}
-                  currentTarget={item.target}
-                  onToggle={handleTargetUpdate}
+                <CircleLetterCIcon />
+              </Toggle>
+            </WithTooltip>
+          )}
+
+          <IconAction
+            label={t("tools.timeline.editor.actions.duplicate")}
+            onClick={duplicate}
+          >
+            <CopyPlusIcon />
+          </IconAction>
+
+          <IconAction
+            label={t("tools.timeline.editor.actions.remove")}
+            className="hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20 dark:hover:text-red-400"
+            onClick={handleRemove}
+          >
+            <Trash2Icon />
+          </IconAction>
+        </header>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+          {item.type === "student" && (
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2">
+              <Field
+                label={t("tools.timeline.editor.fields.trigger")}
+                htmlFor={`pop-trigger-${item.id}`}
+              >
+                <Input
+                  id={`pop-trigger-${item.id}`}
+                  className="h-8"
+                  value={item.trigger ?? ""}
+                  placeholder={t(
+                    "tools.timeline.editor.student.trigger.placeholder",
+                  )}
+                  onChange={handleTriggerUpdate}
+                  onKeyDown={onTriggerKeyDown}
                 />
-              </div>
-            )}
+              </Field>
 
-            {item.extraTargets?.map((extraTarget, index) => (
-              <div
-                key={`${item.id}-extra-target-${index}`}
-                className="flex min-w-0 flex-col gap-2"
-              >
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <Label className="shrink-0">
-                    {t("tools.timeline.editor.student.target.extraLabel", {
-                      index: index + 2,
-                    })}
-                  </Label>
+              {skillVariants.length > 0 && (
+                <Field
+                  label={t("tools.timeline.editor.fields.variant")}
+                  htmlFor={`pop-variant-${item.id}`}
+                >
+                  <Select
+                    value={item.variantId ?? "default"}
+                    onValueChange={handleVariantUpdate}
+                  >
+                    <SelectTrigger
+                      id={`pop-variant-${item.id}`}
+                      className="h-8 w-full"
+                    >
+                      <span className="truncate">
+                        {skillVariants.find((v) => v.id === item.variantId)
+                          ?.name ??
+                          t("tools.timeline.editor.student.variant.default")}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {skillVariants.map((variant) => (
+                        <SelectItem key={variant.id} value={variant.id}>
+                          {variant.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+
+              <Field label={t("tools.timeline.editor.fields.targets")}>
+                <div className="flex items-center gap-1">
+                  <TimelineItemTargetPicker
+                    uniqueStudents={targetOptions}
+                    selectedIds={selectedTargets.map((target) => target.id)}
+                    onToggle={toggleTarget}
+                  />
+
                   <StudentPicker
-                    onStudentSelected={(student) =>
-                      handleExtraTargetUpdate(index, student)
-                    }
+                    onStudentSelected={toggleTarget}
                     className="w-full z-[60]"
                   >
                     <Button
                       variant="outline"
-                      className="min-w-0 flex-1 justify-between"
+                      size="icon"
+                      className="size-7 shrink-0"
+                      aria-label={t("tools.timeline.editor.student.target.add")}
+                      title={t("tools.timeline.editor.student.target.add")}
+                      disabled={selectedTargets.length >= MAX_TIMELINE_TARGETS}
                     >
-                      <span className="truncate">
-                        {extraTarget?.name ??
-                          t("tools.timeline.editor.student.target.select")}
-                      </span>
-                      <ChevronsUpDownIcon />
+                      <PlusIcon />
                     </Button>
                   </StudentPicker>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => removeExtraTarget(index)}
-                    aria-label={t("tools.timeline.editor.actions.remove")}
-                  >
-                    <XIcon />
-                  </Button>
                 </div>
-                {uniqueStudents.length > 0 && (
-                  <div className="max-w-full overflow-x-auto">
-                    <TimelineItemTargetPicker
-                      uniqueStudents={uniqueStudents}
-                      currentTarget={extraTarget}
-                      onToggle={(student) =>
-                        handleExtraTargetUpdate(index, student)
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+              </Field>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={addExtraTarget}
-              disabled={
-                (item.extraTargets?.length ?? 0) >= MAX_TIMELINE_TARGETS - 1
-              }
-            >
-              <PlusIcon />
-              {t("tools.timeline.editor.student.target.add")}
-            </Button>
-          </div>
-          <Separator />
+              <Field
+                label={t("tools.timeline.editor.fields.notes")}
+                htmlFor={`pop-notes-${item.id}`}
+              >
+                <Textarea
+                  id={`pop-notes-${item.id}`}
+                  rows={1}
+                  value={item.notes ?? ""}
+                  placeholder={t(
+                    "tools.timeline.editor.student.notes.placeholder",
+                  )}
+                  onChange={handleNotesUpdate}
+                  className="max-h-24 min-h-8 resize-none px-3 py-1.5"
+                />
+              </Field>
+            </div>
+          )}
 
-          <div className="flex items-center gap-2">
-            <Switch
-              id={`pop-copy-${item.id}`}
-              checked={!!item.copy}
-              onCheckedChange={handleCopyUpdate}
-            />
-            <Label className="shrink-0" htmlFor={`pop-copy-${item.id}`}>
-              {t("tools.timeline.editor.student.copy.label")}
-            </Label>
-          </div>
+          {item.type === "separator" && (
+            <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3">
+              <Field
+                label={t("tools.timeline.editor.fields.size")}
+                htmlFor={`pop-size-${item.id}`}
+              >
+                <Input
+                  id={`pop-size-${item.id}`}
+                  type="number"
+                  className="h-8"
+                  value={item.size ?? ""}
+                  placeholder={t(
+                    "tools.timeline.editor.separator.size.placeholder",
+                  )}
+                  onChange={handleSizeUpdate}
+                />
+              </Field>
+            </div>
+          )}
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor={`pop-notes-${item.id}`}>
-              {t("tools.timeline.editor.student.notes.label")}
-            </Label>
+          {item.type === "text" && (
             <Textarea
-              id={`pop-notes-${item.id}`}
-              value={item.notes ?? ""}
-              placeholder={t("tools.timeline.editor.student.notes.placeholder")}
-              onChange={handleNotesUpdate}
-              className="resize-none min-h-16"
-            />
-          </div>
-        </>
-      )}
-
-      {item.type === "separator" && (
-        <>
-          <div className="font-semibold text-base">
-            {t(`tools.timeline.editor.separator.title.${item.orientation}`)}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Switch
-              id={`pop-sizeOverride-${item.id}`}
-              checked={separatorOverride}
-              onCheckedChange={(checked) => setSeparatorOverride(checked)}
-            />
-            <Label className="shrink-0" htmlFor={`pop-sizeOverride-${item.id}`}>
-              {t("tools.timeline.editor.separator.size.toggle")}
-            </Label>
-          </div>
-
-          {separatorOverride && (
-            <Input
-              type="number"
-              value={separatorSizeStr ?? ""}
-              placeholder={t(
-                "tools.timeline.editor.separator.size.placeholder",
-              )}
-              onChange={(e) => setSeparatorSizeStr(e.target.value)}
+              id={`pop-text-${item.id}`}
+              aria-label={t("tools.timeline.editor.text.title")}
+              value={item.text}
+              placeholder={t("tools.timeline.editor.text.placeholder")}
+              onChange={handleTextUpdate}
+              className="max-h-40 min-h-16 resize-none px-3 py-1.5"
             />
           )}
-        </>
-      )}
+        </div>
 
-      {item.type === "text" && (
-        <Textarea
-          id={`pop-text-${item.id}`}
-          value={item.text}
-          placeholder={t("tools.timeline.editor.text.placeholder")}
-          onChange={handleTextUpdate}
-          className="resize-none min-h-20"
-        />
-      )}
+        <footer className="flex shrink-0 items-center justify-between gap-2 border-t py-1 pl-3 pr-2">
+          <span className="text-xs text-muted-foreground">
+            {t("tools.timeline.editor.insert.title")}
+          </span>
 
-      <Separator />
-
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={duplicate}
-          className="flex-1"
-        >
-          <CopyIcon className="size-4" />
-          {t("tools.timeline.editor.actions.duplicate")}
-        </Button>
-
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={handleRemove}
-          className="flex-1"
-        >
-          <Trash2Icon className="size-4" />
-          {t("tools.timeline.editor.actions.remove")}
-        </Button>
-      </div>
+          <div className="flex items-center gap-0.5">
+            <IconAction
+              label={t("tools.timeline.editor.actions.insertHS")}
+              onClick={() => onWantsToInsertAfter(item.id, "horizontal")}
+            >
+              <MoveHorizontalIcon />
+            </IconAction>
+            <IconAction
+              label={t("tools.timeline.editor.actions.insertVS")}
+              onClick={() => onWantsToInsertAfter(item.id, "vertical")}
+            >
+              <CornerRightDownIcon />
+            </IconAction>
+            <IconAction
+              label={t("tools.timeline.editor.actions.insertText")}
+              onClick={() => onWantsToInsertAfter(item.id, "text")}
+            >
+              <TypeIcon />
+            </IconAction>
+          </div>
+        </footer>
+      </TooltipProvider>
     </PopoverContent>
   );
 }

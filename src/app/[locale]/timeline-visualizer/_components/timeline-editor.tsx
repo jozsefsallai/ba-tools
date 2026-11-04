@@ -6,7 +6,6 @@ import html2canvas from "html2canvas-pro";
 import {
   ChevronsUpDownIcon,
   ChevronUpIcon,
-  DownloadIcon,
   ImageUpIcon,
   SaveIcon,
   ShareIcon,
@@ -17,13 +16,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import slugify from "slugify";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
-import { CopyTextTimelineButton } from "@/app/[locale]/timeline-visualizer/_components/copy-text-timeline-button";
-import { ImportTextTimelineButton } from "@/app/[locale]/timeline-visualizer/_components/import-text-timeline-button";
+import { FormationRowsReadonly } from "@/app/[locale]/formation-display/_components/formation-rows-readonly";
+import { TimelineDownloadButton } from "@/app/[locale]/timeline-visualizer/_components/timeline-download-button";
+import { TimelineFormationSection } from "@/app/[locale]/timeline-visualizer/_components/timeline-formation-section";
 import {
+  type TimelineInsertKind,
   type TimelineItem,
   TimelinePreview,
 } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/[locale]/timeline-visualizer/_components/timeline-quick-add";
+import { TimelineTextMenu } from "@/app/[locale]/timeline-visualizer/_components/timeline-text-menu";
 import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
@@ -66,6 +68,14 @@ import {
   type TimelineStorageData,
   timelineStorage,
 } from "@/lib/storage/timeline";
+import {
+  compareFormationStates,
+  formationSourceToState,
+  formationStateToStoredData,
+  getFormationStudents,
+  hasFormationSlots,
+  type TimelineFormationState,
+} from "@/lib/timeline-formation";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -260,6 +270,18 @@ export function TimelineEditor() {
     preferences.timelineVisualizer.defaultExportBackgroundOpacity,
   );
 
+  const [formation, setFormation, setFormationUnchecked] =
+    useSaveableState<TimelineFormationState | null>(
+      null,
+      compareFormationStates,
+    );
+
+  const [
+    exportIncludeFormation,
+    setExportIncludeFormation,
+    setExportIncludeFormationUnchecked,
+  ] = useSaveableState(true);
+
   const [generationInProgress, setGenerationInProgress] = useState(false);
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -287,17 +309,23 @@ export function TimelineEditor() {
   const createMutation = useMutation(api.timeline.create);
   const updateMutation = useMutation(api.timeline.update);
 
+  // The formation comes first, then anyone else used on the timeline.
   const uniqueStudents = useMemo(() => {
-    const studentsSet = new Set<Student>();
+    const students = new Map<string, Student>();
 
-    items.forEach((item) => {
+    for (const student of getFormationStudents(formation)) {
+      students.set(student.id, student);
+    }
+
+    for (const item of items) {
       if (item.type === "student" && item.student) {
-        studentsSet.add(item.student);
+        students.set(item.student.id, item.student);
       }
-    });
+    }
 
-    return Array.from(studentsSet);
+    return Array.from(students.values());
   }, [
+    formation,
     items,
   ]);
 
@@ -356,6 +384,43 @@ export function TimelineEditor() {
     setFocusTextFieldItemId(id);
   }, []);
 
+  const insertItemAfter = useCallback(
+    (itemId: string, kind: TimelineInsertKind) => {
+      const id = uuid();
+      const newItem: TimelineItem =
+        kind === "text"
+          ? {
+              type: "text",
+              id,
+              text: "Enter text",
+            }
+          : {
+              type: "separator",
+              id,
+              orientation: kind,
+            };
+
+      setItems((prev) => {
+        const index = prev.findIndex((item) => item.id === itemId);
+
+        return index === -1
+          ? [
+              ...prev,
+              newItem,
+            ]
+          : prev.toSpliced(index + 1, 0, newItem);
+      });
+
+      if (kind === "text") {
+        setSelectedItemId(id);
+        setFocusTextFieldItemId(id);
+      }
+    },
+    [
+      setItems,
+    ],
+  );
+
   const removeItem = useCallback((itemId: string) => {
     setSelectedItemId((prev) => (prev === itemId ? null : prev));
     setFocusTriggerFieldItemId((prev) => (prev === itemId ? null : prev));
@@ -406,6 +471,7 @@ export function TimelineEditor() {
       setItems,
       onWantsToRemove: removeItem,
       onWantsToUpdate: updateItem,
+      onWantsToInsertAfter: insertItemAfter,
       uniqueStudents,
       onTriggerKeyDown: handleTriggerKeyDown,
       focusTriggerFieldItemId,
@@ -418,6 +484,7 @@ export function TimelineEditor() {
       setItems,
       removeItem,
       updateItem,
+      insertItemAfter,
       uniqueStudents,
       handleTriggerKeyDown,
       focusTriggerFieldItemId,
@@ -439,6 +506,8 @@ export function TimelineEditor() {
       exportBackgroundOpacity,
       name: name.length > 0 ? name : undefined,
       description: description.length > 0 ? description : undefined,
+      formation: formationStateToStoredData(formation),
+      exportIncludeFormation,
     };
   }
 
@@ -451,47 +520,52 @@ export function TimelineEditor() {
     setSelectedItemId(null);
     setFocusTriggerFieldItemId(null);
 
-    await sleep(50);
+    try {
+      await sleep(50);
 
-    const canvas = await html2canvas(containerRef.current, {
-      scale,
-      backgroundColor: null,
-      useCORS: true,
-      onclone: prepareCdnImagesForScreenshot,
-    });
+      const canvas = await html2canvas(containerRef.current, {
+        scale,
+        backgroundColor: null,
+        useCORS: true,
+        onclone: prepareCdnImagesForScreenshot,
+      });
 
-    let trimmedCanvas = trimTransparentPixels(canvas);
+      let trimmedCanvas = trimTransparentPixels(canvas);
 
-    if (!exportWithTransparentBackground) {
-      trimmedCanvas = compositeCanvasBackground(
+      if (!exportWithTransparentBackground) {
+        trimmedCanvas = compositeCanvasBackground(
+          trimmedCanvas,
+          exportBackgroundColor,
+          exportBackgroundOpacity,
+        );
+      }
+
+      const trimmedName = name.trim();
+      const filename =
+        trimmedName.length > 0
+          ? slugify(trimmedName, {
+              lower: true,
+            })
+          : "timeline";
+
+      const blob = await encodePngWithItxt(
         trimmedCanvas,
-        exportBackgroundColor,
-        exportBackgroundOpacity,
+        "ba-tools:timeline",
+        JSON.stringify(buildTimelineData()),
       );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${filename}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      toast.error(t("tools.timeline.exportFailed"));
+    } finally {
+      setGenerationInProgress(false);
     }
-
-    const trimmedName = name.trim();
-    const filename =
-      trimmedName.length > 0
-        ? slugify(trimmedName, {
-            lower: true,
-          })
-        : "timeline";
-
-    const blob = await encodePngWithItxt(
-      trimmedCanvas,
-      "ba-tools:timeline",
-      JSON.stringify(buildTimelineData()),
-    );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${filename}.png`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setGenerationInProgress(false);
   }
 
   async function createOrUpdateCloudTimeline() {
@@ -518,6 +592,12 @@ export function TimelineEditor() {
       description: description.length > 0 ? description : undefined,
       visibility,
       showCreator: visibility === "public" ? showCreator : false,
+      formation: formationStateToStoredData(formation),
+      formationId:
+        hasFormationSlots(formation) && formation?.id
+          ? (formation.id as Id<"formation">)
+          : undefined,
+      exportIncludeFormation,
     };
 
     if (timelineId) {
@@ -603,6 +683,14 @@ export function TimelineEditor() {
     setNameUnchecked(storedData.name ?? "");
     setDescriptionUnchecked(storedData.description ?? "");
     setItemsUnchecked(newItems);
+    setFormationUnchecked(
+      storedData.formation
+        ? formationSourceToState(storedData.formation, allStudents)
+        : null,
+    );
+    setExportIncludeFormationUnchecked(
+      storedData.exportIncludeFormation ?? true,
+    );
     setScaleUnchecked(storedData.scale || 1);
     setItemSpacingUnchecked(storedData.itemSpacing || 10);
     setVerticalSeparatorSizeUnchecked(storedData.verticalSeparatorSize || 70);
@@ -727,6 +815,8 @@ export function TimelineEditor() {
         preferences.timelineVisualizer.defaultShowCreator,
       );
       setItemsUnchecked([]);
+      setFormationUnchecked(null);
+      setExportIncludeFormationUnchecked(true);
       setScaleUnchecked(1);
       setItemSpacingUnchecked(10);
       setVerticalSeparatorSizeUnchecked(70);
@@ -789,6 +879,18 @@ export function TimelineEditor() {
       setVisibilityUnchecked(query.data.visibility || "private");
       setShowCreatorUnchecked(query.data.showCreator || false);
       setItemsUnchecked(newItems);
+      setFormationUnchecked(
+        query.data.formation
+          ? formationSourceToState(
+              query.data.formation,
+              allStudents,
+              query.data.formationId,
+            )
+          : null,
+      );
+      setExportIncludeFormationUnchecked(
+        query.data.exportIncludeFormation ?? true,
+      );
       setItemSpacingUnchecked(query.data.itemSpacing || 10);
       setVerticalSeparatorSizeUnchecked(query.data.verticalSeparatorSize || 70);
       setHorizontalSeparatorSizeUnchecked(
@@ -861,6 +963,8 @@ export function TimelineEditor() {
     items,
   ]);
 
+  const canIncludeFormation = hasFormationSlots(formation);
+
   if (timelineId && query.status === "pending") {
     return <MessageBox>{t("tools.timeline.loading")}</MessageBox>;
   }
@@ -885,6 +989,11 @@ export function TimelineEditor() {
         </p>
       </div>
 
+      <TimelineFormationSection
+        formation={formation}
+        setFormation={setFormation}
+      />
+
       <div
         className={cn("flex flex-col", {
           "gap-2": items.length > 0,
@@ -903,6 +1012,19 @@ export function TimelineEditor() {
           verticalSeparatorSize={verticalSeparatorSize}
           horizontalSeparatorSize={horizontalSeparatorSize}
           busy={generationInProgress}
+          exportHeader={
+            formation && canIncludeFormation && exportIncludeFormation ? (
+              <FormationRowsReadonly
+                className="w-max max-w-none"
+                rows={formation.rows}
+                type={formation.type}
+                rowGap={formation.rowGap}
+                displayOverline={formation.displayOverline}
+                noDisplayRole={formation.noDisplayRole}
+                groupsVertical={formation.groupsVertical}
+              />
+            ) : null
+          }
           editableConfig={editableConfig}
         />
       </div>
@@ -1224,13 +1346,23 @@ export function TimelineEditor() {
         </div>
       </Card>
 
-      <div className="flex flex-wrap gap-4 items-center justify-center max-md:gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {query.data?.visibility === "public" && (
-          <Button variant="outline" onClick={copyLink}>
+          <Button
+            variant="outline"
+            size="icon"
+            title={t("tools.timeline.actions.share")}
+            aria-label={t("tools.timeline.actions.share")}
+            onClick={copyLink}
+          >
             <ShareIcon />
-            {t("tools.timeline.actions.share")}
           </Button>
         )}
+
+        <TimelineTextMenu
+          items={items}
+          onImport={(parsedItems) => setItems(parsedItems)}
+        />
 
         <Authenticated>
           <Button
@@ -1243,19 +1375,15 @@ export function TimelineEditor() {
           </Button>
         </Authenticated>
 
-        <ImportTextTimelineButton
-          onImport={(parsedItems) => setItems(parsedItems)}
-        />
-
-        <CopyTextTimelineButton items={items} />
-
-        <Button
-          onClick={getTimelineImage}
+        <TimelineDownloadButton
+          label={t("tools.timeline.actions.download")}
           disabled={items.length === 0 || generationInProgress}
-        >
-          <DownloadIcon />
-          {t("tools.timeline.actions.download")}
-        </Button>
+          onDownload={getTimelineImage}
+          includeFormation={
+            canIncludeFormation ? exportIncludeFormation : undefined
+          }
+          onIncludeFormationChange={setExportIncludeFormation}
+        />
       </div>
 
       <Button

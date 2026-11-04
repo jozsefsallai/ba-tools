@@ -23,6 +23,9 @@ const UPDATE_KEYS = [
   "exportWithTransparentBackground",
   "exportBackgroundColor",
   "exportBackgroundOpacity",
+  "formation",
+  "formationId",
+  "exportIncludeFormation",
 ] as const;
 
 async function findTimeline(userId: string, id: string) {
