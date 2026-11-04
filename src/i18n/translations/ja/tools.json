@@ -1,5 +1,6 @@
 {
   "timeline": {
+    "titleLabel": "タイムライン名",
     "title": "TL可視化ツール",
     "description": "スキルの回転（タイムライン）をグラフ形式で作れるツールだよ（総力戦とかに便利）。生徒を選んだり、間隔を調整したり、コストを使うタイミングや時間を細かく設定したりできるよ。",
     "notice": "<strong>注意：</strong>ダークモードの拡張機能やブラウザのズーム設定によっては、画像が正しく書き出されないことがあるよ。もし表示がおかしくなったら、拡張機能をオフにしたりズームを100%にしたりしてみてね。",
@@ -44,7 +45,9 @@
     "actions": {
       "share": "タイムラインを共有",
       "cloudSave": "クラウドに保存",
-      "download": "画像をダウンロード"
+      "download": "画像をダウンロード",
+      "downloadOptions": "ダウンロードオプション",
+      "textTimeline": "テキスト形式のTL"
     },
     "confirmExit": {
       "title": "タイムラインを保存する？",
@@ -91,6 +94,52 @@
     "quickadd": {
       "title": "生徒をクイック追加"
     },
+    "exportFailed": "画像を生成できなかったよ。",
+    "selection": {
+      "hint": "空いている所をドラッグするか、Ctrl+クリックで複数選択できるよ。選択したアイテムはまとめてドラッグしたり、右クリックで他の操作をしたりできるよ。",
+      "count": "{count, plural, other {#件選択中}}",
+      "duplicate": "複製",
+      "moveToStart": "先頭に移動",
+      "moveToEnd": "末尾に移動",
+      "remove": "削除",
+      "selectAll": "すべて選択",
+      "clear": "選択を解除",
+      "removed": "{count, plural, other {#件のアイテムを削除したよ}}",
+      "copied": "{count, plural, other {#件のアイテムをコピーしたよ}}",
+      "undo": "元に戻す"
+    },
+    "formation": {
+      "title": "編成",
+      "emptyDescription": "このローテーションで使う編成を設定してね。編成の生徒はクイック追加と対象のショートカットに表示されて、書き出す画像にも含められるよ。",
+      "choose": "保存した編成から選ぶ",
+      "buildFromScratch": "一から作る",
+      "namePlaceholder": "編成名",
+      "noStudents": "生徒を追加して編成を作ってね。",
+      "signInToSave": "ログインすると、この編成をマイ編成に保存できるよ。",
+      "saveNew": "マイ編成に保存",
+      "saveFailed": "編成を保存できなかったよ。",
+      "update": "保存した編成を更新",
+      "useSaved": "保存したバージョンを使う",
+      "openInEditor": "編成表示で開く",
+      "change": "変更",
+      "clear": "クリア",
+      "includeInExport": "編成を含める",
+      "status": {
+        "saved": "保存済み",
+        "differs": "保存した編成と異なる",
+        "deleted": "保存した編成は削除されたよ"
+      },
+      "picker": {
+        "search": "編成を検索...",
+        "loading": "編成を読み込み中...",
+        "empty": "編成が見つからないよ。"
+      },
+      "confirmReplace": {
+        "title": "この編成を破棄する？",
+        "description": "この編成への変更はマイ編成に保存されていないから、失われちゃうよ。",
+        "confirm": "破棄"
+      }
+    },
     "editor": {
       "student": {
         "variant": {
@@ -126,7 +175,20 @@
           "placeholder": "サイズ (px)"
         }
       },
+      "fields": {
+        "trigger": "発動条件",
+        "variant": "バリアント",
+        "targets": "対象",
+        "copy": "コピー",
+        "copyDescription": "このスキルカードをコピーしたスキルとしてマークするよ",
+        "notes": "備考",
+        "size": "サイズ"
+      },
+      "insert": {
+        "title": "後ろに追加"
+      },
       "text": {
+        "title": "テキスト",
         "placeholder": "テキストを入力"
       },
       "actions": {
@@ -170,14 +232,12 @@
         "noStudent": "生徒の好み"
       }
     },
-
     "filter": {
       "label": "表示：",
       "allGifts": "すべてのギフト",
       "filtered": "絞り込み中",
       "preferredByGroup": "好みの生徒"
     },
-
     "giftCard": {
       "total": "合計",
       "projectedRank": "予想ランク {rank}"
@@ -537,7 +597,8 @@
       "background": "背景",
       "font": "フォント",
       "elements": "表示要素",
-      "behavior": "動作設定"
+      "behavior": "動作設定",
+      "script": "スクリプト"
     },
     "content": {
       "characterName": "キャラ名",
@@ -587,11 +648,19 @@
       "addCharacterUrl": "キャラを追加 (URL)",
       "deleteCharacter": "キャラクターを削除"
     },
+    "script": {
+      "scriptContent": "スクリプト",
+      "scriptPlaceholder": "ここにシナリオのスクリプトを書いてね...",
+      "play": "スクリプトを再生",
+      "stop": "スクリプトを停止",
+      "errorLine": "{line}行目：{message}"
+    },
     "recording": {
       "title": "録画モード",
       "description": "録画モードに切り替えるよ。画面録画ソフトの準備をしてね。準備ができたら下のボタンを押して録画を開始しよう。",
       "escHint": "Escキーを押すと録画モードを終了できるよ（フルスクリーンの場合は2回押してね）。",
-      "start": "録画開始"
+      "start": "録画開始",
+      "startScript": "スクリプトを再生"
     },
     "toasts": {
       "copied": "シナリオ画像をクリップボードにコピーしたよ！"
@@ -914,7 +983,6 @@
       "seasonName": "シーズン名",
       "seasonNumber": "ゲーム内シーズン"
     },
-
     "bulkImport": {
       "open": "対戦を一括インポート",
       "title": "戦術対抗戦を一括インポート",
@@ -947,7 +1015,6 @@
       "completed": "{count}件の対戦をインポートしました。",
       "failed": "すべての対戦をインポートする前に処理が停止しました。"
     },
-
     "stats": {
       "title": "戦術対抗戦カウンター検索",
       "description": "選択した防衛編成に有効なカウンター編成を検索できるよ。",
@@ -1326,7 +1393,52 @@
     "editGroup": "グループを編集",
     "timelines": "タイムライン一覧",
     "noTimelines": "このグループにはタイムラインが入っていないよ。",
+    "viewTimeline": "表示",
     "defaultDescription": "スキル回転（TL）を可視化した画像のグループだよ。"
+  },
+  "raidDetails": {
+    "title": "レイド詳細",
+    "optional": "任意",
+    "emptyDescription": "何のためのTLかタグを付けてね。ここの項目はすべて任意だよ。",
+    "type": "レイドの種類",
+    "recommended": "おすすめ",
+    "showAll": "すべて表示（{count}）",
+    "showLess": "折りたたむ",
+    "ongoingUntil": "{date}まで開催中",
+    "linkedSeason": "グローバル版ロードマップ：{dates}",
+    "unlinkSeason": "このレイドとのリンクを解除",
+    "notSet": "未設定",
+    "auto": "自動",
+    "resetToAuto": "自動に戻す",
+    "clear": "クリア",
+    "autoDescription": "このグループのタイムラインに共通する内容から自動で入力されるよ。値を選ぶと上書きできるよ。",
+    "boss": {
+      "Raid": "ボス",
+      "EliminateRaid": "ボス",
+      "MultiFloorRaid": "ボス",
+      "TimeAttackDungeon": "演習",
+      "WorldRaid": "ボス"
+    },
+    "defense": "防御タイプ",
+    "terrain": "地形",
+    "difficulty": "難易度",
+    "floor": "階層",
+    "globalSeason": "グローバル版：{dates}",
+    "filters": {
+      "type": "レイドの種類",
+      "boss": "ボス",
+      "defense": "防御タイプ",
+      "terrain": "地形",
+      "difficulty": "難易度",
+      "floor": "階層",
+      "floorFrom": "最小",
+      "floorTo": "最大",
+      "clearAll": "すべてクリア",
+      "search": {
+        "timeline": "タイムラインを検索...",
+        "group": "TLグループを検索..."
+      }
+    }
   },
   "myTimelines": {
     "title": "マイタイムライン",
@@ -1348,8 +1460,20 @@
         "fail": "TLグループの作成に失敗したよ"
       }
     },
+    "moreActions": "その他の操作",
+    "addDialog": {
+      "title": "タイムラインを追加",
+      "description": "このグループに追加するタイムラインを選んでね。",
+      "matches": "このグループに一致",
+      "others": "その他のタイムライン",
+      "alreadyAdded": "追加済み",
+      "add": "タイムラインを追加",
+      "addCount": "{count, plural, other {#件のタイムラインを追加}}"
+    },
     "editGroup": {
       "title": "TLグループを編集",
+      "timelinesCount": "タイムライン（{count}）",
+      "addTimelines": "タイムラインを追加",
       "addTimeline": "タイムラインを追加",
       "selectTimeline": "追加するタイムラインを選択",
       "searchPlaceholder": "検索...",
@@ -1705,7 +1829,6 @@
     "viewYours": "「今日のあなたの生徒」を表示",
     "viewGlobal": "「今日の全ユーザー共通の生徒」を表示"
   },
-
   "recruitment": {
     "title": "募集記録 (BETA)",
     "description": "ゲームアカウントごとの呼び出しチャージ、ピックアップ、天井、募集回数特典を記録します。",
@@ -1892,6 +2015,83 @@
         "offsetSuccess": "{count}件のバナーをずらしました。",
         "offsetFail": "バナーのずらしに失敗しました。",
         "offsetZero": "ずらす日数は0以外にしてください。"
+      }
+    },
+    "roadmap": {
+      "title": "ロードマップ管理",
+      "description": "アイテムはドラッグで移動、端をドラッグで期間を変更、右クリックでその他の操作ができます。時間はすべてUTCです。ガチャはガチャ管理ページで編集してください。",
+      "manageBanners": "ガチャ管理",
+      "revalidate": "公開ロードマップを更新",
+      "add": "アイテムを追加",
+      "addCategory": "{category}を追加",
+      "addCategoryHere": "ここに{category}を追加",
+      "edit": "編集",
+      "duplicate": "複製",
+      "shift": "日数でずらす…",
+      "makePermanent": "常設にする",
+      "delete": "削除",
+      "bannersReadOnly": "ガチャはガチャ管理ページで編集してください。",
+      "form": {
+        "createTitle": "{category}を追加",
+        "editTitle": "{category}を編集",
+        "startDate": "開始（UTC）",
+        "endDate": "終了（UTC）",
+        "duration": "期間（日数）",
+        "permanent": "常設（終了日なし）",
+        "type": "種類",
+        "boss": "ボス",
+        "drillType": "演習の種類",
+        "attackTypes": "攻撃タイプ",
+        "defenseTypes": "防御タイプ",
+        "terrains": "地形",
+        "rooms": "ルーム",
+        "addRoom": "ルームを追加",
+        "removeRoom": "ルームを削除",
+        "torment": "TORMENT",
+        "lunatic": "LUNATIC",
+        "name": "名前",
+        "internalId": "内部ID",
+        "eventStudent": "イベント生徒",
+        "selectStudent": "生徒を選択",
+        "clearStudent": "クリア",
+        "episodeCount": "話数",
+        "multiplier": "倍率",
+        "label": "タイトル",
+        "description": "説明",
+        "none": "なし",
+        "save": "保存",
+        "create": "作成"
+      },
+      "shiftDialog": {
+        "title": "アイテムをずらす",
+        "description": "このアイテムを指定した日数だけずらします。負の数を指定すると前倒しになります。",
+        "days": "日数",
+        "apply": "ずらす"
+      },
+      "push": {
+        "titleLater": "後のアイテムも後ろにずらしますか？",
+        "titleEarlier": "後のアイテムも前倒ししますか？",
+        "description": "<strong>{name}</strong>を<strong>{offset}</strong>移動しました。この後に続くアイテムも移動しますか？",
+        "onlyThis": "このアイテムのみ",
+        "subtype": "後の{subtype}のアイテム{count}件も移動",
+        "category": "後の{category}のアイテム{count}件をすべて移動"
+      },
+      "deleteDialog": {
+        "title": "アイテムを削除",
+        "description": "「{name}」を削除しますか？この操作は取り消せません。",
+        "confirm": "削除"
+      },
+      "toasts": {
+        "saveSuccess": "保存しました。",
+        "saveFail": "保存に失敗しました：{error}",
+        "createSuccess": "アイテムを作成しました。",
+        "createFail": "アイテムの作成に失敗しました：{error}",
+        "deleteSuccess": "アイテムを削除しました。",
+        "deleteFail": "アイテムの削除に失敗しました：{error}",
+        "offsetSuccess": "他のアイテム{count}件を移動しました。",
+        "offsetFail": "アイテムの移動に失敗しました：{error}",
+        "revalidateSuccess": "公開ロードマップのキャッシュをクリアしました。",
+        "revalidateFail": "公開ロードマップのキャッシュのクリアに失敗しました：{error}"
       }
     }
   }
