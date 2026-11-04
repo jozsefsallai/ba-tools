@@ -16,7 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { OwnTimelineEntry } from "@/app/[locale]/user/timelines/_components/own-timeline-entry";
+import { SortableOwnTimelineEntry } from "@/app/[locale]/user/timelines/_components/own-timeline-entry";
 import type { Doc, Id } from "~convex/dataModel";
 
 export type TimelineDocWithId = Doc<"timeline"> & {
@@ -81,10 +81,9 @@ export function TimelineGroupItemsContainer({
       <SortableContext items={items} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-4">
           {items.map((entry) => (
-            <OwnTimelineEntry
+            <SortableOwnTimelineEntry
               key={entry._id}
               entry={entry}
-              isGroupItem
               onWantsToDeleteFromGroup={handleRemove}
             />
           ))}

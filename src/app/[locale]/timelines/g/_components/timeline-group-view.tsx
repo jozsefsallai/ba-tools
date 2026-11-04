@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { TimelineGroupEntry } from "@/app/[locale]/timelines/g/_components/timeline-group-entry";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
+import { RaidSummary } from "@/components/raid/raid-summary";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { useQueryWithStatus } from "@/lib/convex";
+import { resolveGroupRaid } from "@/lib/raid-info";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
@@ -33,6 +35,8 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
       </MessageBox>
     );
   }
+
+  const raid = resolveGroupRaid(query.data.raid, query.data.inferredRaid);
 
   return (
     <div className="flex flex-col gap-10">
@@ -70,6 +74,8 @@ export function TimelineGroupView({ id }: TimelineGroupViewProps) {
             </div>
           )}
         </div>
+
+        {raid && <RaidSummary raid={raid} showDates />}
 
         {query.data.description && (
           <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">

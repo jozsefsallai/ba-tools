@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { TimelineGroupView } from "@/app/[locale]/user/timelines/_components/timeline-group-view";
+import { getRoadmapRaids } from "@/lib/roadmap/roadmap.server";
 import type { Id } from "~convex/dataModel";
 
 export default async function TimelineGroupPage({
@@ -12,5 +13,7 @@ export default async function TimelineGroupPage({
   await auth.protect();
   const { groupId } = await params;
 
-  return <TimelineGroupView groupId={groupId} />;
+  const roadmapRaids = await getRoadmapRaids();
+
+  return <TimelineGroupView groupId={groupId} roadmapRaids={roadmapRaids} />;
 }

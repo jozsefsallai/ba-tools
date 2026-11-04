@@ -17,6 +17,7 @@ import {
 import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { MarkdownRenderer } from "@/components/common/markdown-renderer";
 import { MessageBox } from "@/components/common/message-box";
+import { RaidSummary } from "@/components/raid/raid-summary";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -203,6 +204,8 @@ export function TimelineView({ id }: TimelineViewProps) {
         description: query.data.description ?? undefined,
         formation: query.data.formation,
         exportIncludeFormation,
+        raid: query.data.raid,
+        autoName: query.data.autoName,
       };
 
       const blob = await encodePngWithItxt(
@@ -275,6 +278,8 @@ export function TimelineView({ id }: TimelineViewProps) {
             </div>
           )}
         </div>
+
+        {query.data.raid && <RaidSummary raid={query.data.raid} showDates />}
 
         {query.data.description && (
           <div className="prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:mt-4 max-w-none">

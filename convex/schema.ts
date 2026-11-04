@@ -1,6 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import {
+  ALL_RAID_INFO_BOSSES,
+  DEFENSE_TYPES,
+  RAID_DIFFICULTIES,
+  RAID_TYPES,
+  TERRAINS,
+} from "@/lib/raid-info";
+import {
   BORROW_SLOT_GAMEMODES,
   GAME_SERVERS,
   PVP_SEASONS,
@@ -56,6 +63,40 @@ export const timelineFormation = v.object({
   displayOverline: v.optional(v.boolean()),
   noDisplayRole: v.optional(v.boolean()),
   groupsVertical: v.optional(v.boolean()),
+});
+
+export const raidType = v.union(...RAID_TYPES.map((type) => v.literal(type)));
+
+export const raidBoss = v.union(
+  ...ALL_RAID_INFO_BOSSES.map((boss) => v.literal(boss)),
+);
+
+export const raidDefenseType = v.union(
+  ...DEFENSE_TYPES.map((type) => v.literal(type)),
+);
+
+export const raidTerrain = v.union(
+  ...TERRAINS.map((terrain) => v.literal(terrain)),
+);
+
+export const raidDifficulty = v.union(
+  ...RAID_DIFFICULTIES.map((difficulty) => v.literal(difficulty)),
+);
+
+export const raidInfo = v.object({
+  type: raidType,
+  boss: v.optional(raidBoss),
+  defenseTypes: v.optional(v.array(raidDefenseType)),
+  terrains: v.optional(v.array(raidTerrain)),
+  difficulty: v.optional(raidDifficulty),
+  floor: v.optional(v.number()),
+  season: v.optional(
+    v.object({
+      id: v.string(),
+      startDate: v.string(),
+      endDate: v.string(),
+    }),
+  ),
 });
 
 export const timelineStudentItem = v.object({
@@ -300,6 +341,8 @@ export default defineSchema({
     formation: v.optional(timelineFormation),
     formationId: v.optional(v.id("formation")),
     exportIncludeFormation: v.optional(v.boolean()),
+    raid: v.optional(raidInfo),
+    autoName: v.optional(v.boolean()),
   }).index("by_userId", [
     "userId",
   ]),
@@ -311,6 +354,8 @@ export default defineSchema({
     visibility: v.union(v.literal("private"), v.literal("public")),
     showCreator: v.optional(v.boolean()),
     timelines: v.array(v.id("timeline")),
+    raid: v.optional(raidInfo),
+    autoName: v.optional(v.boolean()),
   }).index("by_userId", [
     "userId",
   ]),

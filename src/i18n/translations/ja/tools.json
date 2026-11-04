@@ -15,8 +15,6 @@
       },
       "settings": {
         "title": "設定",
-        "name": "タイムライン名",
-        "namePlaceholder": "無題のタイムライン",
         "visibility": "公開設定",
         "public": "公開",
         "private": "非公開",

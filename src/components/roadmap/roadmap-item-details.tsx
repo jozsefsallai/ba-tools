@@ -3,6 +3,7 @@
 import { EllipsisIcon } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import type { RoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
+import { DEFENSE_COLORS } from "@/lib/raid-labels";
 import { DAY_MS } from "@/lib/roadmap/constants";
 import { isDotItem, isInstantItem } from "@/lib/roadmap/layout";
 import { getRaidImage } from "@/lib/roadmap/raid-images";
@@ -23,14 +24,6 @@ const ATTACK_COLORS: Partial<Record<AttackType, string>> = {
   Mystic: "bg-type-blue",
   Sonic: "bg-type-purple",
   Chemical: "bg-type-green",
-};
-
-const DEFENSE_COLORS: Partial<Record<DefenseType, string>> = {
-  LightArmor: "bg-type-red",
-  HeavyArmor: "bg-type-yellow",
-  Unarmed: "bg-type-blue",
-  ElasticArmor: "bg-type-purple",
-  CompositeArmor: "bg-type-green",
 };
 
 function Chip({

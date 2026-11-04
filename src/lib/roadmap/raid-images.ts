@@ -21,10 +21,14 @@ import timeAttackEscortImage from "@/assets/images/raid/timeattack_escort.webp";
 import timeAttackShootingImage from "@/assets/images/raid/timeattack_shooting.webp";
 import tipharethImage from "@/assets/images/raid/tiphareth.png";
 import yesodImage from "@/assets/images/raid/yesod.png";
+
+import { getRoadmapRaidBoss } from "@/lib/raid-info";
 import type { RoadmapRaidItem } from "@/lib/roadmap/types";
+
 import type {
   MultiFloorRaidBoss,
   RaidBoss,
+  RaidType,
   TimeAttackDungeonType,
 } from "~prisma";
 
@@ -65,34 +69,53 @@ const TIME_ATTACK_DUNGEON_IMAGES: Record<
   Escort: timeAttackEscortImage,
 };
 
-export function getRaidImage(item: RoadmapRaidItem): {
+export type RaidArt = {
   image: StaticImageData;
   shape: "wide" | "square";
-} | null {
-  switch (item.type) {
+};
+
+export function getRaidArt(
+  type: RaidType,
+  boss?: string | null,
+): RaidArt | null {
+  if (!boss) {
+    return null;
+  }
+
+  switch (type) {
     case "Raid":
-    case "EliminateRaid":
-      return item.raidBoss
+    case "EliminateRaid": {
+      const image = RAID_BOSS_IMAGES[boss as RaidBoss];
+      return image
         ? {
-            image: RAID_BOSS_IMAGES[item.raidBoss],
+            image,
             shape: "wide",
           }
         : null;
-    case "MultiFloorRaid":
-      return item.multiFloorRaidBoss
+    }
+    case "MultiFloorRaid": {
+      const image = MULTI_FLOOR_RAID_BOSS_IMAGES[boss as MultiFloorRaidBoss];
+      return image
         ? {
-            image: MULTI_FLOOR_RAID_BOSS_IMAGES[item.multiFloorRaidBoss],
+            image,
             shape: "wide",
           }
         : null;
-    case "TimeAttackDungeon":
-      return item.timeAttackDungeonType
+    }
+    case "TimeAttackDungeon": {
+      const image = TIME_ATTACK_DUNGEON_IMAGES[boss as TimeAttackDungeonType];
+      return image
         ? {
-            image: TIME_ATTACK_DUNGEON_IMAGES[item.timeAttackDungeonType],
+            image,
             shape: "square",
           }
         : null;
+    }
     case "WorldRaid":
       return null;
   }
+}
+
+export function getRaidImage(item: RoadmapRaidItem): RaidArt | null {
+  return getRaidArt(item.type, getRoadmapRaidBoss(item));
 }

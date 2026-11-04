@@ -4,6 +4,12 @@ import {
   formationRow,
   formationStudentItem,
   pvpFormationStudentItem,
+  raidBoss,
+  raidDefenseType,
+  raidDifficulty,
+  raidInfo,
+  raidTerrain,
+  raidType,
   rosterItem,
   timelineFormation,
   timelineSeparatorItem,
@@ -47,6 +53,18 @@ export const formationArgs = {
   groupsVertical: v.optional(v.boolean()),
 };
 
+const optionalRaid = v.optional(v.union(raidInfo, v.null()));
+
+export const raidFilters = v.object({
+  types: v.optional(v.array(raidType)),
+  bosses: v.optional(v.array(raidBoss)),
+  defenseTypes: v.optional(v.array(raidDefenseType)),
+  terrains: v.optional(v.array(raidTerrain)),
+  difficulties: v.optional(v.array(raidDifficulty)),
+  floorMin: v.optional(v.number()),
+  floorMax: v.optional(v.number()),
+});
+
 export const timelineArgs = {
   name: v.optional(v.string()),
   description: v.optional(v.string()),
@@ -64,6 +82,8 @@ export const timelineArgs = {
   formation: v.optional(timelineFormation),
   formationId: v.optional(v.id("formation")),
   exportIncludeFormation: v.optional(v.boolean()),
+  raid: optionalRaid,
+  autoName: v.optional(v.boolean()),
 };
 
 export const timelineGroupCreateArgs = {
@@ -71,6 +91,8 @@ export const timelineGroupCreateArgs = {
   description: v.optional(v.string()),
   visibility,
   showCreator: v.optional(v.boolean()),
+  raid: optionalRaid,
+  autoName: v.optional(v.boolean()),
 };
 
 export const timelineGroupUpdateArgs = {
@@ -79,6 +101,8 @@ export const timelineGroupUpdateArgs = {
   visibility: v.optional(visibility),
   showCreator: v.optional(v.boolean()),
   timelines: v.optional(v.array(v.id("timeline"))),
+  raid: optionalRaid,
+  autoName: v.optional(v.boolean()),
 };
 
 export const rosterCreateArgs = {

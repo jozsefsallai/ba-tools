@@ -6,6 +6,7 @@ import {
   userMutation,
   userQuery,
 } from "@/lib/public-api/convex.server";
+import { withManualName } from "@/lib/public-api/resources/manual-name";
 import { mergeForUpdate } from "@/lib/public-api/route";
 import { toPage, toResource } from "@/lib/public-api/serialize";
 import { api } from "~convex/api";
@@ -26,6 +27,8 @@ const UPDATE_KEYS = [
   "formation",
   "formationId",
   "exportIncludeFormation",
+  "raid",
+  "autoName",
 ] as const;
 
 async function findTimeline(userId: string, id: string) {
@@ -71,7 +74,7 @@ export async function updateTimeline(
 
   return toResource(
     await userMutation(userId, api.timeline.update, {
-      ...mergeForUpdate(current, UPDATE_KEYS, patch),
+      ...mergeForUpdate(current, UPDATE_KEYS, withManualName(patch)),
       id: current._id,
     } as UserArgs<typeof api.timeline.update>),
   );

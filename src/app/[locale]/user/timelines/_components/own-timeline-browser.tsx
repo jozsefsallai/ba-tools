@@ -4,16 +4,23 @@ import { usePaginatedQuery, useQuery } from "convex/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { OwnTimelineEntry } from "@/app/[locale]/user/timelines/_components/own-timeline-entry";
-import { LoadMoreButton, SearchBar } from "@/components/common/list-controls";
+import { LoadMoreButton } from "@/components/common/list-controls";
 import { MessageBox } from "@/components/common/message-box";
+import {
+  RaidFilterBar,
+  useRaidFilterParams,
+} from "@/components/raid/raid-filter-bar";
 import { useDebounce } from "@/hooks/use-debounce";
+import { hasRaidFilters } from "@/lib/raid-info";
 import { api } from "~convex/api";
 
 export function OwnTimelineBrowser() {
   const t = useTranslations();
   const [search, setSearch] = useState("");
+  const [filters, setFilters] = useRaidFilterParams();
   const debouncedSearch = useDebounce(search, 200);
-  const isSearching = debouncedSearch.trim().length > 0;
+  const hasFilters = hasRaidFilters(filters);
+  const isSearching = debouncedSearch.trim().length > 0 || hasFilters;
 
   const {
     results: paginatedResults,
@@ -32,6 +39,7 @@ export function OwnTimelineBrowser() {
     isSearching
       ? {
           search: debouncedSearch.trim(),
+          filters,
         }
       : "skip",
   );
@@ -44,7 +52,7 @@ export function OwnTimelineBrowser() {
     return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
-  if (paginatedResults.length === 0 && !search) {
+  if (!isSearching && paginatedResults.length === 0 && !search) {
     return (
       <MessageBox>
         <p>{t("tools.myTimelines.ownTimelineBrowser.noTimelines")}</p>
@@ -54,7 +62,13 @@ export function OwnTimelineBrowser() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SearchBar value={search} onChange={setSearch} />
+      <RaidFilterBar
+        scope="timeline"
+        search={search}
+        onSearchChange={setSearch}
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
 
       {isSearchLoading && <MessageBox>{t("common.loading")}</MessageBox>}
 

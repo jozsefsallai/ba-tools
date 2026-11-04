@@ -6,13 +6,17 @@ import { DirtyStateTrackerProvider } from "@/components/providers/dirty-state-tr
 import { HelpSheet } from "@/components/sheets/help-sheet";
 import { Button } from "@/components/ui/button";
 import { getCardMetadata } from "@/lib/og-metadata.server";
+import { getRoadmapRaids } from "@/lib/roadmap/roadmap.server";
 
 export async function generateMetadata() {
   return getCardMetadata("timeline-visualizer", await getLocale());
 }
 
+export const revalidate = 3600;
+
 export default async function TimelineVisualizerPage() {
   const t = await getTranslations();
+  const roadmapRaids = await getRoadmapRaids();
 
   return (
     <div className="flex flex-col gap-10">
@@ -29,7 +33,7 @@ export default async function TimelineVisualizerPage() {
 
       <Suspense>
         <DirtyStateTrackerProvider>
-          <TimelineEditor />
+          <TimelineEditor roadmapRaids={roadmapRaids} />
         </DirtyStateTrackerProvider>
       </Suspense>
     </div>

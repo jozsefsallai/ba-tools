@@ -85,7 +85,7 @@ export function TimelineFormationSection({
   const { isSignedIn } = useUser();
   const { isAuthenticated } = useConvexAuth();
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
@@ -436,14 +436,14 @@ export function TimelineFormationSection({
               )}
 
               {hasSlots ? (
-                <div className="flex w-full justify-center max-md:justify-center-safe max-md:overflow-x-auto">
+                <div className="flex w-full justify-center max-md:justify-center-safe max-md:overflow-x-auto @5xl:justify-center-safe @5xl:overflow-x-auto">
                   <div
                     ref={previewZoomRef}
-                    className="max-md:shrink-0 md:[zoom:0.8] max-md:[zoom:0.75]"
+                    className="max-md:shrink-0 md:[zoom:0.8] max-md:[zoom:0.75] @5xl:shrink-0"
                   >
                     <DndZoomContext value={previewZoomRef}>
                       <FormationRowsStack
-                        className="max-md:w-max max-md:max-w-none max-md:shrink-0"
+                        className="max-md:w-max max-md:max-w-none max-md:shrink-0 @5xl:w-max @5xl:max-w-none @5xl:shrink-0"
                         rowGap={formation.rowGap ?? 8}
                         items={rows.map((row, rowIndex) => ({
                           key: row.id,

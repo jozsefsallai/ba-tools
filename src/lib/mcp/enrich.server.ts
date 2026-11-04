@@ -1,6 +1,7 @@
 import "server-only";
 
 import commonEn from "@/i18n/translations/en/common.json";
+import staticEn from "@/i18n/translations/en/static.json";
 import { db } from "@/lib/db";
 
 /**
@@ -14,6 +15,7 @@ const ENUM_SECTIONS = {
   club: "club",
   attackType: "attackType",
   defenseType: "defenseType",
+  defenseTypes: "defenseType",
   combatClass: "combatClass",
   combatRole: "combatRole",
   combatPosition: "combatPosition",
@@ -84,6 +86,48 @@ function mapDeep(
   return visit(out);
 }
 
+const RAID_KEYS = new Set([
+  "raid",
+  "inferredRaid",
+]);
+
+function raidBossLabel(type: string, boss: string) {
+  const { roadmap } = staticEn;
+
+  switch (type) {
+    case "Raid":
+    case "EliminateRaid":
+      return (commonEn.raids as Record<string, string>)[boss.toLowerCase()];
+    case "MultiFloorRaid":
+      return (roadmap.multiFloorRaidBosses as Record<string, string>)[boss];
+    case "TimeAttackDungeon":
+      return (roadmap.timeAttackDungeonTypes as Record<string, string>)[boss];
+    case "WorldRaid":
+      return (roadmap.worldRaidBosses as Record<string, string>)[boss];
+    default:
+      return undefined;
+  }
+}
+
+function withRaidLabels(raid: Record<string, unknown>) {
+  const { type, boss } = raid;
+  const out = {
+    ...raid,
+  };
+
+  if (typeof type === "string") {
+    out.typeLabel = (staticEn.roadmap.raidTypes as Record<string, string>)[
+      type
+    ];
+
+    if (typeof boss === "string") {
+      out.bossLabel = raidBossLabel(type, boss) ?? boss;
+    }
+  }
+
+  return out;
+}
+
 export function withEnumLabels(value: unknown) {
   return mapDeep(value, (record) => {
     const out = {
@@ -91,6 +135,10 @@ export function withEnumLabels(value: unknown) {
     };
 
     for (const [key, child] of Object.entries(record)) {
+      if (RAID_KEYS.has(key) && isRecord(child)) {
+        out[key] = withRaidLabels(child);
+      }
+
       if (key in ENUM_SECTIONS) {
         const section = ENUM_SECTIONS[key as keyof typeof ENUM_SECTIONS];
         const mapped = Array.isArray(child)

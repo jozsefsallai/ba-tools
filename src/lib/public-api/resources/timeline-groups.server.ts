@@ -6,6 +6,7 @@ import {
   userMutation,
   userQuery,
 } from "@/lib/public-api/convex.server";
+import { withManualName } from "@/lib/public-api/resources/manual-name";
 import { toPage, toResource } from "@/lib/public-api/serialize";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -48,7 +49,7 @@ export async function updateTimelineGroup(
   patch: Record<string, unknown>,
 ) {
   await userMutation(userId, api.timelineGroup.update, {
-    ...patch,
+    ...withManualName(patch),
     id: id as Id<"timelineGroup">,
   } as UserArgs<typeof api.timelineGroup.update>);
 

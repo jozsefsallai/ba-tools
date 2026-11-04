@@ -3,6 +3,8 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useRoadmapTimeZone } from "@/components/roadmap/roadmap-time-zone";
+import { getRoadmapRaidBoss } from "@/lib/raid-info";
+import { getRaidBossLabel } from "@/lib/raid-labels";
 import { isPermanent } from "@/lib/roadmap/constants";
 import { intlTimeZone } from "@/lib/roadmap/time-zone";
 import type {
@@ -65,31 +67,10 @@ export function useRoadmapLabels() {
     });
 
     function raidName(item: RoadmapRaidItem): string {
-      switch (item.type) {
-        case "Raid":
-        case "EliminateRaid":
-          return item.raidBoss
-            ? t(
-                `common.raids.${item.raidBoss.toLowerCase() as Lowercase<RaidBoss>}`,
-              )
-            : t("static.roadmap.unknownBoss");
-        case "MultiFloorRaid":
-          return item.multiFloorRaidBoss
-            ? t(
-                `static.roadmap.multiFloorRaidBosses.${item.multiFloorRaidBoss}`,
-              )
-            : t("static.roadmap.unknownBoss");
-        case "WorldRaid":
-          return item.worldRaidBoss
-            ? t(`static.roadmap.worldRaidBosses.${item.worldRaidBoss}`)
-            : t("static.roadmap.unknownBoss");
-        case "TimeAttackDungeon":
-          return item.timeAttackDungeonType
-            ? t(
-                `static.roadmap.timeAttackDungeonTypes.${item.timeAttackDungeonType}`,
-              )
-            : t("static.roadmap.unknownBoss");
-      }
+      return (
+        getRaidBossLabel(t, item.type, getRoadmapRaidBoss(item)) ??
+        t("static.roadmap.unknownBoss")
+      );
     }
 
     function category(kind: RoadmapCategory): string {

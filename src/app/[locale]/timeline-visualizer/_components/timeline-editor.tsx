@@ -25,7 +25,9 @@ import {
   TimelinePreview,
 } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/[locale]/timeline-visualizer/_components/timeline-quick-add";
+import { TimelineRaidSection } from "@/app/[locale]/timeline-visualizer/_components/timeline-raid-section";
 import { TimelineTextMenu } from "@/app/[locale]/timeline-visualizer/_components/timeline-text-menu";
+import { TimelineTitleInput } from "@/app/[locale]/timeline-visualizer/_components/timeline-title-input";
 import { useTimelineHistory } from "@/app/[locale]/timeline-visualizer/_hooks/use-timeline-history";
 import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { MarkdownTips } from "@/components/common/markdown-tips";
@@ -51,6 +53,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { getInitialAutoName, useAutoName } from "@/hooks/use-auto-name";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
@@ -60,6 +63,8 @@ import { clearCache } from "@/lib/cache";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { decodePngItxt, encodePngWithItxt } from "@/lib/png-metadata";
+import { compareRaids, type RaidInfo } from "@/lib/raid-info";
+import type { RoadmapRaidItem } from "@/lib/roadmap/types";
 import { prepareCdnImagesForScreenshot } from "@/lib/screenshot";
 import { sleep } from "@/lib/sleep";
 import {
@@ -86,7 +91,11 @@ import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
 
-export function TimelineEditor() {
+export type TimelineEditorProps = {
+  roadmapRaids: RoadmapRaidItem[];
+};
+
+export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
   const t = useTranslations();
 
   const { students: allStudents } = useStudents();
@@ -109,6 +118,18 @@ export function TimelineEditor() {
   const { preferences } = useUserPreferences();
 
   const [name, setName, setNameUnchecked] = useSaveableState("");
+  const [autoName, setAutoName, setAutoNameUnchecked] = useSaveableState(true);
+  const [raid, setRaid, setRaidUnchecked] = useSaveableState<
+    RaidInfo | undefined
+  >(undefined, compareRaids);
+
+  const { onNameChange, seedAutoName } = useAutoName({
+    raid,
+    autoName,
+    setName,
+    setAutoName,
+  });
+
   const [visibility, setVisibility, setVisibilityUnchecked] = useSaveableState<
     "public" | "private"
   >(preferences.timelineVisualizer.defaultVisibility);
@@ -485,6 +506,8 @@ export function TimelineEditor() {
       description: description.length > 0 ? description : undefined,
       formation: formationStateToStoredData(formation),
       exportIncludeFormation,
+      raid,
+      autoName: autoName && name.length > 0 ? true : undefined,
     };
   }
 
@@ -575,6 +598,8 @@ export function TimelineEditor() {
           ? (formation.id as Id<"formation">)
           : undefined,
       exportIncludeFormation,
+      raid,
+      autoName: autoName && name.length > 0 ? true : undefined,
     };
 
     if (timelineId) {
@@ -623,7 +648,12 @@ export function TimelineEditor() {
     const newItems = deserializeTimelineItems(storedData.items, allStudents);
 
     resetHistory();
+    seedAutoName(storedData.raid);
+    setRaidUnchecked(storedData.raid);
     setNameUnchecked(storedData.name ?? "");
+    setAutoNameUnchecked(
+      getInitialAutoName(storedData.name, storedData.autoName),
+    );
     setDescriptionUnchecked(storedData.description ?? "");
     setItemsUnchecked(newItems);
     setFormationUnchecked(
@@ -751,7 +781,10 @@ export function TimelineEditor() {
 
   useEffect(() => {
     if (!timelineId) {
+      seedAutoName(undefined);
+      setRaidUnchecked(undefined);
       setNameUnchecked("");
+      setAutoNameUnchecked(true);
       setDescriptionUnchecked("");
       setVisibilityUnchecked(preferences.timelineVisualizer.defaultVisibility);
       setShowCreatorUnchecked(
@@ -784,7 +817,12 @@ export function TimelineEditor() {
       const newItems = deserializeTimelineItems(query.data.items, allStudents);
 
       resetHistory();
+      seedAutoName(query.data.raid);
+      setRaidUnchecked(query.data.raid);
       setNameUnchecked(query.data.name ?? "");
+      setAutoNameUnchecked(
+        getInitialAutoName(query.data.name, query.data.autoName),
+      );
       setDescriptionUnchecked(query.data.description ?? "");
       setVisibilityUnchecked(query.data.visibility || "private");
       setShowCreatorUnchecked(query.data.showCreator || false);
@@ -899,10 +937,22 @@ export function TimelineEditor() {
         </p>
       </div>
 
-      <TimelineFormationSection
-        formation={formation}
-        setFormation={setFormation}
-      />
+      <div className="@container flex flex-col gap-4">
+        <TimelineTitleInput value={name} onChange={onNameChange} />
+
+        <div className="grid grid-cols-1 items-start gap-4 @5xl:grid-cols-2 @5xl:gap-6">
+          <TimelineRaidSection
+            raid={raid}
+            setRaid={setRaid}
+            roadmapRaids={roadmapRaids}
+          />
+
+          <TimelineFormationSection
+            formation={formation}
+            setFormation={setFormation}
+          />
+        </div>
+      </div>
 
       <div
         className={cn("flex flex-col", {
@@ -1013,21 +1063,6 @@ export function TimelineEditor() {
             <Authenticated>
               <TabsContent value="settings" className="flex flex-col gap-4">
                 <div className="flex gap-4 max-md:flex-col">
-                  <div className="flex gap-2 items-center shrink-0 w-full max-w-md">
-                    <Label className="shrink-0">
-                      {t("tools.timeline.tabs.settings.name")}
-                    </Label>
-
-                    <Input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder={t(
-                        "tools.timeline.tabs.settings.namePlaceholder",
-                      )}
-                    />
-                  </div>
-
                   <div className="flex gap-2 items-center">
                     <Label className="shrink-0">
                       {t("tools.timeline.tabs.settings.visibility")}

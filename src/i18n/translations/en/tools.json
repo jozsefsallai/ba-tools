@@ -1,5 +1,6 @@
 {
   "timeline": {
+    "titleLabel": "Timeline name",
     "title": "Timeline Visualizer",
     "description": "This tool allows you to create a visual rotation timeline (e.g. for a raid). You can select students, adjust the spacing between them, set the cost/timestamp at which the student's skill cost should be used, and more.",
     "notice": "<strong>Note:</strong> Dark mode extensions and zoom levels may cause rendering issues in the resulting image. If the generated image looks weird, try disabling any dark mode extensions you may have and using 100% zoom.",
@@ -17,8 +18,6 @@
 
       "settings": {
         "title": "Settings",
-        "name": "Timeline Name",
-        "namePlaceholder": "Untitled Timeline",
         "visibility": "Visibility",
         "public": "Public",
         "private": "Private",
@@ -1547,7 +1546,53 @@
     "editGroup": "Edit Group",
     "timelines": "Timelines",
     "noTimelines": "This group has no timelines.",
+    "viewTimeline": "View",
     "defaultDescription": "A group of visual EX skill rotation timelines."
+  },
+
+  "raidDetails": {
+    "title": "Raid Details",
+    "optional": "Optional",
+    "emptyDescription": "Tag what this is for. Everything here is optional.",
+    "type": "Raid type",
+    "recommended": "Recommended",
+    "showAll": "Show all ({count})",
+    "showLess": "Show less",
+    "ongoingUntil": "Ongoing until {date}",
+    "linkedSeason": "Global Roadmap: {dates}",
+    "unlinkSeason": "Remove the link to this raid",
+    "notSet": "Not set",
+    "auto": "Auto",
+    "resetToAuto": "Reset to auto",
+    "clear": "Clear",
+    "autoDescription": "Filled in from what this group's timelines have in common. Pick a value to override it.",
+    "boss": {
+      "Raid": "Boss",
+      "EliminateRaid": "Boss",
+      "MultiFloorRaid": "Boss",
+      "TimeAttackDungeon": "Drill",
+      "WorldRaid": "Boss"
+    },
+    "defense": "Defense types",
+    "terrain": "Terrain",
+    "difficulty": "Difficulty",
+    "floor": "Floor",
+    "globalSeason": "Global: {dates}",
+    "filters": {
+      "type": "Raid type",
+      "boss": "Boss",
+      "defense": "Defense",
+      "terrain": "Terrain",
+      "difficulty": "Difficulty",
+      "floor": "Floor",
+      "floorFrom": "From",
+      "floorTo": "To",
+      "clearAll": "Clear all",
+      "search": {
+        "timeline": "Search timelines...",
+        "group": "Search timeline groups..."
+      }
+    }
   },
 
   "myTimelines": {
@@ -1573,8 +1618,20 @@
       }
     },
 
+    "moreActions": "More actions",
+    "addDialog": {
+      "title": "Add Timelines",
+      "description": "Pick the timelines to add to this group.",
+      "matches": "Matches this group",
+      "others": "Other timelines",
+      "alreadyAdded": "Already added",
+      "add": "Add timelines",
+      "addCount": "Add {count, plural, one {# timeline} other {# timelines}}"
+    },
     "editGroup": {
       "title": "Edit Timeline Group",
+      "timelinesCount": "Timelines ({count})",
+      "addTimelines": "Add Timelines",
       "addTimeline": "Add Timeline",
       "selectTimeline": "Select Timeline to Add",
       "searchPlaceholder": "Type to search...",

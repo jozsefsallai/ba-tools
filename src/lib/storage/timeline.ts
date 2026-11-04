@@ -2,6 +2,7 @@ import type {
   SeparatorItem,
   TextItem,
 } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
+import type { RaidInfo } from "@/lib/raid-info";
 import { Storage } from "@/lib/storage";
 import type { TimelineFormationData } from "@/lib/timeline-formation";
 
@@ -35,6 +36,8 @@ export type TimelineStorageData = {
   exportBackgroundOpacity?: number;
   formation?: TimelineFormationData;
   exportIncludeFormation?: boolean;
+  raid?: RaidInfo;
+  autoName?: boolean;
 };
 
 export const DEFAULT_EXPORT_WITH_TRANSPARENT_BACKGROUND = true;

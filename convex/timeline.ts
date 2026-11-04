@@ -1,11 +1,13 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { matchesRaidFilters } from "@/lib/raid-info";
 import type { Id } from "~convex/dataModel";
 import type { MutationCtx } from "~convex/server";
 import { query } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
 import { notFound } from "./lib/errors";
-import { timelineArgs } from "./lib/validators";
+import { assertValidRaid } from "./lib/raid";
+import { raidFilters, timelineArgs } from "./lib/validators";
 
 async function assertFormationLinkAllowed(
   ctx: MutationCtx,
@@ -48,7 +50,8 @@ export const getOwnPaginated = authenticatedQuery({
 
 export const searchOwn = authenticatedQuery({
   args: {
-    search: v.string(),
+    search: v.optional(v.string()),
+    filters: v.optional(raidFilters),
   },
   handler: async (ctx, args) => {
     const all = await ctx.db
@@ -56,8 +59,12 @@ export const searchOwn = authenticatedQuery({
       .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
       .order("desc")
       .collect();
-    const term = args.search.toLowerCase();
-    return all.filter((item) => (item.name ?? "").toLowerCase().includes(term));
+    const term = (args.search ?? "").toLowerCase();
+    return all.filter(
+      (item) =>
+        (item.name ?? "").toLowerCase().includes(term) &&
+        matchesRaidFilters(item.raid, args.filters ?? {}),
+    );
   },
 });
 
@@ -65,6 +72,7 @@ export const create = authenticatedMutation({
   args: timelineArgs,
   handler: async (ctx, args) => {
     await assertFormationLinkAllowed(ctx, ctx.user._id, args.formationId);
+    assertValidRaid(args.raid, "timeline");
 
     const timeline = {
       userId: ctx.user._id,
@@ -82,6 +90,8 @@ export const create = authenticatedMutation({
       formation: args.formation,
       formationId: args.formationId,
       exportIncludeFormation: args.exportIncludeFormation,
+      raid: args.raid ?? undefined,
+      autoName: args.autoName,
     };
 
     const id = await ctx.db.insert("timeline", timeline);
@@ -96,6 +106,7 @@ export const update = authenticatedMutation({
   },
   handler: async (ctx, args) => {
     await assertFormationLinkAllowed(ctx, ctx.user._id, args.formationId);
+    assertValidRaid(args.raid, "timeline");
 
     const timeline = {
       name: args.name,
@@ -112,6 +123,8 @@ export const update = authenticatedMutation({
       formation: args.formation,
       formationId: args.formationId,
       exportIncludeFormation: args.exportIncludeFormation,
+      raid: args.raid ?? undefined,
+      autoName: args.autoName,
     };
 
     const current = await ctx.db.get(args.id);

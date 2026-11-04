@@ -608,3 +608,17 @@ export async function offsetRoadmapItems(
 
   return updated.map((row) => serialize(kind, row));
 }
+
+export async function getRoadmapRaids(): Promise<RoadmapRaidItem[]> {
+  try {
+    const items = await getCachedRoadmapItems();
+
+    return items.filter(
+      (item): item is RoadmapRaidItem =>
+        item.kind === "raid" || item.kind === "frr",
+    );
+  } catch (err) {
+    console.error("Failed to load roadmap raids", err);
+    return [];
+  }
+}

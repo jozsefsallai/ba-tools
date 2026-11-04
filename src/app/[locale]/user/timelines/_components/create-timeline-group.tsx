@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MarkdownTips } from "@/components/common/markdown-tips";
+import { RaidDetailsForm } from "@/components/raid/raid-details-form";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,15 +18,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAutoName } from "@/hooks/use-auto-name";
 import { useRouter } from "@/i18n/navigation";
+import type { RaidInfo } from "@/lib/raid-info";
+import type { RoadmapRaidItem } from "@/lib/roadmap/types";
 import { api } from "~convex/api";
 
-export function CreateTimelineGroup() {
+export type CreateTimelineGroupProps = {
+  roadmapRaids: RoadmapRaidItem[];
+};
+
+export function CreateTimelineGroup({
+  roadmapRaids,
+}: CreateTimelineGroupProps) {
   const t = useTranslations();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<"private" | "public">("private");
   const [showCreator, setShowCreator] = useState(false);
+
+  const [raid, setRaid] = useState<RaidInfo | undefined>(undefined);
+  const [autoName, setAutoName] = useState(true);
+
+  const { onNameChange } = useAutoName({
+    raid,
+    autoName,
+    setName,
+    setAutoName,
+  });
 
   const router = useRouter();
 
@@ -37,6 +58,8 @@ export function CreateTimelineGroup() {
         description: description.length > 0 ? description : undefined,
         visibility,
         showCreator: visibility === "public" ? showCreator : false,
+        raid,
+        autoName: autoName || undefined,
       });
 
       toast.success(t("tools.myTimelines.createGroup.toasts.success"));
@@ -58,7 +81,7 @@ export function CreateTimelineGroup() {
         <Input
           id="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => onNameChange(e.target.value)}
           placeholder={t("tools.myTimelines.createGroup.namePlaceholder")}
         />
       </div>
@@ -119,6 +142,24 @@ export function CreateTimelineGroup() {
           </Select>
         </div>
       )}
+
+      <Card>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h3 className="font-semibold">{t("tools.raidDetails.title")}</h3>
+            <p className="text-sm text-muted-foreground">
+              {t("tools.raidDetails.emptyDescription")}
+            </p>
+          </div>
+
+          <RaidDetailsForm
+            scope="group"
+            value={raid}
+            onChange={setRaid}
+            roadmapRaids={roadmapRaids}
+          />
+        </CardContent>
+      </Card>
 
       <div>
         <Button onClick={handleCreate} disabled={name.length === 0}>
