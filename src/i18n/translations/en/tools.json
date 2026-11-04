@@ -108,6 +108,20 @@
 
     "exportFailed": "Couldn't generate the image.",
 
+    "selection": {
+      "hint": "Drag across empty space or Ctrl+click to select several, then drag them together or right-click for more.",
+      "count": "{count, plural, one {# item selected} other {# items selected}}",
+      "duplicate": "Duplicate",
+      "moveToStart": "Move to start",
+      "moveToEnd": "Move to end",
+      "remove": "Remove",
+      "selectAll": "Select all",
+      "clear": "Clear selection",
+      "removed": "{count, plural, one {Removed # item} other {Removed # items}}",
+      "copied": "{count, plural, one {Copied # item} other {Copied # items}}",
+      "undo": "Undo"
+    },
+
     "formation": {
       "title": "Formation",
       "emptyDescription": "Set the team for this rotation. Its students appear in Quick Add and as target shortcuts, and it can be included in the exported image.",

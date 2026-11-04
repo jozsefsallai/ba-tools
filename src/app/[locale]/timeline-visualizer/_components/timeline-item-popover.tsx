@@ -439,6 +439,7 @@ export function TimelineItemPopover({
         maxHeight: "calc(var(--radix-popover-content-available-height) - 1rem)",
       }}
       onOpenAutoFocus={(e) => e.preventDefault()}
+      onContextMenu={(e) => e.stopPropagation()}
       onPointerDownOutside={(e) => {
         if (isTimelinePreviewAnchorTarget(e.target)) {
           e.preventDefault();

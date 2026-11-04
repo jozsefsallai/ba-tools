@@ -26,6 +26,7 @@ import {
 } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { TimelineQuickAdd } from "@/app/[locale]/timeline-visualizer/_components/timeline-quick-add";
 import { TimelineTextMenu } from "@/app/[locale]/timeline-visualizer/_components/timeline-text-menu";
+import { useTimelineHistory } from "@/app/[locale]/timeline-visualizer/_hooks/use-timeline-history";
 import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { MarkdownTips } from "@/components/common/markdown-tips";
 import { MessageBox } from "@/components/common/message-box";
@@ -76,44 +77,14 @@ import {
   hasFormationSlots,
   type TimelineFormationState,
 } from "@/lib/timeline-formation";
+import {
+  deserializeTimelineItems,
+  serializeTimelineItems,
+} from "@/lib/timeline-items";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
-
-function serializeTimelineItems(
-  items: TimelineItem[],
-): TimelineStorageData["items"] {
-  return items.map((item) => {
-    if (item.type === "student") {
-      return {
-        type: "student",
-        studentId: item.student.id,
-        trigger: item.trigger,
-        targetId: item.target?.id,
-        extraTargetIds: (item.extraTargets ?? [])
-          .map((target) => target?.id)
-          .filter((id): id is string => !!id),
-        copy: item.copy,
-        variantId: item.variantId,
-        notes: item.notes,
-      };
-    }
-
-    if (item.type === "separator") {
-      return {
-        type: "separator",
-        orientation: item.orientation,
-        size: item.size,
-      };
-    }
-
-    return {
-      type: "text",
-      text: item.text,
-    };
-  });
-}
 
 export function TimelineEditor() {
   const t = useTranslations();
@@ -217,6 +188,8 @@ export function TimelineEditor() {
       return true;
     }, []),
   );
+
+  const { undo, redo, resetHistory } = useTimelineHistory(items, setItems);
 
   const [scale, setScale, setScaleUnchecked] = useSaveableState(
     preferences.timelineVisualizer.defaultScale,
@@ -472,6 +445,8 @@ export function TimelineEditor() {
       onWantsToRemove: removeItem,
       onWantsToUpdate: updateItem,
       onWantsToInsertAfter: insertItemAfter,
+      onUndo: undo,
+      onRedo: redo,
       uniqueStudents,
       onTriggerKeyDown: handleTriggerKeyDown,
       focusTriggerFieldItemId,
@@ -485,6 +460,8 @@ export function TimelineEditor() {
       removeItem,
       updateItem,
       insertItemAfter,
+      undo,
+      redo,
       uniqueStudents,
       handleTriggerKeyDown,
       focusTriggerFieldItemId,
@@ -643,43 +620,9 @@ export function TimelineEditor() {
       return;
     }
 
-    const newItems: TimelineItem[] = [];
+    const newItems = deserializeTimelineItems(storedData.items, allStudents);
 
-    for (const item of storedData.items) {
-      if (item.type === "student" && item.studentId) {
-        const student = allStudents.find((s) => s.id === item.studentId);
-        if (!student) {
-          continue;
-        }
-
-        let target: Student | undefined;
-        if (item.targetId) {
-          target = allStudents.find((s) => s.id === item.targetId);
-        }
-
-        const extraTargets = (item.extraTargetIds ?? []).map((id) =>
-          allStudents.find((student) => student.id === id),
-        );
-
-        newItems.push({
-          type: "student",
-          id: uuid(),
-          student,
-          target,
-          extraTargets,
-          copy: item.copy,
-          trigger: item.trigger,
-          variantId: item.variantId,
-          notes: item.notes,
-        });
-      } else if (item.type !== "student") {
-        newItems.push({
-          ...item,
-          id: uuid(),
-        });
-      }
-    }
-
+    resetHistory();
     setNameUnchecked(storedData.name ?? "");
     setDescriptionUnchecked(storedData.description ?? "");
     setItemsUnchecked(newItems);
@@ -814,6 +757,7 @@ export function TimelineEditor() {
       setShowCreatorUnchecked(
         preferences.timelineVisualizer.defaultShowCreator,
       );
+      resetHistory();
       setItemsUnchecked([]);
       setFormationUnchecked(null);
       setExportIncludeFormationUnchecked(true);
@@ -837,43 +781,9 @@ export function TimelineEditor() {
     }
 
     if (query.status === "success") {
-      const newItems: TimelineItem[] = [];
+      const newItems = deserializeTimelineItems(query.data.items, allStudents);
 
-      for (const item of query.data.items) {
-        if (item.type === "student") {
-          const student = allStudents.find((s) => s.id === item.studentId);
-          if (!student) {
-            continue;
-          }
-
-          let target: Student | undefined;
-          if (item.targetId) {
-            target = allStudents.find((s) => s.id === item.targetId);
-          }
-
-          const extraTargets = (item.extraTargetIds ?? []).map((id) =>
-            allStudents.find((student) => student.id === id),
-          );
-
-          newItems.push({
-            type: "student",
-            id: uuid(),
-            student,
-            target,
-            extraTargets,
-            copy: item.copy,
-            trigger: item.trigger,
-            variantId: item.variantId,
-            notes: item.notes,
-          });
-        } else {
-          newItems.push({
-            ...item,
-            id: uuid(),
-          });
-        }
-      }
-
+      resetHistory();
       setNameUnchecked(query.data.name ?? "");
       setDescriptionUnchecked(query.data.description ?? "");
       setVisibilityUnchecked(query.data.visibility || "private");
@@ -1001,7 +911,10 @@ export function TimelineEditor() {
       >
         {items.length > 0 && (
           <p className="text-sm text-muted-foreground">
-            {t("tools.timeline.clickToEditPreview")}
+            {t("tools.timeline.clickToEditPreview")}{" "}
+            <span className="pointer-coarse:hidden">
+              {t("tools.timeline.selection.hint")}
+            </span>
           </p>
         )}
 
