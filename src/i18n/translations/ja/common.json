@@ -45,7 +45,6 @@
   "untitledFormation": "無題の編成",
   "untitledTimeline": "無題のタイムライン",
   "untitledTimelineGroup": "無題のタイムライングループ",
-  "viewAll": "すべて表示",
   "clickAgainToConfirm": "もう一度クリックして確定します",
   "signIn": "ログイン",
   "header": {
@@ -65,9 +64,9 @@
         "title": "その他",
         "formationDisplay": "編成表示",
         "roster": "マイロスター",
+        "recruitment": "募集記録 (BETA)",
         "titleGenerator": "称号ジェネレーター",
         "gachaRateStats": "ガチャ確率統計",
-        "recruitment": "募集記録 (BETA)",
         "scenarioImageGenerator": "シナリオ画像メーカー",
         "planaAi": "Plana AI"
       },
@@ -403,9 +402,8 @@
   "breadcrumbs": {
     "ancestorMenu": "親ページを表示"
   },
-
   "import": "インポート",
-
+  "viewAll": "すべて表示",
   "searchPlaceholder": "検索...",
   "filters": {
     "selected": "{count}件選択",

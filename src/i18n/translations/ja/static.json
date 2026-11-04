@@ -153,7 +153,6 @@
     "title": "フラップ・ペロロ",
     "description": "モモフレンズのペロロが登場する「Flappy Bird」風ゲームだよ。"
   },
-
   "roadmap": {
     "title": "グローバル版ロードマップ",
     "description": "ブルーアーカイブ グローバル版で今後開催予定のガチャ、レイド、イベント、ストーリー、キャンペーンの予想スケジュールだよ。日本版の開催スケジュールをもとにしてるから、変更される可能性もあるよ。時間はすべてUTCで表示してるよ。",
@@ -169,6 +168,7 @@
     },
     "localTime": "ローカル時間",
     "zoom": "ズーム",
+    "utc": "UTC",
     "today": "今日",
     "permanent": "常設",
     "from": "{date}から",
@@ -205,6 +205,27 @@
       "TheFuryOfSet": "セトの憤怒",
       "Chokmah": "コクマー",
       "Tiphareth": "ティファレト"
+    },
+    "worldRaidBosses": {
+      "WakamoSwimsuit": "ワカモ（水着）",
+      "WakamoHovercraft": "ワカモ（グレゴリオ）",
+      "BinahColor": "ビナー（色彩）",
+      "ChesedColor": "ケセド（色彩）",
+      "ShiroKuroColor": "シロ&クロ（色彩）",
+      "HieronymusColor": "ヒエロニムス（色彩）",
+      "HodColor": "ホド（色彩）",
+      "PerorodzillaColor": "ペロロジラ（色彩）",
+      "ShirokoTerror": "シロコ＊テラー",
+      "Binah": "ビナー",
+      "Chesed": "ケセド",
+      "Hod": "ホド",
+      "Kether": "ケテル",
+      "Tiphareth": "ティファレト",
+      "Geburah": "ゲブラ",
+      "Chokmah": "コクマー",
+      "Yesod": "イェソド",
+      "Malkuth": "マルクト",
+      "Decagrammaton": "デカグラマトン"
     },
     "eventTypes": {
       "Initial": "新規",
