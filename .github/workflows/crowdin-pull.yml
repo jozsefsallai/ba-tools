@@ -1,0 +1,56 @@
+name: Crowdin pull
+
+on:
+  repository_dispatch:
+    types:
+      - crowdin-project-built
+  workflow_dispatch:
+
+concurrency:
+  group: crowdin
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Download the latest build
+        run: bash scripts/crowdin-pull.sh
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      - run: pnpm exec biome format --write src/i18n/translations
+
+      - run: pnpm run translations:check
+
+      - name: Commit changes
+        run: |
+          if [[ -z "$(git status --porcelain -- src/i18n/translations)" ]]; then
+            echo "No translation changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/i18n/translations
+          git commit -m "update translations from Crowdin"
+          git pull --rebase origin master
+          git push origin HEAD:master

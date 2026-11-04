@@ -26,6 +26,7 @@
     "vendor:init": "git submodule update --init --checkout vendor/mx-data-sync && pnpm --dir vendor/mx-data-sync install",
     "game-data:new-students": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/list-new-students.ts",
     "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts",
+    "translations:check": "tsx scripts/check-translations.ts",
     "game-data:skills": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-student-skills.ts"
   },
   "dependencies": {
@@ -133,6 +134,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1146.0",
     "@biomejs/biome": "^2.6.4",
+    "@formatjs/icu-messageformat-parser": "^3.5.22",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/typography": "^0.5.20",
     "@trigger.dev/build": "^4.6.3",

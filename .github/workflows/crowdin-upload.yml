@@ -1,0 +1,64 @@
+name: Crowdin upload
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - src/i18n/translations/**
+  workflow_dispatch:
+    inputs:
+      upload_translations:
+        description: Also import all translations from the repo into Crowdin
+        type: boolean
+        default: false
+
+concurrency:
+  group: crowdin
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check for translation changes
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_UPLOAD: ${{ inputs.upload_translations }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            upload="$MANUAL_UPLOAD"
+          elif ! changed="$(git diff --name-only "$BEFORE" "$AFTER" -- src/i18n/translations ':!src/i18n/translations/en')"; then
+            # Unknown previous commit (e.g. a force push). Uploading keeps
+            # repo edits that the next pull would otherwise drop.
+            upload=true
+          elif [[ -n "$changed" ]]; then
+            upload=true
+          else
+            upload=false
+          fi
+
+          echo "upload_translations=$upload" >> "$GITHUB_OUTPUT"
+
+      - uses: crowdin/github-action@v3.5.1
+        with:
+          upload_sources: true
+          upload_translations: ${{ steps.changes.outputs.upload_translations }}
+          auto_approve_imported: true
+          download_translations: false
+          push_translations: false
+          create_pull_request: false
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

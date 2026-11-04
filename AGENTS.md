@@ -62,6 +62,15 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 - **Shadcn/ui**: add components via `npx shadcn@latest add <component>`, not manually.
 - **PWA (Serwist)**: service worker built from `src/sw.ts` → `public/sw.js`. Disabled in development.
 
+## Translations (Crowdin)
+
+`src/i18n/translations/en/` is the source; everything else syncs with [Crowdin](https://crowdin.com/project/joexyz-ba-tools). Setup is in `crowdin.yml` and `.github/workflows/crowdin-*.yml`.
+
+- **Repo to Crowdin:** pushing locale changes to `master` uploads the English sources. If a push changes other locales, those are uploaded too and auto-approved. Renaming a key counts as deleting it, so its translations are lost on Crowdin.
+- **Crowdin to repo:** building the project on Crowdin fires a webhook that commits the new translations to `master`, which deploys to production. Only approved strings are exported; the rest fall back to English.
+- **Don't use `crowdin download translations` in the pull workflow.** It creates a build, which fires the webhook again and loops forever. `scripts/crowdin-pull.sh` reads the latest existing build instead.
+- **`pnpm run translations:check`** validates locale files against English (unknown keys, ICU syntax, placeholders, large key losses). The pull workflow won't commit if it fails.
+
 ## Go/WASM Native Module
 
 - `native/` — standalone Go module compiled with **TinyGo** (not standard Go). Exposes `NativeModules.simulateInventoryManagement` (Monte Carlo sim, 30k iterations).
