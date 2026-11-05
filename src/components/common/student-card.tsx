@@ -129,7 +129,7 @@ export function StudentCard({
               starLevel={starLevel}
               ueLevel={ueLevel}
               containerClassName="w-[24px] h-[24px] absolute bottom-[2px] left-[2px] skew-x-[11deg]"
-              textClassName="leading-none mt-[1px]"
+              textClassName="leading-none mt-[3px]"
             />
           )}
 

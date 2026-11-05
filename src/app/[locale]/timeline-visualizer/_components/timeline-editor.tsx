@@ -458,10 +458,26 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
     ],
   );
 
+  // Opening an item's popover requests focus on its trigger field when the
+  // preference is on. The popover only acts on it for student items.
+  const selectItem = useCallback(
+    (itemId: string | null) => {
+      setSelectedItemId(itemId);
+      setFocusTriggerFieldItemId(
+        itemId && preferences.timelineVisualizer.triggerAutoFocus
+          ? itemId
+          : null,
+      );
+    },
+    [
+      preferences.timelineVisualizer.triggerAutoFocus,
+    ],
+  );
+
   const editableConfig = useMemo(
     () => ({
       selectedItemId,
-      onItemSelected: setSelectedItemId,
+      onItemSelected: selectItem,
       setItems,
       onWantsToRemove: removeItem,
       onWantsToUpdate: updateItem,
@@ -477,6 +493,7 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
     }),
     [
       selectedItemId,
+      selectItem,
       setItems,
       removeItem,
       updateItem,
