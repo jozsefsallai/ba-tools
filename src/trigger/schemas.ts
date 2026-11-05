@@ -94,6 +94,25 @@ export const syncStudentSkillsPayload = z.object({
 
 export type SyncStudentSkillsPayload = z.input<typeof syncStudentSkillsPayload>;
 
+export const syncStoriesPayload = z.object({
+  globalSqlcipherKey: sqlcipherKey,
+  // All types when omitted
+  storyTypes: z
+    .array(
+      z.enum([
+        "main",
+        "group",
+        "mini",
+        "event",
+        "bond",
+      ]),
+    )
+    .optional(),
+  dryRun: z.boolean().default(false),
+});
+
+export type SyncStoriesPayload = z.input<typeof syncStoriesPayload>;
+
 const perServerTuple = <T extends z.ZodType>(item: T) =>
   z.tuple([
     item,

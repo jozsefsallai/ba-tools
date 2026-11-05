@@ -9,76 +9,86 @@ import {
 } from "ai";
 import { z } from "zod";
 import { getPlanaProvider } from "@/lib/ai/providers";
-import { dialogueCollection, summaryCollection } from "./chroma";
-import { LORE_CLASSIFIER_PROMPT } from "./lore-classifier";
+import { getLoreCollections } from "./chroma";
+import { LORE_QUERY_PLANNER_PROMPT } from "./lore-classifier";
 import { PLANA_CHARACTER_BIBLE } from "./plana";
+import { type LoreContext, searchStories } from "./story-search.server";
 
-async function queryVectorStores(query: string) {
-  const summaryContext = await summaryCollection.query({
-    queryTexts: [
-      query,
-    ],
-  });
+const PLANNER_HISTORY_MESSAGES = 6;
 
-  const dialogueContext = await dialogueCollection.query({
-    queryTexts: [
-      query,
-    ],
-  });
+function flattenDocuments(documents: (string | null)[][]) {
+  return documents.flat().filter((document) => document !== null);
+}
+
+async function queryChroma(queries: string[]): Promise<LoreContext> {
+  const { summaries, dialogues } = await getLoreCollections();
+
+  const [summaryContext, dialogueContext] = await Promise.all([
+    summaries.query({
+      queryTexts: queries,
+    }),
+    dialogues.query({
+      queryTexts: queries,
+    }),
+  ]);
 
   return {
-    summaryContext: summaryContext.documents.join("\n"),
-    dialogueContext: dialogueContext.documents.join("\n"),
+    summaries: flattenDocuments(summaryContext.documents),
+    passages: flattenDocuments(dialogueContext.documents),
   };
 }
 
-function formatContextForPrompt(context: {
-  summaryContext: string;
-  dialogueContext: string;
-}): string {
-  let formattedContext = "### CONTEXT & MEMORIES ###\n";
-
-  formattedContext +=
-    "Use the following information to construct your answer. The 'Summary' is an objective memory of what happened. The 'Dialogue' is a specific memory of a conversation.\n\n";
-
-  if (context.summaryContext) {
-    formattedContext += `[CONTEXT FROM SUMMARIES]\n- ${context.summaryContext}\n\n`;
+async function queryLore(queries: string[]): Promise<LoreContext | null> {
+  try {
+    return process.env.UPSTASH_VECTOR_REST_URL
+      ? await searchStories(queries)
+      : await queryChroma(queries);
+  } catch (err) {
+    console.error("Plana lore lookup failed", err);
+    return null;
   }
-
-  if (context.dialogueContext) {
-    formattedContext += `[CONTEXT FROM DIALOGUE]\n- ${context.dialogueContext}\n`;
-  }
-  return formattedContext;
 }
 
-export async function getLoreClassifierResult(userMessage: string): Promise<{
-  needsLoreContext: boolean;
-  question?: string | null;
-}>;
-export async function getLoreClassifierResult(
-  userMessage: string,
-  classifierModel: LanguageModel,
-): Promise<{
-  needsLoreContext: boolean;
-  question?: string | null;
-}>;
-export async function getLoreClassifierResult(
-  userMessage: string,
-  classifierModel?: LanguageModel,
-): Promise<{
-  needsLoreContext: boolean;
-  question?: string | null;
-}> {
-  const model = classifierModel ?? (await getPlanaProvider()).classifierModel;
+function formatContextForPrompt(context: LoreContext): string {
+  if (context.summaries.length === 0 && context.passages.length === 0) {
+    return "";
+  }
+
+  const sections = [
+    `### CONTEXT & MEMORIES ###
+These are your memories of the story, each labelled with where it comes from. Use them to answer.
+- The Main Story and Special Operations are the main plot. Event, Group, Mini and Bond stories are side stories and can be lighthearted, so don't present them as main plot events.
+- "Sensei (choice N)" lines are options the player can pick, so don't state that Sensei said any particular one.
+- If these memories don't cover what was asked, say that you don't remember it instead of guessing.`,
+  ];
+
+  if (context.summaries.length > 0) {
+    sections.push(`[SUMMARIES]\n${context.summaries.join("\n\n")}`);
+  }
+
+  if (context.passages.length > 0) {
+    sections.push(`[STORY PASSAGES]\n${context.passages.join("\n\n")}`);
+  }
+
+  return sections.join("\n\n");
+}
+
+const loreQueryPlan = z.object({
+  needsLoreContext: z.boolean(),
+  question: z.string().nullish(),
+  searchQueries: z.array(z.string()).nullish(),
+});
+
+export async function planLoreQuery(
+  conversation: string,
+  plannerModel: LanguageModel,
+) {
   const { output } = await generateText({
-    model,
-    system: LORE_CLASSIFIER_PROMPT,
-    prompt: userMessage,
+    model: plannerModel,
+    system: LORE_QUERY_PLANNER_PROMPT,
+    prompt: conversation,
     output: Output.object({
-      schema: z.object({
-        needsLoreContext: z.boolean(),
-        question: z.string().nullish(),
-      }),
+      schema: loreQueryPlan,
     }),
   });
 
@@ -98,6 +108,16 @@ function getLatestUserMessage(messages: UIMessage[]) {
   ]
     .reverse()
     .find((message) => message.role === "user");
+}
+
+function formatPlannerConversation(messages: UIMessage[]) {
+  return messages
+    .slice(-PLANNER_HISTORY_MESSAGES)
+    .map(
+      (message) =>
+        `${message.role === "user" ? "User" : "Plana"}: ${getTextFromMessage(message)}`,
+    )
+    .join("\n");
 }
 
 function toTextOnlyMessages(messages: UIMessage[]) {
@@ -178,13 +198,20 @@ export async function streamPlanaResponse(
     throw new Error("No user message provided");
   }
 
-  const { needsLoreContext, question } = await getLoreClassifierResult(
-    `Query addressed to Plana: ${userMessage}`,
+  const { needsLoreContext, question, searchQueries } = await planLoreQuery(
+    formatPlannerConversation(messages),
     provider.classifierModel,
   );
 
+  const queries = searchQueries?.length
+    ? searchQueries
+    : question
+      ? [
+          question,
+        ]
+      : [];
   const context =
-    needsLoreContext && question ? await queryVectorStores(question) : null;
+    needsLoreContext && queries.length > 0 ? await queryLore(queries) : null;
   const formattedContext = context ? formatContextForPrompt(context) : "";
 
   const modelMessages = await convertToModelMessages(

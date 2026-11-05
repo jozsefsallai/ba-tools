@@ -750,6 +750,99 @@ export interface ExtractStudentSkillsResult {
   warnings: string[];
 }
 
+export type StoryType = "main" | "group" | "mini" | "event" | "bond";
+
+export type StoryLine =
+  | {
+      kind: "dialogue";
+      /** `null` when the game's name table has no entry for the speaker. */
+      speaker: string | null;
+      /** E.g. `Tea Party`. */
+      affiliation: string | null;
+      text: string;
+      /** The player choice this line answers, when the story branches. */
+      selectionGroup?: number;
+    }
+  | {
+      /** Unvoiced narration. */
+      kind: "narration";
+      text: string;
+      selectionGroup?: number;
+    }
+  | {
+      /** Text shown over the scene. */
+      kind: "caption";
+      text: string;
+      selectionGroup?: number;
+    }
+  | {
+      /** A line Sensei always says. */
+      kind: "sensei";
+      text: string;
+    }
+  | {
+      /** A line the player can pick for Sensei. */
+      kind: "choice";
+      text: string;
+      option: number;
+    };
+
+/** A stretch of story in one place, split on title cards, locations and backgrounds. */
+export interface StoryScene {
+  location: string | null;
+  lines: StoryLine[];
+}
+
+export interface StoryEpisode {
+  /** E.g. `main:3:4:12`, `main:100:2:ev821:3`, `event:801:4`, `bond:10000:2`. */
+  id: string;
+  type: StoryType;
+  /** E.g. `main:3:4`, `event:801`, `bond:10000`. */
+  chapterId: string;
+  /** `1. Foreclosure Task Force`; only main stories have volumes. */
+  volumeTitle: string | null;
+  /** The chapter, event or `<student>'s Bond Story`. */
+  chapterTitle: string | null;
+  title: string | null;
+  /** The game's digest of this episode. */
+  summary: string | null;
+  /**
+   * Position in the chapter. Episodes of an event that branches out of a main
+   * chapter sort between the main episodes around them: 20, 20.001, 20.002, 21.
+   */
+  order: number;
+  /** The event a main episode was told through, for branch events. */
+  branchEventTitle: string | null;
+  /** `yyyy-MM-dd HH:mm:ss`; `null` when the story isn't tied to a release date. */
+  openDate: string | null;
+  /** Student, for bond stories. */
+  characterId: number | null;
+  scenes: StoryScene[];
+}
+
+export interface ExtractStoriesOptions {
+  /** Global SQLCipher key; fetched from the Nexon gateway when omitted. */
+  globalSqlcipherKey?: string;
+  /** Nexon gateway region used to fetch the Global key (`na` by default). */
+  globalRegion?: string;
+  /** All types when omitted. */
+  storyTypes?: StoryType[];
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
+export interface ExtractStoriesResult {
+  gameVersion: string;
+  episodes: StoryEpisode[];
+  /** Script groups with text that no story table points to. */
+  unmapped: {
+    groups: number;
+    characters: number;
+    sampleGroupIds: number[];
+  };
+  warnings: string[];
+}
+
 export interface DataSyncModule {
   listNewStudents(
     options: ListNewStudentsOptions,
@@ -762,4 +855,6 @@ export interface DataSyncModule {
   extractStudentSkills(
     options: ExtractStudentSkillsOptions,
   ): Promise<ExtractStudentSkillsResult>;
+
+  extractStories(options: ExtractStoriesOptions): Promise<ExtractStoriesResult>;
 }

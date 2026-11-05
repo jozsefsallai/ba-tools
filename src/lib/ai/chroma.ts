@@ -1,4 +1,4 @@
-import { CloudClient, type EmbeddingFunction } from "chromadb";
+import { CloudClient, type Collection, type EmbeddingFunction } from "chromadb";
 
 class OpenAIEmbeddingFunction implements EmbeddingFunction {
   async generate(texts: string[]) {
@@ -28,29 +28,48 @@ class OpenAIEmbeddingFunction implements EmbeddingFunction {
   }
 }
 
-const embeddingFunction = new OpenAIEmbeddingFunction();
+const SUMMARY_COLLECTION = "ba-main-story-summaries";
+const DIALOGUE_COLLECTION = "ba-main-story-dialogues";
 
-const client = new CloudClient({
-  apiKey: process.env.CHROMA_API_KEY,
-  tenant: process.env.CHROMA_TENANT_ID,
-  database: process.env.CHROMA_DATABASE_NAME,
-});
+type LoreCollections = {
+  summaries: Collection;
+  dialogues: Collection;
+};
 
-const summaryCollection = await client.getOrCreateCollection({
-  name: "ba-main-story-summaries",
-  metadata: {
-    description:
-      "Summaries or synopses of main story episodes in Blue Archive.",
-  },
-  embeddingFunction,
-});
+let collections: Promise<LoreCollections> | undefined;
 
-const dialogueCollection = await client.getOrCreateCollection({
-  name: "ba-main-story-dialogues",
-  metadata: {
-    description: "Dialogue lines from main story episodes in Blue Archive.",
-  },
-  embeddingFunction,
-});
+async function connect(): Promise<LoreCollections> {
+  const embeddingFunction = new OpenAIEmbeddingFunction();
+  const client = new CloudClient({
+    apiKey: process.env.CHROMA_API_KEY,
+    tenant: process.env.CHROMA_TENANT_ID,
+    database: process.env.CHROMA_DATABASE_NAME,
+  });
 
-export { client, dialogueCollection, summaryCollection };
+  const [summaries, dialogues] = await Promise.all([
+    client.getCollection({
+      name: SUMMARY_COLLECTION,
+      embeddingFunction,
+    }),
+    client.getCollection({
+      name: DIALOGUE_COLLECTION,
+      embeddingFunction,
+    }),
+  ]);
+
+  return {
+    summaries,
+    dialogues,
+  };
+}
+
+export function getLoreCollections(): Promise<LoreCollections> {
+  if (!collections) {
+    collections = connect().catch((err) => {
+      collections = undefined;
+      throw err;
+    });
+  }
+
+  return collections;
+}

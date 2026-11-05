@@ -27,7 +27,8 @@
     "game-data:new-students": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/list-new-students.ts",
     "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts",
     "translations:check": "tsx scripts/check-translations.ts",
-    "game-data:skills": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-student-skills.ts"
+    "game-data:skills": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-student-skills.ts",
+    "game-data:stories": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-stories.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",
@@ -74,6 +75,7 @@
     "@trigger.dev/sdk": "^4.6.3",
     "@upstash/ratelimit": "2.2.0",
     "@upstash/redis": "1.39.0",
+    "@upstash/vector": "^1.2.3",
     "@yaakdoc/next": "0.6.0",
     "ai": "^6.0.286",
     "axios": "^1.20.0",

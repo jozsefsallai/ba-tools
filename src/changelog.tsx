@@ -103,7 +103,12 @@ export const CHANGELOG: ChangelogItemData[] = [
         description: "Improved UX for adding timelines to a timeline group.",
       },
     ],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.formationDisplay,
+        description: "Fixed the alignment of the star count inside stars.",
+      },
+    ],
   },
   {
     date: "November 2, 2026",
