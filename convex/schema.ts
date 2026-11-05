@@ -245,9 +245,25 @@ export const planaMessagePart = v.object({
   text: v.string(),
 });
 
+export const planaToolPart = v.object({
+  type: v.literal("tool"),
+  toolName: v.string(),
+  status: v.union(
+    v.literal("done"),
+    v.literal("error"),
+    v.literal("denied"),
+    v.literal("pending"),
+  ),
+  summary: v.optional(v.string()),
+  students: v.optional(v.array(v.string())),
+  link: v.optional(v.string()),
+});
+
+export const planaAssistantPart = v.union(planaMessagePart, planaToolPart);
+
 export const planaAssistantVariant = v.object({
   clientId: v.string(),
-  parts: v.array(planaMessagePart),
+  parts: v.array(planaAssistantPart),
   createdAt: v.number(),
 });
 
@@ -984,11 +1000,19 @@ export default defineSchema({
   planaChat: defineTable({
     userId: v.id("users"),
     title: v.string(),
+    titleIsCustom: v.optional(v.boolean()),
     updatedAt: v.number(),
-  }).index("by_userId_updatedAt", [
-    "userId",
-    "updatedAt",
-  ]),
+  })
+    .index("by_userId_updatedAt", [
+      "userId",
+      "updatedAt",
+    ])
+    .searchIndex("search_title", {
+      searchField: "title",
+      filterFields: [
+        "userId",
+      ],
+    }),
 
   planaTurn: defineTable({
     chatId: v.id("planaChat"),

@@ -1,40 +1,44 @@
 "use client";
 
-import { RefreshCwIcon } from "lucide-react";
+import { RefreshCwIcon, SettingsIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export function ChatErrorMessage({
   message,
+  onOpenSettings,
   onRetry,
 }: {
   message: string;
+  onOpenSettings?: () => void;
   onRetry: () => void;
 }) {
   const t = useTranslations();
 
   return (
     <div className="flex w-full gap-3">
-      <PlanaChatAvatar className="mt-1" />
+      <PlanaChatAvatar className="mt-0.5" />
 
-      <div
-        className={cn(
-          "max-w-[82%] rounded-2xl rounded-bl-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm leading-relaxed text-foreground shadow-sm md:max-w-[70%] dark:border-destructive/60 dark:bg-destructive/20",
-        )}
-      >
+      <div className="min-w-0 flex-1 rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-sm leading-relaxed dark:bg-destructive/15">
         <p>{message}</p>
-        <Button
-          className="mt-3"
-          onClick={onRetry}
-          size="sm"
-          type="button"
-          variant="outline"
-        >
-          <RefreshCwIcon />
-          {t("tools.plana.errors.retry")}
-        </Button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button onClick={onRetry} size="sm" type="button" variant="outline">
+            <RefreshCwIcon />
+            {t("tools.plana.errors.retry")}
+          </Button>
+          {onOpenSettings ? (
+            <Button
+              onClick={onOpenSettings}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              <SettingsIcon />
+              {t("tools.plana.errors.openSettings")}
+            </Button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

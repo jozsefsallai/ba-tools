@@ -8,9 +8,10 @@ import {
   PanelLeftOpenIcon,
   PencilIcon,
   PlusIcon,
+  SearchIcon,
   Trash2Icon,
 } from "lucide-react";
-import { useFormatter, useNow, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatSidebarSkeleton } from "@/app/[locale]/plana-ai/_components/chat-messages-skeleton";
 import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
@@ -41,6 +42,7 @@ type PlanaChatSidebarProps = {
   collapsed?: boolean;
   onCollapse?: () => void;
   onExpand?: () => void;
+  onNavigate?: () => void;
 };
 
 type ChatListItem = {
@@ -50,7 +52,30 @@ type ChatListItem = {
   displayUpdatedAt: number;
 };
 
+type DateGroup = "today" | "yesterday" | "lastWeek" | "older";
+
+const DATE_GROUPS: DateGroup[] = [
+  "today",
+  "yesterday",
+  "lastWeek",
+  "older",
+];
+
 const CHATS_PAGE_SIZE = 30;
+const SEARCH_DEBOUNCE_MS = 250;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function getDateGroup(timestamp: number, startOfToday: number): DateGroup {
+  if (timestamp >= startOfToday) {
+    return "today";
+  }
+
+  if (timestamp >= startOfToday - DAY_MS) {
+    return "yesterday";
+  }
+
+  return timestamp >= startOfToday - 7 * DAY_MS ? "lastWeek" : "older";
+}
 
 export function PlanaChatSidebar({
   activeChatId,
@@ -58,10 +83,12 @@ export function PlanaChatSidebar({
   collapsed = false,
   onCollapse,
   onExpand,
+  onNavigate,
 }: PlanaChatSidebarProps) {
   const t = useTranslations();
-  const now = useNow();
   const [limit, setLimit] = useState(CHATS_PAGE_SIZE);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { activityTimestamps, replaceChatUrl } = useActivePlanaChat();
   const deleteChat = useMutation(api.planaChat.deleteChat);
   const renameChat = useMutation(api.planaChat.renameChat);
@@ -74,6 +101,28 @@ export function PlanaChatSidebar({
           limit,
         },
   );
+
+  const searchResults = useQuery(
+    api.planaChat.searchChats,
+    searchQuery && !collapsed
+      ? {
+          query: searchQuery,
+        }
+      : "skip",
+  );
+
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => setSearchQuery(searchInput.trim()),
+      SEARCH_DEBOUNCE_MS,
+    );
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [
+    searchInput,
+  ]);
 
   const chats = useMemo(() => {
     if (!chatList) {
@@ -96,11 +145,41 @@ export function PlanaChatSidebar({
     chatList,
   ]);
 
-  const hasMore = chatList?.hasMore ?? false;
-  const isLoadingChats = chatList === undefined;
+  const groupedChats = useMemo(() => {
+    const startOfToday = new Date().setHours(0, 0, 0, 0);
+
+    return DATE_GROUPS.map((group) => ({
+      group,
+      items: (chats ?? []).filter(
+        (chat) => getDateGroup(chat.displayUpdatedAt, startOfToday) === group,
+      ),
+    })).filter(({ items }) => items.length > 0);
+  }, [
+    chats,
+  ]);
+
+  const isSearching = searchQuery.length > 0;
+  const hasMore = !isSearching && (chatList?.hasMore ?? false);
+  const isLoadingChats = isSearching
+    ? searchResults === undefined
+    : chatList === undefined;
 
   function startNewChat() {
     replaceChatUrl(undefined);
+    onNavigate?.();
+  }
+
+  function renderItem(chat: ChatListItem) {
+    return (
+      <PlanaChatSidebarItem
+        chat={chat}
+        isActive={chat._id === activeChatId}
+        key={chat._id}
+        onDelete={() => handleDelete(chat._id)}
+        onNavigate={onNavigate}
+        onRename={(title) => handleRename(chat._id, title)}
+      />
+    );
   }
 
   async function handleDelete(chatId: Id<"planaChat">) {
@@ -124,7 +203,7 @@ export function PlanaChatSidebar({
     return (
       <aside
         className={cn(
-          "flex min-h-0 w-12 shrink-0 flex-col items-center gap-2 overflow-hidden rounded-3xl border bg-background py-3 shadow-sm",
+          "flex min-h-0 w-12 shrink-0 flex-col items-center gap-2 overflow-hidden bg-muted/30 py-2",
           className,
         )}
       >
@@ -143,7 +222,7 @@ export function PlanaChatSidebar({
           onClick={startNewChat}
           size="icon-sm"
           type="button"
-          variant="outline"
+          variant="ghost"
         >
           <PlusIcon />
         </Button>
@@ -154,18 +233,18 @@ export function PlanaChatSidebar({
   return (
     <aside
       className={cn(
-        "flex min-h-0 min-w-0 w-full max-w-full flex-col overflow-hidden rounded-3xl border bg-background shadow-sm",
+        "flex min-h-0 min-w-0 w-full max-w-full flex-col overflow-hidden bg-muted/30",
         className,
       )}
     >
-      <div className="border-b p-3">
-        <div className="flex items-center gap-2">
+      <div className="space-y-2 p-2">
+        <div className="flex items-center gap-1">
           <Button
             className="min-w-0 flex-1 justify-start"
             onClick={startNewChat}
             size="sm"
             type="button"
-            variant="outline"
+            variant="ghost"
           >
             <PlusIcon />
             {t("tools.plana.sidebar.newChat")}
@@ -176,33 +255,58 @@ export function PlanaChatSidebar({
               aria-label={t("tools.plana.sidebar.collapse")}
               onClick={onCollapse}
               size="icon-sm"
+              title={t("tools.plana.sidebar.collapse")}
               type="button"
-              variant="outline"
+              variant="ghost"
             >
               <PanelLeftCloseIcon />
             </Button>
           ) : null}
+        </div>
+
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            aria-label={t("tools.plana.search.placeholder")}
+            className="h-8 pl-8 text-sm"
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder={t("tools.plana.search.placeholder")}
+            value={searchInput}
+          />
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
         {isLoadingChats ? (
           <ChatSidebarSkeleton />
+        ) : isSearching ? (
+          searchResults?.length ? (
+            <div className="flex w-full min-w-0 flex-col gap-0.5 p-2 pt-0">
+              {searchResults.map((chat) =>
+                renderItem({
+                  ...chat,
+                  displayUpdatedAt: chat.updatedAt,
+                }),
+              )}
+            </div>
+          ) : (
+            <p className="p-4 text-sm text-muted-foreground">
+              {t("tools.plana.search.empty")}
+            </p>
+          )
         ) : !chats?.length ? (
           <p className="p-4 text-sm text-muted-foreground">
             {t("tools.plana.sidebar.empty")}
           </p>
         ) : (
-          <div className="flex w-full min-w-0 flex-col gap-1 p-2">
-            {chats.map((chat) => (
-              <PlanaChatSidebarItem
-                chat={chat}
-                isActive={chat._id === activeChatId}
-                key={chat._id}
-                now={now}
-                onDelete={() => handleDelete(chat._id)}
-                onRename={(title) => handleRename(chat._id, title)}
-              />
+          <div className="flex w-full min-w-0 flex-col gap-3 p-2 pt-0">
+            {groupedChats.map(({ group, items }) => (
+              <div className="flex min-w-0 flex-col gap-0.5" key={group}>
+                <h3 className="px-3 py-1 font-medium text-muted-foreground text-xs">
+                  {t(`tools.plana.dateGroups.${group}`)}
+                </h3>
+                {items.map(renderItem)}
+              </div>
             ))}
           </div>
         )}
@@ -230,20 +334,19 @@ export function PlanaChatSidebar({
 type PlanaChatSidebarItemProps = {
   chat: ChatListItem;
   isActive: boolean;
-  now: Date;
   onDelete: () => Promise<void>;
+  onNavigate?: () => void;
   onRename: (title: string) => Promise<void>;
 };
 
 function PlanaChatSidebarItem({
   chat,
   isActive,
-  now,
   onDelete,
+  onNavigate,
   onRename,
 }: PlanaChatSidebarItemProps) {
   const t = useTranslations();
-  const formatter = useFormatter();
   const { pushChatUrl } = useActivePlanaChat();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
@@ -293,17 +396,15 @@ function PlanaChatSidebarItem({
         )}
       >
         <button
-          className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)] rounded-lg px-3 py-2 pr-9 text-left transition-colors hover:bg-muted/70"
-          onClick={() => pushChatUrl(chat._id)}
+          className="block w-full min-w-0 truncate rounded-lg px-3 py-1.5 pr-9 text-left text-sm transition-colors hover:bg-muted"
+          onClick={() => {
+            pushChatUrl(chat._id);
+            onNavigate?.();
+          }}
           title={chat.title}
           type="button"
         >
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium">
-            {chat.title}
-          </span>
-          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground">
-            {formatter.relativeTime(new Date(chat.displayUpdatedAt), now)}
-          </span>
+          {chat.title}
         </button>
 
         <DropdownMenu>

@@ -99,6 +99,14 @@ Exposed at `/mcp` (streamable-http, Node.js runtime, SSE disabled). Published at
 - **Register tools with `defineTool`** (`src/lib/mcp/define-tool.ts`). It passes the signed-in user id, applies the per-user rate limits by `kind`, sets annotations, turns `ApiError`s into tool errors, and runs results through `src/lib/mcp/enrich.server.ts` (adds `…Label` in-game names beside enum fields and `name` to gift `{ id, count }` entries). Tool output only; the REST API keeps raw values.
 - **Write-tool inputs come from Convex validators.** Mutation args live in `convex/lib/validators.ts` and are converted with `convexToZodShape` (`src/lib/mcp/convex-to-zod.ts`), so changing a mutation's args changes the tool schema too.
 
+## Plana AI
+
+Chat page in `src/app/[locale]/plana-ai/`, with its route at `POST /api/plana-ai/chat` and the logic in `src/lib/ai/`. Users bring their own provider key (a cookie, `src/actions/plana-config.ts`).
+
+- **Saving:** the client creates the chat and turn in Convex before sending. The route saves the reply in `onFinish` through the API bridge (`userMutation`), including partial replies after a Stop or a closed tab. `consumeSseStream` and `after()` are what let that finish once the browser has gone.
+- **Tools:** `src/lib/ai/tools/index.server.ts` exposes every MCP tool automatically, by registering them on a stand-in server. `create_`, `update_` and `delete_` tools require approval in the chat and take an extra `change_summary` for the approval card. Plana-specific versions override a few of them there, for chat-sized output or safer behaviour (`update_roster` merges students instead of replacing the list). New read tools need labels under `tools.plana.tools.running` and `.done`.
+- **Messages:** replies keep a `[expression: x]` marker in their text, which the client strips and uses to animate Plana. Only text and a compact tool summary are stored (`planaToolPart`), and past turns reach the model as text only.
+
 ## Production Deployment
 
 `vercel-deploy.sh` runs `convex deploy --cmd 'pnpm run build'` (only when `VERCEL_ENV=production`). Convex deploy is bundled with the Next.js build on Vercel.

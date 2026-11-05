@@ -3,10 +3,11 @@ import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
-import { planaMessagePart } from "./schema";
+import { invalid, notFound } from "./lib/errors";
+import { planaAssistantPart, planaMessagePart } from "./schema";
 
-const DEFAULT_LLM_CONTEXT_TURNS = 50;
 const CHAT_TITLE_MAX_LENGTH = 60;
+const CHAT_SEARCH_LIMIT = 30;
 
 function deriveChatTitle(
   parts: {
@@ -32,6 +33,14 @@ function deriveChatTitle(
   return `${text.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}...`;
 }
 
+function clampChatTitle(title: string) {
+  const trimmed = title.trim().replace(/\s+/g, " ");
+
+  return trimmed.length <= CHAT_TITLE_MAX_LENGTH
+    ? trimmed
+    : `${trimmed.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}...`;
+}
+
 async function getOwnedChat(
   ctx: QueryCtx | MutationCtx,
   chatId: Id<"planaChat">,
@@ -40,7 +49,7 @@ async function getOwnedChat(
   const chat = await ctx.db.get(chatId);
 
   if (!chat || chat.userId !== userId) {
-    throw new Error("Chat not found");
+    throw notFound("Chat not found.");
   }
 
   return chat;
@@ -60,7 +69,7 @@ async function getOwnedTurn(
     .first();
 
   if (!turn || turn.userId !== userId) {
-    throw new Error("Turn not found");
+    throw notFound("Turn not found.");
   }
 
   return turn;
@@ -116,7 +125,15 @@ export const getTurnsPaginated = authenticatedQuery({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, { chatId, paginationOpts }) => {
-    await getOwnedChat(ctx, chatId, ctx.user._id);
+    const chat = await ctx.db.get(chatId);
+
+    if (!chat || chat.userId !== ctx.user._id) {
+      return {
+        page: [],
+        isDone: true,
+        continueCursor: "",
+      };
+    }
 
     return await ctx.db
       .query("planaTurn")
@@ -126,50 +143,50 @@ export const getTurnsPaginated = authenticatedQuery({
   },
 });
 
-export const getLlmContext = authenticatedQuery({
+export const getChat = authenticatedQuery({
   args: {
     chatId: v.id("planaChat"),
-    maxTurns: v.optional(v.number()),
   },
-  handler: async (ctx, { chatId, maxTurns = DEFAULT_LLM_CONTEXT_TURNS }) => {
+  handler: async (ctx, { chatId }) => {
+    const chat = await ctx.db.get(chatId);
+
+    return chat && chat.userId === ctx.user._id
+      ? {
+          _id: chat._id,
+          title: chat.title,
+        }
+      : null;
+  },
+});
+
+export const assertChatOwner = authenticatedQuery({
+  args: {
+    chatId: v.id("planaChat"),
+  },
+  handler: async (ctx, { chatId }) => {
     await getOwnedChat(ctx, chatId, ctx.user._id);
 
-    const allTurns = await ctx.db
-      .query("planaTurn")
-      .withIndex("by_chatId_order", (q) => q.eq("chatId", chatId))
-      .order("asc")
-      .collect();
+    return null;
+  },
+});
 
-    const turns =
-      allTurns.length > maxTurns
-        ? allTurns.slice(allTurns.length - maxTurns)
-        : allTurns;
+export const searchChats = authenticatedQuery({
+  args: {
+    query: v.string(),
+  },
+  handler: async (ctx, { query }) => {
+    const chats = await ctx.db
+      .query("planaChat")
+      .withSearchIndex("search_title", (q) =>
+        q.search("title", query).eq("userId", ctx.user._id),
+      )
+      .take(CHAT_SEARCH_LIMIT);
 
-    const messages: {
-      role: "user" | "assistant";
-      parts: {
-        type: "text";
-        text: string;
-      }[];
-    }[] = [];
-
-    for (const turn of turns) {
-      messages.push({
-        role: "user",
-        parts: turn.userParts,
-      });
-
-      const variant = turn.assistantVariants[turn.selectedVariantIndex];
-
-      if (variant) {
-        messages.push({
-          role: "assistant",
-          parts: variant.parts,
-        });
-      }
-    }
-
-    return messages;
+    return chats.map(({ _id, title, updatedAt }) => ({
+      _id,
+      title,
+      updatedAt,
+    }));
   },
 });
 
@@ -240,24 +257,77 @@ export const completeAssistantVariant = authenticatedMutation({
     chatId: v.id("planaChat"),
     turnOrder: v.number(),
     clientId: v.string(),
-    parts: v.array(planaMessagePart),
+    parts: v.array(planaAssistantPart),
   },
   handler: async (ctx, { chatId, turnOrder, clientId, parts }) => {
     const turn = await getOwnedTurn(ctx, chatId, ctx.user._id, turnOrder);
-    const nextVariant = {
-      clientId,
-      parts,
-      createdAt: Date.now(),
+    const existingIndex = turn.assistantVariants.findIndex(
+      (variant) => variant.clientId === clientId,
+    );
+
+    if (existingIndex !== -1) {
+      await ctx.db.patch(turn._id, {
+        assistantVariants: turn.assistantVariants.map((variant, index) =>
+          index === existingIndex
+            ? {
+                ...variant,
+                parts,
+              }
+            : variant,
+        ),
+      });
+    } else {
+      const assistantVariants = [
+        ...turn.assistantVariants,
+        {
+          clientId,
+          parts,
+          createdAt: Date.now(),
+        },
+      ];
+
+      await ctx.db.patch(turn._id, {
+        assistantVariants,
+        selectedVariantIndex: assistantVariants.length - 1,
+      });
+    }
+
+    await ctx.db.patch(chatId, {
+      updatedAt: Date.now(),
+    });
+
+    return {
+      isFirstReply:
+        turn.order === 0 &&
+        existingIndex === -1 &&
+        turn.assistantVariants.length === 0,
     };
-    const assistantVariants = [
-      ...turn.assistantVariants,
-      nextVariant,
-    ];
-    const selectedVariantIndex = assistantVariants.length - 1;
+  },
+});
+
+export const editTurn = authenticatedMutation({
+  args: {
+    chatId: v.id("planaChat"),
+    order: v.number(),
+    userParts: v.array(planaMessagePart),
+  },
+  handler: async (ctx, { chatId, order, userParts }) => {
+    const turn = await getOwnedTurn(ctx, chatId, ctx.user._id, order);
+    const laterTurns = await ctx.db
+      .query("planaTurn")
+      .withIndex("by_chatId_order", (q) =>
+        q.eq("chatId", chatId).gt("order", order),
+      )
+      .collect();
+
+    for (const laterTurn of laterTurns) {
+      await ctx.db.delete(laterTurn._id);
+    }
 
     await ctx.db.patch(turn._id, {
-      assistantVariants,
-      selectedVariantIndex,
+      userParts,
+      assistantVariants: [],
+      selectedVariantIndex: 0,
     });
 
     await ctx.db.patch(chatId, {
@@ -279,7 +349,7 @@ export const selectVariant = authenticatedMutation({
       selectedVariantIndex < 0 ||
       selectedVariantIndex >= turn.assistantVariants.length
     ) {
-      throw new Error("Invalid variant index");
+      throw invalid("Invalid variant index.");
     }
 
     await ctx.db.patch(turn._id, {
@@ -350,16 +420,31 @@ export const renameChat = authenticatedMutation({
   handler: async (ctx, { chatId, title }) => {
     await getOwnedChat(ctx, chatId, ctx.user._id);
 
-    const trimmed = title.trim().replace(/\s+/g, " ");
+    const nextTitle = clampChatTitle(title);
 
-    if (!trimmed) {
-      throw new Error("Title cannot be empty");
+    if (!nextTitle) {
+      throw invalid("Title cannot be empty.");
     }
 
-    const nextTitle =
-      trimmed.length <= CHAT_TITLE_MAX_LENGTH
-        ? trimmed
-        : `${trimmed.slice(0, CHAT_TITLE_MAX_LENGTH - 1)}...`;
+    await ctx.db.patch(chatId, {
+      title: nextTitle,
+      titleIsCustom: true,
+    });
+  },
+});
+
+export const setGeneratedTitle = authenticatedMutation({
+  args: {
+    chatId: v.id("planaChat"),
+    title: v.string(),
+  },
+  handler: async (ctx, { chatId, title }) => {
+    const chat = await getOwnedChat(ctx, chatId, ctx.user._id);
+    const nextTitle = clampChatTitle(title);
+
+    if (chat.titleIsCustom || !nextTitle) {
+      return;
+    }
 
     await ctx.db.patch(chatId, {
       title: nextTitle,

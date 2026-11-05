@@ -41,13 +41,22 @@ const DEFAULT_CHAT_MODELS: Record<Provider, string> = {
   openrouter: "deepseek/deepseek-v4-flash",
 };
 
-export function PlanaSettingsDialog({ children }: PropsWithChildren) {
+export function PlanaSettingsDialog({
+  children,
+  onOpenChange,
+  onSaved,
+  open,
+}: PropsWithChildren<{
+  onOpenChange: (open: boolean) => void;
+  onSaved?: (hasKey: boolean) => void;
+  open: boolean;
+}>) {
   const t = useTranslations();
-  const [open, setOpen] = useState(false);
+  const setOpen = onOpenChange;
   const [provider, setProvider] = useState<Provider>("openrouter");
   const [apiKey, setApiKey] = useState("");
   const [chatModel, setChatModel] = useState("");
-  const [hasSavedKey, setHasSavedKey] = useState(false);
+  const [savedProvider, setSavedProvider] = useState<Provider | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -61,12 +70,15 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
 
       setProvider(status.provider ?? "openrouter");
       setChatModel(status.chatModel ?? "");
-      setHasSavedKey(status.hasKey);
+      setSavedProvider(status.hasKey ? status.provider : null);
       setApiKey("");
     });
   }, [
     open,
   ]);
+
+  // A saved key belongs to its provider, so switching providers needs a new one.
+  const hasSavedKey = savedProvider === provider;
 
   function handleSave() {
     startTransition(async () => {
@@ -76,8 +88,9 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
           chatModel: chatModel.trim() || undefined,
           provider,
         });
-        setHasSavedKey(true);
+        setSavedProvider(provider);
         setApiKey("");
+        onSaved?.(true);
         toast.success(t("tools.plana.settings.toasts.saved"));
         setOpen(false);
       } catch {
@@ -92,8 +105,9 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
         await clearPlanaConfig();
         setApiKey("");
         setChatModel("");
-        setHasSavedKey(false);
+        setSavedProvider(null);
         setProvider("openrouter");
+        onSaved?.(false);
         toast.success(t("tools.plana.settings.toasts.cleared"));
       } catch {
         toast.error(t("tools.plana.settings.toasts.failed"));
@@ -103,7 +117,7 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
 
   return (
     <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("tools.plana.settings.title")}</DialogTitle>
@@ -177,6 +191,9 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
               placeholder={DEFAULT_CHAT_MODELS[provider]}
               value={chatModel}
             />
+            <p className="text-muted-foreground text-xs">
+              {t("tools.plana.settings.chatModelHint")}
+            </p>
           </div>
 
           <p className="text-muted-foreground text-sm">
@@ -212,7 +229,7 @@ export function PlanaSettingsDialog({ children }: PropsWithChildren) {
             {t("tools.plana.settings.clear")}
           </Button>
           <Button
-            disabled={isPending || !apiKey.trim()}
+            disabled={isPending || (!apiKey.trim() && !hasSavedKey)}
             onClick={handleSave}
             type="button"
           >

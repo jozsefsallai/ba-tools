@@ -14,6 +14,12 @@ export const planaConfigSchema = z.object({
   chatModel: z.string().trim().optional(),
 });
 
+export const planaConfigInputSchema = planaConfigSchema.extend({
+  apiKey: z.string().trim().optional(),
+});
+
+export type PlanaConfigInput = z.infer<typeof planaConfigInputSchema>;
+
 export type PlanaProviderId = z.infer<typeof planaProviderSchema>;
 export type PlanaConfig = z.infer<typeof planaConfigSchema>;
 

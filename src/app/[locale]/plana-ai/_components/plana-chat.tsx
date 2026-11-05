@@ -1,64 +1,136 @@
 "use client";
 
 import { Chat, useChat } from "@ai-sdk/react";
-import { type ChatInit, DefaultChatTransport } from "ai";
 import {
+  type ChatInit,
+  DefaultChatTransport,
+  isToolUIPart,
+  lastAssistantMessageIsCompleteWithApprovalResponses,
+} from "ai";
+import { useQuery } from "convex/react";
+import {
+  ArrowDownIcon,
   LoaderCircleIcon,
   PanelLeftIcon,
+  PanelRightCloseIcon,
+  PanelRightOpenIcon,
   PlusIcon,
   SettingsIcon,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useStickToBottom } from "use-stick-to-bottom";
+import { getPlanaConfigStatus } from "@/actions/plana-config";
 import { ChatEmptyState } from "@/app/[locale]/plana-ai/_components/chat-empty-state";
 import { ChatErrorMessage } from "@/app/[locale]/plana-ai/_components/chat-error-message";
 import { ChatInput } from "@/app/[locale]/plana-ai/_components/chat-input";
-import { ChatMessage } from "@/app/[locale]/plana-ai/_components/chat-message";
+import {
+  ChatMessage,
+  type ChatMessageActions,
+  ChatPendingIndicator,
+} from "@/app/[locale]/plana-ai/_components/chat-message";
 import { ChatMessagesSkeleton } from "@/app/[locale]/plana-ai/_components/chat-messages-skeleton";
 import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
+import { PlanaCompanion } from "@/app/[locale]/plana-ai/_components/plana-companion";
 import { PlanaMobileChatSidebar } from "@/app/[locale]/plana-ai/_components/plana-mobile-chat-sidebar";
 import { PlanaSettingsDialog } from "@/app/[locale]/plana-ai/_components/plana-settings-dialog";
+import { usePlanaBranches } from "@/app/[locale]/plana-ai/_hooks/use-plana-branches";
 import { usePlanaChatPersistence } from "@/app/[locale]/plana-ai/_hooks/use-plana-chat-persistence";
+import { useStoredToggle } from "@/app/[locale]/plana-ai/_hooks/use-stored-toggle";
 import {
   findParentUserMessageId,
-  type PlanaBranches,
+  getLatestUserMessageId,
   type PlanaChatMessage,
+  toWireMessages,
 } from "@/app/[locale]/plana-ai/_lib/chat-persistence";
-import { Plana } from "@/components/plana";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  type PlanaErrorCode,
+  type PlanaStatusKey,
+  toPlanaErrorCode,
+} from "@/lib/ai/message-types";
 import type { PlanaExpression } from "@/lib/plana-expressions";
 import { cn } from "@/lib/utils";
+import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 import {
   getExpressionFromText,
   getResponseFailureErrorKey,
-  getVisibleAssistantText,
+  hasVisibleContent,
 } from "./message-utils";
 
-type PlanaResponseErrorKey = "filtered" | "generic";
 type ResponseFinishPayload = Parameters<
   NonNullable<ChatInit<PlanaChatMessage>["onFinish"]>
 >[0];
+
+const ERROR_MESSAGE_KEYS = {
+  not_configured: "notConfigured",
+  invalid_key: "invalidKey",
+  no_credits: "noCredits",
+  rate_limited: "rateLimited",
+  model_not_found: "modelNotFound",
+  model_no_tools: "modelNoTools",
+  filtered: "filtered",
+  generic: "generic",
+} as const satisfies Record<PlanaErrorCode, string>;
+
+const SETTINGS_ERROR_CODES = new Set<PlanaErrorCode>([
+  "not_configured",
+  "invalid_key",
+  "model_not_found",
+  "model_no_tools",
+]);
+
+function getDraftKey(chatId: string | undefined) {
+  return `plana-draft:${chatId ?? "new"}`;
+}
+
+function loadDraft(chatId: string | undefined) {
+  try {
+    return localStorage.getItem(getDraftKey(chatId)) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function saveDraft(chatId: string | undefined, draft: string) {
+  try {
+    if (draft) {
+      localStorage.setItem(getDraftKey(chatId), draft);
+    } else {
+      localStorage.removeItem(getDraftKey(chatId));
+    }
+  } catch {}
+}
 
 function getLatestAssistantExpression(messages: PlanaChatMessage[]) {
   const latestUserIndex = messages.findLastIndex(
     (message) => message.role === "user",
   );
-  const messagesAfterLatestUser =
-    latestUserIndex === -1 ? messages : messages.slice(latestUserIndex + 1);
-  const latestAssistant = [
-    ...messagesAfterLatestUser,
-  ]
-    .reverse()
-    .find((message) => message.role === "assistant");
-
-  const text = latestAssistant?.parts
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
+  const text = messages
+    .slice(latestUserIndex + 1)
+    .flatMap((message) =>
+      message.parts.map((part) => (part.type === "text" ? part.text : "")),
+    )
     .join("");
 
   return text ? getExpressionFromText(text) : null;
+}
+
+function isRunningTool(part: PlanaChatMessage["parts"][number] | undefined) {
+  return (
+    !!part &&
+    isToolUIPart(part) &&
+    (part.state === "input-streaming" || part.state === "input-available")
+  );
 }
 
 type PlanaChatProps = {
@@ -68,31 +140,57 @@ type PlanaChatProps = {
 
 export function PlanaChat({ chatId, className }: PlanaChatProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const { replaceChatUrl, notifyChatActivity } = useActivePlanaChat();
-  const avatarPanelRef = useRef<HTMLElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const branchesRef = useRef<PlanaBranches>({});
   const chatIdRef = useRef<Id<"planaChat"> | undefined>(chatId);
-  const [, rerenderBranches] = useState(0);
   const [inputDraft, setInputDraft] = useState("");
-  const [planaScale, setPlanaScale] = useState(1);
-  const [optimisticExpression, setOptimisticExpression] =
-    useState<PlanaExpression | null>(null);
-  const wasBusyRef = useRef(false);
+  const [hasKey, setHasKey] = useState<boolean | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const [companionVisible, setCompanionVisible] = useStoredToggle(
+    "plana-companion-visible",
+    true,
+  );
+
+  const [statusKey, setStatusKey] = useState<PlanaStatusKey | null>(null);
+  const [rewindTarget, setRewindTarget] = useState<PlanaChatMessage | null>(
+    null,
+  );
+  const [responseError, setResponseError] = useState<PlanaErrorCode | null>(
+    null,
+  );
+
   const previousRouteChatIdRef = useRef<Id<"planaChat"> | undefined>(chatId);
   const responseFinishRef = useRef<(payload: ResponseFinishPayload) => void>(
     () => {},
   );
+  const getActiveChatIdRef = useRef<() => Id<"planaChat"> | undefined>(
+    () => undefined,
+  );
+  const getTurnOrderRef = useRef<
+    (id: string | undefined) => number | undefined
+  >(() => undefined);
   const pendingSendContextRef = useRef<Promise<void> | null>(null);
-  const [responseError, setResponseError] =
-    useState<PlanaResponseErrorKey | null>(null);
+
+  const chatTitle = useQuery(
+    api.planaChat.getChat,
+    chatId
+      ? {
+          chatId,
+        }
+      : "skip",
+  )?.title;
 
   useEffect(() => {
     chatIdRef.current = chatId;
   }, [
     chatId,
   ]);
+
+  useEffect(() => {
+    void getPlanaConfigStatus().then((status) => setHasKey(status.hasKey));
+  }, []);
 
   const chat = useMemo(
     () =>
@@ -113,22 +211,36 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
             return {
               body: {
                 ...body,
-                chatId: chatIdRef.current,
+                chatId: getActiveChatIdRef.current(),
                 id,
+                locale,
                 messageId,
-                messages,
+                messages: toWireMessages(messages),
                 timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 trigger,
+                turnOrder: getTurnOrderRef.current(
+                  getLatestUserMessageId(messages),
+                ),
               },
             };
           },
         }),
+        onData: (part) => {
+          if (part.type === "data-status") {
+            setStatusKey(part.data.key);
+          }
+        },
         onFinish: (payload) => responseFinishRef.current(payload),
+        sendAutomaticallyWhen:
+          lastAssistantMessageIsCompleteWithApprovalResponses,
       }),
-    [],
+    [
+      locale,
+    ],
   );
 
   const {
+    addToolApprovalResponse,
     clearError,
     error,
     messages,
@@ -139,13 +251,53 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     stop,
   } = useChat<PlanaChatMessage>({
     chat,
+    experimental_throttle: 50,
   });
 
   const isBusy = status === "submitted" || status === "streaming";
+  const { contentRef, isAtBottom, scrollRef, scrollToBottom } =
+    useStickToBottom({
+      initial: "instant",
+      resize: "smooth",
+    });
+  const {
+    branchesRef,
+    bumpBranches,
+    resetBranches,
+    switchBranch,
+    trackSibling,
+    trimBranches,
+  } = usePlanaBranches({
+    setMessages,
+  });
 
-  const bumpBranches = useCallback(() => {
-    rerenderBranches((version) => version + 1);
-  }, []);
+  const {
+    getActiveChatId,
+    getTurnOrder,
+    isLoadingHistory,
+    isLoadingMoreHistory,
+    markSendActive,
+    markSendInactive,
+    persistBranchSwitch,
+    persistEdit,
+    persistRewind,
+    prepareOutgoingUserMessage,
+    persistOutgoingUserMessage,
+    topSentinelRef,
+  } = usePlanaChatPersistence({
+    branchesRef,
+    bumpBranches,
+    chatId,
+    isBusy,
+    notifyChatActivity,
+    replaceChatUrl,
+    scrollToBottom,
+    setMessages,
+    viewportRef: scrollRef,
+  });
+
+  getActiveChatIdRef.current = getActiveChatId;
+  getTurnOrderRef.current = getTurnOrder;
 
   useEffect(() => {
     const previousChatId = previousRouteChatIdRef.current;
@@ -166,46 +318,17 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     }
 
     stop();
-    clearError();
-    setResponseError(null);
-    branchesRef.current = {};
-    bumpBranches();
-    setInputDraft("");
-    setOptimisticExpression(null);
+    clearAllErrors();
+    resetBranches();
+    setInputDraft(loadDraft(chatId));
     setMessages([]);
   }, [
-    bumpBranches,
     chatId,
-    clearError,
-    setMessages,
-    stop,
   ]);
 
-  const {
-    isLoadingHistory,
-    isLoadingMoreHistory,
-    markSendActive,
-    markSendInactive,
-    persistAssistantCompletion,
-    persistBranchSwitch,
-    persistRewind,
-    prepareRegenerate,
-    prepareOutgoingUserMessage,
-    persistOutgoingUserMessage,
-    scrollContainerRef,
-    shouldStickToBottomRef,
-    topSentinelRef,
-  } = usePlanaChatPersistence({
-    branchesRef,
-    bumpBranches,
-    chatId,
-    isBusy,
-    messages,
-    notifyChatActivity,
-    replaceChatUrl,
-    setMessages,
-    status,
-  });
+  useEffect(() => {
+    setInputDraft(loadDraft(chatIdRef.current));
+  }, []);
 
   function clearAllErrors() {
     clearError();
@@ -215,234 +338,99 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
   responseFinishRef.current = ({
     finishReason,
     isAbort,
+    isDisconnect,
     isError,
     message,
     messages: finishedMessages,
   }) => {
-    setOptimisticExpression(null);
+    setStatusKey(null);
 
-    if (isAbort || isError) {
-      return;
-    }
+    const isAssistantReply = message.role === "assistant";
+    const isEmptyReply = isAssistantReply && !hasVisibleContent(message);
 
-    const explicitErrorKey = getResponseFailureErrorKey(finishReason);
-    const visibleText = getVisibleAssistantText(message);
-    const lastMessage = finishedMessages.at(-1);
-    const missingResponse = lastMessage?.role === "user";
-    const emptyAssistantResponse =
-      lastMessage?.role === "assistant" && visibleText.length === 0;
-
-    if (!explicitErrorKey && !missingResponse && !emptyAssistantResponse) {
-      if (message.role === "assistant") {
-        void persistAssistantCompletion(message);
-      }
-      return;
-    }
-
-    setResponseError(explicitErrorKey ?? "generic");
-
-    if (emptyAssistantResponse) {
+    if (isEmptyReply && finishedMessages.at(-1)?.id === message.id) {
       setMessages(finishedMessages.slice(0, -1));
     }
+
+    if (isAbort || isDisconnect || isError) {
+      return;
+    }
+
+    const failureKey = getResponseFailureErrorKey(finishReason);
+
+    if (failureKey || isEmptyReply) {
+      setResponseError(failureKey ?? "generic");
+    }
   };
 
-  const latestExpression = getLatestAssistantExpression(messages);
   const hasError = (status === "error" && !!error) || !!responseError;
+  const errorCode: PlanaErrorCode =
+    responseError ?? toPlanaErrorCode(error?.message);
   const planaExpression: PlanaExpression = hasError
     ? "sad"
-    : isBusy || optimisticExpression
-      ? (optimisticExpression ?? "thinking")
-      : (latestExpression ?? "idle");
-  const latestAssistantMessageId = [
-    ...messages,
-  ]
-    .reverse()
-    .find((message) => message.role === "assistant")?.id;
-  const errorMessage = hasError
-    ? error?.message === "Plana AI is not configured"
-      ? t("tools.plana.errors.notConfigured")
-      : responseError === "filtered"
-        ? t("tools.plana.errors.filtered")
-        : t("tools.plana.errors.generic")
-    : "";
-  const shouldShowTypingPlaceholder =
-    isBusy && messages.at(-1)?.role === "user";
-  const typingPlaceholderMessage: PlanaChatMessage = {
-    id: "plana-typing-placeholder",
-    role: "assistant",
-    parts: [],
-  };
+    : (getLatestAssistantExpression(messages) ??
+      (isBusy ? "thinking" : "idle"));
+  const latestAssistantMessageId = messages.findLast(
+    (message) => message.role === "assistant",
+  )?.id;
+  const lastMessage = messages.at(-1);
+  const lastPart = lastMessage?.parts.at(-1);
+  const showPendingIndicator =
+    isBusy &&
+    (lastMessage?.role !== "assistant" ||
+      (!isRunningTool(lastPart) && lastPart?.type !== "text"));
+  const isAwaitingApproval = lastMessage?.parts.some(
+    (part) => isToolUIPart(part) && part.state === "approval-requested",
+  );
+  const showUnanswered =
+    status === "ready" &&
+    !hasError &&
+    !isLoadingHistory &&
+    lastMessage?.role === "user";
 
-  function upsertBranchSibling(
-    parentUserMessageId: string,
-    assistantMessage: PlanaChatMessage,
-    makeActive = false,
-  ) {
-    const branch = branchesRef.current[parentUserMessageId] ?? {
-      activeIndex: 0,
-      siblings: [],
-    };
-    const existingIndex = branch.siblings.findIndex(
-      (message) => message.id === assistantMessage.id,
+  useEffect(() => {
+    if (status !== "ready" || isLoadingHistory || !latestAssistantMessageId) {
+      return;
+    }
+
+    const latestAssistant = messages.find(
+      (message) => message.id === latestAssistantMessageId,
     );
-
-    if (existingIndex === -1) {
-      branch.siblings = [
-        ...branch.siblings,
-        assistantMessage,
-      ];
-      branch.activeIndex = makeActive
-        ? branch.siblings.length - 1
-        : branch.activeIndex;
-      branchesRef.current[parentUserMessageId] = branch;
-      bumpBranches();
-      return;
-    }
-
-    branch.siblings = branch.siblings.map((message, index) =>
-      index === existingIndex ? assistantMessage : message,
-    );
-
-    if (makeActive && branch.activeIndex !== existingIndex) {
-      branch.activeIndex = existingIndex;
-      bumpBranches();
-      return;
-    }
-
-    branchesRef.current[parentUserMessageId] = branch;
-  }
-
-  useEffect(() => {
-    if (!shouldStickToBottomRef.current) {
-      return;
-    }
-
-    const viewport = scrollContainerRef.current?.closest(
-      '[data-slot="scroll-area-viewport"]',
-    );
-
-    if (viewport instanceof HTMLElement) {
-      viewport.scrollTo({
-        top: viewport.scrollHeight,
-        behavior: "smooth",
-      });
-      return;
-    }
-
-    bottomRef.current?.scrollIntoView({
-      block: "end",
-      behavior: "smooth",
-    });
-  }, [
-    messages,
-    status,
-    shouldShowTypingPlaceholder,
-    hasError,
-    shouldStickToBottomRef,
-    scrollContainerRef,
-  ]);
-
-  useEffect(() => {
-    if (isBusy && !hasError) {
-      setOptimisticExpression((current) => current ?? "thinking");
-    }
-  }, [
-    hasError,
-    isBusy,
-  ]);
-
-  useEffect(() => {
-    if (wasBusyRef.current && !isBusy) {
-      setOptimisticExpression(null);
-      shouldStickToBottomRef.current = true;
-      requestAnimationFrame(() => {
-        inputRef.current?.focus();
-      });
-    }
-
-    wasBusyRef.current = isBusy;
-  }, [
-    isBusy,
-    shouldStickToBottomRef,
-  ]);
-
-  useEffect(() => {
-    if (status !== "ready" || isBusy || isLoadingHistory) {
-      return;
-    }
-
-    const latestAssistant = [
-      ...messages,
-    ]
-      .reverse()
-      .find((message) => message.role === "assistant");
-
-    if (!latestAssistant) {
-      return;
-    }
-
-    const parentUserMessageId = findParentUserMessageId(
+    const parentId = findParentUserMessageId(
       messages,
-      latestAssistant.id,
+      latestAssistantMessageId,
     );
 
-    if (!parentUserMessageId) {
+    if (!latestAssistant || !parentId || !hasVisibleContent(latestAssistant)) {
       return;
     }
 
-    const branch = branchesRef.current[parentUserMessageId];
-    const alreadyTracked = branch?.siblings.some(
-      (message) => message.id === latestAssistant.id,
+    const branch = branchesRef.current[parentId];
+    const isTracked = branch?.siblings.some(
+      (message) =>
+        message.id === latestAssistantMessageId && message === latestAssistant,
     );
 
-    if (alreadyTracked && branch.activeIndex === branch.siblings.length - 1) {
-      return;
+    if (!isTracked) {
+      trackSibling(parentId, latestAssistant);
     }
-
-    upsertBranchSibling(parentUserMessageId, latestAssistant, true);
   }, [
-    isBusy,
     isLoadingHistory,
+    latestAssistantMessageId,
     messages,
     status,
   ]);
 
-  useEffect(() => {
-    const panel = avatarPanelRef.current;
-
-    if (!panel) {
-      return;
-    }
-
-    const updateScale = () => {
-      const { height, width } = panel.getBoundingClientRect();
-      const scaleByWidth = (width - 64) / 500;
-      const scaleByHeight = (height + 96) / 850;
-      const nextScale = Math.min(
-        Math.max(Math.min(scaleByWidth, scaleByHeight), 0.95),
-        1.55,
-      );
-
-      setPlanaScale(nextScale);
-    };
-
-    updateScale();
-
-    const observer = new ResizeObserver(updateScale);
-    observer.observe(panel);
-    window.addEventListener("resize", updateScale);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", updateScale);
-    };
-  }, []);
+  function updateDraft(value: string) {
+    setInputDraft(value);
+    saveDraft(chatIdRef.current, value);
+  }
 
   async function sendText(text: string) {
     clearAllErrors();
-    setOptimisticExpression("thinking");
-    setInputDraft("");
-    shouldStickToBottomRef.current = true;
+    setStatusKey(null);
+    updateDraft("");
+    void scrollToBottom();
 
     const userMessage = prepareOutgoingUserMessage(text);
     pendingSendContextRef.current = persistOutgoingUserMessage(userMessage);
@@ -459,329 +447,368 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
   function startNewChat() {
     stop();
     clearAllErrors();
-    branchesRef.current = {};
-    bumpBranches();
-    setInputDraft("");
-    setOptimisticExpression(null);
+    resetBranches();
+    setInputDraft(loadDraft(undefined));
     setMessages([]);
     chatIdRef.current = undefined;
     replaceChatUrl(undefined);
   }
 
-  function handleRetry() {
+  function regenerateLatest() {
     clearAllErrors();
-    setOptimisticExpression("thinking");
-
-    if (latestAssistantMessageId) {
-      const latestAssistant = messages.find(
-        (message) => message.id === latestAssistantMessageId,
-      );
-
-      if (latestAssistant) {
-        prepareRegenerate(latestAssistant);
-      }
-
-      void regenerate({
-        messageId: latestAssistantMessageId,
-      });
-      return;
-    }
-
+    setStatusKey(null);
     void regenerate();
   }
 
   function handleRegenerate(assistantMessage: PlanaChatMessage) {
-    if (assistantMessage.id !== latestAssistantMessageId) {
+    if (assistantMessage.id === latestAssistantMessageId) {
+      regenerateLatest();
+    }
+  }
+
+  function handleSwitchBranch(
+    assistantMessage: PlanaChatMessage,
+    delta: -1 | 1,
+  ) {
+    const switched = switchBranch(messages, assistantMessage, delta);
+
+    if (switched) {
+      persistBranchSwitch(
+        switched.parentUserMessageId,
+        switched.selectedVariantIndex,
+      );
+    }
+  }
+
+  async function handleEdit(userMessage: PlanaChatMessage, text: string) {
+    const index = messages.findIndex(
+      (message) => message.id === userMessage.id,
+    );
+
+    if (index === -1) {
       return;
     }
 
-    const parentUserMessageId = findParentUserMessageId(
-      messages,
-      assistantMessage.id,
-    );
+    const edited: PlanaChatMessage = {
+      ...userMessage,
+      parts: [
+        {
+          type: "text",
+          text,
+        },
+      ],
+    };
+    const nextMessages = [
+      ...messages.slice(0, index),
+      edited,
+    ];
 
-    if (parentUserMessageId) {
-      upsertBranchSibling(parentUserMessageId, assistantMessage, true);
-    }
-
-    prepareRegenerate(assistantMessage);
     clearAllErrors();
-    setOptimisticExpression("thinking");
-    void regenerate({
-      messageId: assistantMessage.id,
-    });
+    trimBranches(messages.slice(0, index));
+    setMessages(nextMessages);
+    void scrollToBottom();
+    pendingSendContextRef.current = persistEdit(edited);
+    markSendActive();
+
+    try {
+      await regenerate();
+    } finally {
+      pendingSendContextRef.current = null;
+      markSendInactive();
+    }
   }
 
-  function switchBranch(assistantMessage: PlanaChatMessage, delta: -1 | 1) {
-    const parentUserMessageId = findParentUserMessageId(
-      messages,
-      assistantMessage.id,
-    );
+  function confirmRewind() {
+    const assistantMessage = rewindTarget;
 
-    if (!parentUserMessageId) {
+    setRewindTarget(null);
+
+    if (!assistantMessage) {
       return;
     }
 
-    const branch = branchesRef.current[parentUserMessageId];
-
-    if (!branch) {
-      return;
-    }
-
-    const nextIndex = Math.min(
-      Math.max(branch.activeIndex + delta, 0),
-      branch.siblings.length - 1,
-    );
-
-    if (nextIndex === branch.activeIndex) {
-      return;
-    }
-
-    const messageIndex = messages.findIndex(
+    const index = messages.findIndex(
       (message) => message.id === assistantMessage.id,
     );
+    const parentId = findParentUserMessageId(messages, assistantMessage.id);
 
-    if (messageIndex === -1) {
+    if (index === -1 || !parentId) {
       return;
     }
 
-    branch.activeIndex = nextIndex;
-    setMessages(
-      messages.map((message, index) =>
-        index === messageIndex ? branch.siblings[nextIndex] : message,
-      ),
-    );
-    bumpBranches();
-    persistBranchSwitch(parentUserMessageId, nextIndex);
-  }
+    const nextMessages = messages.slice(0, index + 1);
 
-  function rewindTo(assistantMessage: PlanaChatMessage) {
-    const assistantIndex = messages.findIndex(
-      (message) => message.id === assistantMessage.id,
-    );
-
-    if (assistantIndex === -1) {
-      return;
-    }
-
-    const nextMessages = messages.slice(0, assistantIndex + 1);
-    const remainingUserIds = new Set(
-      nextMessages
-        .filter((message) => message.role === "user")
-        .map((message) => message.id),
-    );
-
-    stop();
     clearAllErrors();
     setMessages(nextMessages);
-    branchesRef.current = Object.fromEntries(
-      Object.entries(branchesRef.current).filter(([userMessageId]) =>
-        remainingUserIds.has(userMessageId),
-      ),
-    );
-
-    const parentUserMessageId = findParentUserMessageId(
-      messages,
-      assistantMessage.id,
-    );
-
-    if (parentUserMessageId) {
-      const branch = branchesRef.current[parentUserMessageId];
-
-      if (branch) {
-        const siblingIndex = branch.siblings.findIndex(
-          (message) => message.id === assistantMessage.id,
-        );
-
-        if (siblingIndex !== -1) {
-          branch.siblings = branch.siblings.slice(0, siblingIndex + 1);
-          branch.activeIndex = siblingIndex;
-        }
-      }
-    }
-
-    bumpBranches();
-    setInputDraft("");
-    void persistRewind(assistantMessage);
-
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
+    trimBranches(nextMessages, assistantMessage);
+    void persistRewind(parentId);
+    inputRef.current?.focus();
   }
 
+  const actionsRef = useRef<ChatMessageActions>(null as never);
+
+  actionsRef.current = {
+    edit: (message, text) => void handleEdit(message, text),
+    regenerate: handleRegenerate,
+    respondToApproval: (id, approved) => {
+      void addToolApprovalResponse({
+        id,
+        approved,
+        reason: approved
+          ? undefined
+          : "Sensei declined this in the app. Nothing was saved, and no further approval is pending.",
+      });
+    },
+    rewind: setRewindTarget,
+    switchBranch: handleSwitchBranch,
+  };
+
+  const stableActions = useMemo<ChatMessageActions>(
+    () => ({
+      edit: (...args) => actionsRef.current.edit(...args),
+      regenerate: (...args) => actionsRef.current.regenerate(...args),
+      respondToApproval: (...args) =>
+        actionsRef.current.respondToApproval(...args),
+      rewind: (...args) => actionsRef.current.rewind(...args),
+      switchBranch: (...args) => actionsRef.current.switchBranch(...args),
+    }),
+    [],
+  );
+
   const showEmptyState =
-    !isLoadingHistory && messages.length === 0 && !hasError;
+    !isLoadingHistory && !chatId && messages.length === 0 && !hasError;
+  const canAct = !isBusy && !isAwaitingApproval;
+  const composer = (
+    <ChatInput
+      isBusy={isBusy}
+      onSend={(text) => void sendText(text)}
+      onStop={stop}
+      onValueChange={updateDraft}
+      ref={inputRef}
+      value={inputDraft}
+    />
+  );
 
   return (
-    <div
-      className={cn(
-        "grid h-full min-h-0 flex-1 grid-rows-1 gap-4 overflow-hidden md:grid-cols-[minmax(360px,1fr)_minmax(0,1.25fr)] xl:grid-cols-[minmax(480px,1.05fr)_minmax(0,1.15fr)]",
-        className,
-      )}
-    >
-      <aside
-        className="relative hidden min-h-0 overflow-hidden rounded-3xl border bg-gradient-to-b from-background via-background to-muted/60 md:block"
-        ref={avatarPanelRef}
-      >
-        <div className="absolute inset-x-0 bottom-0 flex justify-center">
-          <div
-            className="translate-y-[10%]"
-            style={{
-              transform: `translateY(10%) scale(${planaScale})`,
-              transformOrigin: "bottom center",
-            }}
-          >
-            <Plana expression={planaExpression} inline />
-          </div>
-        </div>
-      </aside>
-
-      <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm">
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <PlanaMobileChatSidebar>
-              <Button
-                aria-label={t("tools.plana.sidebar.open")}
-                className="shrink-0 md:hidden"
-                size="icon-sm"
-                type="button"
-                variant="outline"
-              >
-                <PanelLeftIcon />
-              </Button>
-            </PlanaMobileChatSidebar>
-
-            <div className="min-w-0">
-              <h1 className="truncate font-semibold tracking-tight">
-                {t("tools.plana.title")}
-              </h1>
-              <p className="truncate text-sm text-muted-foreground">
-                {t("tools.plana.subtitle")}
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <PlanaSettingsDialog>
-              <Button
-                aria-label={t("tools.plana.settings.openSettings")}
-                size="icon-sm"
-                type="button"
-                variant="outline"
-              >
-                <SettingsIcon />
-              </Button>
-            </PlanaSettingsDialog>
+    <div className={cn("flex h-full min-h-0 flex-1", className)}>
+      <section className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
+          <PlanaMobileChatSidebar>
             <Button
-              className="hidden md:inline-flex"
-              onClick={startNewChat}
-              size="sm"
+              aria-label={t("tools.plana.sidebar.open")}
+              className="shrink-0 md:hidden"
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            >
+              <PanelLeftIcon />
+            </Button>
+          </PlanaMobileChatSidebar>
+
+          <h1 className="min-w-0 flex-1 truncate font-medium text-sm">
+            {chatTitle ?? t("tools.plana.title")}
+          </h1>
+
+          <Button
+            aria-label={t("tools.plana.input.newChat")}
+            className="shrink-0 md:hidden"
+            onClick={startNewChat}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            <PlusIcon />
+          </Button>
+          <PlanaSettingsDialog
+            onOpenChange={setSettingsOpen}
+            onSaved={setHasKey}
+            open={settingsOpen}
+          >
+            <Button
+              aria-label={t("tools.plana.settings.openSettings")}
+              size="icon-sm"
+              title={t("tools.plana.settings.openSettings")}
+              type="button"
+              variant="ghost"
+            >
+              <SettingsIcon />
+            </Button>
+          </PlanaSettingsDialog>
+          <Button
+            aria-label={
+              companionVisible
+                ? t("tools.plana.companion.hide")
+                : t("tools.plana.companion.show")
+            }
+            className="hidden lg:inline-flex"
+            onClick={() => setCompanionVisible(!companionVisible)}
+            size="icon-sm"
+            title={
+              companionVisible
+                ? t("tools.plana.companion.hide")
+                : t("tools.plana.companion.show")
+            }
+            type="button"
+            variant="ghost"
+          >
+            {companionVisible ? (
+              <PanelRightCloseIcon />
+            ) : (
+              <PanelRightOpenIcon />
+            )}
+          </Button>
+        </header>
+
+        {showEmptyState ? (
+          <ChatEmptyState
+            composer={composer}
+            hasKey={hasKey}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onSelectSuggestion={(text) => void sendText(text)}
+          />
+        ) : (
+          <>
+            <div className="min-h-0 flex-1 overflow-y-auto" ref={scrollRef}>
+              <div
+                className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6"
+                ref={contentRef}
+              >
+                {isLoadingHistory ? (
+                  <ChatMessagesSkeleton />
+                ) : (
+                  <>
+                    <div
+                      className="flex min-h-px justify-center"
+                      ref={topSentinelRef}
+                    >
+                      {isLoadingMoreHistory && (
+                        <LoaderCircleIcon className="size-4 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
+                    {messages.map((message, index) => {
+                      const isLatestAssistant =
+                        message.id === latestAssistantMessageId;
+                      const parentId =
+                        isLatestAssistant && canAct
+                          ? findParentUserMessageId(messages, message.id)
+                          : null;
+                      const branch = parentId
+                        ? branchesRef.current[parentId]
+                        : undefined;
+                      const isStreamingMessage =
+                        isBusy &&
+                        index === messages.length - 1 &&
+                        message.role === "assistant";
+
+                      return (
+                        <ChatMessage
+                          actions={stableActions}
+                          branchCount={branch?.siblings.length}
+                          branchIndex={branch?.activeIndex}
+                          canEdit={canAct && message.role === "user"}
+                          canRegenerate={
+                            canAct && isLatestAssistant && !showUnanswered
+                          }
+                          canRewind={
+                            canAct &&
+                            message.role === "assistant" &&
+                            !isLatestAssistant
+                          }
+                          isStreaming={isStreamingMessage}
+                          key={message.id}
+                          message={message}
+                        />
+                      );
+                    })}
+                    {showPendingIndicator && (
+                      <ChatPendingIndicator
+                        label={
+                          statusKey
+                            ? t(`tools.plana.status.${statusKey}`)
+                            : undefined
+                        }
+                      />
+                    )}
+                    {hasError && (
+                      <ChatErrorMessage
+                        message={t(
+                          `tools.plana.errors.${ERROR_MESSAGE_KEYS[errorCode]}`,
+                        )}
+                        onOpenSettings={
+                          SETTINGS_ERROR_CODES.has(errorCode)
+                            ? () => setSettingsOpen(true)
+                            : undefined
+                        }
+                        onRetry={regenerateLatest}
+                      />
+                    )}
+                    {showUnanswered && (
+                      <ChatErrorMessage
+                        message={t("tools.plana.message.unanswered")}
+                        onRetry={regenerateLatest}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="relative shrink-0 px-4 pb-3">
+              {!isAtBottom && !isLoadingHistory ? (
+                <Button
+                  aria-label={t("tools.plana.input.scrollToBottom")}
+                  className="absolute -top-11 left-1/2 size-8 -translate-x-1/2 rounded-full shadow-md"
+                  onClick={() => void scrollToBottom()}
+                  size="icon"
+                  title={t("tools.plana.input.scrollToBottom")}
+                  type="button"
+                  variant="outline"
+                >
+                  <ArrowDownIcon />
+                </Button>
+              ) : null}
+              <div className="mx-auto w-full max-w-3xl">
+                {composer}
+                <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+                  {t("tools.plana.input.disclaimer")}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+      </section>
+
+      <PlanaCompanion expression={planaExpression} visible={companionVisible} />
+
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setRewindTarget(null);
+          }
+        }}
+        open={!!rewindTarget}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("tools.plana.message.rewindTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("tools.plana.message.rewindDescription")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => setRewindTarget(null)}
               type="button"
               variant="outline"
             >
-              <PlusIcon />
-              {t("tools.plana.input.newChat")}
+              {t("common.dialogs.confirm.cancel")}
             </Button>
-          </div>
-        </header>
-
-        <ScrollArea className="min-h-0 flex-1 overflow-hidden">
-          <div
-            className={cn("flex min-h-full flex-col gap-5 p-4 md:p-6", {
-              "justify-center": showEmptyState,
-            })}
-            ref={scrollContainerRef}
-          >
-            {isLoadingHistory ? (
-              <ChatMessagesSkeleton />
-            ) : showEmptyState ? (
-              <ChatEmptyState onSelectSuggestion={sendText} />
-            ) : (
-              <>
-                <div className="flex justify-center py-1" ref={topSentinelRef}>
-                  {isLoadingMoreHistory && (
-                    <LoaderCircleIcon className="size-4 animate-spin text-muted-foreground" />
-                  )}
-                </div>
-                {messages.map((message, index) => (
-                  <ChatMessage
-                    branches={
-                      message.role === "assistant" &&
-                      message.id === latestAssistantMessageId &&
-                      !isBusy
-                        ? (() => {
-                            const parentId = findParentUserMessageId(
-                              messages,
-                              message.id,
-                            );
-                            const branch = parentId
-                              ? branchesRef.current[parentId]
-                              : undefined;
-
-                            return branch
-                              ? {
-                                  activeIndex: branch.activeIndex,
-                                  count: branch.siblings.length,
-                                }
-                              : undefined;
-                          })()
-                        : undefined
-                    }
-                    isStreaming={
-                      isBusy &&
-                      index === messages.length - 1 &&
-                      message.role === "assistant"
-                    }
-                    key={message.id}
-                    message={message}
-                    onRegenerate={
-                      message.role === "assistant" &&
-                      message.id === latestAssistantMessageId &&
-                      !isBusy
-                        ? handleRegenerate
-                        : undefined
-                    }
-                    onRewind={
-                      message.role === "assistant" &&
-                      message.id !== latestAssistantMessageId &&
-                      !isBusy
-                        ? rewindTo
-                        : undefined
-                    }
-                    onSwitchBranch={
-                      message.role === "assistant" &&
-                      message.id === latestAssistantMessageId &&
-                      !isBusy
-                        ? (delta) => switchBranch(message, delta)
-                        : undefined
-                    }
-                  />
-                ))}
-                {shouldShowTypingPlaceholder && (
-                  <ChatMessage isStreaming message={typingPlaceholderMessage} />
-                )}
-                {hasError && (
-                  <ChatErrorMessage
-                    message={errorMessage}
-                    onRetry={handleRetry}
-                  />
-                )}
-              </>
-            )}
-            <div ref={bottomRef} />
-          </div>
-        </ScrollArea>
-
-        <div className="shrink-0 border-t bg-background/90 p-3 backdrop-blur md:p-4">
-          <ChatInput
-            onSend={sendText}
-            onStop={stop}
-            onValueChange={setInputDraft}
-            ref={inputRef}
-            status={status}
-            value={inputDraft}
-          />
-        </div>
-      </section>
+            <Button onClick={confirmRewind} type="button" variant="destructive">
+              {t("tools.plana.message.rewind")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

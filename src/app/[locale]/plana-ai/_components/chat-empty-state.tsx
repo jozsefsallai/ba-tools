@@ -2,23 +2,31 @@
 
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
 import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type SuggestionKey = "greeting" | "lore" | "teaParty" | "affection";
+type SuggestionKey = "greeting" | "banner" | "lore" | "teaParty" | "affection";
 
 const SUGGESTION_KEYS: SuggestionKey[] = [
   "greeting",
+  "banner",
   "lore",
   "teaParty",
   "affection",
 ];
 
 export function ChatEmptyState({
+  composer,
+  hasKey,
+  onOpenSettings,
   onSelectSuggestion,
 }: {
+  composer: ReactNode;
+  hasKey: boolean | null;
+  onOpenSettings: () => void;
   onSelectSuggestion: (message: string) => void;
 }) {
   const t = useTranslations();
@@ -48,39 +56,61 @@ export function ChatEmptyState({
     : t("tools.plana.emptyState.heading");
 
   return (
-    <div className="flex min-h-[360px] flex-1 items-center justify-center px-4">
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 rounded-3xl border bg-card/80 p-8 text-center shadow-sm backdrop-blur">
-        <div className="flex flex-col items-center gap-3">
-          <PlanaChatAvatar className="size-24" />
-
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{heading}</h1>
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-4 py-6">
+      <div className="flex w-full max-w-2xl flex-col gap-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <PlanaChatAvatar className="size-16" />
+          <div className="space-y-1">
+            <h2 className="font-semibold text-2xl tracking-tight">{heading}</h2>
             <p className="text-muted-foreground">
               {t("tools.plana.emptyState.body")}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2">
-          {SUGGESTION_KEYS.map((key) => {
-            const suggestion =
-              key === "greeting"
-                ? getGreetingSuggestion()
-                : t(`tools.plana.emptyState.suggestions.${key}`);
+        {hasKey === false ? (
+          <div className="flex flex-col items-center gap-3 rounded-xl border bg-card p-5 text-center">
+            <div className="space-y-1">
+              <p className="font-medium">
+                {t("tools.plana.emptyState.setupTitle")}
+              </p>
 
-            return (
-              <Button
-                className={cn(key === "teaParty" && "hidden md:inline-flex")}
-                key={key}
-                onClick={() => onSelectSuggestion(suggestion)}
-                type="button"
-                variant="outline"
-              >
-                {suggestion}
-              </Button>
-            );
-          })}
-        </div>
+              <p className="text-muted-foreground text-sm">
+                {t("tools.plana.emptyState.setupBody")}
+              </p>
+            </div>
+
+            <Button onClick={onOpenSettings} type="button">
+              {t("tools.plana.emptyState.setupAction")}
+            </Button>
+          </div>
+        ) : (
+          <>
+            {composer}
+            <div className="flex flex-wrap justify-center gap-2">
+              {SUGGESTION_KEYS.map((key) => {
+                const suggestion =
+                  key === "greeting"
+                    ? getGreetingSuggestion()
+                    : t(`tools.plana.emptyState.suggestions.${key}`);
+
+                return (
+                  <button
+                    className={cn(
+                      "rounded-full border bg-card px-4 py-2 text-sm transition-colors hover:bg-accent",
+                      key === "teaParty" && "hidden md:block",
+                    )}
+                    key={key}
+                    onClick={() => onSelectSuggestion(suggestion)}
+                    type="button"
+                  >
+                    {suggestion}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

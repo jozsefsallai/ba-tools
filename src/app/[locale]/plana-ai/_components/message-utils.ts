@@ -1,4 +1,10 @@
-import type { FinishReason, UIMessage } from "ai";
+import {
+  type FinishReason,
+  getToolName,
+  isToolUIPart,
+  type UIMessage,
+} from "ai";
+import { PREPARE_CHANGES_TOOL } from "@/lib/ai/tool-parts";
 import type { PlanaExpression } from "@/lib/plana-expressions";
 
 const ALLOWED_EXPRESSIONS = new Set<string>([
@@ -72,7 +78,9 @@ function toPlanaExpression(expression: string | undefined) {
 }
 
 export function getExpressionFromText(text: string): PlanaExpression | null {
-  for (const expressionMatch of text.matchAll(EXPRESSION_MARKER_REGEX)) {
+  for (const expressionMatch of [
+    ...text.matchAll(EXPRESSION_MARKER_REGEX),
+  ].reverse()) {
     const expression = toPlanaExpression(expressionMatch[1]);
 
     if (expression) {
@@ -126,6 +134,17 @@ export function getVisibleAssistantText(message: UIMessage) {
     .map((part) => stripPlanaMetadata(part.text))
     .join("")
     .trim();
+}
+
+export function hasVisibleContent(message: UIMessage) {
+  return (
+    getVisibleAssistantText(message).length > 0 ||
+    message.parts.some(
+      (part) =>
+        (isToolUIPart(part) && getToolName(part) !== PREPARE_CHANGES_TOOL) ||
+        part.type === "data-savedTool",
+    )
+  );
 }
 
 export function getResponseFailureErrorKey(

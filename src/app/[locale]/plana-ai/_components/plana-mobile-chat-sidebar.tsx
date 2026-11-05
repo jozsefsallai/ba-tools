@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren, useState } from "react";
 import { useActivePlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat-layout";
 import { PlanaChatSidebar } from "@/app/[locale]/plana-ai/_components/plana-chat-sidebar";
 import {
@@ -15,18 +15,23 @@ import {
 export function PlanaMobileChatSidebar({ children }: PropsWithChildren) {
   const t = useTranslations();
   const { activeChatId } = useActivePlanaChat();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Sheet>
+    <Sheet onOpenChange={setOpen} open={open}>
       <SheetTrigger asChild>{children}</SheetTrigger>
 
-      <SheetContent className="w-[min(100vw-2rem,320px)] p-0" side="left">
+      <SheetContent
+        className="flex w-[min(100vw-2rem,320px)] flex-col gap-0 p-0"
+        side="left"
+      >
         <SheetHeader className="border-b p-4">
           <SheetTitle>{t("tools.plana.sidebar.title")}</SheetTitle>
         </SheetHeader>
         <PlanaChatSidebar
           activeChatId={activeChatId}
-          className="h-full rounded-none border-0 shadow-none"
+          className="min-h-0 flex-1"
+          onNavigate={() => setOpen(false)}
         />
       </SheetContent>
     </Sheet>

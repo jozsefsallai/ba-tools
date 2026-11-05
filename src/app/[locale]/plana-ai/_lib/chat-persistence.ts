@@ -1,7 +1,7 @@
-import type { UIMessage } from "ai";
+import type { PlanaChatMessage } from "@/lib/ai/message-types";
 import type { Doc } from "~convex/dataModel";
 
-export type PlanaChatMessage = UIMessage<unknown, Record<string, never>>;
+export type { PlanaChatMessage };
 
 export type PlanaBranch = {
   activeIndex: number;
@@ -16,13 +16,6 @@ export type PlanaMessagePart = {
 };
 
 export type PlanaTurnDoc = Doc<"planaTurn">;
-
-export function getTextFromParts(parts: PlanaMessagePart[]) {
-  return parts
-    .filter((part) => part.type === "text")
-    .map((part) => part.text)
-    .join("");
-}
 
 export function messageToParts(message: PlanaChatMessage): PlanaMessagePart[] {
   return message.parts
@@ -61,21 +54,27 @@ export function findParentUserMessageId(
   return null;
 }
 
-export function findTurnOrderForAssistantMessage(
-  turns: PlanaTurnDoc[],
-  assistantMessageId: string,
-) {
-  for (const turn of turns) {
-    const variantIndex = turn.assistantVariants.findIndex(
-      (variant) => variant.clientId === assistantMessageId,
-    );
-
-    if (variantIndex !== -1) {
-      return turn.order;
-    }
-  }
-
-  return null;
+function variantToMessage(
+  variant: PlanaTurnDoc["assistantVariants"][number],
+): PlanaChatMessage {
+  return {
+    id: variant.clientId,
+    role: "assistant",
+    parts: variant.parts.map((part) =>
+      part.type === "text"
+        ? part
+        : {
+            type: "data-savedTool" as const,
+            data: {
+              toolName: part.toolName,
+              status: part.status,
+              summary: part.summary,
+              students: part.students,
+              link: part.link,
+            },
+          },
+    ),
+  };
 }
 
 export function turnsToMessagesAndBranches(turns: PlanaTurnDoc[]): {
@@ -107,20 +106,12 @@ export function turnsToMessagesAndBranches(turns: PlanaTurnDoc[]): {
       turn.assistantVariants[turn.selectedVariantIndex] ??
       turn.assistantVariants[0];
 
-    messages.push({
-      id: selectedVariant.clientId,
-      role: "assistant",
-      parts: selectedVariant.parts,
-    });
+    messages.push(variantToMessage(selectedVariant));
 
     if (turn.assistantVariants.length > 1) {
       branches[turn.userClientId] = {
         activeIndex: turn.selectedVariantIndex,
-        siblings: turn.assistantVariants.map((variant) => ({
-          id: variant.clientId,
-          role: "assistant",
-          parts: variant.parts,
-        })),
+        siblings: turn.assistantVariants.map(variantToMessage),
       };
     }
   }
@@ -148,4 +139,26 @@ export function mergeTurnPages(
   return [
     ...byId.values(),
   ].sort((left, right) => left.order - right.order);
+}
+
+export function toWireMessages(messages: PlanaChatMessage[]) {
+  return messages.map((message, index) => {
+    const isContinuation =
+      index === messages.length - 1 && message.role === "assistant";
+
+    return {
+      ...message,
+      parts: message.parts.filter(
+        (part) =>
+          part.type === "text" ||
+          (isContinuation &&
+            part.type !== "reasoning" &&
+            !part.type.startsWith("data-")),
+      ),
+    };
+  });
+}
+
+export function getLatestUserMessageId(messages: PlanaChatMessage[]) {
+  return messages.findLast((message) => message.role === "user")?.id;
 }

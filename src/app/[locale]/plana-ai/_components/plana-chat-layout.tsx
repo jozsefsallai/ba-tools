@@ -10,6 +10,7 @@ import {
 import { PlanaChat } from "@/app/[locale]/plana-ai/_components/plana-chat";
 import { PlanaChatSidebar } from "@/app/[locale]/plana-ai/_components/plana-chat-sidebar";
 import { usePlanaChatUrl } from "@/app/[locale]/plana-ai/_hooks/use-plana-chat-url";
+import { useStoredToggle } from "@/app/[locale]/plana-ai/_hooks/use-stored-toggle";
 import { cn } from "@/lib/utils";
 import type { Id } from "~convex/dataModel";
 
@@ -39,13 +40,18 @@ export function useActivePlanaChat() {
 export function PlanaChatLayout({
   chatId: initialChatId,
 }: PlanaChatLayoutProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useStoredToggle(
+    "plana-sidebar-collapsed",
+    false,
+  );
   const [activityTimestamps, setActivityTimestamps] = useState<
     Record<string, number>
   >({});
-  const { pushChatUrl, replaceChatUrl, urlChatId } =
-    usePlanaChatUrl(initialChatId);
-  const activeChatId = urlChatId ?? initialChatId;
+  const {
+    pushChatUrl,
+    replaceChatUrl,
+    urlChatId: activeChatId,
+  } = usePlanaChatUrl(initialChatId);
 
   const notifyChatActivity = useCallback((chatId: Id<"planaChat">) => {
     setActivityTimestamps((current) => ({
@@ -73,12 +79,12 @@ export function PlanaChatLayout({
 
   return (
     <ActivePlanaChatContext.Provider value={contextValue}>
-      <div className="flex min-h-0 flex-1 gap-3 overflow-hidden md:gap-4">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <PlanaChatSidebar
           activeChatId={activeChatId}
           className={cn(
-            "hidden min-h-0 shrink-0 md:flex",
-            sidebarCollapsed ? "w-12" : "w-[min(100%,260px)]",
+            "hidden min-h-0 shrink-0 border-r md:flex",
+            sidebarCollapsed ? "w-12" : "w-[260px]",
           )}
           collapsed={sidebarCollapsed}
           onExpand={() => setSidebarCollapsed(false)}

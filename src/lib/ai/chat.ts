@@ -3,51 +3,34 @@ import type { LanguageModel } from "ai";
 import {
   convertToModelMessages,
   generateText,
+  isToolUIPart,
   Output,
+  smoothStream,
+  stepCountIs,
   streamText,
-  type UIMessage,
 } from "ai";
 import { z } from "zod";
-import { getPlanaProvider } from "@/lib/ai/providers";
-import { getLoreCollections } from "./chroma";
+import { formatLoreSections, queryLore } from "@/lib/ai/lore.server";
+import type { PlanaChatMessage, PlanaStatusKey } from "@/lib/ai/message-types";
+import type { getPlanaProvider } from "@/lib/ai/providers";
+import {
+  createPlanaTools,
+  getActivePlanaTools,
+} from "@/lib/ai/tools/index.server";
 import { LORE_QUERY_PLANNER_PROMPT } from "./lore-classifier";
 import { PLANA_CHARACTER_BIBLE } from "./plana";
-import { type LoreContext, searchStories } from "./story-search.server";
+import type { LoreContext } from "./story-search.server";
 
 const PLANNER_HISTORY_MESSAGES = 6;
+const PLANNER_ATTEMPT_TIMEOUT_MS = 4_000;
+const PLANNER_TOTAL_TIMEOUT_MS = 7_000;
+const TITLE_ATTEMPT_TIMEOUT_MS = 8_000;
+const TITLE_TOTAL_TIMEOUT_MS = 20_000;
+const MAX_CONTEXT_MESSAGES = 50;
+const MAX_STEPS = 8;
 
-function flattenDocuments(documents: (string | null)[][]) {
-  return documents.flat().filter((document) => document !== null);
-}
-
-async function queryChroma(queries: string[]): Promise<LoreContext> {
-  const { summaries, dialogues } = await getLoreCollections();
-
-  const [summaryContext, dialogueContext] = await Promise.all([
-    summaries.query({
-      queryTexts: queries,
-    }),
-    dialogues.query({
-      queryTexts: queries,
-    }),
-  ]);
-
-  return {
-    summaries: flattenDocuments(summaryContext.documents),
-    passages: flattenDocuments(dialogueContext.documents),
-  };
-}
-
-async function queryLore(queries: string[]): Promise<LoreContext | null> {
-  try {
-    return process.env.UPSTASH_VECTOR_REST_URL
-      ? await searchStories(queries)
-      : await queryChroma(queries);
-  } catch (err) {
-    console.error("Plana lore lookup failed", err);
-    return null;
-  }
-}
+// One CJK character at a time, since those texts have no spaces to split on.
+const STREAM_CHUNKING = /[\u3040-\u30ff\u3400-\u9fff\uff00-\uffef]|\S+\s+/;
 
 function formatContextForPrompt(context: LoreContext): string {
   if (context.summaries.length === 0 && context.passages.length === 0) {
@@ -56,19 +39,13 @@ function formatContextForPrompt(context: LoreContext): string {
 
   const sections = [
     `### CONTEXT & MEMORIES ###
-These are your memories of the story, each labelled with where it comes from. Use them to answer.
+These are your memories of what happened in Kivotos, each labelled with where it comes from. Use them to answer. The labels and the words "story" or "chapter" in them are only for your reference, so never repeat them to Sensei.
 - The Main Story and Special Operations are the main plot. Event, Group, Mini and Bond stories are side stories and can be lighthearted, so don't present them as main plot events.
 - "Sensei (choice N)" lines are options the player can pick, so don't state that Sensei said any particular one.
 - If these memories don't cover what was asked, say that you don't remember it instead of guessing.`,
   ];
 
-  if (context.summaries.length > 0) {
-    sections.push(`[SUMMARIES]\n${context.summaries.join("\n\n")}`);
-  }
-
-  if (context.passages.length > 0) {
-    sections.push(`[STORY PASSAGES]\n${context.passages.join("\n\n")}`);
-  }
+  sections.push(formatLoreSections(context));
 
   return sections.join("\n\n");
 }
@@ -79,30 +56,97 @@ const loreQueryPlan = z.object({
   searchQueries: z.array(z.string()).nullish(),
 });
 
-export async function planLoreQuery(
-  conversation: string,
-  plannerModel: LanguageModel,
+/**
+ * Runs a small background task on the cheap model, then on the chat model if
+ * that fails. The cheap model is often rate limited upstream, while the chat
+ * model is one the user has already chosen and is paying for.
+ */
+async function withChatModelFallback<T>(
+  label: string,
+  provider: PlanaProvider,
+  run: (model: LanguageModel, abortSignal: AbortSignal) => Promise<T>,
+  {
+    abortSignal,
+    attemptTimeoutMs,
+    totalTimeoutMs,
+  }: {
+    abortSignal?: AbortSignal;
+    attemptTimeoutMs: number;
+    totalTimeoutMs: number;
+  },
 ) {
-  const { output } = await generateText({
-    model: plannerModel,
-    system: LORE_QUERY_PLANNER_PROMPT,
-    prompt: conversation,
-    output: Output.object({
-      schema: loreQueryPlan,
-    }),
-  });
+  const deadline = AbortSignal.timeout(totalTimeoutMs);
 
-  return output;
+  const shared = abortSignal
+    ? AbortSignal.any([
+        abortSignal,
+        deadline,
+      ])
+    : deadline;
+
+  try {
+    return await run(
+      provider.classifierModel,
+      AbortSignal.any([
+        shared,
+        AbortSignal.timeout(attemptTimeoutMs),
+      ]),
+    );
+  } catch (err) {
+    if (shared.aborted) {
+      throw err;
+    }
+
+    console.warn(`Plana ${label} falling back to the chat model`, err);
+  }
+
+  return await run(provider.chatModel, shared);
 }
 
-function getTextFromMessage(message: UIMessage) {
+async function planLoreQuery(
+  conversation: string,
+  provider: PlanaProvider,
+  abortSignal: AbortSignal | undefined,
+) {
+  // The lookup is optional, so a slow or failing planner must not cost the reply.
+  try {
+    return await withChatModelFallback(
+      "lore planner",
+      provider,
+      async (model, signal) => {
+        const { output } = await generateText({
+          model,
+          system: LORE_QUERY_PLANNER_PROMPT,
+          prompt: conversation,
+          maxRetries: 0,
+          abortSignal: signal,
+          output: Output.object({
+            schema: loreQueryPlan,
+          }),
+        });
+
+        return output;
+      },
+      {
+        abortSignal,
+        attemptTimeoutMs: PLANNER_ATTEMPT_TIMEOUT_MS,
+        totalTimeoutMs: PLANNER_TOTAL_TIMEOUT_MS,
+      },
+    );
+  } catch (err) {
+    console.error("Plana lore planner failed", err);
+    return null;
+  }
+}
+
+function getTextFromMessage(message: PlanaChatMessage) {
   return message.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text)
     .join("");
 }
 
-function getLatestUserMessage(messages: UIMessage[]) {
+function getLatestUserMessage(messages: PlanaChatMessage[]) {
   return [
     ...messages,
   ]
@@ -110,7 +154,7 @@ function getLatestUserMessage(messages: UIMessage[]) {
     .find((message) => message.role === "user");
 }
 
-function formatPlannerConversation(messages: UIMessage[]) {
+function formatPlannerConversation(messages: PlanaChatMessage[]) {
   return messages
     .slice(-PLANNER_HISTORY_MESSAGES)
     .map(
@@ -120,11 +164,41 @@ function formatPlannerConversation(messages: UIMessage[]) {
     .join("\n");
 }
 
-function toTextOnlyMessages(messages: UIMessage[]) {
-  return messages.map((message) => ({
-    role: message.role,
-    parts: message.parts.filter((part) => part.type === "text"),
-  }));
+function hasAnsweredApproval(message: PlanaChatMessage) {
+  return message.parts.some(
+    (part) =>
+      isToolUIPart(part) &&
+      (part.state === "approval-responded" || part.state === "output-denied"),
+  );
+}
+
+/**
+ * Past turns go to the model as text. Only a reply being continued after an
+ * approval keeps its tool parts, because the model has to resume that call.
+ */
+function toModelReadyMessages(messages: PlanaChatMessage[]) {
+  const recent = messages.slice(-MAX_CONTEXT_MESSAGES);
+
+  return recent.flatMap((message, index) => {
+    const isContinuation =
+      index === recent.length - 1 &&
+      message.role === "assistant" &&
+      hasAnsweredApproval(message);
+    const parts = message.parts.filter(
+      (part) =>
+        part.type === "text" ||
+        (isContinuation && (isToolUIPart(part) || part.type === "step-start")),
+    );
+
+    return parts.length > 0
+      ? [
+          {
+            ...message,
+            parts,
+          },
+        ]
+      : [];
+  });
 }
 
 function formatSenseiIdentityPrompt(name: string | undefined) {
@@ -169,7 +243,6 @@ Current date: ${new Intl.DateTimeFormat("en-US", {
 Current time: ${new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
-    second: "2-digit",
     timeZone: safeTimeZone,
     timeZoneName: "short",
   }).format(date)}
@@ -181,14 +254,23 @@ User time zone: ${safeTimeZone}
 Use this when Sensei asks about the date, time, schedule, greetings, or time-sensitive context.`;
 }
 
+export type PlanaProvider = Awaited<ReturnType<typeof getPlanaProvider>>;
+
+export type PlanaResponseOptions = {
+  abortSignal?: AbortSignal;
+  provider: PlanaProvider;
+  locale: "en" | "ja";
+  onStatus?: (key: PlanaStatusKey) => void;
+  senseiName?: string;
+  timeZone?: string;
+  userId: string;
+};
+
 export async function streamPlanaResponse(
-  messages: UIMessage[],
-  options: {
-    senseiName?: string;
-    timeZone?: string;
-  } = {},
+  messages: PlanaChatMessage[],
+  options: PlanaResponseOptions,
 ) {
-  const provider = await getPlanaProvider();
+  const { provider } = options;
   const latestUserMessage = getLatestUserMessage(messages);
   const userMessage = latestUserMessage
     ? getTextFromMessage(latestUserMessage)
@@ -198,24 +280,38 @@ export async function streamPlanaResponse(
     throw new Error("No user message provided");
   }
 
-  const { needsLoreContext, question, searchQueries } = await planLoreQuery(
-    formatPlannerConversation(messages),
-    provider.classifierModel,
-  );
-
-  const queries = searchQueries?.length
-    ? searchQueries
-    : question
+  const isContinuation = messages.at(-1)?.role === "assistant";
+  const plan = isContinuation
+    ? null
+    : await planLoreQuery(
+        formatPlannerConversation(messages),
+        provider,
+        options.abortSignal,
+      );
+  const queries = plan?.searchQueries?.length
+    ? plan.searchQueries
+    : plan?.question
       ? [
-          question,
+          plan.question,
         ]
       : [];
-  const context =
-    needsLoreContext && queries.length > 0 ? await queryLore(queries) : null;
-  const formattedContext = context ? formatContextForPrompt(context) : "";
+  const needsLore = !!plan?.needsLoreContext && queries.length > 0;
 
+  if (needsLore) {
+    options.onStatus?.("recalling");
+  }
+
+  const context = needsLore ? await queryLore(queries) : null;
+  const formattedContext = context ? formatContextForPrompt(context) : "";
+  const tools = createPlanaTools({
+    locale: options.locale,
+    userId: options.userId,
+  });
   const modelMessages = await convertToModelMessages(
-    toTextOnlyMessages(messages),
+    toModelReadyMessages(messages),
+    {
+      tools,
+    },
   );
 
   const system = [
@@ -233,5 +329,54 @@ export async function streamPlanaResponse(
     model: provider.chatModel,
     system,
     messages: modelMessages,
+    tools,
+    abortSignal: options.abortSignal,
+    stopWhen: stepCountIs(MAX_STEPS),
+    prepareStep: ({ stepNumber, steps }) => ({
+      activeTools: getActivePlanaTools(tools, steps) as (keyof typeof tools)[],
+      toolChoice: stepNumber >= MAX_STEPS - 1 ? "none" : undefined,
+    }),
+    experimental_transform: smoothStream({
+      chunking: STREAM_CHUNKING,
+      delayInMs: 12,
+    }),
   });
+}
+
+export async function generatePlanaChatTitle(
+  conversation: string,
+  provider: PlanaProvider,
+) {
+  const text = await withChatModelFallback(
+    "chat title",
+    provider,
+    async (model, abortSignal) => {
+      const result = await generateText({
+        model,
+        system:
+          "Write a title of at most 6 words for this conversation, in the language the user writes in. Reply with only the title, with no quotes, no ending punctuation and no mention of Plana or Sensei.",
+        prompt: conversation,
+        maxRetries: 0,
+        abortSignal,
+      });
+
+      return result.text;
+    },
+    {
+      attemptTimeoutMs: TITLE_ATTEMPT_TIMEOUT_MS,
+      totalTimeoutMs: TITLE_TOTAL_TIMEOUT_MS,
+    },
+  );
+
+  return text.trim().replace(/^["'「]|["'」]$/g, "");
+}
+
+export function formatConversationForTitle(
+  messages: PlanaChatMessage[],
+  reply: PlanaChatMessage,
+) {
+  return formatPlannerConversation([
+    ...messages,
+    reply,
+  ]);
 }

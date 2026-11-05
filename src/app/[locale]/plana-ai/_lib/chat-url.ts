@@ -2,18 +2,20 @@ import type { Id } from "~convex/dataModel";
 
 const PLANA_AI_PATH = "/plana-ai";
 
+// The default locale has no prefix (`/plana-ai`), others do (`/ja/plana-ai`).
+const CHAT_PATH_REGEX = /^(\/[a-z]{2})?\/plana-ai(?:\/([^/]+))?\/?$/;
+
 export function getPlanaChatIdFromPath(pathname: string) {
-  const match = pathname.match(/^\/plana-ai\/([^/]+)$/);
-
-  if (!match?.[1]) {
-    return undefined;
-  }
-
-  return match[1] as Id<"planaChat">;
+  return pathname.match(CHAT_PATH_REGEX)?.[2] as Id<"planaChat"> | undefined;
 }
 
 export function getPlanaChatPath(chatId?: Id<"planaChat">) {
-  return chatId ? `${PLANA_AI_PATH}/${chatId}` : PLANA_AI_PATH;
+  const localePrefix =
+    window.location.pathname.match(CHAT_PATH_REGEX)?.[1] ?? "";
+
+  const path = `${localePrefix}${PLANA_AI_PATH}`;
+
+  return chatId ? `${path}/${chatId}` : path;
 }
 
 export function replacePlanaChatPath(chatId?: Id<"planaChat">) {

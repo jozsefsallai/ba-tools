@@ -6,9 +6,9 @@ import {
   encodePlanaConfig,
   PLANA_CONFIG_COOKIE_KEY,
   PLANA_COOKIE_MAX_AGE_SECONDS,
-  type PlanaConfig,
+  type PlanaConfigInput,
   type PlanaConfigStatus,
-  planaConfigSchema,
+  planaConfigInputSchema,
 } from "@/lib/ai/plana-config";
 
 const COOKIE_OPTIONS = {
@@ -19,13 +19,31 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === "production",
 };
 
-export async function savePlanaConfig(input: PlanaConfig) {
-  const config = planaConfigSchema.parse(input);
+export async function savePlanaConfig(input: PlanaConfigInput) {
+  const config = planaConfigInputSchema.parse(input);
   const cookieStore = await cookies();
+  const existing = decodePlanaConfig(
+    cookieStore.get(PLANA_CONFIG_COOKIE_KEY)?.value,
+  );
 
-  cookieStore.set(PLANA_CONFIG_COOKIE_KEY, encodePlanaConfig(config), {
-    ...COOKIE_OPTIONS,
-  });
+  const apiKey =
+    config.apiKey ||
+    (existing?.provider === config.provider ? existing.apiKey : undefined);
+
+  if (!apiKey) {
+    throw new Error("An API key is required");
+  }
+
+  cookieStore.set(
+    PLANA_CONFIG_COOKIE_KEY,
+    encodePlanaConfig({
+      ...config,
+      apiKey,
+    }),
+    {
+      ...COOKIE_OPTIONS,
+    },
+  );
 }
 
 export async function clearPlanaConfig() {

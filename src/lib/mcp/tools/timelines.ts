@@ -18,9 +18,9 @@ import { timelineArgs } from "~convex-lib/validators";
 
 const fields = convexToZodShape(timelineArgs);
 
-const LAYOUT_GUIDE =
+export const LAYOUT_GUIDE =
   'Layout: items flow left to right in one row until a `separator` with `orientation: "vertical"`, which starts a new row; `horizontal` separators only add a gap inside a row. Without vertical separators the whole rotation renders as one very long row, so break rows at natural points (a new phase, wave, or cost cycle), but don\'t put one after every skill. Keep `notes` to a few words (e.g. "after boss shield"), notes support new lines; long notes push the following cards far apart. Put longer explanations in `description` or a `text` item.';
-const RAID_GUIDE =
+export const RAID_GUIDE =
   "Optional `raid` tags the timeline: `type` (Raid = Total Assault, EliminateRaid = Grand Assault, MultiFloorRaid = Final Restriction Release, TimeAttackDungeon = Joint Firing Drill, WorldRaid = Allied Operation), `boss` of that type (a drill type for Joint Firing Drill), `defenseTypes`, `terrains`, `difficulty` (Total and Grand Assault only) and `floor` from 1 to 124 (Final Restriction Release only). Send `null` to clear it.";
 const timelineId = idInput("Timeline id.");
 
