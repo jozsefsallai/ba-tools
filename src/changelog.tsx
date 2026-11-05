@@ -78,6 +78,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.timelineVisualizer,
         description: "Untitled timelines can now autofill from raid details.",
       },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Added highlight toggle for student cards.",
+      },
     ],
     changes: [
       {

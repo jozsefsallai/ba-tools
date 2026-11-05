@@ -187,6 +187,10 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
           if (itemA.notes !== itemB.notes) {
             return false;
           }
+
+          if (itemA.highlightColor !== itemB.highlightColor) {
+            return false;
+          }
         }
 
         if (itemA.type === "separator" && itemB.type === "separator") {

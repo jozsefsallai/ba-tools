@@ -205,6 +205,9 @@
         "targets": "Targets",
         "copy": "Copy",
         "copyDescription": "Marks this skill card as a copied skill",
+        "highlight": "Highlight",
+        "highlightDescription": "Makes this skill card glow",
+        "highlightColor": "Highlight color",
         "notes": "Notes",
         "size": "Size"
       },

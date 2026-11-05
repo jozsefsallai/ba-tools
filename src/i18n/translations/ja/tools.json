@@ -181,6 +181,9 @@
         "targets": "対象",
         "copy": "コピー",
         "copyDescription": "このスキルカードをコピーしたスキルとしてマークするよ",
+        "highlight": "ハイライト",
+        "highlightDescription": "このスキルカードを光らせるよ",
+        "highlightColor": "ハイライトの色",
         "notes": "備考",
         "size": "サイズ"
       },

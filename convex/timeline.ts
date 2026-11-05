@@ -1,11 +1,12 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { matchesRaidFilters } from "@/lib/raid-info";
+import { isHighlightColor } from "@/lib/timeline-highlight";
 import type { Id } from "~convex/dataModel";
 import type { MutationCtx } from "~convex/server";
 import { query } from "./_generated/server";
 import { authenticatedMutation, authenticatedQuery } from "./lib/auth";
-import { notFound } from "./lib/errors";
+import { invalid, notFound } from "./lib/errors";
 import { assertValidRaid } from "./lib/raid";
 import { raidFilters, timelineArgs } from "./lib/validators";
 
@@ -21,6 +22,19 @@ async function assertFormationLinkAllowed(
   const formation = await ctx.db.get(formationId);
   if (formation && formation.userId !== userId) {
     throw notFound("Formation not found");
+  }
+}
+
+function assertValidHighlightColors(
+  items: Array<{
+    type: string;
+    highlightColor?: string;
+  }>,
+) {
+  for (const { highlightColor } of items) {
+    if (highlightColor !== undefined && !isHighlightColor(highlightColor)) {
+      throw invalid("highlightColor must be a hex color, like #ef4444");
+    }
   }
 }
 
@@ -73,6 +87,7 @@ export const create = authenticatedMutation({
   handler: async (ctx, args) => {
     await assertFormationLinkAllowed(ctx, ctx.user._id, args.formationId);
     assertValidRaid(args.raid, "timeline");
+    assertValidHighlightColors(args.items);
 
     const timeline = {
       userId: ctx.user._id,
@@ -107,6 +122,7 @@ export const update = authenticatedMutation({
   handler: async (ctx, args) => {
     await assertFormationLinkAllowed(ctx, ctx.user._id, args.formationId);
     assertValidRaid(args.raid, "timeline");
+    assertValidHighlightColors(args.items);
 
     const timeline = {
       name: args.name,

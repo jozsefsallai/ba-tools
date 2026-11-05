@@ -142,6 +142,7 @@ export function TimelineView({ id }: TimelineViewProps) {
           trigger: item.trigger,
           variantId: item.variantId,
           notes: item.notes,
+          highlightColor: item.highlightColor,
         });
       } else {
         items.push({

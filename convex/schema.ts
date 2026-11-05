@@ -108,6 +108,7 @@ export const timelineStudentItem = v.object({
   copy: v.optional(v.boolean()),
   variantId: v.optional(v.string()),
   notes: v.optional(v.string()),
+  highlightColor: v.optional(v.string()),
 });
 
 export const timelineSeparatorOrientation = v.union(

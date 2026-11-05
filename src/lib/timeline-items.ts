@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import type { TimelineStorageData } from "@/lib/storage/timeline";
+import { isHighlightColor } from "@/lib/timeline-highlight";
 import type { Student } from "~prisma";
 
 export function serializeTimelineItems(
@@ -19,6 +20,7 @@ export function serializeTimelineItems(
         copy: item.copy,
         variantId: item.variantId,
         notes: item.notes,
+        highlightColor: item.highlightColor,
       };
     }
 
@@ -71,6 +73,9 @@ export function deserializeTimelineItems(
       trigger: item.trigger,
       variantId: item.variantId,
       notes: item.notes,
+      highlightColor: isHighlightColor(item.highlightColor)
+        ? item.highlightColor
+        : undefined,
     });
   }
 

@@ -52,6 +52,11 @@ import { Popover, PopoverAnchor } from "@/components/ui/popover";
 import { useStudents } from "@/hooks/use-students";
 import { preventTouchContextMenu, TOUCH_DRAG_CLASS } from "@/lib/dnd-mobile";
 import {
+  getHighlightGlowUrl,
+  getLastHighlightColor,
+  HIGHLIGHT_GLOW_PADDING_PX,
+} from "@/lib/timeline-highlight";
+import {
   deserializeTimelineItems,
   serializeTimelineItems,
 } from "@/lib/timeline-items";
@@ -81,6 +86,7 @@ export type StudentItem = BaseItem & {
   copy?: boolean;
   variantId?: string;
   notes?: string;
+  highlightColor?: string;
 };
 
 export type SeparatorItem = BaseItem & {
@@ -265,6 +271,9 @@ const DRAG_LIFT_MS = 120;
 
 const SELECTED_ITEM_CLASS =
   "[filter:drop-shadow(2px_0_0_var(--color-sky-400))_drop-shadow(-2px_0_0_var(--color-sky-400))_drop-shadow(0_2px_0_var(--color-sky-400))_drop-shadow(0_-2px_0_var(--color-sky-400))_drop-shadow(0_0_6px_var(--color-sky-400))]";
+
+const SELECTED_STUDENT_ITEM_CLASS =
+  "[&_[data-selection-outline]]:[filter:drop-shadow(2px_0_0_var(--color-sky-400))_drop-shadow(-2px_0_0_var(--color-sky-400))_drop-shadow(0_2px_0_var(--color-sky-400))_drop-shadow(0_-2px_0_var(--color-sky-400))_drop-shadow(0_0_6px_var(--color-sky-400))]";
 const TIMELINE_CLIPBOARD_TYPE = "web application/x-ba-tools-timeline-items";
 
 function SeparatorHandle({
@@ -506,6 +515,23 @@ function getItemClassName(item: TimelineItem): string {
   return "text-center whitespace-pre-wrap h-[88px] flex items-center font-nexon-football-gothic font-bold text-lg text-white px-3 cursor-pointer max-md:inline-flex max-md:align-top";
 }
 
+function HighlightGlow({ color }: { color: string }) {
+  return (
+    <img
+      src={getHighlightGlowUrl(color)}
+      alt=""
+      data-highlight-glow={color}
+      className="absolute max-w-none pointer-events-none skew-x-[-11deg]"
+      style={{
+        top: -HIGHLIGHT_GLOW_PADDING_PX,
+        left: -HIGHLIGHT_GLOW_PADDING_PX,
+        width: `calc(100% + ${HIGHLIGHT_GLOW_PADDING_PX * 2}px)`,
+        height: `calc(100% + ${HIGHLIGHT_GLOW_PADDING_PX * 2}px)`,
+      }}
+    />
+  );
+}
+
 type TimelineItemContentProps = {
   item: TimelineItem;
   busy: boolean;
@@ -554,51 +580,56 @@ const TimelineItemContent = memo(function TimelineItemContent({
     return (
       <>
         <div className="relative">
-          {targetGroups.length > 0 && (
-            <>
-              <div
-                className={cn("absolute left-1/2 -translate-x-1/2", {
-                  "-bottom-[74px] -ml-3": hasCompactTargetBox,
-                  "-bottom-14 -ml-2": !hasCompactTargetBox,
-                })}
-              >
-                <div className="scale-75">
-                  {renderTargetGroup(targetGroups[0], 0)}
-                </div>
-              </div>
+          {item.highlightColor && <HighlightGlow color={item.highlightColor} />}
 
-              {targetGroups[1] && (
-                <div className="absolute left-full top-1/2 -translate-y-[32px]">
-                  <div className="origin-top-left scale-75">
-                    {renderTargetGroup(targetGroups[1], 1)}
+          <div data-selection-outline="" className="relative">
+            {targetGroups.length > 0 && (
+              <>
+                <div
+                  className={cn("absolute left-1/2 -translate-x-1/2", {
+                    "-bottom-[74px] -ml-3": hasCompactTargetBox,
+                    "-bottom-14 -ml-2": !hasCompactTargetBox,
+                  })}
+                >
+                  <div className="scale-75">
+                    {renderTargetGroup(targetGroups[0], 0)}
                   </div>
                 </div>
-              )}
-            </>
-          )}
 
-          <StudentCard
-            isSkillCard
-            noDisplayRole
-            student={item.student}
-            variantId={item.variantId}
-          />
+                {targetGroups[1] && (
+                  <div className="absolute left-full top-1/2 -translate-y-[32px]">
+                    <div className="origin-top-left scale-75">
+                      {renderTargetGroup(targetGroups[1], 1)}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
-          {item.copy && (
-            <img
-              src={skillcardCopyGlow.src}
-              alt=""
-              className="absolute top-0 left-0 right-0 bottom-0 skew-x-[-11deg]"
+            <StudentCard
+              isSkillCard
+              noDisplayRole
+              student={item.student}
+              variantId={item.variantId}
             />
-          )}
 
-          {item.trigger && item.trigger.trim().length > 0 && (
-            <TimelinePreviewTrigger trigger={item.trigger} busy={busy} />
-          )}
+            {item.copy && (
+              <img
+                src={skillcardCopyGlow.src}
+                alt=""
+                className="absolute top-0 left-0 right-0 bottom-0 skew-x-[-11deg]"
+              />
+            )}
+
+            {item.trigger && item.trigger.trim().length > 0 && (
+              <TimelinePreviewTrigger trigger={item.trigger} busy={busy} />
+            )}
+          </div>
         </div>
 
         {item.notes && item.notes.trim().length > 0 && (
           <div
+            data-selection-outline=""
             className={cn(
               "font-nexon-football-gothic font-bold text-sm text-white px-3 -ml-6 whitespace-pre-wrap text-center",
               {
@@ -691,6 +722,7 @@ type EditableTimelineItemProps = {
   horizontalSeparatorSize: number;
   verticalSeparatorSize: number;
   uniqueStudents: Student[];
+  lastHighlightColor: string | undefined;
   autoFocusTrigger: boolean;
   autoFocusText: boolean;
   actions: TimelineItemActions;
@@ -707,6 +739,7 @@ const EditableTimelineItem = memo(function EditableTimelineItem({
   horizontalSeparatorSize,
   verticalSeparatorSize,
   uniqueStudents,
+  lastHighlightColor,
   autoFocusTrigger,
   autoFocusText,
   actions,
@@ -721,7 +754,10 @@ const EditableTimelineItem = memo(function EditableTimelineItem({
         className={cn(
           getItemClassName(item),
           "transition-opacity duration-150",
-          isInGroup && SELECTED_ITEM_CLASS,
+          isInGroup &&
+            (item.type === "student"
+              ? SELECTED_STUDENT_ITEM_CLASS
+              : SELECTED_ITEM_CLASS),
           isDragged && "opacity-60",
         )}
         style={getItemStyle(
@@ -754,6 +790,7 @@ const EditableTimelineItem = memo(function EditableTimelineItem({
               onWantsToUpdate={actions.onWantsToUpdate}
               onWantsToInsertAfter={actions.onWantsToInsertAfter}
               uniqueStudents={uniqueStudents}
+              lastHighlightColor={lastHighlightColor}
               onTriggerKeyDown={actions.onTriggerKeyDown}
               autoFocusTrigger={autoFocusTrigger}
               onAutoFocusTriggerConsumed={actions.onFocusTriggerFieldConsumed}
@@ -1404,6 +1441,7 @@ export function TimelinePreview({
           horizontalSeparatorSize={horizontalSeparatorSize}
           verticalSeparatorSize={verticalSeparatorSize}
           uniqueStudents={isOpen ? editableConfig.uniqueStudents : NO_STUDENTS}
+          lastHighlightColor={isOpen ? getLastHighlightColor(items) : undefined}
           autoFocusTrigger={editableConfig.focusTriggerFieldItemId === item.id}
           autoFocusText={editableConfig.focusTextFieldItemId === item.id}
           actions={itemActions}
@@ -1470,7 +1508,10 @@ export function TimelinePreview({
       >
         <div ref={zoomRef} className={cn(!busy && PREVIEW_ZOOM_CLASS)}>
           <div
-            className="flex items-center gap-3 px-4 py-18"
+            className={cn(
+              "flex items-center gap-3 px-4 py-18",
+              busy && "-mx-6 px-10",
+            )}
             ref={containerRef}
           >
             <div className="flex flex-col gap-1">

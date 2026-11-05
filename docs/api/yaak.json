@@ -364,7 +364,7 @@
         "folderId": "fl_DVUZFcYEkA",
         "authentication": {},
         "authenticationType": null,
-        "description": "Timelines from the Timeline Visualizer. `items` is a list of:\n\n- `{ \"type\": \"student\", \"studentId\", \"trigger\"?, \"targetId\"?, \"extraTargetIds\"?, \"copy\"?, \"variantId\"?, \"notes\"? }`\n- `{ \"type\": \"separator\", \"orientation\": \"horizontal\" | \"vertical\", \"size\"? }`\n- `{ \"type\": \"text\", \"text\" }`\n\n`visibility` is `private` (default) or `public`. Public timelines can be\nread by anyone through **Shared content**.",
+        "description": "Timelines from the Timeline Visualizer. `items` is a list of:\n\n- `{ \"type\": \"student\", \"studentId\", \"trigger\"?, \"targetId\"?, \"extraTargetIds\"?, \"copy\"?, \"variantId\"?, \"notes\"?, \"highlightColor\"? }`\n- `{ \"type\": \"separator\", \"orientation\": \"horizontal\" | \"vertical\", \"size\"? }`\n- `{ \"type\": \"text\", \"text\" }`\n\n`visibility` is `private` (default) or `public`. Public timelines can be\nread by anyone through **Shared content**.",
         "headers": [],
         "name": "Timelines",
         "sortPriority": 2.0,

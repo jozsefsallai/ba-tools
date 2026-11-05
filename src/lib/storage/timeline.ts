@@ -19,6 +19,7 @@ type RawTimelineStudentItem = RawBaseItem & {
   copy?: boolean;
   variantId?: string;
   notes?: string;
+  highlightColor?: string;
 };
 
 export type TimelineStorageData = {

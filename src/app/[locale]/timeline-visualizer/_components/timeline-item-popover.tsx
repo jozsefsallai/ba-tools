@@ -4,6 +4,7 @@ import {
   CircleLetterCIcon,
   CopyPlusIcon,
   CornerRightDownIcon,
+  HighlighterIcon,
   MoveHorizontalIcon,
   PlusIcon,
   Trash2Icon,
@@ -46,10 +47,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
+import {
+  DEFAULT_HIGHLIGHT_COLOR,
+  getSessionHighlightColor,
+  rememberHighlightColor,
+} from "@/lib/timeline-highlight";
 import { cn } from "@/lib/utils";
 import type { Student } from "~prisma";
 
 const MAX_TIMELINE_TARGETS = 10;
+
+const HEADER_TOGGLE_CLASS =
+  "size-7 min-w-0 p-0 text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground";
 
 function isTimelinePreviewAnchorTarget(target: EventTarget | null) {
   return (
@@ -131,6 +140,8 @@ export type TimelineItemPopoverProps = {
   ): void;
   onWantsToInsertAfter(itemId: string, kind: TimelineInsertKind): void;
   uniqueStudents?: Student[];
+  /** The timeline's last highlight color, a default for newly highlighted cards */
+  lastHighlightColor?: string;
   onTriggerKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   /** Focus trigger input after open (e.g. new student with auto-focus preference) */
   autoFocusTrigger?: boolean;
@@ -147,6 +158,7 @@ export function TimelineItemPopover({
   onWantsToUpdate,
   onWantsToInsertAfter,
   uniqueStudents = [],
+  lastHighlightColor,
   onTriggerKeyDown,
   autoFocusTrigger = false,
   onAutoFocusTriggerConsumed,
@@ -263,6 +275,42 @@ export function TimelineItemPopover({
       });
     },
     [
+      onWantsToUpdate,
+      item.id,
+    ],
+  );
+
+  const handleHighlightColorUpdate = useCallback(
+    (color: string) => {
+      rememberHighlightColor(color);
+      onWantsToUpdate(item.id, {
+        highlightColor: color,
+      });
+    },
+    [
+      onWantsToUpdate,
+      item.id,
+    ],
+  );
+
+  const handleHighlightToggle = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        handleHighlightColorUpdate(
+          getSessionHighlightColor() ??
+            lastHighlightColor ??
+            DEFAULT_HIGHLIGHT_COLOR,
+        );
+        return;
+      }
+
+      onWantsToUpdate(item.id, {
+        highlightColor: undefined,
+      });
+    },
+    [
+      handleHighlightColorUpdate,
+      lastHighlightColor,
       onWantsToUpdate,
       item.id,
     ],
@@ -483,10 +531,42 @@ export function TimelineItemPopover({
                 pressed={!!item.copy}
                 onPressedChange={handleCopyUpdate}
                 aria-label={t("tools.timeline.editor.fields.copy")}
-                className="size-7 min-w-0 p-0 text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary/90 aria-pressed:hover:text-primary-foreground"
+                className={HEADER_TOGGLE_CLASS}
               >
                 <CircleLetterCIcon />
               </Toggle>
+            </WithTooltip>
+          )}
+
+          {item.type === "student" && (
+            <WithTooltip
+              label={t("tools.timeline.editor.fields.highlightDescription")}
+            >
+              <Toggle
+                size="sm"
+                pressed={!!item.highlightColor}
+                onPressedChange={handleHighlightToggle}
+                aria-label={t("tools.timeline.editor.fields.highlight")}
+                className={HEADER_TOGGLE_CLASS}
+              >
+                <HighlighterIcon />
+              </Toggle>
+            </WithTooltip>
+          )}
+
+          {item.type === "student" && item.highlightColor && (
+            <WithTooltip
+              label={t("tools.timeline.editor.fields.highlightColor")}
+            >
+              <Input
+                type="color"
+                aria-label={t("tools.timeline.editor.fields.highlightColor")}
+                value={item.highlightColor}
+                onChange={(event) =>
+                  handleHighlightColorUpdate(event.target.value)
+                }
+                className="size-7 shrink-0 cursor-pointer p-0.5"
+              />
             </WithTooltip>
           )}
 
