@@ -49,6 +49,47 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 6, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.api,
+        description: "Added search filters for the Global Roadmap route.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description: "Added search filters for the Global Roadmap tool.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description:
+          "The MCP will now understand colors as attack/defense types, e.g. 'red' for Explosive.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description:
+          "Added better documentation about available fields to the MCP tools.",
+      },
+    ],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.api,
+        description:
+          "Attributes that have defaults in user preferences will now respect those defaults when not provided.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description:
+          "Attributes that have defaults in user preferences will now respect those defaults when not provided.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.api,
+        description: "Fixed some error handling edge cases.",
+      },
+    ],
+  },
+  {
     date: "November 4, 2026",
     features: [
       {
