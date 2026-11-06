@@ -6,6 +6,7 @@ import {
   normalizeRecruitmentSession,
   type RecruitmentKind,
   type RecruitmentSessionKind,
+  RecruitmentValidationError,
   toStoredSessionFields,
   validateRecruitmentSession,
 } from "../src/lib/recruitment";
@@ -17,8 +18,25 @@ import {
   recruitmentSessionArgs,
 } from "./lib/validators";
 
+function asInvalid<T>(compute: () => T): T {
+  try {
+    return compute();
+  } catch (error) {
+    if (error instanceof RecruitmentValidationError) {
+      throw invalid(error.message);
+    }
+    throw error;
+  }
+}
+
+function normalizeSession(
+  session: Parameters<typeof normalizeRecruitmentSession>[0],
+) {
+  return asInvalid(() => normalizeRecruitmentSession(session));
+}
+
 function statsFor(session: Parameters<typeof normalizeRecruitmentSession>[0]) {
-  return calculateRecruitmentStats(session);
+  return asInvalid(() => calculateRecruitmentStats(session));
 }
 
 function computedStatsFor(
@@ -192,7 +210,7 @@ async function rebuildAccountAnalytics(
     );
     const rebateTicketsFromPreviousSession =
       previousRebateTickets ?? session.rebateTicketsFromPreviousSession;
-    const input = normalizeRecruitmentSession({
+    const input = normalizeSession({
       ...session,
       permanentStartCharge,
       limitedStartCharge,
@@ -201,18 +219,20 @@ async function rebuildAccountAnalytics(
     let stats: ReturnType<typeof statsFor>;
     let computedStats: ReturnType<typeof computedStatsFor>;
     try {
-      stats = statsFor(input);
+      stats = calculateRecruitmentStats(input);
       computedStats = computedStatsFor(input);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        (error.message === "Pickup charges must increase after each pickup." ||
+      if (error instanceof RecruitmentValidationError) {
+        if (
+          error.message === "Pickup charges must increase after each pickup." ||
           error.message ===
-            "The first pickup charge must be higher than the starting charge.")
-      ) {
-        throw invalid(
-          `Cannot recalculate "${session.name}": its recorded pickup charges are lower than the recalculated starting charge (${permanentStartCharge}/${limitedStartCharge}). Edit this session or adjust the earlier session so the pull history is consistent.`,
-        );
+            "The first pickup charge must be higher than the starting charge."
+        ) {
+          throw invalid(
+            `Cannot recalculate "${session.name}": its recorded pickup charges are lower than the recalculated starting charge (${permanentStartCharge}/${limitedStartCharge}). Edit this session or adjust the earlier session so the pull history is consistent.`,
+          );
+        }
+        throw invalid(error.message);
       }
       throw error;
     }
@@ -428,7 +448,7 @@ export const createSession = authenticatedMutation({
       );
     }
     const previous = await getLatestSession(ctx, args.recruitmentAccountId);
-    const input = normalizeRecruitmentSession({
+    const input = normalizeSession({
       permanentStartCharge: args.permanentStartCharge,
       limitedStartCharge: args.limitedStartCharge,
       permanentPulls: args.permanentPulls,
@@ -441,7 +461,7 @@ export const createSession = authenticatedMutation({
       isFestBanner: args.isFestBanner,
       pickupsObtained: args.pickupsObtained,
     });
-    validateRecruitmentSession(input);
+    asInvalid(() => validateRecruitmentSession(input));
     const stored = toStoredSessionFields(input);
     const session = {
       userId: ctx.user._id,
@@ -467,7 +487,7 @@ export const updateSession = authenticatedMutation({
   },
   handler: async (ctx, args) => {
     const session = await assertSession(ctx, args.sessionId);
-    const input = normalizeRecruitmentSession({
+    const input = normalizeSession({
       ...session,
       permanentStartCharge: args.permanentStartCharge,
       limitedStartCharge: args.limitedStartCharge,
@@ -478,7 +498,7 @@ export const updateSession = authenticatedMutation({
       isFestBanner: args.isFestBanner,
       pickupsObtained: args.pickupsObtained,
     });
-    validateRecruitmentSession(input);
+    asInvalid(() => validateRecruitmentSession(input));
     const stored = toStoredSessionFields(input);
     const computedStats = computedStatsFor(input);
     await ctx.db.patch(args.sessionId, {

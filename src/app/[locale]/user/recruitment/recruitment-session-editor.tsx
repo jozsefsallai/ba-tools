@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/popover";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { getErrorMessage } from "@/lib/convex-error";
 import {
   type CanonicalPickup,
   calculateRecruitmentStats,
@@ -212,7 +213,7 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
     input,
   ]);
   function getRecruitmentErrorMessage(error: unknown) {
-    const message = error instanceof Error ? error.message : "";
+    const message = getErrorMessage(error);
     if (message.includes("Cannot recalculate")) {
       return t("tools.recruitment.errors.inconsistentHistory");
     }
@@ -308,9 +309,8 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
       router.push(`/user/recruitment/${accountId}`);
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : t("tools.recruitment.toasts.sessionDeleteFail"),
+        getErrorMessage(error) ||
+          t("tools.recruitment.toasts.sessionDeleteFail"),
       );
     }
   }

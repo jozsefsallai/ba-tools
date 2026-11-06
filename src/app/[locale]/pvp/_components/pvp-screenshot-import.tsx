@@ -56,6 +56,7 @@ import { useUserPreferences } from "@/hooks/use-preferences";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { getErrorMessage } from "@/lib/convex-error";
 import { type PvpBattleInfo, resolvePvpReportTeam } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
 import { saveOpponentNameCache } from "@/lib/pvp/opponent-name-client";
@@ -107,7 +108,7 @@ type Screenshot = {
 };
 
 function errorMessage(error: unknown, fallback: string) {
-  return error instanceof Error && error.message ? error.message : fallback;
+  return getErrorMessage(error) || fallback;
 }
 
 export function PvpScreenshotImport({
