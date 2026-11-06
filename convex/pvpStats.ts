@@ -399,7 +399,7 @@ function isValidTeam(team: Team) {
 export function validatePvpTeam(team: Team, label = "Team") {
   const error = getTeamValidationError(team, label);
   if (error) {
-    throw new Error(error);
+    throw invalid(error);
   }
 }
 

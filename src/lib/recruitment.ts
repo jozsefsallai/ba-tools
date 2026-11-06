@@ -29,6 +29,11 @@ export const RECRUITMENT_COLORS = {
   labelText: "#858585",
 } as const;
 
+/** A session that breaks a recruitment rule. The message is safe to show to callers. */
+export class RecruitmentValidationError extends Error {
+  name = "RecruitmentValidationError";
+}
+
 export type RecruitmentKind = "permanent" | "limited";
 export type RecruitmentSessionKind = RecruitmentKind | "mixed";
 
@@ -217,7 +222,9 @@ export function normalizeRecruitmentSession(
     pickupsObtained: session.pickupsObtained.map((pickup) => {
       const kind = pickup.kind ?? defaultKind;
       if (!kind) {
-        throw new Error("Each pickup must have a valid student and charge.");
+        throw new RecruitmentValidationError(
+          "Each pickup must have a valid student and charge.",
+        );
       }
       return {
         ...pickup,
@@ -318,7 +325,7 @@ export function calculateRecruitmentStats(
     rebateTicketsUsed < 0 ||
     rebateTicketsUsed > automaticallyUsedTickets
   ) {
-    throw new Error(
+    throw new RecruitmentValidationError(
       `Rebate tickets used must be between 0 and ${automaticallyUsedTickets}.`,
     );
   }
@@ -621,10 +628,14 @@ function validatePool(
     startCharge < 0 ||
     startCharge > HARD_PITY
   ) {
-    throw new Error("Start charge must be an integer from 0 to 200.");
+    throw new RecruitmentValidationError(
+      "Start charge must be an integer from 0 to 200.",
+    );
   }
   if (!Number.isInteger(pulls) || pulls < 0) {
-    throw new Error("Total pulls must be a non-negative integer.");
+    throw new RecruitmentValidationError(
+      "Total pulls must be a non-negative integer.",
+    );
   }
 
   let consumedPulls = 0;
@@ -635,12 +646,14 @@ function validatePool(
       pickup.charge > HARD_PITY ||
       pickup.studentId.length === 0
     ) {
-      throw new Error("Each pickup must have a valid student and charge.");
+      throw new RecruitmentValidationError(
+        "Each pickup must have a valid student and charge.",
+      );
     }
     const cycleStart = index === 0 ? startCharge : 0;
     const cyclePulls = pickup.charge - cycleStart;
     if (cyclePulls < 1) {
-      throw new Error(
+      throw new RecruitmentValidationError(
         index === 0
           ? "The first pickup charge must be higher than the starting charge."
           : "Pickup charges must increase after each pickup.",
@@ -650,7 +663,7 @@ function validatePool(
   }
 
   if (consumedPulls > pulls) {
-    throw new Error(
+    throw new RecruitmentValidationError(
       "Pickup charges require more pulls than this session contains.",
     );
   }
@@ -662,22 +675,30 @@ export function validateRecruitmentSession(
   const input = normalizeRecruitmentSession(session);
 
   if (!Number.isInteger(input.threeStarCount) || input.threeStarCount < 0) {
-    throw new Error("3★ count must be a non-negative integer.");
+    throw new RecruitmentValidationError(
+      "3★ count must be a non-negative integer.",
+    );
   }
   if (
     !Number.isInteger(input.rebateTicketsFromPreviousSession) ||
     input.rebateTicketsFromPreviousSession < 0
   ) {
-    throw new Error("Previous rebate tickets must be a non-negative integer.");
+    throw new RecruitmentValidationError(
+      "Previous rebate tickets must be a non-negative integer.",
+    );
   }
   if (
     input.rebateTicketsUsed !== undefined &&
     (!Number.isInteger(input.rebateTicketsUsed) || input.rebateTicketsUsed < 0)
   ) {
-    throw new Error("Rebate tickets used must be a non-negative integer.");
+    throw new RecruitmentValidationError(
+      "Rebate tickets used must be a non-negative integer.",
+    );
   }
   if (input.threeStarCount < input.pickupsObtained.length) {
-    throw new Error("3★ count cannot be lower than the number of pickups.");
+    throw new RecruitmentValidationError(
+      "3★ count cannot be lower than the number of pickups.",
+    );
   }
 
   validatePool(
