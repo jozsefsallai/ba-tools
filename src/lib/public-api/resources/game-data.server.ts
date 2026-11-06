@@ -32,8 +32,20 @@ export const studentSearchSchema = z.object({
   combatClass: z.enum(CombatClass).optional(),
   combatRole: z.enum(CombatRole).optional(),
   weaponType: z.enum(WeaponType).optional(),
-  rarity: z.coerce.number().int().min(1).max(3).optional(),
-  limit: z.coerce.number().int().min(1).max(500).default(500),
+  rarity: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(3)
+    .optional()
+    .describe("Base star rarity, 1-3."),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .default(500)
+    .describe("Maximum number of students to return."),
 });
 
 export async function listStudents({
@@ -69,7 +81,8 @@ export const studentSkillsSchema = z.object({
       "en",
       "ja",
     ])
-    .default("en"),
+    .default("en")
+    .describe("Language of the skill text."),
 });
 
 export async function getStudentSkills(
@@ -86,7 +99,13 @@ export async function getStudentSkills(
 
 export const giftSearchSchema = z.object({
   q: z.string().optional().describe("Matches the English or Japanese name."),
-  limit: z.coerce.number().int().min(1).max(500).optional(),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(500)
+    .optional()
+    .describe("Maximum number of gifts to return."),
 });
 
 export async function listGifts({

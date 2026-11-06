@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
+import { rosterCreateDocs, rosterUpdateDocs } from "@/lib/mcp/field-docs";
 import {
   createRoster,
   deleteRoster,
@@ -47,7 +48,7 @@ export function registerRosterTools(server: McpServer) {
       description:
         "Create a roster for a game account. `friendCode` is the account's 8-letter friend code (A-Z) and must be unique per game server. Add students with `update_roster`.",
       kind: "create",
-      input: convexToZodShape(rosterCreateArgs),
+      input: convexToZodShape(rosterCreateArgs, rosterCreateDocs),
     },
     (input, userId) => createRoster(userId, input),
   );
@@ -62,7 +63,7 @@ export function registerRosterTools(server: McpServer) {
       kind: "update",
       input: {
         rosterId,
-        ...convexToZodShape(rosterUpdateArgs),
+        ...convexToZodShape(rosterUpdateArgs, rosterUpdateDocs),
       },
     },
     ({ rosterId, ...patch }, userId) => updateRoster(userId, rosterId, patch),

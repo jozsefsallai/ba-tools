@@ -7,6 +7,7 @@ import {
   paginationInput,
   paginationOpts,
 } from "@/lib/mcp/define-tool";
+import { formationDocs } from "@/lib/mcp/field-docs";
 import {
   createFormation,
   deleteFormation,
@@ -16,7 +17,7 @@ import {
 } from "@/lib/public-api/resources/formations.server";
 import { formationArgs } from "~convex-lib/validators";
 
-const fields = convexToZodShape(formationArgs);
+const fields = convexToZodShape(formationArgs, formationDocs);
 const formationId = idInput("Formation id.");
 
 export function registerFormationTools(server: McpServer) {
@@ -53,7 +54,7 @@ export function registerFormationTools(server: McpServer) {
     {
       title: "Create formation",
       description:
-        "Save a formation. `strikers` and `specials` hold the slots in order; leave `studentId` out for an empty slot. Student ids come from `search_students`. `rows` adds more rows for multi-team formations.",
+        "Save a formation. `strikers` and `specials` hold the slots in order; leave `studentId` out for an empty slot. Each slot can also set `starLevel`, `ueLevel`, `level`, `borrowed` and `starter` with `starterOrder`. Student ids come from `search_students`. For multi-team formations, send every row in `rows`, each with an optional `label`; it takes over from `strikers` and `specials`, which should repeat the first row.",
       kind: "create",
       input: fields,
     },

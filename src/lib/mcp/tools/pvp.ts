@@ -8,6 +8,17 @@ import {
   paginationOpts,
 } from "@/lib/mcp/define-tool";
 import {
+  pvpEnemyPresetCreateDocs,
+  pvpEnemyPresetUpdateDocs,
+  pvpEnemyTeamCreateDocs,
+  pvpEnemyTeamUpdateDocs,
+  pvpFormationPresetCreateDocs,
+  pvpFormationPresetUpdateDocs,
+  pvpMatchCreateDocs,
+  pvpMatchUpdateDocs,
+  pvpSeasonDocs,
+} from "@/lib/mcp/field-docs";
+import {
   createPvpEnemyPreset,
   createPvpEnemyTeam,
   createPvpFormationPreset,
@@ -46,7 +57,7 @@ import {
   pvpSeasonArgs,
 } from "~convex-lib/validators";
 
-const seasonFields = convexToZodShape(pvpSeasonArgs);
+const seasonFields = convexToZodShape(pvpSeasonArgs, pvpSeasonDocs);
 const seasonId = idInput("PvP season id from `list_pvp_seasons`.");
 const matchId = idInput("Match id.");
 const presetId = idInput("Preset id.");
@@ -103,7 +114,10 @@ function registerSeasonTools(server: McpServer) {
       input: {
         seasonId,
         ...z.object(seasonFields).partial().shape,
-        archived: z.boolean().optional(),
+        archived: z
+          .boolean()
+          .optional()
+          .describe("Archives the season, or restores it with `false`."),
       },
     },
     ({ seasonId, ...patch }, userId) =>
@@ -137,8 +151,16 @@ function registerMatchTools(server: McpServer) {
       kind: "read",
       input: {
         seasonId,
-        from: z.number().int().optional(),
-        to: z.number().int().optional(),
+        from: z
+          .number()
+          .int()
+          .optional()
+          .describe("Earliest match date, as Unix ms."),
+        to: z
+          .number()
+          .int()
+          .optional()
+          .describe("Latest match date, as Unix ms."),
       },
     },
     ({ seasonId, ...range }, userId) => listPvpMatches(userId, seasonId, range),
@@ -165,11 +187,11 @@ function registerMatchTools(server: McpServer) {
     {
       title: "Record PvP match",
       description:
-        "Record a match. `date` is Unix ms. `ownTeam` and `opponentTeam` hold six slots in order (four strikers, then two specials); student ids come from `search_students`. `autoCreateEnemyPreset` files the opponent under a new enemy preset.",
+        "Record a match. `date` is Unix ms. `ownTeam` and `opponentTeam` hold exactly six slots in order (four strikers, then two specials), and each slot can also record `level`, `starLevel`, `ueLevel` and `damage`; student ids come from `search_students`. `autoCreateEnemyPreset` files the opponent under an enemy preset named `opponentName`, creating it if needed.",
       kind: "create",
       input: {
         seasonId,
-        ...convexToZodShape(pvpMatchCreateArgs),
+        ...convexToZodShape(pvpMatchCreateArgs, pvpMatchCreateDocs),
       },
     },
     ({ seasonId, ...input }, userId) => createPvpMatch(userId, seasonId, input),
@@ -186,7 +208,7 @@ function registerMatchTools(server: McpServer) {
       input: {
         seasonId,
         matchId,
-        ...convexToZodShape(pvpMatchUpdateArgs),
+        ...convexToZodShape(pvpMatchUpdateArgs, pvpMatchUpdateDocs),
       },
     },
     ({ seasonId, matchId, ...patch }, userId) =>
@@ -255,7 +277,10 @@ function registerFormationPresetTools(server: McpServer) {
       kind: "create",
       input: {
         seasonId,
-        ...convexToZodShape(pvpFormationPresetCreateArgs),
+        ...convexToZodShape(
+          pvpFormationPresetCreateArgs,
+          pvpFormationPresetCreateDocs,
+        ),
       },
     },
     ({ seasonId, ...input }, userId) =>
@@ -272,7 +297,10 @@ function registerFormationPresetTools(server: McpServer) {
       input: {
         seasonId,
         presetId,
-        ...convexToZodShape(pvpFormationPresetUpdateArgs),
+        ...convexToZodShape(
+          pvpFormationPresetUpdateArgs,
+          pvpFormationPresetUpdateDocs,
+        ),
       },
     },
     ({ seasonId, presetId, ...patch }, userId) =>
@@ -363,7 +391,7 @@ function registerEnemyTools(server: McpServer) {
       kind: "create",
       input: {
         seasonId,
-        ...convexToZodShape(pvpEnemyPresetCreateArgs),
+        ...convexToZodShape(pvpEnemyPresetCreateArgs, pvpEnemyPresetCreateDocs),
       },
     },
     ({ seasonId, ...input }, userId) =>
@@ -380,7 +408,7 @@ function registerEnemyTools(server: McpServer) {
       input: {
         seasonId,
         presetId,
-        ...convexToZodShape(pvpEnemyPresetUpdateArgs),
+        ...convexToZodShape(pvpEnemyPresetUpdateArgs, pvpEnemyPresetUpdateDocs),
       },
     },
     ({ seasonId, presetId, ...patch }, userId) =>
@@ -428,7 +456,7 @@ function registerEnemyTools(server: McpServer) {
       kind: "create",
       input: {
         seasonId,
-        ...convexToZodShape(pvpEnemyTeamCreateArgs),
+        ...convexToZodShape(pvpEnemyTeamCreateArgs, pvpEnemyTeamCreateDocs),
       },
     },
     ({ seasonId, ...input }, userId) =>
@@ -446,7 +474,7 @@ function registerEnemyTools(server: McpServer) {
       input: {
         seasonId,
         teamId,
-        ...convexToZodShape(pvpEnemyTeamUpdateArgs),
+        ...convexToZodShape(pvpEnemyTeamUpdateArgs, pvpEnemyTeamUpdateDocs),
       },
     },
     ({ seasonId, teamId, ...patch }, userId) =>

@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
+import { GAME_SERVER_DOC } from "@/lib/mcp/field-docs";
 import {
   getPublicRoster,
   getPublicTimeline,
@@ -18,7 +19,7 @@ export function registerSharedContentTools(server: McpServer) {
         "Another player's public student roster, looked up by game server and friend code.",
       kind: "read",
       input: {
-        gameServer: z.enum(GAME_SERVERS),
+        gameServer: z.enum(GAME_SERVERS).describe(GAME_SERVER_DOC),
         friendCode: z
           .string()
           .describe("The player's 8-letter friend code (A-Z)."),

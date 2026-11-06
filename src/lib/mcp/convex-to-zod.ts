@@ -5,12 +5,74 @@ import type {
 } from "convex/values";
 import { z } from "zod";
 
-function toZod(validator: GenericValidator): z.ZodType {
-  const schema = toRequiredZod(validator);
-  return validator.isOptional === "optional" ? schema.optional() : schema;
+type NestedFields<V> = V extends {
+  kind: "object";
+  fields: infer F;
+}
+  ? F
+  : V extends {
+        kind: "array";
+        element: infer E;
+      }
+    ? NestedFields<E>
+    : V extends {
+          kind: "union";
+          members: readonly (infer M)[];
+        }
+      ? NestedFields<M>
+      : never;
+
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
+
+type FieldOf<T, K extends PropertyKey> =
+  T extends Record<K, infer V> ? V : never;
+
+type FieldDoc<V> = [
+  NestedFields<V>,
+] extends [
+  never,
+]
+  ? string
+  : {
+      about?: string;
+      fields: FieldDocs<NestedFields<V>>;
+    };
+
+export type FieldDocs<F> = {
+  [K in KeysOfUnion<F>]: FieldDoc<FieldOf<F, K>>;
+};
+
+type RuntimeDoc =
+  | string
+  | {
+      about?: string;
+      fields?: RuntimeDocs;
+    };
+
+type RuntimeDocs = Record<string, RuntimeDoc | undefined>;
+
+function toZod(validator: GenericValidator, doc?: RuntimeDoc): z.ZodType {
+  const about = typeof doc === "string" ? doc : doc?.about;
+  const fields = typeof doc === "string" ? undefined : doc?.fields;
+  const schema = toRequiredZod(validator, fields);
+  const described = about ? schema.describe(about) : schema;
+
+  return validator.isOptional === "optional" ? described.optional() : described;
 }
 
-function toRequiredZod(validator: GenericValidator): z.ZodType {
+function toShape(fields: PropertyValidators, docs?: RuntimeDocs) {
+  return Object.fromEntries(
+    Object.entries(fields).map(([key, validator]) => [
+      key,
+      toZod(validator, docs?.[key]),
+    ]),
+  );
+}
+
+function toRequiredZod(
+  validator: GenericValidator,
+  fields?: RuntimeDocs,
+): z.ZodType {
   switch (validator.kind) {
     case "id":
       return z.string().describe(`A \`${validator.tableName}\` id.`);
@@ -29,13 +91,21 @@ function toRequiredZod(validator: GenericValidator): z.ZodType {
     case "literal":
       return z.literal(validator.value as string | number | boolean);
     case "array":
-      return z.array(toZod(validator.element));
+      return z.array(
+        toZod(validator.element, {
+          fields,
+        }),
+      );
     case "object":
-      return z.object(convexToZodShape(validator.fields));
+      return z.object(toShape(validator.fields, fields));
     case "record":
       return z.record(z.string(), toZod(validator.value));
     case "union": {
-      const [first, second, ...rest] = validator.members.map(toZod);
+      const [first, second, ...rest] = validator.members.map((member) =>
+        toZod(member, {
+          fields,
+        }),
+      );
       return second
         ? z.union([
             first,
@@ -51,11 +121,9 @@ function toRequiredZod(validator: GenericValidator): z.ZodType {
 
 export function convexToZodShape<C extends PropertyValidators>(
   fields: C,
+  docs: FieldDocs<C>,
 ): { [K in keyof C]: z.ZodType<Infer<C[K]>> } {
-  return Object.fromEntries(
-    Object.entries(fields).map(([key, validator]) => [
-      key,
-      toZod(validator),
-    ]),
-  ) as { [K in keyof C]: z.ZodType<Infer<C[K]>> };
+  return toShape(fields, docs as RuntimeDocs) as {
+    [K in keyof C]: z.ZodType<Infer<C[K]>>;
+  };
 }

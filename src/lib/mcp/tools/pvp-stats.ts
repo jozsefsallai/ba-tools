@@ -69,7 +69,7 @@ export function registerPvpStatsTools(server: McpServer) {
     {
       title: "Search PvP counters",
       description:
-        "Find attack teams that beat a given defense team in a PvP season. Each `defenseTeam` slot takes a `studentId`, and optionally a `range` or `tank` flag to match by role instead. Paginated.",
+        "Find attack teams that beat a given defense team in a PvP season. Send all six `defenseTeam` slots in order (four strikers, then two specials); use `{}` for a slot that can be anyone. Paginated.",
       kind: "read",
       rateLimit: "search",
       input: {

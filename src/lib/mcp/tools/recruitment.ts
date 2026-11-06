@@ -3,6 +3,10 @@ import { z } from "zod";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import {
+  recruitmentAccountDocs,
+  recruitmentSessionDocs,
+} from "@/lib/mcp/field-docs";
+import {
   createRecruitmentAccount,
   createRecruitmentSession,
   deleteRecruitmentAccount,
@@ -19,8 +23,14 @@ import {
   recruitmentSessionArgs,
 } from "~convex-lib/validators";
 
-const accountFields = convexToZodShape(recruitmentAccountArgs);
-const sessionFields = convexToZodShape(recruitmentSessionArgs);
+const accountFields = convexToZodShape(
+  recruitmentAccountArgs,
+  recruitmentAccountDocs,
+);
+const sessionFields = convexToZodShape(
+  recruitmentSessionArgs,
+  recruitmentSessionDocs,
+);
 const accountId = idInput("Recruitment account id.");
 const sessionId = idInput("Recruitment session id.");
 

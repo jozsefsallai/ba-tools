@@ -2,6 +2,11 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import {
+  giftInventoryDocs,
+  giftTargetCreateDocs,
+  giftTargetUpdateDocs,
+} from "@/lib/mcp/field-docs";
+import {
   createGiftInventory,
   createGiftTarget,
   deleteGiftInventory,
@@ -58,7 +63,7 @@ export function registerGiftInventoryTools(server: McpServer) {
       description:
         "Create a gift inventory. `gifts` lists `{ id, count }` with gift ids from `search_gifts`.",
       kind: "create",
-      input: convexToZodShape(giftInventoryArgs),
+      input: convexToZodShape(giftInventoryArgs, giftInventoryDocs),
     },
     (input, userId) => createGiftInventory(userId, input),
   );
@@ -73,7 +78,7 @@ export function registerGiftInventoryTools(server: McpServer) {
       kind: "update",
       input: {
         inventoryId,
-        ...convexToZodShape(giftInventoryArgs),
+        ...convexToZodShape(giftInventoryArgs, giftInventoryDocs),
       },
     },
     ({ inventoryId, ...patch }, userId) =>
@@ -120,7 +125,7 @@ export function registerGiftInventoryTools(server: McpServer) {
       kind: "create",
       input: {
         inventoryId,
-        ...convexToZodShape(giftTargetCreateArgs),
+        ...convexToZodShape(giftTargetCreateArgs, giftTargetCreateDocs),
       },
     },
     ({ inventoryId, ...input }, userId) =>
@@ -138,7 +143,7 @@ export function registerGiftInventoryTools(server: McpServer) {
       input: {
         inventoryId,
         targetId,
-        ...convexToZodShape(giftTargetUpdateArgs),
+        ...convexToZodShape(giftTargetUpdateArgs, giftTargetUpdateDocs),
       },
     },
     ({ inventoryId, targetId, ...patch }, userId) =>

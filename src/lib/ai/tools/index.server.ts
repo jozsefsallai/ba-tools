@@ -16,6 +16,7 @@ import {
   withEnumLabels,
   withGiftNames,
 } from "@/lib/mcp/enrich.server";
+import { rosterUpdateDocs } from "@/lib/mcp/field-docs";
 import { registerMcpTools } from "@/lib/mcp/register-tools";
 import { toApiError } from "@/lib/public-api/convex.server";
 import { rateLimit } from "@/lib/public-api/rate-limit.server";
@@ -393,7 +394,7 @@ export function createPlanaTools({
 
   // Where Plana's version differs from the MCP tool: outputs sized for a chat,
   // friendlier lookups, and a roster update that can't drop students.
-  const rosterFields = convexToZodShape(rosterUpdateArgs);
+  const rosterFields = convexToZodShape(rosterUpdateArgs, rosterUpdateDocs);
 
   return {
     ...mcp,

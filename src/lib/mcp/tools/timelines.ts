@@ -7,6 +7,7 @@ import {
   paginationInput,
   paginationOpts,
 } from "@/lib/mcp/define-tool";
+import { timelineDocs } from "@/lib/mcp/field-docs";
 import {
   createTimeline,
   deleteTimeline,
@@ -16,12 +17,12 @@ import {
 } from "@/lib/public-api/resources/timelines.server";
 import { timelineArgs } from "~convex-lib/validators";
 
-const fields = convexToZodShape(timelineArgs);
+const fields = convexToZodShape(timelineArgs, timelineDocs);
 
 export const LAYOUT_GUIDE =
-  'Layout: items flow left to right in one row until a `separator` with `orientation: "vertical"`, which starts a new row; `horizontal` separators only add a gap inside a row. Without vertical separators the whole rotation renders as one very long row, so break rows at natural points (a new phase, wave, or cost cycle), but don\'t put one after every skill. Keep `notes` to a few words (e.g. "after boss shield"), notes support new lines; long notes push the following cards far apart. Put longer explanations in `description` or a `text` item.';
+  'Layout: items flow left to right in one row until a `separator` with `orientation: "vertical"`, which starts a new row; `horizontal` separators only add a gap inside a row. Without vertical separators the whole rotation renders as one very long row, so break rows at natural points (a new phase, wave, or cost cycle), but don\'t put one after every skill. Keep `notes` to a few words (e.g. "after boss shield"), notes support new lines; long notes push the following cards far apart. Put costs and timings in `trigger`, not `notes`, and longer explanations in `description` or a `text` item.';
 export const RAID_GUIDE =
-  "Optional `raid` tags the timeline: `type` (Raid = Total Assault, EliminateRaid = Grand Assault, MultiFloorRaid = Final Restriction Release, TimeAttackDungeon = Joint Firing Drill, WorldRaid = Allied Operation), `boss` of that type (a drill type for Joint Firing Drill), `defenseTypes`, `terrains`, `difficulty` (Total and Grand Assault only) and `floor` from 1 to 124 (Final Restriction Release only). Send `null` to clear it.";
+  "Set `raid` when the timeline is for a specific raid or boss.";
 const timelineId = idInput("Timeline id.");
 
 export function registerTimelineTools(server: McpServer) {
@@ -57,7 +58,7 @@ export function registerTimelineTools(server: McpServer) {
     "create_timeline",
     {
       title: "Create timeline",
-      description: `Save a timeline. \`items\` run in order: \`student\` items are EX skill uses (with optional \`targetId\` and \`notes\`), \`separator\` items space or break rows, and \`text\` items add labels. Student ids come from \`search_students\`. To attach a team, send \`formation\`, the timeline's own copy, which is public whenever the timeline is; \`formationId\` optionally links it to a saved formation. ${LAYOUT_GUIDE} ${RAID_GUIDE}`,
+      description: `Save a timeline. \`items\` run in order: \`student\` items are skill cards (EX skill uses), \`separator\` items space or break rows, and \`text\` items add labels. Skill cards can show a \`trigger\` (cost or time), targets (\`targetId\`, \`extraTargetIds\`), a \`copy\` marker, a \`highlightColor\`, alternate art (\`variantId\`) and \`notes\`; use whichever apply, e.g. \`{ "type": "student", "studentId": "<id>", "trigger": "6", "targetId": "<id>", "copy": true }\`. Student ids come from \`search_students\`. To attach a team, send \`formation\`; \`formationId\` optionally links it to a saved formation. ${LAYOUT_GUIDE} ${RAID_GUIDE}`,
       kind: "create",
       input: fields,
     },

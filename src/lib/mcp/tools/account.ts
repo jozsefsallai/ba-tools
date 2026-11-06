@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import { defineTool } from "@/lib/mcp/define-tool";
+import { userPreferencesDocs } from "@/lib/mcp/field-docs";
 import {
   getMe,
   getPreferences,
@@ -39,7 +40,7 @@ export function registerAccountTools(server: McpServer) {
       title: "Update my preferences",
       description: "Change preferences. Only the fields sent change.",
       kind: "update",
-      input: convexToZodShape(userPreferencesArgs),
+      input: convexToZodShape(userPreferencesArgs, userPreferencesDocs),
     },
     (input, userId) => updatePreferences(userId, input),
   );

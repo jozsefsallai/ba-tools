@@ -7,6 +7,10 @@ import {
   paginationOpts,
 } from "@/lib/mcp/define-tool";
 import {
+  timelineGroupCreateDocs,
+  timelineGroupUpdateDocs,
+} from "@/lib/mcp/field-docs";
+import {
   createTimelineGroup,
   deleteTimelineGroup,
   getTimelineGroup,
@@ -55,7 +59,7 @@ export function registerTimelineGroupTools(server: McpServer) {
       description:
         "Create an empty timeline group. Add timelines with `update_timeline_group`.",
       kind: "create",
-      input: convexToZodShape(timelineGroupCreateArgs),
+      input: convexToZodShape(timelineGroupCreateArgs, timelineGroupCreateDocs),
     },
     (input, userId) => createTimelineGroup(userId, input),
   );
@@ -70,7 +74,7 @@ export function registerTimelineGroupTools(server: McpServer) {
       kind: "update",
       input: {
         timelineGroupId,
-        ...convexToZodShape(timelineGroupUpdateArgs),
+        ...convexToZodShape(timelineGroupUpdateArgs, timelineGroupUpdateDocs),
       },
     },
     ({ timelineGroupId, ...patch }, userId) =>
