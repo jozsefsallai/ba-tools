@@ -1,5 +1,9 @@
 import { v } from "convex/values";
-import { GAME_SERVERS, PVP_SEASONS } from "@/lib/types";
+import {
+  GAME_SERVERS,
+  PVP_SEASONS,
+  RECRUITMENT_GAME_SERVERS,
+} from "@/lib/types";
 import {
   formationRow,
   formationStudentItem,
@@ -191,7 +195,9 @@ export const userPreferencesArgs = {
 
 export const recruitmentAccountArgs = {
   name: v.string(),
-  gameServer,
+  gameServer: v.union(
+    ...RECRUITMENT_GAME_SERVERS.map((server) => v.literal(server)),
+  ),
   permanentCharge: v.number(),
   limitedCharge: v.number(),
 };

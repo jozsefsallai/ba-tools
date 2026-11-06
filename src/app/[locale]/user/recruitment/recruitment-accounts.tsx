@@ -21,7 +21,11 @@ import {
 } from "@/components/ui/select";
 import { Link } from "@/i18n/navigation";
 import { RECRUITMENT_COLORS } from "@/lib/recruitment";
-import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
+import {
+  GAME_SERVER_NAMES,
+  RECRUITMENT_GAME_SERVERS,
+  type RecruitmentGameServer,
+} from "@/lib/types";
 import { api } from "~convex/api";
 
 function ChargeBar({ value, limited }: { value: number; limited: boolean }) {
@@ -51,7 +55,7 @@ export function RecruitmentAccounts() {
   const accounts = useQuery(api.recruitment.getOwnAccounts, {});
   const createAccount = useMutation(api.recruitment.createAccount);
   const [name, setName] = useState("");
-  const [gameServer, setGameServer] = useState<GameServer>("JP");
+  const [gameServer, setGameServer] = useState<RecruitmentGameServer>("JP");
   const [permanentCharge, setPermanentCharge] = useState<NumericInputValue>(0);
   const [limitedCharge, setLimitedCharge] = useState<NumericInputValue>(0);
 
@@ -131,18 +135,16 @@ export function RecruitmentAccounts() {
           <Label>{t("common.gameServer")}</Label>
           <Select
             value={gameServer}
-            onValueChange={(value) => setGameServer(value as GameServer)}
+            onValueChange={(value) =>
+              setGameServer(value as RecruitmentGameServer)
+            }
           >
             <SelectTrigger className="w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {GAME_SERVERS.map((server) => (
-                <SelectItem
-                  key={server}
-                  value={server}
-                  disabled={server !== "JP"}
-                >
+              {RECRUITMENT_GAME_SERVERS.map((server) => (
+                <SelectItem key={server} value={server}>
                   {GAME_SERVER_NAMES[server]}
                 </SelectItem>
               ))}

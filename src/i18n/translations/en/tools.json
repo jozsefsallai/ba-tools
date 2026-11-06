@@ -2173,7 +2173,7 @@
   "recruitment": {
     "title": "Recruitment Tracker (BETA)",
     "description": "Track recruitment charges, pick-ups, pity, and rebate tickets across your game accounts.",
-    "systemNotice": "This tool only supports the new <strong>Recruitment Charge</strong> system, which is currently available only on the JP server. It does not work with the old Recruitment Points (spark) system.",
+    "systemNotice": "This tool only supports the new <strong>Recruitment Charge</strong> system. It does not work with the old Recruitment Points (spark) system.",
     "accountName": "Account Name",
     "account": "Recruitment Account",
     "gameServer": "Game server: {server}",

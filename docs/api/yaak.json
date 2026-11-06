@@ -742,7 +742,7 @@
         "folderId": "fl_DVUZFcYEkA",
         "authentication": {},
         "authenticationType": null,
-        "description": "Your recruitment (gacha) history per account. `permanentCharge` and\n`limitedCharge` are the pity points you started tracking with.",
+        "description": "Your recruitment (gacha) history per account. `permanentCharge` and\n`limitedCharge` are the pity points you started tracking with.\n\n- `gameServer`: `JP`, `KR`, `TW`, `NA`, `Asia` or `EU`. The China server isn't supported.",
         "headers": [],
         "name": "Recruitment tracker",
         "sortPriority": 7.0,

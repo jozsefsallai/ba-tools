@@ -6,7 +6,11 @@ import type { FieldDocs } from "@/lib/mcp/convex-to-zod";
 import { describeEnumInput } from "@/lib/mcp/enrich.server";
 import { DEFENSE_TYPES } from "@/lib/raid-info";
 import { skillCardVariantMap } from "@/lib/skill-card";
-import { BORROW_SLOT_GAMEMODE_NAMES, GAME_SERVER_NAMES } from "@/lib/types";
+import {
+  BORROW_SLOT_GAMEMODE_NAMES,
+  GAME_SERVER_NAMES,
+  RECRUITMENT_GAME_SERVERS,
+} from "@/lib/types";
 import type {
   formationArgs,
   giftInventoryArgs,
@@ -376,7 +380,9 @@ export const userPreferencesDocs: FieldDocs<typeof userPreferencesArgs> = {
 export const recruitmentAccountDocs: FieldDocs<typeof recruitmentAccountArgs> =
   {
     name: "Account name.",
-    gameServer: GAME_SERVER_DOC,
+    gameServer: `Game server: ${RECRUITMENT_GAME_SERVERS.map(
+      (server) => `${server} = ${GAME_SERVER_NAMES[server]}`,
+    ).join(", ")}. The China server isn't supported.`,
     permanentCharge: "Current charge (pity count) on permanent banners, 0-200.",
     limitedCharge: "Current charge (pity count) on limited banners, 0-200.",
   };

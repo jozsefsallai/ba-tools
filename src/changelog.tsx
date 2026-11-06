@@ -49,6 +49,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 7, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Recruitment Accounts can now be created on all regions except CN.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "November 6, 2026",
     features: [
       {

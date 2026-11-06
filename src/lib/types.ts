@@ -24,6 +24,16 @@ export const GAME_SERVERS = [
   "CN",
 ] as const;
 
+export const RECRUITMENT_GAME_SERVERS = [
+  "JP",
+  "KR",
+  "TW",
+  "NA",
+  "Asia",
+  "EU",
+  // "CN",
+] as const;
+
 export const PVP_SEASONS = [
   1,
   2,
@@ -51,6 +61,7 @@ export type StarLevel = (typeof STAR_LEVELS)[number];
 export type UELevel = (typeof UE_LEVELS)[number];
 
 export type GameServer = (typeof GAME_SERVERS)[number];
+export type RecruitmentGameServer = (typeof RECRUITMENT_GAME_SERVERS)[number];
 
 export type BorrowSlotGameMode = (typeof BORROW_SLOT_GAMEMODES)[number];
 

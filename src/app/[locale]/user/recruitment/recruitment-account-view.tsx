@@ -23,7 +23,12 @@ import {
 } from "@/components/ui/select";
 import { Link } from "@/i18n/navigation";
 import { RECRUITMENT_COLORS } from "@/lib/recruitment";
-import { GAME_SERVER_NAMES, GAME_SERVERS, type GameServer } from "@/lib/types";
+import {
+  GAME_SERVER_NAMES,
+  type GameServer,
+  RECRUITMENT_GAME_SERVERS,
+  type RecruitmentGameServer,
+} from "@/lib/types";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -35,14 +40,14 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
   });
   const updateAccount = useMutation(api.recruitment.updateAccount);
   const [name, setName] = useState("");
-  const [gameServer, setGameServer] = useState<GameServer>("JP");
+  const [gameServer, setGameServer] = useState<RecruitmentGameServer>("JP");
   const [permanentCharge, setPermanentCharge] = useState<NumericInputValue>(0);
   const [limitedCharge, setLimitedCharge] = useState<NumericInputValue>(0);
 
   useEffect(() => {
     if (result) {
       setName(result.account.name);
-      setGameServer(result.account.gameServer);
+      setGameServer(result.account.gameServer as RecruitmentGameServer);
       setPermanentCharge(result.account.permanentCharge);
       setLimitedCharge(result.account.limitedCharge);
     }
@@ -106,18 +111,16 @@ export function RecruitmentAccountView({ accountId }: { accountId: string }) {
           <Label>{t("common.gameServer")}</Label>
           <Select
             value={gameServer}
-            onValueChange={(value) => setGameServer(value as GameServer)}
+            onValueChange={(value) =>
+              setGameServer(value as RecruitmentGameServer)
+            }
           >
             <SelectTrigger className="w-48 max-md:w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {GAME_SERVERS.map((server) => (
-                <SelectItem
-                  key={server}
-                  value={server}
-                  disabled={server !== "JP"}
-                >
+              {RECRUITMENT_GAME_SERVERS.map((server) => (
+                <SelectItem key={server} value={server}>
                   {GAME_SERVER_NAMES[server]}
                 </SelectItem>
               ))}
