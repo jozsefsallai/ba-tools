@@ -88,6 +88,7 @@ Route handlers in `src/app/api/v1/` (`/api/students` is the legacy endpoint; kee
 - **Convex bridge:** `authenticatedQuery`/`authenticatedMutation` (`convex/lib/auth.ts`) also accept optional `apiSecret` + `apiUserExternalId` args. `userQuery`/`userMutation` in `src/lib/public-api/convex.server.ts` fill them in, so every user function is callable from the API. Functions built with them must declare `args` (use `args: {}`), and callers without args pass `{}`.
 - **Rate limits:** per-minute tiers in `src/lib/public-api/rate-limit.server.ts`, applied by `publicRoute` (per IP; pass `{ rateLimit: "search" }` for costly endpoints) and `userRoute` (per key owner, reads and writes separately). Update the docs' usage limits section when changing them.
 - **Errors:** throw `notFound`/`invalid`/`conflict`/`forbidden` from `convex/lib/errors.ts` (typed `ConvexError`s) in Convex functions, so the API can map them to HTTP statuses; plain `Error` messages are hidden in production and become `500`.
+- **Preference defaults:** creating a timeline, formation or PvP match fills in what the request leaves out from the user's preferences, like the editors do (`src/lib/public-api/preference-defaults.ts`). Keep this in the services so REST, MCP and Plana agree.
 - **Docs:** `docs/api/yaak.json` (a Yaak export; import it into Yaak, edit, re-export) plus Markdown pages in `docs/api/pages/`, served by `@yaakdoc/next` at `/developers` (built into the gitignored `public/developers`). Update the export whenever endpoints change.
 
 ## MCP Server

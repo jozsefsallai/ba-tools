@@ -1,6 +1,11 @@
 import "server-only";
 
 import { z } from "zod";
+import {
+  colorEnum,
+  resolveAttackType,
+  resolveDefenseType,
+} from "@/lib/combat-colors";
 import { getGift as findGift, searchGifts } from "@/lib/data/gifts.server";
 import { getStudentSkills as getSkills } from "@/lib/data/student-skills.server";
 import {
@@ -10,6 +15,7 @@ import {
 } from "@/lib/data/students.server";
 import { getCachedGameBanners } from "@/lib/game-banners.server";
 import { notFound } from "@/lib/public-api/route";
+import { ROADMAP_ITEM_KINDS } from "@/lib/roadmap/constants";
 import { getCachedRoadmapItems } from "@/lib/roadmap/roadmap.server";
 import { resolveStudentIdentifier } from "@/lib/student-resolve.server";
 import { buildItemIconUrl } from "@/lib/url";
@@ -27,8 +33,8 @@ export const studentSearchSchema = z.object({
   q: z.string().optional().describe("Fuzzy name or search-tag query."),
   school: z.enum(School).optional(),
   club: z.enum(Club).optional(),
-  attackType: z.enum(AttackType).optional(),
-  defenseType: z.enum(DefenseType).optional(),
+  attackType: colorEnum(Object.values(AttackType)).optional(),
+  defenseType: colorEnum(Object.values(DefenseType)).optional(),
   combatClass: z.enum(CombatClass).optional(),
   combatRole: z.enum(CombatRole).optional(),
   weaponType: z.enum(WeaponType).optional(),
@@ -50,11 +56,15 @@ export const studentSearchSchema = z.object({
 
 export async function listStudents({
   q,
+  attackType,
+  defenseType,
   ...filters
 }: z.infer<typeof studentSearchSchema>) {
   const students = await searchStudents({
     query: q,
     ...filters,
+    attackType: attackType && resolveAttackType(attackType),
+    defenseType: defenseType && resolveDefenseType(defenseType),
   });
 
   return students.map((student) => ({
@@ -140,6 +150,41 @@ export async function listBanners() {
   return await getCachedGameBanners();
 }
 
-export async function getRoadmap() {
-  return await getCachedRoadmapItems();
+const roadmapDate = z
+  .string()
+  .refine((value) => !Number.isNaN(Date.parse(value)), "Must be an ISO date.");
+
+export const roadmapSchema = z.object({
+  categories: z
+    .array(z.enum(ROADMAP_ITEM_KINDS))
+    .optional()
+    .describe(
+      "Only these kinds of items: `banner` (recruitment), `raid` (Total Assault, Grand Assault, Joint Firing Drill, Allied Operation), `frr` (Final Restriction Release), `event`, `story`, `bonus` (bonus reward campaigns), `workLog`, `battlePass` or `etc`. All of them when left out.",
+    ),
+  from: roadmapDate
+    .optional()
+    .describe(
+      "ISO date or date-time; only items still running at or after it. Use the current time for current and upcoming content.",
+    ),
+  to: roadmapDate
+    .optional()
+    .describe("ISO date or date-time; only items starting at or before it."),
+});
+
+export async function getRoadmap({
+  categories,
+  from,
+  to,
+}: z.infer<typeof roadmapSchema> = {}) {
+  const items = await getCachedRoadmapItems();
+  const fromTime = from ? new Date(from).getTime() : undefined;
+  const toTime = to ? new Date(to).getTime() : undefined;
+
+  return items.filter(
+    (item) =>
+      (!categories || (categories as string[]).includes(item.kind)) &&
+      (fromTime === undefined ||
+        new Date(item.endDate).getTime() >= fromTime) &&
+      (toTime === undefined || new Date(item.startDate).getTime() <= toTime),
+  );
 }

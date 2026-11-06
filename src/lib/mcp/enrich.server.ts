@@ -2,6 +2,10 @@ import "server-only";
 
 import commonEn from "@/i18n/translations/en/common.json";
 import staticEn from "@/i18n/translations/en/static.json";
+import {
+  ATTACK_TYPE_COLOR_DOC,
+  DEFENSE_TYPE_COLOR_DOC,
+} from "@/lib/combat-colors";
 import { db } from "@/lib/db";
 
 /**
@@ -49,6 +53,17 @@ export function describeEnumLabels(section: EnumSection) {
   return Object.entries(enumLabels(section))
     .map(([value, label]) => `${value} = ${label}`)
     .join(", ");
+}
+
+export function describeEnumInput(section: EnumSection) {
+  const colors =
+    section === "attackType"
+      ? ` ${ATTACK_TYPE_COLOR_DOC}`
+      : section === "defenseType"
+        ? ` ${DEFENSE_TYPE_COLOR_DOC}`
+        : "";
+
+  return `Internal value = in-game name: ${describeEnumLabels(section)}.${colors}`;
 }
 
 function label(section: EnumSection, value: unknown) {

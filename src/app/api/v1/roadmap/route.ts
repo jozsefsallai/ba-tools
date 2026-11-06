@@ -1,9 +1,26 @@
-import { getRoadmap } from "@/lib/public-api/resources/game-data.server";
+import { z } from "zod";
+import {
+  getRoadmap,
+  roadmapSchema,
+} from "@/lib/public-api/resources/game-data.server";
 import { ok } from "@/lib/public-api/response";
-import { publicRoute } from "@/lib/public-api/route";
+import { parseQuery, publicRoute } from "@/lib/public-api/route";
 
-export const GET = publicRoute(async () => {
-  return ok(await getRoadmap(), {
+const querySchema = roadmapSchema.extend({
+  categories: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value
+        ?.split(",")
+        .map((category) => category.trim())
+        .filter(Boolean),
+    )
+    .pipe(roadmapSchema.shape.categories),
+});
+
+export const GET = publicRoute(async (req) => {
+  return ok(await getRoadmap(parseQuery(req, querySchema)), {
     cache: "public",
   });
 });

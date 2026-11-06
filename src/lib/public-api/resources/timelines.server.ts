@@ -1,11 +1,18 @@
 import "server-only";
 
 import type { PaginationOptions } from "convex/server";
+import { withRaidTypesResolved } from "@/lib/combat-colors";
 import {
   type UserArgs,
   userMutation,
   userQuery,
 } from "@/lib/public-api/convex.server";
+import {
+  formationDefaults,
+  timelineDefaults,
+  withDefaultLevels,
+} from "@/lib/public-api/preference-defaults";
+import { getResolvedPreferences } from "@/lib/public-api/resources/account.server";
 import { withManualName } from "@/lib/public-api/resources/manual-name";
 import { mergeForUpdate } from "@/lib/public-api/route";
 import { toPage, toResource } from "@/lib/public-api/serialize";
@@ -56,12 +63,20 @@ export async function createTimeline(
   userId: string,
   input: Record<string, unknown>,
 ) {
+  const preferences = await getResolvedPreferences(userId);
+  const formation = input.formation as Record<string, unknown> | undefined;
+
   return toResource(
-    await userMutation(
-      userId,
-      api.timeline.create,
-      input as UserArgs<typeof api.timeline.create>,
-    ),
+    await userMutation(userId, api.timeline.create, {
+      ...timelineDefaults(preferences),
+      ...withRaidTypesResolved(input),
+      ...(formation && {
+        formation: {
+          ...formationDefaults(preferences),
+          ...withDefaultLevels(formation, preferences),
+        },
+      }),
+    } as UserArgs<typeof api.timeline.create>),
   );
 }
 
@@ -71,10 +86,21 @@ export async function updateTimeline(
   patch: Record<string, unknown>,
 ) {
   const current = await findTimeline(userId, id);
+  const formation = patch.formation as Record<string, unknown> | undefined;
+  const preferences = formation && (await getResolvedPreferences(userId));
+  const resolved = withRaidTypesResolved(withManualName(patch));
 
   return toResource(
     await userMutation(userId, api.timeline.update, {
-      ...mergeForUpdate(current, UPDATE_KEYS, withManualName(patch)),
+      ...mergeForUpdate(current, UPDATE_KEYS, resolved),
+      ...(formation &&
+        preferences && {
+          formation: {
+            ...formationDefaults(preferences),
+            ...current.formation,
+            ...withDefaultLevels(formation, preferences, current.formation),
+          },
+        }),
       id: current._id,
     } as UserArgs<typeof api.timeline.update>),
   );

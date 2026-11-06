@@ -12,7 +12,7 @@ import { mergeRosterStudents } from "@/lib/ai/tools/roster-merge";
 import { summarizeSkills } from "@/lib/ai/tools/skills";
 import { convexToZodShape } from "@/lib/mcp/convex-to-zod";
 import {
-  describeEnumLabels,
+  describeEnumInput,
   withEnumLabels,
   withGiftNames,
 } from "@/lib/mcp/enrich.server";
@@ -26,6 +26,7 @@ import {
   giftSearchSchema,
   listGifts,
   listStudents,
+  roadmapSchema,
   studentSearchSchema,
 } from "@/lib/public-api/resources/game-data.server";
 import {
@@ -74,9 +75,7 @@ const studentSearchInput = {
   ...Object.fromEntries(
     enumFilters.map((key) => [
       key,
-      studentSearchSchema.shape[key].describe(
-        `Internal value = in-game name: ${describeEnumLabels(key)}.`,
-      ),
+      studentSearchSchema.shape[key].describe(describeEnumInput(key)),
     ]),
   ),
   limit: z.number().int().min(1).max(50).default(20),
@@ -285,16 +284,6 @@ async function resolveRecruitmentAccountId(userId: string, account: string) {
   return match.id;
 }
 
-function isCurrentOrUpcoming(item: unknown, now: number) {
-  const endDate = (
-    item as {
-      endDate?: string | Date;
-    }
-  ).endDate;
-
-  return !endDate || new Date(endDate).getTime() >= now;
-}
-
 export function createPlanaTools({
   userId,
   locale,
@@ -455,15 +444,15 @@ export function createPlanaTools({
     ),
 
     get_roadmap: read(
-      "The projected Global server roadmap: current and upcoming events, raids and other content.",
-      {},
-      async () => {
-        const now = Date.now();
-        const items = await getRoadmap();
+      "The projected Global server roadmap: banners, events, raids and other content, current and upcoming unless `from` says otherwise. Only the first 30 matches are returned, so narrow it with `categories`.",
+      roadmapSchema.shape,
+      async ({ from, ...filters }) => {
+        const items = await getRoadmap({
+          ...filters,
+          from: from ?? new Date().toISOString(),
+        });
 
-        return items
-          .filter((item) => isCurrentOrUpcoming(item, now))
-          .slice(0, MAX_ROADMAP_ITEMS);
+        return items.slice(0, MAX_ROADMAP_ITEMS);
       },
     ),
 

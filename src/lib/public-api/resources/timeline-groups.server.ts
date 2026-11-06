@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { PaginationOptions } from "convex/server";
+import { withRaidTypesResolved } from "@/lib/combat-colors";
 import {
   type UserArgs,
   userMutation,
@@ -37,7 +38,7 @@ export async function createTimelineGroup(
   const id = await userMutation(
     userId,
     api.timelineGroup.create,
-    input as UserArgs<typeof api.timelineGroup.create>,
+    withRaidTypesResolved(input) as UserArgs<typeof api.timelineGroup.create>,
   );
 
   return await getTimelineGroup(userId, id);
@@ -49,7 +50,7 @@ export async function updateTimelineGroup(
   patch: Record<string, unknown>,
 ) {
   await userMutation(userId, api.timelineGroup.update, {
-    ...withManualName(patch),
+    ...withRaidTypesResolved(withManualName(patch)),
     id: id as Id<"timelineGroup">,
   } as UserArgs<typeof api.timelineGroup.update>);
 

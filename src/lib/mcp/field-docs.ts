@@ -1,7 +1,10 @@
 import "server-only";
 
+import { z } from "zod";
+import { colorEnum } from "@/lib/combat-colors";
 import type { FieldDocs } from "@/lib/mcp/convex-to-zod";
-import { describeEnumLabels } from "@/lib/mcp/enrich.server";
+import { describeEnumInput } from "@/lib/mcp/enrich.server";
+import { DEFENSE_TYPES } from "@/lib/raid-info";
 import { skillCardVariantMap } from "@/lib/skill-card";
 import { BORROW_SLOT_GAMEMODE_NAMES, GAME_SERVER_NAMES } from "@/lib/types";
 import type {
@@ -47,14 +50,19 @@ const CSS_COLOR = "Hex color, like `#ffffff`.";
 const STAR_LEVEL = "Star rating (5 is the maximum).";
 const UE_LEVEL = "Unique Equipment (UE) star level.";
 
+const FROM_PREFERENCE = "Left out on create, this uses the user's preference.";
+
 const raidDocs = {
   about:
     "Tags the content with a raid, which also makes it findable by raid. Send `null` to clear it.",
   fields: {
     type: "Raid = Total Assault, EliminateRaid = Grand Assault, MultiFloorRaid = Final Restriction Release, TimeAttackDungeon = Joint Firing Drill, WorldRaid = Allied Operation.",
     boss: "Must belong to `type`: a boss, or a drill type for TimeAttackDungeon.",
-    defenseTypes: `Armor types. Internal value = in-game name: ${describeEnumLabels("defenseType")}.`,
-    terrains: `Internal value = in-game name: ${describeEnumLabels("terrain")}.`,
+    defenseTypes: {
+      about: `Armor types. ${describeEnumInput("defenseType")}`,
+      schema: z.array(colorEnum(DEFENSE_TYPES)),
+    },
+    terrains: describeEnumInput("terrain"),
     difficulty:
       "Only for Raid and, on timelines, EliminateRaid; anything else is rejected.",
     floor:
@@ -79,7 +87,8 @@ const formationStudentDocs = {
   starLevel: STAR_LEVEL,
   ueLevel: UE_LEVEL,
   borrowed: "Marks the student as borrowed from another player.",
-  level: "Student level shown on the card (up to 90).",
+  level:
+    "Student level shown on the card (up to 90). Left out for a student new to the formation, it uses the user's default level if they have that preference on.",
 };
 
 const formationRowLabelDocs = {
@@ -120,7 +129,7 @@ const formationRowDocs = {
   label: formationRowLabelDocs,
 };
 
-const FORMATION_ROW_GAP = "Space between rows in pixels (default 8).";
+const FORMATION_ROW_GAP = "Space between rows in pixels.";
 const FORMATION_OVERLINE =
   "Draw the colored line above the striker and special groups.";
 const FORMATION_NO_ROLE = "Hide the role icon on the student cards.";
@@ -144,10 +153,10 @@ export const formationDocs: FieldDocs<typeof formationArgs> = {
       "All rows, for formations with several teams. When not empty, this is what the app shows, so it must include the first row too.",
     fields: formationRowDocs,
   },
-  rowGap: FORMATION_ROW_GAP,
-  displayOverline: FORMATION_OVERLINE,
-  noDisplayRole: FORMATION_NO_ROLE,
-  groupsVertical: FORMATION_VERTICAL,
+  rowGap: `${FORMATION_ROW_GAP} ${FROM_PREFERENCE}`,
+  displayOverline: `${FORMATION_OVERLINE} ${FROM_PREFERENCE}`,
+  noDisplayRole: `${FORMATION_NO_ROLE} ${FROM_PREFERENCE}`,
+  groupsVertical: `${FORMATION_VERTICAL} ${FROM_PREFERENCE}`,
 };
 
 const VARIANTS = Object.entries(skillCardVariantMap)
@@ -161,8 +170,8 @@ export const timelineDocs: FieldDocs<typeof timelineArgs> = {
   name: "Timeline name. Sent names are kept as they are; see `autoName`.",
   description:
     "Longer explanation shown with the timeline, such as strategy or requirements.",
-  visibility: VISIBILITY,
-  showCreator: SHOW_CREATOR,
+  visibility: `${VISIBILITY} ${FROM_PREFERENCE} Check \`get_preferences\` or set it explicitly if it matters.`,
+  showCreator: `${SHOW_CREATOR} ${FROM_PREFERENCE}`,
   items: {
     about:
       "The rotation, in order. Each item's `type` decides which of the other fields apply.",
@@ -186,15 +195,12 @@ export const timelineDocs: FieldDocs<typeof timelineArgs> = {
       text: "`text` items: the label, such as a phase name.",
     },
   },
-  itemSpacing: "Space between items in pixels (app default 10).",
-  verticalSeparatorSize:
-    "Space added by `vertical` separators in pixels (app default 70).",
-  horizontalSeparatorSize:
-    "Width of `horizontal` separators in pixels (app default 50).",
-  exportWithTransparentBackground:
-    "Export the timeline image without a background.",
-  exportBackgroundColor: `Export background. ${CSS_COLOR}`,
-  exportBackgroundOpacity: "Export background opacity, 0-100.",
+  itemSpacing: `Space between items in pixels. ${FROM_PREFERENCE}`,
+  verticalSeparatorSize: `Space added by \`vertical\` separators in pixels. ${FROM_PREFERENCE}`,
+  horizontalSeparatorSize: `Width of \`horizontal\` separators in pixels. ${FROM_PREFERENCE}`,
+  exportWithTransparentBackground: `Export the timeline image without a background. ${FROM_PREFERENCE}`,
+  exportBackgroundColor: `Export background. ${CSS_COLOR} ${FROM_PREFERENCE}`,
+  exportBackgroundOpacity: `Export background opacity, 0-100. ${FROM_PREFERENCE}`,
   formation: {
     about:
       "The team to show with the timeline. It's the timeline's own copy and is public whenever the timeline is.",
@@ -205,10 +211,10 @@ export const timelineDocs: FieldDocs<typeof timelineArgs> = {
         about: "The team's rows; usually one.",
         fields: formationRowDocs,
       },
-      rowGap: FORMATION_ROW_GAP,
-      displayOverline: FORMATION_OVERLINE,
-      noDisplayRole: FORMATION_NO_ROLE,
-      groupsVertical: FORMATION_VERTICAL,
+      rowGap: `${FORMATION_ROW_GAP} Uses the user's preference when left out.`,
+      displayOverline: `${FORMATION_OVERLINE} Uses the user's preference when left out.`,
+      noDisplayRole: `${FORMATION_NO_ROLE} Uses the user's preference when left out.`,
+      groupsVertical: `${FORMATION_VERTICAL} Uses the user's preference when left out.`,
     },
   },
   formationId:
@@ -320,7 +326,8 @@ export const giftTargetUpdateDocs: FieldDocs<typeof giftTargetUpdateArgs> =
 
 export const userPreferencesDocs: FieldDocs<typeof userPreferencesArgs> = {
   timelineVisualizer: {
-    about: "Defaults for new timelines in the timeline editor.",
+    about:
+      "Defaults for new timelines, in the timeline editor and `create_timeline`.",
     fields: {
       triggerAutoFocus:
         "Focus the trigger field after picking a student in the editor.",
@@ -337,7 +344,8 @@ export const userPreferencesDocs: FieldDocs<typeof userPreferencesArgs> = {
     },
   },
   formationDisplay: {
-    about: "Defaults for the formation editor.",
+    about:
+      "Defaults for new formations, in the formation editor and `create_formation`, and for formations on timelines.",
     fields: {
       defaultScale: "Preview scale, where 1 is 100%.",
       defaultDisplayOverline: FORMATION_OVERLINE,
@@ -360,7 +368,7 @@ export const userPreferencesDocs: FieldDocs<typeof userPreferencesArgs> = {
     fields: {
       hideEmptyAgendaDays: "Hide agenda days without recorded matches.",
       includeMatchesInStatisticsByDefault:
-        "Include new matches in the public statistics by default.",
+        "Include new matches in the public statistics by default, including through `create_pvp_match`.",
     },
   },
 };
@@ -442,6 +450,10 @@ const pvpMatchDocs = {
 
 export const pvpMatchCreateDocs: FieldDocs<typeof pvpMatchCreateArgs> = {
   ...pvpMatchDocs,
+  includeInStatistics: {
+    about: `${pvpMatchDocs.includeInStatistics} ${FROM_PREFERENCE}`,
+    schema: z.boolean().optional(),
+  },
   autoCreateEnemyPreset:
     "Files the match under the enemy preset named `opponentName`, creating it if needed. Needs `opponentName`; ignored with `enemyPresetId`.",
 };

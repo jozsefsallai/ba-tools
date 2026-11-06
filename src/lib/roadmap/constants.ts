@@ -164,6 +164,18 @@ export const ROADMAP_CATEGORIES: RoadmapCategory[] = [
   "etc",
 ];
 
+export const ROADMAP_ITEM_KINDS = [
+  "banner",
+  "raid",
+  "frr",
+  "event",
+  "story",
+  "bonus",
+  "workLog",
+  "battlePass",
+  "etc",
+] as const satisfies readonly RoadmapCategory[];
+
 export const EDITABLE_ROADMAP_KINDS: EditableRoadmapKind[] = [
   "raid",
   "frr",

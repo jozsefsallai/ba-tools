@@ -6,6 +6,7 @@ import {
   userMutation,
   userQuery,
 } from "@/lib/public-api/convex.server";
+import { getResolvedPreferences } from "@/lib/public-api/resources/account.server";
 import { mergeForUpdate, notFound } from "@/lib/public-api/route";
 import { toPage, toResource } from "@/lib/public-api/serialize";
 import { api } from "~convex/api";
@@ -160,7 +161,9 @@ export async function createPvpMatch(
   seasonId: string,
   input: Record<string, unknown>,
 ) {
+  const preferences = await getResolvedPreferences(userId);
   const matchId = await userMutation(userId, api.pvp.recordMatch, {
+    includeInStatistics: preferences.pvp.includeMatchesInStatisticsByDefault,
     ...input,
     seasonId: seasonId as Id<"pvpSeason">,
   } as UserArgs<typeof api.pvp.recordMatch>);

@@ -32,11 +32,16 @@ type FieldDoc<V> = [
 ] extends [
   never,
 ]
-  ? string
+  ? string | ScalarOverride
   : {
       about?: string;
       fields: FieldDocs<NestedFields<V>>;
     };
+
+type ScalarOverride = {
+  about: string;
+  schema: z.ZodType;
+};
 
 export type FieldDocs<F> = {
   [K in KeysOfUnion<F>]: FieldDoc<FieldOf<F, K>>;
@@ -47,6 +52,7 @@ type RuntimeDoc =
   | {
       about?: string;
       fields?: RuntimeDocs;
+      schema?: z.ZodType;
     };
 
 type RuntimeDocs = Record<string, RuntimeDoc | undefined>;
@@ -54,7 +60,8 @@ type RuntimeDocs = Record<string, RuntimeDoc | undefined>;
 function toZod(validator: GenericValidator, doc?: RuntimeDoc): z.ZodType {
   const about = typeof doc === "string" ? doc : doc?.about;
   const fields = typeof doc === "string" ? undefined : doc?.fields;
-  const schema = toRequiredZod(validator, fields);
+  const override = typeof doc === "string" ? undefined : doc?.schema;
+  const schema = override ?? toRequiredZod(validator, fields);
   const described = about ? schema.describe(about) : schema;
 
   return validator.isOptional === "optional" ? described.optional() : described;
@@ -123,7 +130,7 @@ export function convexToZodShape<C extends PropertyValidators>(
   fields: C,
   docs: FieldDocs<C>,
 ): { [K in keyof C]: z.ZodType<Infer<C[K]>> } {
-  return toShape(fields, docs as RuntimeDocs) as {
+  return toShape(fields, docs as unknown as RuntimeDocs) as {
     [K in keyof C]: z.ZodType<Infer<C[K]>>;
   };
 }

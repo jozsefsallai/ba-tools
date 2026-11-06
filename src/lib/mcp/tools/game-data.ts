@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
-import { describeEnumLabels, type EnumSection } from "@/lib/mcp/enrich.server";
+import { describeEnumInput, type EnumSection } from "@/lib/mcp/enrich.server";
 import {
   getGift,
   getRoadmap,
@@ -10,6 +10,7 @@ import {
   listBanners,
   listGifts,
   listStudents,
+  roadmapSchema,
   studentSearchSchema,
   studentSkillsSchema,
 } from "@/lib/public-api/resources/game-data.server";
@@ -33,9 +34,7 @@ const studentSearchInput = {
   ...Object.fromEntries(
     enumFilters.map((key) => [
       key,
-      studentSearchSchema.shape[key].describe(
-        `Internal value = in-game name: ${describeEnumLabels(key)}.`,
-      ),
+      studentSearchSchema.shape[key].describe(describeEnumInput(key)),
     ]),
   ),
 } as typeof studentSearchSchema.shape;
@@ -130,9 +129,10 @@ export function registerGameDataTools(server: McpServer) {
     {
       title: "Get roadmap",
       description:
-        "The projected Global server roadmap: upcoming events, raids, and other content.",
+        "The projected Global server roadmap: banners, events, raids, and other content. It's long, so narrow it with `categories` and a date range.",
       kind: "read",
+      input: roadmapSchema.shape,
     },
-    () => getRoadmap(),
+    (input) => getRoadmap(input),
   );
 }

@@ -6,6 +6,11 @@ import {
   userMutation,
   userQuery,
 } from "@/lib/public-api/convex.server";
+import {
+  formationDefaults,
+  withDefaultLevels,
+} from "@/lib/public-api/preference-defaults";
+import { getResolvedPreferences } from "@/lib/public-api/resources/account.server";
 import { mergeForUpdate } from "@/lib/public-api/route";
 import { toPage, toResource } from "@/lib/public-api/serialize";
 import { api } from "~convex/api";
@@ -48,12 +53,13 @@ export async function createFormation(
   userId: string,
   input: Record<string, unknown>,
 ) {
+  const preferences = await getResolvedPreferences(userId);
+
   return toResource(
-    await userMutation(
-      userId,
-      api.formation.create,
-      input as UserArgs<typeof api.formation.create>,
-    ),
+    await userMutation(userId, api.formation.create, {
+      ...formationDefaults(preferences),
+      ...withDefaultLevels(input, preferences),
+    } as UserArgs<typeof api.formation.create>),
   );
 }
 
@@ -64,9 +70,16 @@ export async function updateFormation(
 ) {
   const current = await findFormation(userId, id);
 
+  const changesSlots =
+    "strikers" in patch || "specials" in patch || "rows" in patch;
+
+  const filled = changesSlots
+    ? withDefaultLevels(patch, await getResolvedPreferences(userId), current)
+    : patch;
+
   return toResource(
     await userMutation(userId, api.formation.update, {
-      ...mergeForUpdate(current, UPDATE_KEYS, patch),
+      ...mergeForUpdate(current, UPDATE_KEYS, filled),
       id: current._id,
     } as UserArgs<typeof api.formation.update>),
   );
