@@ -61,10 +61,6 @@ export const getByGameServerAndFriendCode = query({
 
     const identity = await ctx.auth.getUserIdentity();
 
-    if (roster.visibility === "public") {
-      return roster;
-    }
-
     const user =
       identity &&
       (await ctx.db
@@ -74,6 +70,11 @@ export const getByGameServerAndFriendCode = query({
 
     if (user && roster.userId === user._id) {
       return roster;
+    }
+
+    if (roster.visibility === "public") {
+      const { userId: _userId, ...publicRoster } = roster;
+      return publicRoster;
     }
 
     throw notFound("Roster not found");

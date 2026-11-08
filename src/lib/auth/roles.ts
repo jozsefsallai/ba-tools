@@ -1,7 +1,6 @@
 type ClerkMetadataContainer = {
   publicMetadata?: unknown;
   privateMetadata?: unknown;
-  unsafeMetadata?: unknown;
 };
 
 type RoleFlag = "isSuperUser" | "isMaintainer";
@@ -20,9 +19,7 @@ function hasRole(
   flag: RoleFlag,
 ) {
   return (
-    hasFlag(user?.publicMetadata, flag) ||
-    hasFlag(user?.privateMetadata, flag) ||
-    hasFlag(user?.unsafeMetadata, flag)
+    hasFlag(user?.publicMetadata, flag) || hasFlag(user?.privateMetadata, flag)
   );
 }
 

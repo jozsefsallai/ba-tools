@@ -9,9 +9,34 @@ import { Link } from "@/i18n/navigation";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 
 const STUDENT_LINK_REGEX = /^\/students\/([^/?#]+)$/;
+const IMAGE_CDN_ORIGIN = getOrigin(process.env.NEXT_PUBLIC_IMAGE_CDN_URL);
 const REMARK_PLUGINS = [
   remarkGfm,
 ];
+
+function getOrigin(url: string | undefined) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    return new URL(url).origin;
+  } catch {
+    return null;
+  }
+}
+
+function MarkdownImage({ alt, src }: ComponentProps<"img">) {
+  if (
+    typeof src === "string" &&
+    IMAGE_CDN_ORIGIN &&
+    getOrigin(src) === IMAGE_CDN_ORIGIN
+  ) {
+    return <img alt={alt ?? ""} loading="lazy" src={src} />;
+  }
+
+  return alt || null;
+}
 
 function getNodeText(node: ReactNode): string {
   if (typeof node === "string" || typeof node === "number") {
@@ -106,6 +131,7 @@ function CodeBlock({ children }: ComponentProps<"pre">) {
 
 const COMPONENTS: Components = {
   a: MarkdownLink,
+  img: MarkdownImage,
   em: ({ children }) => <em className="text-muted-foreground">{children}</em>,
   p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
   pre: CodeBlock,

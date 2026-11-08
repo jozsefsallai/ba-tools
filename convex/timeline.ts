@@ -197,10 +197,17 @@ export const getById = query({
     const identity = await ctx.auth.getUserIdentity();
 
     if (timeline.visibility === "public") {
-      const isOwn = identity?.subject === owner?.externalId;
+      const isOwn =
+        identity !== null &&
+        owner !== null &&
+        identity.subject === owner.externalId;
 
-      // The link points at a private formation, so only the owner gets it.
-      const { formationId, ...publicTimeline } = timeline;
+      const {
+        formationId: _formationId,
+        userId: _userId,
+        ...publicTimeline
+      } = timeline;
+
       const visibleTimeline = isOwn ? timeline : publicTimeline;
 
       if (timeline.showCreator && owner) {

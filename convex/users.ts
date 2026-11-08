@@ -26,8 +26,7 @@ export const upsertFromClerk = internalMutation({
     const clerkData = data as ClerkWebhookUser;
     const isSuperUserFromClerk =
       clerkData.public_metadata?.isSuperUser === true ||
-      clerkData.private_metadata?.isSuperUser === true ||
-      clerkData.unsafe_metadata?.isSuperUser === true;
+      clerkData.private_metadata?.isSuperUser === true;
     const user = await getUserByExternalId(ctx, data.id);
     const userAttributes = {
       externalId: data.id,

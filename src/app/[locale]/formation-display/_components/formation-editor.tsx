@@ -40,7 +40,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
-import { clearCache } from "@/lib/cache";
+import { revalidateFormation } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import { DndZoomContext } from "@/lib/dnd-mobile";
 import type { EchelonData } from "@/lib/echelon-parser";
@@ -251,7 +251,7 @@ export function FormationEditor() {
         navigationGuard.accept();
       }
 
-      await clearCache(`/formation-display?id=${formationId}`);
+      await revalidateFormation(formationId);
 
       toast.success(t("tools.formationDisplay.toasts.updateSuccess"));
     } else {

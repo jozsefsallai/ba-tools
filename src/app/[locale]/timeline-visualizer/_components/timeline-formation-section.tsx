@@ -63,7 +63,7 @@ import {
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
-import { clearCache } from "@/lib/cache";
+import { revalidateFormation } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import { DndZoomContext } from "@/lib/dnd-mobile";
 import type { FormationEditorRow } from "@/lib/formation-display-utils";
@@ -271,7 +271,7 @@ export function TimelineFormationSection({
           id: formationId as Id<"formation">,
           ...payload,
         });
-        await clearCache(`/formation-display?id=${formationId}`);
+        await revalidateFormation(formationId);
         toast.success(t("tools.formationDisplay.toasts.updateSuccess"));
       } else {
         const created = await createMutation(payload);

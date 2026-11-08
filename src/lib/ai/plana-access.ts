@@ -1,7 +1,7 @@
+// `unsafeMetadata` is user-writable from the browser, so it can't grant access.
 type ClerkMetadataContainer = {
   publicMetadata?: unknown;
   privateMetadata?: unknown;
-  unsafeMetadata?: unknown;
 };
 
 function hasPlanaMetadataAccess(metadata: unknown) {
@@ -23,7 +23,6 @@ export function canAccessPlanaAi(
   return (
     isPlanaAiGloballyEnabled() ||
     hasPlanaMetadataAccess(user?.publicMetadata) ||
-    hasPlanaMetadataAccess(user?.privateMetadata) ||
-    hasPlanaMetadataAccess(user?.unsafeMetadata)
+    hasPlanaMetadataAccess(user?.privateMetadata)
   );
 }

@@ -59,7 +59,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
-import { clearCache } from "@/lib/cache";
+import { revalidateTimeline } from "@/lib/cache";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { decodePngItxt, encodePngWithItxt } from "@/lib/png-metadata";
@@ -635,7 +635,7 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
         navigationGuard.accept();
       }
 
-      await clearCache(`/timeline-visualizer?id=${timelineId}`);
+      await revalidateTimeline(timelineId);
 
       toast.success("Timeline saved successfully.");
     } else {

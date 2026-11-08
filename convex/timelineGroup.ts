@@ -45,9 +45,16 @@ function getPreviewStudentIds(timelines: Doc<"timeline">[]) {
   return Array.from(ids).slice(0, CARD_PREVIEW_STUDENTS);
 }
 
-async function toGroupCard(ctx: QueryCtx, group: Doc<"timelineGroup">) {
+async function getGroupTimelines(ctx: QueryCtx, group: Doc<"timelineGroup">) {
   const docs = await Promise.all(group.timelines.map((id) => ctx.db.get(id)));
-  const timelines = docs.filter((doc) => doc !== null);
+  return docs.filter(
+    (doc): doc is Doc<"timeline"> =>
+      doc !== null && doc.userId === group.userId,
+  );
+}
+
+async function toGroupCard(ctx: QueryCtx, group: Doc<"timelineGroup">) {
+  const timelines = await getGroupTimelines(ctx, group);
 
   return {
     ...group,
@@ -142,13 +149,7 @@ export const getOwnById = authenticatedQuery({
       throw notFound("Timeline group not found");
     }
 
-    const timelines = [];
-    for (const timeline of timelineGroup.timelines) {
-      const t = await ctx.db.get(timeline);
-      if (t) {
-        timelines.push(t);
-      }
-    }
+    const timelines = await getGroupTimelines(ctx, timelineGroup);
 
     return {
       ...timelineGroup,
@@ -171,11 +172,15 @@ export const getById = query({
     const owner = await ctx.db.get(timelineGroup.userId);
     const timelines = [];
 
-    for (const timeline of timelineGroup.timelines) {
-      const t = await ctx.db.get(timeline);
-      if (t && t.visibility === "public") {
-        // The link points at a private formation, so it isn't shared here.
-        const { formationId: _formationId, ...publicTimeline } = t;
+    for (const t of await getGroupTimelines(ctx, timelineGroup)) {
+      if (t.visibility === "public") {
+        // The link points at a private formation, and the owner id is
+        // internal, so neither is shared here.
+        const {
+          formationId: _formationId,
+          userId: _userId,
+          ...publicTimeline
+        } = t;
         timelines.push(publicTimeline);
       }
     }
@@ -185,9 +190,16 @@ export const getById = query({
     const inferredRaid = inferGroupRaid(timelines.map((t) => t.raid));
 
     if (timelineGroup.visibility === "public") {
+      const isOwn =
+        identity !== null &&
+        owner !== null &&
+        identity.subject === owner.externalId;
+      const { userId: _userId, ...publicGroup } = timelineGroup;
+      const visibleGroup = isOwn ? timelineGroup : publicGroup;
+
       if (timelineGroup.showCreator && owner) {
         return {
-          ...timelineGroup,
+          ...visibleGroup,
           timelines,
           inferredRaid,
           user: {
@@ -195,15 +207,15 @@ export const getById = query({
             username: owner.username,
             avatar: owner.avatar,
           },
-          isOwn: identity?.subject === owner.externalId,
+          isOwn,
         };
       }
 
       return {
-        ...timelineGroup,
+        ...visibleGroup,
         timelines,
         inferredRaid,
-        isOwn: identity?.subject === owner?.externalId,
+        isOwn,
       };
     }
 
@@ -280,6 +292,15 @@ export const update = authenticatedMutation({
     const timelineGroup = await ctx.db.get(id);
     if (!timelineGroup || timelineGroup.userId !== ctx.user._id) {
       throw notFound("Timeline group not found");
+    }
+
+    if (timelines) {
+      for (const timelineId of timelines) {
+        const timeline = await ctx.db.get(timelineId);
+        if (!timeline || timeline.userId !== ctx.user._id) {
+          throw notFound("Timeline not found");
+        }
+      }
     }
 
     await ctx.db.patch(id, {

@@ -60,6 +60,8 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 - **i18n uses locale-based routing** via next-intl (`localePrefix: "as-needed"`). English is unprefixed (`/bond`); Japanese is `/ja/...`. Locales: `en` (default), `ja`. Page locale comes from the `[locale]` segment / `next/root-params` (not `cookies()` in RSC). A next-intl locale cookie remembers an explicit choice so unprefixed paths can redirect (e.g. `/bond` → `/ja/bond`); `Accept-Language` detection is off. Three message namespaces: `common`, `static`, `tools`. Non-English translations deep-merge with English fallback. Navigation helpers live in `src/i18n/navigation.ts`.
 - **Biome** handles lint + format (not ESLint/Prettier). `noUnusedImports` is an error. Objects and arrays always expand to one entry per line (`formatter.expand: "always"`), and `if`/loop bodies always need braces (`useBlockStatements`, autofixed). `public/`, `vendor/`, generated code, `src/components/ui/` (shadcn) and `docs/api/yaak.json` are excluded. `next lint` is still available for Next.js-specific rules.
 - **Shadcn/ui**: add components via `npx shadcn@latest add <component>`, not manually.
+- **Content-Security-Policy** is built in `next.config.ts` (`cspDirectives`). When a feature loads scripts, frames or fetches from a new external origin, add it there. `/plana-ai` gets a stricter `img-src` so model replies can't leak chat data through image URLs.
+- **Roles** (`isSuperUser`, `isMaintainer`, `canAccessPlanaAI`) come only from Clerk public or private metadata, never `unsafeMetadata` (users can write it themselves).
 - **PWA (Serwist)**: service worker built from `src/sw.ts` → `public/sw.js`. Disabled in development.
 
 ## Translations (Crowdin)

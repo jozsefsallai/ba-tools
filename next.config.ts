@@ -38,6 +38,157 @@ if (!IMAGE_CDN_URL) {
 }
 
 const url = new URL(IMAGE_CDN_URL);
+const isDev = process.env.NODE_ENV === "development";
+
+function originOf(value: string | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+}
+
+function clerkFrontendApiOrigin() {
+  const key = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const encoded = key?.split("_")[2];
+  if (!encoded) {
+    return null;
+  }
+
+  const host = Buffer.from(encoded, "base64")
+    .toString("utf8")
+    .replace(/\$$/, "");
+
+  return originOf(`https://${host}`);
+}
+
+const cdnOrigin = url.origin;
+const convexOrigin = originOf(process.env.NEXT_PUBLIC_CONVEX_URL);
+const clerkOrigin = clerkFrontendApiOrigin();
+const turnstileOrigin = "https://challenges.cloudflare.com";
+const unityGameOrigin = "https://cdn.nimblebun.works";
+
+function csp(
+  directives: Record<string, Array<string | null | undefined | false>>,
+) {
+  return Object.entries(directives)
+    .map(([name, sources]) =>
+      [
+        name,
+        ...sources.filter(Boolean),
+      ].join(" "),
+    )
+    .join("; ");
+}
+
+const cspDirectives = {
+  "default-src": [
+    "'self'",
+  ],
+  "script-src": [
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "'wasm-unsafe-eval'",
+    "blob:",
+    cdnOrigin,
+    clerkOrigin,
+    turnstileOrigin,
+    unityGameOrigin,
+  ],
+  "style-src": [
+    "'self'",
+    "'unsafe-inline'",
+  ],
+  "img-src": [
+    "'self'",
+    "data:",
+    "blob:",
+    "https:",
+  ],
+  "font-src": [
+    "'self'",
+    "data:",
+  ],
+  "media-src": [
+    "'self'",
+    "blob:",
+    "data:",
+    cdnOrigin,
+  ],
+  "connect-src": [
+    "'self'",
+    cdnOrigin,
+    convexOrigin,
+    convexOrigin?.replace(/^http/, "ws"),
+    clerkOrigin,
+    "https://clerk-telemetry.com",
+    unityGameOrigin,
+    isDev && "ws:",
+  ],
+  "frame-src": [
+    "https://www.youtube.com",
+    "https://player.bilibili.com",
+    turnstileOrigin,
+  ],
+  "worker-src": [
+    "'self'",
+    "blob:",
+  ],
+  "object-src": [
+    "'none'",
+  ],
+  "base-uri": [
+    "'self'",
+  ],
+  "form-action": [
+    "'self'",
+  ],
+  "frame-ancestors": [
+    "'self'",
+  ],
+};
+
+const planaCspDirectives = {
+  ...cspDirectives,
+  "img-src": [
+    "'self'",
+    "data:",
+    "blob:",
+    cdnOrigin,
+    "https://img.clerk.com",
+  ],
+};
+
+const securityHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: csp(cspDirectives),
+  },
+  {
+    key: "X-Content-Type-Options",
+    value: "nosniff",
+  },
+  {
+    key: "X-Frame-Options",
+    value: "SAMEORIGIN",
+  },
+  {
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
+  },
+];
+
+const planaHeaders = [
+  {
+    key: "Content-Security-Policy",
+    value: csp(planaCspDirectives),
+  },
+];
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -149,12 +300,20 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+      {
+        source: "/plana-ai/:path*",
+        headers: planaHeaders,
+      },
+      {
+        source: "/ja/plana-ai/:path*",
+        headers: planaHeaders,
+      },
+      {
         source: "/api/students",
         headers: [
-          {
-            key: "Access-Control-Allow-Credentials",
-            value: "true",
-          },
           {
             key: "Access-Control-Allow-Origin",
             value: "*",
