@@ -122,6 +122,8 @@ const cspDirectives = {
   ],
   "connect-src": [
     "'self'",
+    "data:",
+    "blob:",
     cdnOrigin,
     convexOrigin,
     convexOrigin?.replace(/^http/, "ws"),
