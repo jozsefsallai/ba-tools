@@ -92,6 +92,10 @@ const SAVE_ERROR_KEYS = [
     "Pickup charges require",
     "tools.recruitment.errors.tooFewPulls",
   ],
+  [
+    "cannot pass 200",
+    "tools.recruitment.errors.chargePastHardPity",
+  ],
 ] as const;
 
 function saveErrorKey(error: unknown) {
@@ -494,6 +498,10 @@ export function RecruitmentSessionEditor({
           )}
 
           <FormSection title={t("tools.recruitment.sessionDetails")}>
+            <p className="text-xs text-muted-foreground">
+              {t("tools.recruitment.sessionScopeHint")}
+            </p>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
                 label={t("tools.recruitment.sessionName")}

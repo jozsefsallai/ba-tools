@@ -957,6 +957,15 @@ export default defineSchema({
     permanentStartCharge: v.optional(v.number()),
     limitedStartCharge: v.optional(v.number()),
 
+    // starting charges the user set by hand. A banner type without one starts
+    // from the ending charge of the previous session that pulled on it.
+    startChargeOverrides: v.optional(
+      v.object({
+        permanent: v.optional(v.number()),
+        limited: v.optional(v.number()),
+      }),
+    ),
+
     // list of PUs obtained in the session, including dupes + at what charge
     // you obtained them
     pickupsObtained: v.array(

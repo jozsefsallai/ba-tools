@@ -2,15 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ReferenceLine,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 import { Readout } from "@/app/[locale]/user/recruitment/_components/shared";
 import type { SessionWithStats } from "@/app/[locale]/user/recruitment/_components/types";
 import {
@@ -66,7 +58,36 @@ const PITY_RESULTS = [
   },
 ] as const;
 
-const HISTOGRAM_BIN_SIZE = 10;
+type ChargeBin = {
+  from: number;
+  to: number;
+};
+
+/** Bins of ten charges, with the soft and hard pity charges in bins of their own. */
+const CHARGE_BINS: ChargeBin[] = Array.from(
+  {
+    length: HARD_PITY / 10,
+  },
+  (_, index) => ({
+    from: index * 10 + 1,
+    to: index * 10 + 10,
+  }),
+).flatMap((bin) =>
+  bin.to === SOFT_PITY || bin.to === HARD_PITY
+    ? [
+        {
+          from: bin.from,
+          to: bin.to - 1,
+        },
+        {
+          from: bin.to,
+          to: bin.to,
+        },
+      ]
+    : [
+        bin,
+      ],
+);
 
 function mergeBuckets(...buckets: AggregateBucket[]): AggregateBucket {
   const result = emptyAggregateBucket();
@@ -301,19 +322,16 @@ function PitySummary({ bucket }: BucketProps) {
   );
 }
 
-/** The colour of the pity result that pick-ups in the bin starting at `start` count as. */
-function binColor(start: number) {
-  const end = start + HISTOGRAM_BIN_SIZE - 1;
-
-  if (end < SOFT_PITY) {
+function binColor({ from, to }: ChargeBin) {
+  if (to < SOFT_PITY) {
     return PITY_COLORS.beforeSoftPity;
   }
 
-  if (start <= SOFT_PITY && end >= SOFT_PITY) {
+  if (from === SOFT_PITY) {
     return PITY_COLORS.softWin;
   }
 
-  if (end < HARD_PITY) {
+  if (to < HARD_PITY) {
     return PITY_COLORS.afterSoftPity;
   }
 
@@ -323,21 +341,13 @@ function binColor(start: number) {
 function PickupDistributionChart({ bucket }: BucketProps) {
   const t = useTranslations();
 
-  const bins = Array.from(
-    {
-      length: HARD_PITY / HISTOGRAM_BIN_SIZE,
-    },
-    (_, index) => {
-      const start = index * HISTOGRAM_BIN_SIZE + 1;
-
-      return {
-        charge: start,
-        count: bucket.pickupChargeHistogram
-          .slice(start, start + HISTOGRAM_BIN_SIZE)
-          .reduce((sum, count) => sum + count, 0),
-      };
-    },
-  );
+  const bins = CHARGE_BINS.map((bin) => ({
+    ...bin,
+    range: bin.from === bin.to ? `${bin.to}` : `${bin.from}-${bin.to}`,
+    count: bucket.pickupChargeHistogram
+      .slice(bin.from, bin.to + 1)
+      .reduce((sum, count) => sum + count, 0),
+  }));
 
   return (
     <ChartCard title={t("tools.recruitment.pickupDistribution")}>
@@ -360,46 +370,23 @@ function PickupDistributionChart({ bucket }: BucketProps) {
         >
           <CartesianGrid vertical={false} />
 
-          <XAxis
-            dataKey="charge"
-            tickFormatter={(charge) =>
-              String(Number(charge) + HISTOGRAM_BIN_SIZE - 1)
-            }
-            tickLine={false}
-            axisLine={false}
-          />
+          <XAxis dataKey="to" tickLine={false} axisLine={false} />
 
           <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
 
           <ChartTooltip
             content={
               <ChartTooltipContent
-                labelFormatter={(_value, payload) => {
-                  const charge = Number(payload?.[0]?.payload?.charge);
-
-                  return Number.isFinite(charge)
-                    ? `${charge}-${charge + HISTOGRAM_BIN_SIZE - 1}`
-                    : "";
-                }}
+                labelFormatter={(_value, payload) =>
+                  payload?.[0]?.payload?.range ?? ""
+                }
               />
             }
           />
 
-          <ReferenceLine
-            x={SOFT_PITY}
-            stroke={PITY_COLORS.softWin}
-            strokeDasharray="4 4"
-          />
-
-          <ReferenceLine
-            x={HARD_PITY}
-            stroke={PITY_COLORS.hardPity}
-            strokeDasharray="4 4"
-          />
-
           <Bar dataKey="count" radius={2}>
             {bins.map((bin) => (
-              <Cell fill={binColor(bin.charge)} key={bin.charge} />
+              <Cell fill={binColor(bin)} key={bin.to} />
             ))}
           </Bar>
         </BarChart>

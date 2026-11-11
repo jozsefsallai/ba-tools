@@ -176,58 +176,81 @@ function storedStartCharge(
   );
 }
 
-function poolStartCharge(
-  session: Session,
-  kind: RecruitmentKind,
-  previousEndCharge: number | undefined,
-  preserve: boolean,
-): number {
-  const stored = storedStartCharge(session, kind);
+type PoolCharges = Partial<Record<RecruitmentKind, number>>;
 
-  if (preserve) {
-    return stored ?? previousEndCharge ?? 0;
+/** The starting charges the session was saved with, for the banner types it pulled on. */
+function savedStartCharges(session: Session): PoolCharges {
+  const charges: PoolCharges = {};
+
+  for (const kind of KINDS) {
+    const charge = storedStartCharge(session, kind);
+
+    if (charge !== undefined && sessionTouchesKind(session, kind)) {
+      charges[kind] = charge;
+    }
   }
 
-  return previousEndCharge ?? stored ?? 0;
+  return charges;
 }
 
+type RebuildOptions = {
+  /**
+   * The session that was just saved. A starting charge on it that differs from
+   * the previous session's ending charge was set by hand, and is kept as an
+   * override from then on.
+   */
+  savedSessionId?: Id<"recruitmentSession">;
+  /** The account's charge on a banner type that no session pulls on any more. */
+  fallbackCharges?: PoolCharges;
+};
+
 /**
- * Replays the account's sessions in order, so each one starts from the charge
- * and rebate tickets the previous one ended with, then stores the recalculated
+ * Replays the account's sessions in order, then stores the recalculated
  * sessions, the account's aggregates and its current charges.
  *
- * The session given as `preserveStartChargeFor` keeps the starting charges it
- * was saved with.
+ * Each session starts from the rebate tickets the previous one ended with, and
+ * from the previous ending charge on each banner type unless its starting
+ * charge was set by hand.
  */
 async function rebuildAccountAnalytics(
   ctx: MutationCtx,
   account: Account,
-  preserveStartChargeFor?: Id<"recruitmentSession">,
+  { savedSessionId, fallbackCharges = {} }: RebuildOptions = {},
 ) {
   const sessions = await getSessions(ctx, account._id, "asc");
 
   let aggregates = emptyAccountAggregates();
   let previousRebateTickets: number | undefined;
 
-  const endCharges: Partial<Record<RecruitmentKind, number>> = {};
+  const endCharges: PoolCharges = {};
   const latest: Partial<Record<RecruitmentKind, Session>> = {};
 
   for (const session of sessions) {
-    const preserve = session._id === preserveStartChargeFor;
+    const saved = savedStartCharges(session);
+    const overrides: PoolCharges = {};
 
-    const permanentStartCharge = poolStartCharge(
-      session,
-      "permanent",
-      endCharges.permanent,
-      preserve,
-    );
+    for (const kind of KINDS) {
+      const override =
+        session._id !== savedSessionId
+          ? session.startChargeOverrides?.[kind]
+          : endCharges[kind] !== undefined && saved[kind] !== endCharges[kind]
+            ? saved[kind]
+            : undefined;
 
-    const limitedStartCharge = poolStartCharge(
-      session,
-      "limited",
-      endCharges.limited,
-      preserve,
-    );
+      // Only a banner type the session pulls on can have an override.
+      if (override !== undefined && saved[kind] !== undefined) {
+        overrides[kind] = override;
+      }
+    }
+
+    const startChargeOf = (kind: RecruitmentKind) =>
+      overrides[kind] ??
+      endCharges[kind] ??
+      storedStartCharge(session, kind) ??
+      0;
+
+    const permanentStartCharge = startChargeOf("permanent");
+    const limitedStartCharge = startChargeOf("limited");
 
     const rebateTicketsFromPreviousSession =
       previousRebateTickets ?? session.rebateTicketsFromPreviousSession;
@@ -270,6 +293,8 @@ async function rebuildAccountAnalytics(
       limitedPulls: stored.limitedPulls,
       permanentStartCharge: stored.permanentStartCharge,
       limitedStartCharge: stored.limitedStartCharge,
+      startChargeOverrides:
+        Object.keys(overrides).length > 0 ? overrides : undefined,
       pickupsObtained: stored.pickupsObtained,
       rebateTicketsFromPreviousSession,
       computedStats: toComputedStats(stats),
@@ -303,8 +328,12 @@ async function rebuildAccountAnalytics(
     aggregates,
     latestPermanentSessionId: latest.permanent?._id,
     latestLimitedSessionId: latest.limited?._id,
-    permanentCharge: endCharges.permanent ?? 0,
-    limitedCharge: endCharges.limited ?? 0,
+    permanentCharge:
+      endCharges.permanent ??
+      fallbackCharges.permanent ??
+      account.permanentCharge,
+    limitedCharge:
+      endCharges.limited ?? fallbackCharges.limited ?? account.limitedCharge,
   });
 }
 
@@ -450,7 +479,9 @@ export const createSession = authenticatedMutation({
       computedStats: computedStatsFor(input),
     });
 
-    await rebuildAccountAnalytics(ctx, account, sessionId);
+    await rebuildAccountAnalytics(ctx, account, {
+      savedSessionId: sessionId,
+    });
 
     return sessionId;
   },
@@ -486,7 +517,10 @@ export const updateSession = authenticatedMutation({
     });
 
     const account = await assertAccount(ctx, session.recruitmentAccountId);
-    await rebuildAccountAnalytics(ctx, account, session._id);
+    await rebuildAccountAnalytics(ctx, account, {
+      savedSessionId: session._id,
+      fallbackCharges: savedStartCharges(session),
+    });
   },
 });
 
@@ -499,7 +533,10 @@ export const deleteSession = authenticatedMutation({
     const account = await assertAccount(ctx, session.recruitmentAccountId);
 
     await ctx.db.delete(sessionId);
-    await rebuildAccountAnalytics(ctx, account);
+
+    await rebuildAccountAnalytics(ctx, account, {
+      fallbackCharges: savedStartCharges(session),
+    });
   },
 });
 

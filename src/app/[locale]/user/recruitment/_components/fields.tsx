@@ -95,6 +95,17 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
           captionLayout="dropdown"
           onSelect={(date) => {
             if (date) {
+              // The calendar gives midnight. Use the current time of day, so
+              // sessions logged on the same day keep the order they were added in.
+              const now = new Date();
+
+              date.setHours(
+                now.getHours(),
+                now.getMinutes(),
+                now.getSeconds(),
+                now.getMilliseconds(),
+              );
+
               onChange(date);
             }
 

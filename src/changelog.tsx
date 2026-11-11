@@ -65,6 +65,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.recruitment,
         description: "Revamped UI of the Recruitment Tracker tool.",
       },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description: "Various logic and clarity improvements.",
+      },
     ],
     fixes: [],
   },

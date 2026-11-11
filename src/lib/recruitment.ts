@@ -256,6 +256,11 @@ function pickupsForKind<Pickup extends CanonicalPickup>(
   return pickups.filter((pickup) => pickup.kind === kind);
 }
 
+/** Whether a charge going from `from` to `to` without a pick-up reaches soft pity on the way. */
+function passesSoftPity(from: number, to: number): boolean {
+  return from < SOFT_PITY && to >= SOFT_PITY;
+}
+
 function calculatePoolStats(
   startCharge: number,
   pulls: number,
@@ -272,7 +277,7 @@ function calculatePoolStats(
 
     if (pickup.charge === SOFT_PITY) {
       softPityWins += 1;
-    } else if (pickup.charge > SOFT_PITY) {
+    } else if (passesSoftPity(cycleStart, pickup.charge)) {
       softPityLosses += 1;
     }
 
@@ -281,14 +286,14 @@ function calculatePoolStats(
     }
   }
 
-  const remainingPulls = pulls - consumedPulls;
-  const endCharge =
-    pulls === 0
-      ? startCharge
-      : Math.min(
-          HARD_PITY,
-          pickups.length > 0 ? remainingPulls : startCharge + remainingPulls,
-        );
+  const lastCycleStart = pickups.length > 0 ? 0 : startCharge;
+  const endCharge = lastCycleStart + pulls - consumedPulls;
+
+  // The 50/50 is lost as soon as the charge passes soft pity, not when the
+  // pick-up finally arrives.
+  if (passesSoftPity(lastCycleStart, endCharge)) {
+    softPityLosses += 1;
+  }
 
   return {
     startCharge,
@@ -800,6 +805,16 @@ function validatePool(
   if (consumedPulls > pulls) {
     throw new RecruitmentValidationError(
       "Pickup charges require more pulls than this session contains.",
+    );
+  }
+
+  // The rate-up student is guaranteed at hard pity, so the charge cannot go
+  // past it: either a pick-up is missing or the pull count is too high.
+  const lastCycleStart = pickups.length > 0 ? 0 : startCharge;
+
+  if (lastCycleStart + pulls - consumedPulls > HARD_PITY) {
+    throw new RecruitmentValidationError(
+      "The charge cannot pass 200 without a pickup.",
     );
   }
 }

@@ -1,7 +1,12 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { ChevronLeftIcon, PlusIcon, SettingsIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  InfoIcon,
+  PlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { AccountDialog } from "@/app/[locale]/user/recruitment/_components/account-dialog";
@@ -13,6 +18,12 @@ import {
 import type { SessionWithStats } from "@/app/[locale]/user/recruitment/_components/types";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Link, usePathname } from "@/i18n/navigation";
 import { GAME_SERVER_NAMES } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -143,6 +154,24 @@ export function RecruitmentAccountShell({
             <span className="font-nexon-football-gothic text-lg leading-none">
               {latestSession?.stats.remainingRebateTickets ?? 0}
             </span>
+
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="self-center text-muted-foreground"
+                    aria-label={t("tools.recruitment.rebateTicketExpiryHint")}
+                  >
+                    <InfoIcon className="size-3.5" />
+                  </button>
+                </TooltipTrigger>
+
+                <TooltipContent className="max-w-xs">
+                  {t("tools.recruitment.rebateTicketExpiryHint")}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 
