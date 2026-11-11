@@ -12,6 +12,7 @@ import {
   toStoredSessionFields,
   validateRecruitmentSession,
 } from "../src/lib/recruitment";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   internalMutation,
@@ -200,6 +201,12 @@ type RebuildOptions = {
    * override from then on.
    */
   savedSessionId?: Id<"recruitmentSession">;
+  /**
+   * Treats every session as just saved. Sessions from before overrides were
+   * stored only have a starting charge that differs from the previous ending
+   * charge when it was set by hand, so this turns those into overrides.
+   */
+  adoptStoredStartCharges?: boolean;
   /** The account's charge on a banner type that no session pulls on any more. */
   fallbackCharges?: PoolCharges;
 };
@@ -215,7 +222,11 @@ type RebuildOptions = {
 async function rebuildAccountAnalytics(
   ctx: MutationCtx,
   account: Account,
-  { savedSessionId, fallbackCharges = {} }: RebuildOptions = {},
+  {
+    savedSessionId,
+    adoptStoredStartCharges = false,
+    fallbackCharges = {},
+  }: RebuildOptions = {},
 ) {
   const sessions = await getSessions(ctx, account._id, "asc");
 
@@ -229,13 +240,17 @@ async function rebuildAccountAnalytics(
     const saved = savedStartCharges(session);
     const overrides: PoolCharges = {};
 
+    const isSaved = adoptStoredStartCharges || session._id === savedSessionId;
+
     for (const kind of KINDS) {
-      const override =
-        session._id !== savedSessionId
-          ? session.startChargeOverrides?.[kind]
-          : endCharges[kind] !== undefined && saved[kind] !== endCharges[kind]
-            ? saved[kind]
-            : undefined;
+      const differsFromPrevious =
+        endCharges[kind] !== undefined && saved[kind] !== endCharges[kind];
+
+      const override = isSaved
+        ? differsFromPrevious
+          ? saved[kind]
+          : undefined
+        : session.startChargeOverrides?.[kind];
 
       // Only a banner type the session pulls on can have an override.
       if (override !== undefined && saved[kind] !== undefined) {
@@ -562,13 +577,43 @@ export const deleteAccount = authenticatedMutation({
   },
 });
 
+/**
+ * Recalculates every account's stored statistics. Each account runs as its own
+ * mutation, so one with inconsistent history fails alone and shows up in the
+ * logs instead of stopping the rest.
+ */
 export const backfillRecruitmentAnalytics = internalMutation({
   args: {},
   handler: async (ctx) => {
     const accounts = await ctx.db.query("recruitmentAccount").collect();
 
     for (const account of accounts) {
-      await rebuildAccountAnalytics(ctx, account);
+      await ctx.scheduler.runAfter(
+        0,
+        internal.recruitment.backfillAccountAnalytics,
+        {
+          accountId: account._id,
+        },
+      );
     }
+
+    return accounts.length;
+  },
+});
+
+export const backfillAccountAnalytics = internalMutation({
+  args: {
+    accountId: v.id("recruitmentAccount"),
+  },
+  handler: async (ctx, { accountId }) => {
+    const account = await ctx.db.get(accountId);
+
+    if (!account) {
+      return;
+    }
+
+    await rebuildAccountAnalytics(ctx, account, {
+      adoptStoredStartCharges: true,
+    });
   },
 });
