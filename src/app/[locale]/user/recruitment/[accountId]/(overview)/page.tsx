@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { RecruitmentAccountView } from "@/app/[locale]/user/recruitment/recruitment-account-view";
+import type { Id } from "~convex/dataModel";
 
 export default async function RecruitmentAccountPage({
   params,
@@ -10,5 +11,7 @@ export default async function RecruitmentAccountPage({
 }) {
   await auth.protect();
   const { accountId } = await params;
-  return <RecruitmentAccountView accountId={accountId} />;
+  return (
+    <RecruitmentAccountView accountId={accountId as Id<"recruitmentAccount">} />
+  );
 }

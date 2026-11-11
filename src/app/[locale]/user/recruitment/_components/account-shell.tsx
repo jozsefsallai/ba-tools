@@ -10,61 +10,75 @@ import {
   formatRate,
   Readout,
 } from "@/app/[locale]/user/recruitment/_components/shared";
+import type { SessionWithStats } from "@/app/[locale]/user/recruitment/_components/types";
 import { MessageBox } from "@/components/common/message-box";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
-import { GAME_SERVER_NAMES, type GameServer } from "@/lib/types";
+import { GAME_SERVER_NAMES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
+function sumSessions(sessions: SessionWithStats[]) {
+  const totals = {
+    pulls: 0,
+    paidPulls: 0,
+    threeStars: 0,
+    pickups: 0,
+  };
+
+  for (const session of sessions) {
+    totals.pulls += session.totalPulls;
+    totals.paidPulls += session.stats.paidPulls;
+    totals.threeStars += session.threeStarCount;
+    totals.pickups += session.stats.pickupCount;
+  }
+
+  return totals;
+}
+
+type RecruitmentAccountShellProps = {
+  accountId: Id<"recruitmentAccount">;
+  children: ReactNode;
+};
+
 export function RecruitmentAccountShell({
   accountId,
   children,
-}: {
-  accountId: string;
-  children: ReactNode;
-}) {
+}: RecruitmentAccountShellProps) {
   const t = useTranslations();
   const pathname = usePathname();
-  const result = useQuery(api.recruitment.getAccount, {
-    accountId: accountId as Id<"recruitmentAccount">,
-  });
   const [editOpen, setEditOpen] = useState(false);
+
+  const result = useQuery(api.recruitment.getAccount, {
+    accountId,
+  });
 
   if (result === undefined) {
     return <MessageBox>{t("common.loading")}</MessageBox>;
   }
+
   if (!result) {
     return <MessageBox>{t("tools.recruitment.failedToLoad")}</MessageBox>;
   }
 
   const { account, sessions } = result;
+  const [latestSession] = sessions;
+  const totals = sumSessions(sessions);
+
   const basePath = `/user/recruitment/${accountId}`;
-  const totals = sessions.reduce(
-    (sum, session) => ({
-      pulls: sum.pulls + session.totalPulls,
-      paidPulls: sum.paidPulls + session.stats.paidPulls,
-      threeStars: sum.threeStars + session.threeStarCount,
-      pickups: sum.pickups + session.stats.pickupCount,
-    }),
-    {
-      pulls: 0,
-      paidPulls: 0,
-      threeStars: 0,
-      pickups: 0,
-    },
-  );
+  const onAnalytics = pathname.endsWith("/analytics");
+
   const tabs = [
     {
       href: basePath,
       label: t("tools.recruitment.sessions"),
-      active: !pathname.endsWith("/analytics"),
+      active: !onAnalytics,
     },
     {
       href: `${basePath}/analytics`,
       label: t("tools.recruitment.analytics"),
-      active: pathname.endsWith("/analytics"),
+      active: onAnalytics,
     },
   ];
 
@@ -84,13 +98,16 @@ export function RecruitmentAccountShell({
             })}
           </Link>
         </Button>
+
         <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
           <div className="flex min-w-0 items-baseline gap-3">
             <h1 className="truncate text-xl font-bold">{account.name}</h1>
+
             <span className="shrink-0 text-sm text-muted-foreground">
-              {GAME_SERVER_NAMES[account.gameServer as GameServer]}
+              {GAME_SERVER_NAMES[account.gameServer]}
             </span>
           </div>
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -100,6 +117,7 @@ export function RecruitmentAccountShell({
               <SettingsIcon />
               {t("tools.recruitment.editAccount")}
             </Button>
+
             <Button asChild className="max-sm:flex-1">
               <Link href={`${basePath}/sessions/new`}>
                 <PlusIcon />
@@ -109,21 +127,25 @@ export function RecruitmentAccountShell({
           </div>
         </div>
       </div>
+
       <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,2fr)_minmax(14rem,0.8fr)]">
         <div className="flex flex-col gap-3">
           <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
             <ChargeGauge kind="permanent" value={account.permanentCharge} />
             <ChargeGauge kind="limited" value={account.limitedCharge} />
           </div>
+
           <div className="flex items-baseline gap-2 text-sm">
             <span className="text-muted-foreground">
               {t("tools.recruitment.availableRebateTickets")}
             </span>
+
             <span className="font-nexon-football-gothic text-lg leading-none">
-              {sessions[0]?.stats.remainingRebateTickets ?? 0}
+              {latestSession?.stats.remainingRebateTickets ?? 0}
             </span>
           </div>
         </div>
+
         <Readout
           className="border-t"
           items={[
@@ -154,6 +176,7 @@ export function RecruitmentAccountShell({
           ]}
         />
       </div>
+
       <nav className="flex gap-1 border-b">
         {tabs.map((tab) => (
           <Link
@@ -171,7 +194,9 @@ export function RecruitmentAccountShell({
           </Link>
         ))}
       </nav>
+
       {children}
+
       <AccountDialog
         open={editOpen}
         onOpenChange={setEditOpen}

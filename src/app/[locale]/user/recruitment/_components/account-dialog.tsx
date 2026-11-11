@@ -5,6 +5,8 @@ import { Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Field } from "@/app/[locale]/user/recruitment/_components/fields";
+import type { Account } from "@/app/[locale]/user/recruitment/_components/types";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +17,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   NumericInput,
   type NumericInputValue,
@@ -35,30 +36,26 @@ import {
   type RecruitmentGameServer,
 } from "@/lib/types";
 import { api } from "~convex/api";
-import type { Id } from "~convex/dataModel";
 
-type EditableAccount = {
-  _id: Id<"recruitmentAccount">;
-  name: string;
-  gameServer: string;
-  permanentCharge: number;
-  limitedCharge: number;
+type AccountDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** The account to edit. A new account is created when it is left out. */
+  account?: Account;
 };
 
 export function AccountDialog({
   open,
   onOpenChange,
   account,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  account?: EditableAccount;
-}) {
+}: AccountDialogProps) {
   const t = useTranslations();
   const router = useRouter();
+
   const createAccount = useMutation(api.recruitment.createAccount);
   const updateAccount = useMutation(api.recruitment.updateAccount);
   const deleteAccount = useMutation(api.recruitment.deleteAccount);
+
   const [name, setName] = useState("");
   const [gameServer, setGameServer] = useState<RecruitmentGameServer>("JP");
   const [permanentCharge, setPermanentCharge] = useState<NumericInputValue>(0);
@@ -66,10 +63,12 @@ export function AccountDialog({
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  // Reset only when the dialog opens, not on every live account update.
   useEffect(() => {
     if (!open) {
       return;
     }
+
     setName(account?.name ?? "");
     setGameServer((account?.gameServer as RecruitmentGameServer) ?? "JP");
     setPermanentCharge(account?.permanentCharge ?? 0);
@@ -84,41 +83,41 @@ export function AccountDialog({
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+
     if (!valid || saving) {
       return;
     }
+
+    const fields = {
+      name: name.trim(),
+      gameServer,
+      permanentCharge,
+      limitedCharge,
+    };
+
     setSaving(true);
+
     try {
       if (account) {
         await updateAccount({
           accountId: account._id,
-          name: name.trim(),
-          gameServer,
-          permanentCharge,
-          limitedCharge,
+          ...fields,
         });
+
         toast.success(t("tools.recruitment.toasts.accountUpdated"));
         onOpenChange(false);
       } else {
-        const created = await createAccount({
-          name: name.trim(),
-          gameServer,
-          permanentCharge,
-          limitedCharge,
-        });
+        const accountId = await createAccount(fields);
+
         toast.success(t("tools.recruitment.toasts.accountCreated"));
         onOpenChange(false);
-        if (typeof created === "string") {
-          router.push(`/user/recruitment/${created}`);
-        }
+        router.push(`/user/recruitment/${accountId}`);
       }
     } catch {
       toast.error(
-        t(
-          account
-            ? "tools.recruitment.toasts.accountUpdateFail"
-            : "tools.recruitment.toasts.accountCreateFail",
-        ),
+        account
+          ? t("tools.recruitment.toasts.accountUpdateFail")
+          : t("tools.recruitment.toasts.accountCreateFail"),
       );
     } finally {
       setSaving(false);
@@ -129,14 +128,17 @@ export function AccountDialog({
     if (!account) {
       return;
     }
+
     if (!confirmingDelete) {
       setConfirmingDelete(true);
       return;
     }
+
     try {
       await deleteAccount({
         accountId: account._id,
       });
+
       toast.success(t("tools.recruitment.toasts.accountDeleted"));
       onOpenChange(false);
       router.push("/user/recruitment");
@@ -155,24 +157,27 @@ export function AccountDialog({
                 ? t("tools.recruitment.editAccount")
                 : t("tools.recruitment.newAccount")}
             </DialogTitle>
+
             <DialogDescription>
               {t("tools.recruitment.accountChargesHint")}
             </DialogDescription>
           </DialogHeader>
+
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label htmlFor="recruitment-account-name">
-                {t("tools.recruitment.accountName")}
-              </Label>
+            <Field
+              className="sm:col-span-2"
+              label={t("tools.recruitment.accountName")}
+              htmlFor="recruitment-account-name"
+            >
               <Input
                 id="recruitment-account-name"
                 autoFocus={!account}
                 value={name}
                 onChange={(event) => setName(event.target.value)}
               />
-            </div>
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label>{t("common.gameServer")}</Label>
+            </Field>
+
+            <Field className="sm:col-span-2" label={t("common.gameServer")}>
               <Select
                 value={gameServer}
                 onValueChange={(value) =>
@@ -182,6 +187,7 @@ export function AccountDialog({
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
+
                 <SelectContent>
                   {RECRUITMENT_GAME_SERVERS.map((server) => (
                     <SelectItem key={server} value={server}>
@@ -190,11 +196,12 @@ export function AccountDialog({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="recruitment-permanent-charge">
-                {t("tools.recruitment.permanentCharge")}
-              </Label>
+            </Field>
+
+            <Field
+              label={t("tools.recruitment.permanentCharge")}
+              htmlFor="recruitment-permanent-charge"
+            >
               <NumericInput
                 id="recruitment-permanent-charge"
                 min={0}
@@ -202,11 +209,12 @@ export function AccountDialog({
                 value={permanentCharge}
                 onValueChange={setPermanentCharge}
               />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="recruitment-limited-charge">
-                {t("tools.recruitment.limitedCharge")}
-              </Label>
+            </Field>
+
+            <Field
+              label={t("tools.recruitment.limitedCharge")}
+              htmlFor="recruitment-limited-charge"
+            >
               <NumericInput
                 id="recruitment-limited-charge"
                 min={0}
@@ -214,8 +222,9 @@ export function AccountDialog({
                 value={limitedCharge}
                 onValueChange={setLimitedCharge}
               />
-            </div>
+            </Field>
           </div>
+
           <DialogFooter className="sm:justify-between">
             {account ? (
               <Button
@@ -234,6 +243,7 @@ export function AccountDialog({
             ) : (
               <span />
             )}
+
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button
                 type="button"
@@ -242,11 +252,13 @@ export function AccountDialog({
               >
                 {t("common.cancel")}
               </Button>
+
               <Button type="submit" disabled={!valid || saving}>
                 {account ? t("common.saveChanges") : t("common.create")}
               </Button>
             </div>
           </DialogFooter>
+
           {confirmingDelete && (
             <p className="text-sm text-destructive">
               {t("tools.recruitment.deleteAccountWarning")}

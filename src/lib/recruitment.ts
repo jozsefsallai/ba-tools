@@ -8,9 +8,11 @@ export const REBATE_MILESTONES = [
   350,
   370,
 ] as const;
+
 export const SOFT_PITY = 100;
 export const HARD_PITY = 200;
 export const PYROXENE_COST = 120;
+
 export const RECRUITMENT_COLORS = {
   base: {
     accent: "#0ebaf2",
@@ -57,6 +59,11 @@ export type ComputedPickup = CanonicalPickup & {
   classification: PickupClassification;
 };
 
+/**
+ * A session as stored, including sessions saved before pulls and charges were
+ * tracked per banner type. `RecruitmentSessionInput` is its normalized form
+ * and can be used wherever a record is accepted.
+ */
 export type RecruitmentSessionRecord = {
   kind?: RecruitmentSessionKind;
   startCharge?: number;
@@ -98,10 +105,7 @@ export type RecruitmentStats = {
   endCharge: number;
   permanentEndCharge: number;
   limitedEndCharge: number;
-  pools: {
-    permanent: PoolStats;
-    limited: PoolStats;
-  };
+  pools: Record<RecruitmentKind, PoolStats>;
   pickupCount: number;
   softPityWins: number;
   softPityLosses: number;
@@ -120,10 +124,12 @@ export type RecruitmentStats = {
   pickupClassifications: ComputedPickup[];
 };
 
-export function pickupPoolKind(student: {
+type StudentAvailability = {
   isLimitedJP?: boolean;
   isFestJP?: boolean;
-}): RecruitmentKind {
+};
+
+export function pickupPoolKind(student: StudentAvailability): RecruitmentKind {
   return student.isLimitedJP || student.isFestJP ? "limited" : "permanent";
 }
 
@@ -134,9 +140,11 @@ export function deriveSessionKind(
   if (permanentPulls > 0 && limitedPulls > 0) {
     return "mixed";
   }
+
   if (limitedPulls > 0) {
     return "limited";
   }
+
   return "permanent";
 }
 
@@ -144,9 +152,11 @@ export function legacyStartCharge(input: RecruitmentSessionInput): number {
   if (input.permanentPulls > 0) {
     return input.permanentStartCharge;
   }
+
   if (input.limitedPulls > 0) {
     return input.limitedStartCharge;
   }
+
   return input.permanentStartCharge;
 }
 
@@ -157,13 +167,7 @@ export function totalPullsOf(input: RecruitmentSessionInput): number {
 export function fallbackPickupKind(
   sessionKind: RecruitmentSessionKind | undefined,
 ): RecruitmentKind | undefined {
-  if (sessionKind === "limited") {
-    return "limited";
-  }
-  if (sessionKind === "permanent") {
-    return "permanent";
-  }
-  return undefined;
+  return sessionKind === "mixed" ? undefined : sessionKind;
 }
 
 export function toStoredSessionFields(input: RecruitmentSessionInput) {
@@ -186,18 +190,22 @@ export function toStoredSessionFields(input: RecruitmentSessionInput) {
 export function normalizeRecruitmentSession(
   session: RecruitmentSessionRecord,
 ): RecruitmentSessionInput {
+  const isLimited = session.kind === "limited";
   const hasSplit =
     session.permanentPulls != null || session.limitedPulls != null;
+
   const permanentPulls = hasSplit
     ? (session.permanentPulls ?? 0)
-    : session.kind === "limited"
+    : isLimited
       ? 0
       : (session.totalPulls ?? 0);
+
   const limitedPulls = hasSplit
     ? (session.limitedPulls ?? 0)
-    : session.kind === "limited"
+    : isLimited
       ? (session.totalPulls ?? 0)
       : 0;
+
   const defaultKind =
     fallbackPickupKind(session.kind) ??
     (limitedPulls > 0 && permanentPulls === 0
@@ -209,10 +217,10 @@ export function normalizeRecruitmentSession(
   return {
     permanentStartCharge:
       session.permanentStartCharge ??
-      (session.kind === "limited" ? 0 : (session.startCharge ?? 0)),
+      (isLimited ? 0 : (session.startCharge ?? 0)),
     limitedStartCharge:
       session.limitedStartCharge ??
-      (session.kind === "limited" ? (session.startCharge ?? 0) : 0),
+      (isLimited ? (session.startCharge ?? 0) : 0),
     permanentPulls,
     limitedPulls,
     threeStarCount: session.threeStarCount,
@@ -221,11 +229,13 @@ export function normalizeRecruitmentSession(
     isFestBanner: session.isFestBanner,
     pickupsObtained: session.pickupsObtained.map((pickup) => {
       const kind = pickup.kind ?? defaultKind;
+
       if (!kind) {
         throw new RecruitmentValidationError(
           "Each pickup must have a valid student and charge.",
         );
       }
+
       return {
         ...pickup,
         kind,
@@ -239,10 +249,10 @@ export function numberOfRebateTickets(totalPulls: number): number {
     .length;
 }
 
-function pickupsForKind(
-  pickups: CanonicalPickup[],
+function pickupsForKind<Pickup extends CanonicalPickup>(
+  pickups: Pickup[],
   kind: RecruitmentKind,
-): CanonicalPickup[] {
+): Pickup[] {
   return pickups.filter((pickup) => pickup.kind === kind);
 }
 
@@ -259,11 +269,13 @@ function calculatePoolStats(
   for (const [index, pickup] of pickups.entries()) {
     const cycleStart = index === 0 ? startCharge : 0;
     consumedPulls += pickup.charge - cycleStart;
+
     if (pickup.charge === SOFT_PITY) {
       softPityWins += 1;
     } else if (pickup.charge > SOFT_PITY) {
       softPityLosses += 1;
     }
+
     if (pickup.charge === HARD_PITY) {
       hardPities += 1;
     }
@@ -290,36 +302,40 @@ function calculatePoolStats(
 }
 
 export function calculateRecruitmentStats(
-  session: RecruitmentSessionRecord | RecruitmentSessionInput,
+  session: RecruitmentSessionRecord,
 ): RecruitmentStats {
   const input = normalizeRecruitmentSession(session);
   validateRecruitmentSession(input);
 
   const totalPulls = totalPullsOf(input);
-  const permanentPickups = pickupsForKind(input.pickupsObtained, "permanent");
-  const limitedPickups = pickupsForKind(input.pickupsObtained, "limited");
+  const pickupCount = input.pickupsObtained.length;
+
   const permanent = calculatePoolStats(
     input.permanentStartCharge,
     input.permanentPulls,
-    permanentPickups,
+    pickupsForKind(input.pickupsObtained, "permanent"),
   );
+
   const limited = calculatePoolStats(
     input.limitedStartCharge,
     input.limitedPulls,
-    limitedPickups,
+    pickupsForKind(input.pickupsObtained, "limited"),
   );
 
   const earnedRebateTickets = REBATE_MILESTONES.filter(
     (milestone) => milestone <= totalPulls,
   ).length;
-  const usableEarnedTickets = numberOfRebateTickets(totalPulls);
+
   const availableTickets =
-    input.rebateTicketsFromPreviousSession + usableEarnedTickets;
+    input.rebateTicketsFromPreviousSession + numberOfRebateTickets(totalPulls);
+
   const automaticallyUsedTickets = Math.min(
     availableTickets,
     Math.floor(totalPulls / 10),
   );
+
   const rebateTicketsUsed = input.rebateTicketsUsed ?? automaticallyUsedTickets;
+
   if (
     !Number.isInteger(rebateTicketsUsed) ||
     rebateTicketsUsed < 0 ||
@@ -330,10 +346,8 @@ export function calculateRecruitmentStats(
     );
   }
 
-  const pickupClassifications = input.pickupsObtained.map((pickup) => ({
-    ...pickup,
-    classification: classifyPickup(pickup.charge),
-  }));
+  const rebatePulls = rebateTicketsUsed * 10;
+  const paidPulls = totalPulls - rebatePulls;
 
   return {
     endCharge: legacyStartCharge({
@@ -347,7 +361,7 @@ export function calculateRecruitmentStats(
       permanent,
       limited,
     },
-    pickupCount: input.pickupsObtained.length,
+    pickupCount,
     softPityWins: permanent.softPityWins + limited.softPityWins,
     softPityLosses: permanent.softPityLosses + limited.softPityLosses,
     hardPities: permanent.hardPities + limited.hardPities,
@@ -357,21 +371,20 @@ export function calculateRecruitmentStats(
       input.rebateTicketsFromPreviousSession +
       earnedRebateTickets -
       rebateTicketsUsed,
-    paidPulls: totalPulls - rebateTicketsUsed * 10,
+    paidPulls,
     experiencedThreeStarRate:
       totalPulls === 0 ? 0 : (input.threeStarCount / totalPulls) * 100,
-    experiencedPURate:
-      totalPulls === 0 ? 0 : (input.pickupsObtained.length / totalPulls) * 100,
-    pullsPerPU:
-      input.pickupsObtained.length === 0
-        ? null
-        : totalPulls / input.pickupsObtained.length,
+    experiencedPURate: totalPulls === 0 ? 0 : (pickupCount / totalPulls) * 100,
+    pullsPerPU: pickupCount === 0 ? null : totalPulls / pickupCount,
     pullsPerThreeStar:
       input.threeStarCount === 0 ? null : totalPulls / input.threeStarCount,
-    rebatePulls: rebateTicketsUsed * 10,
-    pyroxenesSpent: (totalPulls - rebateTicketsUsed * 10) * PYROXENE_COST,
-    pyroxenesSaved: rebateTicketsUsed * 10 * PYROXENE_COST,
-    pickupClassifications,
+    rebatePulls,
+    pyroxenesSpent: paidPulls * PYROXENE_COST,
+    pyroxenesSaved: rebatePulls * PYROXENE_COST,
+    pickupClassifications: input.pickupsObtained.map((pickup) => ({
+      ...pickup,
+      classification: classifyPickup(pickup.charge),
+    })),
   };
 }
 
@@ -403,17 +416,27 @@ export type ResolvedPickupCharge =
       error: PickupChargeError;
     };
 
+type PoolPulls = {
+  startCharge: number;
+  pulls: number;
+};
+
+/** What the pick-ups resolved so far have used up of one banner type's pulls. */
+type PoolProgress = {
+  chargeSum: number;
+  lastTotalPulls: number;
+  blocked: boolean;
+};
+
+const PENDING: ResolvedPickupCharge = {
+  status: "pending",
+};
+
 export function resolvePickupCharges(
-  pools: Record<
-    RecruitmentKind,
-    {
-      startCharge: number;
-      pulls: number;
-    }
-  >,
+  pools: Record<RecruitmentKind, PoolPulls>,
   pickups: PickupChargeEntry[],
 ): ResolvedPickupCharge[] {
-  const state = {
+  const progress: Record<RecruitmentKind, PoolProgress> = {
     permanent: {
       chargeSum: 0,
       lastTotalPulls: 0,
@@ -426,20 +449,23 @@ export function resolvePickupCharges(
     },
   };
 
-  return pickups.map((pickup): ResolvedPickupCharge => {
-    const pool = pickup.kind ? state[pickup.kind] : undefined;
-    const resolved = resolvePickupCharge(pools, pool, pickup);
+  return pickups.map((pickup) => {
+    if (!pickup.kind) {
+      return resolvePickupCharge(pickup);
+    }
 
-    if (pool) {
-      if (resolved.status === "ok") {
-        pool.chargeSum += resolved.charge;
+    const pool = progress[pickup.kind];
+    const resolved = resolvePickupCharge(pickup, pools[pickup.kind], pool);
 
-        if (pickup.calculated && pickup.totalPulls !== undefined) {
-          pool.lastTotalPulls = pickup.totalPulls;
-        }
-      } else {
-        pool.blocked = true;
-      }
+    if (resolved.status !== "ok") {
+      pool.blocked = true;
+      return resolved;
+    }
+
+    pool.chargeSum += resolved.charge;
+
+    if (pickup.calculated && pickup.totalPulls !== undefined) {
+      pool.lastTotalPulls = pickup.totalPulls;
     }
 
     return resolved;
@@ -447,27 +473,13 @@ export function resolvePickupCharges(
 }
 
 function resolvePickupCharge(
-  pools: Record<
-    RecruitmentKind,
-    {
-      startCharge: number;
-      pulls: number;
-    }
-  >,
-  pool:
-    | {
-        chargeSum: number;
-        lastTotalPulls: number;
-        blocked: boolean;
-      }
-    | undefined,
   pickup: PickupChargeEntry,
+  pool?: PoolPulls,
+  progress?: PoolProgress,
 ): ResolvedPickupCharge {
   if (!pickup.calculated) {
     return pickup.charge === undefined
-      ? {
-          status: "pending",
-        }
+      ? PENDING
       : {
           status: "ok",
           charge: pickup.charge,
@@ -477,15 +489,13 @@ function resolvePickupCharge(
   const { totalPulls, chargeAfter } = pickup;
 
   if (
-    !pickup.kind ||
     !pool ||
-    pool.blocked ||
+    !progress ||
+    progress.blocked ||
     totalPulls === undefined ||
     chargeAfter === undefined
   ) {
-    return {
-      status: "pending",
-    };
+    return PENDING;
   }
 
   const fail = (error: PickupChargeError): ResolvedPickupCharge => ({
@@ -503,16 +513,16 @@ function resolvePickupCharge(
     return fail("invalidNumbers");
   }
 
-  if (totalPulls < pool.lastTotalPulls) {
+  if (totalPulls < progress.lastTotalPulls) {
     return fail("outOfOrder");
   }
 
-  if (totalPulls > pools[pickup.kind].pulls) {
+  if (totalPulls > pool.pulls) {
     return fail("exceedsSessionPulls");
   }
 
   const charge =
-    pools[pickup.kind].startCharge + totalPulls - pool.chargeSum - chargeAfter;
+    pool.startCharge + totalPulls - progress.chargeSum - chargeAfter;
 
   if (charge < 1) {
     return fail("noPullsLeft");
@@ -532,12 +542,15 @@ export function classifyPickup(charge: number): PickupClassification {
   if (charge === HARD_PITY) {
     return "hardPity";
   }
+
   if (charge === SOFT_PITY) {
     return "softWin";
   }
+
   if (charge > SOFT_PITY) {
     return "afterSoftPity";
   }
+
   return "beforeSoftPity";
 }
 
@@ -559,11 +572,8 @@ export type AggregateBucket = {
   pickupChargeHistogram: number[];
 };
 
-export type AccountAggregates = {
-  permanent: AggregateBucket;
-  limited: AggregateBucket;
-  fest: AggregateBucket;
-};
+export type AggregateBucketKey = RecruitmentKind | "fest";
+export type AccountAggregates = Record<AggregateBucketKey, AggregateBucket>;
 
 export function emptyAggregateBucket(): AggregateBucket {
   return {
@@ -581,12 +591,7 @@ export function emptyAggregateBucket(): AggregateBucket {
     softWinPickups: 0,
     softLossPickups: 0,
     hardPityPickups: 0,
-    pickupChargeHistogram: Array.from(
-      {
-        length: HARD_PITY + 1,
-      },
-      () => 0,
-    ),
+    pickupChargeHistogram: new Array<number>(HARD_PITY + 1).fill(0),
   };
 }
 
@@ -601,174 +606,150 @@ export function emptyAccountAggregates(): AccountAggregates {
 export function getAggregateBucket(
   kind: RecruitmentKind,
   isFestBanner = false,
-): keyof AccountAggregates {
-  if (kind === "limited" && isFestBanner) {
-    return "fest";
-  }
-  return kind;
+): AggregateBucketKey {
+  return kind === "limited" && isFestBanner ? "fest" : kind;
+}
+
+function cloneBucket(bucket: AggregateBucket): AggregateBucket {
+  return {
+    ...bucket,
+    pickupChargeHistogram: [
+      ...bucket.pickupChargeHistogram,
+    ],
+  };
 }
 
 function cloneAggregates(aggregates: AccountAggregates): AccountAggregates {
   return {
-    permanent: {
-      ...aggregates.permanent,
-      pickupChargeHistogram: [
-        ...aggregates.permanent.pickupChargeHistogram,
-      ],
-    },
-    limited: {
-      ...aggregates.limited,
-      pickupChargeHistogram: [
-        ...aggregates.limited.pickupChargeHistogram,
-      ],
-    },
-    fest: {
-      ...aggregates.fest,
-      pickupChargeHistogram: [
-        ...aggregates.fest.pickupChargeHistogram,
-      ],
-    },
+    permanent: cloneBucket(aggregates.permanent),
+    limited: cloneBucket(aggregates.limited),
+    fest: cloneBucket(aggregates.fest),
   };
 }
 
+/** Splits a session-wide total between the banner types by their share of the pulls. */
 function splitByPullShare(
   total: number,
   permanentPulls: number,
   limitedPulls: number,
-): {
-  permanent: number;
-  limited: number;
-} {
+): Record<RecruitmentKind, number> {
   const pulls = permanentPulls + limitedPulls;
+
   if (pulls === 0 || total === 0) {
     return {
       permanent: 0,
       limited: 0,
     };
   }
+
   if (limitedPulls === 0) {
     return {
       permanent: total,
       limited: 0,
     };
   }
+
   if (permanentPulls === 0) {
     return {
       permanent: 0,
       limited: total,
     };
   }
+
   const permanent = Math.round((total * permanentPulls) / pulls);
+
   return {
     permanent,
     limited: total - permanent,
   };
 }
 
+const CLASSIFICATION_COUNTERS = {
+  beforeSoftPity: "naturalPickups",
+  softWin: "softWinPickups",
+  afterSoftPity: "softLossPickups",
+  hardPity: "hardPityPickups",
+} as const satisfies Record<PickupClassification, keyof AggregateBucket>;
+
+/** One banner type's part of a session, as it is added to an aggregate bucket. */
+type PoolContribution = {
+  pulls: number;
+  threeStars: number;
+  paidPulls: number;
+  rebatePulls: number;
+  pyroxenesSaved: number;
+  stats: PoolStats;
+  pickups: ComputedPickup[];
+};
+
 function applyPoolToBucket(
   bucket: AggregateBucket,
-  factor: number,
-  pulls: number,
-  threeStars: number,
-  paidPulls: number,
-  rebatePulls: number,
-  pyroxenesSaved: number,
-  poolStats: PoolStats,
-  pickups: ComputedPickup[],
+  factor: 1 | -1,
+  pool: PoolContribution,
 ): void {
   bucket.sessionCount += factor;
-  bucket.totalPulls += factor * pulls;
-  bucket.paidPulls += factor * paidPulls;
-  bucket.totalThreeStars += factor * threeStars;
-  bucket.totalPickups += factor * poolStats.pickupCount;
-  bucket.rebatePulls += factor * rebatePulls;
-  bucket.pyroxenesSaved += factor * pyroxenesSaved;
-  bucket.softPityWins += factor * poolStats.softPityWins;
-  bucket.softPityLosses += factor * poolStats.softPityLosses;
-  bucket.hardPities += factor * poolStats.hardPities;
+  bucket.totalPulls += factor * pool.pulls;
+  bucket.paidPulls += factor * pool.paidPulls;
+  bucket.totalThreeStars += factor * pool.threeStars;
+  bucket.totalPickups += factor * pool.stats.pickupCount;
+  bucket.rebatePulls += factor * pool.rebatePulls;
+  bucket.pyroxenesSaved += factor * pool.pyroxenesSaved;
+  bucket.softPityWins += factor * pool.stats.softPityWins;
+  bucket.softPityLosses += factor * pool.stats.softPityLosses;
+  bucket.hardPities += factor * pool.stats.hardPities;
 
-  for (const pickup of pickups) {
+  for (const pickup of pool.pickups) {
     bucket.pickupChargeHistogram[pickup.charge] += factor;
-    if (pickup.classification === "beforeSoftPity") {
-      bucket.naturalPickups += factor;
-    }
-    if (pickup.classification === "softWin") {
-      bucket.softWinPickups += factor;
-    }
-    if (pickup.classification === "afterSoftPity") {
-      bucket.softLossPickups += factor;
-    }
-    if (pickup.classification === "hardPity") {
-      bucket.hardPityPickups += factor;
-    }
+    bucket[CLASSIFICATION_COUNTERS[pickup.classification]] += factor;
   }
 }
 
 export function applySessionToAggregates(
   aggregates: AccountAggregates,
-  session: RecruitmentSessionRecord | RecruitmentSessionInput,
+  session: RecruitmentSessionRecord,
   stats: RecruitmentStats,
   direction: 1 | -1,
 ): AccountAggregates {
   const input = normalizeRecruitmentSession(session);
   const result = cloneAggregates(aggregates);
-  const factor = direction;
-  const offRateThreeStars = Math.max(
-    0,
-    input.threeStarCount - input.pickupsObtained.length,
+
+  const split = (total: number) =>
+    splitByPullShare(total, input.permanentPulls, input.limitedPulls);
+
+  const offRateThreeStars = split(
+    Math.max(0, input.threeStarCount - input.pickupsObtained.length),
   );
-  const offRateSplit = splitByPullShare(
-    offRateThreeStars,
-    input.permanentPulls,
-    input.limitedPulls,
-  );
-  const paidSplit = splitByPullShare(
-    stats.paidPulls,
-    input.permanentPulls,
-    input.limitedPulls,
-  );
-  const rebateSplit = splitByPullShare(
-    stats.rebatePulls,
-    input.permanentPulls,
-    input.limitedPulls,
-  );
-  const savedSplit = splitByPullShare(
-    stats.pyroxenesSaved,
-    input.permanentPulls,
-    input.limitedPulls,
-  );
+  const paidPulls = split(stats.paidPulls);
+  const rebatePulls = split(stats.rebatePulls);
+  const pyroxenesSaved = split(stats.pyroxenesSaved);
+
+  const contributionOf = (kind: RecruitmentKind): PoolContribution => ({
+    pulls: kind === "permanent" ? input.permanentPulls : input.limitedPulls,
+    threeStars: stats.pools[kind].pickupCount + offRateThreeStars[kind],
+    paidPulls: paidPulls[kind],
+    rebatePulls: rebatePulls[kind],
+    pyroxenesSaved: pyroxenesSaved[kind],
+    stats: stats.pools[kind],
+    pickups: pickupsForKind(stats.pickupClassifications, kind),
+  });
 
   if (input.permanentPulls > 0) {
-    applyPoolToBucket(
-      result.permanent,
-      factor,
-      input.permanentPulls,
-      stats.pools.permanent.pickupCount + offRateSplit.permanent,
-      paidSplit.permanent,
-      rebateSplit.permanent,
-      savedSplit.permanent,
-      stats.pools.permanent,
-      stats.pickupClassifications.filter(
-        (pickup) => pickup.kind === "permanent",
-      ),
-    );
+    applyPoolToBucket(result.permanent, direction, contributionOf("permanent"));
   }
 
   if (input.limitedPulls > 0) {
     applyPoolToBucket(
-      result[getAggregateBucket("limited", input.isFestBanner ?? false)],
-      factor,
-      input.limitedPulls,
-      stats.pools.limited.pickupCount + offRateSplit.limited,
-      paidSplit.limited,
-      rebateSplit.limited,
-      savedSplit.limited,
-      stats.pools.limited,
-      stats.pickupClassifications.filter((pickup) => pickup.kind === "limited"),
+      result[getAggregateBucket("limited", input.isFestBanner)],
+      direction,
+      contributionOf("limited"),
     );
   }
 
   return result;
+}
+
+function isCount(value: number): boolean {
+  return Number.isInteger(value) && value >= 0;
 }
 
 function validatePool(
@@ -776,22 +757,20 @@ function validatePool(
   pulls: number,
   pickups: CanonicalPickup[],
 ): void {
-  if (
-    !Number.isInteger(startCharge) ||
-    startCharge < 0 ||
-    startCharge > HARD_PITY
-  ) {
+  if (!isCount(startCharge) || startCharge > HARD_PITY) {
     throw new RecruitmentValidationError(
       "Start charge must be an integer from 0 to 200.",
     );
   }
-  if (!Number.isInteger(pulls) || pulls < 0) {
+
+  if (!isCount(pulls)) {
     throw new RecruitmentValidationError(
       "Total pulls must be a non-negative integer.",
     );
   }
 
   let consumedPulls = 0;
+
   for (const [index, pickup] of pickups.entries()) {
     if (
       !Number.isInteger(pickup.charge) ||
@@ -803,8 +782,10 @@ function validatePool(
         "Each pickup must have a valid student and charge.",
       );
     }
+
     const cycleStart = index === 0 ? startCharge : 0;
     const cyclePulls = pickup.charge - cycleStart;
+
     if (cyclePulls < 1) {
       throw new RecruitmentValidationError(
         index === 0
@@ -812,6 +793,7 @@ function validatePool(
           : "Pickup charges must increase after each pickup.",
       );
     }
+
     consumedPulls += cyclePulls;
   }
 
@@ -823,31 +805,31 @@ function validatePool(
 }
 
 export function validateRecruitmentSession(
-  session: RecruitmentSessionRecord | RecruitmentSessionInput,
+  session: RecruitmentSessionRecord,
 ): void {
   const input = normalizeRecruitmentSession(session);
 
-  if (!Number.isInteger(input.threeStarCount) || input.threeStarCount < 0) {
+  if (!isCount(input.threeStarCount)) {
     throw new RecruitmentValidationError(
       "3★ count must be a non-negative integer.",
     );
   }
-  if (
-    !Number.isInteger(input.rebateTicketsFromPreviousSession) ||
-    input.rebateTicketsFromPreviousSession < 0
-  ) {
+
+  if (!isCount(input.rebateTicketsFromPreviousSession)) {
     throw new RecruitmentValidationError(
       "Previous rebate tickets must be a non-negative integer.",
     );
   }
+
   if (
     input.rebateTicketsUsed !== undefined &&
-    (!Number.isInteger(input.rebateTicketsUsed) || input.rebateTicketsUsed < 0)
+    !isCount(input.rebateTicketsUsed)
   ) {
     throw new RecruitmentValidationError(
       "Rebate tickets used must be a non-negative integer.",
     );
   }
+
   if (input.threeStarCount < input.pickupsObtained.length) {
     throw new RecruitmentValidationError(
       "3★ count cannot be lower than the number of pickups.",
@@ -859,6 +841,7 @@ export function validateRecruitmentSession(
     input.permanentPulls,
     pickupsForKind(input.pickupsObtained, "permanent"),
   );
+
   validatePool(
     input.limitedStartCharge,
     input.limitedPulls,

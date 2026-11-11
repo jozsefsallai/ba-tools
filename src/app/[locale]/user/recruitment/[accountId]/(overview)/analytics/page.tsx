@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { RecruitmentAnalyticsPage } from "@/app/[locale]/user/recruitment/recruitment-analytics-page";
+import type { Id } from "~convex/dataModel";
 
 export default async function RecruitmentAnalyticsRoute({
   params,
@@ -10,5 +11,9 @@ export default async function RecruitmentAnalyticsRoute({
 }) {
   await auth.protect();
   const { accountId } = await params;
-  return <RecruitmentAnalyticsPage accountId={accountId} />;
+  return (
+    <RecruitmentAnalyticsPage
+      accountId={accountId as Id<"recruitmentAccount">}
+    />
+  );
 }

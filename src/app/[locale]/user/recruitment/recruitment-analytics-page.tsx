@@ -5,9 +5,15 @@ import { AccountAnalytics } from "@/app/[locale]/user/recruitment/_components/ac
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
 
-export function RecruitmentAnalyticsPage({ accountId }: { accountId: string }) {
+type RecruitmentAnalyticsPageProps = {
+  accountId: Id<"recruitmentAccount">;
+};
+
+export function RecruitmentAnalyticsPage({
+  accountId,
+}: RecruitmentAnalyticsPageProps) {
   const result = useQuery(api.recruitment.getAccount, {
-    accountId: accountId as Id<"recruitmentAccount">,
+    accountId,
   });
 
   if (!result) {

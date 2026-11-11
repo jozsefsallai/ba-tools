@@ -17,14 +17,19 @@ export function poolColors(kind: RecruitmentKind) {
     : RECRUITMENT_COLORS.base;
 }
 
-/** The colour dot that stands for a banner type. */
-export function PoolMark({
-  kind,
-  className,
-}: {
+export function formatRate(numerator: number, denominator: number) {
+  return denominator === 0
+    ? "—"
+    : `${((numerator / denominator) * 100).toFixed(2)}%`;
+}
+
+type PoolMarkProps = {
   kind: RecruitmentKind;
   className?: string;
-}) {
+};
+
+/** The colour dot that stands for a banner type. */
+export function PoolMark({ kind, className }: PoolMarkProps) {
   return (
     <span
       aria-hidden
@@ -36,21 +41,23 @@ export function PoolMark({
   );
 }
 
+type ChargeGaugeProps = {
+  kind: RecruitmentKind;
+  value: number;
+  label?: ReactNode;
+  compact?: boolean;
+  className?: string;
+};
+
 export function ChargeGauge({
   kind,
   value,
   label,
   compact = false,
   className,
-}: {
-  kind: RecruitmentKind;
-  value: number;
-  label?: ReactNode;
-  compact?: boolean;
-  className?: string;
-}) {
+}: ChargeGaugeProps) {
   const t = useTranslations();
-  const colors = poolColors(kind);
+
   const hint =
     value >= HARD_PITY
       ? t("tools.recruitment.atHardPity")
@@ -68,19 +75,23 @@ export function ChargeGauge({
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-sm font-medium">
             <PoolMark kind={kind} />
+
             <span className="truncate">
               {label ?? t(`tools.recruitment.${kind}`)}
             </span>
           </div>
+
           {!compact && (
             <div className="text-xs text-muted-foreground">{hint}</div>
           )}
         </div>
+
         <div className="shrink-0 font-nexon-football-gothic leading-none">
           <span className={compact ? "text-xl" : "text-3xl"}>{value}</span>
           <span className="text-sm text-muted-foreground">/{HARD_PITY}</span>
         </div>
       </div>
+
       <div
         className="relative my-1.5 h-2.5 rounded-full bg-[#d4d4d4]/45 dark:bg-[#d4d4d4]/20"
         role="progressbar"
@@ -92,38 +103,38 @@ export function ChargeGauge({
           className="h-full rounded-full transition-all"
           style={{
             width: `${Math.min(100, (value / HARD_PITY) * 100)}%`,
-            backgroundColor: colors.trackAccent,
+            backgroundColor: poolColors(kind).trackAccent,
           }}
         />
+
         <Milestone
           className="left-1/2 -translate-x-1/2"
           kind={kind}
+          charge={SOFT_PITY}
           reached={value >= SOFT_PITY}
-          value={SOFT_PITY}
         />
+
         <Milestone
           className="right-0"
           kind={kind}
+          charge={HARD_PITY}
           reached={value >= HARD_PITY}
-          value={HARD_PITY}
         />
       </div>
     </div>
   );
 }
 
-function Milestone({
-  kind,
-  value,
-  reached,
-  className,
-}: {
+type MilestoneProps = {
   kind: RecruitmentKind;
-  value: number;
+  charge: number;
   reached: boolean;
   className: string;
-}) {
+};
+
+function Milestone({ kind, charge, reached, className }: MilestoneProps) {
   const colors = poolColors(kind);
+
   return (
     <span
       className={cn(
@@ -137,20 +148,22 @@ function Milestone({
         color: reached ? colors.labelTextActive : RECRUITMENT_COLORS.labelText,
       }}
     >
-      {value}
+      {charge}
     </span>
   );
 }
+
+type SessionKindLabelProps = {
+  kind: RecruitmentSessionKind;
+  isFestBanner?: boolean;
+  className?: string;
+};
 
 export function SessionKindLabel({
   kind,
   isFestBanner,
   className,
-}: {
-  kind: RecruitmentSessionKind;
-  isFestBanner?: boolean;
-  className?: string;
-}) {
+}: SessionKindLabelProps) {
   const t = useTranslations();
 
   return (
@@ -164,6 +177,7 @@ export function SessionKindLabel({
         {kind !== "limited" && <PoolMark kind="permanent" />}
         {kind !== "permanent" && <PoolMark kind="limited" />}
       </span>
+
       {kind === "mixed"
         ? t("tools.recruitment.mixed")
         : isFestBanner
@@ -179,13 +193,12 @@ export type ReadoutItem = {
   detail?: ReactNode;
 };
 
-export function Readout({
-  items,
-  className,
-}: {
+type ReadoutProps = {
   items: ReadoutItem[];
   className?: string;
-}) {
+};
+
+export function Readout({ items, className }: ReadoutProps) {
   return (
     <dl className={cn("text-sm", className)}>
       {items.map((item, index) => (
@@ -194,12 +207,14 @@ export function Readout({
           className="flex break-inside-avoid items-baseline justify-between gap-4 border-b py-1.5"
         >
           <dt className="text-muted-foreground">{item.label}</dt>
+
           <dd className="text-right font-medium tabular-nums">
             {item.detail !== undefined && (
               <span className="mr-2 text-xs font-normal text-muted-foreground">
                 {item.detail}
               </span>
             )}
+
             {item.value}
           </dd>
         </div>
@@ -208,28 +223,22 @@ export function Readout({
   );
 }
 
-export function EmptyState({
-  title,
-  description,
-  action,
-}: {
+type EmptyStateProps = {
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
-}) {
+};
+
+export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-md border px-4 py-12 text-center">
       <div className="text-lg font-medium">{title}</div>
+
       {description && (
         <p className="max-w-md text-sm text-muted-foreground">{description}</p>
       )}
+
       {action}
     </div>
   );
-}
-
-export function formatRate(numerator: number, denominator: number) {
-  return denominator === 0
-    ? "—"
-    : `${((numerator / denominator) * 100).toFixed(2)}%`;
 }

@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { RecruitmentSessionEditor } from "@/app/[locale]/user/recruitment/recruitment-session-editor";
+import type { Id } from "~convex/dataModel";
 
 export default async function NewRecruitmentSessionPage({
   params,
@@ -10,5 +11,9 @@ export default async function NewRecruitmentSessionPage({
 }) {
   await auth.protect();
   const { accountId } = await params;
-  return <RecruitmentSessionEditor accountId={accountId} />;
+  return (
+    <RecruitmentSessionEditor
+      accountId={accountId as Id<"recruitmentAccount">}
+    />
+  );
 }
