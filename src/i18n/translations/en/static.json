@@ -55,7 +55,7 @@
         "description": "Track the 3* rate of a pulling session in real time. You may use it in gacha videos or streams to display your luck (or lack thereof)."
       },
       "recruitment": {
-        "title": "Recruitment Tracker (BETA)",
+        "title": "Recruitment Tracker",
         "description": "Track your pick-ups, Recruitment Charge, and recruitment history across your game accounts."
       },
       "birthdays": {

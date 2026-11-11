@@ -61,6 +61,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.pvp,
         description: "Add Season 12.",
       },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description: "Revamped UI of the Recruitment Tracker tool.",
+      },
     ],
     fixes: [],
   },

@@ -64,6 +64,10 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
         label: t("common.header.nav.misc.formationDisplay"),
         group: t("common.header.nav.misc.title"),
       },
+      "/user/recruitment": {
+        label: t("common.header.nav.misc.recruitment"),
+        group: t("common.header.nav.misc.title"),
+      },
       "/user/rosters": {
         label: t("common.header.nav.misc.roster"),
         group: t("common.header.nav.misc.title"),

@@ -11,5 +11,8 @@ export default async function RecruitmentLayout({
   children,
 }: PropsWithChildren) {
   await auth.protect();
-  return children;
+
+  return (
+    <div className="mx-auto w-full min-w-0 max-w-[1400px]">{children}</div>
+  );
 }

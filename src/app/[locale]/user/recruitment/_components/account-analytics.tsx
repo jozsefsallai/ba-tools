@@ -12,11 +12,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Readout } from "@/app/[locale]/user/recruitment/_components/shared";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   type AccountAggregates,
   type AggregateBucket,
@@ -106,8 +108,18 @@ export function AccountAnalytics({
   const fest = filter === "permanent" ? emptyBucket() : sourceAggregates.fest;
 
   return (
-    <section className="grid w-full max-w-4xl gap-4">
-      <div className="flex flex-wrap justify-end gap-1">
+    <section className="grid w-full gap-4">
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="sm"
+        value={filter}
+        onValueChange={(value) => {
+          if (value) {
+            setFilter(value as Filter);
+          }
+        }}
+      >
         {(
           [
             "all",
@@ -116,64 +128,60 @@ export function AccountAnalytics({
             "fest",
           ] as const
         ).map((value) => (
-          <button
-            className={`rounded-md border px-3 py-1 text-sm ${
-              filter === value ? "bg-accent font-medium" : ""
-            }`}
-            key={value}
-            onClick={() => setFilter(value)}
-            type="button"
-          >
+          <ToggleGroupItem className="flex-none px-3" key={value} value={value}>
             {t(`tools.recruitment.filters.${value}`)}
-          </button>
+          </ToggleGroupItem>
         ))}
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric
-          label={t("tools.recruitment.regularThreeStarRate")}
-          value={rate(regular.totalThreeStars, regular.totalPulls)}
-        />
-        <Metric
-          label={t("tools.recruitment.festThreeStarRate")}
-          value={rate(fest?.totalThreeStars ?? 0, fest?.totalPulls ?? 0)}
-        />
-        <Metric
-          label={t("tools.recruitment.accountPURate")}
-          value={rate(aggregate.totalPickups, aggregate.totalPulls)}
-        />
-        <Metric
-          label={t("tools.recruitment.averagePullsPerPU")}
-          value={average(aggregate.totalPulls, aggregate.totalPickups)}
-        />
-        <Metric
-          label={t("tools.recruitment.totalRebatePulls")}
-          value={aggregate.rebatePulls}
-        />
-        <Metric
-          label={t("tools.recruitment.pyroxenesSaved")}
-          value={aggregate.pyroxenesSaved.toLocaleString()}
-        />
-        <Metric
-          label={t("tools.recruitment.softPityRecord")}
-          value={`${aggregate.softPityWins}/${aggregate.softPityLosses}`}
-        />
-        <Metric
-          label={t("tools.recruitment.softPityWinRate")}
-          value={rate(
-            aggregate.softPityWins,
-            aggregate.softPityWins + aggregate.softPityLosses,
-          )}
-        />
-        <Metric
-          label={t("tools.recruitment.hardPityCount")}
-          value={aggregate.hardPities}
-        />
-        <Metric
-          label={t("tools.recruitment.hardPityPUPercent")}
-          value={rate(aggregate.hardPityPickups, aggregate.totalPickups)}
-        />
-      </div>
-      <div className="grid w-full gap-4">
+      </ToggleGroup>
+      <Readout
+        className="gap-x-10 border-t sm:columns-2"
+        items={[
+          {
+            label: t("tools.recruitment.regularThreeStarRate"),
+            value: rate(regular.totalThreeStars, regular.totalPulls),
+          },
+          {
+            label: t("tools.recruitment.festThreeStarRate"),
+            value: rate(fest?.totalThreeStars ?? 0, fest?.totalPulls ?? 0),
+          },
+          {
+            label: t("tools.recruitment.accountPURate"),
+            value: rate(aggregate.totalPickups, aggregate.totalPulls),
+          },
+          {
+            label: t("tools.recruitment.averagePullsPerPU"),
+            value: average(aggregate.totalPulls, aggregate.totalPickups),
+          },
+          {
+            label: t("tools.recruitment.totalRebatePulls"),
+            value: aggregate.rebatePulls,
+          },
+          {
+            label: t("tools.recruitment.pyroxenesSaved"),
+            value: aggregate.pyroxenesSaved.toLocaleString(),
+          },
+          {
+            label: t("tools.recruitment.softPityRecord"),
+            value: `${aggregate.softPityWins}/${aggregate.softPityLosses}`,
+          },
+          {
+            label: t("tools.recruitment.softPityWinRate"),
+            value: rate(
+              aggregate.softPityWins,
+              aggregate.softPityWins + aggregate.softPityLosses,
+            ),
+          },
+          {
+            label: t("tools.recruitment.hardPityCount"),
+            value: aggregate.hardPities,
+          },
+          {
+            label: t("tools.recruitment.hardPityPUPercent"),
+            value: rate(aggregate.hardPityPickups, aggregate.totalPickups),
+          },
+        ]}
+      />
+      <div className="grid w-full items-start gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <PitySummary aggregate={aggregate} />
         <PickupDistributionChart aggregate={aggregate} />
       </div>
@@ -217,7 +225,7 @@ function PitySummary({ aggregate }: { aggregate: AggregateBucket }) {
         <EmptyChart />
       ) : (
         <div className="grid gap-4">
-          <div className="flex h-8 overflow-hidden rounded-full bg-muted">
+          <div className="flex h-6 overflow-hidden bg-muted">
             {values.map(
               (item) =>
                 item.value > 0 && (
@@ -235,7 +243,7 @@ function PitySummary({ aggregate }: { aggregate: AggregateBucket }) {
             {values.map((item) => (
               <div className="flex items-center gap-2" key={item.key}>
                 <span
-                  className="size-3 rounded-full"
+                  className="size-2.5"
                   style={{
                     backgroundColor: item.color,
                   }}
@@ -298,6 +306,7 @@ function PickupDistributionChart({
   return (
     <ChartCard title={t("tools.recruitment.pickupDistribution")}>
       <ChartContainer
+        className="aspect-auto h-72 w-full"
         config={{
           count: {
             label: t("tools.recruitment.pickups"),
@@ -363,7 +372,7 @@ function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border p-4">
+    <div className="rounded-md border p-4">
       <h3 className="mb-3 font-semibold">{title}</h3>
       {children}
     </div>
@@ -373,17 +382,8 @@ function ChartCard({
 function EmptyChart() {
   const t = useTranslations();
   return (
-    <div className="flex aspect-video items-center justify-center text-sm text-muted-foreground">
+    <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
       {t("tools.recruitment.noAnalyticsData")}
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="rounded-md border p-3">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold tabular-nums">{value}</div>
     </div>
   );
 }

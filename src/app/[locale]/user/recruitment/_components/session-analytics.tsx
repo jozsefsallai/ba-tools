@@ -1,115 +1,28 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStudents } from "@/hooks/use-students";
-import {
-  RECRUITMENT_COLORS,
-  type RecruitmentPickup,
-  type RecruitmentStats,
-} from "@/lib/recruitment";
+import { RECRUITMENT_COLORS, type RecruitmentStats } from "@/lib/recruitment";
 import { buildStudentIconUrl } from "@/lib/url";
 
-export function SessionAnalytics({
-  stats,
-  pickups,
-}: {
-  stats: RecruitmentStats;
-  pickups: RecruitmentPickup[];
-}) {
+export function PullComposition({ stats }: { stats: RecruitmentStats }) {
   const t = useTranslations();
+  const total = stats.paidPulls + stats.rebatePulls;
+  const paidPercentage = total === 0 ? 0 : (stats.paidPulls / total) * 100;
 
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("tools.recruitment.pullComposition")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CompositionBar stats={stats} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("tools.recruitment.costSummary")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3 text-sm">
-            <Metric
-              label={t("tools.recruitment.paidPulls")}
-              value={stats.paidPulls}
-            />
-            <Metric
-              label={t("tools.recruitment.rebatePulls")}
-              value={stats.rebatePulls}
-            />
-            <Metric
-              label={t("tools.recruitment.pyroxenesSpent")}
-              value={stats.pyroxenesSpent.toLocaleString()}
-            />
-            <Metric
-              label={t("tools.recruitment.pyroxenesSaved")}
-              value={stats.pyroxenesSaved.toLocaleString()}
-            />
-          </CardContent>
-        </Card>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
-            {t("tools.recruitment.acquisitions")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {pickups.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("tools.recruitment.noAcquisitions")}
-            </p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {stats.pickupClassifications.map((pickup, index) => (
-                <AcquisitionCard
-                  key={`${pickup.studentId}-${index}`}
-                  pickup={pickup}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function CompositionBar({ stats }: { stats: RecruitmentStats }) {
-  const t = useTranslations();
-  const paidPercentage =
-    stats.paidPulls + stats.rebatePulls === 0
-      ? 0
-      : (stats.paidPulls / (stats.paidPulls + stats.rebatePulls)) * 100;
-  const rebatePercentage = 100 - paidPercentage;
-
-  return (
-    <div className="grid gap-2">
-      <div className="flex h-5 overflow-hidden rounded-full bg-muted">
-        {paidPercentage > 0 && (
+    <div className="grid gap-1.5">
+      <div className="flex h-2.5 overflow-hidden bg-muted">
+        <div
+          style={{
+            width: `${paidPercentage}%`,
+            backgroundColor: RECRUITMENT_COLORS.base.accent,
+          }}
+        />
+        {stats.rebatePulls > 0 && (
           <div
-            className="flex items-center justify-center text-[10px] font-medium text-white"
+            className="flex-1"
             style={{
-              width: `${paidPercentage}%`,
-              backgroundColor: RECRUITMENT_COLORS.base.accent,
-            }}
-          />
-        )}
-        {rebatePercentage > 0 && (
-          <div
-            className="flex items-center justify-center text-[10px] font-medium text-white"
-            style={{
-              width: `${rebatePercentage}%`,
               backgroundColor: RECRUITMENT_COLORS.limited.accent,
             }}
           />
@@ -127,75 +40,66 @@ function CompositionBar({ stats }: { stats: RecruitmentStats }) {
   );
 }
 
-function AcquisitionCard({
-  pickup,
-}: {
-  pickup: RecruitmentStats["pickupClassifications"][number];
-}) {
+const CLASSIFICATION_COLORS: Record<string, string> = {
+  beforeSoftPity: "text-emerald-600 dark:text-emerald-400",
+  softWin: "text-emerald-600 dark:text-emerald-400",
+  afterSoftPity: "text-amber-600 dark:text-amber-400",
+  hardPity: "text-rose-600 dark:text-rose-400",
+};
+
+export function Acquisitions({ stats }: { stats: RecruitmentStats }) {
   const t = useTranslations();
   const { studentMap } = useStudents();
-  const student = studentMap[pickup.studentId];
-  const classification = t(
-    `tools.recruitment.classifications.${pickup.classification}`,
-  );
 
-  return (
-    <div
-      className={`flex items-center gap-3 rounded-lg border border-l-4 p-3 ${acquisitionColorClass(
-        pickup.classification,
-      )}`}
-    >
-      {student ? (
-        <img
-          src={buildStudentIconUrl(student)}
-          alt=""
-          className="size-12 rounded-full object-cover"
-        />
-      ) : (
-        <div className="size-12 rounded-full bg-muted" />
-      )}
-      <div className="min-w-0">
-        <div className="truncate font-medium">
-          {student?.name ?? pickup.studentId}
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {t("tools.recruitment.chargeAtAcquisition", {
-            charge: pickup.charge,
-          })}
-        </div>
-        {pickup.kind && (
-          <div className="text-xs text-muted-foreground">
-            {t(`tools.recruitment.${pickup.kind}`)}
-          </div>
-        )}
-        <div className="text-xs text-muted-foreground">{classification}</div>
-      </div>
-    </div>
-  );
-}
-
-function acquisitionColorClass(
-  classification: RecruitmentStats["pickupClassifications"][number]["classification"],
-) {
-  switch (classification) {
-    case "beforeSoftPity":
-      return "border-emerald-500/60 bg-emerald-500/5";
-    case "softWin":
-      return "border-cyan-500/60 bg-cyan-500/5";
-    case "afterSoftPity":
-      return "border-amber-500/60 bg-amber-500/5";
-    case "hardPity":
-      return "border-rose-500/60 bg-rose-500/5";
-    default:
-      return "border-muted";
+  if (stats.pickupClassifications.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t("tools.recruitment.noAcquisitions")}
+      </p>
+    );
   }
-}
 
-function Metric({ label, value }: { label: string; value: number | string }) {
   return (
-    <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="font-semibold tabular-nums">{value}</div>
-    </div>
+    <ul className="flex flex-col">
+      {stats.pickupClassifications.map((pickup, index) => {
+        const student = studentMap[pickup.studentId];
+        return (
+          <li
+            className="flex items-center gap-3 border-b py-2 last:border-b-0"
+            key={`${pickup.studentId}-${index}`}
+          >
+            {student ? (
+              <img
+                src={buildStudentIconUrl(student)}
+                alt=""
+                className="size-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="size-10 rounded-full bg-muted" />
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-medium">
+                {student?.name ?? pickup.studentId}
+              </div>
+              <div
+                className={`text-xs ${CLASSIFICATION_COLORS[pickup.classification] ?? "text-muted-foreground"}`}
+              >
+                {t(
+                  `tools.recruitment.classifications.${pickup.classification}`,
+                )}
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="font-nexon-football-gothic text-lg leading-none">
+                {pickup.charge}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {t("tools.recruitment.pickupCharge")}
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
