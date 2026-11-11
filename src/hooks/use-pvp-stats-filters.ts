@@ -5,10 +5,11 @@ import {
   readPvpStatsFilters,
   writePvpStatsFilters,
 } from "@/lib/pvp/stats-filters";
-import type { PVPSeasonNumber } from "@/lib/types";
+import { LATEST_PVP_SEASON, type PVPSeasonNumber } from "@/lib/types";
 
 export function usePvpStatsFilters() {
-  const [seasonNumber, setSeasonNumber] = useState<PVPSeasonNumber>(11);
+  const [seasonNumber, setSeasonNumber] =
+    useState<PVPSeasonNumber>(LATEST_PVP_SEASON);
   const [excludedStudentIds, setExcludedStudentIds] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
 

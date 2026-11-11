@@ -3379,7 +3379,7 @@
           "text": "{\n  \"name\": \"S11 Outdoor\",\n  \"gameServer\": \"EU\",\n  \"seasonNumber\": 11\n}"
         },
         "bodyType": "application/json",
-        "description": "Creates a season. `seasonNumber` is the in-game season (1–11).\n\n```response:201\n{\n  \"data\": {\n    \"id\": \"kh73y62jqqhmwbxbnrtpdfe7w18dydwx\",\n    \"createdAt\": \"2026-09-07T18:08:28.941Z\",\n    \"name\": \"S11 Outdoor\",\n    \"gameServer\": \"EU\",\n    \"seasonNumber\": 11,\n    \"sortOrder\": 0\n  }\n}\n```",
+        "description": "Creates a season. `seasonNumber` is the in-game season (1–12).\n\n```response:201\n{\n  \"data\": {\n    \"id\": \"kh73y62jqqhmwbxbnrtpdfe7w18dydwx\",\n    \"createdAt\": \"2026-09-07T18:08:28.941Z\",\n    \"name\": \"S11 Outdoor\",\n    \"gameServer\": \"EU\",\n    \"seasonNumber\": 11,\n    \"sortOrder\": 0\n  }\n}\n```",
         "headers": [
           {
             "enabled": true,

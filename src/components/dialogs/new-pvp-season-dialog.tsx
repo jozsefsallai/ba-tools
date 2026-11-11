@@ -28,6 +28,7 @@ import {
   GAME_SERVER_NAMES,
   GAME_SERVERS,
   type GameServer,
+  LATEST_PVP_SEASON,
   PVP_SEASONS,
 } from "@/lib/types";
 import { api } from "~convex/api";
@@ -44,7 +45,7 @@ export function NewPVPSeasonDialog({
   const t = useTranslations();
   const [name, setName] = useState("");
   const [gameServer, setGameServer] = useState<GameServer>("JP");
-  const [seasonNumber, setSeasonNumber] = useState(11);
+  const [seasonNumber, setSeasonNumber] = useState<number>(LATEST_PVP_SEASON);
 
   const [requestInProgress, setRequestInProgress] = useState(false);
 

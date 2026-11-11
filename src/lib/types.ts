@@ -46,9 +46,12 @@ export const PVP_SEASONS = [
   9,
   10,
   11,
+  12,
 ] as const;
 
 export type PVPSeasonNumber = (typeof PVP_SEASONS)[number];
+
+export const LATEST_PVP_SEASON: PVPSeasonNumber = 12;
 
 export const BORROW_SLOT_GAMEMODES = [
   "raid",

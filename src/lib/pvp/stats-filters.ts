@@ -1,11 +1,15 @@
 import { Storage } from "@/lib/storage";
-import { PVP_SEASONS, type PVPSeasonNumber } from "@/lib/types";
+import {
+  LATEST_PVP_SEASON,
+  PVP_SEASONS,
+  type PVPSeasonNumber,
+} from "@/lib/types";
 
 const seasonStorage = new Storage<unknown>("pvp_stats_season");
 const exclusionsStorage = new Storage<unknown>("pvp_stats_excluded_students");
 
 export function readPvpStatsFilters() {
-  let seasonNumber: PVPSeasonNumber = 11;
+  let seasonNumber: PVPSeasonNumber = LATEST_PVP_SEASON;
   let excludedStudentIds: string[] = [];
 
   try {

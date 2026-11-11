@@ -57,6 +57,10 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Made it easier to figure out at how many charges you got a pick-up using a calculator based on numbers you have access to after the fact.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description: "Add Season 12.",
+      },
     ],
     fixes: [],
   },
