@@ -2,9 +2,11 @@
 
 import { useMutation, useQuery } from "convex/react";
 import {
+  CalculatorIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   InfoIcon,
+  PencilIcon,
   PlusIcon,
   SaveIcon,
   Trash2Icon,
@@ -38,6 +40,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
 import { getErrorMessage } from "@/lib/convex-error";
@@ -45,10 +53,13 @@ import {
   type CanonicalPickup,
   calculateRecruitmentStats,
   normalizeRecruitmentSession,
+  type PickupChargeError,
   pickupPoolKind,
   RECRUITMENT_COLORS,
   type RecruitmentKind,
   type RecruitmentSessionInput,
+  type ResolvedPickupCharge,
+  resolvePickupCharges,
 } from "@/lib/recruitment";
 import { buildStudentIconUrl } from "@/lib/url";
 import { api } from "~convex/api";
@@ -61,7 +72,23 @@ type Props = {
 type RecruitmentPickupDraft = Omit<CanonicalPickup, "charge" | "kind"> & {
   charge: NumericInputValue;
   kind?: RecruitmentKind;
+  // When set, the charge is worked out from `totalPulls` and `chargeAfter`
+  calculated?: boolean;
+  totalPulls?: NumericInputValue;
+  chargeAfter?: NumericInputValue;
 };
+
+const PICKUP_CHARGE_ERROR_KEYS = {
+  outOfOrder: "tools.recruitment.errors.pickupTotalOutOfOrder",
+  exceedsSessionPulls: "tools.recruitment.errors.pickupTotalExceedsSession",
+  noPullsLeft: "tools.recruitment.errors.pickupNoPullsLeft",
+  aboveHardPity: "tools.recruitment.errors.pickupAboveHardPity",
+  invalidNumbers: "tools.recruitment.errors.pickupInvalidNumbers",
+} as const satisfies Record<PickupChargeError, string>;
+
+function numberOrUndefined(value: NumericInputValue | undefined) {
+  return value === "" ? undefined : value;
+}
 
 export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
   const t = useTranslations();
@@ -126,7 +153,57 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
     sessionId,
   ]);
 
+  const resolvedCharges = useMemo<ResolvedPickupCharge[]>(() => {
+    if (
+      permanentStartCharge === "" ||
+      limitedStartCharge === "" ||
+      permanentPulls === "" ||
+      limitedPulls === ""
+    ) {
+      return pickups.map(() => ({
+        status: "pending",
+      }));
+    }
+
+    const onlyPool =
+      limitedPulls > 0 && permanentPulls === 0
+        ? "limited"
+        : permanentPulls > 0 && limitedPulls === 0
+          ? "permanent"
+          : undefined;
+
+    return resolvePickupCharges(
+      {
+        permanent: {
+          startCharge: permanentStartCharge,
+          pulls: permanentPulls,
+        },
+        limited: {
+          startCharge: limitedStartCharge,
+          pulls: limitedPulls,
+        },
+      },
+      pickups.map((pickup) => ({
+        kind: pickup.kind ?? onlyPool,
+        charge: numberOrUndefined(pickup.charge),
+        totalPulls: numberOrUndefined(pickup.totalPulls),
+        chargeAfter: numberOrUndefined(pickup.chargeAfter),
+        calculated: pickup.calculated ?? false,
+      })),
+    );
+  }, [
+    permanentStartCharge,
+    limitedStartCharge,
+    permanentPulls,
+    limitedPulls,
+    pickups,
+  ]);
+
   const input = useMemo<RecruitmentSessionInput | null>(() => {
+    const charges = resolvedCharges.map((resolved) =>
+      resolved.status === "ok" ? resolved.charge : null,
+    );
+
     if (
       permanentStartCharge === "" ||
       limitedStartCharge === "" ||
@@ -135,7 +212,7 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
       threeStarCount === "" ||
       previousTickets === "" ||
       (rebateTicketsUsed !== undefined && rebateTicketsUsed === "") ||
-      pickups.some((pickup) => pickup.charge === "")
+      charges.includes(null)
     ) {
       return null;
     }
@@ -149,8 +226,8 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
         rebateTicketsFromPreviousSession: previousTickets,
         rebateTicketsUsed,
         isFestBanner,
-        pickupsObtained: pickups.map((pickup) => ({
-          charge: pickup.charge as number,
+        pickupsObtained: pickups.map((pickup, index) => ({
+          charge: charges[index] as number,
           studentId: pickup.studentId,
           kind: pickup.kind,
         })),
@@ -165,8 +242,8 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
         rebateTicketsFromPreviousSession: previousTickets,
         rebateTicketsUsed,
         isFestBanner,
-        pickupsObtained: pickups.map((pickup) => ({
-          charge: pickup.charge as number,
+        pickupsObtained: pickups.map((pickup, index) => ({
+          charge: charges[index] as number,
           studentId: pickup.studentId,
           kind: pickup.kind ?? "permanent",
         })),
@@ -182,7 +259,21 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
     rebateTicketsUsed,
     isFestBanner,
     pickups,
+    resolvedCharges,
   ]);
+
+  function updatePickup(index: number, patch: Partial<RecruitmentPickupDraft>) {
+    setPickups(
+      pickups.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              ...patch,
+            }
+          : item,
+      ),
+    );
+  }
   const stats = useMemo(() => {
     if (!input) {
       return {
@@ -469,8 +560,11 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
                 setPickups([
                   ...pickups,
                   {
-                    charge: 1,
+                    charge: "",
                     studentId: "",
+                    calculated: true,
+                    totalPulls: "",
+                    chargeAfter: "",
                   },
                 ])
               }
@@ -479,92 +573,198 @@ export function RecruitmentSessionEditor({ accountId, sessionId }: Props) {
               {t("tools.recruitment.addPickup")}
             </Button>
           </div>
-          {pickups.map((pickup, index) => (
-            <div
-              className="grid items-center gap-3 rounded-lg border bg-card p-3 shadow-sm sm:grid-cols-[auto_minmax(0,1fr)_auto_7rem_auto]"
-              key={`${index}-${pickup.studentId}`}
-            >
-              <span className="hidden size-7 place-items-center rounded-full bg-muted text-xs font-semibold text-muted-foreground sm:grid">
-                {index + 1}
-              </span>
-              <StudentPicker
-                onStudentSelected={(student) =>
-                  setPickups(
-                    pickups.map((item, i) =>
-                      i === index
-                        ? {
-                            ...item,
-                            studentId: student.id,
-                            kind: pickupPoolKind(student),
+
+          <p className="text-xs text-muted-foreground">
+            {t("tools.recruitment.pickupsHint")}
+          </p>
+
+          {pickups.map((pickup, index) => {
+            const resolved = resolvedCharges[index];
+
+            const student = students.find(
+              (item) => item.id === pickup.studentId,
+            );
+
+            return (
+              <div
+                className="flex flex-col gap-3 rounded-lg border bg-card p-3 shadow-sm"
+                key={`${index}-${pickup.studentId}`}
+              >
+                <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]">
+                  <span className="hidden size-7 place-items-center rounded-full bg-muted text-xs font-semibold text-muted-foreground sm:grid">
+                    {index + 1}
+                  </span>
+                  <StudentPicker
+                    onStudentSelected={(selected) =>
+                      updatePickup(index, {
+                        studentId: selected.id,
+                        kind: pickupPoolKind(selected),
+                      })
+                    }
+                  >
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-12 w-full justify-start px-2"
+                    >
+                      {student ? (
+                        <>
+                          <img
+                            src={buildStudentIconUrl(student)}
+                            alt=""
+                            className="size-10 rounded-full object-cover"
+                          />
+
+                          <span className="truncate">{student.name}</span>
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {t("common.selectStudent")}
+                        </span>
+                      )}
+                    </Button>
+                  </StudentPicker>
+
+                  <PickupPoolBadge kind={pickup.kind} />
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t("tools.recruitment.removePickup")}
+                    onClick={() =>
+                      setPickups(pickups.filter((_, i) => i !== index))
+                    }
+                  >
+                    <XIcon />
+                  </Button>
+                </div>
+
+                <div className="grid items-start gap-3 sm:grid-cols-3">
+                  {pickup.calculated && (
+                    <>
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <Label className="text-xs text-muted-foreground">
+                          {t("tools.recruitment.pickupTotalPulls", {
+                            kind: pickup.kind ?? "unknown",
+                          })}
+                        </Label>
+
+                        <NumericInput
+                          min={1}
+                          value={pickup.totalPulls ?? ""}
+                          onValueChange={(totalPulls) =>
+                            updatePickup(index, {
+                              totalPulls,
+                            })
                           }
-                        : item,
-                    ),
-                  )
-                }
-              >
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="h-12 w-full justify-start px-2"
-                >
-                  {(() => {
-                    const student = students.find(
-                      (item) => item.id === pickup.studentId,
-                    );
-                    return student ? (
-                      <>
-                        <img
-                          src={buildStudentIconUrl(student)}
-                          alt=""
-                          className="size-10 rounded-full object-cover"
                         />
-                        <span className="truncate">{student.name}</span>
-                      </>
-                    ) : (
-                      <span className="text-muted-foreground">
-                        {t("common.selectStudent")}
-                      </span>
-                    );
-                  })()}
-                </Button>
-              </StudentPicker>
-              <PickupPoolBadge kind={pickup.kind} />
-              <div className="flex min-w-0 flex-col gap-1">
-                <Label className="text-xs text-muted-foreground">
-                  {t("tools.recruitment.pickupCharge")}
-                </Label>
-                <NumericInput
-                  aria-label={t("tools.recruitment.pickupCharge")}
-                  min={1}
-                  max={200}
-                  value={pickup.charge}
-                  onValueChange={(charge) =>
-                    setPickups(
-                      pickups.map((item, i) =>
-                        i === index
-                          ? {
-                              ...item,
+                      </div>
+
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <Label className="text-xs text-muted-foreground">
+                          {t("tools.recruitment.pickupChargeAfter", {
+                            kind: pickup.kind ?? "unknown",
+                          })}
+                        </Label>
+
+                        <NumericInput
+                          min={0}
+                          max={200}
+                          value={pickup.chargeAfter ?? ""}
+                          onValueChange={(chargeAfter) =>
+                            updatePickup(index, {
+                              chargeAfter,
+                            })
+                          }
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="order-first flex min-w-0 flex-col gap-1 sm:order-none sm:col-start-3">
+                    <Label className="text-xs text-muted-foreground">
+                      {t("tools.recruitment.pickupCharge")}
+                    </Label>
+
+                    <div className="flex items-center gap-1">
+                      {pickup.calculated ? (
+                        <output className="flex h-9 min-w-0 flex-1 items-center rounded-md border border-dashed bg-muted/40 px-3 font-semibold tabular-nums">
+                          {resolved?.status === "ok" ? resolved.charge : "—"}
+                        </output>
+                      ) : (
+                        <NumericInput
+                          aria-label={t("tools.recruitment.pickupCharge")}
+                          className="min-w-0 flex-1"
+                          min={1}
+                          max={200}
+                          value={pickup.charge}
+                          onValueChange={(charge) =>
+                            updatePickup(index, {
                               charge,
-                            }
-                          : item,
-                      ),
-                    )
-                  }
-                />
+                            })
+                          }
+                        />
+                      )}
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="shrink-0 text-muted-foreground"
+                              aria-label={
+                                pickup.calculated
+                                  ? t("tools.recruitment.pickupModeDirect")
+                                  : t("tools.recruitment.pickupModeCalculated")
+                              }
+                              onClick={() =>
+                                updatePickup(
+                                  index,
+                                  pickup.calculated
+                                    ? {
+                                        calculated: false,
+                                        // Keep the charge that was just worked out.
+                                        charge:
+                                          resolved?.status === "ok"
+                                            ? resolved.charge
+                                            : pickup.charge,
+                                      }
+                                    : {
+                                        calculated: true,
+                                      },
+                                )
+                              }
+                            >
+                              {pickup.calculated ? (
+                                <PencilIcon />
+                              ) : (
+                                <CalculatorIcon />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+
+                          <TooltipContent>
+                            {pickup.calculated
+                              ? t("tools.recruitment.pickupModeDirect")
+                              : t("tools.recruitment.pickupModeCalculated")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                </div>
+
+                {pickup.calculated && resolved?.status === "error" && (
+                  <p className="text-sm text-destructive">
+                    {t(PICKUP_CHARGE_ERROR_KEYS[resolved.error])}
+                  </p>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={t("tools.recruitment.removePickup")}
-                onClick={() =>
-                  setPickups(pickups.filter((_, i) => i !== index))
-                }
-              >
-                <XIcon />
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </fieldset>
       <div className="grid gap-3 rounded-md border p-4 text-sm sm:grid-cols-3">

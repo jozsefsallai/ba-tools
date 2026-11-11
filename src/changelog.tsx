@@ -49,6 +49,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 12, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Made it easier to figure out at how many charges you got a pick-up using a calculator based on numbers you have access to after the fact.",
+      },
+    ],
+    fixes: [],
+  },
+  {
     date: "November 7, 2026",
     features: [],
     changes: [

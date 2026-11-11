@@ -375,6 +375,159 @@ export function calculateRecruitmentStats(
   };
 }
 
+export type PickupChargeEntry = {
+  kind?: RecruitmentKind;
+  charge?: number;
+  totalPulls?: number;
+  chargeAfter?: number;
+  calculated: boolean;
+};
+
+export type PickupChargeError =
+  | "outOfOrder"
+  | "exceedsSessionPulls"
+  | "noPullsLeft"
+  | "aboveHardPity"
+  | "invalidNumbers";
+
+export type ResolvedPickupCharge =
+  | {
+      status: "ok";
+      charge: number;
+    }
+  | {
+      status: "pending";
+    }
+  | {
+      status: "error";
+      error: PickupChargeError;
+    };
+
+export function resolvePickupCharges(
+  pools: Record<
+    RecruitmentKind,
+    {
+      startCharge: number;
+      pulls: number;
+    }
+  >,
+  pickups: PickupChargeEntry[],
+): ResolvedPickupCharge[] {
+  const state = {
+    permanent: {
+      chargeSum: 0,
+      lastTotalPulls: 0,
+      blocked: false,
+    },
+    limited: {
+      chargeSum: 0,
+      lastTotalPulls: 0,
+      blocked: false,
+    },
+  };
+
+  return pickups.map((pickup): ResolvedPickupCharge => {
+    const pool = pickup.kind ? state[pickup.kind] : undefined;
+    const resolved = resolvePickupCharge(pools, pool, pickup);
+
+    if (pool) {
+      if (resolved.status === "ok") {
+        pool.chargeSum += resolved.charge;
+
+        if (pickup.calculated && pickup.totalPulls !== undefined) {
+          pool.lastTotalPulls = pickup.totalPulls;
+        }
+      } else {
+        pool.blocked = true;
+      }
+    }
+
+    return resolved;
+  });
+}
+
+function resolvePickupCharge(
+  pools: Record<
+    RecruitmentKind,
+    {
+      startCharge: number;
+      pulls: number;
+    }
+  >,
+  pool:
+    | {
+        chargeSum: number;
+        lastTotalPulls: number;
+        blocked: boolean;
+      }
+    | undefined,
+  pickup: PickupChargeEntry,
+): ResolvedPickupCharge {
+  if (!pickup.calculated) {
+    return pickup.charge === undefined
+      ? {
+          status: "pending",
+        }
+      : {
+          status: "ok",
+          charge: pickup.charge,
+        };
+  }
+
+  const { totalPulls, chargeAfter } = pickup;
+
+  if (
+    !pickup.kind ||
+    !pool ||
+    pool.blocked ||
+    totalPulls === undefined ||
+    chargeAfter === undefined
+  ) {
+    return {
+      status: "pending",
+    };
+  }
+
+  const fail = (error: PickupChargeError): ResolvedPickupCharge => ({
+    status: "error",
+    error,
+  });
+
+  if (
+    !Number.isInteger(totalPulls) ||
+    totalPulls < 1 ||
+    !Number.isInteger(chargeAfter) ||
+    chargeAfter < 0 ||
+    chargeAfter > HARD_PITY
+  ) {
+    return fail("invalidNumbers");
+  }
+
+  if (totalPulls < pool.lastTotalPulls) {
+    return fail("outOfOrder");
+  }
+
+  if (totalPulls > pools[pickup.kind].pulls) {
+    return fail("exceedsSessionPulls");
+  }
+
+  const charge =
+    pools[pickup.kind].startCharge + totalPulls - pool.chargeSum - chargeAfter;
+
+  if (charge < 1) {
+    return fail("noPullsLeft");
+  }
+
+  if (charge > HARD_PITY) {
+    return fail("aboveHardPity");
+  }
+
+  return {
+    status: "ok",
+    charge,
+  };
+}
+
 export function classifyPickup(charge: number): PickupClassification {
   if (charge === HARD_PITY) {
     return "hardPity";
