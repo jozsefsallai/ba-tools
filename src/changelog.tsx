@@ -1159,7 +1159,7 @@ export const CHANGELOG: ChangelogItemData[] = [
         description: (
           <>
             Added{" "}
-            <Link href="/user/rosters" className="font-semibold underline">
+            <Link href="/rosters" className="font-semibold underline">
               My Roster
             </Link>{" "}
             tool. You can use this tool to create and manage your rosters which

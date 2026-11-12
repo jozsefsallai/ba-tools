@@ -308,12 +308,12 @@ export function AppSidebar() {
       },
     },
     {
-      href: "/user/rosters",
+      href: "/rosters",
       text: t("common.header.nav.misc.roster"),
       icon: IdCardIcon,
     },
     {
-      href: "/user/recruitment",
+      href: "/recruitment-tracker",
       text: t("common.header.nav.misc.recruitment"),
       icon: SquareText,
     },

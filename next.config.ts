@@ -296,6 +296,31 @@ const nextConfig: NextConfig = {
         destination: "/ja/timeline-visualizer",
         statusCode: 307,
       },
+      ...[
+        "",
+        "/ja",
+      ].flatMap((prefix) => [
+        {
+          source: `${prefix}/user/rosters`,
+          destination: `${prefix}/rosters`,
+          statusCode: 307 as const,
+        },
+        {
+          source: `${prefix}/user/rosters/new`,
+          destination: `${prefix}/rosters/new`,
+          statusCode: 307 as const,
+        },
+        {
+          source: `${prefix}/user/rosters/:rosterId`,
+          destination: `${prefix}/rosters/edit/:rosterId`,
+          statusCode: 307 as const,
+        },
+        {
+          source: `${prefix}/user/recruitment/:path*`,
+          destination: `${prefix}/recruitment-tracker/:path*`,
+          statusCode: 307 as const,
+        },
+      ]),
     ];
   },
 

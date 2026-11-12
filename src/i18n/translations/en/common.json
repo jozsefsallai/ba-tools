@@ -47,6 +47,10 @@
   "untitledTimelineGroup": "Untitled Timeline Group",
   "clickAgainToConfirm": "Click again to confirm",
   "signIn": "Sign in",
+  "signedOut": {
+    "prompt": "Sign in to start using this tool. It's free, and what you save is kept on your account.",
+    "example": "Example"
+  },
   "header": {
     "nav": {
       "gameplay": {

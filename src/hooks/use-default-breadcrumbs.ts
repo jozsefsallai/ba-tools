@@ -64,18 +64,13 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
         label: t("common.header.nav.misc.formationDisplay"),
         group: t("common.header.nav.misc.title"),
       },
-      "/user/recruitment": {
+      "/recruitment-tracker": {
         label: t("common.header.nav.misc.recruitment"),
         group: t("common.header.nav.misc.title"),
       },
-      "/user/rosters": {
+      "/rosters": {
         label: t("common.header.nav.misc.roster"),
         group: t("common.header.nav.misc.title"),
-      },
-      "/rosters/": {
-        label: t("common.header.nav.misc.roster"),
-        group: t("common.header.nav.misc.title"),
-        href: "/user/rosters",
       },
       "/title-generator": {
         label: t("common.header.nav.misc.titleGenerator"),

@@ -88,7 +88,7 @@ export async function ToolsAndResources() {
     },
     {
       name: t("static.home.toollist.roster.title"),
-      path: "/user/rosters",
+      path: "/rosters",
       icon: <IdCardIcon className="size-10 text-teal-500 shrink-0" />,
       description: t("static.home.toollist.roster.description"),
     },
@@ -108,7 +108,7 @@ export async function ToolsAndResources() {
     },
     {
       name: t("static.home.toollist.recruitment.title"),
-      path: "/user/recruitment",
+      path: "/recruitment-tracker",
       icon: <SquareText className="size-10 text-cyan-400 shrink-0" />,
       description: t("static.home.toollist.recruitment.description"),
       isNew: true,

@@ -1,4 +1,4 @@
-import type { RosterItem } from "@/app/[locale]/user/rosters/_components/roster-item-editor";
+import type { RosterItem } from "@/app/[locale]/rosters/(own)/_components/roster-item-editor";
 import {
   type StudentStorageItem,
   studentStorage,

@@ -3,7 +3,7 @@
 import { TriangleAlertIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type PropsWithChildren, useState } from "react";
-import type { RosterItem } from "@/app/[locale]/user/rosters/_components/roster-item-editor";
+import type { RosterItem } from "@/app/[locale]/rosters/(own)/_components/roster-item-editor";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,

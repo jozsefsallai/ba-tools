@@ -1373,6 +1373,16 @@
       "failedToLoad": "Failed to load rosters."
     },
 
+    "signedOut": {
+      "title": "Student rosters",
+      "description": "Keep a record of the students you've raised, and share it with a link when a club or a friend asks what you can lend.",
+      "featureProgress": "Record each student's level, stars, skills, equipment and bond rank.",
+      "featureBorrow": "Mark the students in your borrow slots, so friends know who they can use.",
+      "featureShare": "Make a roster public to get a page at your friend code, or keep it private.",
+      "featureImport": "Import your students from Justin Planner instead of entering them by hand.",
+      "exampleName": "Sensei's roster"
+    },
+
     "create": {
       "title": "Create Roster",
       "submit": "Create Roster",
@@ -2373,6 +2383,13 @@
     },
     "confirmDeleteTitle": "Delete recruitment session?",
     "confirmDeleteDescription": "This action cannot be undone. The session and its recorded recruitment results will be deleted.",
+    "signedOut": {
+      "description": "Log every banner you pull on, and see where your Recruitment Charge stands and how your luck has held up.",
+      "featureCharge": "See how far each banner type is from soft and hard pity.",
+      "featureSessions": "Log one session per banner cycle, with the pick-ups you got and the rebate tickets you used.",
+      "featureAnalytics": "See the 3★ and pick-up rates you actually got, your soft pity wins and losses, and the pyroxenes your rebate tickets saved.",
+      "exampleName": "Main account"
+    },
     "toasts": {
       "accountCreated": "Recruitment account created.",
       "accountCreateFail": "Failed to create recruitment account.",
