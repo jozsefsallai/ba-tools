@@ -42,6 +42,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { getErrorMessage } from "@/lib/convex-error";
 import {
   calculateRecruitmentStats,
+  compareWithSparkSystem,
   normalizeRecruitmentSession,
   type RecruitmentSessionInput,
   type ResolvedPickupCharge,
@@ -338,6 +339,24 @@ export function RecruitmentSessionEditor({
     input,
   ]);
 
+  const paidPulls = stats.value?.paidPulls;
+
+  const spark = useMemo(
+    () =>
+      input && paidPulls !== undefined
+        ? compareWithSparkSystem([
+            {
+              session: input,
+              paidPulls,
+            },
+          ])
+        : null,
+    [
+      input,
+      paidPulls,
+    ],
+  );
+
   if (
     accountResult === undefined ||
     (sessionId && sessionResult === undefined)
@@ -628,6 +647,7 @@ export function RecruitmentSessionEditor({
         <SessionSummary
           stats={stats.value}
           error={stats.error ? t(saveErrorKey(stats.error)) : undefined}
+          spark={spark}
         />
       </div>
 

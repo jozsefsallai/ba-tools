@@ -9,16 +9,22 @@ import {
   ChargeGauge,
   Readout,
 } from "@/app/[locale]/user/recruitment/_components/shared";
-import type { RecruitmentStats } from "@/lib/recruitment";
+import { SparkComparison } from "@/app/[locale]/user/recruitment/_components/spark-comparison";
+import type {
+  RecruitmentStats,
+  SparkSystemComparison,
+} from "@/lib/recruitment";
 
 type SessionSummaryProps = {
   stats: RecruitmentStats | null;
   /** Why the stats could not be worked out, already translated. */
   error?: string;
+  /** How the session would have gone in the old spark system. */
+  spark?: SparkSystemComparison | null;
 };
 
 /** The live results of the session being edited. */
-export function SessionSummary({ stats, error }: SessionSummaryProps) {
+export function SessionSummary({ stats, error, spark }: SessionSummaryProps) {
   const t = useTranslations();
 
   return (
@@ -88,6 +94,8 @@ export function SessionSummary({ stats, error }: SessionSummaryProps) {
               },
             ]}
           />
+
+          {spark && <SparkComparison comparison={spark} />}
 
           <div className="flex flex-col gap-1">
             <h3 className="text-sm font-semibold">

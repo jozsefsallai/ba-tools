@@ -393,6 +393,581 @@ export function calculateRecruitmentStats(
   };
 }
 
+export const SPARK_COST = 200;
+export const SPARK_PICKUP_RATE = 0.007;
+export const THREE_STAR_RATE = 0.03;
+export const FEST_THREE_STAR_RATE = 0.06;
+
+const NEGLIGIBLE_CHANCE = 1e-18;
+
+const UNLIKELY_OUTCOME = 1e-14;
+
+const MAX_TRACKED_PICKUPS = 30;
+
+function logFactorials(max: number): number[] {
+  const table = [
+    0,
+  ];
+
+  for (let n = 1; n <= max; n++) {
+    table.push(table[n - 1] + Math.log(n));
+  }
+
+  return table;
+}
+
+function binomialProbability(
+  logFactorial: number[],
+  pulls: number,
+  hits: number,
+  chance: number,
+): number {
+  if (hits > pulls) {
+    return 0;
+  }
+
+  return Math.exp(
+    logFactorial[pulls] -
+      logFactorial[hits] -
+      logFactorial[pulls - hits] +
+      hits * Math.log(chance) +
+      (pulls - hits) * Math.log(1 - chance),
+  );
+}
+
+type OddsTargets = {
+  pickups: number;
+  threeStars: number;
+};
+
+type Outcomes = Float64Array;
+
+function emptyOutcomes(targets: OddsTargets): Outcomes {
+  return new Float64Array((targets.pickups + 1) * (targets.threeStars + 1));
+}
+
+function outcomeIndex(
+  targets: OddsTargets,
+  pickups: number,
+  threeStars: number,
+): number {
+  return (
+    Math.min(pickups, targets.pickups) * (targets.threeStars + 1) +
+    Math.min(threeStars, targets.threeStars)
+  );
+}
+
+function addOutcomes(
+  outcomes: Outcomes,
+  targets: OddsTargets,
+  logFactorial: number[],
+  chance: number,
+  pickups: number,
+  guaranteedThreeStars: number,
+  freePulls: number,
+  offRateChance: number,
+): void {
+  const expectedOffRates = freePulls * offRateChance;
+  let covered = 0;
+
+  for (let offRates = 0; offRates <= freePulls; offRates++) {
+    const threeStars = guaranteedThreeStars + offRates;
+
+    // Everything from the target up counts the same.
+    if (threeStars >= targets.threeStars) {
+      outcomes[outcomeIndex(targets, pickups, threeStars)] +=
+        chance * Math.max(0, 1 - covered);
+
+      return;
+    }
+
+    const share = binomialProbability(
+      logFactorial,
+      freePulls,
+      offRates,
+      offRateChance,
+    );
+
+    if (offRates > expectedOffRates && chance * share < NEGLIGIBLE_CHANCE) {
+      return;
+    }
+
+    outcomes[outcomeIndex(targets, pickups, threeStars)] += chance * share;
+    covered += share;
+  }
+}
+
+function flatRateOutcomes(
+  logFactorial: number[],
+  pulls: number,
+  threeStarRate: number,
+  targets: OddsTargets,
+): Outcomes {
+  const outcomes = emptyOutcomes(targets);
+  const offRateChance =
+    (threeStarRate - SPARK_PICKUP_RATE) / (1 - SPARK_PICKUP_RATE);
+
+  for (let pickups = 0; pickups <= pulls; pickups++) {
+    const chance = binomialProbability(
+      logFactorial,
+      pulls,
+      pickups,
+      SPARK_PICKUP_RATE,
+    );
+
+    if (pickups > pulls * SPARK_PICKUP_RATE && chance < NEGLIGIBLE_CHANCE) {
+      break;
+    }
+
+    addOutcomes(
+      outcomes,
+      targets,
+      logFactorial,
+      chance,
+      pickups,
+      pickups,
+      pulls - pickups,
+      offRateChance,
+    );
+  }
+
+  return outcomes;
+}
+
+function chargeOutcomes(
+  logFactorial: number[],
+  startCharge: number,
+  pulls: number,
+  threeStarRate: number,
+  targets: OddsTargets,
+): Outcomes {
+  const chargeSize = HARD_PITY + 1;
+  const pickupSize = Math.min(pulls, MAX_TRACKED_PICKUPS) + 1;
+  const lossSize = pickupSize + 1;
+
+  const stateIndex = (pickups: number, losses: number, charge: number) =>
+    (pickups * lossSize + losses) * chargeSize + charge;
+
+  let current = new Float64Array(pickupSize * lossSize * chargeSize);
+  let next = new Float64Array(current.length);
+  let mostPickups = 0;
+
+  current[stateIndex(0, 0, Math.min(startCharge, HARD_PITY))] = 1;
+
+  for (let pull = 0; pull < pulls; pull++) {
+    const reachedPickups = mostPickups;
+    const highestCharge = Math.min(HARD_PITY, startCharge + pull);
+
+    next.fill(
+      0,
+      0,
+      Math.min(next.length, stateIndex(reachedPickups + 2, 0, 0)),
+    );
+
+    for (let pickups = 0; pickups <= reachedPickups; pickups++) {
+      const morePickups = Math.min(pickupSize - 1, pickups + 1);
+
+      for (let losses = 0; losses <= pickups + 1; losses++) {
+        for (let charge = 0; charge <= highestCharge; charge++) {
+          const chance = current[stateIndex(pickups, losses, charge)];
+
+          if (chance < NEGLIGIBLE_CHANCE) {
+            continue;
+          }
+
+          const newCharge = charge + 1;
+
+          const pickupChance =
+            newCharge >= HARD_PITY
+              ? 1
+              : newCharge === SOFT_PITY
+                ? 0.5
+                : SPARK_PICKUP_RATE;
+
+          next[stateIndex(morePickups, losses, 0)] += chance * pickupChance;
+
+          if (chance * pickupChance >= UNLIKELY_OUTCOME) {
+            mostPickups = Math.max(mostPickups, morePickups);
+          }
+
+          if (newCharge < HARD_PITY) {
+            const lost = newCharge === SOFT_PITY ? 1 : 0;
+
+            next[stateIndex(pickups, losses + lost, newCharge)] +=
+              chance * (1 - pickupChance);
+          }
+        }
+      }
+    }
+
+    [current, next] = [
+      next,
+      current,
+    ];
+  }
+
+  const outcomes = emptyOutcomes(targets);
+  const offRateChance =
+    (threeStarRate - SPARK_PICKUP_RATE) / (1 - SPARK_PICKUP_RATE);
+
+  for (let pickups = 0; pickups <= mostPickups; pickups++) {
+    for (let losses = 0; losses <= pickups + 1; losses++) {
+      let chance = 0;
+
+      for (let charge = 0; charge <= HARD_PITY; charge++) {
+        chance += current[stateIndex(pickups, losses, charge)];
+      }
+
+      if (chance < NEGLIGIBLE_CHANCE) {
+        continue;
+      }
+
+      addOutcomes(
+        outcomes,
+        targets,
+        logFactorial,
+        chance,
+        pickups,
+        pickups + losses,
+        Math.max(0, pulls - pickups - losses),
+        offRateChance,
+      );
+    }
+  }
+
+  return outcomes;
+}
+
+export type RecruitmentOdds = {
+  pickups: number;
+  threeStars: number;
+  combined: number;
+};
+
+function likelyOutcomes(targets: OddsTargets, outcomes: Outcomes) {
+  const threeStarSize = targets.threeStars + 1;
+  const pickups: number[] = [];
+  const threeStars: number[] = [];
+  const chances: number[] = [];
+
+  for (let index = 0; index < outcomes.length; index++) {
+    if (outcomes[index] >= UNLIKELY_OUTCOME) {
+      pickups.push(Math.floor(index / threeStarSize));
+      threeStars.push(index % threeStarSize);
+      chances.push(outcomes[index]);
+    }
+  }
+
+  return {
+    pickups,
+    threeStars,
+    chances,
+  };
+}
+
+function oddsOfReaching(
+  targets: OddsTargets,
+  parts: Outcomes[],
+): RecruitmentOdds {
+  const threeStarSize = targets.threeStars + 1;
+
+  let total = emptyOutcomes(targets);
+  total[0] = 1;
+
+  for (const part of parts) {
+    const sum = emptyOutcomes(targets);
+    const from = likelyOutcomes(targets, total);
+    const added = likelyOutcomes(targets, part);
+
+    for (let i = 0; i < from.chances.length; i++) {
+      for (let j = 0; j < added.chances.length; j++) {
+        sum[
+          outcomeIndex(
+            targets,
+            from.pickups[i] + added.pickups[j],
+            from.threeStars[i] + added.threeStars[j],
+          )
+        ] += from.chances[i] * added.chances[j];
+      }
+    }
+
+    total = sum;
+  }
+
+  const odds: RecruitmentOdds = {
+    pickups: 0,
+    threeStars: 0,
+    combined: total[outcomeIndex(targets, targets.pickups, targets.threeStars)],
+  };
+
+  for (let index = 0; index < total.length; index++) {
+    if (Math.floor(index / threeStarSize) === targets.pickups) {
+      odds.pickups += total[index];
+    }
+
+    if (index % threeStarSize === targets.threeStars) {
+      odds.threeStars += total[index];
+    }
+  }
+
+  return {
+    pickups: Math.min(1, odds.pickups),
+    threeStars: Math.min(1, odds.threeStars),
+    combined: Math.min(1, odds.combined),
+  };
+}
+
+export type SparkComparisonSession = {
+  session: RecruitmentSessionRecord;
+  paidPulls: number;
+};
+
+export type StudentCounts = {
+  pickups: number;
+  threeStars: number;
+};
+
+function chargeExpectation(
+  startCharge: number,
+  pulls: number,
+  threeStarRate: number,
+): StudentCounts {
+  let charges = new Float64Array(HARD_PITY + 1);
+  let next = new Float64Array(HARD_PITY + 1);
+  let pickups = 0;
+  let losses = 0;
+
+  charges[Math.min(startCharge, HARD_PITY)] = 1;
+
+  for (let pull = 0; pull < pulls; pull++) {
+    next.fill(0);
+
+    for (let charge = 0; charge <= HARD_PITY; charge++) {
+      const chance = charges[charge];
+
+      if (chance === 0) {
+        continue;
+      }
+
+      const newCharge = charge + 1;
+
+      const pickupChance =
+        newCharge >= HARD_PITY
+          ? 1
+          : newCharge === SOFT_PITY
+            ? 0.5
+            : SPARK_PICKUP_RATE;
+
+      pickups += chance * pickupChance;
+      next[0] += chance * pickupChance;
+
+      if (newCharge < HARD_PITY) {
+        next[newCharge] += chance * (1 - pickupChance);
+
+        if (newCharge === SOFT_PITY) {
+          losses += chance * (1 - pickupChance);
+        }
+      }
+    }
+
+    [charges, next] = [
+      next,
+      charges,
+    ];
+  }
+
+  const offRateChance =
+    (threeStarRate - SPARK_PICKUP_RATE) / (1 - SPARK_PICKUP_RATE);
+
+  return {
+    pickups,
+    threeStars: pickups + losses + (pulls - pickups - losses) * offRateChance,
+  };
+}
+
+export type SparkSystemExpectation = {
+  sessionCount: number;
+  pickupCount: number;
+  threeStarCount: number;
+  paidPulls: number;
+  ratePulls: {
+    regular: number;
+    fest: number;
+  };
+  sparks: number;
+  sparkExpected: StudentCounts;
+  chargeExpected: StudentCounts;
+};
+
+type PoolPlay = readonly [
+  startCharge: number,
+  pulls: number,
+  threeStarRate: number,
+];
+
+function poolsPlayed(input: RecruitmentSessionInput): PoolPlay[] {
+  const pools: PoolPlay[] = [
+    [
+      input.permanentStartCharge,
+      input.permanentPulls,
+      THREE_STAR_RATE,
+    ],
+    [
+      input.limitedStartCharge,
+      input.limitedPulls,
+      input.isFestBanner ? FEST_THREE_STAR_RATE : THREE_STAR_RATE,
+    ],
+  ];
+
+  return pools.filter(([, pulls]) => pulls > 0);
+}
+
+export function expectWithSparkSystem(
+  entries: SparkComparisonSession[],
+): SparkSystemExpectation | null {
+  const sessions = entries.map(({ session, paidPulls }) => ({
+    input: normalizeRecruitmentSession(session),
+    paidPulls,
+  }));
+
+  const expectation: SparkSystemExpectation = {
+    sessionCount: sessions.length,
+    pickupCount: 0,
+    threeStarCount: 0,
+    paidPulls: 0,
+    ratePulls: {
+      regular: 0,
+      fest: 0,
+    },
+    sparks: 0,
+    sparkExpected: {
+      pickups: 0,
+      threeStars: 0,
+    },
+    chargeExpected: {
+      pickups: 0,
+      threeStars: 0,
+    },
+  };
+
+  for (const { input, paidPulls } of sessions) {
+    expectation.pickupCount += input.pickupsObtained.length;
+    expectation.threeStarCount += input.threeStarCount;
+    expectation.paidPulls += paidPulls;
+    expectation.sparks += Math.floor(paidPulls / SPARK_COST);
+
+    const pulls = splitByPullShare(
+      paidPulls,
+      input.permanentPulls,
+      input.limitedPulls,
+    );
+
+    expectation.ratePulls.regular += pulls.permanent;
+    expectation.ratePulls[input.isFestBanner ? "fest" : "regular"] +=
+      pulls.limited;
+
+    for (const pool of poolsPlayed(input)) {
+      const expected = chargeExpectation(...pool);
+
+      expectation.chargeExpected.pickups += expected.pickups;
+      expectation.chargeExpected.threeStars += expected.threeStars;
+    }
+  }
+
+  if (expectation.paidPulls <= 0) {
+    return null;
+  }
+
+  const { ratePulls, sparks } = expectation;
+
+  expectation.sparkExpected = {
+    pickups: expectation.paidPulls * SPARK_PICKUP_RATE + sparks,
+    threeStars:
+      ratePulls.regular * THREE_STAR_RATE +
+      ratePulls.fest * FEST_THREE_STAR_RATE +
+      sparks,
+  };
+
+  return expectation;
+}
+
+export type SparkSystemComparison = SparkSystemExpectation & {
+  neededPickups: number;
+  neededThreeStars: number;
+  sparkOdds: RecruitmentOdds;
+  chargeOdds: RecruitmentOdds;
+};
+
+export function compareWithSparkSystem(
+  entries: SparkComparisonSession[],
+): SparkSystemComparison | null {
+  const expectation = expectWithSparkSystem(entries);
+
+  if (!expectation) {
+    return null;
+  }
+
+  const inputs = entries.map(({ session }) =>
+    normalizeRecruitmentSession(session),
+  );
+
+  const { ratePulls, sparks } = expectation;
+
+  const targets: OddsTargets = {
+    pickups: expectation.pickupCount,
+    threeStars: expectation.threeStarCount,
+  };
+
+  const logFactorial = logFactorials(
+    Math.max(
+      expectation.paidPulls,
+      ...inputs.flatMap((input) => [
+        input.permanentPulls,
+        input.limitedPulls,
+      ]),
+    ),
+  );
+
+  const sparkTargets: OddsTargets = {
+    pickups: Math.max(0, targets.pickups - sparks),
+    threeStars: Math.max(0, targets.threeStars - sparks),
+  };
+
+  return {
+    ...expectation,
+    neededPickups: sparkTargets.pickups,
+    neededThreeStars: sparkTargets.threeStars,
+    sparkOdds: oddsOfReaching(sparkTargets, [
+      flatRateOutcomes(
+        logFactorial,
+        ratePulls.regular,
+        THREE_STAR_RATE,
+        sparkTargets,
+      ),
+      flatRateOutcomes(
+        logFactorial,
+        ratePulls.fest,
+        FEST_THREE_STAR_RATE,
+        sparkTargets,
+      ),
+    ]),
+    chargeOdds: oddsOfReaching(
+      targets,
+      inputs.flatMap((input) =>
+        poolsPlayed(input).map(([startCharge, pulls, threeStarRate]) =>
+          chargeOutcomes(
+            logFactorial,
+            startCharge,
+            pulls,
+            threeStarRate,
+            targets,
+          ),
+        ),
+      ),
+    ),
+  };
+}
+
 export type PickupChargeEntry = {
   kind?: RecruitmentKind;
   charge?: number;

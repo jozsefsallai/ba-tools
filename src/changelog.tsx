@@ -69,6 +69,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.recruitment,
         description: "Various logic and clarity improvements.",
       },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Sessions now show the odds of doing at least as well in the old Recruitment Points (spark) system with the same number of paid pulls, compared with the charge system, with the method explained. Account analytics compare what all sessions together give on average in each system.",
+      },
     ],
     fixes: [],
   },

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { type ReactNode, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 import { Readout } from "@/app/[locale]/user/recruitment/_components/shared";
+import { SparkExpectation } from "@/app/[locale]/user/recruitment/_components/spark-comparison";
 import type { SessionWithStats } from "@/app/[locale]/user/recruitment/_components/types";
 import {
   ChartContainer,
@@ -18,6 +19,7 @@ import {
   calculateRecruitmentStats,
   emptyAccountAggregates,
   emptyAggregateBucket,
+  expectWithSparkSystem,
   HARD_PITY,
   SOFT_PITY,
 } from "@/lib/recruitment";
@@ -249,10 +251,45 @@ export function AccountAnalytics({
       />
 
       <div className="grid w-full items-start gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <PitySummary bucket={bucket} />
+        <div className="grid gap-4">
+          <PitySummary bucket={bucket} />
+          <AccountSparkComparison sessions={sessions} />
+        </div>
+
         <PickupDistributionChart bucket={bucket} />
       </div>
     </section>
+  );
+}
+
+type AccountSparkComparisonProps = {
+  sessions: SessionWithStats[];
+};
+
+function AccountSparkComparison({ sessions }: AccountSparkComparisonProps) {
+  const expectation = useMemo(() => {
+    try {
+      return expectWithSparkSystem(
+        sessions.map((session) => ({
+          session,
+          paidPulls: session.stats.paidPulls,
+        })),
+      );
+    } catch {
+      return null;
+    }
+  }, [
+    sessions,
+  ]);
+
+  if (!expectation) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md border p-4">
+      <SparkExpectation expectation={expectation} />
+    </div>
   );
 }
 

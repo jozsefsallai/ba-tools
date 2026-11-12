@@ -93,6 +93,7 @@
     "howler": "^2.2.4",
     "html2canvas-pro": "^2.4.3",
     "ismobilejs": "^1.1.1",
+    "katex": "^0.19.1",
     "lucide-react": "^1.68.0",
     "mcp-handler": "^1.1.0",
     "motion": "^12.43.0",
