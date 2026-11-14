@@ -58,7 +58,13 @@ export const CHANGELOG: ChangelogItemData[] = [
       },
     ],
     changes: [],
-    fixes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Teams that only differ in the order of their special students are now treated as the same team, so they no longer show up twice in an opponent's used teams or get saved as duplicates.",
+      },
+    ],
   },
   {
     date: "November 12, 2026",

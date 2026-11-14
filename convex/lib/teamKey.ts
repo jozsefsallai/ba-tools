@@ -1,4 +1,4 @@
-export function canonicalPvpStatsTeam<
+export function canonicalPvpTeam<
   T extends {
     studentId?: string;
   },
@@ -13,12 +13,13 @@ export function canonicalPvpStatsTeam<
   ];
 }
 
-export function getPvpStatsTeamKey(
+// Use this, not getTeamKey, to identify a PvP team.
+export function getPvpTeamKey(
   team: Array<{
     studentId?: string;
   }>,
 ) {
-  return getTeamKey(canonicalPvpStatsTeam(team));
+  return getTeamKey(canonicalPvpTeam(team));
 }
 
 export function getTeamKey(

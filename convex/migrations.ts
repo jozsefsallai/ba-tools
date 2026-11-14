@@ -2,7 +2,7 @@ import { Migrations } from "@convex-dev/migrations";
 import { components, internal } from "~convex/api";
 import type { DataModel } from "~convex/dataModel";
 import { getPvpVideoUrl } from "./lib/pvpVideo";
-import { getTeamKey } from "./lib/teamKey";
+import { getPvpTeamKey, getTeamKey } from "./lib/teamKey";
 import { queueMatchStatsForSeason } from "./pvpStats";
 import schema from "./schema";
 
@@ -64,6 +64,85 @@ export const runPvpTeamKeyBackfill = migrations.runner([
   internal.migrations.backfillPvpEnemyTeamKeys,
   internal.migrations.backfillPvpMatchTeamKeys,
   internal.migrations.backfillPvpEnemyPresetRecency,
+]);
+
+export const rekeyPvpFormationPresets = migrations.define({
+  table: "pvpFormationPreset",
+  migrateOne: async (_ctx, preset) => ({
+    teamKey: getPvpTeamKey(preset.team),
+  }),
+});
+
+export const rekeyPvpMatches = migrations.define({
+  table: "pvpMatchRecord",
+  migrateOne: async (_ctx, match) => ({
+    ownTeamKey: getPvpTeamKey(match.ownTeam),
+    opponentTeamKey: getPvpTeamKey(match.opponentTeam),
+  }),
+});
+
+export const rekeyPvpEnemyTeams = migrations.define({
+  table: "pvpEnemyTeam",
+  migrateOne: async (ctx, team) => {
+    const current = await ctx.db.get(team._id);
+
+    if (!current) {
+      return;
+    }
+
+    const teamKey = getPvpTeamKey(current.team);
+    const siblings = (
+      await ctx.db
+        .query("pvpEnemyTeam")
+        .withIndex("by_seasonId_enemyPresetId", (q) =>
+          q
+            .eq("seasonId", current.seasonId)
+            .eq("enemyPresetId", current.enemyPresetId),
+        )
+        .collect()
+    ).filter((item) => getPvpTeamKey(item.team) === teamKey);
+
+    if (siblings.length <= 1) {
+      return {
+        teamKey,
+      };
+    }
+
+    const newest = siblings.reduce((best, item) =>
+      item.updatedAt > best.updatedAt ? item : best,
+    );
+    const roles = new Set(
+      siblings.flatMap((item) =>
+        item.matchType === "both"
+          ? [
+              "attack",
+              "defense",
+            ]
+          : [
+              item.matchType,
+            ],
+      ),
+    );
+    const keeper = siblings[0];
+
+    for (const duplicate of siblings.slice(1)) {
+      await ctx.db.delete(duplicate._id);
+    }
+
+    await ctx.db.patch(keeper._id, {
+      teamKey,
+      team: newest.team,
+      updatedAt: newest.updatedAt,
+      matchType:
+        roles.size === 2 ? "both" : roles.has("attack") ? "attack" : "defense",
+    });
+  },
+});
+
+export const runPvpTeamRekey = migrations.runner([
+  internal.migrations.rekeyPvpFormationPresets,
+  internal.migrations.rekeyPvpMatches,
+  internal.migrations.rekeyPvpEnemyTeams,
 ]);
 
 export const backfillPvpStatsVideos = migrations.define({

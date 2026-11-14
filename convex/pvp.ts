@@ -16,7 +16,7 @@ import {
   staffMutation,
 } from "./lib/auth";
 import { invalid, notFound } from "./lib/errors";
-import { getTeamKey } from "./lib/teamKey";
+import { getPvpTeamKey } from "./lib/teamKey";
 import {
   pvpEnemyPresetCreateArgs,
   pvpEnemyPresetUpdateArgs,
@@ -185,9 +185,7 @@ async function findManualEnemyTeam(
 ) {
   const teams = await getManualEnemyTeams(ctx, seasonId, presetId);
 
-  return teams.find(
-    (team) => team.teamKey === teamKey || getTeamKey(team.team) === teamKey,
-  );
+  return teams.find((team) => getPvpTeamKey(team.team) === teamKey);
 }
 
 function mergeEnemyRoles(
@@ -233,7 +231,7 @@ async function getUniqueEnemyTeamsForPreset(
     }
 
     const normalized = withoutDamage(team);
-    const key = getTeamKey(normalized);
+    const key = getPvpTeamKey(normalized);
     const existing = byKey.get(key);
 
     if (!existing) {
@@ -894,9 +892,9 @@ export const recordMatch = authenticatedMutation({
       opponentRank,
       matchType,
       ownTeam,
-      ownTeamKey: getTeamKey(ownTeam),
+      ownTeamKey: getPvpTeamKey(ownTeam),
       opponentTeam,
-      opponentTeamKey: getTeamKey(opponentTeam),
+      opponentTeamKey: getPvpTeamKey(opponentTeam),
       result,
       videoUrl,
       includeInStatistics,
@@ -953,9 +951,9 @@ export const bulkImportMatches = staffMutation({
         date,
         matchType: "attack",
         ownTeam: imported.attackTeam,
-        ownTeamKey: getTeamKey(imported.attackTeam),
+        ownTeamKey: getPvpTeamKey(imported.attackTeam),
         opponentTeam: imported.defenseTeam,
-        opponentTeamKey: getTeamKey(imported.defenseTeam),
+        opponentTeamKey: getPvpTeamKey(imported.defenseTeam),
         result: imported.attackWins ? "win" : "loss",
         videoUrl: imported.videoUrl,
         includeInStatistics: true,
@@ -1052,10 +1050,10 @@ export const updateMatch = authenticatedMutation({
       opponentRank: opponentRank ?? match.opponentRank,
       matchType: matchType ?? match.matchType,
       ownTeam: nextOwnTeam,
-      ownTeamKey: ownTeam ? getTeamKey(ownTeam) : match.ownTeamKey,
+      ownTeamKey: ownTeam ? getPvpTeamKey(ownTeam) : match.ownTeamKey,
       opponentTeam: nextOpponentTeam,
       opponentTeamKey: opponentTeam
-        ? getTeamKey(opponentTeam)
+        ? getPvpTeamKey(opponentTeam)
         : match.opponentTeamKey,
       result: result ?? match.result,
       videoUrl: videoUrl ?? match.videoUrl,
@@ -1186,7 +1184,7 @@ export const createFormationPreset = authenticatedMutation({
       name: name.trim(),
       matchType,
       team: withoutDamage(team),
-      teamKey: getTeamKey(team),
+      teamKey: getPvpTeamKey(team),
       usedByMe,
     });
   },
@@ -1208,7 +1206,7 @@ export const updateFormationPreset = authenticatedMutation({
       name: name?.trim() ?? preset.name,
       matchType: matchType ?? preset.matchType,
       team: team ? withoutDamage(team) : preset.team,
-      teamKey: team ? getTeamKey(team) : preset.teamKey,
+      teamKey: team ? getPvpTeamKey(team) : preset.teamKey,
       usedByMe: usedByMe ?? preset.usedByMe,
     });
   },
@@ -1280,7 +1278,7 @@ async function mergeManualEnemyTeams(
   const byKey = new Map<string, (typeof teams)[number]>();
 
   for (const team of teams) {
-    const teamKey = getTeamKey(team.team);
+    const teamKey = getPvpTeamKey(team.team);
     const existing = byKey.get(teamKey);
 
     if (!existing) {
@@ -1458,7 +1456,7 @@ export const createEnemyTeam = authenticatedMutation({
     }
 
     const team = withoutDamage(args.team);
-    const teamKey = getTeamKey(team);
+    const teamKey = getPvpTeamKey(team);
     const existing = await findManualEnemyTeam(
       ctx,
       args.seasonId,
@@ -1511,9 +1509,9 @@ export const updateEnemyTeam = authenticatedMutation({
     }
 
     const team = args.team ? withoutDamage(args.team) : current.team;
-    const teamKey = getTeamKey(team);
+    const teamKey = getPvpTeamKey(team);
     const collision =
-      teamKey === current.teamKey || getTeamKey(current.team) === teamKey
+      getPvpTeamKey(current.team) === teamKey
         ? null
         : await findManualEnemyTeam(
             ctx,

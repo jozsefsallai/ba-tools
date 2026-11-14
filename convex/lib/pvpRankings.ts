@@ -1,11 +1,11 @@
-import { canonicalPvpStatsTeam, getTeamKey } from "./teamKey";
+import { canonicalPvpTeam, getTeamKey } from "./teamKey";
 
 export type RankingTeam = Array<{
   studentId?: string;
 }>;
 
 export function canonicalRankingTeam(team: RankingTeam): RankingTeam {
-  return canonicalPvpStatsTeam(team);
+  return canonicalPvpTeam(team);
 }
 
 export function rankingIdentity(team: RankingTeam) {
