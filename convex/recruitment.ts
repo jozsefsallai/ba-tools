@@ -352,14 +352,37 @@ async function rebuildAccountAnalytics(
   });
 }
 
+function getAccountSortOrder(
+  account: Pick<Account, "_creationTime" | "sortOrder">,
+) {
+  return account.sortOrder ?? -account._creationTime;
+}
+
+async function getUserAccounts(ctx: UserCtx) {
+  return await ctx.db
+    .query("recruitmentAccount")
+    .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
+    .collect();
+}
+
+function firstSortOrder(accounts: Account[]) {
+  const active = accounts.filter((account) => !account.archived);
+
+  return active.length ? Math.min(...active.map(getAccountSortOrder)) - 1 : 0;
+}
+
 export const getOwnAccounts = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
-      .query("recruitmentAccount")
-      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
-      .order("desc")
-      .collect();
+    const accounts = await getUserAccounts(ctx);
+
+    return accounts.sort((a, b) => {
+      if (Boolean(a.archived) !== Boolean(b.archived)) {
+        return a.archived ? 1 : -1;
+      }
+
+      return getAccountSortOrder(a) - getAccountSortOrder(b);
+    });
   },
 });
 
@@ -420,10 +443,13 @@ export const createAccount = authenticatedMutation({
   ) => {
     assertValidCharges(permanentCharge, limitedCharge);
 
+    const accounts = await getUserAccounts(ctx);
+
     return ctx.db.insert("recruitmentAccount", {
       userId: ctx.user._id,
       name,
       gameServer,
+      sortOrder: firstSortOrder(accounts),
       permanentCharge,
       limitedCharge,
       aggregates: emptyAccountAggregates(),
@@ -448,6 +474,59 @@ export const updateAccount = authenticatedMutation({
       gameServer,
       permanentCharge,
       limitedCharge,
+    });
+  },
+});
+
+export const reorderAccounts = authenticatedMutation({
+  args: {
+    accountIds: v.array(v.id("recruitmentAccount")),
+  },
+  handler: async (ctx, { accountIds }) => {
+    const accounts = await getUserAccounts(ctx);
+    const activeAccounts = accounts.filter((account) => !account.archived);
+    const requestedAccounts = new Set(accountIds);
+
+    if (
+      requestedAccounts.size !== accountIds.length ||
+      requestedAccounts.size !== activeAccounts.length ||
+      !activeAccounts.every((account) => requestedAccounts.has(account._id))
+    ) {
+      throw invalid("Account order must include every active account once.");
+    }
+
+    for (const [sortOrder, accountId] of accountIds.entries()) {
+      await ctx.db.patch(accountId, {
+        sortOrder,
+      });
+    }
+  },
+});
+
+export const setAccountArchived = authenticatedMutation({
+  args: {
+    accountId: v.id("recruitmentAccount"),
+    archived: v.boolean(),
+  },
+  handler: async (ctx, { accountId, archived }) => {
+    const account = await assertAccount(ctx, accountId);
+
+    if (Boolean(account.archived) === archived) {
+      return;
+    }
+
+    if (archived) {
+      await ctx.db.patch(accountId, {
+        archived: true,
+      });
+      return;
+    }
+
+    const accounts = await getUserAccounts(ctx);
+
+    await ctx.db.patch(accountId, {
+      archived: false,
+      sortOrder: firstSortOrder(accounts),
     });
   },
 });

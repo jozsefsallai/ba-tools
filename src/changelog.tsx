@@ -49,6 +49,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 14, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Added ability to reorder and archive recruitment accounts. An archived account keeps its sessions and can be restored at any time.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
+  {
     date: "November 12, 2026",
     features: [],
     changes: [

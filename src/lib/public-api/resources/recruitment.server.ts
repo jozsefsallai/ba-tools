@@ -82,14 +82,23 @@ export async function createRecruitmentAccount(
 export async function updateRecruitmentAccount(
   userId: string,
   accountId: string,
-  patch: Record<string, unknown>,
+  { archived, ...patch }: Record<string, unknown>,
 ) {
   const { account: current } = await findAccount(userId, accountId);
 
-  await userMutation(userId, api.recruitment.updateAccount, {
-    ...mergeForUpdate(current, ACCOUNT_UPDATE_KEYS, patch),
-    accountId: current._id,
-  } as UserArgs<typeof api.recruitment.updateAccount>);
+  if (Object.keys(patch).length > 0) {
+    await userMutation(userId, api.recruitment.updateAccount, {
+      ...mergeForUpdate(current, ACCOUNT_UPDATE_KEYS, patch),
+      accountId: current._id,
+    } as UserArgs<typeof api.recruitment.updateAccount>);
+  }
+
+  if (archived !== undefined) {
+    await userMutation(userId, api.recruitment.setAccountArchived, {
+      accountId: current._id,
+      archived: archived as boolean,
+    });
+  }
 
   return await getRecruitmentAccount(userId, accountId);
 }

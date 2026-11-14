@@ -904,6 +904,8 @@ export default defineSchema({
     userId: v.id("users"),
     name: v.string(),
     gameServer: v.union(...GAME_SERVERS.map((level) => v.literal(level))),
+    sortOrder: v.optional(v.number()),
+    archived: v.optional(v.boolean()),
 
     // number of permanent charge points, auto-populated from the last session
     permanentCharge: v.number(),

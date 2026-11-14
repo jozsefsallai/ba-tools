@@ -41,7 +41,7 @@ export function registerRecruitmentTools(server: McpServer) {
     {
       title: "List my recruitment accounts",
       description:
-        "The user's tracked recruitment (gacha) accounts, with pity charge and aggregate pull statistics.",
+        "The user's tracked recruitment (gacha) accounts, with pity charge and aggregate pull statistics. Active accounts come first in the user's display order, then archived ones (`archived: true`).",
       kind: "read",
     },
     (_input, userId) => listRecruitmentAccounts(userId),
@@ -79,11 +79,18 @@ export function registerRecruitmentTools(server: McpServer) {
     "update_recruitment_account",
     {
       title: "Update recruitment account",
-      description: "Change a recruitment account. Only the fields sent change.",
+      description:
+        "Change a recruitment account, or archive it with `archived`. Only the fields sent change.",
       kind: "update",
       input: {
         accountId,
         ...z.object(accountFields).partial().shape,
+        archived: z
+          .boolean()
+          .optional()
+          .describe(
+            "Archives the account, hiding it from the active list while keeping its sessions, or restores it with `false`.",
+          ),
       },
     },
     ({ accountId, ...patch }, userId) =>
