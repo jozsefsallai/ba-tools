@@ -34,6 +34,7 @@ uniform float uDistortMain;
 uniform float uDistortMask;
 uniform float uCustomData;
 uniform float uVertexAlpha;
+uniform float uLinearOutput;
 
 vec4 fetch(sampler2D tex, vec2 uv) {
   return texture2D(tex, vec2(uv.x, 1.0 - uv.y));
@@ -119,9 +120,10 @@ void main() {
   }
 
   // The game works in linear light: textures and particle colors are
-  // decoded, multiplied by the HDR tint and blended. The canvas blends sRGB
-  // values, so each effect's color goes back to sRGB first, which matches
-  // linear blending over the dark backgrounds effects mostly sit on.
+  // decoded, multiplied by the HDR tint and blended. The renderer blends in
+  // linear light too (uLinearOutput); without WebGL 2 it blends sRGB values,
+  // so each effect's color goes back to sRGB first, which matches linear
+  // blending over the dark backgrounds effects mostly sit on.
   vec3 linear = pow(tex.rgb, vec3(2.2)) * pow(vColor.rgb, vec3(2.2)) * uTint.rgb;
 
   // HDR tints push colors past 1. The game renders in HDR, so rather than
@@ -131,7 +133,8 @@ void main() {
   float knee = 0.6;
   float rolled = peak <= knee ? peak : knee + (1.0 - knee) * (1.0 - exp(-(peak - knee) / (1.0 - knee)));
 
-  vec3 rgb = pow(peak > 0.0 ? linear * (rolled / peak) : linear, vec3(1.0 / 2.2));
+  vec3 color = peak > 0.0 ? linear * (rolled / peak) : linear;
+  vec3 rgb = uLinearOutput > 0.5 ? color : pow(color, vec3(1.0 / 2.2));
 
   float alpha = coverage * mix(1.0, vColor.a, uVertexAlpha) * uTint.a;
 

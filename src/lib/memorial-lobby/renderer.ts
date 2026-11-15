@@ -29,6 +29,9 @@ import type {
   MemorialLobbySkeletonUrls,
   ResolvedMemorialLobbyManifest,
 } from "@/lib/student-spine";
+import MASK_FRAGMENT from "./shaders/light-mask.frag.glsl";
+import PRESENT_FRAGMENT from "./shaders/present.frag.glsl";
+import PRESENT_VERTEX from "./shaders/present.vert.glsl";
 
 export type ResolvedMemorialLobby =
   ResolvedMemorialLobbyManifest["lobbies"][number];
@@ -159,14 +162,16 @@ async function fetchOk(url: string) {
 // We build skeletons by hand instead of going through PIXI.Assets, because
 // pixi-spine (used by Plana) registers its own `.skel`/`.atlas` parsers on the
 // same loader and they would clash with this runtime's.
-async function loadSkeleton(skeleton: MemorialLobbySkeletonUrls) {
+async function loadSkeleton(
+  skeleton: MemorialLobbySkeletonUrls,
+  linear: boolean,
+) {
   const [atlasText, skelBuffer] = await Promise.all([
     fetchOk(skeleton.atlasUrl).then((res) => res.text()),
     fetchOk(skeleton.skelUrl).then((res) => res.arrayBuffer()),
   ]);
 
   const atlas = new TextureAtlas(atlasText);
-  const images = new Map<TextureAtlasPage, HTMLImageElement>();
 
   await Promise.all(
     atlas.pages.map(async (page) => {
@@ -176,11 +181,12 @@ async function loadSkeleton(skeleton: MemorialLobbySkeletonUrls) {
       }
 
       const image = await loadImage(url);
-      images.set(page, image);
 
-      const baseTexture = PIXI.BaseTexture.from(image, {
-        alphaMode: alphaModeFor(page),
-      });
+      const baseTexture = linear
+        ? linearPage(image, page.pma)
+        : PIXI.BaseTexture.from(image, {
+            alphaMode: alphaModeFor(page),
+          });
 
       page.setTexture(SpineTexture.from(baseTexture));
     }),
@@ -188,7 +194,6 @@ async function loadSkeleton(skeleton: MemorialLobbySkeletonUrls) {
 
   const binary = new SkeletonBinary(new AtlasAttachmentLoader(atlas));
   const skeletonData = binary.readSkeletonData(new Uint8Array(skelBuffer));
-  linearizeAdditiveAttachments(skeletonData, images);
 
   // The renderer updates every skeleton itself, on one clock, so the intro
   // timeline stays in sync across them.
@@ -264,106 +269,368 @@ function alphaModeFor(page: TextureAtlasPage) {
   return page.pma ? PIXI.ALPHA_MODES.PMA : PIXI.ALPHA_MODES.UNPACK;
 }
 
-// sRGB -> linear lookup table for 8-bit channels.
-const SRGB_TO_LINEAR = new Uint8ClampedArray(256).map((_, i) => {
-  const c = i / 255;
-  const linear = c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  return Math.round(linear * 255);
-});
-
-/**
- * Light overlays (additive slots) are meant to be blended in linear color
- * space, as the game does. Blended in sRGB, the way the browser does, even a
- * dim full-screen glow pushes an already bright scene to white (Seia's and
- * S.Fubuki's lobbies). Pointing additive attachments at a copy of their atlas
- * page with linearized colors makes each glow add roughly what it adds in-game,
- * while the rest of the art is untouched.
+/*
+ * The game renders in linear color space: textures are decoded from sRGB
+ * when sampled, blending happens in linear light and the result is encoded
+ * once at the end. Blending sRGB values instead, the way the browser does,
+ * lets glows (additive slots, effects) add far too much over bright areas
+ * (Seia's and S.Fubuki's lobbies, R.Hifumi's shaft of light) and soft edges
+ * come out darker.
+ *
+ * With WebGL 2 the renderer does the same: atlas pages and render targets are
+ * stored as sRGB textures (SRGB8_ALPHA8), which the GPU decodes when sampling
+ * and blends in linear light when drawing into; the frame is drawn into one
+ * and encoded onto the canvas at the end (`shaders/present.frag.glsl`).
  */
-function linearizeAdditiveAttachments(
-  skeletonData: SkeletonData,
-  images: Map<TextureAtlasPage, HTMLImageElement>,
-) {
-  const linearPages = new Map<TextureAtlasPage, SpineTexture>();
 
-  const linearPage = (page: TextureAtlasPage) => {
-    const cached = linearPages.get(page);
-    if (cached) {
-      return cached;
-    }
+/** Textures stored as sRGB: atlas pages from `linearPage`. */
+const SRGB_TEXTURES = new WeakSet<PIXI.BaseTexture>();
 
-    const image = images.get(page);
-    if (!image) {
-      return null;
-    }
+/** Stores atlas pages and every render target as sRGB textures. */
+function storeTexturesAsSrgb(renderer: PIXI.Renderer) {
+  const gl = renderer.gl as WebGL2RenderingContext;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = image.naturalWidth;
-    canvas.height = image.naturalHeight;
-
-    const context = canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
-    if (!context) {
-      return null;
-    }
-
-    context.drawImage(image, 0, 0);
-
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
-    const { data } = pixels;
-
-    for (let i = 0; i < data.length; i += 4) {
-      data[i] = SRGB_TO_LINEAR[data[i]];
-      data[i + 1] = SRGB_TO_LINEAR[data[i + 1]];
-      data[i + 2] = SRGB_TO_LINEAR[data[i + 2]];
-    }
-
-    context.putImageData(pixels, 0, 0);
-
-    const texture = SpineTexture.from(
-      PIXI.BaseTexture.from(canvas, {
-        alphaMode: alphaModeFor(page),
-      }),
-    );
-
-    linearPages.set(page, texture);
-    return texture;
+  // Pixi picks a texture's GL format here, before uploading it.
+  const textures = renderer.texture as unknown as {
+    initTextureType(texture: PIXI.BaseTexture, glTexture: PIXI.GLTexture): void;
   };
 
-  for (const skin of skeletonData.skins) {
-    for (const { slotIndex, attachment } of skin.getAttachments()) {
-      if (skeletonData.slots[slotIndex].blendMode !== BlendMode.Additive) {
-        continue;
-      }
+  const initTextureType = textures.initTextureType.bind(textures);
 
-      if (
-        !(attachment instanceof RegionAttachment) &&
-        !(attachment instanceof MeshAttachment)
-      ) {
-        continue;
-      }
+  textures.initTextureType = (texture, glTexture) => {
+    initTextureType(texture, glTexture);
 
-      const region = attachment.region;
-      if (!(region instanceof TextureAtlasRegion)) {
-        continue;
-      }
+    if (
+      texture instanceof PIXI.BaseRenderTexture ||
+      SRGB_TEXTURES.has(texture)
+    ) {
+      glTexture.internalFormat = gl.SRGB8_ALPHA8;
+    }
+  };
+}
 
-      const texture = linearPage(region.page);
-      if (!texture) {
-        continue;
-      }
+const LINEAR_STEPS = 1 << 14;
 
-      // Regions can be shared with normally blended attachments, so give
-      // this attachment its own copy pointing at the linear page.
-      const copy = Object.assign(
-        Object.create(Object.getPrototypeOf(region)),
-        region,
-      ) as TextureAtlasRegion;
+// sRGB -> linear for 8-bit channels.
+const DECODE = Float32Array.from(
+  {
+    length: 256,
+  },
+  (_, i) => {
+    const c = i / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  },
+);
 
-      copy.texture = texture;
-      attachment.region = copy;
+// Linear (in `LINEAR_STEPS` steps) -> 8-bit sRGB.
+const ENCODE = Uint8Array.from(
+  {
+    length: LINEAR_STEPS + 1,
+  },
+  (_, i) => {
+    const l = i / LINEAR_STEPS;
+    const c = l <= 0.0031308 ? l * 12.92 : 1.055 * l ** (1 / 2.4) - 0.055;
+    return Math.round(c * 255);
+  },
+);
+
+/**
+ * An atlas page as an sRGB texture holding premultiplied linear colors, the
+ * way the game blends: each color is decoded, multiplied by its alpha and
+ * encoded again. (Premultiplying the sRGB values, as the browser would, makes
+ * the GPU decode a darker color at soft edges.)
+ */
+function linearPage(image: HTMLImageElement, pma: boolean) {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+
+  const context = canvas.getContext("2d", {
+    willReadFrequently: true,
+  });
+  if (!context) {
+    throw new Error("Failed to read a texture");
+  }
+
+  context.drawImage(image, 0, 0);
+  const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < data.length; i += 4) {
+    const alpha = data[i + 3] / 255;
+
+    for (let c = i; c < i + 3; c++) {
+      // Premultiplied pages hold sRGB values already multiplied by alpha.
+      const value =
+        pma && alpha > 0 ? Math.min(255, Math.round(data[c] / alpha)) : data[c];
+
+      data[c] = ENCODE[Math.round(DECODE[value] * alpha * LINEAR_STEPS)];
     }
   }
+
+  const baseTexture = PIXI.BaseTexture.fromBuffer(
+    new Uint8Array(data.buffer),
+    canvas.width,
+    canvas.height,
+    {
+      alphaMode: PIXI.ALPHA_MODES.PMA,
+    },
+  );
+
+  SRGB_TEXTURES.add(baseTexture);
+  return baseTexture;
+}
+
+/**
+ * Renders a scene into an sRGB render target, which blends in linear light,
+ * and draws it onto the canvas encoded as sRGB.
+ */
+class LinearFrame {
+  private target: PIXI.RenderTexture | null = null;
+  private readonly quad = new PIXI.Geometry()
+    .addAttribute("aVertexPosition", new Float32Array(8), 2)
+    .addAttribute(
+      "aTextureCoord",
+      [
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+      ],
+      2,
+    )
+    .addIndex([
+      0,
+      1,
+      2,
+      0,
+      2,
+      3,
+    ]);
+  private readonly shader = PIXI.Shader.from(PRESENT_VERTEX, PRESENT_FRAGMENT, {
+    uSampler: PIXI.Texture.EMPTY,
+  });
+  private readonly present = new PIXI.Mesh(this.quad, this.shader);
+
+  constructor(private readonly renderer: PIXI.Renderer) {
+    this.present.state.blend = false;
+  }
+
+  render(scene: PIXI.DisplayObject) {
+    const { width, height } = this.renderer.screen;
+    const resolution = this.renderer.resolution;
+
+    if (
+      !this.target ||
+      this.target.width !== width ||
+      this.target.height !== height ||
+      this.target.baseTexture.resolution !== resolution
+    ) {
+      this.target?.destroy(true);
+      this.target = PIXI.RenderTexture.create({
+        width,
+        height,
+        resolution,
+      });
+      this.shader.uniforms.uSampler = this.target;
+
+      const positions = this.quad.getBuffer("aVertexPosition");
+      // Pixi v7's buffer types predate TypeScript's generic typed arrays.
+      positions.data = new Float32Array([
+        0,
+        0,
+        width,
+        0,
+        width,
+        height,
+        0,
+        height,
+      ]) as unknown as PIXI.ITypedArray;
+      positions.update();
+    }
+
+    this.renderer.render(scene, {
+      renderTexture: this.target,
+      clear: true,
+    });
+    this.renderer.render(this.present);
+  }
+
+  destroy() {
+    this.target?.destroy(true);
+    this.present.destroy();
+    this.quad.destroy();
+  }
+}
+
+/**
+ * Multiplies what it filters by the alpha of `masks`, drawn into a texture
+ * matching the filter's input.
+ */
+class AlphaMaskFilter extends PIXI.Filter {
+  private readonly destinationFrame = new PIXI.Rectangle();
+
+  constructor(private readonly masks: PIXI.Container) {
+    super(undefined, MASK_FRAGMENT, {
+      uMask: PIXI.Texture.EMPTY,
+    });
+
+    // Match the render target, as the overlays would be drawn unfiltered.
+    this.resolution = null;
+  }
+
+  override apply(
+    filterManager: PIXI.FilterSystem,
+    input: PIXI.RenderTexture,
+    output: PIXI.RenderTexture,
+    clearMode: PIXI.CLEAR_MODES,
+    state: PIXI.FilterState,
+  ) {
+    const renderer = filterManager.renderer;
+    const mask = filterManager.getFilterTexture(input);
+    mask.filterFrame = input.filterFrame;
+
+    // Draw the masks the way the filtered children were drawn into `input`:
+    // the filter area into the top left corner of a pooled texture, which is
+    // usually larger (`state.destinationFrame` is the whole texture).
+    const { sourceFrame } = state;
+    this.destinationFrame.width = sourceFrame.width;
+    this.destinationFrame.height = sourceFrame.height;
+
+    const transform = renderer.projection.transform;
+    renderer.projection.transform = null as unknown as PIXI.Matrix;
+    renderer.renderTexture.bind(mask, sourceFrame, this.destinationFrame);
+    renderer.framebuffer.clear(0, 0, 0, 0);
+
+    for (const child of this.masks.children) {
+      child.render(renderer);
+    }
+
+    renderer.batch.flush();
+    renderer.projection.transform = transform;
+
+    this.uniforms.uMask = mask;
+    filterManager.applyFilter(this, input, output, clearMode);
+    filterManager.returnFilterTexture(mask);
+  }
+}
+
+function regionName(attachment: unknown) {
+  if (
+    !(attachment instanceof RegionAttachment) &&
+    !(attachment instanceof MeshAttachment)
+  ) {
+    return null;
+  }
+
+  return attachment.region instanceof TextureAtlasRegion
+    ? attachment.region.name
+    : null;
+}
+
+/**
+ * Some lobbies light the character with a second, brighter copy of her parts
+ * (`Light/` images), cut to a shaft of light by soft-edged `Stencil/` shapes
+ * drawn after them at an alpha of 1/255 (R.Hifumi). Drawn as they are, the
+ * overlays show in full, with the hard edges of their meshes. This draws them
+ * as one group multiplied by the shapes' alpha, as the game does.
+ */
+function maskLightOverlays(spine: Spine) {
+  const { skins } = spine.skeleton.data;
+
+  // Slots whose images all come from `folder`. Some normal slots also hold
+  // the odd overlay image (R.Hifumi's `R_Eye_03`); those stay where they are.
+  const slotsUsing = (folder: string) => {
+    const matching = new Set<number>();
+    const other = new Set<number>();
+
+    for (const skin of skins) {
+      for (const { slotIndex, attachment } of skin.getAttachments()) {
+        const name = regionName(attachment);
+        if (name === null) {
+          continue;
+        }
+
+        (name.startsWith(folder) ? matching : other).add(slotIndex);
+      }
+    }
+
+    return new Set(
+      [
+        ...matching,
+      ].filter((index) => !other.has(index)),
+    );
+  };
+
+  const maskSlots = slotsUsing("Stencil/");
+  if (maskSlots.size === 0) {
+    return;
+  }
+
+  // Only overlays drawn before the masks are cut by them.
+  const lastMask = Math.max(...maskSlots);
+  const lightSlots = new Set(
+    [
+      ...slotsUsing("Light/"),
+    ].filter((index) => index < lastMask && !maskSlots.has(index)),
+  );
+
+  if (lightSlots.size === 0) {
+    return;
+  }
+
+  const lights = new PIXI.Container();
+  lights.sortableChildren = true;
+
+  // Never drawn in place; the filter draws them into its mask texture.
+  const masks = new PIXI.Container();
+  masks.renderable = false;
+
+  lights.filters = [
+    new AlphaMaskFilter(masks),
+  ];
+
+  spine.addChild(lights, masks);
+
+  const internals = spine as unknown as {
+    renderMeshes(): void;
+    meshesCache: Map<Slot, PIXI.DisplayObject>;
+  };
+
+  const renderMeshes = internals.renderMeshes.bind(spine);
+
+  internals.renderMeshes = () => {
+    renderMeshes();
+
+    let zIndex = Number.POSITIVE_INFINITY;
+
+    for (const [slot, mesh] of internals.meshesCache) {
+      const index = slot.data.index;
+
+      if (maskSlots.has(index)) {
+        if (mesh.parent !== masks) {
+          masks.addChild(mesh);
+        }
+
+        // Shapes are nearly transparent so they don't show in the editor.
+        mesh.alpha = 1;
+      } else if (lightSlots.has(index)) {
+        if (mesh.parent !== lights) {
+          lights.addChild(mesh);
+        }
+
+        if (mesh.visible && mesh.zIndex >= 0) {
+          zIndex = Math.min(zIndex, mesh.zIndex);
+        }
+      }
+    }
+
+    lights.visible = Number.isFinite(zIndex);
+    lights.zIndex = Number.isFinite(zIndex) ? zIndex : 0;
+  };
 }
 
 function hasAnimation(spine: Spine, name: string) {
@@ -1156,6 +1423,8 @@ export class MemorialLobbyRenderer {
   private app: PIXI.Application;
 
   private scene = new PIXI.Container();
+  /** Blends in linear light, as the game does (WebGL 2 only). */
+  private linearFrame: LinearFrame | null = null;
   private main?: Spine;
   private frame: PIXI.Rectangle | null = null;
 
@@ -1264,7 +1533,26 @@ export class MemorialLobbyRenderer {
       resolution: Math.min(window.devicePixelRatio || 1, 2),
     });
 
-    this.app.stage.addChild(this.scene);
+    const renderer = this.app.renderer as PIXI.Renderer;
+
+    if (renderer.context.webGLVersion === 2) {
+      storeTexturesAsSrgb(renderer);
+      this.linearFrame = new LinearFrame(renderer);
+
+      // Draw frames through the linear target instead of the stage.
+      this.app.ticker.remove(this.app.render, this.app);
+      this.app.ticker.add(this.render, this, PIXI.UPDATE_PRIORITY.LOW);
+    } else {
+      this.app.stage.addChild(this.scene);
+    }
+  }
+
+  private render() {
+    if (this.linearFrame) {
+      this.linearFrame.render(this.scene);
+    } else {
+      this.app.renderer.render(this.app.stage);
+    }
   }
 
   async load(lobby: ResolvedMemorialLobby) {
@@ -1281,7 +1569,9 @@ export class MemorialLobbyRenderer {
     const scene = lobby.scene;
 
     const [spines, effects] = await Promise.all([
-      Promise.all(ordered.map(loadSkeleton)),
+      Promise.all(
+        ordered.map((skeleton) => loadSkeleton(skeleton, !!this.linearFrame)),
+      ),
       scene && lobby.effectsUrl
         ? MemorialLobbyEffectPlayer.load(
             lobby.effectsUrl,
@@ -1296,6 +1586,7 @@ export class MemorialLobbyRenderer {
     });
     this.effects?.destroy();
     this.effects = effects;
+    this.effects?.setLinearOutput(!!this.linearFrame);
     this.sceneData = scene ?? null;
     this.collectReactionTracks();
     this.spines = [];
@@ -1335,6 +1626,8 @@ export class MemorialLobbyRenderer {
       if (skeleton.layers && skeleton.pageQueues) {
         drawInLayers(spine, skeleton.pageQueues, skeleton.layers);
       }
+
+      maskLightOverlays(spine);
 
       this.spines.push({
         spine,
@@ -2658,7 +2951,7 @@ export class MemorialLobbyRenderer {
     // The drawing buffer isn't preserved between frames, so the canvas has to
     // be copied in the same task it's rendered in (`toBlob` copies it
     // synchronously). That also means the upscaled frame is never painted.
-    this.app.renderer.render(this.app.stage);
+    this.render();
 
     const canvas = this.app.view as HTMLCanvasElement;
     const blob = new Promise<Blob>((resolve, reject) => {
@@ -2674,7 +2967,7 @@ export class MemorialLobbyRenderer {
     if (upscaled) {
       renderer.resolution = resolution;
       renderer.resize(width, height);
-      this.app.renderer.render(this.app.stage);
+      this.render();
     }
 
     return blob;
@@ -2707,6 +3000,9 @@ export class MemorialLobbyRenderer {
 
   destroy() {
     this.app.ticker.remove(this.tick);
+    this.app.ticker.remove(this.render, this);
+    this.linearFrame?.destroy();
+    this.linearFrame = null;
     this.effects?.destroy();
     this.effects = null;
     this.app.destroy(false, {

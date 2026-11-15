@@ -1190,6 +1190,7 @@ class EffectDisplay {
       uRedShading: material.redShading ? 1 : 0,
       uTime: 0,
       uVertexAlpha: material.vertexAlpha ? 1 : 0,
+      uLinearOutput: 0,
       uHasMain: material.main ? 1 : 0,
       uHasMask: material.mask ? 1 : 0,
       uHasDistort: material.distort ? 1 : 0,
@@ -1415,6 +1416,16 @@ export class MemorialLobbyEffectPlayer {
       order: l.effect.order,
       display: l.display.mesh as PIXI.DisplayObject,
     }));
+  }
+
+  /**
+   * Whether effects are drawn into a target that blends in linear light, so
+   * their colors stay linear instead of going back to sRGB.
+   */
+  setLinearOutput(linear: boolean) {
+    for (const live of this.live) {
+      live.display.mesh.shader.uniforms.uLinearOutput = linear ? 1 : 0;
+    }
   }
 
   /** Draws an effect inside a skeleton's container instead of the scene. */

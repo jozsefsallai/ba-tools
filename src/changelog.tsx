@@ -1,4 +1,9 @@
 import type { ReactNode } from "react";
+
+import hifumiRacingLobbyAfter from "@/assets/images/changelog/hifumi-racing-lobby-after.webp";
+import hifumiRacingLobbyBefore from "@/assets/images/changelog/hifumi-racing-lobby-before.webp";
+
+import { BeforeAfter } from "@/components/common/before-after";
 import { Link } from "@/i18n/navigation";
 
 export const CHANGELOG_SCOPES = {
@@ -48,6 +53,34 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "November 15, 2026",
+    features: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.memorialLobby,
+        description:
+          "Lobbies are now rendered in linear color space, making them more accurate to how they work in-game. Glows and lighting effects no longer wash out bright areas, which is most noticeable in Seia's lobby.",
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.memorialLobby,
+        description: (
+          <>
+            Fixed the shaft of light in Hifumi (Racing)'s lobby being too wide
+            and having hard edges. It now has the same shape and soft edges as
+            the in-game lobby.
+            <BeforeAfter
+              before={hifumiRacingLobbyBefore}
+              after={hifumiRacingLobbyAfter}
+              alt="Hifumi (Racing)'s recollection lobby"
+            />
+          </>
+        ),
+      },
+    ],
+  },
   {
     date: "November 14, 2026",
     features: [
