@@ -88,6 +88,10 @@ const ODDS_ROWS = [
 
 const SAME_ODDS_MARGIN = 0.005;
 
+function isWorse(spark: number, charge: number): boolean {
+  return (charge - spark) * 100 <= -SAME_ODDS_MARGIN;
+}
+
 function oddsColor(odds: number): string {
   if (odds < 1 / 3) {
     return "text-rose-600 dark:text-rose-400";
@@ -151,10 +155,31 @@ function OddsValue({ spark, charge }: OddsValueProps) {
 
 type SparkComparisonProps = {
   comparison: SparkSystemComparison;
+  withTickets?: {
+    unusedTickets: number;
+    comparison: SparkSystemComparison;
+  } | null;
 };
 
-export function SparkComparison({ comparison }: SparkComparisonProps) {
+export function SparkComparison({
+  comparison,
+  withTickets,
+}: SparkComparisonProps) {
   const t = useTranslations("tools.recruitment.spark");
+
+  const worseRows = ODDS_ROWS.filter((row) =>
+    isWorse(comparison.sparkOdds[row], comparison.chargeOdds[row]),
+  );
+
+  const ticketRows = withTickets
+    ? worseRows.filter(
+        (row) =>
+          !isWorse(
+            withTickets.comparison.sparkOdds[row],
+            withTickets.comparison.chargeOdds[row],
+          ),
+      )
+    : [];
 
   return (
     <div className="flex flex-col gap-1">
@@ -188,6 +213,20 @@ export function SparkComparison({ comparison }: SparkComparisonProps) {
           ),
         }))}
       />
+
+      {withTickets && ticketRows.length > 0 && (
+        <p className="mt-1 flex gap-2 rounded-md border border-sky-500/40 bg-sky-500/10 p-2.5 text-xs text-sky-700 dark:text-sky-300">
+          <InfoIcon className="mt-px size-3.5 shrink-0" />
+
+          <span>
+            {t("unusedTicketsWarning", {
+              tickets: withTickets.unusedTickets,
+              paidPulls: withTickets.comparison.paidPulls,
+              scope: ticketRows.length === worseRows.length ? "all" : "partly",
+            })}
+          </span>
+        </p>
+      )}
     </div>
   );
 }

@@ -47,6 +47,8 @@ import {
   type RecruitmentSessionInput,
   type ResolvedPickupCharge,
   resolvePickupCharges,
+  totalPullsOf,
+  usableRebateTickets,
 } from "@/lib/recruitment";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -357,6 +359,37 @@ export function RecruitmentSessionEditor({
     ],
   );
 
+  const ticketsUsed = stats.value?.rebateTicketsUsed;
+
+  const sparkWithTickets = useMemo(() => {
+    if (!input || ticketsUsed === undefined) {
+      return null;
+    }
+
+    const usable = usableRebateTickets(input);
+
+    if (usable <= ticketsUsed) {
+      return null;
+    }
+
+    const comparison = compareWithSparkSystem([
+      {
+        session: input,
+        paidPulls: totalPullsOf(input) - usable * 10,
+      },
+    ]);
+
+    return comparison
+      ? {
+          unusedTickets: usable - ticketsUsed,
+          comparison,
+        }
+      : null;
+  }, [
+    input,
+    ticketsUsed,
+  ]);
+
   if (
     accountResult === undefined ||
     (sessionId && sessionResult === undefined)
@@ -648,6 +681,8 @@ export function RecruitmentSessionEditor({
           stats={stats.value}
           error={stats.error ? t(saveErrorKey(stats.error)) : undefined}
           spark={spark}
+          sparkWithTickets={sparkWithTickets}
+          threeStarCount={input?.threeStarCount ?? 0}
         />
       </div>
 

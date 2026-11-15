@@ -67,6 +67,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Season 12 can only be selected by JP accounts now. Previous non-JP accounts that created a PVP account in Season 12 have been migrated to use Season 11.",
       },
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Added notice about charge system showing as worse when no rebate tickets were used (i.e. from free 200 pulls).",
+      },
     ],
     fixes: [
       {

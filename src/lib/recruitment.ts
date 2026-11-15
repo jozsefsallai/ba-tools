@@ -306,6 +306,15 @@ function calculatePoolStats(
   };
 }
 
+export function usableRebateTickets(input: RecruitmentSessionInput): number {
+  const totalPulls = totalPullsOf(input);
+
+  return Math.min(
+    input.rebateTicketsFromPreviousSession + numberOfRebateTickets(totalPulls),
+    Math.floor(totalPulls / 10),
+  );
+}
+
 export function calculateRecruitmentStats(
   session: RecruitmentSessionRecord,
 ): RecruitmentStats {
@@ -331,13 +340,7 @@ export function calculateRecruitmentStats(
     (milestone) => milestone <= totalPulls,
   ).length;
 
-  const availableTickets =
-    input.rebateTicketsFromPreviousSession + numberOfRebateTickets(totalPulls);
-
-  const automaticallyUsedTickets = Math.min(
-    availableTickets,
-    Math.floor(totalPulls / 10),
-  );
+  const automaticallyUsedTickets = usableRebateTickets(input);
 
   const rebateTicketsUsed = input.rebateTicketsUsed ?? automaticallyUsedTickets;
 

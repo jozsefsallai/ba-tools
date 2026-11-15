@@ -15,16 +15,32 @@ import type {
   SparkSystemComparison,
 } from "@/lib/recruitment";
 
+type SparkWithTickets = {
+  /** Rebate tickets the session could have used but didn't. */
+  unusedTickets: number;
+  /** The comparison with those tickets used. */
+  comparison: SparkSystemComparison;
+};
+
 type SessionSummaryProps = {
   stats: RecruitmentStats | null;
   /** Why the stats could not be worked out, already translated. */
   error?: string;
   /** How the session would have gone in the old spark system. */
   spark?: SparkSystemComparison | null;
+  /** The same comparison with every usable rebate ticket used. */
+  sparkWithTickets?: SparkWithTickets | null;
+  threeStarCount: number;
 };
 
 /** The live results of the session being edited. */
-export function SessionSummary({ stats, error, spark }: SessionSummaryProps) {
+export function SessionSummary({
+  stats,
+  error,
+  spark,
+  sparkWithTickets,
+  threeStarCount,
+}: SessionSummaryProps) {
   const t = useTranslations();
 
   return (
@@ -52,6 +68,14 @@ export function SessionSummary({ stats, error, spark }: SessionSummaryProps) {
           <Readout
             className="border-t"
             items={[
+              {
+                label: t("tools.recruitment.pickupsObtained"),
+                value: stats.pickupCount,
+              },
+              {
+                label: t("tools.recruitment.threeStarsObtained"),
+                value: threeStarCount,
+              },
               {
                 label: t("tools.recruitment.pyroxenesSpent"),
                 value: stats.pyroxenesSpent.toLocaleString(),
@@ -95,7 +119,12 @@ export function SessionSummary({ stats, error, spark }: SessionSummaryProps) {
             ]}
           />
 
-          {spark && <SparkComparison comparison={spark} />}
+          {spark && (
+            <SparkComparison
+              comparison={spark}
+              withTickets={sparkWithTickets}
+            />
+          )}
 
           <div className="flex flex-col gap-1">
             <h3 className="text-sm font-semibold">
