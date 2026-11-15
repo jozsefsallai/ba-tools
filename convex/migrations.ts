@@ -1,9 +1,10 @@
 import { Migrations } from "@convex-dev/migrations";
+import { LATEST_PVP_SEASON_BY_SERVER } from "@/lib/types";
 import { components, internal } from "~convex/api";
 import type { DataModel } from "~convex/dataModel";
 import { getPvpVideoUrl } from "./lib/pvpVideo";
 import { getPvpTeamKey, getTeamKey } from "./lib/teamKey";
-import { queueMatchStatsForSeason } from "./pvpStats";
+import { queueMatchStatsForSeason, queueSeasonRebuild } from "./pvpStats";
 import schema from "./schema";
 
 export const migrations = new Migrations<DataModel, typeof schema>(
@@ -282,4 +283,24 @@ export const requeuePvpStatsSpecialOrder = migrations.define({
 
 export const runPvpStatsSpecialOrderBackfill = migrations.runner([
   internal.migrations.requeuePvpStatsSpecialOrder,
+]);
+
+export const clampPvpSeasonNumbersToServer = migrations.define({
+  table: "pvpSeason",
+  migrateOne: async (ctx, season) => {
+    const latest = LATEST_PVP_SEASON_BY_SERVER[season.gameServer];
+
+    if (season.seasonNumber === undefined || season.seasonNumber <= latest) {
+      return;
+    }
+
+    await ctx.db.patch(season._id, {
+      seasonNumber: latest,
+    });
+    await queueSeasonRebuild(ctx, season._id);
+  },
+});
+
+export const runPvpSeasonServerClamp = migrations.runner([
+  internal.migrations.clampPvpSeasonNumbersToServer,
 ]);

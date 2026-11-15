@@ -2,6 +2,9 @@ import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { stream } from "convex-helpers/server/stream";
 import {
+  type GameServer,
+  isPvpSeasonAvailable,
+  LATEST_PVP_SEASON_BY_SERVER,
   PVP_SEASONS,
   type PVPFormationPresetType,
   type PVPMatchType,
@@ -309,6 +312,17 @@ async function getUniqueEnemyTeamsForPreset(
     }));
 }
 
+function assertPvpSeasonAvailable(
+  gameServer: GameServer,
+  seasonNumber: number,
+) {
+  if (!isPvpSeasonAvailable(gameServer, seasonNumber)) {
+    throw invalid(
+      `Season ${seasonNumber} isn't out on this server yet; the latest is season ${LATEST_PVP_SEASON_BY_SERVER[gameServer]}.`,
+    );
+  }
+}
+
 async function getSeasonForUser(ctx: any, seasonId: any) {
   const season = await ctx.db.get(seasonId);
 
@@ -356,6 +370,8 @@ export const getSeason = authenticatedQuery({
 export const createSeason = authenticatedMutation({
   args: pvpSeasonArgs,
   handler: async (ctx, { name, gameServer, seasonNumber }) => {
+    assertPvpSeasonAvailable(gameServer, seasonNumber);
+
     const seasons = await ctx.db
       .query("pvpSeason")
       .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
@@ -447,7 +463,8 @@ export const updateSeasonNumber = authenticatedMutation({
     seasonNumber: v.union(...PVP_SEASONS.map((season) => v.literal(season))),
   },
   handler: async (ctx, { seasonId, seasonNumber }) => {
-    await getSeasonForUser(ctx, seasonId);
+    const season = await getSeasonForUser(ctx, seasonId);
+    assertPvpSeasonAvailable(season.gameServer, seasonNumber);
     await ctx.db.patch(seasonId, {
       seasonNumber,
     });
@@ -467,6 +484,8 @@ export const updateSeason = authenticatedMutation({
     if (!trimmedName) {
       throw invalid("Season name cannot be empty.");
     }
+
+    assertPvpSeasonAvailable(gameServer, seasonNumber);
 
     await ctx.db.patch(seasonId, {
       name: trimmedName,

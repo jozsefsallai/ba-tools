@@ -9,6 +9,8 @@ import { skillCardVariantMap } from "@/lib/skill-card";
 import {
   BORROW_SLOT_GAMEMODE_NAMES,
   GAME_SERVER_NAMES,
+  GAME_SERVERS,
+  LATEST_PVP_SEASON_BY_SERVER,
   RECRUITMENT_GAME_SERVERS,
 } from "@/lib/types";
 import type {
@@ -416,7 +418,7 @@ export const recruitmentSessionDocs: FieldDocs<typeof recruitmentSessionArgs> =
 export const pvpSeasonDocs: FieldDocs<typeof pvpSeasonArgs> = {
   name: "Season name, not empty.",
   gameServer: GAME_SERVER_DOC,
-  seasonNumber: "The Tactical Challenge season number.",
+  seasonNumber: `The Tactical Challenge season number. It can't be newer than the season \`gameServer\` has reached: ${GAME_SERVERS.map((server) => `${server} ${LATEST_PVP_SEASON_BY_SERVER[server]}`).join(", ")}.`,
 };
 
 const pvpStudentDocs = {

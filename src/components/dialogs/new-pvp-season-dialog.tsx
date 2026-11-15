@@ -28,8 +28,9 @@ import {
   GAME_SERVER_NAMES,
   GAME_SERVERS,
   type GameServer,
-  LATEST_PVP_SEASON,
-  PVP_SEASONS,
+  getPvpSeasonsForServer,
+  LATEST_PVP_SEASON_BY_SERVER,
+  type PVP_SEASONS,
 } from "@/lib/types";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -45,7 +46,19 @@ export function NewPVPSeasonDialog({
   const t = useTranslations();
   const [name, setName] = useState("");
   const [gameServer, setGameServer] = useState<GameServer>("JP");
-  const [seasonNumber, setSeasonNumber] = useState<number>(LATEST_PVP_SEASON);
+  const [seasonNumber, setSeasonNumber] = useState<number>(
+    LATEST_PVP_SEASON_BY_SERVER.JP,
+  );
+
+  function handleGameServerChange(server: GameServer) {
+    const previousLatest = LATEST_PVP_SEASON_BY_SERVER[gameServer];
+    const latest = LATEST_PVP_SEASON_BY_SERVER[server];
+
+    setSeasonNumber((current) =>
+      current === previousLatest || current > latest ? latest : current,
+    );
+    setGameServer(server);
+  }
 
   const [requestInProgress, setRequestInProgress] = useState(false);
 
@@ -105,7 +118,9 @@ export function NewPVPSeasonDialog({
 
             <Select
               value={gameServer}
-              onValueChange={(value) => setGameServer(value as GameServer)}
+              onValueChange={(value) =>
+                handleGameServerChange(value as GameServer)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -135,7 +150,7 @@ export function NewPVPSeasonDialog({
               </SelectTrigger>
 
               <SelectContent>
-                {PVP_SEASONS.map((season) => (
+                {getPvpSeasonsForServer(gameServer).map((season) => (
                   <SelectItem key={season} value={season.toString()}>
                     {season}
                   </SelectItem>

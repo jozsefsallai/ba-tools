@@ -62,6 +62,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Lobbies are now rendered in linear color space, making them more accurate to how they work in-game. Glows and lighting effects no longer wash out bright areas, which is most noticeable in Seia's lobby.",
       },
+      {
+        scope: CHANGELOG_SCOPES.pvp,
+        description:
+          "Season 12 can only be selected by JP accounts now. Previous non-JP accounts that created a PVP account in Season 12 have been migrated to use Season 11.",
+      },
     ],
     fixes: [
       {

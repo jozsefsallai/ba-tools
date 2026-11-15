@@ -25,7 +25,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { GameServer, PVPSeasonNumber } from "@/lib/types";
-import { GAME_SERVER_NAMES, GAME_SERVERS, PVP_SEASONS } from "@/lib/types";
+import {
+  GAME_SERVER_NAMES,
+  GAME_SERVERS,
+  getPvpSeasonsForServer,
+  LATEST_PVP_SEASON_BY_SERVER,
+} from "@/lib/types";
 import { api } from "~convex/api";
 import type { Doc } from "~convex/dataModel";
 
@@ -117,7 +122,15 @@ export function PVPSeasonEditDialog({ season }: PVPSeasonEditDialogProps) {
 
             <Select
               value={gameServer}
-              onValueChange={(value) => setGameServer(value as GameServer)}
+              onValueChange={(value) => {
+                const server = value as GameServer;
+                const latest = LATEST_PVP_SEASON_BY_SERVER[server];
+
+                setGameServer(server);
+                setSeasonNumber((current) =>
+                  current && current > latest ? latest : current,
+                );
+              }}
             >
               <SelectTrigger id="pvp-season-edit-server">
                 <SelectValue />
@@ -151,7 +164,7 @@ export function PVPSeasonEditDialog({ season }: PVPSeasonEditDialogProps) {
               </SelectTrigger>
 
               <SelectContent>
-                {PVP_SEASONS.map((number) => (
+                {getPvpSeasonsForServer(gameServer).map((number) => (
                   <SelectItem key={number} value={number.toString()}>
                     {number}
                   </SelectItem>

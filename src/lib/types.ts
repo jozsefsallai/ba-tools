@@ -104,6 +104,26 @@ export const GAME_SERVER_NAMES: Record<GameServer, string> = {
   CN: "China",
 };
 
+export const LATEST_PVP_SEASON_BY_SERVER: Record<GameServer, PVPSeasonNumber> =
+  {
+    JP: 12,
+    KR: 11,
+    TW: 11,
+    NA: 11,
+    Asia: 11,
+    EU: 11,
+    CN: 11,
+  };
+
+export function getPvpSeasonsForServer(server: GameServer) {
+  const latest = LATEST_PVP_SEASON_BY_SERVER[server];
+  return PVP_SEASONS.filter((season) => season <= latest);
+}
+
+export function isPvpSeasonAvailable(server: GameServer, season: number) {
+  return season <= LATEST_PVP_SEASON_BY_SERVER[server];
+}
+
 export const BORROW_SLOT_GAMEMODE_NAMES: Record<BorrowSlotGameMode, string> = {
   raid: "Total Assault, Grand Assault, Allied Operation",
   jfd: "Joint Firing Drill",
