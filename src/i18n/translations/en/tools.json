@@ -2492,6 +2492,8 @@
       "description": "Drag items to move them, drag their edges to resize them, and right-click for more options. All times are in UTC. Banners are edited on the Manage Banners page.",
       "manageBanners": "Manage Banners",
       "revalidate": "Refresh public roadmap",
+      "earlier": "Show {weeks} weeks earlier",
+      "backToToday": "Back to today",
       "add": "Add item",
       "addCategory": "Add {category}",
       "addCategoryHere": "Add {category} here",
@@ -2581,6 +2583,7 @@
         "offsetFail": "Failed to move items: {error}",
         "revalidateSuccess": "Public roadmap cache cleared.",
         "revalidateFail": "Failed to clear the public roadmap cache: {error}",
+        "loadFail": "Failed to load earlier items: {error}",
         "refreshSuggestionsSuccess": "Refreshing suggestions. Please wait a few minutes.",
         "refreshSuggestionsFail": "Failed to refresh suggestions: {error}"
       }

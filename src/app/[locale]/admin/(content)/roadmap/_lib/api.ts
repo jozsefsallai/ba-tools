@@ -3,6 +3,7 @@ import type { RoadmapSuggestions } from "@/lib/roadmap/suggestions.server";
 import type {
   EditableRoadmapItem,
   EditableRoadmapKind,
+  RoadmapItem,
 } from "@/lib/roadmap/types";
 
 async function parseError(res: Response) {
@@ -104,5 +105,15 @@ export async function refreshRoadmapSuggestions(): Promise<void> {
   await request("/api/admin/roadmap/suggestions/refresh", {
     method: "POST",
     body: "{}",
+  });
+}
+
+export function fetchRoadmapItemsFrom(from: Date): Promise<RoadmapItem[]> {
+  const params = new URLSearchParams({
+    from: from.toISOString(),
+  });
+
+  return request(`/api/admin/roadmap/items?${params}`, {
+    method: "GET",
   });
 }

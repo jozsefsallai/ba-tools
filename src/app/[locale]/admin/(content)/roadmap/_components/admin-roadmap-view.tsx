@@ -2,6 +2,7 @@
 
 import {
   CalendarClockIcon,
+  ChevronsLeftIcon,
   CopyIcon,
   DownloadIcon,
   GemIcon,
@@ -12,7 +13,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ItemFormDialog,
@@ -26,6 +27,7 @@ import { ShiftDialog } from "@/app/[locale]/admin/(content)/roadmap/_components/
 import {
   createRoadmapItem,
   deleteRoadmapItem,
+  fetchRoadmapItemsFrom,
   offsetRoadmapItems,
   refreshRoadmapSuggestions,
   revalidatePublicRoadmap,
@@ -71,6 +73,7 @@ import {
 } from "@/lib/roadmap/constants";
 import { addUTCDays, startOfUTCDay } from "@/lib/roadmap/layout";
 import type { AnyRoadmapInput } from "@/lib/roadmap/schemas";
+import { addCalendarDays } from "@/lib/roadmap/time-zone";
 import type {
   EditableRoadmapItem,
   RoadmapCategory,
@@ -86,6 +89,8 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
 }
 
+const LOOK_BACK_WEEKS = 4;
+
 export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
   const t = useTranslations();
   const labels = useRoadmapLabels();
@@ -93,7 +98,17 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
     "admin-roadmap-view",
     false,
   );
-  const rangeStart = useRoadmapRangeStart(now, controls.timeZone);
+  const today = useRoadmapRangeStart(now, controls.timeZone);
+
+  const [weeksBack, setWeeksBack] = useState(0);
+  const rangeStart = useMemo(
+    () => addCalendarDays(today, -7 * weeksBack, controls.timeZone),
+    [
+      today,
+      weeksBack,
+      controls.timeZone,
+    ],
+  );
 
   const [items, setItems] = useState(initialItems);
   const itemsRef = useRef(items);
@@ -305,6 +320,22 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
     }
   };
 
+  const showFrom = async (weeks: number) => {
+    try {
+      const loaded = await fetchRoadmapItemsFrom(
+        addCalendarDays(today, -7 * weeks, controls.timeZone),
+      );
+      setItems(loaded);
+      setWeeksBack(weeks);
+    } catch (error) {
+      toast.error(
+        t("tools.admin.roadmap.toasts.loadFail", {
+          error: errorMessage(error),
+        }),
+      );
+    }
+  };
+
   const handleRefreshSuggestions = async () => {
     try {
       await refreshRoadmapSuggestions();
@@ -509,6 +540,23 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => showFrom(weeksBack + LOOK_BACK_WEEKS)}
+          >
+            <ChevronsLeftIcon />
+            {t("tools.admin.roadmap.earlier", {
+              weeks: LOOK_BACK_WEEKS,
+            })}
+          </Button>
+
+          {weeksBack > 0 && (
+            <Button variant="outline" size="sm" onClick={() => showFrom(0)}>
+              {t("tools.admin.roadmap.backToToday")}
+            </Button>
+          )}
 
           <Button asChild variant="outline" size="sm">
             <Link href="/admin/banners">

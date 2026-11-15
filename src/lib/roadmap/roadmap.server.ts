@@ -169,40 +169,39 @@ const FOUR_YEARS_FROM = (date: Date) => {
   return d;
 };
 
-const GA_TICKET_LOOKBACK = () => {
-  const d = new Date();
+const GA_TICKET_LOOKBACK = (from: Date) => {
+  const d = new Date(from);
   d.setUTCMonth(d.getUTCMonth() - 2, 1);
   return d;
 };
 
-function upcomingWhere() {
-  const now = new Date();
-  const today = startOfUTCDay(now);
+function upcomingWhere(from: Date) {
+  const day = startOfUTCDay(from);
 
   return {
     endDate: {
-      gt: now,
+      gt: from,
     },
     OR: [
       {
         startDate: {
-          gte: today,
+          gte: day,
         },
       },
       {
         endDate: {
-          lt: FOUR_YEARS_FROM(now),
+          lt: FOUR_YEARS_FROM(from),
         },
       },
     ],
   };
 }
 
-async function fetchBanners(): Promise<RoadmapBannerItem[]> {
+async function fetchBanners(from: Date): Promise<RoadmapBannerItem[]> {
   const banners = await db.gameBanner.findMany({
     where: {
       endDate: {
-        gt: new Date(),
+        gt: from,
       },
     },
     orderBy: {
@@ -238,15 +237,17 @@ async function fetchBanners(): Promise<RoadmapBannerItem[]> {
   }));
 }
 
-export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
-  const where = upcomingWhere();
+export async function fetchRoadmapItems(
+  from: Date = new Date(),
+): Promise<RoadmapItem[]> {
+  const where = upcomingWhere(from);
   const orderBy = {
     startDate: "asc",
   } as const;
 
   const [banners, raids, events, scenarios, bonuses, workLogs, passes, etcs] =
     await Promise.all([
-      fetchBanners(),
+      fetchBanners(from),
       db.raid.findMany({
         // recently ended Grand Assaults are kept for their GA tickets
         where: {
@@ -255,7 +256,7 @@ export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
             {
               type: "EliminateRaid",
               endDate: {
-                gt: GA_TICKET_LOOKBACK(),
+                gt: GA_TICKET_LOOKBACK(from),
               },
             },
           ],
@@ -349,7 +350,7 @@ export async function fetchRoadmapHistory(
 }
 
 export const getCachedRoadmapItems = unstable_cache(
-  fetchRoadmapItems,
+  () => fetchRoadmapItems(),
   [
     "public-roadmap",
   ],
