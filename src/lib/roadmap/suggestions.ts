@@ -372,11 +372,21 @@ function eventName(event: UpcomingEvent) {
   return event.season === null ? name : `[S${event.season}] ${name}`;
 }
 
-/** Permanent copies are listed under the event they are a copy of. */
-function eventInternalId(event: UpcomingEvent) {
-  return String(
-    event.kind === "permanent" ? (event.originalId ?? event.id) : event.id,
-  );
+/**
+ * The ids a roadmap item for this event may have. The game gives every run
+ * its own id (`840`, its rerun `10840`, its permanent copy `900840`), which is
+ * the first one. Permanent copies have also been saved under the id of the
+ * event they are a copy of.
+ */
+function eventInternalIds(event: UpcomingEvent) {
+  return [
+    event.id,
+    ...(event.kind === "permanent" && event.originalId !== null
+      ? [
+          event.originalId,
+        ]
+      : []),
+  ].map(String);
 }
 
 /**
@@ -405,7 +415,7 @@ export function suggestEvents(
 
   const candidates = events.map((event) => ({
     event,
-    internalId: eventInternalId(event),
+    internalIds: eventInternalIds(event),
     type: EVENT_TYPES_BY_KIND[event.kind],
   }));
 
@@ -413,8 +423,10 @@ export function suggestEvents(
   let anchor: Anchor | null = null;
   let anchorIndex = -1;
 
-  for (const [index, { event, internalId, type }] of candidates.entries()) {
-    const item = onRoadmap.get(key(internalId, type));
+  for (const [index, { event, internalIds, type }] of candidates.entries()) {
+    const item = internalIds
+      .map((id) => onRoadmap.get(key(id, type)))
+      .find((match) => match !== undefined);
 
     if (item) {
       anchor = {
@@ -432,7 +444,7 @@ export function suggestEvents(
         anchor !== null ||
         time(event.jp.start) + delay >= Date.now() - 14 * DAY_MS,
     )
-    .map(({ event, internalId, type }): RoadmapSuggestion => {
+    .map(({ event, internalIds, type }): RoadmapSuggestion => {
       const dates = resolveDates(event, anchor, delay);
       const studentId = event.rewardCharacterIds
         .map((id) => students.get(id))
@@ -445,7 +457,7 @@ export function suggestEvents(
           startDate: dates.startDate,
           endDate: dates.endDate,
           name: eventName(event),
-          internalId,
+          internalId: internalIds[0],
           type,
           eventStudentId: studentId ?? null,
         },
