@@ -51,6 +51,7 @@ export const eventInputSchema = z.object({
 export const storyInputSchema = z.object({
   ...dates,
   name: z.string().min(1),
+  label: z.string().nullable(),
   internalId: z.string(),
   type: z.enum(SCENARIO_TYPES),
   episodeCount: z.number().int().min(0),

@@ -2521,6 +2521,8 @@
         "lunatic": "Lunatic",
         "name": "Name",
         "internalId": "Internal ID",
+        "storyLabel": "Chapter number (optional)",
+        "storyLabelPlaceholder": "Act 2, Volume 2, Chapter 1, Part 1",
         "eventStudent": "Event student",
         "selectStudent": "Select student",
         "clearStudent": "Clear",
@@ -2531,6 +2533,23 @@
         "none": "None",
         "save": "Save",
         "create": "Create"
+      },
+      "suggestions": {
+        "title": "Suggested content",
+        "loading": "Loading...",
+        "failed": "Couldn't load the suggestions: {error}",
+        "empty": "No new content could be suggested.",
+        "notSynced": "No update has been performed yet.",
+        "syncedAt": "Last update: {date}",
+        "dates": {
+          "global": "Dates from GL",
+          "projected": "Dates projected from JP ({date})",
+          "none": "No date available"
+        },
+        "tentative": "Placeholder, likely to change",
+        "unknownBoss": "Unknown boss ({boss}), need manual intervention",
+        "untranslated": "No English name yet",
+        "refresh": "Refresh suggestions"
       },
       "shiftDialog": {
         "title": "Shift item",
@@ -2561,7 +2580,9 @@
         "offsetSuccess": "Moved {count} more item(s).",
         "offsetFail": "Failed to move items: {error}",
         "revalidateSuccess": "Public roadmap cache cleared.",
-        "revalidateFail": "Failed to clear the public roadmap cache: {error}"
+        "revalidateFail": "Failed to clear the public roadmap cache: {error}",
+        "refreshSuggestionsSuccess": "Refreshing suggestions. Please wait a few minutes.",
+        "refreshSuggestionsFail": "Failed to refresh suggestions: {error}"
       }
     }
   }

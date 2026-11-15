@@ -28,7 +28,8 @@
     "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts",
     "translations:check": "tsx scripts/check-translations.ts",
     "game-data:skills": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-student-skills.ts",
-    "game-data:stories": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-stories.ts"
+    "game-data:stories": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-stories.ts",
+    "game-data:upcoming": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-upcoming-content.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",

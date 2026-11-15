@@ -351,6 +351,7 @@ export function RoadmapItemDetails({
   withTitle?: boolean;
 }) {
   const subtitle = labels.subtitle(item);
+  const caption = labels.caption(item);
   const duration = durationDays(item);
 
   const raidArt =
@@ -377,6 +378,7 @@ export function RoadmapItemDetails({
               </div>
             )}
             <div className="font-bold">{labels.title(item)}</div>
+            {caption && <div className="text-sm">{caption}</div>}
           </div>
 
           {raidArt?.shape === "square" && (

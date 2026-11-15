@@ -3,6 +3,7 @@
 import {
   CalendarClockIcon,
   CopyIcon,
+  DownloadIcon,
   GemIcon,
   InfinityIcon,
   PencilIcon,
@@ -26,6 +27,7 @@ import {
   createRoadmapItem,
   deleteRoadmapItem,
   offsetRoadmapItems,
+  refreshRoadmapSuggestions,
   revalidatePublicRoadmap,
   updateRoadmapItem,
 } from "@/app/[locale]/admin/(content)/roadmap/_lib/api";
@@ -303,6 +305,19 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
     }
   };
 
+  const handleRefreshSuggestions = async () => {
+    try {
+      await refreshRoadmapSuggestions();
+      toast.success(t("tools.admin.roadmap.toasts.refreshSuggestionsSuccess"));
+    } catch (error) {
+      toast.error(
+        t("tools.admin.roadmap.toasts.refreshSuggestionsFail", {
+          error: errorMessage(error),
+        }),
+      );
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteItem) {
       return;
@@ -329,6 +344,7 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
       mode: "create",
       kind,
       input: defaultInput(kind, date),
+      suggest: true,
     });
   };
 
@@ -504,6 +520,15 @@ export function AdminRoadmapView({ initialItems, now }: AdminRoadmapViewProps) {
           <Button variant="outline" size="sm" onClick={handleRevalidate}>
             <RefreshCwIcon />
             {t("tools.admin.roadmap.revalidate")}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshSuggestions}
+          >
+            <DownloadIcon />
+            {t("tools.admin.roadmap.suggestions.refresh")}
           </Button>
         </RoadmapControls>
 

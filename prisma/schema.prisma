@@ -663,6 +663,7 @@ model Scenario {
   endDate   DateTime @default("2099-12-31T23:59:59Z")
 
   name         String
+  label        String?
   type         ScenarioType
   episodeCount Int          @default(0)
 }
@@ -703,4 +704,24 @@ model RoadmapETC {
 
   label       String
   description String?
+}
+
+model UpcomingContent {
+  id String @id // `${kind}:${sourceId}`
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  kind     String // raid, eliminateRaid, multiFloorRaid, timeAttackDungeon, event or chapter
+  sourceId String // the game's id: season id, EventContentId or chapter id
+
+  // position within the kind, oldest first
+  sortOrder Int
+
+  // UpcomingRaid, UpcomingEvent or UpcomingChapter (src/lib/game-data/contract.ts)
+  data Json
+
+  gameVersion String
+
+  @@index([kind, sortOrder])
 }

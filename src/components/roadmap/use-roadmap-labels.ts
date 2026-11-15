@@ -86,8 +86,9 @@ export function useRoadmapLabels() {
         case "raid":
         case "frr":
           return raidName(item);
-        case "event":
         case "story":
+          return item.label || item.name;
+        case "event":
         case "workLog":
         case "battlePass":
           return item.name;
@@ -126,6 +127,10 @@ export function useRoadmapLabels() {
       }
     }
 
+    function caption(item: RoadmapItem): string | null {
+      return item.kind === "story" && item.label ? item.name : null;
+    }
+
     function fullTitle(item: RoadmapItem): string {
       const sub = subtitle(item);
       return sub ? `${sub}: ${title(item)}` : title(item);
@@ -159,6 +164,7 @@ export function useRoadmapLabels() {
       category,
       title,
       subtitle,
+      caption,
       fullTitle,
       dateRange,
       formatDateTime,

@@ -198,7 +198,7 @@ export const LANE_HEIGHTS: Record<RoadmapCategory, number> = {
   gaTicket: 48,
   frr: 60,
   event: 60,
-  story: 60,
+  story: 72,
   bonus: 48,
   birthday: 48,
   shopReset: 40,

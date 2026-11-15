@@ -120,6 +120,7 @@ function serializeStory(scenario: Scenario): EditableRoadmapItem {
     ...serializeDates(scenario),
     kind: "story",
     name: scenario.name,
+    label: scenario.label,
     internalId: scenario.internalId,
     type: scenario.type,
     episodeCount: scenario.episodeCount,
@@ -299,6 +300,52 @@ export async function fetchRoadmapItems(): Promise<RoadmapItem[]> {
     ...passes.map(serializeBattlePass),
     ...etcs.map(serializeEtc),
   ];
+}
+
+const HISTORY_LIMIT = 200;
+
+export async function fetchRoadmapHistory(
+  kind: "raid" | "frr" | "event" | "story",
+): Promise<EditableRoadmapItem[]> {
+  const options = {
+    orderBy: {
+      startDate: "desc",
+    },
+    take: HISTORY_LIMIT,
+  } as const;
+
+  switch (kind) {
+    case "raid":
+    case "frr": {
+      const raids = await db.raid.findMany({
+        ...options,
+        where: {
+          type:
+            kind === "frr"
+              ? "MultiFloorRaid"
+              : {
+                  not: "MultiFloorRaid",
+                },
+        },
+        include: RAID_INCLUDE,
+      });
+
+      return raids.map(serializeRaid);
+    }
+    case "event": {
+      const events = await db.event.findMany({
+        ...options,
+        include: EVENT_INCLUDE,
+      });
+
+      return events.map(serializeEvent);
+    }
+    case "story": {
+      const scenarios = await db.scenario.findMany(options);
+
+      return scenarios.map(serializeStory);
+    }
+  }
 }
 
 export const getCachedRoadmapItems = unstable_cache(

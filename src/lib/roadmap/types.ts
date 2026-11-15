@@ -89,6 +89,7 @@ export type RoadmapEventItem = RoadmapItemBase & {
 export type RoadmapStoryItem = RoadmapItemBase & {
   kind: "story";
   name: string;
+  label: string | null;
   internalId: string;
   type: ScenarioType;
   episodeCount: number;

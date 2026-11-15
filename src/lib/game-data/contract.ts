@@ -843,6 +843,156 @@ export interface ExtractStoriesResult {
   warnings: string[];
 }
 
+/** A period in UTC, as ISO 8601 strings. */
+export interface ContentPeriod {
+  start: string;
+  end: string;
+}
+
+export type UpcomingRaidKind =
+  | "raid"
+  | "eliminateRaid"
+  | "multiFloorRaid"
+  | "timeAttackDungeon";
+
+/** One of the three bosses of a Grand Assault season. */
+export interface UpcomingRaidRoom {
+  /** E.g. `Goz_Indoor_HeavyArmor`. */
+  bossGroup: string;
+  /** The game's `ArmorType` names, e.g. `HeavyArmor`. */
+  armorTypes: string[];
+  hasTorment: boolean;
+  hasLunatic: boolean;
+}
+
+/** A Total Assault, Grand Assault, Final Restriction Release or Joint Firing Drill season. */
+export interface UpcomingRaid {
+  kind: UpcomingRaidKind;
+  /** The JP season id; Global numbers its seasons differently. */
+  seasonId: number;
+  /**
+   * The game's name for the boss: `RaidBossGroupType` for raids (`Binah`, `HOD`,
+   * `EN0023`), the boss group without its armor suffix for Final Restriction
+   * Release (`EN0008`), and the drill type for drills (`Defense`).
+   */
+  boss: string;
+  /** The season's boss groups as the game lists them; three for a Grand Assault. */
+  bossGroups: string[];
+  /** The boss's `BulletType` on the hardest difficulty; empty for drills. */
+  attackTypes: string[];
+  /** The boss's `ArmorType`s; for a Grand Assault, see `rooms` instead. */
+  armorTypes: string[];
+  /** `StageTopography` names: `Street`, `Outdoor`, `Indoor`. */
+  terrains: string[];
+  /** Only for a Grand Assault. */
+  rooms: UpcomingRaidRoom[];
+  jp: ContentPeriod;
+  /** Global's own dates for this season, once its files have them. */
+  global: ContentPeriod | null;
+  /**
+   * `true` for a season that hasn't started and repeats the one before it: the
+   * game files hold a copy of the last season until the next one is announced.
+   */
+  tentative: boolean;
+}
+
+export type UpcomingEventKind = "event" | "rerun" | "permanent" | "mini";
+
+export interface UpcomingEvent {
+  /** `EventContentId` */
+  id: number;
+  /** For reruns and permanent copies, the original event; otherwise `null`. */
+  originalId: number | null;
+  kind: UpcomingEventKind;
+  /** For the recurring mini event, which run this is (`60019` is 19). */
+  season: number | null;
+  nameJp: string | null;
+  /** From Global, so `null` until Global's files have the event. */
+  nameEn: string | null;
+  /** Character ids of the students the event's stages give away. */
+  rewardCharacterIds: number[];
+  jp: ContentPeriod;
+  global: ContentPeriod | null;
+}
+
+export interface UpcomingChapterPart {
+  openDate: string;
+  episodeCount: number;
+}
+
+export interface UpcomingChapter {
+  /** `{ModeType}_{SubType}_{VolumeId}_{ChapterId}`, e.g. `Main_Series2_3_1`. */
+  id: string;
+  /** `Main`, `SpecialOperation`, `Sub`, `Mini` or `Prologue`. */
+  modeType: string;
+  subType: string;
+  volumeId: number;
+  chapterId: number;
+  nameJp: string | null;
+  nameEn: string | null;
+  episodeCount: number;
+  /**
+   * Position among the chapters of its mode type, oldest first. JP has no
+   * release dates, but its table is chronological within a mode type.
+   */
+  order: number;
+  /** When the chapter opens on Global, once its files have it. */
+  globalOpenDate: string | null;
+  /**
+   * The volume as the game shows it, where that differs from `volumeId`
+   * (`Main_Series2_3_1` is shown as volume `2`); empty otherwise.
+   */
+  displayVolumeId: string;
+  /**
+   * The batches Global releases the chapter's episodes in, oldest first: a
+   * chapter can come out in parts weeks apart. Empty until Global's files have
+   * the chapter. JP has no dates, so there a new part only shows as
+   * `episodeCount` growing.
+   */
+  globalParts: UpcomingChapterPart[];
+}
+
+export interface ExtractUpcomingContentOptions {
+  /** JP SQLCipher key; fetched from the JP gateway when omitted. */
+  sqlcipherKey?: string;
+  /** Global SQLCipher key; fetched from the Nexon gateway when omitted. */
+  globalSqlcipherKey?: string;
+  /** Nexon gateway region used to fetch the Global key (`na` by default). */
+  globalRegion?: string;
+  /** Leaves out seasons and events that started before this; a year ago by default. */
+  since?: Date;
+  /** How many chapters to keep per mode type (10 by default). */
+  chapterLimit?: number;
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
+export interface ExtractUpcomingContentResult {
+  gameVersion: {
+    jp: string;
+    /** `null` when Global couldn't be loaded (see `warnings`). */
+    global: string | null;
+  };
+  /** Oldest first within a kind. */
+  raids: UpcomingRaid[];
+  /** Oldest first. */
+  events: UpcomingEvent[];
+  chapters: UpcomingChapter[];
+  warnings: string[];
+}
+
+export interface JpMaintenance {
+  start: string;
+  end: string;
+  /** Whether the maintenance window covers the current time. */
+  ongoing: boolean;
+}
+
+export interface GetJpMaintenanceOptions {
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
 export interface DataSyncModule {
   listNewStudents(
     options: ListNewStudentsOptions,
@@ -857,4 +1007,13 @@ export interface DataSyncModule {
   ): Promise<ExtractStudentSkillsResult>;
 
   extractStories(options: ExtractStoriesOptions): Promise<ExtractStoriesResult>;
+
+  extractUpcomingContent(
+    options: ExtractUpcomingContentOptions,
+  ): Promise<ExtractUpcomingContentResult>;
+
+  /** The JP maintenance window the game announces, or `null` when there is none. */
+  getJpMaintenance(
+    options: GetJpMaintenanceOptions,
+  ): Promise<JpMaintenance | null>;
 }

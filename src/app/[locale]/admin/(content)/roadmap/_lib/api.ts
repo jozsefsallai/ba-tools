@@ -1,4 +1,5 @@
 import type { AnyRoadmapInput } from "@/lib/roadmap/schemas";
+import type { RoadmapSuggestions } from "@/lib/roadmap/suggestions.server";
 import type {
   EditableRoadmapItem,
   EditableRoadmapKind,
@@ -80,6 +81,27 @@ export function offsetRoadmapItems(
 
 export async function revalidatePublicRoadmap(): Promise<void> {
   await request("/api/admin/roadmap/revalidate", {
+    method: "POST",
+    body: "{}",
+  });
+}
+
+export function fetchRoadmapSuggestions(
+  kind: EditableRoadmapKind,
+  date: string,
+): Promise<RoadmapSuggestions> {
+  const params = new URLSearchParams({
+    kind,
+    date,
+  });
+
+  return request(`/api/admin/roadmap/suggestions?${params}`, {
+    method: "GET",
+  });
+}
+
+export async function refreshRoadmapSuggestions(): Promise<void> {
+  await request("/api/admin/roadmap/suggestions/refresh", {
     method: "POST",
     body: "{}",
   });

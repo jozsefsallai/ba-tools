@@ -94,6 +94,26 @@ export const syncStudentSkillsPayload = z.object({
 
 export type SyncStudentSkillsPayload = z.input<typeof syncStudentSkillsPayload>;
 
+export const syncUpcomingContentPayload = z.object({
+  sqlcipherKey,
+  globalSqlcipherKey: sqlcipherKey,
+  // What started the run. Scheduled runs and their retries wait for JP
+  // maintenance to end; a manual run syncs right away.
+  source: z
+    .enum([
+      "schedule",
+      "retry",
+      "manual",
+    ])
+    .default("manual"),
+  // How many maintenance checks came before this one
+  retry: z.number().int().min(0).default(0),
+});
+
+export type SyncUpcomingContentPayload = z.input<
+  typeof syncUpcomingContentPayload
+>;
+
 export const syncStoriesPayload = z.object({
   globalSqlcipherKey: sqlcipherKey,
   // All types when omitted

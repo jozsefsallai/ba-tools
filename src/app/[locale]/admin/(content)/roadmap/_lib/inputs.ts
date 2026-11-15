@@ -60,6 +60,7 @@ export function defaultInput(
       return {
         ...week(2),
         name: "",
+        label: null,
         internalId: "",
         type: "Main",
         episodeCount: 0,
@@ -119,6 +120,7 @@ export function itemToInput(item: EditableRoadmapItem): AnyRoadmapInput {
       return {
         ...dates,
         name: item.name,
+        label: item.label,
         internalId: item.internalId,
         type: item.type,
         episodeCount: item.episodeCount,

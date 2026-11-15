@@ -119,10 +119,21 @@ function stickyOffset(left: number, max: number): string {
   return `clamp(0px, calc(var(--roadmap-scroll, 0px) - ${left}px), ${Math.max(0, max)}px)`;
 }
 
-function estimateDotWidthPx(label: string, extra = 0) {
-  return (
-    Math.min(DOT_LABEL_MAX_WIDTH, Math.max(label.length, 12) * 6.5 + extra) + 28
+// A caption is set smaller than the title, so its characters count for less.
+const CAPTION_CHARACTER_WIDTH = 0.85;
+
+function estimateDotWidthPx(
+  label: string,
+  extra = 0,
+  caption: string | null = null,
+) {
+  const characters = Math.max(
+    label.length,
+    12,
+    Math.ceil((caption?.length ?? 0) * CAPTION_CHARACTER_WIDTH),
   );
+
+  return Math.min(DOT_LABEL_MAX_WIDTH, characters * 6.5 + extra) + 28;
 }
 
 function dotExtraWidth(item: RoadmapItem) {
@@ -253,7 +264,12 @@ export function RoadmapTimeline({
 
   const rows = useMemo(() => {
     const dotWidthMs = (item: RoadmapItem) =>
-      (estimateDotWidthPx(labels.title(item), dotExtraWidth(item)) / dayWidth) *
+      (estimateDotWidthPx(
+        labels.title(item),
+        dotExtraWidth(item),
+        labels.caption(item),
+      ) /
+        dayWidth) *
       DAY_MS;
 
     return categories
@@ -663,7 +679,11 @@ export function RoadmapTimeline({
             const left = dateToX(display.startDate, rangeStart, dayWidth);
             const right = dot
               ? left +
-                estimateDotWidthPx(labels.title(item), dotExtraWidth(item))
+                estimateDotWidthPx(
+                  labels.title(item),
+                  dotExtraWidth(item),
+                  labels.caption(item),
+                )
               : dateToX(display.endDate, rangeStart, dayWidth);
 
             if (right < windowStart || left > windowEnd) {
@@ -893,6 +913,7 @@ function BarContent({
   labels: RoadmapLabels;
 }) {
   const subtitle = labels.subtitle(item);
+  const caption = labels.caption(item);
   const fest = isFestBanner(item);
   const limited = isLimitedBanner(item);
   const freePulls = item.kind === "banner" ? item.freePulls : 0;
@@ -946,6 +967,10 @@ function BarContent({
         <div className="truncate text-xs font-bold">{labels.title(item)}</div>
       )}
 
+      {caption && (
+        <div className="truncate text-[10px] opacity-80">{caption}</div>
+      )}
+
       {(item.kind === "raid" || item.kind === "frr") && (
         <RaidChips
           item={item}
@@ -973,7 +998,7 @@ type BarArt = {
   variant: "faded" | "fadedSquare" | "icon";
 };
 
-function getBarArt(item: RoadmapItem): BarArt | null {
+export function getBarArt(item: RoadmapItem): BarArt | null {
   if (item.kind === "raid" || item.kind === "frr") {
     const art = getRaidImage(item);
     if (!art) {
@@ -1002,7 +1027,7 @@ function getBarArt(item: RoadmapItem): BarArt | null {
   return null;
 }
 
-function BarArtImage({ art }: { art: BarArt }) {
+export function BarArtImage({ art }: { art: BarArt }) {
   return (
     <img
       src={art.src}
@@ -1141,6 +1166,7 @@ function RoadmapDot({
 }: ItemProps) {
   const swatch = getItemSwatch(item);
   const subtitle = labels.subtitle(item);
+  const caption = labels.caption(item);
 
   return (
     <ItemTooltip
@@ -1212,6 +1238,12 @@ function RoadmapDot({
           ) : (
             <div className="truncate text-xs font-bold">
               {labels.title(item)}
+            </div>
+          )}
+
+          {caption && (
+            <div className="truncate text-[10px] text-muted-foreground">
+              {caption}
             </div>
           )}
 

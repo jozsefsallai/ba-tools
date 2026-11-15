@@ -15,4 +15,12 @@ declare module "mx-data-sync:entry" {
   export const extractStudentSkills:
     | import("@/lib/game-data/contract").DataSyncModule["extractStudentSkills"]
     | undefined;
+
+  export const extractUpcomingContent:
+    | import("@/lib/game-data/contract").DataSyncModule["extractUpcomingContent"]
+    | undefined;
+
+  export const getJpMaintenance:
+    | import("@/lib/game-data/contract").DataSyncModule["getJpMaintenance"]
+    | undefined;
 }

@@ -3,3 +3,5 @@ export const listNewStudents = undefined;
 export const extractImageAssets = undefined;
 export const extractStudentSkills = undefined;
 export const extractStories = undefined;
+export const extractUpcomingContent = undefined;
+export const getJpMaintenance = undefined;

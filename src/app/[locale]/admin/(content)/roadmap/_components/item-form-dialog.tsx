@@ -4,6 +4,10 @@ import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
+import {
+  hasSuggestions,
+  ItemSuggestions,
+} from "@/app/[locale]/admin/(content)/roadmap/_components/item-suggestions";
 import { StudentPicker } from "@/components/common/student-picker";
 import { useRoadmapLabels } from "@/components/roadmap/use-roadmap-labels";
 import { Button } from "@/components/ui/button";
@@ -49,6 +53,7 @@ import {
   type RoadmapInput,
   roadmapInputSchemas,
 } from "@/lib/roadmap/schemas";
+import type { RoadmapSuggestion } from "@/lib/roadmap/suggestions";
 import type { EditableRoadmapKind, RoadmapRaidRoom } from "@/lib/roadmap/types";
 
 export type ItemFormState = {
@@ -56,6 +61,7 @@ export type ItemFormState = {
   kind: EditableRoadmapKind;
   input: AnyRoadmapInput;
   eventStudentName?: string | null;
+  suggest?: boolean;
 };
 
 export type ItemFormDialogProps = {
@@ -186,10 +192,12 @@ export function ItemFormDialog({
   const [input, setInput] = useState<AnyRoadmapInput | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [durationDraft, setDurationDraft] = useState<string | null>(null);
+  const [suggestionId, setSuggestionId] = useState<string | null>(null);
 
   useEffect(() => {
     setInput(state?.input ?? null);
     setDurationDraft(null);
+    setSuggestionId(null);
   }, [
     state,
   ]);
@@ -211,6 +219,20 @@ export function ItemFormDialog({
 
   const permanent = isPermanent(input.startDate, input.endDate);
   const category = labels.category(kind);
+
+  const applySuggestion = (suggestion: RoadmapSuggestion) => {
+    setSuggestionId(suggestion.id);
+    setDurationDraft(null);
+    setInput((prev) =>
+      prev && suggestion.dateSource === "none"
+        ? {
+            ...suggestion.input,
+            // the game files have no date for it, so keep the one in the form
+            startDate: prev.startDate,
+          }
+        : suggestion.input,
+    );
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -292,6 +314,15 @@ export function ItemFormDialog({
               {labels.t("static.roadmap.utc")}
             </DialogDescription>
           </DialogHeader>
+
+          {state.suggest && hasSuggestions(kind) && (
+            <ItemSuggestions
+              kind={kind}
+              date={state.input.startDate}
+              selectedId={suggestionId}
+              onSelect={applySuggestion}
+            />
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field
@@ -689,6 +720,26 @@ export function ItemFormDialog({
                   }
                 />
               </Field>
+
+              {story && (
+                <Field
+                  label={t("tools.admin.roadmap.form.storyLabel")}
+                  htmlFor={`${id}-story-label`}
+                >
+                  <Input
+                    id={`${id}-story-label`}
+                    value={story.label ?? ""}
+                    placeholder={t(
+                      "tools.admin.roadmap.form.storyLabelPlaceholder",
+                    )}
+                    onChange={(e) =>
+                      update({
+                        label: e.target.value || null,
+                      })
+                    }
+                  />
+                </Field>
+              )}
 
               {event && (
                 <Field label={t("tools.admin.roadmap.form.type")}>
