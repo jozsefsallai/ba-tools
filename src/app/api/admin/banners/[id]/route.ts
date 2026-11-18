@@ -3,7 +3,7 @@ import { updateGameBannerSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
-import { invalidateGameBannersCache } from "@/lib/game-banners.server";
+import { onGameBannersChanged } from "@/lib/game-banners.server";
 
 export const runtime = "nodejs";
 
@@ -147,7 +147,7 @@ export async function PATCH(req: Request, context: RouteContext) {
     },
   });
 
-  invalidateGameBannersCache();
+  onGameBannersChanged();
   return NextResponse.json(serializeGameBanner(banner));
 }
 
@@ -181,7 +181,7 @@ export async function DELETE(_req: Request, context: RouteContext) {
     },
   });
 
-  invalidateGameBannersCache();
+  onGameBannersChanged();
   return NextResponse.json({
     ok: true,
   });

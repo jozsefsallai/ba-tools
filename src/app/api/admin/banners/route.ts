@@ -3,7 +3,7 @@ import { createGameBannerSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
-import { invalidateGameBannersCache } from "@/lib/game-banners.server";
+import { onGameBannersChanged } from "@/lib/game-banners.server";
 
 export const runtime = "nodejs";
 
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
     },
   });
 
-  invalidateGameBannersCache();
+  onGameBannersChanged();
   return NextResponse.json(serializeGameBanner(banner), {
     status: 201,
   });

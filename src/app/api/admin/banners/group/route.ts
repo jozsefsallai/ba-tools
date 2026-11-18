@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { updateGameBannerGroupSchema } from "@/lib/admin/game-banner-schemas";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
-import { invalidateGameBannersCache } from "@/lib/game-banners.server";
+import { onGameBannersChanged } from "@/lib/game-banners.server";
 
 export const runtime = "nodejs";
 
@@ -67,7 +67,7 @@ export async function PATCH(req: Request) {
     },
   });
 
-  invalidateGameBannersCache();
+  onGameBannersChanged();
   return NextResponse.json({
     ok: true,
     updatedCount: result.count,

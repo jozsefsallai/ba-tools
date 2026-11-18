@@ -1,5 +1,7 @@
 import { logger, type Task, task } from "@trigger.dev/sdk";
+import { ARONABOT_BANNER_SYNC_DEBOUNCE } from "../lib/aronabot/banner-sync";
 import { db } from "../lib/db";
+import { syncAronaBotBannersTask } from "./aronabot-sync-banners";
 import {
   type OffsetGameBannersPayload,
   offsetGameBannersPayload,
@@ -61,5 +63,14 @@ export const offsetGameBanners: Task<
     }
 
     logger.info(`Offset ${banners.length} banners by ${offsetDays} days.`);
+
+    await syncAronaBotBannersTask.trigger(
+      {
+        source: "banners-changed",
+      },
+      {
+        debounce: ARONABOT_BANNER_SYNC_DEBOUNCE,
+      },
+    );
   },
 });

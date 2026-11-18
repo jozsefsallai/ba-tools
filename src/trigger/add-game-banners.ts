@@ -1,6 +1,8 @@
 import { logger, type Task, task } from "@trigger.dev/sdk";
+import { ARONABOT_BANNER_SYNC_DEBOUNCE } from "../lib/aronabot/banner-sync";
 import { db } from "../lib/db";
 import type { Student } from "../lib/db/client";
+import { syncAronaBotBannersTask } from "./aronabot-sync-banners";
 import {
   type AddGameBannersPayload,
   addGameBannersPayload,
@@ -85,5 +87,14 @@ export const addGameBannersTask: Task<
         `Created game banner from ${startDate.toISOString()} to ${endDate.toISOString()} for students: ${studentNames}`,
       );
     }
+
+    await syncAronaBotBannersTask.trigger(
+      {
+        source: "banners-changed",
+      },
+      {
+        debounce: ARONABOT_BANNER_SYNC_DEBOUNCE,
+      },
+    );
   },
 });

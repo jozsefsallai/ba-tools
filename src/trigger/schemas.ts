@@ -62,6 +62,31 @@ export const setBannersPayload = z.object({
 
 export type SetBannersPayload = z.infer<typeof setBannersPayload>;
 
+export const syncAronaBotBannersPayload = z.object({
+  source: z
+    .enum([
+      "schedule",
+      "banners-changed",
+      "manual",
+    ])
+    .default("manual"),
+});
+
+export type SyncAronaBotBannersPayload = z.input<
+  typeof syncAronaBotBannersPayload
+>;
+
+export const updateAronaBotRegionPayload = z.object({
+  kind: z.enum(BannerKind),
+  banners: z.array(rawBanner),
+  // ISO timestamp of the sync, so a retried run uses the same date
+  date: z.iso.datetime(),
+});
+
+export type UpdateAronaBotRegionPayload = z.infer<
+  typeof updateAronaBotRegionPayload
+>;
+
 const sqlcipherKey = z
   .string()
   .regex(/^[0-9a-fA-F]{64}$/, "Expected 64 hex characters")

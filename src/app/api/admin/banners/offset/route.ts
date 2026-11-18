@@ -4,7 +4,7 @@ import { offsetGameBannersSchema } from "@/lib/admin/game-banner-schemas";
 import { serializeGameBanner } from "@/lib/admin/serialize-game-banner";
 import { requireContentManager } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
-import { invalidateGameBannersCache } from "@/lib/game-banners.server";
+import { onGameBannersChanged } from "@/lib/game-banners.server";
 
 export const runtime = "nodejs";
 
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     updated.push(serializeGameBanner(next));
   }
 
-  invalidateGameBannersCache();
+  onGameBannersChanged();
   return NextResponse.json({
     ok: true,
     updatedCount: updated.length,
