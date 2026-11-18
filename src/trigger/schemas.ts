@@ -76,15 +76,15 @@ export type SyncAronaBotBannersPayload = z.input<
   typeof syncAronaBotBannersPayload
 >;
 
-export const updateAronaBotRegionPayload = z.object({
-  kind: z.enum(BannerKind),
+export const updateAronaBotBannersPayload = z.object({
+  kinds: z.array(z.enum(BannerKind)).min(1),
   banners: z.array(rawBanner),
   // ISO timestamp of the sync, so a retried run uses the same date
   date: z.iso.datetime(),
 });
 
-export type UpdateAronaBotRegionPayload = z.infer<
-  typeof updateAronaBotRegionPayload
+export type UpdateAronaBotBannersPayload = z.infer<
+  typeof updateAronaBotBannersPayload
 >;
 
 const sqlcipherKey = z

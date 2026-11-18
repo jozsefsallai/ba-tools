@@ -13,6 +13,9 @@ const FIRST_SORT_KEY: Record<BannerKind, number> = {
   JP: 51,
 };
 
+// How many other fest students a fest banner's extra pool holds
+const FEST_EXTRA_POOL_SIZE = 9;
+
 export function getBannerDate(date: Date): string {
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -42,6 +45,11 @@ async function withFestExtras(banner: RawBanner): Promise<RawBanner> {
         ],
       },
     },
+    // Only the newest fests (by release order) stay in a fest banner's pool
+    orderBy: {
+      defaultOrder: "desc",
+    },
+    take: FEST_EXTRA_POOL_SIZE,
     select: {
       id: true,
     },

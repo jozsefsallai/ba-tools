@@ -81,15 +81,17 @@ async function getRegionBlocks(
   return [
     heading,
     ...entries,
-    `\nℹ️ __Notice:__ Recruitment points have been reset for everyone for the **${kind}** region.\n\n`,
+    `\nℹ️ __Notice:__ Total recruitment counts have been reset for everyone for the **${kind}** region.\n\n`,
   ];
 }
 
-export async function getAnnouncementText(
+async function getAnnouncementBlocks(
   banners: RawBanner[],
   date: Date,
-): Promise<string> {
-  let output = ANNOUNCEMENT_HEADER;
+): Promise<string[]> {
+  const blocks = [
+    ANNOUNCEMENT_HEADER,
+  ];
 
   for (const kind of [
     "Global",
@@ -98,22 +100,25 @@ export async function getAnnouncementText(
     const regionBanners = banners.filter((b) => b.kind === kind);
 
     if (regionBanners.length > 0) {
-      output += (await getRegionBlocks(kind, regionBanners, date)).join("");
+      blocks.push(...(await getRegionBlocks(kind, regionBanners, date)));
     }
   }
 
-  return output;
+  return blocks;
 }
 
-export async function getRegionAnnouncementMessages(
-  kind: BannerKind,
+export async function getAnnouncementText(
+  banners: RawBanner[],
+  date: Date,
+): Promise<string> {
+  return (await getAnnouncementBlocks(banners, date)).join("");
+}
+
+export async function getAnnouncementMessages(
   banners: RawBanner[],
   date: Date,
 ): Promise<string[]> {
-  const blocks = [
-    ANNOUNCEMENT_HEADER,
-    ...(await getRegionBlocks(kind, banners, date)),
-  ];
+  const blocks = await getAnnouncementBlocks(banners, date);
 
   const messages: string[] = [];
   let current = "";
