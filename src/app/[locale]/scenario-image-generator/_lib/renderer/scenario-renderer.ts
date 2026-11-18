@@ -96,6 +96,39 @@ function loadScenarioFonts(): Promise<void> {
   return fontsPromise;
 }
 
+const userTextureCache = new Map<string, Promise<Texture>>();
+
+/**
+ * Loads a user-supplied background or sprite (an external URL, or a data URL
+ * from an upload). Pixi's `Assets.load` fetches images with `fetch()`, which
+ * the CSP's `connect-src` only allows for our own origins, and it also needs a
+ * file extension in the URL. An `<img>` element falls under `img-src`, which
+ * allows any HTTPS origin. `crossOrigin` keeps the canvas exportable when the
+ * host sends CORS headers.
+ */
+function loadUserTexture(url: string): Promise<Texture> {
+  const cached = userTextureCache.get(url);
+  if (cached) {
+    return cached;
+  }
+
+  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () =>
+      reject(new Error(`Failed to load scenario image: ${url}`));
+    image.src = url;
+  }).then((image) => Texture.from(image));
+
+  promise.catch(() => {
+    userTextureCache.delete(url);
+  });
+
+  userTextureCache.set(url, promise);
+  return promise;
+}
+
 function createGradientTexture(): Texture {
   const canvas = document.createElement("canvas");
   canvas.width = SCENARIO_VIEW_WIDTH;
@@ -478,7 +511,7 @@ export class ScenarioRenderer {
       if (!url) {
         this.backgroundSprite.texture = Texture.EMPTY;
       } else {
-        Assets.load<Texture>(url)
+        loadUserTexture(url)
           .then((texture) => {
             if (this.backgroundLoadToken !== token || !texture) {
               return;
@@ -569,7 +602,7 @@ export class ScenarioRenderer {
         if (!character.spriteUrl) {
           slot.sprite.texture = Texture.EMPTY;
         } else {
-          Assets.load<Texture>(character.spriteUrl)
+          loadUserTexture(character.spriteUrl)
             .then((texture) => {
               if (slot.loadToken !== token || !texture) {
                 return;
