@@ -59,7 +59,7 @@ export function registerGameDataTools(server: McpServer) {
     {
       title: "Get student",
       description:
-        "One student's full profile: stats, terrain adaptation (`…Grade`: D to SS; street = Urban, outdoor = Field, indoor = Indoor), gift preferences (adored/loved/liked gifts), and variants. Use the `…Label` fields, not the internal enum names, when talking to the user.",
+        "One student's full profile: stats, terrain adaptation (`…Grade`: D to SS; street = Urban, outdoor = Field, indoor = Indoor), gift preferences (adored/loved/liked gifts), variants, and the relationship story (`bondStories`: each episode's title and the bond rank it unlocks at; `unlocksMemorialLobby` marks the episode that unlocks the memorial lobby, `unlocksBondGear` the bond gear's episode; `title` is null for episodes not on Global yet, so use `titleJP`). Use the `…Label` fields, not the internal enum names, when talking to the user.",
       kind: "read",
       input: {
         student: studentIdentifier,

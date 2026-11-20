@@ -12,6 +12,10 @@ declare module "mx-data-sync:entry" {
     | import("@/lib/game-data/contract").DataSyncModule["extractImageAssets"]
     | undefined;
 
+  export const extractBondStories:
+    | import("@/lib/game-data/contract").DataSyncModule["extractBondStories"]
+    | undefined;
+
   export const extractStories:
     | import("@/lib/game-data/contract").DataSyncModule["extractStories"]
     | undefined;

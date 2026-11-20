@@ -9,6 +9,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     listFavorItems,
     extractImageAssets,
     extractStudentSkills,
+    extractBondStories,
     extractStories,
     extractUpcomingContent,
     getJpMaintenance,
@@ -19,6 +20,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     !listFavorItems ||
     !extractImageAssets ||
     !extractStudentSkills ||
+    !extractBondStories ||
     !extractStories ||
     !extractUpcomingContent ||
     !getJpMaintenance
@@ -33,6 +35,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     listFavorItems,
     extractImageAssets,
     extractStudentSkills,
+    extractBondStories,
     extractStories,
     extractUpcomingContent,
     getJpMaintenance,

@@ -119,6 +119,16 @@ export const syncStudentSkillsPayload = z.object({
 
 export type SyncStudentSkillsPayload = z.input<typeof syncStudentSkillsPayload>;
 
+export const syncBondStoriesPayload = z.object({
+  sqlcipherKey,
+  globalSqlcipherKey: sqlcipherKey,
+  // All students when omitted
+  devNames: z.array(z.string().min(1)).optional(),
+  dryRun: z.boolean().default(false),
+});
+
+export type SyncBondStoriesPayload = z.input<typeof syncBondStoriesPayload>;
+
 export const syncUpcomingContentPayload = z.object({
   sqlcipherKey,
   globalSqlcipherKey: sqlcipherKey,

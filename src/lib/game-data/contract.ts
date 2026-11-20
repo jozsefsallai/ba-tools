@@ -768,6 +768,51 @@ export interface ExtractStudentSkillsResult {
   warnings: string[];
 }
 
+/** One episode of a student's relationship (bond) story. */
+export interface BondStoryEpisodeData {
+  /** `${studentId}:${episode}` */
+  id: string;
+  /** `Student.id` */
+  studentId: string;
+  /** Position in the student's relationship story, from 1. */
+  episode: number;
+  /** The bond rank the episode unlocks at. */
+  favorRank: number;
+  /**
+   * The episode's title. JP and KR come from JP, EN, TW and TH from Global, so
+   * episodes Global doesn't have yet have no EN/TW/TH title.
+   */
+  titles: Partial<Record<SkillLocale, string>>;
+  /** Whether Global's files have the episode. */
+  isReleasedGlobal: boolean;
+  /** Reading the episode unlocks the student's memorial lobby. */
+  unlocksMemoryLobby: boolean;
+  /** The episode is the bond gear's: it opens at the rank the gear unlocks at. */
+  unlocksBondGear: boolean;
+}
+
+export interface ExtractBondStoriesOptions {
+  students: SkillStudent[];
+  sqlcipherKey?: string;
+  globalSqlcipherKey?: string;
+  /** Nexon gateway region used to fetch the Global key (`na` by default). */
+  globalRegion?: string;
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
+export interface ExtractBondStoriesResult {
+  gameVersion: {
+    jp: string;
+    global: string | null;
+  };
+  /** By student, in episode order. */
+  episodes: BondStoryEpisodeData[];
+  /** devNames of students without a relationship story. */
+  missing: string[];
+  warnings: string[];
+}
+
 export type StoryType = "main" | "group" | "mini" | "event" | "bond";
 
 export type StoryLine =
@@ -1026,6 +1071,11 @@ export interface DataSyncModule {
   extractStudentSkills(
     options: ExtractStudentSkillsOptions,
   ): Promise<ExtractStudentSkillsResult>;
+
+  /** The students' relationship story episodes, with their titles and unlocks. */
+  extractBondStories(
+    options: ExtractBondStoriesOptions,
+  ): Promise<ExtractBondStoriesResult>;
 
   extractStories(options: ExtractStoriesOptions): Promise<ExtractStoriesResult>;
 

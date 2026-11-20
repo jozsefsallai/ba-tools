@@ -46,6 +46,24 @@ const studentSummarySelect = {
   searchTags: true,
 } as const;
 
+export const BOND_STORY_SELECT = {
+  select: {
+    episode: true,
+    bondRank: true,
+    title: true,
+    titleJP: true,
+    titleKR: true,
+    titleTW: true,
+    titleTH: true,
+    isReleasedGlobal: true,
+    unlocksMemorialLobby: true,
+    unlocksBondGear: true,
+  },
+  orderBy: {
+    episode: "asc",
+  },
+} as const;
+
 export function studentMediaUrls(id: string) {
   return {
     iconUrl: buildStudentIconUrlFromId(id),
@@ -136,6 +154,7 @@ export async function getStudentDetails(identifier: string) {
       giftsLiked: giftSelect,
       baseVariant: variantSelect,
       variants: variantSelect,
+      bondStories: BOND_STORY_SELECT,
     },
   });
 }

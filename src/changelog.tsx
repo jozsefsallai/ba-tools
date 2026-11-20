@@ -61,6 +61,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Sessions now have a Free Pulls field for free recruitment campaigns (e.g. the free 100/200 pulls around fest banners). Free pulls count toward the charge and rebate milestones, but aren't counted as paid pulls and are used before rebate tickets.",
       },
+      {
+        scope: CHANGELOG_SCOPES.students,
+        description:
+          "Added Relationship Story section to student pages, the API, and the MCP. This section lists which relationship story is unlocked at which bond level and which ones unlock the recollection lobby or the bond gear of a student.",
+      },
     ],
     changes: [],
     fixes: [

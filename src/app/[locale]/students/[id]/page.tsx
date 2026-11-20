@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getLocalizedStudentNames } from "@/app/[locale]/students/_lib/student-display";
 import { MemorialLobbySection } from "@/app/[locale]/students/[id]/_components/memorial-lobby-section";
+import { StudentBondStorySection } from "@/app/[locale]/students/[id]/_components/student-bond-story-section";
 import { StudentBreadcrumbs } from "@/app/[locale]/students/[id]/_components/student-breadcrumbs";
 import {
   StudentHeader,
@@ -125,6 +126,8 @@ export default async function StudentPage({
             studentId={student.id}
             attackType={student.attackType}
           />
+
+          <StudentBondStorySection stories={student.bondStories} />
 
           <MemorialLobbySection
             studentId={student.id}

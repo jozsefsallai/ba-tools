@@ -1793,6 +1793,7 @@
         "media": "Media",
         "variants": "Other Variants",
         "memorialLobby": "Recollection Lobby",
+        "bondStory": "Relationship Story",
         "skills": "Skills"
       },
       "fields": {
@@ -1876,6 +1877,13 @@
         "open": "Open image"
       },
       "metaDescription": "{name} from Blue Archive. View the student's basic details, stats, gifts, sprites, and recollection/memorial lobby (L2D).",
+      "bondStory": {
+        "episode": "Episode {episode}",
+        "bondRank": "Unlocks at bond rank {rank}",
+        "notOnGlobal": "Not on Global yet",
+        "unlocksMemorialLobby": "Unlocks the recollection lobby",
+        "unlocksBondGear": "Unlocks the bond gear"
+      },
       "memorialLobby": {
         "load": "Load recollection lobby",
         "loading": "Loading recollection lobby...",
@@ -2390,7 +2398,7 @@
       "invalidTotalPulls": "Total pulls must be a non-negative whole number.",
       "invalidThreeStarCount": "The 3★ count must be at least the number of pick-ups.",
       "invalidTicketsUsed": "The number of rebate tickets used is higher than the available amount.",
-    "invalidFreePulls": "Free pulls must be a whole number, at most the session's pulls.",
+      "invalidFreePulls": "Free pulls must be a whole number, at most the session's pulls.",
       "invalidPickup": "Each pick-up needs a student and a charge from 1 to 200.",
       "firstPickupBelowStart": "The first pick-up charge must be higher than the starting charge.",
       "pickupsOutOfOrder": "Pick-up charges must increase after each pick-up.",

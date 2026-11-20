@@ -397,6 +397,7 @@ model Student {
 
   skills        Skill[] // legacy model, to be deleted later
   studentSkills StudentSkill[]
+  bondStories   StudentBondStory[]
 
   giftsAdored Gift[] @relation("GiftAdoredBy")
   giftsLoved  Gift[] @relation("GiftLovedBy")
@@ -452,6 +453,28 @@ model StudentSkill {
 
   texts   StudentSkillText[]
   effects StudentSkillEffect[]
+
+  @@index([studentId])
+}
+
+model StudentBondStory {
+  id        String  @id // `${studentId}:${episode}`
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  episode  Int // position in the story, from 1
+  bondRank Int // the bond rank the episode unlocks at
+
+  title   String?
+  titleJP String?
+  titleKR String?
+  titleTW String?
+  titleTH String?
+
+  isReleasedGlobal Boolean @default(false)
+
+  unlocksMemorialLobby Boolean @default(false)
+  unlocksBondGear      Boolean @default(false)
 
   @@index([studentId])
 }

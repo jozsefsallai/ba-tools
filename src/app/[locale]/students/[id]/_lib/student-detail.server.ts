@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { BOND_STORY_SELECT } from "@/lib/data/students.server";
 import { db } from "@/lib/db";
 import { resolveStudentIdentifier } from "@/lib/student-resolve.server";
 
@@ -53,6 +54,7 @@ export const getStudentDetail = cache(async (id: string) => {
       variants: {
         select: VARIANT_SELECT,
       },
+      bondStories: BOND_STORY_SELECT,
     },
   });
 });
@@ -64,3 +66,5 @@ export type StudentDetail = NonNullable<
 export type StudentDetailGift = StudentDetail["giftsAdored"][number];
 
 export type StudentDetailVariant = StudentDetail["variants"][number];
+
+export type StudentDetailBondStory = StudentDetail["bondStories"][number];
