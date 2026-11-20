@@ -38,6 +38,24 @@ export interface ListNewStudentsResult {
   students: NewStudent[];
 }
 
+export interface ListFavorItemsOptions {
+  sqlcipherKey?: string;
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
+export interface FavorItem {
+  /** Item id, the same as SchaleDB's and the `Gift` table's. */
+  id: number;
+  /** `Tag` enum names, spelled like SchaleDB's (`BC`, `iM`). */
+  tags: string[];
+}
+
+export interface ListFavorItemsResult {
+  gameVersion: string;
+  items: FavorItem[];
+}
+
 export interface ImageStudent {
   devName: string;
   characterId: number;
@@ -997,6 +1015,9 @@ export interface DataSyncModule {
   listNewStudents(
     options: ListNewStudentsOptions,
   ): Promise<ListNewStudentsResult>;
+
+  /** JP's released gifts and their tags. */
+  listFavorItems(options: ListFavorItemsOptions): Promise<ListFavorItemsResult>;
 
   extractImageAssets(
     options: ExtractImageAssetsOptions,

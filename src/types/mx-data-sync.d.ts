@@ -4,6 +4,10 @@ declare module "mx-data-sync:entry" {
     | import("@/lib/game-data/contract").DataSyncModule["listNewStudents"]
     | undefined;
 
+  export const listFavorItems:
+    | import("@/lib/game-data/contract").DataSyncModule["listFavorItems"]
+    | undefined;
+
   export const extractImageAssets:
     | import("@/lib/game-data/contract").DataSyncModule["extractImageAssets"]
     | undefined;

@@ -1,5 +1,7 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { logger, type Task, task } from "@trigger.dev/sdk";
-
 import axios from "axios";
 
 import { db } from "../lib/db";
@@ -55,6 +57,74 @@ async function fetchGiftsJP() {
   return data as Record<string, RawGiftItemData>;
 }
 
+async function fetchGameGiftTags(
+  sqlcipherKey: string | undefined,
+): Promise<Map<number, string[]> | null> {
+  const { listFavorItems } = await import("mx-data-sync:entry");
+
+  if (!listFavorItems) {
+    logger.warn(
+      "mx-data-sync isn't bundled with this deployment, so gift tags come from SchaleDB only.",
+    );
+    return null;
+  }
+
+  const workDir = await mkdtemp(join(tmpdir(), "mx-data-sync-"));
+
+  try {
+    const { items } = await listFavorItems({
+      sqlcipherKey,
+      cacheDir: join(workDir, "cache"),
+      logger,
+    });
+
+    return new Map(
+      items.map((item) => [
+        item.id,
+        item.tags,
+      ]),
+    );
+  } catch (err) {
+    logger.warn(
+      `Couldn't read gift tags from the game data, so they come from SchaleDB only: ${(err as Error).message}`,
+    );
+    return null;
+  } finally {
+    await rm(workDir, {
+      recursive: true,
+      force: true,
+    });
+  }
+}
+
+function applyGameGiftTags(
+  gifts: RawGiftItemData[],
+  gameTags: Map<number, string[]>,
+) {
+  const schaleIds = new Set(gifts.map((gift) => gift.Id));
+
+  for (const gift of gifts) {
+    const tags = gameTags.get(gift.Id);
+
+    if (!tags) {
+      logger.warn(
+        `Gift ${gift.Id} (${gift.Name}) isn't in the game data; keeping SchaleDB's tags.`,
+      );
+      continue;
+    }
+
+    gift.Tags = tags;
+  }
+
+  for (const id of gameTags.keys()) {
+    if (!schaleIds.has(id)) {
+      logger.warn(
+        `Gift ${id} is in the game data but not on SchaleDB yet, so it can't be added. Run this task again once SchaleDB has it.`,
+      );
+    }
+  }
+}
+
 type StudentFavorTags = {
   PathName: string;
   FavorItemTags: string[];
@@ -85,6 +155,8 @@ async function setFavorGifts(
   });
 
   const sortedGifts = allGifts.sort((a, b) => b.ExpValue - a.ExpValue);
+  const giftTags = new Set(allGifts.flatMap((gift) => gift.Tags));
+  const incompleteStudents: string[] = [];
 
   for await (const student of students) {
     const item = tagsByStudentId.get(student.id);
@@ -94,6 +166,17 @@ async function setFavorGifts(
         `No favor tags for student ${student.id}. Pass them in the payload to set their gifts.`,
       );
       continue;
+    }
+
+    const unknownTags = item.FavorItemUniqueTags.filter(
+      (tag) => !giftTags.has(tag),
+    );
+
+    if (unknownTags.length > 0) {
+      incompleteStudents.push(student.id);
+      logger.warn(
+        `No gift has ${student.id}'s unique tags ${unknownTags.join(", ")}, so their gifts are incomplete. Run this task again once the game data or SchaleDB's items list them.`,
+      );
     }
 
     const adoredGiftIds: number[] = [];
@@ -156,13 +239,23 @@ async function setFavorGifts(
 
     logger.info(`Set favor gifts for student: ${student.name}`);
   }
+
+  return incompleteStudents;
 }
 
-async function seedGifts(providedStudents?: StudentFavorTags[]) {
+async function seedGifts(
+  providedStudents: StudentFavorTags[] | undefined,
+  sqlcipherKey: string | undefined,
+) {
   const gifts = await fetchGifts();
   const giftsJP = await fetchGiftsJP();
 
   const allGifts = Object.values(gifts);
+
+  const gameTags = await fetchGameGiftTags(sqlcipherKey);
+  if (gameTags) {
+    applyGameGiftTags(allGifts, gameTags);
+  }
 
   for await (const item of allGifts) {
     const giftJP = giftsJP[item.Id];
@@ -208,18 +301,24 @@ async function seedGifts(providedStudents?: StudentFavorTags[]) {
     }
   }
 
-  await setFavorGifts(allGifts, providedStudents);
+  return setFavorGifts(allGifts, providedStudents);
 }
 
 export const seedGiftsTask: Task<
   "seed-gifts",
   SeedGiftsPayload | undefined,
-  void
+  {
+    incompleteStudents: string[];
+  }
 > = task({
   id: "seed-gifts",
   run: async (payload) => {
-    const { students } = seedGiftsPayload.parse(payload ?? {});
-    await seedGifts(students);
+    const { students, sqlcipherKey } = seedGiftsPayload.parse(payload ?? {});
+    const incompleteStudents = await seedGifts(students, sqlcipherKey);
     logger.info("Gifts seeded successfully");
+
+    return {
+      incompleteStudents,
+    };
   },
 });

@@ -6,6 +6,7 @@ import type { DataSyncModule } from "../../lib/game-data/contract";
 export async function loadMxDataSync(): Promise<DataSyncModule> {
   const {
     listNewStudents,
+    listFavorItems,
     extractImageAssets,
     extractStudentSkills,
     extractStories,
@@ -15,6 +16,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
 
   if (
     !listNewStudents ||
+    !listFavorItems ||
     !extractImageAssets ||
     !extractStudentSkills ||
     !extractStories ||
@@ -28,6 +30,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
 
   return {
     listNewStudents,
+    listFavorItems,
     extractImageAssets,
     extractStudentSkills,
     extractStories,

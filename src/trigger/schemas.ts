@@ -205,6 +205,7 @@ export const seedGiftsStudentInput = z.looseObject({
 
 export const seedGiftsPayload = z.object({
   students: z.array(seedGiftsStudentInput).optional(),
+  sqlcipherKey,
 });
 
 export type SeedGiftsPayload = z.input<typeof seedGiftsPayload>;
