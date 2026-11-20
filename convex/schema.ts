@@ -177,6 +177,7 @@ const recruitmentAggregateBucket = v.object({
   totalThreeStars: v.number(),
   totalPickups: v.number(),
   rebatePulls: v.number(),
+  freePulls: v.optional(v.number()),
   pyroxenesSaved: v.number(),
   softPityWins: v.number(),
   softPityLosses: v.number(),
@@ -208,6 +209,7 @@ const recruitmentComputedStats = v.object({
   rebateTicketsUsed: v.number(),
   remainingRebateTickets: v.number(),
   paidPulls: v.number(),
+  freePulls: v.optional(v.number()),
   experiencedThreeStarRate: v.number(),
   experiencedPURate: v.number(),
   pullsPerPU: v.optional(v.number()),
@@ -944,6 +946,10 @@ export default defineSchema({
 
     // manually adjustable number of rebate tickets used in this session
     rebateTicketsUsed: v.optional(v.number()),
+
+    // pulls from free recruitment campaigns, counted in the pulls below. They
+    // can't be rebate pulls and aren't paid for.
+    freePulls: v.optional(v.number()),
 
     // number of charge points at the start of the session, generally auto
     // populated from the recruitment account. For mixed sessions this is the

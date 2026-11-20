@@ -101,7 +101,8 @@ function mergeBuckets(...buckets: AggregateBucket[]): AggregateBucket {
           (count, charge) => count + bucket[key][charge],
         );
       } else {
-        result[key] += bucket[key];
+        // Aggregates stored before free pulls were tracked lack them.
+        result[key] = (result[key] ?? 0) + (bucket[key] ?? 0);
       }
     }
   }
@@ -225,6 +226,10 @@ export function AccountAnalytics({
             value: bucket.rebatePulls,
           },
           {
+            label: t("tools.recruitment.totalFreePulls"),
+            value: bucket.freePulls ?? 0,
+          },
+          {
             label: t("tools.recruitment.pyroxenesSaved"),
             value: bucket.pyroxenesSaved.toLocaleString(),
           },
@@ -272,7 +277,7 @@ function AccountSparkComparison({ sessions }: AccountSparkComparisonProps) {
       return expectWithSparkSystem(
         sessions.map((session) => ({
           session,
-          paidPulls: session.stats.paidPulls,
+          pulls: session.stats.paidPulls + (session.stats.freePulls ?? 0),
         })),
       );
     } catch {

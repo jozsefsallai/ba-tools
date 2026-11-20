@@ -157,6 +157,7 @@ type SparkComparisonProps = {
   comparison: SparkSystemComparison;
   withTickets?: {
     unusedTickets: number;
+    paidPulls: number;
     comparison: SparkSystemComparison;
   } | null;
 };
@@ -193,7 +194,7 @@ export function SparkComparison({
 
       <p className="text-xs text-muted-foreground">
         {t("intro", {
-          count: comparison.paidPulls,
+          count: comparison.pulls,
         })}
       </p>
 
@@ -221,7 +222,7 @@ export function SparkComparison({
           <span>
             {t("unusedTicketsWarning", {
               tickets: withTickets.unusedTickets,
-              paidPulls: withTickets.comparison.paidPulls,
+              paidPulls: withTickets.paidPulls,
               scope: ticketRows.length === worseRows.length ? "all" : "partly",
             })}
           </span>
@@ -267,7 +268,7 @@ export function SparkExpectation({ expectation }: SparkExpectationProps) {
 
       <p className="text-xs text-muted-foreground">
         {t("accountIntro", {
-          count: expectation.paidPulls,
+          count: expectation.pulls,
           sessions: expectation.sessionCount,
         })}
       </p>
@@ -414,7 +415,7 @@ function pullValues(
   return [
     {
       label: t("valuePaidPulls"),
-      value: expectation.paidPulls,
+      value: expectation.pulls,
     },
     ...(expectation.ratePulls.fest > 0
       ? [

@@ -28,6 +28,7 @@ const SESSION_UPDATE_KEYS = [
   "pickupsObtained",
   "threeStarCount",
   "rebateTicketsUsed",
+  "freePulls",
 ] as const;
 
 async function findAccount(userId: string, accountId: string) {

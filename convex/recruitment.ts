@@ -558,6 +558,7 @@ export const createSession = authenticatedMutation({
         ? statsFor(previous).remainingRebateTickets
         : 0,
       rebateTicketsUsed: args.rebateTicketsUsed,
+      freePulls: args.freePulls,
       isFestBanner: args.isFestBanner,
       pickupsObtained: args.pickupsObtained,
     });
@@ -597,6 +598,7 @@ export const updateSession = authenticatedMutation({
       limitedPulls: args.limitedPulls,
       threeStarCount: args.threeStarCount,
       rebateTicketsUsed: args.rebateTicketsUsed,
+      freePulls: args.freePulls ?? session.freePulls,
       isFestBanner: args.isFestBanner,
       pickupsObtained: args.pickupsObtained,
     });

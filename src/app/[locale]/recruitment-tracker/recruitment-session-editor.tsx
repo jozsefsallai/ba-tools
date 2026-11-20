@@ -80,6 +80,10 @@ const SAVE_ERROR_KEYS = [
     "tools.recruitment.errors.invalidTicketsUsed",
   ],
   [
+    "Free pulls must be",
+    "tools.recruitment.errors.invalidFreePulls",
+  ],
+  [
     "Each pickup",
     "tools.recruitment.errors.invalidPickup",
   ],
@@ -161,6 +165,7 @@ export function RecruitmentSessionEditor({
   const [permanentPulls, setPermanentPulls] = useState<NumericInputValue>(0);
   const [limitedPulls, setLimitedPulls] = useState<NumericInputValue>(0);
   const [threeStarCount, setThreeStarCount] = useState<NumericInputValue>(0);
+  const [freePulls, setFreePulls] = useState<NumericInputValue>(0);
   const [previousTickets, setPreviousTickets] = useState<NumericInputValue>(0);
   const [rebateTicketsUsed, setRebateTicketsUsed] =
     useState<NumericInputValue>();
@@ -181,6 +186,7 @@ export function RecruitmentSessionEditor({
       setPermanentPulls(normalized.permanentPulls);
       setLimitedPulls(normalized.limitedPulls);
       setThreeStarCount(sessionResult.threeStarCount);
+      setFreePulls(normalized.freePulls);
       setPreviousTickets(sessionResult.rebateTicketsFromPreviousSession);
       setRebateTicketsUsed(sessionResult.rebateTicketsUsed);
       setPickups(normalized.pickupsObtained);
@@ -265,6 +271,7 @@ export function RecruitmentSessionEditor({
       permanentPulls === "" ||
       limitedPulls === "" ||
       threeStarCount === "" ||
+      freePulls === "" ||
       previousTickets === "" ||
       rebateTicketsUsed === "" ||
       charges.length !== pickups.length
@@ -280,6 +287,7 @@ export function RecruitmentSessionEditor({
       threeStarCount,
       rebateTicketsFromPreviousSession: previousTickets,
       rebateTicketsUsed,
+      freePulls,
       isFestBanner,
     };
 
@@ -311,6 +319,7 @@ export function RecruitmentSessionEditor({
     permanentPulls,
     limitedPulls,
     threeStarCount,
+    freePulls,
     previousTickets,
     rebateTicketsUsed,
     isFestBanner,
@@ -341,21 +350,21 @@ export function RecruitmentSessionEditor({
     input,
   ]);
 
-  const paidPulls = stats.value?.paidPulls;
+  const rebatePulls = stats.value?.rebatePulls;
 
   const spark = useMemo(
     () =>
-      input && paidPulls !== undefined
+      input && rebatePulls !== undefined
         ? compareWithSparkSystem([
             {
               session: input,
-              paidPulls,
+              pulls: totalPullsOf(input) - rebatePulls,
             },
           ])
         : null,
     [
       input,
-      paidPulls,
+      rebatePulls,
     ],
   );
 
@@ -372,16 +381,19 @@ export function RecruitmentSessionEditor({
       return null;
     }
 
+    const pulls = totalPullsOf(input) - usable * 10;
+
     const comparison = compareWithSparkSystem([
       {
         session: input,
-        paidPulls: totalPullsOf(input) - usable * 10,
+        pulls,
       },
     ]);
 
     return comparison
       ? {
           unusedTickets: usable - ticketsUsed,
+          paidPulls: pulls - input.freePulls,
           comparison,
         }
       : null;
@@ -443,6 +455,7 @@ export function RecruitmentSessionEditor({
       pickupsObtained: input.pickupsObtained,
       threeStarCount: input.threeStarCount,
       rebateTicketsUsed: stats.value.rebateTicketsUsed,
+      freePulls: input.freePulls,
     };
 
     try {
@@ -609,7 +622,7 @@ export function RecruitmentSessionEditor({
               {t("tools.recruitment.totalPullsHint")}
             </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid items-start gap-4 sm:grid-cols-3">
               <Field
                 label={t("tools.recruitment.threeStars")}
                 htmlFor="session-three-stars"
@@ -620,6 +633,19 @@ export function RecruitmentSessionEditor({
                   min={0}
                   value={threeStarCount}
                   onValueChange={setThreeStarCount}
+                />
+              </Field>
+
+              <Field
+                label={t("tools.recruitment.freePulls")}
+                htmlFor="session-free-pulls"
+                hint={t("tools.recruitment.freePullsHint")}
+              >
+                <NumericInput
+                  id="session-free-pulls"
+                  min={0}
+                  value={freePulls}
+                  onValueChange={setFreePulls}
                 />
               </Field>
 

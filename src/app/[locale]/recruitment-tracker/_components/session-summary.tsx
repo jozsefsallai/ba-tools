@@ -18,6 +18,8 @@ import type {
 type SparkWithTickets = {
   /** Rebate tickets the session could have used but didn't. */
   unusedTickets: number;
+  /** The session's paid pulls with those tickets used. */
+  paidPulls: number;
   /** The comparison with those tickets used. */
   comparison: SparkSystemComparison;
 };

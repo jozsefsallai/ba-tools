@@ -26,6 +26,9 @@ export const RECRUITMENT_COLORS = {
     labelBorderActive: "#ff8ae5",
     labelTextActive: "#c14098",
   },
+  free: {
+    accent: "#ffcb3d",
+  },
   track: "#d4d4d4",
   labelBorder: "#a8a9ab",
   labelText: "#858585",
@@ -75,6 +78,7 @@ export type RecruitmentSessionRecord = {
   threeStarCount: number;
   rebateTicketsFromPreviousSession: number;
   rebateTicketsUsed?: number;
+  freePulls?: number;
   isFestBanner?: boolean;
   pickupsObtained: RecruitmentPickup[];
 };
@@ -87,6 +91,7 @@ export type RecruitmentSessionInput = {
   threeStarCount: number;
   rebateTicketsFromPreviousSession: number;
   rebateTicketsUsed?: number;
+  freePulls: number;
   isFestBanner?: boolean;
   pickupsObtained: CanonicalPickup[];
 };
@@ -114,6 +119,7 @@ export type RecruitmentStats = {
   rebateTicketsUsed: number;
   remainingRebateTickets: number;
   paidPulls: number;
+  freePulls: number;
   experiencedThreeStarRate: number;
   experiencedPURate: number;
   pullsPerPU: number | null;
@@ -183,6 +189,7 @@ export function toStoredSessionFields(input: RecruitmentSessionInput) {
     threeStarCount: input.threeStarCount,
     rebateTicketsFromPreviousSession: input.rebateTicketsFromPreviousSession,
     rebateTicketsUsed: input.rebateTicketsUsed,
+    freePulls: input.freePulls,
     isFestBanner: input.isFestBanner,
   };
 }
@@ -226,6 +233,7 @@ export function normalizeRecruitmentSession(
     threeStarCount: session.threeStarCount,
     rebateTicketsFromPreviousSession: session.rebateTicketsFromPreviousSession,
     rebateTicketsUsed: session.rebateTicketsUsed,
+    freePulls: session.freePulls ?? 0,
     isFestBanner: session.isFestBanner,
     pickupsObtained: session.pickupsObtained.map((pickup) => {
       const kind = pickup.kind ?? defaultKind;
@@ -309,9 +317,13 @@ function calculatePoolStats(
 export function usableRebateTickets(input: RecruitmentSessionInput): number {
   const totalPulls = totalPullsOf(input);
 
-  return Math.min(
-    input.rebateTicketsFromPreviousSession + numberOfRebateTickets(totalPulls),
-    Math.floor(totalPulls / 10),
+  return Math.max(
+    0,
+    Math.min(
+      input.rebateTicketsFromPreviousSession +
+        numberOfRebateTickets(totalPulls),
+      Math.floor((totalPulls - input.freePulls) / 10),
+    ),
   );
 }
 
@@ -355,7 +367,7 @@ export function calculateRecruitmentStats(
   }
 
   const rebatePulls = rebateTicketsUsed * 10;
-  const paidPulls = totalPulls - rebatePulls;
+  const paidPulls = totalPulls - rebatePulls - input.freePulls;
 
   return {
     endCharge: legacyStartCharge({
@@ -380,6 +392,7 @@ export function calculateRecruitmentStats(
       earnedRebateTickets -
       rebateTicketsUsed,
     paidPulls,
+    freePulls: input.freePulls,
     experiencedThreeStarRate:
       totalPulls === 0 ? 0 : (input.threeStarCount / totalPulls) * 100,
     experiencedPURate: totalPulls === 0 ? 0 : (pickupCount / totalPulls) * 100,
@@ -467,13 +480,13 @@ function addOutcomes(
   chance: number,
   pickups: number,
   guaranteedThreeStars: number,
-  freePulls: number,
+  otherPulls: number,
   offRateChance: number,
 ): void {
-  const expectedOffRates = freePulls * offRateChance;
+  const expectedOffRates = otherPulls * offRateChance;
   let covered = 0;
 
-  for (let offRates = 0; offRates <= freePulls; offRates++) {
+  for (let offRates = 0; offRates <= otherPulls; offRates++) {
     const threeStars = guaranteedThreeStars + offRates;
 
     // Everything from the target up counts the same.
@@ -486,7 +499,7 @@ function addOutcomes(
 
     const share = binomialProbability(
       logFactorial,
-      freePulls,
+      otherPulls,
       offRates,
       offRateChance,
     );
@@ -722,7 +735,7 @@ function oddsOfReaching(
 
 export type SparkComparisonSession = {
   session: RecruitmentSessionRecord;
-  paidPulls: number;
+  pulls: number;
 };
 
 export type StudentCounts = {
@@ -792,7 +805,7 @@ export type SparkSystemExpectation = {
   sessionCount: number;
   pickupCount: number;
   threeStarCount: number;
-  paidPulls: number;
+  pulls: number;
   ratePulls: {
     regular: number;
     fest: number;
@@ -828,16 +841,16 @@ function poolsPlayed(input: RecruitmentSessionInput): PoolPlay[] {
 export function expectWithSparkSystem(
   entries: SparkComparisonSession[],
 ): SparkSystemExpectation | null {
-  const sessions = entries.map(({ session, paidPulls }) => ({
+  const sessions = entries.map(({ session, pulls }) => ({
     input: normalizeRecruitmentSession(session),
-    paidPulls,
+    pulls,
   }));
 
   const expectation: SparkSystemExpectation = {
     sessionCount: sessions.length,
     pickupCount: 0,
     threeStarCount: 0,
-    paidPulls: 0,
+    pulls: 0,
     ratePulls: {
       regular: 0,
       fest: 0,
@@ -853,21 +866,21 @@ export function expectWithSparkSystem(
     },
   };
 
-  for (const { input, paidPulls } of sessions) {
+  for (const { input, pulls } of sessions) {
     expectation.pickupCount += input.pickupsObtained.length;
     expectation.threeStarCount += input.threeStarCount;
-    expectation.paidPulls += paidPulls;
-    expectation.sparks += Math.floor(paidPulls / SPARK_COST);
+    expectation.pulls += pulls;
+    expectation.sparks += Math.floor(pulls / SPARK_COST);
 
-    const pulls = splitByPullShare(
-      paidPulls,
+    const split = splitByPullShare(
+      pulls,
       input.permanentPulls,
       input.limitedPulls,
     );
 
-    expectation.ratePulls.regular += pulls.permanent;
+    expectation.ratePulls.regular += split.permanent;
     expectation.ratePulls[input.isFestBanner ? "fest" : "regular"] +=
-      pulls.limited;
+      split.limited;
 
     for (const pool of poolsPlayed(input)) {
       const expected = chargeExpectation(...pool);
@@ -877,14 +890,14 @@ export function expectWithSparkSystem(
     }
   }
 
-  if (expectation.paidPulls <= 0) {
+  if (expectation.pulls <= 0) {
     return null;
   }
 
   const { ratePulls, sparks } = expectation;
 
   expectation.sparkExpected = {
-    pickups: expectation.paidPulls * SPARK_PICKUP_RATE + sparks,
+    pickups: expectation.pulls * SPARK_PICKUP_RATE + sparks,
     threeStars:
       ratePulls.regular * THREE_STAR_RATE +
       ratePulls.fest * FEST_THREE_STAR_RATE +
@@ -923,7 +936,7 @@ export function compareWithSparkSystem(
 
   const logFactorial = logFactorials(
     Math.max(
-      expectation.paidPulls,
+      expectation.pulls,
       ...inputs.flatMap((input) => [
         input.permanentPulls,
         input.limitedPulls,
@@ -1144,6 +1157,7 @@ export type AggregateBucket = {
   totalThreeStars: number;
   totalPickups: number;
   rebatePulls: number;
+  freePulls?: number;
   pyroxenesSaved: number;
   softPityWins: number;
   softPityLosses: number;
@@ -1166,6 +1180,7 @@ export function emptyAggregateBucket(): AggregateBucket {
     totalThreeStars: 0,
     totalPickups: 0,
     rebatePulls: 0,
+    freePulls: 0,
     pyroxenesSaved: 0,
     softPityWins: 0,
     softPityLosses: 0,
@@ -1260,6 +1275,7 @@ type PoolContribution = {
   threeStars: number;
   paidPulls: number;
   rebatePulls: number;
+  freePulls: number;
   pyroxenesSaved: number;
   stats: PoolStats;
   pickups: ComputedPickup[];
@@ -1276,6 +1292,7 @@ function applyPoolToBucket(
   bucket.totalThreeStars += factor * pool.threeStars;
   bucket.totalPickups += factor * pool.stats.pickupCount;
   bucket.rebatePulls += factor * pool.rebatePulls;
+  bucket.freePulls = (bucket.freePulls ?? 0) + factor * pool.freePulls;
   bucket.pyroxenesSaved += factor * pool.pyroxenesSaved;
   bucket.softPityWins += factor * pool.stats.softPityWins;
   bucket.softPityLosses += factor * pool.stats.softPityLosses;
@@ -1304,6 +1321,7 @@ export function applySessionToAggregates(
   );
   const paidPulls = split(stats.paidPulls);
   const rebatePulls = split(stats.rebatePulls);
+  const freePulls = split(stats.freePulls);
   const pyroxenesSaved = split(stats.pyroxenesSaved);
 
   const contributionOf = (kind: RecruitmentKind): PoolContribution => ({
@@ -1311,6 +1329,7 @@ export function applySessionToAggregates(
     threeStars: stats.pools[kind].pickupCount + offRateThreeStars[kind],
     paidPulls: paidPulls[kind],
     rebatePulls: rebatePulls[kind],
+    freePulls: freePulls[kind],
     pyroxenesSaved: pyroxenesSaved[kind],
     stats: stats.pools[kind],
     pickups: pickupsForKind(stats.pickupClassifications, kind),
@@ -1420,6 +1439,12 @@ export function validateRecruitmentSession(
   ) {
     throw new RecruitmentValidationError(
       "Rebate tickets used must be a non-negative integer.",
+    );
+  }
+
+  if (!isCount(input.freePulls) || input.freePulls > totalPullsOf(input)) {
+    throw new RecruitmentValidationError(
+      "Free pulls must be a non-negative integer, at most the session's pulls.",
     );
   }
 

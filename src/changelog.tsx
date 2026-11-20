@@ -54,6 +54,24 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 20, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.recruitment,
+        description:
+          "Sessions now have a Free Pulls field for free recruitment campaigns (e.g. the free 100/200 pulls around fest banners). Free pulls count toward the charge and rebate milestones, but aren't counted as paid pulls and are used before rebate tickets.",
+      },
+    ],
+    changes: [],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed gift data for students Hifumi (Racing), Azusa (Racing), and Rana.",
+      },
+    ],
+  },
+  {
     date: "November 15, 2026",
     features: [],
     changes: [

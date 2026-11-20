@@ -24,30 +24,36 @@ type StatsProps = {
 export function PullComposition({ stats }: StatsProps) {
   const t = useTranslations();
 
-  const total = stats.paidPulls + stats.rebatePulls;
-  const paidPercentage = total === 0 ? 0 : (stats.paidPulls / total) * 100;
+  const freePulls = stats.freePulls ?? 0;
+  const total = stats.paidPulls + stats.rebatePulls + freePulls;
+  const share = (pulls: number) => (total === 0 ? 0 : (pulls / total) * 100);
 
   return (
     <div className="grid gap-1.5">
       <div className="flex h-2.5 overflow-hidden bg-muted">
         <div
           style={{
-            width: `${paidPercentage}%`,
+            width: `${share(stats.paidPulls)}%`,
             backgroundColor: RECRUITMENT_COLORS.base.accent,
           }}
         />
 
-        {stats.rebatePulls > 0 && (
-          <div
-            className="flex-1"
-            style={{
-              backgroundColor: RECRUITMENT_COLORS.limited.accent,
-            }}
-          />
-        )}
+        <div
+          style={{
+            width: `${share(stats.rebatePulls)}%`,
+            backgroundColor: RECRUITMENT_COLORS.limited.accent,
+          }}
+        />
+
+        <div
+          style={{
+            width: `${share(freePulls)}%`,
+            backgroundColor: RECRUITMENT_COLORS.free.accent,
+          }}
+        />
       </div>
 
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="flex flex-wrap justify-between gap-x-3 text-xs text-muted-foreground">
         <span>
           {t("tools.recruitment.paidPulls")}: {stats.paidPulls}
         </span>
@@ -55,6 +61,12 @@ export function PullComposition({ stats }: StatsProps) {
         <span>
           {t("tools.recruitment.rebatePulls")}: {stats.rebatePulls}
         </span>
+
+        {freePulls > 0 && (
+          <span>
+            {t("tools.recruitment.freePulls")}: {freePulls}
+          </span>
+        )}
       </div>
     </div>
   );

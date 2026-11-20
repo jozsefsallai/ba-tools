@@ -219,6 +219,7 @@ export const recruitmentSessionArgs = {
   ),
   threeStarCount: v.number(),
   rebateTicketsUsed: v.number(),
+  freePulls: v.optional(v.number()),
 };
 
 export const pvpSeasonArgs = {

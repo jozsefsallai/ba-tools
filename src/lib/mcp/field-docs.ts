@@ -412,7 +412,9 @@ export const recruitmentSessionDocs: FieldDocs<typeof recruitmentSessionArgs> =
     threeStarCount:
       "All 3★ students obtained, pickups included, so at least as many as `pickupsObtained`.",
     rebateTicketsUsed:
-      "Rebate tickets spent in the session; at most one per 10 pulls, and no more than are available.",
+      "Rebate tickets spent in the session; at most one per 10 pulls not made with free pulls, and no more than are available.",
+    freePulls:
+      "Pulls from free recruitment campaigns (e.g. a \"Free 100 Recruitments\"), already counted in `permanentPulls`/`limitedPulls`. They count toward the charge and rebate milestones but aren't paid and can't be rebate pulls. Defaults to 0.",
   };
 
 export const pvpSeasonDocs: FieldDocs<typeof pvpSeasonArgs> = {
