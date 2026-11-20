@@ -29,6 +29,10 @@ export function buildItemIconUrl(iconName: string) {
   return buildCDNUrl(`v2/images/items/${iconName}.webp`);
 }
 
+export function buildGameItemIconUrl(iconName: string) {
+  return buildCDNUrl(`v2/images/item-icons/${iconName.toLowerCase()}.png`);
+}
+
 export function buildSkillPortraitUrl(student: Pick<Student, "devName">) {
   return buildCDNUrl(
     `v2/images/skill-portraits/Skill_Portrait_${student.devName}.png`,

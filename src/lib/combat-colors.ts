@@ -38,6 +38,27 @@ function isColor(value: string): value is CombatColor {
   return (COMBAT_COLORS as readonly string[]).includes(value);
 }
 
+/** The colour of an attack type (`Explosion` is red), null for `Normal`/`Mixed`. */
+export function attackTypeColor(attackType: string | null | undefined) {
+  return (
+    COMBAT_COLORS.find((c) => ATTACK_TYPE_COLORS[c] === attackType) ?? null
+  );
+}
+
+/** The colour of a defense type (`LightArmor` is red), null for `Normal`/`Mixed`. */
+export function defenseTypeColor(defenseType: string | null | undefined) {
+  return (
+    COMBAT_COLORS.find((c) => DEFENSE_TYPE_COLORS[c] === defenseType) ?? null
+  );
+}
+
+/** The attack type that's effective against a defense type (same colour). */
+export function effectiveAttackType(defenseType: string | null | undefined) {
+  const color = defenseTypeColor(defenseType);
+
+  return color ? ATTACK_TYPE_COLORS[color] : null;
+}
+
 export function resolveAttackType<T extends string>(value: T) {
   return (isColor(value) ? ATTACK_TYPE_COLORS[value] : value) as Exclude<
     T,

@@ -26,6 +26,10 @@ const { values } = parseArgs({
       type: "boolean",
       default: false,
     },
+    "no-students": {
+      type: "boolean",
+      default: false,
+    },
     "dry-run": {
       type: "boolean",
       default: false,
@@ -63,8 +67,16 @@ const devNames = (values["dev-names"] ?? "")
   .map((n) => n.trim())
   .filter(Boolean);
 
-if (values.all === devNames.length > 0) {
-  console.error("Pass either --dev-names <devName,devName,...> or --all.");
+if (
+  [
+    values.all,
+    devNames.length > 0,
+    values["no-students"],
+  ].filter(Boolean).length !== 1
+) {
+  console.error(
+    "Pass one of --dev-names <devName,devName,...>, --all or --no-students.",
+  );
   process.exit(1);
 }
 
@@ -72,9 +84,11 @@ const { extractImageAssets } = await loadMxDataSync();
 
 const result = await extractImageAssets({
   sqlcipherKey,
-  students: values.all
-    ? await resolveAllImageStudents()
-    : await resolveImageStudents(devNames),
+  students: values["no-students"]
+    ? []
+    : values.all
+      ? await resolveAllImageStudents()
+      : await resolveImageStudents(devNames),
   outDir: values.out,
   cacheDir,
   logger,

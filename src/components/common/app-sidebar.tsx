@@ -27,6 +27,7 @@ import {
   IdCardIcon,
   ListOrderedIcon,
   LogIn,
+  MapIcon,
   MessageCircleHeartIcon,
   RectangleEllipsisIcon,
   ShieldIcon,
@@ -348,6 +349,11 @@ export function AppSidebar() {
       href: "/students",
       text: t("common.header.nav.resouces.students"),
       icon: GraduationCapIcon,
+    },
+    {
+      href: "/missions",
+      text: t("common.header.nav.resouces.missions"),
+      icon: MapIcon,
     },
     {
       href: "/global/banners",

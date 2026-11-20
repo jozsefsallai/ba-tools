@@ -6,4 +6,5 @@ export const extractStudentSkills = undefined;
 export const extractBondStories = undefined;
 export const extractStories = undefined;
 export const extractUpcomingContent = undefined;
+export const extractMissions = undefined;
 export const getJpMaintenance = undefined;

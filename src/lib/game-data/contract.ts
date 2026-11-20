@@ -1,3 +1,11 @@
+import type {
+  EquipmentCategory,
+  ItemCategory,
+  ItemRarity,
+  MissionDifficulty,
+  ParcelType,
+  Terrain,
+} from "~prisma";
 import type { NameOverrides, SeedStudentInput } from "../../trigger/lib/common";
 
 export interface SyncLogger {
@@ -1056,6 +1064,249 @@ export interface GetJpMaintenanceOptions {
   logger?: SyncLogger;
 }
 
+/** A hex on a mission's map, in cube coordinates (`z` is `-x - y`). */
+export interface HexCoord {
+  x: number;
+  y: number;
+}
+
+/** `CampaignUnitExcel.AIMoveType`. */
+export type MissionEnemyAi = "None" | "Guard" | "Pursuit";
+
+export type MissionEnemyGrade = "Grade1" | "Grade2" | "Grade3" | "Boss";
+
+/** An enemy on a mission's map (`hexaUnitList`). */
+export interface MissionMapUnit extends HexCoord {
+  /** The map's own id for the unit, which events refer to. */
+  entityId: number;
+  /** `CampaignUnitExcel.Id` */
+  unitId: number;
+  ai: MissionEnemyAi;
+  /** Tiles the unit moves per enemy phase. */
+  moveRange: number;
+  grade: MissionEnemyGrade;
+  /**
+   * The attack types of the enemies the unit's battle spawns (`Explosion`,
+   * `Pierce`, …), the most common first. From the battle's stage file, or the
+   * ground's `EnemyBulletType` when the stage names no enemies.
+   */
+  attackTypes: string[];
+  /**
+   * The armor types of those enemies (`LightArmor`, `Unarmed`, …), the most
+   * common first. A battle can mix them: 10-2H's first has Light and Special.
+   */
+  armorTypes: string[];
+  /** The unit's model (`SchoolGirl01_Sukeban_SMG`). */
+  prefab: string;
+}
+
+/** `CampaignStrategyObjectExcel.StrategyObjectType`, the ones mission maps use. */
+export type MissionObjectType =
+  | "Start"
+  | "FixedStart01"
+  | "FixedStart02"
+  | "FixedStart03"
+  | "FixedStart04"
+  | "Heal"
+  | "StatBuff"
+  | "Parcel"
+  | "ParcelOneTimePerAccount"
+  | "Portal"
+  | "PortalOneWayEnterance"
+  | "PortalOneWayExit"
+  | "Observatory"
+  | "Beacon"
+  | "BeaconOneTime"
+  | "EnemySpawn"
+  | "SwitchToggle"
+  | "SwitchMovableWhenToggleOff"
+  | "SwitchMovableWhenToggleOn";
+
+/** A strategy object on a mission's map (`hexaStrageyList`). */
+export interface MissionMapObject extends HexCoord {
+  entityId: number;
+  /** `CampaignStrategyObjectExcel.Id` */
+  objectId: number;
+  type: MissionObjectType;
+  /**
+   * Portals with the same id are linked: two-way portals with each other, a one-way
+   * entrance with its exit.
+   */
+  portalId?: number;
+  /** Switches toggle the switch tiles with the same id. */
+  switchId?: number;
+  /** For switches: whether the switch starts toggled on. */
+  switchOn?: boolean;
+  /** What picking the object up gives (the Pyroxene box of Hard missions). */
+  reward?: MissionParcel;
+  /** Healing in thousandths of max HP. */
+  healValue?: number;
+  /** `StrategyObjectBuffDefineExcel` id, for buffs. */
+  buffId?: number;
+  /** The object goes away once used. */
+  disposable: boolean;
+}
+
+export type MissionMapCondition =
+  | {
+      type: "start";
+    }
+  | ({
+      /** A player echelon arrives on the tile. */
+      type: "arrive";
+    } & HexCoord)
+  | {
+      /** The given phase of turn `turn` begins. */
+      type: "turn";
+      turn: number;
+      phase: "player" | "enemy";
+    }
+  | {
+      /** All of the given units have been defeated. */
+      type: "unitsDead";
+      entityIds: number[];
+    };
+
+export type MissionMapCommand =
+  | {
+      type: "spawnUnits";
+      entityIds: number[];
+    }
+  | {
+      type: "spawnObjects";
+      entityIds: number[];
+    }
+  | {
+      type: "hideObjects";
+      entityIds: number[];
+    }
+  | {
+      type: "showTiles";
+      tiles: HexCoord[];
+    }
+  | {
+      type: "hideTiles";
+      tiles: HexCoord[];
+    }
+  | ({
+      /** Moves a unit to the tile (scripted enemies). */
+      type: "moveUnit";
+      entityId: number;
+    } & HexCoord)
+  | {
+      /** The commands after this one run `turns` turns later. */
+      type: "wait";
+      turns: number;
+    }
+  | {
+      type: "endBattle";
+      win: boolean;
+    };
+
+/** A scripted event: once every condition has held, its commands run. */
+export interface MissionMapEvent {
+  id: number;
+  name: string;
+  conditions: MissionMapCondition[];
+  commands: MissionMapCommand[];
+}
+
+/**
+ * A mission's hexamap (`TableBundles/HexaMap.zip`, `strategymap_<id>.json`). Tiles
+ * are all listed, including ones events show later; units and objects only appear
+ * once an event spawns them (the start event spawns most).
+ */
+export interface MissionMapData {
+  tiles: HexCoord[];
+  units: MissionMapUnit[];
+  objects: MissionMapObject[];
+  events: MissionMapEvent[];
+}
+
+export interface MissionParcel {
+  /** `Item`, `Equipment` or `Currency` for mission drops. */
+  parcelType: ParcelType;
+  parcelId: number;
+  amount: number;
+}
+
+export type MissionRewardTag = "FirstClear" | "Default" | "Rare" | "ThreeStar";
+
+/** A drop (`CampaignStageRewardExcel`). Random drop groups (`GachaGroup`) are left out. */
+export interface MissionRewardData extends MissionParcel {
+  tag: MissionRewardTag;
+  /** 0 to 1. */
+  probability: number;
+}
+
+/** A main story mission (`CampaignStageExcel`). */
+export interface MissionData {
+  id: number;
+  /** The area (chapter) number. */
+  chapter: number;
+  /** The mission's number within the area and difficulty. */
+  stage: number;
+  difficulty: MissionDifficulty;
+  /** AP to enter. */
+  cost: number;
+  /** Echelons that can be deployed. */
+  echelonCount: number;
+  recommendedLevel: number;
+  terrain: Terrain;
+  /** The map is covered in fog: tiles show as echelons get near. */
+  fog: boolean;
+  /** The "Clear within N turns" star condition. */
+  starTurns: number;
+  /** The "Clear within N turns" challenge (`MissionExcel`), when the mission has one. */
+  challengeTurns: number | null;
+  /** The "Acquire S rank N times" star condition. */
+  starSRanks: number;
+  rewards: MissionRewardData[];
+  map: MissionMapData;
+  /** Whether Global's files have the mission. */
+  isReleasedGlobal: boolean;
+}
+
+/** An item (`ItemExcel`) or equipment piece (`EquipmentExcel`). */
+export type GameItemData = {
+  id: number;
+  names: Partial<Record<SkillLocale, string>>;
+  /** The icon texture (`Item_Icon_SecretStone_Suzumi`); see `itemIconKey`. */
+  iconName: string;
+  rarity: ItemRarity;
+} & (
+  | {
+      parcelType: "Item";
+      itemCategory: ItemCategory;
+    }
+  | {
+      parcelType: "Equipment";
+      equipmentCategory: EquipmentCategory;
+      tier: number;
+    }
+);
+
+export interface ExtractMissionsOptions {
+  sqlcipherKey?: string;
+  globalSqlcipherKey?: string;
+  /** Nexon gateway region used to fetch the Global key (`na` by default). */
+  globalRegion?: string;
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
+export interface ExtractMissionsResult {
+  gameVersion: {
+    jp: string;
+    global: string | null;
+  };
+  /** By area, difficulty and number. */
+  missions: MissionData[];
+  /** The items and equipment the missions drop. */
+  items: GameItemData[];
+  warnings: string[];
+}
+
 export interface DataSyncModule {
   listNewStudents(
     options: ListNewStudentsOptions,
@@ -1082,6 +1333,11 @@ export interface DataSyncModule {
   extractUpcomingContent(
     options: ExtractUpcomingContentOptions,
   ): Promise<ExtractUpcomingContentResult>;
+
+  /** The main story missions, with their drops and hexamaps. */
+  extractMissions(
+    options: ExtractMissionsOptions,
+  ): Promise<ExtractMissionsResult>;
 
   /** The JP maintenance window the game announces, or `null` when there is none. */
   getJpMaintenance(

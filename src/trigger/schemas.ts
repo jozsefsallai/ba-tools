@@ -129,6 +129,14 @@ export const syncBondStoriesPayload = z.object({
 
 export type SyncBondStoriesPayload = z.input<typeof syncBondStoriesPayload>;
 
+export const syncMissionsPayload = z.object({
+  sqlcipherKey,
+  globalSqlcipherKey: sqlcipherKey,
+  dryRun: z.boolean().default(false),
+});
+
+export type SyncMissionsPayload = z.input<typeof syncMissionsPayload>;
+
 export const syncUpcomingContentPayload = z.object({
   sqlcipherKey,
   globalSqlcipherKey: sqlcipherKey,

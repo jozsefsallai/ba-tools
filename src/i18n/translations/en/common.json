@@ -79,7 +79,8 @@
         "glBanners": "Upcoming Global Banners",
         "glRoadmap": "Global Roadmap",
         "birthdays": "Student Birthdays",
-        "students": "Students"
+        "students": "Students",
+        "missions": "Missions"
       },
       "games": {
         "title": "Games",
@@ -522,6 +523,10 @@
       "user": {
         "title": "My tools",
         "description": "Your saved rosters, formations, timelines, and recruitment history."
+      },
+      "missions": {
+        "title": "Missions",
+        "description": "Mission drops, maps, and fewest-turn routes."
       }
     },
     "title": "{title} - {appName}",

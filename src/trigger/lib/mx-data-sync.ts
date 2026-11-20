@@ -12,6 +12,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     extractBondStories,
     extractStories,
     extractUpcomingContent,
+    extractMissions,
     getJpMaintenance,
   } = await import("mx-data-sync:entry");
 
@@ -23,6 +24,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     !extractBondStories ||
     !extractStories ||
     !extractUpcomingContent ||
+    !extractMissions ||
     !getJpMaintenance
   ) {
     throw new AbortTaskRunError(
@@ -38,6 +40,7 @@ export async function loadMxDataSync(): Promise<DataSyncModule> {
     extractBondStories,
     extractStories,
     extractUpcomingContent,
+    extractMissions,
     getJpMaintenance,
   };
 }

@@ -2603,5 +2603,116 @@
         "refreshSuggestionsFail": "Failed to refresh suggestions: {error}"
       }
     }
+  },
+
+  "missions": {
+    "title": "Missions",
+    "description": "Every campaign mission with its drops. Open one to see its map and get a step by step guide on how to clear it in the fewest number of turns in Concentrated Command.",
+    "search": "Search drops",
+    "empty": "No missions yet.",
+    "noMatches": "No mission drops that.",
+    "notOnGlobal": "Not on Global yet.",
+    "turns": "{count, plural, one {# turn} other {# turns}}",
+    "teams": {
+      "label": "Students on the map",
+      "none": "Choose a student",
+      "choose": "Choose a student for Team {team}",
+      "search": "Search students",
+      "remove": "Remove the student from Team {team}",
+      "noBattles": "No battles",
+      "battles": "Battles:",
+      "enemies": "{count, plural, one {<enemy>{armor}</enemy>} other {<enemy>{armor}</enemy> ×#}}",
+      "boss": "<enemy>{armor}</enemy> boss",
+      "withdrawal": "{count, plural, one {<enemy>{armor}</enemy>} other {<enemy>{armor}</enemy> ×#}} (withdraws)"
+    },
+    "fields": {
+      "cost": "AP",
+      "terrain": "Terrain",
+      "level": "Rec. level",
+      "echelons": "Teams"
+    },
+    "detail": {
+      "title": "Mission {label}",
+      "metaDescription": "Drops, map, and the fewest-turn route for mission {label}.",
+      "area": "Area {area}",
+      "route": "Route",
+      "drops": "Drops",
+      "goals": "Stars: finish the mission, clear within {turns} turns, and get {sRanks} S ranks.",
+      "challenge": "Challenge: clear within {count, plural, one {# turn} other {# turns}}."
+    },
+    "drops": {
+      "Default": "Drops",
+      "Rare": "Rare drops",
+      "FirstClear": "First clear",
+      "ThreeStar": "All stars",
+      "pyroxene": "Pyroxene"
+    },
+    "map": {
+      "title": "Mission map",
+      "boss": "Boss",
+      "enemy": "Enemy"
+    },
+    "directions": {
+      "upRight": "up-right",
+      "right": "right",
+      "downRight": "down-right",
+      "downLeft": "down-left",
+      "left": "left",
+      "upLeft": "up-left"
+    },
+    "route": {
+      "kinds": {
+        "fastest": "Fewest turns",
+        "withBox": "With Pyroxene box",
+        "allStars": "All stars"
+      },
+      "notes": {
+        "fastest": "The fewest turns the mission can be cleared in.",
+        "fasterThanChallenge": "Faster than the {challenge}-turn challenge, because it skips battles the challenge doesn't need.",
+        "withBox": "The fewest turns that also pick up the Pyroxene box.",
+        "allStars": "The fewest turns that also fight {count} battles for the S rank star.",
+        "battles": "{count, plural, one {# battle} other {# battles}}.",
+        "withdrawals": "{count, plural, one {A team withdraws from # battle.} other {Teams withdraw from # battles.}}"
+      },
+      "none": "No route found for this mission.",
+      "team": "Team {team}",
+      "teamWithStudent": "{student} team ({team})",
+      "move": "moves {direction}",
+      "attackEnemy": "attacks the <enemy>enemy</enemy> {direction}",
+      "attackBoss": "attacks the <enemy>boss</enemy> {direction}",
+      "pickup": "and picks up the Pyroxene box",
+      "switch": "and steps on the switch",
+      "swapWith": "swaps places with",
+      "teleport": "teleports through the portal",
+      "evacuate": "is moved to a start tile as its tile disappears",
+      "withdrawFromEnemy": "attacks the <enemy>enemy</enemy> {direction} and withdraws from the battle",
+      "withdrawFromBoss": "attacks the <enemy>boss</enemy> {direction} and withdraws from the battle",
+      "withdrawsWhenAttacked": "which withdraws from the battle",
+      "enemyMoves": "An <enemy>enemy</enemy> moves {direction}",
+      "bossMoves": "The <enemy>boss</enemy> moves {direction}",
+      "enemyAttacks": "An <enemy>enemy</enemy> attacks",
+      "bossAttacks": "The <enemy>boss</enemy> attacks",
+      "wait": "End the turn without moving",
+      "setup": "Start",
+      "deploy": "Deploy {count, plural, one {Team A} other {the teams}} on the start {count, plural, one {tile} other {tiles}} shown at turn 1.",
+      "turn": "Turn {turn}",
+      "previous": "Previous turn",
+      "next": "Next turn",
+      "cleared": "Clear",
+      "clearedIn": "Mission cleared in {count, plural, one {# turn} other {# turns}}.",
+      "position": {
+        "action": "Turn {turn}: step {step} of {count}",
+        "enemy": "Turn {turn}: enemy phase",
+        "idle": "Turn {turn}: the teams wait"
+      },
+      "play": "Play the route",
+      "pause": "Pause",
+      "speed": "Playback speed",
+      "speedValue": "{speed}x",
+      "enemiesMove": "The enemies move"
+    },
+    "card": {
+      "level": "Lv. {level}"
+    }
   }
 }

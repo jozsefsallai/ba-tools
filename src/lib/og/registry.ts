@@ -454,6 +454,17 @@ export const OG_CARDS = {
     variant: "progress",
   },
 
+  missions: {
+    title: {
+      message: "tools.missions.title",
+    },
+    description: {
+      message: "common.sharing.cards.missions.description",
+    },
+    variant: "progress",
+    icon: "swords",
+  },
+
   "railroad-puzzle-solver": {
     title: {
       message: "tools.railroad.title",

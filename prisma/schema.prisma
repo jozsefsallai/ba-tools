@@ -190,6 +190,76 @@ enum ItemRarity {
   SSR
 }
 
+enum ParcelType {
+  None
+  Character
+  Currency
+  Equipment
+  Item
+  GachaGroup
+  Product
+  Shop
+  MemoryLobby
+  AccountExp
+  CharacterExp
+  FavorExp
+  TSS
+  Furniture
+  ShopRefresh
+  LocationExp
+  Recipe
+  CharacterWeapon
+  CharacterGear
+  IdCardBackground
+  Emblem
+  Sticker
+  Costume
+  PossessionCheck
+  BattlePassExp
+  SelectedCharacter
+  UnSelectedCharacter
+  ProductBattlePass
+  ProductSelect
+  SNSPost
+  ProductDailyRecord
+  StudentFrame
+  ProductStreakRecord
+}
+
+enum ItemCategory {
+  Coin
+  CharacterExpGrowth
+  SecretStone
+  Material
+  Consumable
+  Collectible
+  Favor
+  RecruitCoin
+  InvisibleToken
+  BattlePass
+  ProductSelect
+  ProductDailyRecord
+  ProductStreakRecord
+}
+
+enum EquipmentCategory {
+  Unable
+  Exp
+  Bag
+  Hat
+  Gloves
+  Shoes
+  Badge
+  Hairpin
+  Charm
+  Watch
+  Necklace
+  WeaponExpGrowthA
+  WeaponExpGrowthB
+  WeaponExpGrowthC
+  WeaponExpGrowthZ
+}
+
 enum MissionDifficulty {
   Normal
   Hard
@@ -552,6 +622,59 @@ model Mission {
   recommendedLevel Int
   drops            String[]
   stageImageUrl    String?
+}
+
+model CampaignMission {
+  id Int @id // CampaignStageExcel.Id
+
+  chapter    Int
+  stage      Int
+  difficulty MissionDifficulty
+
+  cost             Int
+  echelonCount     Int
+  recommendedLevel Int
+  terrain          Terrain
+  fog              Boolean @default(false)
+
+  starTurns      Int
+  challengeTurns Int?
+  starSRanks     Int
+
+  isReleasedGlobal Boolean @default(false)
+
+  // MissionRewardData[] and MissionMapData (src/lib/game-data/contract.ts)
+  rewards Json
+  map     Json
+
+  // MissionSolutions (src/lib/missions/solver.ts), worked out when the mission is saved
+  solutions    Json
+  fastestTurns Int? // solutions.fastest.turns, for the mission list
+
+  gameVersion String
+  updatedAt   DateTime @updatedAt
+
+  @@unique([chapter, difficulty, stage])
+}
+
+model GameItem {
+  parcelType ParcelType // Item or Equipment
+  itemId     Int // ItemExcel.Id or EquipmentExcel.Id
+
+  name   String?
+  nameJP String?
+  nameKR String?
+  nameTW String?
+  nameTH String?
+
+  iconName String // icon texture, e.g. Item_Icon_SecretStone_Suzumi
+  rarity   ItemRarity
+
+  itemCategory      ItemCategory? // for items
+  equipmentCategory EquipmentCategory? // for equipment
+  tier              Int? // equipment tier
+
+  @@id([parcelType, itemId])
 }
 
 model Banner {

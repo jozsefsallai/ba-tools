@@ -34,6 +34,7 @@ export const CHANGELOG_SCOPES = {
   recruitment: "Recruitment Tracker",
   roadmap: "Global Roadmap",
   students: "Students",
+  missions: "Missions",
   memorialLobby: "Recollection Lobby",
   api: "API",
 } as const;
@@ -65,6 +66,18 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.students,
         description:
           "Added Relationship Story section to student pages, the API, and the MCP. This section lists which relationship story is unlocked at which bond level and which ones unlock the recollection lobby or the bond gear of a student.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.missions,
+        description: (
+          <>
+            Added a <Link href="/missions">Missions</Link> page listing every
+            campaign mission and its drops. Each mission shows its map and the
+            fewest turns it can be cleared in, step by step, along with the
+            fastest route that picks up the Pyroxene box in hard missions and
+            one that also earns every star.
+          </>
+        ),
       },
     ],
     changes: [],
