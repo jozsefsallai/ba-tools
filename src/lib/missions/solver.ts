@@ -8,7 +8,7 @@ import type {
   MissionMapUnit,
 } from "@/lib/game-data/contract";
 import { mainArmor } from "./armor";
-import { HEX_DIRECTIONS, hexDistance, hexKey } from "./hex";
+import { HEX_DIRECTIONS, hexDistance, hexKey, hexToPixel } from "./hex";
 import { isBoxObject, isStartObject } from "./map-objects";
 
 /**
@@ -22,18 +22,24 @@ import { isBoxObject, isStartObject } from "./map-objects";
  * - In the player phase each echelon may move once, to a neighboring tile.
  *   Moving onto an enemy starts a battle, which is always won: the enemy is
  *   defeated and the echelon takes its tile. Two neighboring echelons can swap
- *   places at any time without using a move.
+ *   places at any time without using a move, unless both have moved.
  * - Arriving on a tile uses its object: boxes are picked up and switches toggle
  *   the tiles of their id. Then the map's "arrive" events run.
- * - An echelon standing on a portal may teleport to the linked portal (when
- *   nobody stands there) at any time, without using its move.
+ * - An echelon standing on a portal may teleport to the linked portal (when no
+ *   echelon stands there) at any time, as often as it likes, without using its
+ *   move. An enemy on the linked portal doesn't stop it: the echelon fights it
+ *   on arrival.
  * - When the tile under an echelon disappears or closes, the echelon is moved
- *   to the nearest free start tile.
- * - In the enemy phase enemies act in map order. `Pursuit` enemies step towards
- *   the nearest echelon (by path length, through other enemies but never onto
- *   them), `Guard` enemies attack an echelon next to them, and other enemies
- *   stay put. An enemy that walks into an echelon starts a battle, which the
- *   echelon wins.
+ *   to the free start tile it can walk to in the fewest steps (over open tiles,
+ *   through enemies), the one closest in a straight line among equals. Enemies
+ *   on such a tile are removed from the map; when that's the boss, the mission
+ *   is lost.
+ * - In the enemy phase enemies act in map order, bosses last. `Pursuit` enemies
+ *   step towards the nearest echelon (by path length, through other enemies but
+ *   never onto them), `Guard` enemies attack an echelon next to them, and other
+ *   enemies stay put. An enemy next to several echelons attacks the one that got
+ *   there first, taken as the one whose position changed longest ago. An enemy
+ *   that walks into an echelon starts a battle, which the echelon wins.
  * - The mission is cleared when an `endBattle` win event runs, which is in the
  *   turn the target enemy is defeated, whichever phase that is in.
  * - Teams that fight enemies of a single armor type can bring the one damage
@@ -72,6 +78,8 @@ export type MissionAction =
       echelon: number;
       from: HexCoord;
       to: HexCoord;
+      /** The enemy that stood on the linked portal, defeated on arrival. */
+      battle?: number;
     }
   | {
       /** The echelon's tile went away, so the game moved it to a start tile. */
@@ -207,6 +215,8 @@ type MapObject = MissionMapObject & {
 /** Unit slot values in the world array, besides a tile index. */
 const ABSENT = -1;
 const DEAD = -2;
+/** Taken off the map with its tile. */
+const REMOVED = -3;
 
 /** An echelon's tile once it has withdrawn. */
 const GONE = -1;
@@ -230,6 +240,11 @@ interface State {
   turn: number;
   /** Tile of each echelon. */
   ech: number[];
+  /**
+   * Echelons by when their position last changed, longest ago first: an enemy
+   * next to several attacks the first of them.
+   */
+  order: number[];
   /** Armor types (`ARMOR_BITS`) each echelon has fought. */
   armor: number[];
   /** Battles each echelon has fought. */
@@ -279,6 +294,10 @@ class MissionMap {
   readonly switchIndex = new Map<number, number>();
   readonly events: MissionMapEvent[];
   readonly battleGoal: number;
+  /** Unit indices in the order enemies act: by entity id, bosses last. */
+  readonly actOrder: number[];
+  /** By unit index: whether the enemy can change tiles (chases, or is moved by events). */
+  readonly mobile: boolean[];
 
   // Layout of `World`.
   readonly UNITS = 0;
@@ -289,6 +308,7 @@ class MissionMap {
   readonly BOX: number;
   readonly WON: number;
   readonly BATTLES: number;
+  readonly LOST: number;
   readonly size: number;
 
   constructor(map: MissionMapData, battleGoal: number) {
@@ -370,6 +390,30 @@ class MissionMap {
     this.events = map.events;
     this.battleGoal = battleGoal;
 
+    const scripted = new Set(
+      map.events.flatMap((e) =>
+        e.commands.flatMap((c) =>
+          c.type === "moveUnit"
+            ? [
+                c.entityId,
+              ]
+            : [],
+        ),
+      ),
+    );
+
+    this.mobile = this.units.map(
+      (u) => u.ai === "Pursuit" || scripted.has(u.entityId),
+    );
+
+    this.actOrder = this.units
+      .map((_, i) => i)
+      .sort(
+        (a, b) =>
+          Number(this.units[a].grade === "Boss") -
+            Number(this.units[b].grade === "Boss") || a - b,
+      );
+
     this.VISIBLE = this.units.length;
     this.OBJECTS = this.VISIBLE + this.tiles.length;
     this.SWITCHES = this.OBJECTS + this.objects.length;
@@ -377,7 +421,8 @@ class MissionMap {
     this.BOX = this.FIRED + this.events.length;
     this.WON = this.BOX + 1;
     this.BATTLES = this.BOX + 2;
-    this.size = this.BOX + 3;
+    this.LOST = this.BOX + 3;
+    this.size = this.BOX + 4;
   }
 
   private addTile(c: HexCoord) {
@@ -497,6 +542,39 @@ class MissionMap {
     w[this.UNITS + unit] = DEAD;
     w[this.BATTLES] = Math.min(w[this.BATTLES] + 1, this.battleGoal);
   }
+
+  /**
+   * Takes enemies off the map whose tile is gone (hidden, or closed by a
+   * switch). Losing the boss this way loses the mission.
+   */
+  strand(w: World) {
+    for (let i = 0; i < this.units.length; i++) {
+      const tile = w[this.UNITS + i];
+
+      if (tile >= 0 && !this.isOpen(w, tile)) {
+        w[this.UNITS + i] = REMOVED;
+
+        if (this.units[i].grade === "Boss") {
+          w[this.LOST] = 1;
+        }
+      }
+    }
+  }
+}
+
+/** An echelon defeats an enemy, whoever started the battle. */
+function fight(map: MissionMap, st: State, echelon: number, unit: number) {
+  st.armor[echelon] |= armorMask(map.units[unit]);
+  st.fights[echelon]++;
+  map.defeat(st.w, unit);
+}
+
+/** The echelon's position changed: it's now the last to have arrived. */
+function arrived(st: State, echelon: number) {
+  st.order = [
+    ...st.order.filter((e) => e !== echelon),
+    echelon,
+  ];
 }
 
 /** Runs map events for a trigger, and any whose conditions now hold. */
@@ -570,7 +648,7 @@ function runCommands(
       case "spawnUnits":
         for (const id of c.entityIds) {
           const unit = map.unitIndex.get(id);
-          if (unit !== undefined && w[map.UNITS + unit] !== DEAD) {
+          if (unit !== undefined && w[map.UNITS + unit] === ABSENT) {
             w[map.UNITS + unit] = map.unitTile[unit];
           }
         }
@@ -624,9 +702,7 @@ function runCommands(
         });
 
         if (echelon >= 0) {
-          st.armor[echelon] |= armorMask(map.units[unit]);
-          st.fights[echelon]++;
-          map.defeat(w, unit);
+          fight(map, st, echelon, unit);
         } else {
           w[map.UNITS + unit] = to;
         }
@@ -675,12 +751,10 @@ function moveEchelon(
 
   const enemy = map.enemyAt(w, to);
   st.ech[echelon] = to;
+  arrived(st, echelon);
 
   if (enemy >= 0) {
-    st.armor[echelon] |= armorMask(map.units[enemy]);
-    st.fights[echelon]++;
-
-    map.defeat(w, enemy);
+    fight(map, st, echelon, enemy);
     action.battle = map.units[enemy].entityId;
 
     runEvents(
@@ -741,7 +815,10 @@ function moveEchelon(
   return action;
 }
 
-/** The portal an echelon on `tile` can teleport to, if it's free. */
+/**
+ * The portal an echelon on `tile` can teleport to, if no echelon stands there.
+ * An enemy may: the echelon fights it on arrival.
+ */
 function portalExit(map: MissionMap, st: State, tile: number) {
   const w = st.w;
 
@@ -756,7 +833,6 @@ function portalExit(map: MissionMap, st: State, tile: number) {
       if (
         map.hasObject(w, exit) &&
         !st.ech.includes(exitTile) &&
-        map.enemyAt(w, exitTile) < 0 &&
         map.isOpen(w, exitTile)
       ) {
         return exitTile;
@@ -768,18 +844,115 @@ function portalExit(map: MissionMap, st: State, tile: number) {
 }
 
 /**
- * Moves echelons whose tile is gone (hidden, or closed by a switch) to the
- * nearest free start tile.
+ * Teleports an echelon to the portal `exit`, fighting the enemy that stands
+ * there, if any.
+ */
+function teleportEchelon(
+  map: MissionMap,
+  st: State,
+  echelon: number,
+  exit: number,
+  log: Log,
+): MissionAction {
+  const action: MissionAction & {
+    type: "teleport";
+  } = {
+    type: "teleport",
+    echelon,
+    from: map.coord(st.ech[echelon]),
+    to: map.coord(exit),
+  };
+
+  st.ech[echelon] = exit;
+  arrived(st, echelon);
+
+  const enemy = map.enemyAt(st.w, exit);
+
+  if (enemy >= 0) {
+    fight(map, st, echelon, enemy);
+    action.battle = map.units[enemy].entityId;
+
+    runEvents(
+      map,
+      st,
+      {
+        type: "check",
+      },
+      log,
+    );
+
+    if (st.w[map.WON] === 1) {
+      return action;
+    }
+  }
+
+  runEvents(
+    map,
+    st,
+    {
+      type: "arrive",
+      tile: exit,
+    },
+    log,
+  );
+
+  return action;
+}
+
+/**
+ * Two neighboring echelons trade places (`st.ech` is changed in place). Both
+ * arrive somewhere new; switches under them aren't pressed.
+ */
+function swapEchelons(st: State, echelon: number, other: number) {
+  const tile = st.ech[echelon];
+  st.ech[echelon] = st.ech[other];
+  st.ech[other] = tile;
+  arrived(st, other);
+  arrived(st, echelon);
+}
+
+/**
+ * After tiles went away (hidden, or closed by a switch): removes the enemies
+ * that stood on them, and moves the echelons that did to the nearest free start
+ * tile. Nearest is by steps over open tiles, which enemies don't block (a team
+ * cut off counts as infinitely far from all of them), then in a straight line,
+ * then by tile.
  */
 function evacuate(map: MissionMap, st: State, log?: Log) {
   const w = st.w;
+
+  map.strand(w);
 
   st.ech.forEach((tile, echelon) => {
     if (tile === GONE || map.isOpen(w, tile)) {
       return;
     }
 
+    const steps = new Map<number, number>([
+      [
+        tile,
+        0,
+      ],
+    ]);
+    const queue = [
+      tile,
+    ];
+
+    for (let q = 0; q < queue.length; q++) {
+      const from = queue[q];
+
+      for (const n of map.tiles[from].neighbors) {
+        if (!steps.has(n) && map.isOpen(w, n)) {
+          steps.set(n, (steps.get(from) as number) + 1);
+          queue.push(n);
+        }
+      }
+    }
+
+    const here = hexToPixel(map.tiles[tile]);
+
     let best: MapObject | null = null;
+    let bestSteps = Number.POSITIVE_INFINITY;
     let bestDistance = Number.POSITIVE_INFINITY;
 
     map.objects.forEach((o, i) => {
@@ -793,13 +966,21 @@ function evacuate(map: MissionMap, st: State, log?: Log) {
         return;
       }
 
-      const distance = hexDistance(o, map.tiles[tile]);
+      const walk = steps.get(o.tile) ?? Number.POSITIVE_INFINITY;
+      const p = hexToPixel(o);
+      // Rounded, so that equal distances compare equal.
+      const distance = Math.round(
+        Math.hypot(p.px - here.px, p.py - here.py) * 1000,
+      );
 
       if (
-        distance < bestDistance ||
-        (distance === bestDistance && best && o.tile < best.tile)
+        walk < bestSteps ||
+        (walk === bestSteps &&
+          (distance < bestDistance ||
+            (distance === bestDistance && best && o.tile < best.tile)))
       ) {
         best = o;
+        bestSteps = walk;
         bestDistance = distance;
       }
     });
@@ -810,6 +991,7 @@ function evacuate(map: MissionMap, st: State, log?: Log) {
     }
 
     st.ech[echelon] = to;
+    arrived(st, echelon);
 
     log?.player.push({
       type: "evacuate",
@@ -874,14 +1056,17 @@ function enemyPhase(map: MissionMap, st: State, log: Log, withdraw = 0) {
     log,
   );
 
-  if (w[map.WON] === 1 || st.ech.every((t) => t === GONE)) {
+  if (
+    w[map.WON] === 1 ||
+    w[map.LOST] === 1 ||
+    st.ech.every((t) => t === GONE)
+  ) {
     return fought;
   }
 
-  // Units are sorted by entity id, which is the order enemies act in.
   let dist: number[] | null = null;
 
-  for (let unit = 0; unit < map.units.length; unit++) {
+  for (const unit of map.actOrder) {
     const start = w[map.UNITS + unit];
     const u = map.units[unit];
 
@@ -900,7 +1085,19 @@ function enemyPhase(map: MissionMap, st: State, log: Log, withdraw = 0) {
         (n) => map.enemyAt(w, n, unit) < 0 && map.isOpen(w, n),
       );
 
-      const echelonNext = next.find((n) => st.ech.includes(n));
+      // The echelon that got next to the enemy first.
+      let echelonNext: number | undefined;
+      let first = Number.POSITIVE_INFINITY;
+
+      for (const n of next) {
+        const e = st.ech.indexOf(n);
+        const rank = e < 0 ? -1 : st.order.indexOf(e);
+
+        if (rank >= 0 && rank < first) {
+          echelonNext = n;
+          first = rank;
+        }
+      }
 
       if (echelonNext !== undefined) {
         before = tile;
@@ -963,9 +1160,7 @@ function enemyPhase(map: MissionMap, st: State, log: Log, withdraw = 0) {
       }
     } else if (battle >= 0) {
       fought |= 1 << battle;
-      st.armor[battle] |= armorMask(u);
-      st.fights[battle]++;
-      map.defeat(w, unit);
+      fight(map, st, battle, unit);
 
       runEvents(
         map,
@@ -1014,16 +1209,86 @@ function worldKey(st: State) {
  * the board where teams met fewer armor types wins, which keeps the search as
  * small as without armor.
  */
-function positionsKey(st: State, acted: number, withArmor = true) {
-  return String.fromCharCode(
-    ...st.ech
-      .map(
-        (t, i) =>
-          ((t + 1) * 2 + ((acted >> i) & 1)) * 32 +
-          (withArmor ? st.armor[i] : 0),
-      )
-      .sort((a, b) => a - b),
+function positionsKey(
+  map: MissionMap,
+  st: State,
+  acted: number,
+  withArmor = true,
+) {
+  return (
+    String.fromCharCode(
+      ...st.ech
+        .map(
+          (t, i) =>
+            ((t + 1) * 2 + ((acted >> i) & 1)) * 32 +
+            (withArmor ? st.armor[i] : 0),
+        )
+        .sort((a, b) => a - b),
+    ) + orderKey(map, st)
   );
+}
+
+/**
+ * Which of two echelons got somewhere first matters only when an enemy can be
+ * next to both while neither moves (once one moves, it's the later one anyway):
+ * a `Guard` already on a tile beside both, or any enemy that moves (`Pursuit`,
+ * or moved by the map's events) when they share a neighboring tile. The key
+ * holds the order of just those pairs, by tile so that it ignores which
+ * echelon is which.
+ */
+function orderKey(map: MissionMap, st: State) {
+  const w = st.w;
+
+  const live = st.ech
+    .map((_, e) => e)
+    .filter((e) => st.ech[e] !== GONE)
+    .sort((a, b) => st.ech[a] - st.ech[b]);
+
+  if (live.length < 2) {
+    return "";
+  }
+
+  const movers: number[] = [];
+  for (let i = 0; i < map.units.length; i++) {
+    if (w[map.UNITS + i] >= 0 && map.mobile[i]) {
+      movers.push(w[map.UNITS + i]);
+    }
+  }
+
+  let bits = 0;
+  let pair = 0;
+
+  for (let i = 0; i < live.length; i++) {
+    for (let j = i + 1; j < live.length; j++, pair++) {
+      const a = live[i];
+      const b = live[j];
+      const nb = map.tiles[st.ech[b]].neighbors;
+
+      const matters = map.tiles[st.ech[a]].neighbors.some((n) => {
+        if (!nb.includes(n) || !map.isOpen(w, n)) {
+          return false;
+        }
+
+        // An enemy that moves matters once it's close (a step from the tile, or
+        // on it). Further away, both echelons would have to wait for it for
+        // turns; keys drop that case to keep the search small, which can only
+        // miss such a route, not get one wrong.
+        if (movers.some((t) => hexDistance(map.tiles[t], map.tiles[n]) <= 1)) {
+          return true;
+        }
+
+        const unit = map.enemyAt(w, n);
+        return unit >= 0 && map.units[unit].ai === "Guard";
+      });
+
+      if (matters) {
+        bits |=
+          (st.order.indexOf(a) < st.order.indexOf(b) ? 1 : 2) << (2 * pair);
+      }
+    }
+  }
+
+  return bits === 0 ? "" : `~${String.fromCharCode(bits)}`;
 }
 
 /** A unit's main armor as a bit, to track which types a team has fought. */
@@ -1120,6 +1385,8 @@ const cloneState = (st: State): State => ({
   ech: [
     ...st.ech,
   ],
+  // Replaced, never changed in place (see `arrived`).
+  order: st.order,
   armor: [
     ...st.armor,
   ],
@@ -1158,7 +1425,12 @@ function playerPhases(map: MissionMap, begins: Begin[]): Partial[] {
   const queue: Partial[] = [];
 
   const push = (p: Partial) => {
-    const key = `${positionsKey(p.st, p.acted)}#${worldKey(p.st)}`;
+    // Losing the boss with its tile loses the mission.
+    if (p.st.w[map.LOST] === 1) {
+      return;
+    }
+
+    const key = `${positionsKey(map, p.st, p.acted)}#${worldKey(p.st)}`;
 
     if (seen.has(key)) {
       return;
@@ -1185,7 +1457,7 @@ function playerPhases(map: MissionMap, begins: Begin[]): Partial[] {
 
     const { st, acted } = p;
 
-    const endKey = `${positionsKey(st, 0)}#${worldKey(st)}`;
+    const endKey = `${positionsKey(map, st, 0)}#${worldKey(st)}`;
 
     if (!ends.has(endKey)) {
       ends.set(endKey, p);
@@ -1204,30 +1476,16 @@ function playerPhases(map: MissionMap, begins: Begin[]): Partial[] {
 
       if (exit !== undefined) {
         const next = cloneState(st);
-        next.ech[e] = exit;
 
         const log: Log = {
           player: [],
           enemy: [],
         };
 
-        runEvents(
-          map,
-          next,
-          {
-            type: "arrive",
-            tile: exit,
-          },
-          log,
-        );
+        const action = teleportEchelon(map, next, e, exit, log);
 
         const actions: MissionAction[] = [
-          {
-            type: "teleport",
-            echelon: e,
-            from: map.coord(tile),
-            to: map.coord(exit),
-          },
+          action,
           ...log.player,
         ];
 
@@ -1254,18 +1512,17 @@ function playerPhases(map: MissionMap, begins: Begin[]): Partial[] {
             continue;
           }
 
-          const ech = [
-            ...st.ech,
-          ];
-          ech[e] = n;
-          ech[other] = tile;
+          const swapped: State = {
+            // Swaps don't change the world, so it (and its key) is shared.
+            ...st,
+            ech: [
+              ...st.ech,
+            ],
+          };
+          swapEchelons(swapped, e, other);
 
           push({
-            // Swaps don't change the world, so it (and its key) is shared.
-            st: {
-              ...st,
-              ech,
-            },
+            st: swapped,
             acted,
             begin: p.begin,
             parent: p,
@@ -1397,7 +1654,10 @@ export function routeBattles(steps: MissionSolutionTurn[]): RouteBattle[] {
 
   for (const step of steps) {
     for (const a of step.player) {
-      if (a.type === "move" && a.battle !== undefined) {
+      if (
+        (a.type === "move" || a.type === "teleport") &&
+        a.battle !== undefined
+      ) {
         battles.push({
           echelon: a.echelon,
           entityId: a.battle,
@@ -1493,6 +1753,7 @@ export function solveMission(
   const initial: State = {
     turn: 0,
     ech: [],
+    order: [],
     armor: [],
     fights: [],
     w: map.newWorld(),
@@ -1510,6 +1771,7 @@ export function solveMission(
         ech: [
           ...deploy,
         ],
+        order: deploy.map((_, i) => i),
         armor: deploy.map(() => 0),
         fights: deploy.map(() => 0),
         w: initial.w.slice(),
@@ -1632,12 +1894,13 @@ export function solveMission(
           continue;
         }
 
-        if (st.ech.every((t) => t === GONE)) {
-          // Every team withdrew: the mission is lost.
+        if (st.ech.every((t) => t === GONE) || st.w[map.LOST] === 1) {
+          // Every team withdrew, or the boss left with its tile: the mission is
+          // lost.
           continue;
         }
 
-        const key = `${positionsKey(st, 0, false)}#${worldKey(st)}`;
+        const key = `${positionsKey(map, st, 0, false)}#${worldKey(st)}`;
         const existing = next.get(key);
 
         if (!existing || rank(child) < rank(existing)) {

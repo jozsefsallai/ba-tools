@@ -884,7 +884,10 @@ export function MissionBoard({
 
   const battles = new Map<string, "fight" | "withdraw">();
   for (const a of marks?.player ?? []) {
-    if (a.type === "move" && a.battle !== undefined) {
+    if (
+      (a.type === "move" || a.type === "teleport") &&
+      a.battle !== undefined
+    ) {
       battles.set(hexKey(a.to), "fight");
     }
 
@@ -922,7 +925,10 @@ export function MissionBoard({
   }
 
   for (const a of transition?.marks.player ?? []) {
-    if (a.type === "move" && a.battle !== undefined) {
+    if (
+      (a.type === "move" || a.type === "teleport") &&
+      a.battle !== undefined
+    ) {
       foughtAt.set(a.battle, a.to);
     }
   }

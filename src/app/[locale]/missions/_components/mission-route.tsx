@@ -344,13 +344,30 @@ function PlayerStep({
           <TeamName echelon={action.other} />
         </>
       );
-    case "teleport":
+    case "teleport": {
+      const target =
+        action.battle === undefined
+          ? null
+          : map.units.find((u) => u.entityId === action.battle);
+
       return (
         <>
           <TeamName echelon={action.echelon} />{" "}
-          {t("tools.missions.route.teleport")}
+          {target
+            ? t.rich(
+                target.grade === "Boss"
+                  ? "tools.missions.route.teleportAttackBoss"
+                  : "tools.missions.route.teleportAttackEnemy",
+                {
+                  enemy: (chunks) => (
+                    <EnemyWord unit={target}>{chunks}</EnemyWord>
+                  ),
+                },
+              )
+            : t("tools.missions.route.teleport")}
         </>
       );
+    }
     case "evacuate":
       return (
         <>

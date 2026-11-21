@@ -2684,6 +2684,8 @@
       "switch": "and steps on the switch",
       "swapWith": "swaps places with",
       "teleport": "teleports through the portal",
+      "teleportAttackEnemy": "teleports through the portal and attacks the <enemy>enemy</enemy> on the other side",
+      "teleportAttackBoss": "teleports through the portal and attacks the <enemy>boss</enemy> on the other side",
       "evacuate": "is moved to a start tile as its tile disappears",
       "withdrawFromEnemy": "attacks the <enemy>enemy</enemy> {direction} and withdraws from the battle",
       "withdrawFromBoss": "attacks the <enemy>boss</enemy> {direction} and withdraws from the battle",
