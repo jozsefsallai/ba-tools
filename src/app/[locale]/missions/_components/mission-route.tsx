@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ImageIcon,
   PauseIcon,
   PlayIcon,
   XIcon,
@@ -18,6 +20,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { toast } from "sonner";
 import {
   type BoardTransition,
   MissionBoard,
@@ -40,6 +43,7 @@ import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import type { MissionMapData, MissionMapUnit } from "@/lib/game-data/contract";
 import { mainArmor } from "@/lib/missions/armor";
+import { initialBoard } from "@/lib/missions/initial-board";
 import { echelonName, hexDirection } from "@/lib/missions/labels";
 import type {
   EnemyAction,
@@ -106,6 +110,62 @@ const TeamStudents = createContext<
 const TeamDamage = createContext<(echelon: number) => AttackType | null>(
   () => null,
 );
+
+function CopyBoardButton({ label }: { label: string }) {
+  const t = useTranslations();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) {
+      return;
+    }
+
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [
+    copied,
+  ]);
+
+  const copy = async () => {
+    try {
+      // The map image the mission's OG image and AronaBot use. Safari wants
+      // the item created during the click, with the data to come.
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": fetch(
+            `/api/missions/${encodeURIComponent(label)}/map`,
+          ).then((response) => {
+            if (!response.ok) {
+              throw new Error(`Map image request failed: ${response.status}`);
+            }
+
+            return response.blob();
+          }),
+        }),
+      ]);
+    } catch (err) {
+      console.error("Failed to copy the mission map", err);
+      toast.error(t("tools.missions.map.copyFailed"));
+      return;
+    }
+
+    toast.success(t("tools.missions.map.copied"));
+    setCopied(true);
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      className="size-7"
+      onClick={copy}
+      aria-label={t("tools.missions.map.copy")}
+      title={t("tools.missions.map.copy")}
+    >
+      {copied ? <CheckIcon /> : <ImageIcon />}
+    </Button>
+  );
+}
 
 function TeamName({ echelon }: { echelon: number }) {
   const t = useTranslations();
@@ -463,11 +523,14 @@ function EnemyStep({
 }
 
 export function MissionRoute({
+  label,
   map,
   solutions,
   challengeTurns,
   starSRanks,
 }: {
+  /** The mission's label (`25-3H`), for its map image. */
+  label: string;
   map: MissionMapData;
   solutions: MissionSolutions;
   challengeTurns: number | null;
@@ -680,10 +743,17 @@ export function MissionRoute({
   if (!route) {
     return (
       <div className="flex flex-col gap-4">
-        <MissionBoard map={map} snapshot={null} labels={labels} />
-        <p className="text-muted-foreground text-sm">
-          {t("tools.missions.route.none")}
-        </p>
+        <MissionBoard
+          map={map}
+          snapshot={initialBoard(map, solutions)}
+          labels={labels}
+        />
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-muted-foreground text-sm">
+            {t("tools.missions.route.none")}
+          </p>
+          <CopyBoardButton label={label} />
+        </div>
       </div>
     );
   }
@@ -866,6 +936,8 @@ export function MissionRoute({
                   >
                     {playing ? <PauseIcon /> : <PlayIcon />}
                   </Button>
+
+                  <CopyBoardButton label={label} />
 
                   <fieldset className="flex items-center gap-1">
                     <legend className="sr-only">

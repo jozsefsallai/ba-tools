@@ -1242,6 +1242,118 @@
       },
       {
         "model": "http_request",
+        "id": "rq_Lk4mPs7wQz",
+        "createdAt": "2026-11-21T00:00:00",
+        "updatedAt": "2026-11-21T00:00:00",
+        "workspaceId": "wk_z9Ek68UZue",
+        "folderId": "fl_tB23aHmDLW",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {},
+        "bodyType": null,
+        "description": "Lists the main story campaign missions, in order of area, difficulty and\nmission number, with their cost, star goals and drops. Use\n`GET /api/v1/missions/:label` for a mission's enemies and the routes that clear\nit.\n\n`fastestTurns` is the fewest turns the mission can be cleared in, or `null` when\nno route was found. `drops` lists every reward, as described under \"Get a mission\";\n`probability` is from 0 to 1.\n\n**Parameters**\n\n- `difficulty`: `Normal` or `Hard`.\n- `chapter`: Only the missions of this area.\n- `drop`: Only missions that drop an item whose English or Japanese name\n  contains this, as a regular or rare drop (e.g. `Saya` for her eleph).\n\n```response:200\n{\n  \"data\": [\n    {\n      \"label\": \"25-3H\",\n      \"chapter\": 25,\n      \"stage\": 3,\n      \"difficulty\": \"Hard\",\n      \"cost\": 20,\n      \"terrain\": \"Street\",\n      \"recommendedLevel\": 94,\n      \"echelonCount\": 3,\n      \"starTurns\": 5,\n      \"starSRanks\": 9,\n      \"challengeTurns\": 5,\n      \"fastestTurns\": 5,\n      \"isReleasedGlobal\": true,\n      \"url\": \"https://ba.joexyz.online/missions/25-3H\",\n      \"mapImageUrl\": \"https://ba.joexyz.online/api/missions/25-3H/map\",\n      \"drops\": [\n        {\n          \"tag\": \"Default\",\n          \"parcelType\": \"Item\",\n          \"parcelId\": 20006,\n          \"name\": \"Saya (Casual)'s Eleph\",\n          \"nameJP\": \"サヤ（私服）の神名文字\",\n          \"rarity\": \"N\",\n          \"iconUrl\": \"https://ba.cdn.nimblebun.works/v2/images/item-icons/item_icon_secretstone_saya_casual.png\",\n          \"amount\": 1,\n          \"probability\": 0.4\n        },\n        \"…\"\n      ]\n    },\n    \"…\"\n  ]\n}\n```",
+        "headers": [],
+        "method": "GET",
+        "name": "List missions",
+        "sortPriority": 7.0,
+        "url": "${[ base_url ]}/api/v1/missions",
+        "urlParameters": [
+          {
+            "enabled": false,
+            "name": "difficulty",
+            "value": "Hard",
+            "id": "up_ml0difficulty"
+          },
+          {
+            "enabled": false,
+            "name": "chapter",
+            "value": "25",
+            "id": "up_ml0chapter"
+          },
+          {
+            "enabled": false,
+            "name": "drop",
+            "value": "Saya",
+            "id": "up_ml0drop"
+          }
+        ],
+        "settingSendCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingStoreCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingValidateCertificates": {
+          "enabled": false,
+          "value": true
+        },
+        "settingFollowRedirects": {
+          "enabled": false,
+          "value": true
+        },
+        "settingRequestTimeout": {
+          "enabled": false,
+          "value": 0
+        },
+        "settingHttpVersion": {
+          "enabled": false,
+          "value": "auto"
+        }
+      },
+      {
+        "model": "http_request",
+        "id": "rq_Mn5sNq8dRt",
+        "createdAt": "2026-11-21T00:00:00",
+        "updatedAt": "2026-11-21T00:00:00",
+        "workspaceId": "wk_z9Ek68UZue",
+        "folderId": "fl_tB23aHmDLW",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {},
+        "bodyType": null,
+        "description": "Gets a main story campaign mission: its cost and star goals, its drops, its\nenemies, and the routes that clear it in the fewest turns in Concentrated\nCommand, worked out by the same solver as the site's mission pages.\n\n`routes` has up to three routes, each with a `kind`:\n\n- `fastest`: the fewest turns, preferring routes that pick up the Pyroxene box.\n- `withBox`: the fewest turns that also pick up the box, when `fastest` doesn't.\n- `allStars`: the fewest turns that also fight `starSRanks` battles for the S\n  rank star, when `fastest` has fewer.\n\nIt's empty when no route was found; `routeSearchExhausted` is `true` when the\nsearch gave up (too many turns or states).\n\nEach route lists its `teams`, named `A`, `B`, … in the order they're deployed,\nwith the start tile each is deployed on, the `attackType` to bring (the one\neffective against the armor it fights most, `null` for a team that never\nfights) and its `battles`. Then come its `turns`, each in the order it plays:\n\n- `start`: what the turn's map events did before the player phase: scripted\n  enemy moves (`enemy`) and teams moved to a start tile because their tile went\n  away (`evacuations`).\n- `player`: each team's action, in order.\n- `enemy`: the enemy phase.\n- `evacuations`: teams moved by events after the enemy phase.\n\nPlayer actions have a `type`:\n\n- `move`: one tile in `direction`. `attacks` is the enemy on that tile, if\n  any. `picksUpBox` and `togglesSwitch` say what the team stepped on.\n- `swap`: trades places with the adjacent `otherTeam`.\n- `teleport`: through a portal; doesn't use the team's move. `attacks` is the\n  enemy on the other side, if any.\n- `evacuate`: moved to a start tile by the game, as its tile went away.\n- `withdraw`: attacks the enemy in `direction` and withdraws from the battle:\n  the team leaves the map and the enemy stays.\n\nEnemy actions are a `move` or an `attack` on `team` (`teamWithdraws` when the\nteam withdraws instead of fighting). `scripted` ones are moved by a map event\nrather than their AI. Enemies are referenced by `entityId`, matching\n`enemies`, with `boss` and their main `defenseType` repeated for convenience.\n\nTiles are `{ x, y }` in cube coordinates (`z` is `-x - y`). A `direction` is\none of `upRight`, `right`, `downRight`, `downLeft`, `left` and `upLeft`, as the\nmap is shown in the game.\n\n`drops` lists every reward with its `tag`: `Default` and `Rare` drops, the\n`FirstClear` reward and the `ThreeStar` reward for clearing with all stars.\n`probability` is from 0 to 1. Pyroxene has `parcelType: \"Currency\"`.\n\n`mapImageUrl` is a PNG of the map at turn 1 of the `fastest` route, with each\nteam's start tile in the colour of its attack type, as shown on the mission's\npage (`url`). It has a transparent background and is up to 1520×916 pixels.\n\n**Parameters**\n\n- `label` (path): The mission's area and number, with `H` for Hard (e.g. `1-1`, `25-3H`).\n\n```response:200\n{\n  \"data\": {\n    \"label\": \"25-3H\",\n    \"chapter\": 25,\n    \"stage\": 3,\n    \"difficulty\": \"Hard\",\n    \"cost\": 20,\n    \"terrain\": \"Street\",\n    \"recommendedLevel\": 94,\n    \"echelonCount\": 3,\n    \"starTurns\": 5,\n    \"starSRanks\": 9,\n    \"challengeTurns\": 5,\n    \"fastestTurns\": 5,\n    \"isReleasedGlobal\": true,\n    \"url\": \"https://ba.joexyz.online/missions/25-3H\",\n    \"mapImageUrl\": \"https://ba.joexyz.online/api/missions/25-3H/map\",\n    \"drops\": [\n      {\n        \"tag\": \"FirstClear\",\n        \"parcelType\": \"Item\",\n        \"parcelId\": 20006,\n        \"name\": \"Saya (Casual)'s Eleph\",\n        \"nameJP\": \"サヤ（私服）の神名文字\",\n        \"rarity\": \"N\",\n        \"iconUrl\": \"https://ba.cdn.nimblebun.works/v2/images/item-icons/item_icon_secretstone_saya_casual.png\",\n        \"amount\": 5,\n        \"probability\": 1\n      },\n      {\n        \"tag\": \"Default\",\n        \"parcelType\": \"Item\",\n        \"parcelId\": 20006,\n        \"name\": \"Saya (Casual)'s Eleph\",\n        \"nameJP\": \"サヤ（私服）の神名文字\",\n        \"rarity\": \"N\",\n        \"iconUrl\": \"https://ba.cdn.nimblebun.works/v2/images/item-icons/item_icon_secretstone_saya_casual.png\",\n        \"amount\": 1,\n        \"probability\": 0.4\n      },\n      \"…\"\n    ],\n    \"enemies\": [\n      {\n        \"entityId\": 10172,\n        \"x\": 1,\n        \"y\": 1,\n        \"grade\": \"Grade3\",\n        \"boss\": false,\n        \"ai\": \"Guard\",\n        \"moveRange\": 1,\n        \"defenseType\": \"HeavyArmor\",\n        \"defenseTypes\": [\n          \"HeavyArmor\"\n        ],\n        \"attackTypes\": [\n          \"Normal\"\n        ]\n      },\n      \"…\"\n    ],\n    \"hasBox\": true,\n    \"routeSearchExhausted\": false,\n    \"routes\": [\n      {\n        \"kind\": \"fastest\",\n        \"turnCount\": 5,\n        \"battles\": 9,\n        \"withdrawals\": 0,\n        \"takesBox\": true,\n        \"teams\": [\n          {\n            \"team\": \"A\",\n            \"start\": {\n              \"x\": 1,\n              \"y\": -1\n            },\n            \"attackType\": \"Sonic\",\n            \"battles\": [\n              {\n                \"defenseType\": \"ElasticArmor\",\n                \"boss\": false,\n                \"withdrawn\": false\n              },\n              \"…\"\n            ]\n          },\n          \"…\"\n        ],\n        \"turns\": [\n          {\n            \"turn\": 2,\n            \"start\": {\n              \"enemy\": [],\n              \"evacuations\": []\n            },\n            \"player\": [\n              {\n                \"type\": \"move\",\n                \"team\": \"B\",\n                \"from\": {\n                  \"x\": -4,\n                  \"y\": 4\n                },\n                \"to\": {\n                  \"x\": -3,\n                  \"y\": 3\n                },\n                \"direction\": \"right\",\n                \"attacks\": {\n                  \"entityId\": 10181,\n                  \"boss\": false,\n                  \"defenseType\": \"ElasticArmor\"\n                },\n                \"picksUpBox\": false,\n                \"togglesSwitch\": false\n              },\n              \"…\"\n            ],\n            \"enemy\": [\n              {\n                \"type\": \"attack\",\n                \"enemy\": {\n                  \"entityId\": 10173,\n                  \"boss\": false,\n                  \"defenseType\": \"HeavyArmor\"\n                },\n                \"from\": {\n                  \"x\": 2,\n                  \"y\": -2\n                },\n                \"to\": {\n                  \"x\": 1,\n                  \"y\": -1\n                },\n                \"direction\": \"left\",\n                \"scripted\": false,\n                \"team\": \"C\",\n                \"teamWithdraws\": false\n              },\n              \"…\"\n            ],\n            \"evacuations\": []\n          },\n          \"…\"\n        ]\n      }\n    ]\n  }\n}\n```\n\n```response:404\n{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"Mission not found.\"\n  }\n}\n```",
+        "headers": [],
+        "method": "GET",
+        "name": "Get a mission",
+        "sortPriority": 8.0,
+        "url": "${[ base_url ]}/api/v1/missions/:label",
+        "urlParameters": [
+          {
+            "enabled": true,
+            "name": ":label",
+            "value": "25-3H",
+            "id": "up_ms0label"
+          }
+        ],
+        "settingSendCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingStoreCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingValidateCertificates": {
+          "enabled": false,
+          "value": true
+        },
+        "settingFollowRedirects": {
+          "enabled": false,
+          "value": true
+        },
+        "settingRequestTimeout": {
+          "enabled": false,
+          "value": 0
+        },
+        "settingHttpVersion": {
+          "enabled": false,
+          "value": "auto"
+        }
+      },
+      {
+        "model": "http_request",
         "id": "rq_DVwDhT4RUG",
         "createdAt": "2026-11-01T00:00:00",
         "updatedAt": "2026-11-01T00:00:00",

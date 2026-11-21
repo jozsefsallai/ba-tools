@@ -14,6 +14,11 @@ import {
   studentSearchSchema,
   studentSkillsSchema,
 } from "@/lib/public-api/resources/game-data.server";
+import {
+  getMissionDetail,
+  listMissionSummaries,
+  missionSearchSchema,
+} from "@/lib/public-api/resources/missions.server";
 
 const studentIdentifier = idInput(
   "Student id, or a name to resolve (e.g. `Hoshino`, `Shiroko (Swimsuit)`).",
@@ -134,5 +139,35 @@ export function registerGameDataTools(server: McpServer) {
       input: roadmapSchema.shape,
     },
     (input) => getRoadmap(input),
+  );
+
+  defineTool(
+    server,
+    "list_missions",
+    {
+      title: "List missions",
+      description:
+        "Main story campaign missions with their AP cost, star goals, the fewest turns they can be cleared in (`fastestTurns`) and their drops (`probability` is 0 to 1). Use `drop` to find where an item drops, and `get_mission` for a mission's map and routes.",
+      kind: "read",
+      input: missionSearchSchema.shape,
+    },
+    (input) => listMissionSummaries(input),
+  );
+
+  defineTool(
+    server,
+    "get_mission",
+    {
+      title: "Get mission",
+      description:
+        "A main story campaign mission: AP cost, star goals, drops (`probability` is 0 to 1), its enemies, and the routes that clear it in the fewest turns in Concentrated Command. `routes` has up to three: `fastest`, `withBox` (also picks up the Pyroxene box) and `allStars` (also fights enough battles for the S rank star). Each route lists its teams (`A`, `B`, …) with their start tile and the attack type to bring, then every turn: `start` (what map events did), `player` (each team's action in order), `enemy` (enemy phase) and `evacuations`. Directions are on the hex map as the game shows it (`upRight`, `right`, `downRight`, `downLeft`, `left`, `upLeft`). `mapImageUrl` is a picture of the map with the start tiles coloured by attack type; `url` is the mission's page with an animated guide.",
+      kind: "read",
+      input: {
+        mission: idInput(
+          "The mission's label: area and mission number, with `H` for Hard (`1-1`, `25-3H`).",
+        ),
+      },
+    },
+    ({ mission }) => getMissionDetail(mission),
   );
 }

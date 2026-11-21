@@ -2062,6 +2062,8 @@
         "search_gifts": "Checking gift records",
         "list_banners": "Checking recruitment banners",
         "get_roadmap": "Checking upcoming schedules",
+        "list_missions": "Checking the campaign missions",
+        "get_mission": "Studying a mission map",
         "get_pvp_stats_summary": "Checking Tactical Challenge reports",
         "list_pvp_teams": "Reviewing Tactical Challenge teams",
         "search_pvp_stats": "Analyzing counter-strategies",
@@ -2111,6 +2113,8 @@
         "search_gifts": "Checked gift records",
         "list_banners": "Checked recruitment banners",
         "get_roadmap": "Checked upcoming schedules",
+        "list_missions": "Checked the campaign missions",
+        "get_mission": "Studied a mission map",
         "get_pvp_stats_summary": "Checked Tactical Challenge reports",
         "list_pvp_teams": "Reviewed Tactical Challenge teams",
         "search_pvp_stats": "Analyzed counter-strategies",
@@ -2650,7 +2654,10 @@
     "map": {
       "title": "Mission map",
       "boss": "Boss",
-      "enemy": "Enemy"
+      "enemy": "Enemy",
+      "copy": "Copy the map as an image",
+      "copied": "Map copied to the clipboard.",
+      "copyFailed": "Couldn't copy the map."
     },
     "directions": {
       "upRight": "up-right",

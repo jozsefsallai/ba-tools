@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import {
   DropIcon,
   dropDisplay,
+  percent,
 } from "@/app/[locale]/missions/_components/mission-drops";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
@@ -258,7 +259,7 @@ function MissionCard({
           <li
             key={d.iconName + d.name}
             className="flex w-10 flex-col items-center"
-            title={`${d.name} ${Math.round(d.probability * 100)}%`}
+            title={`${d.name} ${percent(d.probability)}`}
           >
             <DropIcon
               iconName={d.iconName}
@@ -268,9 +269,7 @@ function MissionCard({
             />
 
             <span className="font-nexon-football-gothic text-muted-foreground text-xs tabular-nums">
-              {d.probability >= 1
-                ? "\u00a0"
-                : `${Math.round(d.probability * 100)}%`}
+              {d.probability >= 1 ? "\u00a0" : `${percent(d.probability)}`}
             </span>
           </li>
         ))}

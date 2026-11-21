@@ -82,8 +82,8 @@ export function dropDisplay(
   };
 }
 
-const percent = (probability: number) =>
-  `${(probability * 100).toFixed(probability < 0.1 ? 1 : 0)}%`;
+export const percent = (probability: number) =>
+  `${Math.trunc(Number((probability * 10_000).toFixed(6))) / 100}%`;
 
 export function MissionDrops({
   rewards,

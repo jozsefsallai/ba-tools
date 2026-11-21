@@ -7,7 +7,7 @@ icon: book-open
 
 The Joe's Blue Archive Tools API gives programs the same data the site uses:
 
-- **Game data**: students, skills, gifts, upcoming Global banners, and the Global roadmap.
+- **Game data**: students, skills, gifts, campaign missions and how to clear them, upcoming Global banners, and the Global roadmap.
 - **Shared content**: timelines, timeline groups, and rosters that players made public.
 - **PVP statistics**: Tactical Challenge statistics aggregated from all recorded matches.
 - **Your data**: your formations, timelines, rosters, gift planners, PVP tracker, and recruitment history.

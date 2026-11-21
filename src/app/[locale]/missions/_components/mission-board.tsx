@@ -1,20 +1,17 @@
-import {
-  ArrowBigUpIcon,
-  BanIcon,
-  DoorClosedIcon,
-  DoorOpenIcon,
-  EyeIcon,
-  FlagIcon,
-  FootprintsIcon,
-  HeartPlusIcon,
-  type LucideIcon,
-  OrbitIcon,
-  ShieldIcon,
-  SwordsIcon,
-  ToggleLeftIcon,
-  ToggleRightIcon,
-} from "lucide-react";
-import { type CSSProperties, useId, useLayoutEffect, useRef } from "react";
+import * as arrowBigUpModule from "lucide-react/icons/arrow-big-up";
+import * as banModule from "lucide-react/icons/ban";
+import * as doorClosedModule from "lucide-react/icons/door-closed";
+import * as doorOpenModule from "lucide-react/icons/door-open";
+import * as eyeModule from "lucide-react/icons/eye";
+import * as flagModule from "lucide-react/icons/flag";
+import * as footprintsModule from "lucide-react/icons/footprints";
+import * as heartPlusModule from "lucide-react/icons/heart-plus";
+import * as orbitModule from "lucide-react/icons/orbit";
+import * as shieldModule from "lucide-react/icons/shield";
+import * as swordsModule from "lucide-react/icons/swords";
+import * as toggleLeftModule from "lucide-react/icons/toggle-left";
+import * as toggleRightModule from "lucide-react/icons/toggle-right";
+import { type CSSProperties, createElement, useId } from "react";
 import {
   attackTypeStyle,
   defenseTypeStyle,
@@ -37,6 +34,34 @@ import type {
   MissionSnapshot,
 } from "@/lib/missions/solver";
 import { buildGameItemIconUrl } from "@/lib/url";
+
+type IconNode = [
+  string,
+  Record<string, string>,
+][];
+
+const iconNode = (module: object) =>
+  (
+    module as {
+      __iconData: {
+        node: IconNode;
+      };
+    }
+  ).__iconData.node;
+
+const ArrowBigUpIcon = iconNode(arrowBigUpModule);
+const BanIcon = iconNode(banModule);
+const DoorClosedIcon = iconNode(doorClosedModule);
+const DoorOpenIcon = iconNode(doorOpenModule);
+const EyeIcon = iconNode(eyeModule);
+const FlagIcon = iconNode(flagModule);
+const FootprintsIcon = iconNode(footprintsModule);
+const HeartPlusIcon = iconNode(heartPlusModule);
+const OrbitIcon = iconNode(orbitModule);
+const ShieldIcon = iconNode(shieldModule);
+const SwordsIcon = iconNode(swordsModule);
+const ToggleLeftIcon = iconNode(toggleLeftModule);
+const ToggleRightIcon = iconNode(toggleRightModule);
 
 const R = 40;
 
@@ -75,7 +100,7 @@ const BOARD = {
   enemyArrow: "#ff5a5f",
 };
 
-const OBJECT_ICONS: Partial<Record<MissionMapObject["type"], LucideIcon>> = {
+const OBJECT_ICONS: Partial<Record<MissionMapObject["type"], IconNode>> = {
   Heal: HeartPlusIcon,
   StatBuff: ArrowBigUpIcon,
   Portal: OrbitIcon,
@@ -145,13 +170,13 @@ const px = (c: HexCoord) => {
 };
 
 function Icon({
-  icon: IconComponent,
+  icon,
   at,
   size,
   color,
   strokeWidth = 2.25,
 }: {
-  icon: LucideIcon;
+  icon: IconNode;
   at: {
     x: number;
     y: number;
@@ -161,15 +186,26 @@ function Icon({
   strokeWidth?: number;
 }) {
   return (
-    <IconComponent
+    <svg
       x={at.x - size / 2}
       y={at.y - size / 2}
       width={size}
       height={size}
-      color={color}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
       strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden
-    />
+    >
+      {icon.map(([tag, { key, ...attributes }]) =>
+        createElement(tag, {
+          key,
+          ...attributes,
+        }),
+      )}
+    </svg>
   );
 }
 
@@ -345,6 +381,39 @@ function ArmorDisc({
   );
 }
 
+function DeployMark({
+  at,
+  r,
+  color,
+}: {
+  at: {
+    x: number;
+    y: number;
+  };
+  r: number;
+  color: string;
+}) {
+  return (
+    <>
+      <path
+        d={hexPath(at.x, at.y, r)}
+        fill={color}
+        fillOpacity={0.45}
+        stroke={color}
+        strokeWidth={6}
+      />
+
+      <path
+        d={hexPath(at.x, at.y, r - 6)}
+        fill="none"
+        stroke="white"
+        strokeWidth={2}
+        strokeOpacity={0.9}
+      />
+    </>
+  );
+}
+
 type BeaconEffect = "reveal" | "remove";
 
 type BeaconBadge = {
@@ -413,6 +482,18 @@ function BeaconMark({
   );
 }
 
+export type BoardImages = {
+  boss: string;
+  enemy: string;
+  gem: string;
+};
+
+const defaultImages = (): BoardImages => ({
+  boss: bossIcon.src,
+  enemy: enemyIcon.src,
+  gem: buildGameItemIconUrl("Currency_Icon_Gem"),
+});
+
 export type BoardMarks = {
   player: MissionAction[];
   enemy: EnemyAction[];
@@ -466,16 +547,31 @@ function placed(
   opacity = 1,
   fadeDelay = 0,
   delay = 0,
-): CSSProperties {
+  still = false,
+): {
+  transform?: string;
+  style: CSSProperties;
+} {
   const p = px(c);
 
+  if (still) {
+    return {
+      transform: `translate(${p.x} ${p.y})`,
+      style: {
+        opacity,
+      },
+    };
+  }
+
   return {
-    transform: `translate(${p.x}px, ${p.y}px)`,
-    opacity,
-    transition:
-      duration > 0
-        ? `transform ${duration}ms ${ease} ${delay}ms, opacity ${duration * 0.6}ms ${ease} ${delay + fadeDelay}ms`
-        : "none",
+    style: {
+      transform: `translate(${p.x}px, ${p.y}px)`,
+      opacity,
+      transition:
+        duration > 0
+          ? `transform ${duration}ms ${ease} ${delay}ms, opacity ${duration * 0.6}ms ${ease} ${delay + fadeDelay}ms`
+          : "none",
+    },
   };
 }
 
@@ -494,6 +590,9 @@ function EchelonToken({
   icon,
   clipId,
   color,
+  fadeInName,
+  still,
+  plate,
 }: {
   echelon: number;
   icon?: string | null;
@@ -504,52 +603,40 @@ function EchelonToken({
   teleportId: number | null;
   duration: number;
   delay?: number;
+  fadeInName: string;
+  still?: boolean;
+  plate?: boolean;
 }) {
-  const ref = useRef<SVGGElement>(null);
-
-  useLayoutEffect(() => {
-    if (teleportId === null || duration === 0 || !ref.current?.animate) {
-      return;
-    }
-
-    ref.current.animate(
-      [
-        {
-          opacity: 0,
-        },
-        {
-          opacity: 1,
-        },
-      ],
-      {
-        duration: duration * 0.45,
-        delay: delay + duration * 0.4,
-        easing: ease,
-        fill: "backwards",
-      },
-    );
-  }, [
-    teleportId,
-    duration,
-    delay,
-  ]);
-
-  const style = placed(
+  const placement = placed(
     at,
     teleportId === null ? duration : 0,
     gone ? 0 : 1,
     0,
     delay,
+    still,
   );
 
+  const fadeIn =
+    teleportId !== null && duration > 0
+      ? `${fadeInName} ${duration * 0.45}ms ${ease} ${delay + duration * 0.4}ms backwards`
+      : undefined;
+
   return (
-    <g ref={ref} style={style}>
-      <EchelonShape
-        echelon={echelon}
-        icon={icon}
-        clipId={clipId}
-        color={color}
-      />
+    <g {...placement}>
+      <g
+        key={teleportId ?? "still"}
+        style={{
+          animation: fadeIn,
+        }}
+      >
+        <EchelonShape
+          echelon={echelon}
+          icon={icon}
+          clipId={clipId}
+          color={color}
+          plate={plate}
+        />
+      </g>
     </g>
   );
 }
@@ -559,21 +646,25 @@ function EchelonShape({
   icon,
   clipId,
   color,
+  plate = true,
 }: {
   echelon: number;
   icon?: string | null;
   clipId: string;
   color: string;
+  plate?: boolean;
 }) {
   const badge = hexPath(0, 0, R * 0.52);
   return (
     <>
-      <path
-        d={hexPath(0, 0, R * 0.8)}
-        fill={BOARD.teamPlate}
-        stroke={BOARD.team}
-        strokeWidth={5}
-      />
+      {plate && (
+        <path
+          d={hexPath(0, 0, R * 0.8)}
+          fill={BOARD.teamPlate}
+          stroke={BOARD.team}
+          strokeWidth={5}
+        />
+      )}
 
       <path d={hexPath(0, 2, R * 0.52)} fill="black" fillOpacity={0.2} />
 
@@ -640,8 +731,10 @@ function EchelonShape({
 function EnemyShape({
   unit,
   labels,
+  images,
 }: {
   unit: MissionMapUnit;
+  images: BoardImages;
   labels: {
     boss: string;
     enemy: string;
@@ -678,7 +771,7 @@ function EnemyShape({
 
       {boss ? (
         <image
-          href={bossIcon.src}
+          href={images.boss}
           x={-R * 0.52}
           y={-R * 0.48}
           width={R * 1.04}
@@ -687,7 +780,7 @@ function EnemyShape({
       ) : (
         <>
           <image
-            href={enemyIcon.src}
+            href={images.enemy}
             x={-R * 0.33}
             y={-R * 0.35}
             width={R * 0.66}
@@ -742,15 +835,7 @@ function EnemyShape({
   );
 }
 
-export function MissionBoard({
-  map,
-  snapshot,
-  marks,
-  transition,
-  teamIcons,
-  teamColors,
-  labels,
-}: {
+type MissionBoardProps = {
   map: MissionMapData;
   snapshot: MissionSnapshot | null;
   marks?: BoardMarks;
@@ -763,9 +848,31 @@ export function MissionBoard({
     enemy: string;
     armor: Record<string, string>;
   };
-}) {
-  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  images?: BoardImages;
+  still?: boolean;
+  deployment?: boolean;
+};
 
+export function MissionBoard(props: MissionBoardProps) {
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  return <MissionBoardSvg {...props} id={id} />;
+}
+
+export function MissionBoardSvg({
+  id,
+  map,
+  snapshot,
+  marks,
+  transition,
+  teamIcons,
+  teamColors,
+  labels,
+  images = defaultImages(),
+  still = false,
+  deployment = false,
+}: MissionBoardProps & {
+  id: string;
+}) {
   const duration = transition?.duration ?? 0;
 
   const teamColor = (echelon: number) =>
@@ -914,6 +1021,16 @@ export function MissionBoard({
     ),
   );
 
+  const deployedAt = new Map<string, number>();
+
+  if (deployment) {
+    snapshot?.echelons.forEach((e, echelon) => {
+      if (e && startTiles.has(hexKey(e))) {
+        deployedAt.set(hexKey(e), echelon);
+      }
+    });
+  }
+
   const ordered = [
     ...tiles.entries(),
   ].sort(([, a], [, b]) => px(a).y - px(b).y || px(a).x - px(b).x);
@@ -1020,11 +1137,21 @@ export function MissionBoard({
 
   return (
     <svg
+      xmlns="http://www.w3.org/2000/svg"
       viewBox={`${minX} ${minY} ${maxX - minX} ${maxY - minY}`}
-      className="mx-auto block h-auto max-h-[max(18rem,calc(100vh-29rem))] w-full"
-      style={{
-        maxWidth: `${(maxX - minX) * MAX_SCALE}px`,
-      }}
+      {...(still
+        ? {
+            width: maxX - minX,
+            height: maxY - minY,
+            fontFamily: "Noto Sans",
+          }
+        : {
+            className:
+              "mx-auto block h-auto max-h-[max(18rem,calc(100vh-29rem))] w-full",
+            style: {
+              maxWidth: `${(maxX - minX) * MAX_SCALE}px`,
+            },
+          })}
       role="img"
       aria-label={labels.title}
     >
@@ -1169,6 +1296,14 @@ export function MissionBoard({
                 opacity={0.9}
               />
 
+              {deployedAt.has(key) && (
+                <DeployMark
+                  at={p}
+                  r={r}
+                  color={teamColor(deployedAt.get(key) as number)}
+                />
+              )}
+
               {beacon && (
                 <>
                   <Icon
@@ -1210,7 +1345,7 @@ export function MissionBoard({
           return (
             <image
               key={o.entityId}
-              href={buildGameItemIconUrl("Currency_Icon_Gem")}
+              href={images.gem}
               x={p.x - GEM.width / 2}
               y={p.y + R * 0.03 - GEM.height * 0.49}
               width={GEM.width}
@@ -1287,15 +1422,16 @@ export function MissionBoard({
         return (
           <g
             key={unit.entityId}
-            style={placed(
+            {...placed(
               at,
               duration,
               now ? 1 : 0,
               now ? 0 : duration * 0.6,
               enemyDelay(unit.entityId),
+              still,
             )}
           >
-            <EnemyShape unit={unit} labels={labels} />
+            <EnemyShape unit={unit} labels={labels} images={images} />
           </g>
         );
       })}
@@ -1307,7 +1443,7 @@ export function MissionBoard({
           <g
             key={`ghost${transition?.id}-${echelon}`}
             style={{
-              ...placed(from, 0),
+              ...placed(from, 0).style,
               animation: `${id}-fade-out ${duration * 0.4}ms ${ease} ${echelonDelay(echelon)}ms forwards`,
             }}
           >
@@ -1321,7 +1457,9 @@ export function MissionBoard({
         ) : null,
       )}
 
-      <style>{`@keyframes ${id}-fade-out { from { opacity: 1 } to { opacity: 0 } }`}</style>
+      {!still && (
+        <style>{`@keyframes ${id}-fade-out { from { opacity: 1 } to { opacity: 0 } } @keyframes ${id}-fade-in { from { opacity: 0 } to { opacity: 1 } }`}</style>
+      )}
 
       {snapshot?.echelons.map((e, i) => {
         const at = e ?? transition?.previous.echelons[i];
@@ -1338,6 +1476,9 @@ export function MissionBoard({
             icon={teamIcons?.[i]}
             clipId={`${id}-team-${i}`}
             color={teamColor(i)}
+            fadeInName={`${id}-fade-in`}
+            still={still}
+            plate={!(e && deployedAt.has(hexKey(e)))}
           />
         ) : null;
       })}

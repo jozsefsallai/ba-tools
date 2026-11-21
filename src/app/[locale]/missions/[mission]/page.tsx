@@ -16,7 +16,7 @@ import {
 import { gameItemKey } from "@/lib/game-items";
 import { missionLabel, parseMissionLabel } from "@/lib/missions/labels";
 import { OG_DESIGN_VERSION } from "@/lib/og/registry";
-import { ogLocale, sharingMetadata } from "@/lib/og-metadata.server";
+import { localizedPath, sharingMetadata } from "@/lib/og-metadata.server";
 import { TERRAIN_ICONS } from "@/lib/terrain";
 import { buildGameItemIconUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
@@ -64,7 +64,7 @@ export async function generateMetadata({
     description: t("tools.missions.detail.metaDescription", {
       label,
     }),
-    image: `/api/og/${ogLocale(locale)}/missions?v=${OG_DESIGN_VERSION}`,
+    image: `${localizedPath(`/missions/${encodeURIComponent(label)}/opengraph-image`, locale)}?v=${OG_DESIGN_VERSION}`,
     locale,
     alt: label,
   });
@@ -221,6 +221,7 @@ export default async function MissionPage({
           </h2>
 
           <MissionRoute
+            label={label}
             map={mission.map}
             solutions={mission.solutions}
             challengeTurns={mission.challengeTurns}
