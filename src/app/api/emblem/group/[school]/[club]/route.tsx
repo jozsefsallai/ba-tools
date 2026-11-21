@@ -1,46 +1,13 @@
 import { NextResponse } from "next/server";
 import { GroupEmblem } from "@/app/api/emblem/_components/group-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
-import {
-  GROUP_EMBLEM_CLUBS,
-  GROUP_EMBLEM_SCHOOLS,
-  GROUP_EMBLEM_VALID_COMBINATIONS,
-} from "@/lib/emblems";
-import {
-  DEFAULT_SIZES,
-  makeEmblem,
-  processTrailingPart,
-} from "@/lib/emblems.server";
+import { GROUP_EMBLEM_CLUBS, GROUP_EMBLEM_SCHOOLS } from "@/lib/emblems";
+import { makeEmblem, processTrailingPart } from "@/lib/emblems.server";
 
 type RouteParams = {
   school: string;
   club: string;
 };
-
-export async function generateStaticParams(): Promise<RouteParams[]> {
-  const combinations: RouteParams[] = [];
-
-  for (const combo of GROUP_EMBLEM_VALID_COMBINATIONS) {
-    combinations.push({
-      school: combo.school,
-      club: combo.club,
-    });
-
-    combinations.push({
-      school: combo.school,
-      club: `${combo.club}.png`,
-    });
-
-    for (const size of DEFAULT_SIZES) {
-      combinations.push({
-        school: combo.school,
-        club: `${combo.club}.png@w${size}`,
-      });
-    }
-  }
-
-  return combinations;
-}
 
 export async function GET(
   _req: Request,

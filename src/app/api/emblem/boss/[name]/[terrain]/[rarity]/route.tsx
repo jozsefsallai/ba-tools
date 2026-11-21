@@ -5,47 +5,13 @@ import {
   BOSS_EMBLEM_RARITIES,
   VALID_BOSS_EMBLEM_COMBINATIONS,
 } from "@/lib/emblems";
-import {
-  DEFAULT_SIZES,
-  makeEmblem,
-  processTrailingPart,
-} from "@/lib/emblems.server";
+import { makeEmblem, processTrailingPart } from "@/lib/emblems.server";
 
 type RouteParams = {
   name: string;
   terrain: string;
   rarity: string;
 };
-
-export async function generateStaticParams(): Promise<RouteParams[]> {
-  const combinations: RouteParams[] = [];
-
-  for (const combo of VALID_BOSS_EMBLEM_COMBINATIONS) {
-    for (const rarity of BOSS_EMBLEM_RARITIES) {
-      combinations.push({
-        name: combo.name,
-        terrain: combo.terrain,
-        rarity: rarity.id,
-      });
-
-      combinations.push({
-        name: combo.name,
-        terrain: combo.terrain,
-        rarity: `${rarity.id}.png`,
-      });
-
-      for (const size of DEFAULT_SIZES) {
-        combinations.push({
-          name: combo.name,
-          terrain: combo.terrain,
-          rarity: `${rarity.id}.png@w${size}`,
-        });
-      }
-    }
-  }
-
-  return combinations;
-}
 
 export async function GET(
   _req: Request,

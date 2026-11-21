@@ -1,37 +1,11 @@
 import { NextResponse } from "next/server";
 import { BasicEmblem } from "@/app/api/emblem/_components/basic-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
-import { DEFAULT_BASIC_EMBLEM_TEXTS } from "@/lib/emblems";
-import {
-  DEFAULT_SIZES,
-  makeEmblem,
-  processTrailingPart,
-} from "@/lib/emblems.server";
+import { makeEmblem, processTrailingPart } from "@/lib/emblems.server";
 
 type RouteParams = {
   text: string;
 };
-
-export async function generateStaticParams(): Promise<RouteParams[]> {
-  const combinations: RouteParams[] = [];
-
-  for (const text of DEFAULT_BASIC_EMBLEM_TEXTS) {
-    combinations.push({
-      text,
-    });
-    combinations.push({
-      text: `${text}.png`,
-    });
-
-    for (const size of DEFAULT_SIZES) {
-      combinations.push({
-        text: `${text}.png@w${size}`,
-      });
-    }
-  }
-
-  return combinations;
-}
 
 export async function GET(
   _req: Request,

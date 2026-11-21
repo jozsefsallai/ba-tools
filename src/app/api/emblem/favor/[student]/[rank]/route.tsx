@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { FavorEmblem } from "@/app/api/emblem/_components/favor-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
-import { db } from "@/lib/db";
 import { getCachedEmblemStudent } from "@/lib/emblem-student.server";
 import {
   FAVOR_EMBLEM_EXTRA_ARONA,
@@ -9,114 +8,12 @@ import {
   type FavorEmblemExtra,
   type FavorEmblemRank,
 } from "@/lib/emblems";
-import {
-  DEFAULT_SIZES,
-  makeEmblem,
-  processTrailingPart,
-} from "@/lib/emblems.server";
+import { makeEmblem, processTrailingPart } from "@/lib/emblems.server";
 
 type RouteParams = {
   student: string;
   rank: string;
 };
-
-export async function generateStaticParams(): Promise<RouteParams[]> {
-  const students = await db.student.findMany();
-  const ranks: FavorEmblemRank[] = [
-    20,
-    50,
-    100,
-  ];
-
-  const combinations: RouteParams[] = [];
-
-  for (const student of students) {
-    for (const rank of ranks) {
-      combinations.push({
-        student: student.devName,
-        rank: rank.toString(),
-      });
-      combinations.push({
-        student: student.devName,
-        rank: `${rank}.png`,
-      });
-      combinations.push({
-        student: student.id,
-        rank: rank.toString(),
-      });
-      combinations.push({
-        student: student.id,
-        rank: `${rank}.png`,
-      });
-      combinations.push({
-        student: student.schaleDbId.toString(),
-        rank: rank.toString(),
-      });
-      combinations.push({
-        student: student.schaleDbId.toString(),
-        rank: `${rank}.png`,
-      });
-
-      for (const size of DEFAULT_SIZES) {
-        combinations.push({
-          student: student.devName,
-          rank: `${rank}.png@w${size}`,
-        });
-        combinations.push({
-          student: student.id,
-          rank: `${rank}.png@w${size}`,
-        });
-        combinations.push({
-          student: student.schaleDbId.toString(),
-          rank: `${rank}.png@w${size}`,
-        });
-      }
-    }
-  }
-
-  for (const rank of ranks) {
-    combinations.push({
-      student: "hoshino_battle",
-      rank: rank.toString(),
-    });
-    combinations.push({
-      student: "hoshino_battle",
-      rank: `${rank}.png`,
-    });
-
-    for (const size of DEFAULT_SIZES) {
-      combinations.push({
-        student: "hoshino_battle",
-        rank: `${rank}.png@w${size}`,
-      });
-    }
-  }
-
-  for (const extraStudent of [
-    FAVOR_EMBLEM_EXTRA_ARONA,
-    FAVOR_EMBLEM_EXTRA_PLANA,
-  ]) {
-    for (const rank of ranks) {
-      combinations.push({
-        student: extraStudent.id,
-        rank: rank.toString(),
-      });
-      combinations.push({
-        student: extraStudent.id,
-        rank: `${rank}.png`,
-      });
-
-      for (const size of DEFAULT_SIZES) {
-        combinations.push({
-          student: extraStudent.id,
-          rank: `${rank}.png@w${size}`,
-        });
-      }
-    }
-  }
-
-  return combinations;
-}
 
 export async function GET(
   req: Request,

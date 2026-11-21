@@ -2,57 +2,13 @@ import { NextResponse } from "next/server";
 import { TowerEmblem } from "@/app/api/emblem/_components/tower-emblem";
 import { createEmblemResponse } from "@/app/api/emblem/_lib/response";
 import { TOWER_EMBLEM_BOSSES, TOWER_EMBLEM_DEFENSE_TYPES } from "@/lib/emblems";
-import {
-  DEFAULT_SIZES,
-  makeEmblem,
-  processTrailingPart,
-} from "@/lib/emblems.server";
+import { makeEmblem, processTrailingPart } from "@/lib/emblems.server";
 
 type RouteParams = {
   boss: string;
   defenseType: string;
   floor: string;
 };
-
-export async function generateStaticParams(): Promise<RouteParams[]> {
-  const combinations: RouteParams[] = [];
-
-  for (const boss of TOWER_EMBLEM_BOSSES) {
-    for (const defenseType of TOWER_EMBLEM_DEFENSE_TYPES) {
-      for (const name of [
-        boss.id,
-        boss.name,
-      ]) {
-        for (const floor of [
-          50,
-          100,
-        ]) {
-          combinations.push({
-            boss: name,
-            defenseType: defenseType,
-            floor: floor.toString(),
-          });
-
-          combinations.push({
-            boss: name,
-            defenseType: defenseType,
-            floor: `${floor}.png`,
-          });
-
-          for (const size of DEFAULT_SIZES) {
-            combinations.push({
-              boss: name,
-              defenseType: defenseType,
-              floor: `${floor}.png@w${size}`,
-            });
-          }
-        }
-      }
-    }
-  }
-
-  return combinations;
-}
 
 export async function GET(
   _req: Request,
