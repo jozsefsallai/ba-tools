@@ -560,8 +560,49 @@ export function MissionRoute({
     setMoving(duration > 0);
   };
 
+  const go = (index: number) => {
+    setPlaying(false);
+    setMoving(false);
+    setTransition(null);
+    setPosition(Math.max(0, Math.min(frames.length - 1, index)));
+  };
+
   const advanceRef = useRef(advance);
   advanceRef.current = advance;
+
+  const stepByKeyRef = useRef((_direction: -1 | 1) => {});
+  stepByKeyRef.current = (direction) => {
+    if (direction < 0) {
+      if (current > 0) {
+        go(current - 1);
+      }
+    } else {
+      setPlaying(false);
+      advance();
+    }
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.key !== "ArrowLeft" && event.key !== "ArrowRight") ||
+        event.defaultPrevented ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        handlesArrowKeys(event.target)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      stepByKeyRef.current(event.key === "ArrowLeft" ? -1 : 1);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!moving || !transition) {
@@ -645,13 +686,6 @@ export function MissionRoute({
 
   const { solution } = route;
   const frame = frames[current];
-
-  const go = (index: number) => {
-    setPlaying(false);
-    setMoving(false);
-    setTransition(null);
-    setPosition(Math.max(0, Math.min(frames.length - 1, index)));
-  };
 
   const togglePlaying = () => {
     if (playing) {
@@ -1107,6 +1141,26 @@ type Frame = {
   player: MissionAction[];
   enemy: EnemyAction[];
 };
+
+/** Whether the focused element uses the arrow keys itself (text fields, sliders, tabs, menus…). */
+function handlesArrowKeys(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (
+    target.isContentEditable ||
+    target.closest("input, textarea, select") !== null
+  ) {
+    return true;
+  }
+
+  return (
+    target.closest(
+      '[role="slider"], [role="tab"], [role="radio"], [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"], [role="combobox"], [role="listbox"], [role="spinbutton"], [role="dialog"]',
+    ) !== null
+  );
+}
 
 function startEvacuations(step: MissionSolutionTurn) {
   const inFrames = (step.frames ?? []).reduce(
