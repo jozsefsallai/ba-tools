@@ -427,11 +427,45 @@ export type BoardTransition = {
 
 const ease = "cubic-bezier(0.4, 0, 0.2, 1)";
 
+const moves = (e: EnemyAction) =>
+  e.battle !== undefined || e.from.x !== e.to.x || e.from.y !== e.to.y;
+
+function sequence(marks: BoardMarks | undefined) {
+  const enemies = new Map<number, number>();
+  const echelons = new Map<number, number>();
+
+  for (const e of marks?.enemy ?? []) {
+    if (!moves(e)) {
+      continue;
+    }
+
+    const slot = enemies.get(e.entityId) ?? enemies.size;
+    enemies.set(e.entityId, slot);
+
+    if (e.battle !== undefined) {
+      echelons.set(e.battle, slot);
+    }
+  }
+
+  const evacuates = (marks?.player ?? []).some((a) => a.type === "evacuate");
+
+  return {
+    enemies,
+    echelons,
+    evacuationSlot: enemies.size,
+    steps: Math.max(1, enemies.size + (evacuates && enemies.size > 0 ? 1 : 0)),
+  };
+}
+
+export const transitionLength = (transition: BoardTransition) =>
+  transition.duration * sequence(transition.marks).steps;
+
 function placed(
   c: HexCoord,
   duration: number,
   opacity = 1,
   fadeDelay = 0,
+  delay = 0,
 ): CSSProperties {
   const p = px(c);
 
@@ -440,7 +474,7 @@ function placed(
     opacity,
     transition:
       duration > 0
-        ? `transform ${duration}ms ${ease}, opacity ${duration * 0.6}ms ${ease} ${fadeDelay}ms`
+        ? `transform ${duration}ms ${ease} ${delay}ms, opacity ${duration * 0.6}ms ${ease} ${delay + fadeDelay}ms`
         : "none",
   };
 }
@@ -456,6 +490,7 @@ function EchelonToken({
   gone = false,
   teleportId,
   duration,
+  delay = 0,
   icon,
   clipId,
   color,
@@ -468,6 +503,7 @@ function EchelonToken({
   gone?: boolean;
   teleportId: number | null;
   duration: number;
+  delay?: number;
 }) {
   const ref = useRef<SVGGElement>(null);
 
@@ -487,7 +523,7 @@ function EchelonToken({
       ],
       {
         duration: duration * 0.45,
-        delay: duration * 0.4,
+        delay: delay + duration * 0.4,
         easing: ease,
         fill: "backwards",
       },
@@ -495,9 +531,16 @@ function EchelonToken({
   }, [
     teleportId,
     duration,
+    delay,
   ]);
 
-  const style = placed(at, teleportId === null ? duration : 0, gone ? 0 : 1);
+  const style = placed(
+    at,
+    teleportId === null ? duration : 0,
+    gone ? 0 : 1,
+    0,
+    delay,
+  );
 
   return (
     <g ref={ref} style={style}>
@@ -941,6 +984,23 @@ export function MissionBoard({
     }
   }
 
+  const order = sequence(transition?.marks);
+
+  const enemyDelay = (entityId: number) =>
+    (order.enemies.get(entityId) ?? 0) * duration;
+
+  const echelonDelay = (echelon: number) => {
+    const slot = order.echelons.get(echelon);
+
+    if (slot !== undefined) {
+      return (slot + 0.6) * duration;
+    }
+
+    return teleports.has(echelon) && order.enemies.size > 0
+      ? order.evacuationSlot * duration
+      : 0;
+  };
+
   const teamAt = teamTiles;
   const enemyRadius = new Map<string, number>();
 
@@ -1227,7 +1287,13 @@ export function MissionBoard({
         return (
           <g
             key={unit.entityId}
-            style={placed(at, duration, now ? 1 : 0, now ? 0 : duration * 0.6)}
+            style={placed(
+              at,
+              duration,
+              now ? 1 : 0,
+              now ? 0 : duration * 0.6,
+              enemyDelay(unit.entityId),
+            )}
           >
             <EnemyShape unit={unit} labels={labels} />
           </g>
@@ -1242,7 +1308,7 @@ export function MissionBoard({
             key={`ghost${transition?.id}-${echelon}`}
             style={{
               ...placed(from, 0),
-              animation: `${id}-fade-out ${duration * 0.4}ms ${ease} forwards`,
+              animation: `${id}-fade-out ${duration * 0.4}ms ${ease} ${echelonDelay(echelon)}ms forwards`,
             }}
           >
             <EchelonShape
@@ -1268,6 +1334,7 @@ export function MissionBoard({
             gone={!e}
             teleportId={teleports.has(i) ? (transition?.id ?? 0) : null}
             duration={duration}
+            delay={echelonDelay(i)}
             icon={teamIcons?.[i]}
             clipId={`${id}-team-${i}`}
             color={teamColor(i)}

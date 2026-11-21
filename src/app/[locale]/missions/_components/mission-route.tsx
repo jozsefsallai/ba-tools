@@ -21,6 +21,7 @@ import {
 import {
   type BoardTransition,
   MissionBoard,
+  transitionLength,
 } from "@/app/[locale]/missions/_components/mission-board";
 import {
   attackTypeStyle,
@@ -609,7 +610,10 @@ export function MissionRoute({
       return;
     }
 
-    const timer = setTimeout(() => setMoving(false), transition.duration);
+    const timer = setTimeout(
+      () => setMoving(false),
+      transitionLength(transition),
+    );
     return () => clearTimeout(timer);
   }, [
     moving,
