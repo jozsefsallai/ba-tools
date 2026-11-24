@@ -1,12 +1,17 @@
 "use client";
 
-import { CheckIcon, PencilIcon } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import bondImage from "@/assets/images/bond.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import type { FavorTableEntry } from "@/lib/favor-table";
 import { cn } from "@/lib/utils";
@@ -29,29 +34,25 @@ export function BondProgress({
   onCurrentExpChange,
 }: BondProgressProps) {
   const t = useTranslations();
-  const [draft, setDraft] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
 
   const canEdit =
     !!onCurrentExpChange &&
     typeof currentExp === "number" &&
     startingLevel.level < 100;
 
-  function startEditing() {
-    if (typeof currentExp !== "number") {
-      return;
+  function handleOpenChange(next: boolean) {
+    if (next && typeof currentExp === "number") {
+      setDraft((currentExp - startingLevel.totalExp).toString());
     }
-    setDraft((currentExp - startingLevel.totalExp).toString());
+    setOpen(next);
   }
 
-  function commit() {
-    if (draft === null) {
-      return;
-    }
-
-    const value = Number.parseInt(draft, 10);
-    setDraft(null);
-
+  function handleDraftChange(raw: string) {
+    const value = Number.parseInt(raw, 10);
     if (Number.isNaN(value)) {
+      setDraft(raw);
       return;
     }
 
@@ -59,6 +60,7 @@ export function BondProgress({
       0,
       Math.min(value, startingLevel.expToNextLevel - 1),
     );
+    setDraft(clamped === value ? raw : clamped.toString());
     onCurrentExpChange?.(startingLevel.totalExp + clamped);
   }
 
@@ -95,68 +97,55 @@ export function BondProgress({
         }
       />
 
-      {draft !== null ? (
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs text-muted-foreground">
-            {t("tools.bond.progress.editing", {
-              nextRank: startingLevel.level + 1,
-            })}
+      <div className="flex items-center gap-1 text-lg text-center">
+        {currentLevel.level !== 100 ? (
+          <span>
+            {exp - currentLevel.totalExp} / {currentLevel.expToNextLevel}
           </span>
+        ) : (
+          <span className="text-green-500 font-bold">MAX</span>
+        )}
 
-          <div className="flex items-center gap-2 text-lg">
-            <Input
-              type="number"
-              min={0}
-              max={startingLevel.expToNextLevel - 1}
-              autoFocus
-              className="w-24 text-center"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commit}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  commit();
-                } else if (e.key === "Escape") {
-                  setDraft(null);
-                }
-              }}
-            />
-            <span>/ {startingLevel.expToNextLevel}</span>
+        {canEdit && (
+          <Popover open={open} onOpenChange={handleOpenChange}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                title={t("tools.bond.progress.edit")}
+                aria-label={t("tools.bond.progress.edit")}
+              >
+                <PencilIcon />
+              </Button>
+            </PopoverTrigger>
 
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("tools.bond.progress.done")}
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={commit}
-            >
-              <CheckIcon />
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center gap-1 text-lg text-center">
-          {currentLevel.level !== 100 ? (
-            <span>
-              {exp - currentLevel.totalExp} / {currentLevel.expToNextLevel}
-            </span>
-          ) : (
-            <span className="text-green-500 font-bold">MAX</span>
-          )}
+            <PopoverContent className="w-auto flex flex-col gap-2">
+              <span className="text-xs text-muted-foreground">
+                {t("tools.bond.progress.editing", {
+                  nextRank: startingLevel.level + 1,
+                })}
+              </span>
 
-          {canEdit && (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              title={t("tools.bond.progress.edit")}
-              aria-label={t("tools.bond.progress.edit")}
-              onClick={startEditing}
-            >
-              <PencilIcon />
-            </Button>
-          )}
-        </div>
-      )}
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  max={startingLevel.expToNextLevel - 1}
+                  className="w-24"
+                  value={draft}
+                  onChange={(e) => handleDraftChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setOpen(false);
+                    }
+                  }}
+                />
+                <span>/ {startingLevel.expToNextLevel}</span>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
 
       <div className="text-sm text-center text-muted-foreground">
         {t.rich("tools.bond.progress.total", {

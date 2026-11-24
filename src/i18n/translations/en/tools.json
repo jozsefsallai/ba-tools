@@ -330,8 +330,7 @@
       "goal": "(Goal: {targetBond})",
       "total": "<strong>Total EXP:</strong> {exp}",
       "edit": "Set the EXP towards the next rank",
-      "editing": "EXP towards rank {nextRank}",
-      "done": "Done"
+      "editing": "EXP towards rank {nextRank}, without gifts"
     },
 
     "breakdown": {
