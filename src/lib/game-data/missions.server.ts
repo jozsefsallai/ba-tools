@@ -3,6 +3,7 @@ import { solveMission } from "@/lib/missions/solver";
 import type { Prisma } from "~prisma";
 import { db } from "../db";
 import type { ExtractMissionsResult } from "./contract";
+import { replaceGameItems } from "./game-items.server";
 
 export interface SaveMissionsResult {
   missions: number;
@@ -46,22 +47,6 @@ export async function saveMissions(
     };
   });
 
-  const items = result.items.map((item) => ({
-    parcelType: item.parcelType,
-    itemId: item.id,
-    name: item.names.en ?? null,
-    nameJP: item.names.jp ?? null,
-    nameKR: item.names.kr ?? null,
-    nameTW: item.names.tw ?? null,
-    nameTH: item.names.th ?? null,
-    iconName: item.iconName,
-    rarity: item.rarity,
-    itemCategory: item.parcelType === "Item" ? item.itemCategory : null,
-    equipmentCategory:
-      item.parcelType === "Equipment" ? item.equipmentCategory : null,
-    tier: item.parcelType === "Equipment" ? item.tier : null,
-  }));
-
   const ids = rows.map((r) => r.id);
 
   const removed = await db.$transaction(
@@ -86,27 +71,7 @@ export async function saveMissions(
         data: rows,
       });
 
-      await tx.gameItem.deleteMany({
-        where: {
-          OR: (
-            [
-              "Item",
-              "Equipment",
-            ] as const
-          ).map((parcelType) => ({
-            parcelType,
-            itemId: {
-              in: items
-                .filter((item) => item.parcelType === parcelType)
-                .map((item) => item.itemId),
-            },
-          })),
-        },
-      });
-
-      await tx.gameItem.createMany({
-        data: items,
-      });
+      await replaceGameItems(tx, result.items);
 
       return count;
     },
@@ -118,7 +83,7 @@ export async function saveMissions(
 
   return {
     missions: rows.length,
-    items: items.length,
+    items: result.items.length,
     removed,
     unsolved,
   };

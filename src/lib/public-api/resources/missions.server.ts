@@ -190,14 +190,9 @@ function enemy(unit: MissionMapUnit) {
   };
 }
 
-async function itemMap() {
+async function itemMap(rewards: MissionRewardData[]) {
   return new Map(
-    (
-      await getGameItems([
-        "Item",
-        "Equipment",
-      ])
-    ).map((i) => [
+    (await getGameItems(rewards)).map((i) => [
       gameItemKey(i.parcelType, i.itemId),
       i,
     ]),
@@ -280,10 +275,8 @@ export async function listMissionSummaries({
   chapter,
   drop: dropQuery,
 }: z.infer<typeof missionSearchSchema>) {
-  const [missions, items] = await Promise.all([
-    listMissions(),
-    itemMap(),
-  ]);
+  const missions = await listMissions();
+  const items = await itemMap(missions.flatMap((m) => m.rewards));
 
   const q = dropQuery?.trim().toLowerCase();
 
@@ -315,7 +308,7 @@ export async function getMissionDetail(identifier: string) {
   const { solutions, map } = mission;
 
   return {
-    ...summary(mission, await itemMap()),
+    ...summary(mission, await itemMap(mission.rewards)),
     enemies: map.units.map(enemy),
     hasBox: solutions.hasBox,
     routeSearchExhausted: solutions.exhausted,

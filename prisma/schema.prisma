@@ -235,6 +235,7 @@ enum ItemCategory {
   Collectible
   Favor
   RecruitCoin
+  MonthlyBonus // Global only
   InvisibleToken
   BattlePass
   ProductSelect
@@ -658,8 +659,8 @@ model CampaignMission {
 }
 
 model GameItem {
-  parcelType ParcelType // Item or Equipment
-  itemId     Int // ItemExcel.Id or EquipmentExcel.Id
+  parcelType ParcelType // Item, Equipment or Currency
+  itemId     Int // ItemExcel.Id, EquipmentExcel.Id or CurrencyExcel.ID
 
   name   String?
   nameJP String?

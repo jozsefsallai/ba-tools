@@ -12,13 +12,8 @@ export async function generateMetadata() {
 
 export default async function MissionsPage() {
   const t = await getTranslations();
-  const [missions, items] = await Promise.all([
-    listMissions(),
-    getGameItems([
-      "Item",
-      "Equipment",
-    ]),
-  ]);
+  const missions = await listMissions();
+  const items = await getGameItems(missions.flatMap((m) => m.rewards));
 
   return (
     <div className="flex flex-col gap-8">

@@ -1267,7 +1267,7 @@ export interface MissionData {
   isReleasedGlobal: boolean;
 }
 
-/** An item (`ItemExcel`) or equipment piece (`EquipmentExcel`). */
+/** An item (`ItemExcel`), equipment piece (`EquipmentExcel`) or currency (`CurrencyExcel`). */
 export type GameItemData = {
   id: number;
   names: Partial<Record<SkillLocale, string>>;
@@ -1284,7 +1284,28 @@ export type GameItemData = {
       equipmentCategory: EquipmentCategory;
       tier: number;
     }
+  | {
+      parcelType: "Currency";
+    }
 );
+
+export interface ExtractGameItemsOptions {
+  sqlcipherKey?: string;
+  globalSqlcipherKey?: string;
+  /** Nexon gateway region used to fetch the Global key (`na` by default). */
+  globalRegion?: string;
+  cacheDir: string;
+  logger?: SyncLogger;
+}
+
+export interface ExtractGameItemsResult {
+  gameVersion: {
+    jp: string;
+    global: string;
+  };
+  /** By parcel type and id. */
+  items: GameItemData[];
+}
 
 export interface ExtractMissionsOptions {
   sqlcipherKey?: string;
@@ -1338,6 +1359,11 @@ export interface DataSyncModule {
   extractMissions(
     options: ExtractMissionsOptions,
   ): Promise<ExtractMissionsResult>;
+
+  /** Every item, equipment piece and currency, on JP or Global. */
+  extractGameItems(
+    options: ExtractGameItemsOptions,
+  ): Promise<ExtractGameItemsResult>;
 
   /** The JP maintenance window the game announces, or `null` when there is none. */
   getJpMaintenance(

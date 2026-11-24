@@ -86,10 +86,7 @@ export default async function MissionPage({
   const label = missionLabel(mission);
 
   const [items, neighbours] = await Promise.all([
-    getGameItems([
-      "Item",
-      "Equipment",
-    ]),
+    getGameItems(mission.rewards),
     getMissionNeighbours(mission.id),
   ]);
 

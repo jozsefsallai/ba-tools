@@ -40,12 +40,7 @@ async function ogDrops(
   pyroxene: string,
 ) {
   const items = new Map(
-    (
-      await getGameItems([
-        "Item",
-        "Equipment",
-      ])
-    ).map((i) => [
+    (await getGameItems(rewards)).map((i) => [
       gameItemKey(i.parcelType, i.itemId),
       i,
     ]),

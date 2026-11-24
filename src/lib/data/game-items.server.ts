@@ -20,16 +20,30 @@ export type GameItemSummary = Prisma.GameItemGetPayload<{
 }>;
 
 export async function getGameItems(
-  parcelTypes?: ParcelType[],
+  parcels: {
+    parcelType: ParcelType;
+    parcelId: number;
+  }[],
 ): Promise<GameItemSummary[]> {
+  const ids = new Map<ParcelType, Set<number>>();
+
+  for (const { parcelType, parcelId } of parcels) {
+    ids.set(parcelType, (ids.get(parcelType) ?? new Set()).add(parcelId));
+  }
+
   return await db.gameItem.findMany({
-    where: parcelTypes
-      ? {
-          parcelType: {
-            in: parcelTypes,
-          },
-        }
-      : undefined,
+    where: {
+      OR: [
+        ...ids,
+      ].map(([parcelType, itemIds]) => ({
+        parcelType,
+        itemId: {
+          in: [
+            ...itemIds,
+          ],
+        },
+      })),
+    },
     select: summarySelect,
   });
 }
