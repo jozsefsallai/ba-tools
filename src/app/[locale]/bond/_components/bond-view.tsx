@@ -13,6 +13,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { AddBondExpDialog } from "@/app/[locale]/bond/_components/add-bond-exp-dialog";
 import { BondProgress } from "@/app/[locale]/bond/_components/bond-progress";
 import { GiftAllocationCard } from "@/app/[locale]/bond/_components/gift-allocation-card";
 import { GiftBreakdown } from "@/app/[locale]/bond/_components/gift-breakdown";
@@ -854,7 +855,7 @@ export function BondView({ students, gifts }: BondViewProps) {
       const entry = favorTableMap[nextEntry.level - 1];
 
       if (entry) {
-        setCurrentBondExp(entry.totalExp);
+        setCurrentBondExp(bondExp);
         setCurrentBondStr(entry.level.toString());
         setCurrentBondExpStr(bondExp.toString());
         bondUpdated = true;
@@ -1624,9 +1625,29 @@ export function BondView({ students, gifts }: BondViewProps) {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <Label className="text-xs">
-                      {t("tools.bond.student.currentExp")}
-                    </Label>
+                    <div className="flex items-center justify-between gap-1">
+                      <Label className="text-xs">
+                        {t("tools.bond.student.currentExp")}
+                      </Label>
+
+                      <AddBondExpDialog
+                        onAdd={(exp) =>
+                          updateCurrentBondExp(
+                            (currentBondExp + exp).toString(),
+                          )
+                        }
+                      >
+                        <Button
+                          variant="outline"
+                          size="icon-xs"
+                          className="-my-1.5 size-5"
+                          title={t("tools.bond.student.addExp.button")}
+                          aria-label={t("tools.bond.student.addExp.button")}
+                        >
+                          <PlusIcon />
+                        </Button>
+                      </AddBondExpDialog>
+                    </div>
 
                     <Input
                       type="number"
@@ -1674,6 +1695,8 @@ export function BondView({ students, gifts }: BondViewProps) {
               currentLevel={currentLevel}
               exp={totalExp}
               targetBond={targetBondStr}
+              currentExp={currentBondExp}
+              onCurrentExpChange={(exp) => updateCurrentBondExp(exp.toString())}
             />
 
             <GiftBreakdown

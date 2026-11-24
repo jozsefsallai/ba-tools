@@ -55,6 +55,29 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 24, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "The EXP shown under the progress bar can now be edited with the pencil button next to it. Enter the EXP you have towards the next rank (the number most other sites show) instead of working out the total EXP yourself.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          'Added a "+" button next to Current EXP that adds EXP to it.',
+      },
+    ],
+    fixes: [
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed the calculator using the start of the rank instead of the saved EXP when selecting a student whose bond EXP was saved earlier.",
+      },
+    ],
+    changes: [],
+  },
+  {
     date: "November 20, 2026",
     features: [
       {

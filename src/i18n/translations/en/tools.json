@@ -309,6 +309,14 @@
       "currentExp": "Current EXP",
       "targetExp": "Target EXP",
 
+      "addExp": {
+        "button": "Add EXP",
+        "title": "Add EXP",
+        "description": "Enter the EXP you gained. It will be added to the current EXP.",
+        "placeholder": "EXP to add",
+        "submit": "Add"
+      },
+
       "irrelevantGifts": {
         "title": "Notice",
         "description": "Some allocated gifts are hidden by the current gift filter. Adjust the filter on the left panel to view and edit them.",
@@ -320,7 +328,10 @@
 
     "progress": {
       "goal": "(Goal: {targetBond})",
-      "total": "<strong>Total EXP:</strong> {exp}"
+      "total": "<strong>Total EXP:</strong> {exp}",
+      "edit": "Set the EXP towards the next rank",
+      "editing": "EXP towards rank {nextRank}",
+      "done": "Done"
     },
 
     "breakdown": {
