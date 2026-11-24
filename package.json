@@ -24,15 +24,8 @@
     "jobs:deploy": "trigger deploy",
     "pvp:icon-assets": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/prepare-pvp-icons.ts",
     "vendor:init": "git submodule update --init --checkout vendor/mx-data-sync && pnpm --dir vendor/mx-data-sync install",
-    "game-data:new-students": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/list-new-students.ts",
-    "game-data:images": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-image-assets.ts",
-    "translations:check": "tsx scripts/check-translations.ts",
-    "game-data:bond-stories": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-bond-stories.ts",
-    "game-data:items": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-game-items.ts",
-    "game-data:missions": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-missions.ts",
-    "game-data:skills": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-student-skills.ts",
-    "game-data:stories": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-stories.ts",
-    "game-data:upcoming": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/sync-upcoming-content.ts"
+    "game-data": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/game-data.ts",
+    "translations:check": "tsx scripts/check-translations.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.196",
