@@ -19,22 +19,7 @@ import { GiftAllocationCard } from "@/app/[locale]/bond/_components/gift-allocat
 import { GiftBreakdown } from "@/app/[locale]/bond/_components/gift-breakdown";
 import { GiftChoiceBoxCard } from "@/app/[locale]/bond/_components/gift-choice-box-card";
 import { GiftPreferenceFilter } from "@/app/[locale]/bond/_components/gift-preference-filter";
-import {
-  EXP_VALUES,
-  type RemainingExpBreakdown,
-  RemainingExpBreakdownCard,
-} from "@/app/[locale]/bond/_components/remaining-exp-breakdown-card";
-import {
-  boxAllocationsEqual,
-  buildTargetAllocationsFromDoc,
-  computeTargetProjectedExp,
-  getGiftExpValue,
-  isGiftPreferredByStudent,
-  normalizeTargetGiftBoxCount,
-  serializeTargetAllocations,
-  sortGiftsByStudentPreference,
-  targetAllocationsEqual,
-} from "@/app/[locale]/bond/_lib/gift-utils";
+import { RemainingExpBreakdownCard } from "@/app/[locale]/bond/_components/remaining-exp-breakdown-card";
 import type {
   BondViewProps,
   StudentWithGifts,
@@ -67,6 +52,22 @@ import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
+import {
+  boxAllocationsEqual,
+  buildTargetAllocationsFromDoc,
+  computeTargetProjectedExp,
+  getGiftBoxExpPerUnit,
+  getGiftExpValue,
+  isGiftPreferredByStudent,
+  normalizeTargetGiftBoxCount,
+  serializeTargetAllocations,
+  sortGiftsByStudentPreference,
+  targetAllocationsEqual,
+} from "@/lib/bond/gift-utils";
+import {
+  getRemainingExpBreakdown,
+  type RemainingExpBreakdown,
+} from "@/lib/bond/progress";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
   type FavorTableEntry,
@@ -393,32 +394,6 @@ export function BondView({ students, gifts }: BondViewProps) {
     studentWithGiftsMap,
   ]);
 
-  const studentGiftKinds = useMemo(() => {
-    if (!selectedStudent) {
-      return {
-        hasAdoredSSR: false,
-        hasLovedSSR: false,
-        hasLikedSSR: false,
-        hasAdoredSR: false,
-        hasLovedSR: false,
-        hasLikedSR: false,
-        hasNormalSR: false,
-      };
-    }
-
-    return {
-      hasAdoredSSR: true,
-      hasLovedSSR: true,
-      hasLikedSSR: true,
-      hasAdoredSR: selectedStudent.giftsAdored.some((g) => g.rarity === "SR"),
-      hasLovedSR: selectedStudent.giftsLoved.some((g) => g.rarity === "SR"),
-      hasLikedSR: selectedStudent.giftsLiked.some((g) => g.rarity === "SR"),
-      hasNormalSR: true,
-    };
-  }, [
-    selectedStudent,
-  ]);
-
   const totalExp = useMemo(() => {
     if (!selectedStudent) {
       return 0;
@@ -437,13 +412,7 @@ export function BondView({ students, gifts }: BondViewProps) {
 
     const boxCount = allocatedBoxCount;
     if (boxCount > 0) {
-      if (studentGiftKinds.hasAdoredSR) {
-        total += boxCount * 80;
-      } else if (studentGiftKinds.hasLovedSR) {
-        total += boxCount * 60;
-      } else {
-        total += boxCount * 40;
-      }
+      total += boxCount * getGiftBoxExpPerUnit(selectedStudent);
     }
 
     return total;
@@ -453,7 +422,6 @@ export function BondView({ students, gifts }: BondViewProps) {
     selectedStudent,
     currentBondExp,
     gifts,
-    studentGiftKinds,
   ]);
 
   const targetProjectedRanks = useMemo(() => {
@@ -539,7 +507,7 @@ export function BondView({ students, gifts }: BondViewProps) {
   ]);
 
   const remainingExpBreakdown = useMemo<RemainingExpBreakdown | null>(() => {
-    if (targetBondExp === null) {
+    if (targetBondExp === null || !selectedStudent) {
       return null;
     }
 
@@ -548,44 +516,11 @@ export function BondView({ students, gifts }: BondViewProps) {
       return null;
     }
 
-    const result: RemainingExpBreakdown = {
-      headpats: Math.ceil(difference / EXP_VALUES.headpats),
-      normalSRGifts: 0,
-      likedSRGifts: 0,
-      lovedSRGifts: 0,
-      adoredSRGifts: 0,
-      likedSSRGifts: 0,
-      lovedSSRGifts: 0,
-      adoredSSRGifts: 0,
-    };
-
-    if (studentGiftKinds.hasNormalSR) {
-      result.normalSRGifts = Math.ceil(difference / EXP_VALUES.normalSRGifts);
-    }
-    if (studentGiftKinds.hasLikedSR) {
-      result.likedSRGifts = Math.ceil(difference / EXP_VALUES.likedSRGifts);
-    }
-    if (studentGiftKinds.hasLovedSR) {
-      result.lovedSRGifts = Math.ceil(difference / EXP_VALUES.lovedSRGifts);
-    }
-    if (studentGiftKinds.hasAdoredSR) {
-      result.adoredSRGifts = Math.ceil(difference / EXP_VALUES.adoredSRGifts);
-    }
-    if (studentGiftKinds.hasLikedSSR) {
-      result.likedSSRGifts = Math.ceil(difference / EXP_VALUES.likedSSRGifts);
-    }
-    if (studentGiftKinds.hasLovedSSR) {
-      result.lovedSSRGifts = Math.ceil(difference / EXP_VALUES.lovedSSRGifts);
-    }
-    if (studentGiftKinds.hasAdoredSSR) {
-      result.adoredSSRGifts = Math.ceil(difference / EXP_VALUES.adoredSSRGifts);
-    }
-
-    return result;
+    return getRemainingExpBreakdown(difference, selectedStudent);
   }, [
     targetBondExp,
     totalExp,
-    studentGiftKinds,
+    selectedStudent,
   ]);
 
   const targetAlreadyExists = useMemo(() => {

@@ -315,8 +315,14 @@ export const giftInventoryDocs: FieldDocs<typeof giftInventoryArgs> = {
 
 const giftTargetDocs = {
   studentId: `${STUDENT_ID} An inventory has one target per student.`,
-  currentExp: "The student's current relationship EXP.",
-  targetExp: "The relationship EXP to reach.",
+  currentExp:
+    "The student's current total relationship EXP, counted from rank 1, 0-240225. For progress within a rank, like `950 / 6925`, use `currentRank` and `currentRankExp` instead.",
+  currentRank:
+    "The student's current bond rank, 1-100, instead of `currentExp`. Defaults to the saved rank (1 for a new target) when only `currentRankExp` is sent.",
+  currentRankExp:
+    "The EXP the student has within their rank, instead of `currentExp`: the 950 in `950 / 6925`. Must be less than the rank's `rankExpRequired`. Defaults to 0 when only `currentRank` is sent.",
+  targetExp:
+    "The total relationship EXP to reach, counted from rank 1. For a rank, use its `totalExp` from `list_bond_ranks`.",
   gifts: {
     about: "The gifts planned for this student.",
     fields: giftCountDocs,
@@ -327,8 +333,11 @@ const giftTargetDocs = {
 export const giftTargetCreateDocs: FieldDocs<typeof giftTargetCreateArgs> =
   giftTargetDocs;
 
-export const giftTargetUpdateDocs: FieldDocs<typeof giftTargetUpdateArgs> =
-  giftTargetDocs;
+export const giftTargetUpdateDocs: FieldDocs<typeof giftTargetUpdateArgs> = {
+  ...giftTargetDocs,
+  addExp:
+    "EXP to add to the saved total, instead of setting it (negative takes EXP away). Each call adds it again, so don't repeat a call that succeeded.",
+};
 
 export const userPreferencesDocs: FieldDocs<typeof userPreferencesArgs> = {
   timelineVisualizer: {

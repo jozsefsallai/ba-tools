@@ -2,12 +2,14 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { defineTool, idInput } from "@/lib/mcp/define-tool";
 import { describeEnumInput, type EnumSection } from "@/lib/mcp/enrich.server";
 import {
+  bondRanksSchema,
   getGift,
   getRoadmap,
   getStudent,
   getStudentSkills,
   giftSearchSchema,
   listBanners,
+  listBondRanks,
   listGifts,
   listStudents,
   roadmapSchema,
@@ -114,6 +116,19 @@ export function registerGameDataTools(server: McpServer) {
       },
     },
     ({ giftId }) => getGift(giftId),
+  );
+
+  defineTool(
+    server,
+    "list_bond_ranks",
+    {
+      title: "List bond ranks",
+      description:
+        "The bond (relationship) EXP table: the total EXP each rank starts at (`totalExp`) and the EXP within it needed for the next rank (`rankExpRequired`, `null` at rank 100). Also tells which rank progress like `350 / 1465` belongs to: the one whose `rankExpRequired` is 1465 (a few low ranks share a value).",
+      kind: "read",
+      input: bondRanksSchema.shape,
+    },
+    (input) => listBondRanks(input),
   );
 
   defineTool(

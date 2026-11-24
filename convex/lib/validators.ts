@@ -144,6 +144,8 @@ export const giftInventoryArgs = {
 export const giftTargetCreateArgs = {
   studentId: v.string(),
   currentExp: v.optional(v.number()),
+  currentRank: v.optional(v.number()),
+  currentRankExp: v.optional(v.number()),
   targetExp: v.optional(v.number()),
   gifts: v.optional(v.array(giftCount)),
   giftBoxCount: v.optional(v.number()),
@@ -152,6 +154,7 @@ export const giftTargetCreateArgs = {
 export const giftTargetUpdateArgs = {
   ...giftTargetCreateArgs,
   studentId: v.optional(v.string()),
+  addExp: v.optional(v.number()),
 };
 
 export const userPreferencesArgs = {

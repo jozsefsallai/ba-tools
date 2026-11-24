@@ -11,29 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+  EXP_VALUES,
+  type ExpSource,
+  emptyBreakdown,
+  getOptimalBreakdown,
+  padExp,
+  type RemainingExpBreakdown,
+} from "@/lib/bond/progress";
 import { cn } from "@/lib/utils";
-
-export type RemainingExpBreakdown = {
-  headpats: number;
-  normalSRGifts: number;
-  likedSRGifts: number;
-  lovedSRGifts: number;
-  adoredSRGifts: number;
-  likedSSRGifts: number;
-  lovedSSRGifts: number;
-  adoredSSRGifts: number;
-};
-
-export const EXP_VALUES: RemainingExpBreakdown = {
-  headpats: 15,
-  normalSRGifts: 20,
-  likedSRGifts: 40,
-  lovedSRGifts: 60,
-  adoredSRGifts: 80,
-  likedSSRGifts: 120,
-  lovedSSRGifts: 180,
-  adoredSSRGifts: 240,
-};
 
 export type RemainingExpBreakdownCardProps = {
   currentBond: string;
@@ -42,24 +28,7 @@ export type RemainingExpBreakdownCardProps = {
   breakdown: RemainingExpBreakdown;
 };
 
-const ALL_BREAKDOWN_KEYS: (keyof RemainingExpBreakdown)[] = [
-  "headpats",
-  "normalSRGifts",
-  "likedSRGifts",
-  "lovedSRGifts",
-  "adoredSRGifts",
-  "likedSSRGifts",
-  "lovedSSRGifts",
-  "adoredSSRGifts",
-];
-
-const NON_SSR_BREAKDOWN_KEYS: (keyof RemainingExpBreakdown)[] = [
-  "headpats",
-  "normalSRGifts",
-  "likedSRGifts",
-  "lovedSRGifts",
-  "adoredSRGifts",
-];
+const ALL_BREAKDOWN_KEYS = Object.keys(EXP_VALUES) as ExpSource[];
 
 type WastedEXPResult = {
   hasWastedEXP: boolean;
@@ -112,16 +81,7 @@ export function RemainingExpBreakdownCard({
   const wastedEXP = useMemo<WastedEXPResult>(() => {
     const result: WastedEXPResult = {
       hasWastedEXP: false,
-      wastedEXPMap: {
-        headpats: 0,
-        normalSRGifts: 0,
-        likedSRGifts: 0,
-        lovedSRGifts: 0,
-        adoredSRGifts: 0,
-        likedSSRGifts: 0,
-        lovedSSRGifts: 0,
-        adoredSSRGifts: 0,
-      },
+      wastedEXPMap: emptyBreakdown(),
     };
 
     ALL_BREAKDOWN_KEYS.forEach((key) => {
@@ -141,69 +101,21 @@ export function RemainingExpBreakdownCard({
     breakdown,
   ]);
 
-  const paddedExp = useMemo(() => {
-    return expNeeded % 15 === 0
-      ? expNeeded
-      : expNeeded + (15 - (expNeeded % 15));
-  }, [
-    expNeeded,
-  ]);
+  const paddedExp = padExp(expNeeded);
 
-  const optimalBreakdown = useMemo<RemainingExpBreakdown>(() => {
-    const result: RemainingExpBreakdown = {
-      headpats: 0,
-      normalSRGifts: 0,
-      likedSRGifts: 0,
-      lovedSRGifts: 0,
-      adoredSRGifts: 0,
-      likedSSRGifts: 0,
-      lovedSSRGifts: 0,
-      adoredSSRGifts: 0,
-    };
-
-    const BREAKDOWN_KEYS = (
-      excludeSSRGifts ? NON_SSR_BREAKDOWN_KEYS : ALL_BREAKDOWN_KEYS
-    ).filter((key) => breakdown[key] > 0);
-
-    const localExpValues = BREAKDOWN_KEYS.map((key) => EXP_VALUES[key]);
-
-    const dp = new Array(paddedExp + 1).fill(Number.POSITIVE_INFINITY);
-    dp[0] = 0;
-
-    for (const expValue of localExpValues) {
-      for (let j = expValue; j <= paddedExp; ++j) {
-        if (dp[j - expValue] !== Number.POSITIVE_INFINITY) {
-          dp[j] = Math.min(dp[j], dp[j - expValue] + 1);
-        }
-      }
-    }
-
-    if (dp[paddedExp] === Number.POSITIVE_INFINITY) {
-      // should probably never happen tbh
-      return result;
-    }
-
-    let current = paddedExp;
-
-    while (current > 0) {
-      for (let i = BREAKDOWN_KEYS.length - 1; i >= 0; --i) {
-        const key = BREAKDOWN_KEYS[i];
-        const expValue = EXP_VALUES[key];
-
-        if (current >= expValue && dp[current] === dp[current - expValue] + 1) {
-          result[key]++;
-          current -= expValue;
-          break;
-        }
-      }
-    }
-
-    return result;
-  }, [
-    breakdown,
-    expNeeded,
-    excludeSSRGifts,
-  ]);
+  const optimalBreakdown = useMemo<RemainingExpBreakdown>(
+    () =>
+      getOptimalBreakdown(
+        paddedExp,
+        ALL_BREAKDOWN_KEYS.filter((key) => breakdown[key] > 0),
+        excludeSSRGifts,
+      ),
+    [
+      breakdown,
+      paddedExp,
+      excludeSSRGifts,
+    ],
+  );
 
   return (
     <Card className="w-full">

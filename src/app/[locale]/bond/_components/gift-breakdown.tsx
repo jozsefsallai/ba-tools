@@ -3,10 +3,6 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { type PropsWithChildren, useMemo } from "react";
-import {
-  getGiftAffinity,
-  getGiftExpValue,
-} from "@/app/[locale]/bond/_lib/gift-utils";
 import type {
   GiftWithStudents,
   StudentWithGifts,
@@ -36,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getGiftAffinity, getGiftExpValue } from "@/lib/bond/gift-utils";
 
 export type GiftBreakdownProps = PropsWithChildren<{
   gifts: GiftWithStudents[];

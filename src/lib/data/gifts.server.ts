@@ -70,3 +70,51 @@ export async function getGift(id: number) {
     },
   });
 }
+
+const bondGiftSelect = {
+  select: {
+    id: true,
+    rarity: true,
+  },
+} as const;
+
+export async function getBondData(studentIds: string[], giftIds: number[]) {
+  const [students, gifts] = await Promise.all([
+    db.student.findMany({
+      where: {
+        id: {
+          in: studentIds,
+        },
+      },
+      select: {
+        id: true,
+        giftsAdored: bondGiftSelect,
+        giftsLoved: bondGiftSelect,
+        giftsLiked: bondGiftSelect,
+      },
+    }),
+    db.gift.findMany({
+      where: {
+        id: {
+          in: giftIds,
+        },
+      },
+      select: {
+        id: true,
+        rarity: true,
+        expValue: true,
+        isLovedByEveryone: true,
+      },
+    }),
+  ]);
+
+  return {
+    students: new Map(
+      students.map((student) => [
+        student.id,
+        student,
+      ]),
+    ),
+    gifts,
+  };
+}

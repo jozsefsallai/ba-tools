@@ -8,37 +8,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  type LessonsFavorTableEntry,
-  lessonsFavorTable,
-} from "@/lib/favor-table";
+import { getLessonsNeeded } from "@/lib/bond/progress";
 
 export type LessonsTableProps = {
   exp: number;
 };
 
-export type LessonsEntry = {
-  lesson: LessonsFavorTableEntry;
-  count: number;
-  countWithBonus: number;
-  expectedCount: number;
-};
-
 export function LessonsTable({ exp }: LessonsTableProps) {
   const t = useTranslations();
 
-  const lessonsNeeded = useMemo<LessonsEntry[]>(() => {
-    return lessonsFavorTable.map((lesson) => ({
-      lesson,
-      count: Math.ceil(exp / lesson.exp),
-      countWithBonus: Math.ceil(exp / (lesson.exp + lesson.bonusExp)),
-      expectedCount: Math.ceil(
-        exp / (lesson.exp + lesson.bonusExp * lesson.bonusChance),
-      ),
-    }));
-  }, [
-    exp,
-  ]);
+  const lessonsNeeded = useMemo(
+    () => getLessonsNeeded(exp),
+    [
+      exp,
+    ],
+  );
 
   // Area | Level | Exp | Bonus | Count
 

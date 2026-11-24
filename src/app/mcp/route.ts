@@ -24,6 +24,7 @@ const handler = createMcpHandler(
       "Players often call attack and defense types by color: red = Explosive damage and Light armor, yellow = Piercing and Heavy, blue = Mystic and Special, purple = Sonic and Elastic, green = Corrosive and Composite. Inputs for these types accept the color names.",
       "Details left out when creating timelines, formations and PvP matches use the user's preferences (`get_preferences`), so only send them when the user asks for something specific.",
       "Before writing data, read the tool's field descriptions, including nested ones: most details have a dedicated field, so don't put them in free-text fields.",
+      "To save a student's bond progress from a screenshot, read three things: the student, the bond rank (the number in the pink heart) and the EXP within the rank (like `950 / 6925`).",
       "When building timelines, follow the layout rules in `create_timeline`: put costs and timings in `trigger`, mark targets and copied skills with their own fields, break long rotations into rows with vertical separators, and keep notes short.",
     ].join("\n\n"),
   },

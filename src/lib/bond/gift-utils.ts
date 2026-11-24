@@ -1,8 +1,15 @@
-import type {
-  GiftWithStudents,
-  StudentWithGifts,
-} from "@/app/[locale]/bond/_lib/types";
 import type { Doc, Id } from "~convex/dataModel";
+import type { Gift } from "~prisma";
+
+export type BondGift = Pick<
+  Gift,
+  "id" | "rarity" | "expValue" | "isLovedByEveryone"
+>;
+
+export type BondStudent = Record<
+  "giftsAdored" | "giftsLoved" | "giftsLiked",
+  Pick<Gift, "id" | "rarity">[]
+>;
 
 export type GiftAffinity = "adored" | "loved" | "liked" | "normal";
 
@@ -17,36 +24,27 @@ export type GiftTargetDoc = Doc<"giftTarget">;
 
 export type TargetGiftEntry = GiftTargetDoc["gifts"][number];
 
-export function isGiftAdoredByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
+export function isGiftAdoredByStudent(gift: BondGift, student: BondStudent) {
   return (
     student.giftsAdored.some((g) => g.id === gift.id) ||
     (gift.isLovedByEveryone && gift.expValue === 60)
   );
 }
 
-export function isGiftLovedByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
+export function isGiftLovedByStudent(gift: BondGift, student: BondStudent) {
   return (
     student.giftsLoved.some((g) => g.id === gift.id) ||
     (gift.isLovedByEveryone && gift.expValue !== 60)
   );
 }
 
-export function isGiftLikedByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
+export function isGiftLikedByStudent(gift: BondGift, student: BondStudent) {
   return student.giftsLiked.some((g) => g.id === gift.id);
 }
 
 export function getGiftAffinity(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
+  gift: BondGift,
+  student: BondStudent,
 ): GiftAffinity {
   if (isGiftAdoredByStudent(gift, student)) {
     return "adored";
@@ -63,10 +61,7 @@ export function getGiftAffinity(
   return "normal";
 }
 
-export function getGiftExpMultiplier(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
+export function getGiftExpMultiplier(gift: BondGift, student: BondStudent) {
   const affinity = getGiftAffinity(gift, student);
 
   switch (affinity) {
@@ -81,17 +76,11 @@ export function getGiftExpMultiplier(
   }
 }
 
-export function getGiftExpValue(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
+export function getGiftExpValue(gift: BondGift, student: BondStudent) {
   return gift.expValue * getGiftExpMultiplier(gift, student);
 }
 
-export function isGiftPreferredByStudent(
-  gift: GiftWithStudents,
-  student: StudentWithGifts,
-) {
+export function isGiftPreferredByStudent(gift: BondGift, student: BondStudent) {
   return (
     gift.isLovedByEveryone ||
     isGiftAdoredByStudent(gift, student) ||
@@ -100,9 +89,9 @@ export function isGiftPreferredByStudent(
   );
 }
 
-export function sortGiftsByStudentPreference(
-  gifts: GiftWithStudents[],
-  student: StudentWithGifts,
+export function sortGiftsByStudentPreference<G extends BondGift>(
+  gifts: G[],
+  student: BondStudent,
 ) {
   const adored = gifts
     .filter((gift) => isGiftAdoredByStudent(gift, student))
@@ -144,9 +133,14 @@ export function sortGiftsByStudentPreference(
 }
 
 export function sortTargetsByGiftAffinity(
-  gift: GiftWithStudents,
+  gift: BondGift,
   targets: GiftTargetDoc[],
-  studentMap: Map<string, StudentWithGifts>,
+  studentMap: Map<
+    string,
+    BondStudent & {
+      name: string;
+    }
+  >,
 ) {
   return [
     ...targets,
@@ -328,7 +322,7 @@ export function targetAllocationsEqual(
   return true;
 }
 
-export function getGiftBoxExpPerUnit(student: StudentWithGifts): number {
+export function getGiftBoxExpPerUnit(student: BondStudent): number {
   if (student.giftsAdored.some((gift) => gift.rarity === "SR")) {
     return 80;
   }
@@ -342,8 +336,8 @@ export function getGiftBoxExpPerUnit(student: StudentWithGifts): number {
 
 export function computeTargetProjectedExp(
   targetId: Id<"giftTarget">,
-  student: StudentWithGifts,
-  gifts: GiftWithStudents[],
+  student: BondStudent,
+  gifts: BondGift[],
   targetAllocations: Record<Id<"giftTarget">, Record<number, number>>,
   targetBoxAllocations: Record<Id<"giftTarget">, number>,
   currentExp: number,

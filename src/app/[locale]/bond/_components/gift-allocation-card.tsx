@@ -11,11 +11,6 @@ import {
   buildGiftTargetGridItems,
   GiftTargetAllocationGrid,
 } from "@/app/[locale]/bond/_components/gift-target-allocation-grid";
-import {
-  type GiftTargetDoc,
-  getRemainingAllocatable,
-  sortTargetsByGiftAffinity,
-} from "@/app/[locale]/bond/_lib/gift-utils";
 import type {
   GiftWithStudents,
   StudentWithGifts,
@@ -27,6 +22,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  type GiftTargetDoc,
+  getRemainingAllocatable,
+  sortTargetsByGiftAffinity,
+} from "@/lib/bond/gift-utils";
 import { cn } from "@/lib/utils";
 import type { Id } from "~convex/dataModel";
 

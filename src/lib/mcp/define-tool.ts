@@ -52,6 +52,8 @@ type ToolConfig<S extends z.ZodRawShape> = {
   input?: S;
   /** Overrides the per-user bucket picked from `kind`. */
   rateLimit?: RateLimitTier;
+  /** Overrides the annotation picked from `kind`. */
+  idempotent?: boolean;
 };
 
 function textResult(text: string, isError = false): CallToolResult {
@@ -80,7 +82,14 @@ function errorResult(error: ApiError) {
 export function defineTool<S extends z.ZodRawShape = z.ZodRawShape>(
   server: McpServer,
   name: string,
-  { title, description, kind, input, rateLimit: tier }: ToolConfig<S>,
+  {
+    title,
+    description,
+    kind,
+    input,
+    rateLimit: tier,
+    idempotent,
+  }: ToolConfig<S>,
   run: (
     args: z.output<z.ZodObject<S>>,
     userId: string,
@@ -146,6 +155,9 @@ export function defineTool<S extends z.ZodRawShape = z.ZodRawShape>(
       annotations: {
         title,
         ...ANNOTATIONS[kind],
+        ...(idempotent !== undefined && {
+          idempotentHint: idempotent,
+        }),
       },
     },
     callback as unknown as ToolCallback<S>,

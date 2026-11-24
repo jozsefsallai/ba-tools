@@ -67,12 +67,31 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           'Added a "+" button next to Current EXP that adds EXP to it.',
       },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description:
+          "AI assistants can now see your bond progress, including your current rank, the EXP left until the next rank and your target, and where your planned gifts will get you. They can also suggest ways to gain the missing EXP. This also applies to Plana and the API.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.mcp,
+        description:
+          "AI assistants can now add EXP to a student's bond, or set it as a rank and the EXP within that rank. With an assistant that can read images, you can send a screenshot of a student's bond progress to update it.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.api,
+        description: "Added the bond EXP table to the API and the MCP.",
+      },
     ],
     fixes: [
       {
         scope: CHANGELOG_SCOPES.bondCalculator,
         description:
           "Fixed the calculator using the start of the rank instead of the saved EXP when selecting a student whose bond EXP was saved earlier.",
+      },
+      {
+        scope: CHANGELOG_SCOPES.bondCalculator,
+        description:
+          "Fixed being able to add the same student to a gift inventory more than once in some cases.",
       },
     ],
     changes: [],

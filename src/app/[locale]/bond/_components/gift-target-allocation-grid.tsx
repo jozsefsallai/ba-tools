@@ -4,11 +4,11 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import type { GiftTargetDoc } from "@/app/[locale]/bond/_lib/gift-utils";
 import type { StudentWithGifts } from "@/app/[locale]/bond/_lib/types";
 import bondImage from "@/assets/images/bond.png";
 import { StudentCard } from "@/components/common/student-card";
 import { Input } from "@/components/ui/input";
+import type { GiftTargetDoc } from "@/lib/bond/gift-utils";
 import { cn } from "@/lib/utils";
 import type { Id } from "~convex/dataModel";
 

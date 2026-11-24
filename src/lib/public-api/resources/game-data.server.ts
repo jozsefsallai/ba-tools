@@ -1,6 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
+import { getBondRanks, MAX_BOND_RANK } from "@/lib/bond/progress";
 import {
   colorEnum,
   resolveAttackType,
@@ -144,6 +145,20 @@ export async function getGift(id: string | number) {
     ...gift,
     iconUrl: buildItemIconUrl(gift.iconName),
   };
+}
+
+const bondRank = z.coerce.number().int().min(1).max(MAX_BOND_RANK).optional();
+
+export const bondRanksSchema = z.object({
+  from: bondRank.describe("First rank to return (1-100)."),
+  to: bondRank.describe("Last rank to return (1-100)."),
+});
+
+export function listBondRanks({
+  from = 1,
+  to = MAX_BOND_RANK,
+}: z.infer<typeof bondRanksSchema>) {
+  return getBondRanks().filter(({ rank }) => rank >= from && rank <= to);
 }
 
 export async function listBanners() {
