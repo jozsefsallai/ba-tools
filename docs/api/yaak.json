@@ -144,6 +144,48 @@
       },
       {
         "model": "folder",
+        "id": "fl_cAlcuLat0r",
+        "createdAt": "2026-11-01T00:00:00",
+        "updatedAt": "2026-11-01T00:00:00",
+        "workspaceId": "wk_z9Ek68UZue",
+        "folderId": null,
+        "authentication": {},
+        "authenticationType": null,
+        "description": "The site's calculators. They don't need an API key or save anything.",
+        "headers": [],
+        "name": "Calculators",
+        "sortPriority": 0.5,
+        "settingSendCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingStoreCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingValidateCertificates": {
+          "enabled": false,
+          "value": true
+        },
+        "settingFollowRedirects": {
+          "enabled": false,
+          "value": true
+        },
+        "settingRequestTimeout": {
+          "enabled": false,
+          "value": 0
+        },
+        "settingRequestMessageSize": {
+          "enabled": false,
+          "value": 67108864
+        },
+        "settingHttpVersion": {
+          "enabled": false,
+          "value": "auto"
+        }
+      },
+      {
+        "model": "folder",
         "id": "fl_s5AKfifzF4",
         "createdAt": "2026-11-01T00:00:00",
         "updatedAt": "2026-11-01T00:00:00",
@@ -1154,13 +1196,13 @@
         "url": "${[ base_url ]}/api/v1/bond-ranks",
         "urlParameters": [
           {
-            "enabled": true,
+            "enabled": false,
             "name": "from",
             "value": "",
             "id": "up_b0ndfr0m01"
           },
           {
-            "enabled": true,
+            "enabled": false,
             "name": "to",
             "value": "",
             "id": "up_b0ndt00001"
@@ -5444,6 +5486,166 @@
             "name": ":sessionId",
             "value": "",
             "id": "up_ce764d79a1"
+          }
+        ],
+        "settingSendCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingStoreCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingValidateCertificates": {
+          "enabled": false,
+          "value": true
+        },
+        "settingFollowRedirects": {
+          "enabled": false,
+          "value": true
+        },
+        "settingRequestTimeout": {
+          "enabled": false,
+          "value": 0
+        },
+        "settingHttpVersion": {
+          "enabled": false,
+          "value": "auto"
+        }
+      },
+      {
+        "model": "http_request",
+        "id": "rq_rAidScR7qx",
+        "createdAt": "2026-11-01T00:00:00",
+        "updatedAt": "2026-11-01T00:00:00",
+        "workspaceId": "wk_z9Ek68UZue",
+        "folderId": "fl_cAlcuLat0r",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {},
+        "bodyType": null,
+        "description": "Works out the score of a Total Assault or Grand Assault clear, or the clear time a score takes. For Grand Assault, calculate each armor type separately and add up the scores.\n\nSend exactly one of `clearTimes`, `remainingTime` and `score`. Times are `min:sec.ms` (`3:25.5`) or seconds (`205.5`). `remainingTime` in the response is `null` for several teams.\n\n**Parameters**\n\n- `boss`: The boss, which sets the time limit: `binah`, `kaiten`, `chesed`, `shirokuro`, `hieronymus`, `perorodzilla`, `hod`, `goz`, `gregorius`, `hovercraft`, `kurokage`, `geburah`, `nightmaretrain`, `yesod` or `drumbarka`. Not case-sensitive, and English names work too.\n- `duration`: The boss's time limit in seconds, instead of `boss`: `180`, `240` or `270`.\n- `difficulty` (required): `Normal`, `Hard`, `VeryHard`, `Hardcore`, `Extreme`, `Insane`, `Torment` or `Lunatic`.\n- `clearTimes`: The time each team spent fighting, comma-separated. Up to 100 teams and 60 minutes in total.\n- `remainingTime`: The time left on the clock when a single team clears.\n- `score`: The score to find the clear time of.\n\n```response:200\n{\n  \"data\": {\n    \"duration\": 180,\n    \"difficulty\": \"Torment\",\n    \"score\": 39354800,\n    \"clearTime\": \"2:30.5\",\n    \"clearTimeSeconds\": 150.5,\n    \"remainingTime\": \"0:29.5\"\n  }\n}\n```\n\n```response:400\n{\n  \"error\": {\n    \"code\": \"INVALID_REQUEST\",\n    \"message\": \"Send exactly one of `clearTimes`, `remainingTime` and `score`.\"\n  }\n}\n```",
+        "headers": [],
+        "method": "GET",
+        "name": "Calculate raid score",
+        "sortPriority": 0.0,
+        "url": "${[ base_url ]}/api/v1/calculators/raid-score",
+        "urlParameters": [
+          {
+            "enabled": true,
+            "name": "boss",
+            "value": "binah",
+            "id": "up_raids00000"
+          },
+          {
+            "enabled": false,
+            "name": "duration",
+            "value": "",
+            "id": "up_raids00001"
+          },
+          {
+            "enabled": true,
+            "name": "difficulty",
+            "value": "Torment",
+            "id": "up_raids00002"
+          },
+          {
+            "enabled": true,
+            "name": "clearTimes",
+            "value": "2:30.5",
+            "id": "up_raids00003"
+          },
+          {
+            "enabled": false,
+            "name": "remainingTime",
+            "value": "",
+            "id": "up_raids00004"
+          },
+          {
+            "enabled": false,
+            "name": "score",
+            "value": "",
+            "id": "up_raids00005"
+          }
+        ],
+        "settingSendCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingStoreCookies": {
+          "enabled": false,
+          "value": true
+        },
+        "settingValidateCertificates": {
+          "enabled": false,
+          "value": true
+        },
+        "settingFollowRedirects": {
+          "enabled": false,
+          "value": true
+        },
+        "settingRequestTimeout": {
+          "enabled": false,
+          "value": 0
+        },
+        "settingHttpVersion": {
+          "enabled": false,
+          "value": "auto"
+        }
+      },
+      {
+        "model": "http_request",
+        "id": "rq_sTudExp4nw",
+        "createdAt": "2026-11-01T00:00:00",
+        "updatedAt": "2026-11-01T00:00:00",
+        "workspaceId": "wk_z9Ek68UZue",
+        "folderId": "fl_cAlcuLat0r",
+        "authentication": {},
+        "authenticationType": null,
+        "body": {},
+        "bodyType": null,
+        "description": "Works out how many students can be raised from one level to another with your Activity Reports, and what's left over. Reports are spent whole, smallest first. `expPerStudent` is the EXP one student needs.\n\n**Parameters**\n\n- `fromLevel`: Level the students start at, 1–90 (default 1).\n- `toLevel`: Level to raise them to, 1–90 (default 90). Must be higher than `fromLevel`.\n- `novice`, `normal`, `advanced`, `superior`: How many of each Activity Report you have (50, 500, 2,000 and 10,000 EXP), up to 999,999 (default 0).\n\n```response:200\n{\n  \"data\": {\n    \"fromLevel\": 1,\n    \"toLevel\": 90,\n    \"students\": 6,\n    \"expPerStudent\": 1249185,\n    \"totalExp\": 8100000,\n    \"leftoverExp\": 600000,\n    \"leftoverReports\": {\n      \"novice\": 0,\n      \"normal\": 0,\n      \"advanced\": 0,\n      \"superior\": 60\n    }\n  }\n}\n```\n\n```response:400\n{\n  \"error\": {\n    \"code\": \"INVALID_REQUEST\",\n    \"message\": \"`toLevel` must be higher than `fromLevel`.\"\n  }\n}\n```",
+        "headers": [],
+        "method": "GET",
+        "name": "Calculate student EXP",
+        "sortPriority": 1.0,
+        "url": "${[ base_url ]}/api/v1/calculators/student-exp",
+        "urlParameters": [
+          {
+            "enabled": true,
+            "name": "fromLevel",
+            "value": "1",
+            "id": "up_stude00000"
+          },
+          {
+            "enabled": true,
+            "name": "toLevel",
+            "value": "90",
+            "id": "up_stude00001"
+          },
+          {
+            "enabled": true,
+            "name": "novice",
+            "value": "12000",
+            "id": "up_stude00002"
+          },
+          {
+            "enabled": true,
+            "name": "normal",
+            "value": "5000",
+            "id": "up_stude00003"
+          },
+          {
+            "enabled": true,
+            "name": "advanced",
+            "value": "1500",
+            "id": "up_stude00004"
+          },
+          {
+            "enabled": true,
+            "name": "superior",
+            "value": "200",
+            "id": "up_stude00005"
           }
         ],
         "settingSendCookies": {

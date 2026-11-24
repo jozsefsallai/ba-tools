@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerAccountTools } from "@/lib/mcp/tools/account";
+import { registerCalculatorTools } from "@/lib/mcp/tools/calculators";
 import { registerFormationTools } from "@/lib/mcp/tools/formations";
 import { registerGameDataTools } from "@/lib/mcp/tools/game-data";
 import { registerGiftInventoryTools } from "@/lib/mcp/tools/gift-inventories";
@@ -13,6 +14,7 @@ import { registerTimelineTools } from "@/lib/mcp/tools/timelines";
 
 export function registerMcpTools(server: McpServer) {
   registerGameDataTools(server);
+  registerCalculatorTools(server);
   registerSharedContentTools(server);
   registerPvpStatsTools(server);
   registerAccountTools(server);

@@ -7,6 +7,7 @@ icon: history
 
 ## v1 (2026-11)
 
+- `GET /api/v1/calculators/raid-score` (and `calculate_raid_score`) works out Total Assault and Grand Assault scores and clear times. `GET /api/v1/calculators/student-exp` (and `calculate_student_exp`) works out how many students your Activity Reports can raise.
 - Gift targets accept `currentRank` and `currentRankExp` (the EXP within the rank) instead of the total `currentExp`, and updates accept `addExp` to add to the saved EXP.
 - `GET /api/v1/bond-ranks` (and `list_bond_ranks`) lists the EXP each bond rank needs.
 - `GET /api/v1/me/gift-inventories` (and `list_gift_inventories`) includes a summary of each inventory's `targets`.

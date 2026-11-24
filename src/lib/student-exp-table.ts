@@ -534,10 +534,12 @@ export function tryFundStudent(
   for (const rarity of REPORT_RARITIES_ASC) {
     const value = REPORT_EXP_VALUES[rarity];
 
-    while (accumulated < expNeeded && remaining[rarity] > 0) {
-      remaining[rarity] -= 1;
-      accumulated += value;
-    }
+    const used = Math.min(
+      remaining[rarity],
+      Math.ceil((expNeeded - accumulated) / value),
+    );
+    remaining[rarity] -= used;
+    accumulated += used * value;
 
     if (accumulated >= expNeeded) {
       return remaining;

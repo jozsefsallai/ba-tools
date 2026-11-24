@@ -81,6 +81,11 @@ export const CHANGELOG: ChangelogItemData[] = [
         scope: CHANGELOG_SCOPES.api,
         description: "Added the bond EXP table to the API and the MCP.",
       },
+      {
+        scope: CHANGELOG_SCOPES.api,
+        description:
+          "Added the Raid Score Calculator and the Student EXP Calculator to the API and the MCP. Plana can use them too.",
+      },
     ],
     fixes: [
       {
