@@ -34,8 +34,10 @@ export async function saveStudentSkills(
   result: ExtractStudentSkillsResult,
 ): Promise<SaveStudentSkillsResult> {
   for (const effect of result.effects) {
+    const hash = String(effect.hash);
+    // An effect's id changes from its hash to its key once a description tags it
     const fields = {
-      hash: String(effect.hash),
+      id: effect.id,
       category: effect.category,
       iconName: effect.iconName,
       filterable: effect.filterable,
@@ -43,10 +45,10 @@ export async function saveStudentSkills(
 
     await db.skillEffect.upsert({
       where: {
-        id: effect.id,
+        hash,
       },
       create: {
-        id: effect.id,
+        hash,
         ...fields,
       },
       update: fields,
@@ -55,78 +57,83 @@ export async function saveStudentSkills(
 
   const effectIds = result.effects.map((e) => e.id);
 
-  await db.$transaction([
-    db.skillEffectText.deleteMany({
-      where: {
-        effectId: {
-          in: effectIds,
-        },
-      },
-    }),
-    db.skillEffectText.createMany({
-      data: result.effects.flatMap((effect) =>
-        entries(effect.texts).map(([locale, text]) => ({
-          effectId: effect.id,
-          locale,
-          ...text,
-        })),
-      ),
-    }),
-  ]);
-
   const studentIds = [
     ...new Set(result.skills.map((s) => s.studentId)),
   ];
 
-  await db.$transaction([
-    db.studentSkill.deleteMany({
-      where: {
-        studentId: {
-          in: studentIds,
+  await db.$transaction(
+    async (tx) => {
+      await tx.skillEffectText.deleteMany({
+        where: {
+          effectId: {
+            in: effectIds,
+          },
         },
-      },
-    }),
+      });
 
-    db.studentSkill.createMany({
-      data: result.skills.map((skill) => ({
-        id: skill.id,
-        studentId: skill.studentId,
-        groupId: skill.groupId,
-        type: skill.type,
-        source: skill.source,
-        sortOrder: skill.sortOrder,
-        formIndices: skill.formIndices,
-        requiredWeaponGrade: skill.requiredWeaponGrade,
-        requiredGearTier: skill.requiredGearTier,
-        upgradeOfId: skill.upgradeOfId,
-        parentId: skill.parentId,
-        iconName: skill.iconName,
-        maxLevel: skill.maxLevel,
-        levelCount: skill.levelCount,
-        costs: skill.costs,
-        stats: skill.stats,
-      })),
-    }),
+      await tx.skillEffectText.createMany({
+        data: result.effects.flatMap((effect) =>
+          entries(effect.texts).map(([locale, text]) => ({
+            effectId: effect.id,
+            locale,
+            ...text,
+          })),
+        ),
+      });
 
-    db.studentSkillText.createMany({
-      data: result.skills.flatMap((skill) =>
-        entries(skill.texts).map(([locale, text]) => ({
-          skillId: skill.id,
-          locale,
-          ...text,
+      await tx.studentSkill.deleteMany({
+        where: {
+          studentId: {
+            in: studentIds,
+          },
+        },
+      });
+
+      await tx.studentSkill.createMany({
+        data: result.skills.map((skill) => ({
+          id: skill.id,
+          studentId: skill.studentId,
+          groupId: skill.groupId,
+          type: skill.type,
+          source: skill.source,
+          sortOrder: skill.sortOrder,
+          formIndices: skill.formIndices,
+          requiredWeaponGrade: skill.requiredWeaponGrade,
+          requiredGearTier: skill.requiredGearTier,
+          upgradeOfId: skill.upgradeOfId,
+          parentId: skill.parentId,
+          iconName: skill.iconName,
+          maxLevel: skill.maxLevel,
+          levelCount: skill.levelCount,
+          costs: skill.costs,
+          stats: skill.stats,
         })),
-      ),
-    }),
+      });
 
-    db.studentSkillEffect.createMany({
-      data: result.skills.flatMap((skill) =>
-        skill.effectIds.map((effectId) => ({
-          skillId: skill.id,
-          effectId,
-        })),
-      ),
-    }),
-  ]);
+      await tx.studentSkillText.createMany({
+        data: result.skills.flatMap((skill) =>
+          entries(skill.texts).map(([locale, text]) => ({
+            skillId: skill.id,
+            locale,
+            ...text,
+          })),
+        ),
+      });
+
+      await tx.studentSkillEffect.createMany({
+        data: result.skills.flatMap((skill) =>
+          skill.effectIds.map((effectId) => ({
+            skillId: skill.id,
+            effectId,
+          })),
+        ),
+      });
+    },
+    {
+      maxWait: 10_000,
+      timeout: 120_000,
+    },
+  );
 
   return {
     effects: result.effects.length,
