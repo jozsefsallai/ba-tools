@@ -17,6 +17,7 @@ export const CHANGELOG_SCOPES = {
   timelineVisualizer: "Timeline Visualizer",
   formationDisplay: "Formation Display",
   inventoryManagement: "Inventory Management",
+  inventoryScanner: "Inventory Scanner",
   railroadPuzzleSolver: "Railroad Puzzle Solver",
   gachaRateStats: "Gacha Rate Stats",
   scenarioImageGenerator: "Scenario Image Generator",
@@ -54,6 +55,28 @@ export type ChangelogItemData = {
 };
 
 export const CHANGELOG: ChangelogItemData[] = [
+  {
+    date: "November 26, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.inventoryScanner,
+        description: (
+          <>
+            Added the <Link href="/inventory-scanner">Inventory Scanner</Link>,
+            which reads your item and equipment counts from screenshots or
+            screen recordings of the in-game lists and exports them to
+            Justin&apos;s Planner. It covers Activity Reports, Enhancement
+            Stones, weapon parts, equipment blueprints and choice boxes,
+            Blu-rays, tech notes, artifacts, workbooks and gifts. Items you
+            don&apos;t have are counted as zero when the screenshots overlap.
+            Everything is read in your browser, and nothing is uploaded.
+          </>
+        ),
+      },
+    ],
+    fixes: [],
+    changes: [],
+  },
   {
     date: "November 24, 2026",
     features: [
