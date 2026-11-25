@@ -241,6 +241,49 @@ export const ITEMS = {
     width: 3,
     height: 3,
   },
+
+  // Wildhunt Event
+  brooch: {
+    name: "Brooch",
+    width: 3,
+    height: 1,
+  },
+
+  ceremonialRapier: {
+    name: "Ceremonial Rapier",
+    width: 4,
+    height: 1,
+  },
+
+  painting: {
+    name: "Painting",
+    width: 3,
+    height: 2,
+  },
+
+  featherPen: {
+    name: "Feather Pen",
+    width: 2,
+    height: 1,
+  },
+
+  pocketWatch: {
+    name: "Old Pocket Watch",
+    width: 2,
+    height: 2,
+  },
+
+  ceramics: {
+    name: "Ceramics",
+    width: 4,
+    height: 2,
+  },
+
+  marbleBust: {
+    name: "Marble Bust",
+    width: 3,
+    height: 3,
+  },
 } as const satisfies Record<
   string,
   Omit<InventoryManagementPresetItem, "count">
@@ -651,6 +694,90 @@ export const inventoryManagementPresets: InventoryManagementPreset[] = [
         withCounts(ITEMS.seahorse, 2),
         withCounts(ITEMS.seaweed, 2),
         withCounts(ITEMS.seashell, 2),
+      ],
+    ],
+  },
+
+  {
+    id: "wildhunt",
+    name: "Art of Manipulation: The Ivory Tower and the Uninvited Guest (Wildhunt Event)",
+    rounds: [
+      [
+        withCounts(ITEMS.brooch, 4),
+        withCounts(ITEMS.ceremonialRapier, 3),
+        withCounts(ITEMS.painting, 1),
+      ],
+
+      [
+        withCounts(ITEMS.featherPen, 3),
+        withCounts(ITEMS.pocketWatch, 4),
+        withCounts(ITEMS.ceramics, 1),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 3),
+        withCounts(ITEMS.pocketWatch, 3),
+        withCounts(ITEMS.marbleBust, 1),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 2),
+        withCounts(ITEMS.pocketWatch, 3),
+        withCounts(ITEMS.painting, 2),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 4),
+        withCounts(ITEMS.ceremonialRapier, 3),
+        withCounts(ITEMS.painting, 1),
+      ],
+
+      [
+        withCounts(ITEMS.featherPen, 3),
+        withCounts(ITEMS.pocketWatch, 4),
+        withCounts(ITEMS.ceramics, 1),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 3),
+        withCounts(ITEMS.pocketWatch, 3),
+        withCounts(ITEMS.marbleBust, 1),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 2),
+        withCounts(ITEMS.pocketWatch, 3),
+        withCounts(ITEMS.painting, 2),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 4),
+        withCounts(ITEMS.ceremonialRapier, 3),
+        withCounts(ITEMS.painting, 1),
+      ],
+
+      [
+        withCounts(ITEMS.featherPen, 3),
+        withCounts(ITEMS.pocketWatch, 4),
+        withCounts(ITEMS.ceramics, 1),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 3),
+        withCounts(ITEMS.pocketWatch, 3),
+        withCounts(ITEMS.marbleBust, 1),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 2),
+        withCounts(ITEMS.pocketWatch, 3),
+        withCounts(ITEMS.painting, 2),
+      ],
+
+      [
+        withCounts(ITEMS.brooch, 2),
+        withCounts(ITEMS.ceremonialRapier, 2),
+        withCounts(ITEMS.ceramics, 2),
       ],
     ],
   },
