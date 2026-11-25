@@ -78,6 +78,7 @@ enum Club {
   FoxSquad
   DivingClub
   Class183
+  AssemblyOfArts
   EmptyClub
 }
 

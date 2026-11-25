@@ -418,6 +418,10 @@ export const GROUP_EMBLEM_CLUBS: EmblemConfigItem<Club>[] = [
     id: "Class183",
     name: "Spec Ops No. 183",
   },
+  {
+    id: "AssemblyOfArts",
+    name: "Assembly of Arts",
+  },
 ];
 
 export const GROUP_EMBLEM_VALID_COMBINATIONS: {
@@ -623,6 +627,10 @@ export const GROUP_EMBLEM_VALID_COMBINATIONS: {
   {
     club: "Class183",
     school: "RedWinter",
+  },
+  {
+    club: "AssemblyOfArts",
+    school: "WildHunt",
   },
 ];
 
