@@ -48,6 +48,10 @@ function useToolBreadcrumb(): BreadcrumbInfo | null {
         label: t("common.header.nav.gameplay.raidScore"),
         group: t("common.header.nav.gameplay.title"),
       },
+      "/inventory-scanner": {
+        label: t("common.header.nav.gameplay.inventoryScanner"),
+        group: t("common.header.nav.gameplay.title"),
+      },
       "/student-exp-calculator": {
         label: t("common.header.nav.gameplay.studentExp"),
         group: t("common.header.nav.gameplay.title"),

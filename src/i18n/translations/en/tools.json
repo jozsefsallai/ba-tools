@@ -241,7 +241,7 @@
 
     "inventory": {
       "select": {
-        "label": "Gift Inventory (BETA)",
+        "label": "Gift Inventory",
         "none": "(no inventory)",
         "unnamed": "Unnamed Gift Inventory",
         "new": "New Inventory",
@@ -348,7 +348,7 @@
       "close": "Close"
     },
 
-    "inventoryTip": "<strong>Tip:</strong> <signIn></signIn> to save your gift inventory and bond targets (BETA).",
+    "inventoryTip": "<strong>Tip:</strong> <signIn></signIn> to save your gift inventory and bond targets.",
 
     "remaining": {
       "title": "EXP Needed to Reach Rank {targetBond}: {expNeeded}",
@@ -451,6 +451,111 @@
         "total": "Total Time:",
         "add": "Add Clear Time"
       }
+    }
+  },
+
+  "inventoryScanner": {
+    "title": "Inventory Scanner (BETA)",
+    "description": "Read your items and equipment from screenshots, then export the counts to a planner.",
+    "instructions": {
+      "title": "Taking screenshots",
+      "overlap": "The cut off row of one screenshot is the first full row of the next.",
+      "collects": "Items it collects",
+      "lists": "Take screenshots of the Items and Equipment lists in the game. You can add all of them at once, in any order.",
+      "sort": "Use the default sort (Basic, ascending) with no filters or search.",
+      "recording": "Instead of screenshots, you can add a screen recording of yourself scrolling through the lists, both in one recording or one each. Scroll at a steady pace.",
+      "scroll": "Scroll so that the row cut off at the bottom is fully visible in the next screenshot. Items between two screenshots that don't connect can't be counted as zero."
+    },
+    "input": {
+      "add": "Choose, drop or paste screenshots or screen recordings",
+      "private": "They're read in your browser and aren't uploaded.",
+      "remove": "Remove screenshot",
+      "clear": "Remove all",
+      "failed": "This screenshot couldn't be read.",
+      "noGrid": "No item list found in this image.",
+      "tooMany": "You can add up to {max} screenshots.",
+      "progress": "Reading: {done} of {total}",
+      "video": "Video",
+      "videoProgress": "{percent}%"
+    },
+    "label": {
+      "screenshot": "screenshot {number}",
+      "frame": "video {number} at {time}",
+      "frameName": "{name} at {time}"
+    },
+    "missing": {
+      "between": "Between {previous} and {next}, which don't connect",
+      "after": "After {previous}, where the list goes on",
+      "before": "Before {next}, where the list starts",
+      "nowhere": "Not in any screenshot",
+      "show": "Show {name}",
+      "more": "{count, plural, one { and # more} other { and # more}}"
+    },
+    "viewer": {
+      "open": "Enlarge {name}",
+      "show": "Show {name} in its screenshot",
+      "previous": "Previous screenshot",
+      "next": "Next screenshot",
+      "position": "{index} of {total}",
+      "actualSize": "Show at actual size",
+      "fit": "Fit to screen"
+    },
+    "warnings": {
+      "video": {
+        "title": "{count, plural, one {# recording couldn't be read} other {# recordings couldn't be read}}",
+        "unsupported": "Your browser can't play it. Recordings are often saved as HEVC (iPhone) or AV1 (OBS), which not every browser supports. Try another browser, or record in H.264.",
+        "noList": "No item list was found in it.",
+        "failed": "Reading it failed."
+      },
+      "failed": {
+        "title": "{count, plural, one {# screenshot couldn't be read} other {# screenshots couldn't be read}}",
+        "description": "Make sure the whole item list is visible in the image, from its left to its right edge."
+      },
+      "order": {
+        "title": "The list doesn't seem to be in the default order",
+        "description": "Items you don't have can only be set to zero when the list uses the default sort (Basic, ascending). Change the sort in the game and take the screenshots again, or enter zeros yourself."
+      },
+      "unsupported": {
+        "title": "The screenshots were read, but have none of the items this tool collects",
+        "description": "Other items, like the choice boxes at the top of the Items list, are skipped. Scroll on to find these: {items}."
+      },
+      "unknown": {
+        "title": "{count, plural, one {# item isn't covered by the screenshots} other {# items aren't covered by the screenshots}}",
+        "description": "They won't be exported unless you enter a count. Add screenshots of the rows they're in, so that each one starts with the cut off row of the one before."
+      }
+    },
+    "check": {
+      "title": "{count, plural, one {Check # item} other {Check # items}}",
+      "description": "These were hard to read. Compare them with the screenshot.",
+      "conflict": "Your screenshots show different counts.",
+      "confirm": "Correct"
+    },
+    "review": {
+      "countOf": "Number of {name}",
+      "approximate": "The game shortens counts of 10,000 and above, so this one is rounded down.",
+      "legend": "≈ marks counts the game shortens (65K), which are rounded down. A dash means the screenshots don't show whether you have the item."
+    },
+    "export": {
+      "title": "Export",
+      "open": "Open planner",
+      "download": "Download",
+      "copy": "Copy",
+      "copied": "Copied to clipboard.",
+      "copyFailed": "Couldn't copy to the clipboard.",
+      "included": "{count} of {total} supported items will be exported.",
+      "justinPlanner": "Import the file in the planner's Transfer dialog. It only changes the materials listed here, and keeps your students and targets."
+    },
+    "groups": {
+      "reports": "Activity Reports",
+      "stones": "Enhancement Stones",
+      "weaponParts": "Weapon Parts",
+      "blueprints": "Equipment Blueprints",
+      "choiceBoxes": "Blueprint Choice Boxes",
+      "bluRays": "Tactical Training Blu-rays",
+      "techNotes": "Tech Notes",
+      "artifacts": "Artifacts",
+      "workbooks": "Workbooks",
+      "gifts": "Gifts"
     }
   },
 

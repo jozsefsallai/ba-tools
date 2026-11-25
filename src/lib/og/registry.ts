@@ -485,6 +485,17 @@ export const OG_CARDS = {
     variant: "scene",
   },
 
+  "inventory-scanner": {
+    title: {
+      message: "common.sharing.cards.inventory-scanner.title",
+    },
+    description: {
+      message: "common.sharing.cards.inventory-scanner.description",
+    },
+    variant: "inventory",
+    icon: "grid-2x2",
+  },
+
   "student-exp-calculator": {
     title: {
       message: "common.sharing.cards.student-exp-calculator.title",

@@ -41,6 +41,12 @@ const SCHOOL_LOGOS = {
   }
 >;
 
+const SCHOOLS = Object.keys(SCHOOL_LOGOS) as Student["school"][];
+
+export function findSchool(name: string) {
+  return SCHOOLS.find((school) => school.toLowerCase() === name.toLowerCase());
+}
+
 export type SchoolLogoProps = {
   school: Student["school"];
   label?: string;

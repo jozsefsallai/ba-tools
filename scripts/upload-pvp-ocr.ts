@@ -12,6 +12,10 @@ import {
   S3ServiceException,
 } from "@aws-sdk/client-s3";
 import {
+  ITEM_ICON_CATALOG_FORMAT,
+  type ItemIconCatalog,
+} from "@/lib/inventory-scan/catalog-format";
+import {
   PVP_ICON_CATALOG_FORMAT,
   PVP_ICON_TEMPLATE_BYTES,
   type PvpIconCatalog,
@@ -132,6 +136,34 @@ try {
     throw new Error("Student icon export is incomplete or has an invalid hash");
   }
 
+  const itemIconDirectory = join(root, ".cache/pvp-ocr/v2/ocr/item-icons");
+  const itemIconManifest = await readFile(
+    join(itemIconDirectory, "manifest.json"),
+  );
+  const itemCatalog: ItemIconCatalog = JSON.parse(itemIconManifest.toString());
+
+  if (
+    itemCatalog.format !== ITEM_ICON_CATALOG_FORMAT ||
+    !Array.isArray(itemCatalog.icons) ||
+    !/^[a-f0-9]{16}\.bin$/.test(itemCatalog.asset)
+  ) {
+    throw new Error("Invalid item icon export; run pnpm run ocr:assets");
+  }
+
+  const itemTemplates = await readFile(
+    join(itemIconDirectory, itemCatalog.asset),
+  );
+
+  const itemIconVersion = createHash("sha256")
+    .update(JSON.stringify(itemCatalog.icons))
+    .update(itemTemplates)
+    .digest("hex")
+    .slice(0, 16);
+
+  if (itemCatalog.asset !== `${itemIconVersion}.bin`) {
+    throw new Error("Item icon export has an invalid hash");
+  }
+
   const uploadFiles = [
     ...filenames.map((filename, index) => ({
       filename,
@@ -148,6 +180,16 @@ try {
       filename: `${iconVersion}.json`,
       key: `v2/ocr/pvp-icons/${iconVersion}.json`,
       body: iconManifest,
+    },
+    {
+      filename: itemCatalog.asset,
+      key: `v2/ocr/item-icons/${itemCatalog.asset}`,
+      body: itemTemplates,
+    },
+    {
+      filename: `${itemIconVersion}.json`,
+      key: `v2/ocr/item-icons/${itemIconVersion}.json`,
+      body: itemIconManifest,
     },
   ];
 

@@ -30,6 +30,7 @@ import {
   MapIcon,
   MessageCircleHeartIcon,
   RectangleEllipsisIcon,
+  ScanLineIcon,
   ShieldIcon,
   SquareText,
   SwordsIcon,
@@ -290,6 +291,11 @@ export function AppSidebar() {
       href: "/student-exp-calculator",
       text: t("common.header.nav.gameplay.studentExp"),
       icon: ClipboardMinusIcon,
+    },
+    {
+      href: "/inventory-scanner",
+      text: t("common.header.nav.gameplay.inventoryScanner"),
+      icon: ScanLineIcon,
     },
     {
       href: "/pvp",

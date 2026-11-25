@@ -11,6 +11,7 @@ import {
   IdCardIcon,
   ListOrderedIcon,
   RectangleEllipsisIcon,
+  ScanLineIcon,
   SquareText,
   SwordsIcon,
   TrainTrackIcon,
@@ -51,13 +52,13 @@ export async function ToolsAndResources() {
       path: "/inventory-management",
       icon: <Grid2X2Icon className="size-10 text-purple-400 shrink-0" />,
       description: t("static.home.toollist.inventoryManagement.description"),
+      isHot: true,
     },
     {
       name: t("static.home.toollist.railroadPuzzleSolver.title"),
       path: "/railroad-puzzle-solver",
       icon: <TrainTrackIcon className="size-10 text-green-500 shrink-0" />,
       description: t("static.home.toollist.railroadPuzzleSolver.description"),
-      isHot: true,
     },
     {
       name: t("static.home.toollist.raidScore.title"),
@@ -74,11 +75,17 @@ export async function ToolsAndResources() {
       description: t("static.home.toollist.studentExp.description"),
     },
     {
+      name: t("static.home.toollist.inventoryScanner.title"),
+      path: "/inventory-scanner",
+      icon: <ScanLineIcon className="size-10 text-sky-500 shrink-0" />,
+      description: t("static.home.toollist.inventoryScanner.description"),
+      isNew: true,
+    },
+    {
       name: t("static.home.toollist.pvp.title"),
       path: "/pvp",
       icon: <SwordsIcon className="size-10 text-indigo-500 shrink-0" />,
       description: t("static.home.toollist.pvp.description"),
-      isNew: true,
     },
     {
       name: t("static.home.toollist.formationDisplay.title"),
@@ -111,7 +118,6 @@ export async function ToolsAndResources() {
       path: "/recruitment-tracker",
       icon: <SquareText className="size-10 text-cyan-400 shrink-0" />,
       description: t("static.home.toollist.recruitment.description"),
-      isNew: true,
     },
     {
       name: t("static.home.toollist.scenarioImageGenerator.title"),
@@ -130,7 +136,6 @@ export async function ToolsAndResources() {
       path: "/global/roadmap",
       icon: <CalendarRangeIcon className="size-10 text-emerald-400 shrink-0" />,
       description: t("static.home.toollist.glRoadmap.description"),
-      isNew: true,
     },
     {
       name: t("static.home.toollist.birthdays.title"),

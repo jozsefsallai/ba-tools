@@ -26,6 +26,10 @@
         "title": "Raid Score Calculator",
         "description": "Convert between clear time and raid score for various bosses and difficulties. Supports multiple teams and remaining time input (for single teams)."
       },
+      "inventoryScanner": {
+        "title": "Inventory Scanner (BETA)",
+        "description": "Read your items and equipment from screenshots and export the counts to a planner."
+      },
       "studentExp": {
         "title": "Student EXP Calculator",
         "description": "Calculate how many students you can level up across a level range with the Activity Reports you have, and see how many reports you'll have left over."

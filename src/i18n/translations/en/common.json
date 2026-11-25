@@ -61,6 +61,7 @@
         "railroadPuzzleSolver": "Railroad Puzzle Solver",
         "raidScore": "Raid Score Calculator",
         "studentExp": "Student EXP Calculator",
+        "inventoryScanner": "Inventory Scanner (BETA)",
         "pvp": "PVP Tools",
         "pvpSearch": "PVP Counter Search"
       },
@@ -501,6 +502,10 @@
       },
       "railroad-puzzle-solver": {
         "description": "Find the best railroad routes and visualize track placement for the Highlander event minigame."
+      },
+      "inventory-scanner": {
+        "title": "Inventory Scanner (BETA)",
+        "description": "Read your items from screenshots and export them to a planner."
       },
       "student-exp-calculator": {
         "title": "Student EXP Calculator",

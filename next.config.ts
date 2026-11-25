@@ -8,6 +8,7 @@ import {
   PHASE_PRODUCTION_BUILD,
 } from "next/constants";
 import createNextIntlPlugin from "next-intl/plugin";
+import { ITEM_ICON_CATALOG_FORMAT } from "@/lib/inventory-scan/catalog-format";
 import { PVP_ICON_CATALOG_FORMAT } from "@/lib/pvp/icon-catalog-format";
 
 const withSerwist = withSerwistInit({
@@ -407,8 +408,20 @@ export default async function configuration(
       throw new Error("Invalid PvP icon catalog; run pnpm run ocr:assets");
     }
 
+    const itemCatalog = JSON.parse(
+      readFileSync(".cache/pvp-ocr/v2/ocr/item-icons/manifest.json", "utf8"),
+    );
+
+    if (
+      itemCatalog.format !== ITEM_ICON_CATALOG_FORMAT ||
+      !/^[a-f0-9]{16}\.bin$/.test(itemCatalog.asset)
+    ) {
+      throw new Error("Invalid item icon catalog; run pnpm run ocr:assets");
+    }
+
     config.env = {
       NEXT_PUBLIC_PVP_ICON_VERSION: iconCatalog.asset.slice(0, -4),
+      NEXT_PUBLIC_ITEM_ICON_VERSION: itemCatalog.asset.slice(0, -4),
     };
   }
 
