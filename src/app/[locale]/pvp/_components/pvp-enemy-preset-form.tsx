@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 import type { Student } from "~prisma";
@@ -60,6 +61,12 @@ export function PVPEnemyPresetForm({
           opponentStudentRepId: studentRep?.id,
         });
       }
+
+      track("pvp_enemy_preset_saved", {
+        is_new: !preset,
+        source: "preset_form",
+        has_representative: !!studentRep,
+      });
 
       router.push(`/pvp/${seasonId}/presets/opponents`);
     } finally {

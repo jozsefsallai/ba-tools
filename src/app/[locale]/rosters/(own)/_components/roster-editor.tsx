@@ -43,6 +43,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
@@ -700,6 +701,9 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       const url = new URL(publicRosterPath, window.location.origin).toString();
       await navigator.clipboard.writeText(url);
       setCopiedShareLink(true);
+      track("roster_link_copied", {
+        source: "editor",
+      });
       toast.success(t("tools.roster.editor.toasts.shareLinkCopied"));
 
       setTimeout(() => {
@@ -773,6 +777,17 @@ export function RosterEditor({ rosterId }: RosterEditorProps) {
       if (navigationGuard.active) {
         navigationGuard.accept();
       }
+
+      track("roster_saved", {
+        is_new: false,
+        visibility,
+        game_server: gameServer,
+        student_count: studentsToSave.length,
+        featured_count: studentsToSave.filter(
+          (student) => student.featuredBorrowSlot !== undefined,
+        ).length,
+        has_representative: !!studentRepId,
+      });
 
       toast.success(t("tools.roster.editor.toasts.success"));
     } catch (err) {

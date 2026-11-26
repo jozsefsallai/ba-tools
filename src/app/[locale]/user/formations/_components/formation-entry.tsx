@@ -8,6 +8,7 @@ import { FormationRowsReadonly } from "@/app/[locale]/formation-display/_compone
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { formationDocToRows } from "@/lib/formation-display-utils";
 import { api } from "~convex/api";
 
@@ -44,6 +45,11 @@ export function FormationEntry({ entry }: FormationEntryProps) {
 
     await destroyMutation({
       id: entry._id,
+    });
+
+    track("formation_deleted", {
+      formation_type: entry.type ?? null,
+      row_count: entry.rows?.length ?? 1,
     });
   }
 

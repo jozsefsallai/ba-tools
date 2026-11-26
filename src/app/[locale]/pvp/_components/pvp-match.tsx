@@ -15,6 +15,7 @@ import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
@@ -79,6 +80,10 @@ export function PVPMatch({ seasonId, match, seasonNumber }: PVPMatchProps) {
       await deleteMatchMutation({
         matchId: match._id,
       });
+      track("pvp_match_deleted", {
+        match_type: match.matchType,
+        result: match.result,
+      });
       toast.success(t("tools.pvp.match.deleteSuccess"));
     } catch (err) {
       console.error(err);
@@ -87,6 +92,8 @@ export function PVPMatch({ seasonId, match, seasonNumber }: PVPMatchProps) {
   }, [
     deleteMatchMutation,
     match._id,
+    match.matchType,
+    match.result,
     t,
   ]);
 

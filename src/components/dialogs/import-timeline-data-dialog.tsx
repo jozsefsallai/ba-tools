@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   type TimelineStorageData,
   timelineStorage,
@@ -37,11 +38,19 @@ export function ImportTimelineDataDialog({
     try {
       const data = JSON.parse(jsonImport) as TimelineStorageData;
       timelineStorage.set(data);
+      track("timeline_imported", {
+        source: "json",
+        item_count: data.items?.length ?? 0,
+      });
       closeRef.current?.click();
       toast.success(t("common.dialogs.importTimelineData.toasts.success"));
       onComplete?.();
     } catch (err) {
       console.error(err);
+      track("timeline_import_failed", {
+        source: "json",
+        reason: "invalid",
+      });
       toast.error(t("common.dialogs.importTimelineData.toasts.invalidData"));
     }
   }

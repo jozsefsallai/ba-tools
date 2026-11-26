@@ -22,6 +22,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -114,6 +115,13 @@ export function PVPFormationPresetForm({
           team: persistedTeam,
         });
       }
+
+      track("pvp_formation_preset_saved", {
+        is_new: !preset,
+        source: "preset_form",
+        match_type: matchType,
+        student_count: persistedTeam.filter((item) => item.studentId).length,
+      });
 
       router.push(`/pvp/${seasonId}/presets/formations`);
     } finally {

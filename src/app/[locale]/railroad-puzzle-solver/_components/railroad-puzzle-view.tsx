@@ -35,6 +35,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { track } from "@/lib/analytics/posthog.client";
 import { cn } from "@/lib/utils";
 import aobahuh from "../_assets/aobahuh.png";
 import minigameCurrencyIcon from "../_assets/minigame-currency-icon.png";
@@ -45,6 +46,14 @@ import styles from "./hexagon.module.css";
 type HexagonMapStyles = CSSProperties & {
   "--railroad-cell-height": string;
 };
+
+function railCountProperties(rails: Record<RailType, number>) {
+  return {
+    straight_rails: rails.STRAIGHT,
+    slightly_curved_rails: rails.SLIGHTLY_CURVED,
+    very_curved_rails: rails.VERY_CURVED,
+  };
+}
 
 export function RailroadPuzzleView() {
   const t = useTranslations();
@@ -111,12 +120,23 @@ export function RailroadPuzzleView() {
     setResultMap(new Map());
   }
 
-  function solve() {
+  function solve(trigger: "button" | "auto") {
     setResultMap(new Map());
 
+    const startedAt = performance.now();
     const result = solveRailroadPuzzle({
       grid: selectedPreset.grid,
       availableRails: railInventory,
+    });
+
+    track("railroad_puzzle_solved", {
+      puzzle: selectedPreset.name,
+      mode: "solve",
+      trigger,
+      solved: !!result,
+      result_count: result ? 1 : 0,
+      duration_ms: Math.round(performance.now() - startedAt),
+      ...railCountProperties(railInventory),
     });
 
     if (!result) {
@@ -135,7 +155,8 @@ export function RailroadPuzzleView() {
   }
 
   function handleSolveClick() {
-    const solved = solve();
+    const solved = solve("button");
+
     if (!solved) {
       toast.error(t("tools.railroad.toasts.noSolution"));
       return;
@@ -147,7 +168,7 @@ export function RailroadPuzzleView() {
       return;
     }
 
-    solve();
+    solve("auto");
   }, [
     railInventory,
     solveInstantly,
@@ -156,6 +177,7 @@ export function RailroadPuzzleView() {
   function handleGetMinimalConfigsClick() {
     setMinRailConfigs([]);
 
+    const startedAt = performance.now();
     const solutions = findShortestRailPaths({
       grid: selectedPreset.grid,
       availableRails: selectedPreset.defaultAvailableRails,
@@ -189,6 +211,16 @@ export function RailroadPuzzleView() {
     }
 
     setMinRailConfigs(minResults);
+
+    track("railroad_puzzle_solved", {
+      puzzle: selectedPreset.name,
+      mode: "min_configs",
+      trigger: "button",
+      solved: minResults.length > 0,
+      result_count: minResults.length,
+      duration_ms: Math.round(performance.now() - startedAt),
+      ...railCountProperties(selectedPreset.defaultAvailableRails),
+    });
   }
 
   const flatTiles = useMemo(
@@ -271,6 +303,9 @@ export function RailroadPuzzleView() {
     }
 
     setRailingAoba(true);
+    track("railroad_aoba_started", {
+      puzzle: selectedPreset.name,
+    });
 
     const randomHowl = howls[Math.floor(Math.random() * howls.length)];
     randomHowl.play();

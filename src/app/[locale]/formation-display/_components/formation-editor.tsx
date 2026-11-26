@@ -40,6 +40,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { revalidateFormation } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import { DndZoomContext } from "@/lib/dnd-mobile";
@@ -194,6 +195,11 @@ export function FormationEditor() {
     a.download = "formation.png";
     a.click();
 
+    track("formation_image_exported", {
+      source: "formation_display",
+      scale,
+    });
+
     setGenerationInProgress(false);
   }
 
@@ -239,6 +245,22 @@ export function FormationEditor() {
       groupsVertical,
     };
 
+    const savedEventProperties = {
+      source: "formation_display" as const,
+      formation_type: formationType ?? null,
+      row_count: rows.length,
+      student_count: rows.reduce(
+        (count, row) =>
+          count +
+          [
+            ...row.strikers,
+            ...row.specials,
+            ...(formationType === "tacticalRelay" ? row.tcs : []),
+          ].filter((item) => item.student).length,
+        0,
+      ),
+    };
+
     if (formationId) {
       await updateMutation({
         id: formationId as Id<"formation">,
@@ -253,12 +275,22 @@ export function FormationEditor() {
 
       await revalidateFormation(formationId);
 
+      track("formation_saved", {
+        ...savedEventProperties,
+        is_new: false,
+      });
+
       toast.success(t("tools.formationDisplay.toasts.updateSuccess"));
     } else {
       const newFormation = await createMutation(data);
 
       if (newFormation) {
         markAsSaved();
+
+        track("formation_saved", {
+          ...savedEventProperties,
+          is_new: true,
+        });
 
         toast.success(t("tools.formationDisplay.toasts.createSuccess"));
 
@@ -338,6 +370,11 @@ export function FormationEditor() {
           : row,
       ),
     );
+
+    track("formation_echelon_imported", {
+      striker_count: newStrikers.filter((item) => item.student).length,
+      special_count: newSpecials.filter((item) => item.student).length,
+    });
   }
 
   useEffect(() => {

@@ -41,6 +41,7 @@ import {
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import type { MissionMapData, MissionMapUnit } from "@/lib/game-data/contract";
 import { mainArmor } from "@/lib/missions/armor";
 import { initialBoard } from "@/lib/missions/initial-board";
@@ -150,6 +151,9 @@ function CopyBoardButton({ label }: { label: string }) {
     }
 
     toast.success(t("tools.missions.map.copied"));
+    track("mission_map_copied", {
+      mission: label,
+    });
     setCopied(true);
   };
 
@@ -774,6 +778,10 @@ export function MissionRoute({
     }
 
     setPlaying(true);
+    track("mission_route_played", {
+      mission: label,
+      route: route.kind,
+    });
   };
 
   const firstOfTurn = (turnIndex: number) =>

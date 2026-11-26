@@ -10,10 +10,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { track } from "@/lib/analytics/posthog.client";
 
 export function ThemeToggle() {
   const t = useTranslations();
-  const { setTheme } = useTheme();
+  const { setTheme: applyTheme } = useTheme();
+
+  function setTheme(theme: "light" | "dark" | "system") {
+    applyTheme(theme);
+    track("theme_changed", {
+      theme,
+    });
+  }
 
   return (
     <DropdownMenu>

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import { parseTimelineFromText } from "@/lib/timeline-text-format";
 
 export type ImportTextTimelineDialogProps = {
@@ -57,6 +58,12 @@ export function ImportTextTimelineDialog({
 
     onImport(importedItems);
     onOpenChange(false);
+
+    track("timeline_imported", {
+      source: "text",
+      item_count: importedItems.length,
+      unresolved_count: parsed.unresolved.length,
+    });
 
     toast.success(
       t("tools.timeline.import.toasts.success", {

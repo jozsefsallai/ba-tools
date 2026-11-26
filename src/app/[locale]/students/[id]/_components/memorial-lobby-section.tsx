@@ -64,6 +64,7 @@ export function MemorialLobbySection({
           <MemorialLobbyViewer
             lobbies={manifest.lobbies}
             posterUrl={posterUrl}
+            studentId={studentId}
           />
         ) : (
           <div className="bg-muted aspect-[4/3] w-full animate-pulse rounded-lg border" />

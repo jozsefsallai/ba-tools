@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
   type BorrowSlotGameMode,
@@ -318,6 +319,7 @@ export function RosterView({ gameServer, friendCode }: RosterViewProps) {
     try {
       await navigator.clipboard.writeText(friendCode);
       setCopied(true);
+      track("roster_friend_code_copied");
 
       setTimeout(() => {
         setCopied(false);

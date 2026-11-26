@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { track } from "@/lib/analytics/posthog.client";
 import { useQueryWithStatus } from "@/lib/convex";
 import { OG_DESIGN_VERSION } from "@/lib/og/registry";
 import type { GameServer } from "@/lib/types";
@@ -70,6 +71,9 @@ export function RosterOwnerActions({
       const url = new URL(publicRosterPath, window.location.origin).toString();
       await navigator.clipboard.writeText(url);
       setCopiedLink(true);
+      track("roster_link_copied", {
+        source: "public_view",
+      });
       toast.success(t("tools.roster.editor.toasts.shareLinkCopied"));
     } catch (err) {
       console.error(err);
@@ -106,6 +110,7 @@ export function RosterOwnerActions({
           [blob.type]: blob,
         }),
       ]);
+      track("roster_image_copied");
       toast.success(t("tools.roster.view.toasts.imageCardCopied"));
     } catch (err) {
       console.error(err);

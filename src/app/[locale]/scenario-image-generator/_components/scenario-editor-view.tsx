@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { track } from "@/lib/analytics/posthog.client";
 
 const SCRIPTING_ENABLED = process.env.NODE_ENV !== "production";
 
@@ -208,7 +209,19 @@ export function ScenarioEditorView() {
         ])
         .then(() => {
           toast.success(t("tools.scenarioImageGenerator.toasts.copied"));
+          trackExport("copy");
         });
+    });
+  }
+
+  function trackExport(method: "copy" | "download") {
+    track("scenario_image_exported", {
+      method,
+      character_count: characters.length,
+      has_background:
+        backgroundMode === "image" ? !!backgroundImage : !!backgroundUrl,
+      transparent_background: transparentBackground,
+      animate,
     });
   }
 
@@ -226,6 +239,7 @@ export function ScenarioEditorView() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      trackExport("download");
     });
   }
 
@@ -246,6 +260,10 @@ export function ScenarioEditorView() {
     }
 
     scenarioScriptPlayer.play(scriptParseResult.events);
+    track("scenario_script_played", {
+      event_count: scriptParseResult.events.length,
+      character_count: characters.length,
+    });
   }
 
   useEffect(() => {

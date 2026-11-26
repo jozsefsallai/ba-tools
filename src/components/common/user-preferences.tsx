@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AnalyticsSettings } from "@/components/common/analytics-consent";
 import { ExportBackgroundControls } from "@/components/common/export-background-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useUserPreferences } from "@/hooks/use-preferences";
+import { track } from "@/lib/analytics/posthog.client";
 import type { UserPreferences as UserPreferencesType } from "@/lib/user-preferences";
 
 export function UserPreferences() {
@@ -57,6 +59,7 @@ export function UserPreferences() {
         bond: newPreferences.bond,
         pvp: newPreferences.pvp,
       });
+      track("preferences_saved");
       toast.success(t("common.userPreferences.toasts.saved"));
     } catch (err) {
       console.error(err);
@@ -583,6 +586,16 @@ export function UserPreferences() {
             "common.userPreferences.pvp.includeMatchesInStatisticsByDefaultHint",
           )}
         </div>
+      </div>
+
+      <Separator />
+
+      <div className="flex flex-col gap-4 text-sm">
+        <h2 className="text-base font-semibold">
+          {t("common.analytics.title")}
+        </h2>
+
+        <AnalyticsSettings />
       </div>
 
       <Separator />

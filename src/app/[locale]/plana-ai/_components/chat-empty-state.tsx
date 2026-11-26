@@ -8,7 +8,12 @@ import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type SuggestionKey = "greeting" | "banner" | "lore" | "teaParty" | "affection";
+export type SuggestionKey =
+  | "greeting"
+  | "banner"
+  | "lore"
+  | "teaParty"
+  | "affection";
 
 const SUGGESTION_KEYS: SuggestionKey[] = [
   "greeting",
@@ -27,7 +32,7 @@ export function ChatEmptyState({
   composer: ReactNode;
   hasKey: boolean | null;
   onOpenSettings: () => void;
-  onSelectSuggestion: (message: string) => void;
+  onSelectSuggestion: (message: string, key: SuggestionKey) => void;
 }) {
   const t = useTranslations();
   const { user } = useUser();
@@ -101,7 +106,7 @@ export function ChatEmptyState({
                       key === "teaParty" && "hidden md:block",
                     )}
                     key={key}
-                    onClick={() => onSelectSuggestion(suggestion)}
+                    onClick={() => onSelectSuggestion(suggestion, key)}
                     type="button"
                   >
                     {suggestion}

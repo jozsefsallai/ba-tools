@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { track } from "@/lib/analytics/posthog.client";
 import type { GameServer, PVPSeasonNumber } from "@/lib/types";
 import {
   GAME_SERVER_NAMES,
@@ -72,6 +73,12 @@ export function PVPSeasonEditDialog({ season }: PVPSeasonEditDialogProps) {
         name,
         gameServer,
         seasonNumber,
+      });
+
+      track("pvp_season_saved", {
+        is_new: false,
+        game_server: gameServer,
+        season_number: seasonNumber,
       });
 
       toast.success(t("tools.pvp.seasonEdit.saved"));

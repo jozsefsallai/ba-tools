@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Blue Archive Tools — Next.js 16 (App Router) web app with Convex backend, Prisma read-only DB, Clerk auth, and Biome for linting/formatting. Deployed to Vercel.
+Joe's Blue Archive Tools (never "BA Tools" or "Blue Archive Tools" in user-facing text) — Next.js 16 (App Router) web app with Convex backend, Prisma read-only DB, Clerk auth, and Biome for linting/formatting. Deployed to Vercel.
 
 ## Commands
 
@@ -33,7 +33,7 @@ Always use these aliases. Never import from the raw generated paths.
 
 ## Architecture
 
-- **Prisma / Neon PostgreSQL** — static game data, **read-only**. Schema pulled from AronaBot's DB via `prisma db pull`. No migrations. All table models: `Student`, `Skill`, `StudentSkill`, `StudentSkillText`, `SkillEffect`, `SkillEffectText`, `Gift`, `Mission`, `Banner`, `GameBanner`.
+- **Prisma / PlanetScale Postgres** (through Neon's serverless driver, `@prisma/adapter-neon`) — static game data, **read-only**. Schema pulled from AronaBot's DB via `prisma db pull`. No migrations. All table models: `Student`, `Skill`, `StudentSkill`, `StudentSkillText`, `SkillEffect`, `SkillEffectText`, `Gift`, `Mission`, `Banner`, `GameBanner`.
 - **Skills** — `Skill` is the legacy SchaleDB-seeded model, kept until AronaBot moves off it. `StudentSkill` (+ texts and effects) comes from the game data via `pnpm game-data skills` / the `sync-student-skills` Trigger task; description markup is documented on `SkillTextData` in `src/lib/game-data/contract.ts`.
 - **Relationship stories** — `StudentBondStory` lists each student's relationship story episodes (titles in every language, the bond rank each opens at, and which one unlocks the memorial lobby or is the bond gear's), from the game files via `pnpm game-data bond-stories` / the `sync-bond-stories` Trigger task. JP decides the episodes and unlocks; EN/TW/TH titles are Global's. Shown on the student page and in `GET /api/v1/students/:id` / `get_student`.
 - **Gift preferences** — the `seed-gifts` Trigger task creates `Gift` rows from SchaleDB's items and sets each student's adored/loved/liked gifts by matching tags. Gift tags come from the JP game files (`listFavorItems` in mx-data-sync) when it can read them, otherwise from SchaleDB, which adds a new student's unique tags to its gifts late. Students not on SchaleDB yet are passed in the payload (`list-new-students` output). The run's `incompleteStudents` lists students whose unique tags no gift has, so their gifts need another run.
@@ -56,11 +56,12 @@ Always use these aliases. Never import from the raw generated paths.
 All must be present in `.env.local`. See `.env.example` for the full list.
 
 - `IMAGE_CDN_URL` — **required at startup/build**; Next.js config throws if missing. Use `https://aronabot.cdn.nimblebun.works` locally.
-- `DATABASE_URL` — Neon connection string (used by both Next.js and Prisma config)
+- `DATABASE_URL` — PlanetScale Postgres connection string (used by both Next.js and Prisma config)
 - `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CLERK_JWT_ISSUER_DOMAIN`
 - `API_BRIDGE_SECRET` — must match the same variable on the Convex deployment; the public API (`/api/v1/me/*`) uses it to act for API key owners.
 - `TRIGGER_SECRET_KEY` — optional; lets the roadmap admin page start the `sync-upcoming-content` task ("Read game files"). A manual run cancels the task's pending maintenance checks.
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — REST credentials of the Upstash database behind `REDIS_URL`; `@upstash/ratelimit` uses them to rate-limit `/api/v1`. When unset (or Upstash is down), requests aren't limited.
+- `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` — optional; PostHog analytics and error tracking (see Analytics below). Unset means no analytics.
 - `NEXT_PUBLIC_PLANA_AI_ENABLED`, `OPENAI_API_KEY`, `CHROMA_API_KEY`, `CHROMA_TENANT_ID`, `CHROMA_DATABASE_NAME` — Plana AI feature. Chat provider keys are supplied through Plana's BYOK settings UI.
 
 ## Key Quirks
@@ -72,6 +73,10 @@ All must be present in `.env.local`. See `.env.example` for the full list.
 - **Content-Security-Policy** is built in `next.config.ts` (`cspDirectives`). When a feature loads scripts, frames or fetches from a new external origin, add it there. `/plana-ai` gets a stricter `img-src` so model replies can't leak chat data through image URLs.
 - **Roles** (`isSuperUser`, `isMaintainer`, `canAccessPlanaAI`) come only from Clerk public or private metadata, never `unsafeMetadata` (users can write it themselves).
 - **PWA (Serwist)**: service worker built from `src/sw.ts` → `public/sw.js`. Disabled in development.
+
+## Analytics (PostHog)
+
+Started in `src/instrumentation-client.ts`, configured in `src/lib/analytics/posthog.client.ts` to match the privacy policy (https://nimblebun.works/en/privacy, section 12): events are never tied to the account (no `identify`, `person_profiles: "never"`), no session recordings, surveys or feature flags, no Plana AI autocapture, and Clerk/OAuth tokens are stripped from URLs. Exceptions are autocaptured for error tracking. Analytics are opt-in everywhere: every visitor gets a consent banner, and nothing is captured or stored until they allow it (no region checks, on purpose). Anyone can turn analytics off from the footer's "Analytics" link or the Preferences page (per browser). In development without `NEXT_PUBLIC_POSTHOG_KEY`, analytics are simulated: the banner and switch work against localStorage (`ba-analytics-simulated-consent`), `track()` logs `[analytics] …` to the console, and nothing is sent. Use a separate PostHog project if you need real events locally. Don't route PostHog through a first-party proxy: the policy says content blockers may block analytics. Product events go through `track()` (`posthog.client.ts`), typed by the catalog in `src/lib/analytics/events.ts`; fire them after the action succeeds, and never put user-written text or ids of the user's own items in properties. Every event is documented for users in `ANALYTICS.md`: update it with the catalog. If you change what's collected, check the policy still covers it.
 
 ## Translations (Crowdin)
 

@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Toggle } from "@/components/ui/toggle";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { GAME_SERVER_NAMES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
@@ -152,6 +153,10 @@ export function RecruitmentAccounts() {
     try {
       await setAccountArchived({
         accountId,
+        archived,
+      });
+
+      track("recruitment_account_archived", {
         archived,
       });
 

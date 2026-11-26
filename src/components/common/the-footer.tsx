@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { AnalyticsSettingsDialog } from "@/components/common/analytics-consent";
 import { Link, usePathname } from "@/i18n/navigation";
 
 export function TheFooter({ commitHash }: { commitHash: string }) {
@@ -44,6 +45,12 @@ export function TheFooter({ commitHash }: { commitHash: string }) {
         >
           {t("common.footer.nav.privacy")}
         </a>{" "}
+        &middot;{" "}
+        <AnalyticsSettingsDialog>
+          <button type="button" className="underline">
+            {t("common.footer.nav.analytics")}
+          </button>
+        </AnalyticsSettingsDialog>{" "}
         &middot;{" "}
         <Link href="/credits" className="underline">
           {t("common.footer.nav.credits")}

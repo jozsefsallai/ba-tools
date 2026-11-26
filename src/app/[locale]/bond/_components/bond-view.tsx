@@ -52,6 +52,7 @@ import { useDirtyStateTracker } from "@/hooks/use-dirty-state-tracker";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   boxAllocationsEqual,
   buildTargetAllocationsFromDoc,
@@ -810,6 +811,11 @@ export function BondView({ students, gifts }: BondViewProps) {
       setCurrentBondStr("1");
       setCurrentBondExpStr("0");
     }
+
+    track("bond_student_selected", {
+      student_id: student.id,
+      prefilled_from_roster: bondUpdated,
+    });
   }
 
   const startingLevel = useMemo(() => {
@@ -881,6 +887,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       }
 
       setSelectedInventoryId(id);
+
+      track("gift_inventory_created", {
+        gift_type_count: Object.values(giftCounts).filter((count) => count > 0)
+          .length,
+        gift_boxes_used: giftBoxesUsed,
+      });
     } catch (err) {
       console.error(err);
       toast.error(t("tools.bond.toasts.inventoryCreateFail"));
@@ -911,6 +923,8 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     setBusy(true);
+
+    const targetStudentId = selectedStudent.id;
 
     try {
       const id = await createTargetMutation({
@@ -952,6 +966,15 @@ export function BondView({ students, gifts }: BondViewProps) {
       if (navigationGuard.active) {
         navigationGuard.accept();
       }
+
+      track("gift_target_created", {
+        student_id: targetStudentId,
+        current_rank: bondRankAtExp(currentBondExp),
+        target_rank:
+          targetBondExp === null
+            ? bondRankAtExp(currentBondExp)
+            : bondRankForTargetExp(targetBondExp),
+      });
     } catch (err) {
       console.error(err);
       toast.error(t("tools.bond.toasts.targetCreateFail"));
@@ -966,6 +989,8 @@ export function BondView({ students, gifts }: BondViewProps) {
     }
 
     setBusy(true);
+
+    const saveSource = navigationGuard.active ? "leave_prompt" : "button";
 
     try {
       if (selectedInvenetoryId) {
@@ -994,6 +1019,11 @@ export function BondView({ students, gifts }: BondViewProps) {
       if (navigationGuard.active) {
         navigationGuard.accept();
       }
+
+      track("gift_inventory_saved", {
+        target_count: inventoryQuery.data?.targets.length ?? 0,
+        source: saveSource,
+      });
     } catch (err) {
       console.error(err);
       toast.error(t("tools.bond.toasts.inventoryUpdateFail"));
@@ -1015,6 +1045,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       });
 
       toast.success(t("tools.bond.toasts.inventoryDeleteSuccess"));
+
+      track("gift_inventory_deleted", {
+        target_count: inventoryTargets.length,
+      });
 
       setSelectedInventoryId(null);
       setSelectedTargetId(null);
@@ -1060,6 +1094,10 @@ export function BondView({ students, gifts }: BondViewProps) {
       });
 
       toast.success(t("tools.bond.toasts.targetDeleteSuccess"));
+
+      track("gift_target_deleted", {
+        student_id: selectedStudent?.id ?? null,
+      });
 
       setTargetAllocations((prev) => {
         const next = {
@@ -1671,4 +1709,12 @@ export function BondView({ students, gifts }: BondViewProps) {
       </Authenticated>
     </div>
   );
+}
+
+function bondRankAtExp(exp: number) {
+  return favorTable.findLast((entry) => entry.totalExp <= exp)?.level ?? 1;
+}
+
+function bondRankForTargetExp(exp: number) {
+  return favorTable.find((entry) => entry.totalExp >= exp)?.level ?? 1;
 }

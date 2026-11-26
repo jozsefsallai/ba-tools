@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
 
@@ -75,6 +76,7 @@ export function PVPEnemyPresetsPage({
       await anonymize({
         presetId: anonymizeSource._id,
       });
+      track("pvp_enemy_preset_anonymized");
       setAnonymizeSource(undefined);
     } catch {
       setAnonymizeFailed(true);
@@ -325,7 +327,7 @@ export function PVPEnemyPresetsPage({
           onConfirm={() =>
             remove({
               presetId: deleteSource._id,
-            })
+            }).then(() => track("pvp_enemy_preset_deleted"))
           }
         />
       )}

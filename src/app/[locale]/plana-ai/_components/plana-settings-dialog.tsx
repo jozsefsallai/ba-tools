@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { track } from "@/lib/analytics/posthog.client";
 
 type Provider = "openrouter" | "gateway";
 
@@ -88,6 +89,14 @@ export function PlanaSettingsDialog({
           chatModel: chatModel.trim() || undefined,
           provider,
         });
+        const customModel = chatModel.trim();
+        track("plana_config_saved", {
+          provider,
+          key_changed: Boolean(apiKey.trim()),
+          provider_changed: savedProvider !== provider,
+          uses_custom_model:
+            customModel !== "" && customModel !== DEFAULT_CHAT_MODELS[provider],
+        });
         setSavedProvider(provider);
         setApiKey("");
         onSaved?.(true);
@@ -108,6 +117,7 @@ export function PlanaSettingsDialog({
         setSavedProvider(null);
         setProvider("openrouter");
         onSaved?.(false);
+        track("plana_config_cleared");
         toast.success(t("tools.plana.settings.toasts.cleared"));
       } catch {
         toast.error(t("tools.plana.settings.toasts.failed"));

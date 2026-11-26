@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { track } from "@/lib/analytics/posthog.client";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -186,6 +187,7 @@ export function PlanaChatSidebar({
     await deleteChat({
       chatId,
     });
+    track("plana_chat_deleted");
 
     if (activeChatId === chatId) {
       replaceChatUrl(undefined);
@@ -197,6 +199,7 @@ export function PlanaChatSidebar({
       chatId,
       title,
     });
+    track("plana_chat_renamed");
   }
 
   if (collapsed) {

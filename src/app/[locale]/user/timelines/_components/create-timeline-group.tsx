@@ -20,6 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAutoName } from "@/hooks/use-auto-name";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import type { RaidInfo } from "@/lib/raid-info";
 import type { RoadmapRaidItem } from "@/lib/roadmap/types";
 import { api } from "~convex/api";
@@ -60,6 +61,14 @@ export function CreateTimelineGroup({
         showCreator: visibility === "public" ? showCreator : false,
         raid,
         autoName: autoName || undefined,
+      });
+
+      track("timeline_group_saved", {
+        is_new: true,
+        timeline_count: 0,
+        visibility,
+        show_creator: visibility === "public" ? showCreator : false,
+        raid_type: raid?.type ?? null,
       });
 
       toast.success(t("tools.myTimelines.createGroup.toasts.success"));

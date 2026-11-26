@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/numeric-input";
 import { Switch } from "@/components/ui/switch";
 import { Link, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { getErrorMessage } from "@/lib/convex-error";
 import {
   calculateRecruitmentStats,
@@ -472,6 +473,15 @@ export function RecruitmentSessionEditor({
       }
 
       toast.success(t("tools.recruitment.toasts.sessionSaved"));
+      track("recruitment_session_saved", {
+        is_new: !sessionId,
+        fest_banner: session.isFestBanner,
+        permanent_pulls: session.permanentPulls,
+        limited_pulls: session.limitedPulls,
+        free_pulls: session.freePulls ?? 0,
+        three_star_count: session.threeStarCount,
+        pickups_obtained: session.pickupsObtained.length,
+      });
       router.push(accountPath);
     } catch (error) {
       toast.error(t(saveErrorKey(error)));
@@ -488,6 +498,7 @@ export function RecruitmentSessionEditor({
         sessionId,
       });
 
+      track("recruitment_session_deleted");
       setDeleteDialogOpen(false);
       router.push(accountPath);
     } catch (error) {

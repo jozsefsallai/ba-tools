@@ -56,6 +56,7 @@ import { useUserPreferences } from "@/hooks/use-preferences";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { getErrorMessage } from "@/lib/convex-error";
 import { type PvpBattleInfo, resolvePvpReportTeam } from "@/lib/pvp";
 import type { PvpOcrClient } from "@/lib/pvp/ocr";
@@ -700,6 +701,19 @@ export function PvpScreenshotImport({
         }
       }
     } finally {
+      const countStage = (stage: Stage) =>
+        batch.filter((item) => item.stage === stage).length;
+
+      track("pvp_screenshots_imported", {
+        screenshot_count: batch.length,
+        imported_count: countStage("imported"),
+        failed_count: countStage("failed"),
+        skipped_count: countStage("skipped"),
+        assisted_mode: batchAssistedMode,
+        include_in_statistics: batchIncludeInStatistics,
+        aborted: signal.aborted,
+      });
+
       for (const client of clients.current) {
         client?.dispose();
       }

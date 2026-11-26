@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useStudents } from "@/hooks/use-students";
 import { getWriteVerb, type PlanaToolView } from "@/lib/ai/tool-parts";
+import { track } from "@/lib/analytics/posthog.client";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 
 export function ToolApprovalCard({
@@ -29,6 +30,15 @@ export function ToolApprovalCard({
   const verb = getWriteVerb(tool.toolName) ?? "update";
 
   const isDelete = verb === "delete";
+
+  function respond(id: string, approved: boolean) {
+    track("plana_tool_approval", {
+      tool: tool.toolName,
+      verb,
+      approved,
+    });
+    onRespond(id, approved);
+  }
 
   return (
     <div className="space-y-3 rounded-xl border bg-card p-4">
@@ -82,7 +92,7 @@ export function ToolApprovalCard({
       {approvalId ? (
         <div className="flex gap-2">
           <Button
-            onClick={() => onRespond(approvalId, true)}
+            onClick={() => respond(approvalId, true)}
             size="sm"
             type="button"
             variant={isDelete ? "destructive" : "default"}
@@ -93,7 +103,7 @@ export function ToolApprovalCard({
           </Button>
 
           <Button
-            onClick={() => onRespond(approvalId, false)}
+            onClick={() => respond(approvalId, false)}
             size="sm"
             type="button"
             variant="outline"

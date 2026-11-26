@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import type { PVPFormationPresetType } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -169,7 +170,7 @@ export function PVPFormationPresetsPage({
                     onConfirm={() =>
                       remove({
                         presetId: preset._id,
-                      })
+                      }).then(() => track("pvp_formation_preset_deleted"))
                     }
                   >
                     <Button size="sm" variant="destructive">

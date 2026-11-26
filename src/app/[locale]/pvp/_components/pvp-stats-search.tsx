@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { usePvpStatsFilters } from "@/hooks/use-pvp-stats-filters";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import { type PvpBattleInfo, resolvePvpReportTeam } from "@/lib/pvp";
 import {
   buildPvpCounterSearchHref,
@@ -491,6 +492,13 @@ export function PVPStatsSearch() {
   function handleReportImported(battle: PvpBattleInfo) {
     const team = resolvePvpReportTeam(battle.enemyUnits, students);
 
+    track("pvp_combat_report_imported", {
+      source: "stats_search",
+      battle_type: battle.battleType.value ?? "unknown",
+      unresolved_count: team.filter((item) => item.report && !item.student)
+        .length,
+    });
+
     setDefenseTeam(
       team.map(({ student }) =>
         student
@@ -542,10 +550,24 @@ export function PVPStatsSearch() {
 
     scrollToResultsRef.current = true;
 
+    const defenseTeamPayload = getDefenseTeamPayload();
+
     setSubmittedSearch({
       seasonNumber,
-      defenseTeam: getDefenseTeamPayload(),
+      defenseTeam: defenseTeamPayload,
       excludedStudentIds,
+    });
+
+    track("pvp_stats_searched", {
+      season_number: seasonNumber,
+      defense_student_ids: defenseTeamPayload.flatMap((item) =>
+        "studentId" in item && item.studentId
+          ? [
+              item.studentId,
+            ]
+          : [],
+      ),
+      excluded_count: excludedStudentIds.length,
     });
   }
 
@@ -578,6 +600,10 @@ export function PVPStatsSearch() {
         setShareFeedback("idle");
         shareFeedbackTimerRef.current = null;
       }, 2000);
+
+      track("pvp_stats_link_copied", {
+        season_number: seasonNumber,
+      });
 
       toast.success(t("tools.pvp.stats.shareLinkCopied"));
     } catch (error) {

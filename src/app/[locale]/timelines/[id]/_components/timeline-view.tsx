@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
 import { encodePngWithItxt } from "@/lib/png-metadata";
@@ -221,8 +222,20 @@ export function TimelineView({ id }: TimelineViewProps) {
       link.download = `${filename}.png`;
       link.click();
       URL.revokeObjectURL(url);
+
+      track("timeline_image_exported", {
+        source: "view",
+        scale,
+        transparent_background: exportWithTransparentBackground,
+        include_formation: exportIncludeFormation,
+        item_count: query.data.items.length,
+        raid_type: query.data.raid?.type ?? null,
+      });
     } catch (err) {
       console.error(err);
+      track("timeline_image_export_failed", {
+        source: "view",
+      });
       toast.error(t("tools.timeline.exportFailed"));
     } finally {
       setGenerationInProgress(false);

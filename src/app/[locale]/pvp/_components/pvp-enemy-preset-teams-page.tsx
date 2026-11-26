@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { buildPvpCounterSearchHref } from "@/lib/pvp/counter-link";
 import { Storage } from "@/lib/storage";
 import { api } from "~convex/api";
@@ -148,6 +149,11 @@ export function PVPEnemyPresetTeamsPage({
         matchType,
       });
     }
+    track("pvp_enemy_team_saved", {
+      is_new: !editingTeamId,
+      match_type: matchType,
+      student_count: persisted.filter((slot) => slot.studentId).length,
+    });
     setDialogOpen(false);
   }
 
@@ -337,7 +343,7 @@ export function PVPEnemyPresetTeamsPage({
                           deleteTeam({
                             teamId:
                               knownTeam.manualTeamId as Id<"pvpEnemyTeam">,
-                          })
+                          }).then(() => track("pvp_enemy_team_deleted"))
                         }
                       >
                         <Button size="sm" variant="destructive">

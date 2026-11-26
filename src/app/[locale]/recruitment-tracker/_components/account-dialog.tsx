@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { HARD_PITY } from "@/lib/recruitment";
 import {
   GAME_SERVER_NAMES,
@@ -105,11 +106,19 @@ export function AccountDialog({
         });
 
         toast.success(t("tools.recruitment.toasts.accountUpdated"));
+        track("recruitment_account_saved", {
+          is_new: false,
+          game_server: gameServer,
+        });
         onOpenChange(false);
       } else {
         const accountId = await createAccount(fields);
 
         toast.success(t("tools.recruitment.toasts.accountCreated"));
+        track("recruitment_account_saved", {
+          is_new: true,
+          game_server: gameServer,
+        });
         onOpenChange(false);
         router.push(`/recruitment-tracker/${accountId}`);
       }
@@ -140,6 +149,7 @@ export function AccountDialog({
       });
 
       toast.success(t("tools.recruitment.toasts.accountDeleted"));
+      track("recruitment_account_deleted");
       onOpenChange(false);
       router.push("/recruitment-tracker");
     } catch {

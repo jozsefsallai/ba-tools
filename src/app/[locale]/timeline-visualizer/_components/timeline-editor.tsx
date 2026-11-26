@@ -59,6 +59,7 @@ import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { revalidateTimeline } from "@/lib/cache";
 import { compositeCanvasBackground, trimTransparentPixels } from "@/lib/canvas";
 import { useQueryWithStatus } from "@/lib/convex";
@@ -581,8 +582,20 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
       link.download = `${filename}.png`;
       link.click();
       URL.revokeObjectURL(url);
+
+      track("timeline_image_exported", {
+        source: "editor",
+        scale,
+        transparent_background: exportWithTransparentBackground,
+        include_formation: exportIncludeFormation,
+        item_count: items.length,
+        raid_type: raid?.type ?? null,
+      });
     } catch (err) {
       console.error(err);
+      track("timeline_image_export_failed", {
+        source: "editor",
+      });
       toast.error(t("tools.timeline.exportFailed"));
     } finally {
       setGenerationInProgress(false);
@@ -623,6 +636,16 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
       autoName: autoName && name.length > 0 ? true : undefined,
     };
 
+    const savedEventProperties = {
+      item_count: items.length,
+      visibility,
+      show_creator: data.showCreator,
+      raid_type: raid?.type ?? null,
+      raid_boss: raid?.boss ?? null,
+      raid_difficulty: raid?.difficulty ?? null,
+      has_formation: hasFormationSlots(formation),
+    };
+
     if (timelineId) {
       await updateMutation({
         id: timelineId as Id<"timeline">,
@@ -637,12 +660,27 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
 
       await revalidateTimeline(timelineId);
 
+      track("timeline_saved", {
+        ...savedEventProperties,
+        is_new: false,
+        visibility_changed:
+          query.status === "success" &&
+          query.data?.visibility !== undefined &&
+          query.data.visibility !== visibility,
+      });
+
       toast.success("Timeline saved successfully.");
     } else {
       const newTimeline = await createMutation(data);
 
       if (newTimeline) {
         markAsSaved();
+
+        track("timeline_saved", {
+          ...savedEventProperties,
+          is_new: true,
+          visibility_changed: false,
+        });
 
         toast.success("Timeline created successfully.");
 
@@ -716,6 +754,10 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
       const text = decodePngItxt(buffer, "ba-tools:timeline");
 
       if (!text) {
+        track("timeline_import_failed", {
+          source: "image",
+          reason: "no_data",
+        });
         toast.error(
           t("common.dialogs.importTimelineData.toasts.noDataInImage"),
         );
@@ -725,9 +767,17 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
       const data = JSON.parse(text) as TimelineStorageData;
       timelineStorage.set(data);
       loadTimelineFromStorage();
+      track("timeline_imported", {
+        source: "image",
+        item_count: data.items?.length ?? 0,
+      });
       toast.success(t("common.dialogs.importTimelineData.toasts.success"));
     } catch (err) {
       console.error(err);
+      track("timeline_import_failed", {
+        source: "image",
+        reason: "invalid",
+      });
       toast.error(t("common.dialogs.importTimelineData.toasts.invalidData"));
     }
   }
@@ -742,6 +792,9 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
     timelineStorage.set(buildTimelineData());
 
     if (showToast) {
+      track("timeline_saved_locally", {
+        item_count: items.length,
+      });
       toast.success("Timeline saved successfully.");
     }
 
@@ -764,6 +817,7 @@ export function TimelineEditor({ roadmapRaids }: TimelineEditorProps) {
   async function copyLink() {
     const url = new URL(`/timelines/${timelineId}`, window.location.origin);
     await navigator.clipboard.writeText(url.toString());
+    track("timeline_link_copied");
     toast.success("Link copied to clipboard.");
   }
 

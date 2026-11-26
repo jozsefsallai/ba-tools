@@ -63,6 +63,7 @@ import {
 import { useUserPreferences } from "@/hooks/use-preferences";
 import { useStudents } from "@/hooks/use-students";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { revalidateFormation } from "@/lib/cache";
 import { useQueryWithStatus } from "@/lib/convex";
 import { DndZoomContext } from "@/lib/dnd-mobile";
@@ -265,6 +266,22 @@ export function TimelineFormationSection({
       specials: firstRow.specials,
     };
 
+    const savedEventProperties = {
+      source: "timeline_editor" as const,
+      formation_type: formation.type ?? null,
+      row_count: formation.rows.length,
+      student_count: formation.rows.reduce(
+        (count, row) =>
+          count +
+          [
+            ...row.strikers,
+            ...row.specials,
+            ...row.tcs,
+          ].filter((item) => item.student).length,
+        0,
+      ),
+    };
+
     try {
       if (isLinked && formationId) {
         await updateMutation({
@@ -272,6 +289,10 @@ export function TimelineFormationSection({
           ...payload,
         });
         await revalidateFormation(formationId);
+        track("formation_saved", {
+          ...savedEventProperties,
+          is_new: false,
+        });
         toast.success(t("tools.formationDisplay.toasts.updateSuccess"));
       } else {
         const created = await createMutation(payload);
@@ -285,6 +306,10 @@ export function TimelineFormationSection({
                 }
               : prev,
           );
+          track("formation_saved", {
+            ...savedEventProperties,
+            is_new: true,
+          });
           toast.success(t("tools.formationDisplay.toasts.createSuccess"));
         } else {
           toast.error(t("tools.formationDisplay.toasts.createFail"));
@@ -332,6 +357,11 @@ export function TimelineFormationSection({
       link.href = canvas.toDataURL("image/png");
       link.download = `${filename}.png`;
       link.click();
+
+      track("formation_image_exported", {
+        source: "timeline_editor",
+        scale: effectiveDownloadScale,
+      });
     } catch (err) {
       console.error(err);
     } finally {

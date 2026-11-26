@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { revalidateRosterPublicCache } from "@/lib/cache";
 import {
   FRIEND_CODE_LENGTH,
@@ -64,6 +65,15 @@ export function CreateRoster() {
       if (visibility === "public") {
         await revalidateRosterPublicCache(gameServer, friendCode);
       }
+
+      track("roster_saved", {
+        is_new: true,
+        visibility,
+        game_server: gameServer,
+        student_count: 0,
+        featured_count: 0,
+        has_representative: !!studentRep,
+      });
 
       toast.success(t("tools.roster.create.toasts.success"));
       router.push(`/rosters/edit/${id}`);

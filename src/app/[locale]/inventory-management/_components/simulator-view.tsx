@@ -36,6 +36,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   type AoiInventoryData,
   type AoiInventorySlot,
@@ -183,6 +184,9 @@ function RecommendedPresetCard({
       await navigator.clipboard.writeText(url.toString());
       setCopied(true);
       toast.success(t("tools.inventoryManagement.toasts.presetShareCopied"));
+      track("inventory_preset_link_copied", {
+        preset_id: preset.id,
+      });
       setTimeout(() => setCopied(false), 2500);
     } catch (error) {
       console.error(error);
@@ -246,6 +250,13 @@ export function InventoryManagementSimulatorView({
   const [ready, setReady] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const workerRef = useRef<Worker | null>(null);
+
+  const simulationRef = useRef<{
+    presetId: string | null;
+    roundIndex: number | null;
+    blockedCellCount: number;
+    startedAt: number;
+  } | null>(null);
 
   const searchParams = useSearchParams();
 
@@ -384,6 +395,13 @@ export function InventoryManagementSimulatorView({
 
     setRequestInProgress(true);
 
+    simulationRef.current = {
+      presetId: preset?.id ?? null,
+      roundIndex: preset ? presetRoundIndex : null,
+      blockedCellCount: blockedCells.length,
+      startedAt: performance.now(),
+    };
+
     workerRef.current.postMessage({
       type: "simulate_inventory_management",
       payload: {
@@ -405,6 +423,18 @@ export function InventoryManagementSimulatorView({
       toast.error(error);
     } else {
       setResults(result ?? undefined);
+    }
+
+    const simulation = simulationRef.current;
+    if (simulation) {
+      simulationRef.current = null;
+      track("inventory_simulation_completed", {
+        failed: Boolean(error),
+        preset_id: simulation.presetId,
+        round_index: simulation.roundIndex,
+        blocked_cell_count: simulation.blockedCellCount,
+        duration_ms: Math.round(performance.now() - simulation.startedAt),
+      });
     }
 
     setRequestInProgress(false);
@@ -435,7 +465,10 @@ export function InventoryManagementSimulatorView({
     setBlockedCells([]);
   }
 
-  function handleLoad(slot: AoiInventorySlot) {
+  function handleLoad(
+    slot: AoiInventorySlot,
+    source: "button" | "url" = "button",
+  ) {
     const data = aoiInventoryStorage.get();
     if (!data?.[slot]) {
       toast.warning(t("tools.inventoryManagement.toasts.noSavedData"));
@@ -459,6 +492,10 @@ export function InventoryManagementSimulatorView({
     }
 
     toast.success(t("tools.inventoryManagement.toasts.dataLoaded"));
+    track("inventory_layout_loaded", {
+      slot,
+      source,
+    });
   }
 
   function handleSave(slot: AoiInventorySlot) {
@@ -491,9 +528,16 @@ export function InventoryManagementSimulatorView({
     }));
 
     toast.success(t("tools.inventoryManagement.toasts.dataSaved"));
+    track("inventory_layout_saved", {
+      slot,
+    });
   }
 
-  function handlePresetLoaded(id: string, roundIndex: number) {
+  function handlePresetLoaded(
+    id: string,
+    roundIndex: number,
+    source: "recommended" | "dialog" | "next_round" | "url" = "dialog",
+  ) {
     const preset = inventoryManagementPresets.find((p) => p.id === id);
     if (!preset) {
       toast.error(t("tools.inventoryManagement.toasts.presetNotFound"));
@@ -538,6 +582,11 @@ export function InventoryManagementSimulatorView({
         round: roundIndex + 1,
       }),
     );
+    track("inventory_preset_loaded", {
+      preset_id: preset.id,
+      round_index: roundIndex,
+      source,
+    });
   }
 
   function onPlacingToggled(item: InventoryManagementItem, rotated: boolean) {
@@ -565,7 +614,7 @@ export function InventoryManagementSimulatorView({
       return;
     }
 
-    handlePresetLoaded(preset.id, presetRoundIndex + 1);
+    handlePresetLoaded(preset.id, presetRoundIndex + 1, "next_round");
   }
 
   useEffect(() => {
@@ -620,7 +669,7 @@ export function InventoryManagementSimulatorView({
       parsedSlotParam <= 3
     ) {
       const slot = `slot${parsedSlotParam}` as AoiInventorySlot;
-      handleLoad(slot);
+      handleLoad(slot, "url");
       return;
     }
 
@@ -640,7 +689,7 @@ export function InventoryManagementSimulatorView({
     }
 
     if (preset) {
-      handlePresetLoaded(preset.id, roundIndex);
+      handlePresetLoaded(preset.id, roundIndex, "url");
     }
   }, [
     presetParam,
@@ -671,7 +720,9 @@ export function InventoryManagementSimulatorView({
         {!preset && !presetFromSearchParams && recommendedPreset && (
           <RecommendedPresetCard
             preset={recommendedPreset}
-            onApply={() => handlePresetLoaded(recommendedPreset.id, 0)}
+            onApply={() =>
+              handlePresetLoaded(recommendedPreset.id, 0, "recommended")
+            }
           />
         )}
 
@@ -785,7 +836,11 @@ export function InventoryManagementSimulatorView({
             </SelectContent>
           </Select>
 
-          <LoadInventoryPresetDialog onFinish={handlePresetLoaded}>
+          <LoadInventoryPresetDialog
+            onFinish={(id, roundIndex) =>
+              handlePresetLoaded(id, roundIndex, "dialog")
+            }
+          >
             <Button variant="outline">
               {t("tools.inventoryManagement.loadPreset")}
             </Button>

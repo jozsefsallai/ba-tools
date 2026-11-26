@@ -1,8 +1,10 @@
 "use client";
 
 import type { PropsWithChildren } from "react";
+import { AnalyticsConsentBanner } from "@/components/common/analytics-consent";
 import { AppMain } from "@/components/common/app-main";
 import { AppSidebar } from "@/components/common/app-sidebar";
+import { SignInTracker } from "@/components/common/sign-in-tracker";
 import { TheFooter } from "@/components/common/the-footer";
 import { InsetHeader } from "@/components/common/the-header";
 import { AppBreadcrumbsProvider } from "@/components/providers/app-breadcrumbs-provider";
@@ -37,6 +39,9 @@ export function AppShell({ children, commitHash }: AppShellProps) {
 
           <TheFooter commitHash={commitHash} />
         </SidebarInset>
+
+        <AnalyticsConsentBanner />
+        <SignInTracker />
       </SidebarProvider>
     </AppBreadcrumbsProvider>
   );

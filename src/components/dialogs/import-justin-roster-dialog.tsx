@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   type JustinPlannerExportData,
   justinToRosterItems,
@@ -51,6 +52,11 @@ export function ImportJustinRosterDialog({
       const items = justinToRosterItems(students, data);
       onImport(items);
       closeRef.current?.click();
+
+      track("roster_imported", {
+        format: "justin",
+        student_count: items.length,
+      });
 
       toast.success(
         t("tools.roster.editor.importJustinPlanner.toasts.success"),

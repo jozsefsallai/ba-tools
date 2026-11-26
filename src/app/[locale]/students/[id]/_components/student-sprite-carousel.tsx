@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { FallbackImage } from "@/components/common/fallback-image";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics/posthog.client";
 import { fetchStudentSprites } from "@/lib/student-spine";
 import { buildStudentDefaultSpriteUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
@@ -228,6 +229,10 @@ export function StudentSpriteCarousel({
     }
 
     toast.success(t("tools.students.detail.sprite.copied"));
+    track("student_sprite_copied", {
+      student_id: studentId,
+      variant: current.key,
+    });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

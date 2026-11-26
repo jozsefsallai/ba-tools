@@ -2,7 +2,7 @@
 
 import { ChevronsUpDownIcon, LoaderCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StudentPicker } from "@/components/common/student-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   BOSS_EMBLEM_NAMES,
   BOSS_EMBLEM_TERRAINS,
@@ -54,6 +55,8 @@ export function TitleGeneratorView() {
   const [clientReady, setClientReady] = useState(false);
 
   const [mode, setMode] = useState<TitleGeneratorMode>("basic");
+  // The emblem shown when the page opens isn't one the user generated.
+  const initialImageLoadedRef = useRef(false);
 
   const [loading, setLoading] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -272,6 +275,15 @@ export function TitleGeneratorView() {
   function handleImageLoaded() {
     setLoading(false);
     setErrored(false);
+
+    if (!initialImageLoadedRef.current) {
+      initialImageLoadedRef.current = true;
+      return;
+    }
+
+    track("title_generated", {
+      mode,
+    });
   }
 
   function handleImageErrored() {

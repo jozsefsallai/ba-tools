@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { track } from "@/lib/analytics/posthog.client";
 import { serializeTimelineToText } from "@/lib/timeline-text-format";
 
 export type TimelineTextMenuProps = {
@@ -27,6 +28,10 @@ export function TimelineTextMenu({ items, onImport }: TimelineTextMenuProps) {
 
   async function copyToClipboard() {
     await navigator.clipboard.writeText(serializeTimelineToText(items));
+    track("timeline_text_copied", {
+      source: "editor",
+      item_count: items.length,
+    });
     toast.success(t("tools.timeline.copy.copiedToast"));
   }
 

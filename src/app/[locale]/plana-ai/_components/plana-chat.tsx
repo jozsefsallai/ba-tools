@@ -21,7 +21,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { getPlanaConfigStatus } from "@/actions/plana-config";
-import { ChatEmptyState } from "@/app/[locale]/plana-ai/_components/chat-empty-state";
+import {
+  ChatEmptyState,
+  type SuggestionKey,
+} from "@/app/[locale]/plana-ai/_components/chat-empty-state";
 import { ChatErrorMessage } from "@/app/[locale]/plana-ai/_components/chat-error-message";
 import { ChatInput } from "@/app/[locale]/plana-ai/_components/chat-input";
 import {
@@ -57,6 +60,8 @@ import {
   type PlanaStatusKey,
   toPlanaErrorCode,
 } from "@/lib/ai/message-types";
+import type { AnalyticsEvents } from "@/lib/analytics/events";
+import { track } from "@/lib/analytics/posthog.client";
 import type { PlanaExpression } from "@/lib/plana-expressions";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
@@ -138,6 +143,44 @@ type PlanaChatProps = {
   className?: string;
 };
 
+type ReplyOutcome = AnalyticsEvents["plana_reply_finished"]["outcome"];
+
+function getReplyOutcome({
+  isAbort,
+  isDisconnect,
+  isError,
+  failureKey,
+  isEmptyReply,
+}: {
+  isAbort: boolean;
+  isDisconnect: boolean;
+  isError: boolean;
+  failureKey: ReturnType<typeof getResponseFailureErrorKey>;
+  isEmptyReply: boolean;
+}): ReplyOutcome {
+  if (isAbort) {
+    return "stopped";
+  }
+
+  if (isDisconnect) {
+    return "disconnected";
+  }
+
+  if (isError || failureKey === "generic") {
+    return "error";
+  }
+
+  if (failureKey === "filtered") {
+    return "filtered";
+  }
+
+  if (isEmptyReply) {
+    return "empty";
+  }
+
+  return "completed";
+}
+
 export function PlanaChat({ chatId, className }: PlanaChatProps) {
   const t = useTranslations();
   const locale = useLocale();
@@ -162,6 +205,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
   );
 
   const previousRouteChatIdRef = useRef<Id<"planaChat"> | undefined>(chatId);
+  const replyStartedAtRef = useRef<number | null>(null);
   const responseFinishRef = useRef<(payload: ResponseFinishPayload) => void>(
     () => {},
   );
@@ -347,6 +391,24 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
 
     const isAssistantReply = message.role === "assistant";
     const isEmptyReply = isAssistantReply && !hasVisibleContent(message);
+    const failureKey = getResponseFailureErrorKey(finishReason);
+    const startedAt = replyStartedAtRef.current;
+    replyStartedAtRef.current = null;
+
+    track("plana_reply_finished", {
+      outcome: getReplyOutcome({
+        isAbort,
+        isDisconnect,
+        isError,
+        failureKey,
+        isEmptyReply,
+      }),
+      finish_reason: finishReason ?? null,
+      tool_call_count: isAssistantReply
+        ? message.parts.filter(isToolUIPart).length
+        : 0,
+      duration_ms: startedAt === null ? null : Date.now() - startedAt,
+    });
 
     if (isEmptyReply && finishedMessages.at(-1)?.id === message.id) {
       setMessages(finishedMessages.slice(0, -1));
@@ -356,8 +418,6 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
       return;
     }
 
-    const failureKey = getResponseFailureErrorKey(finishReason);
-
     if (failureKey || isEmptyReply) {
       setResponseError(failureKey ?? "generic");
     }
@@ -366,6 +426,27 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
   const hasError = (status === "error" && !!error) || !!responseError;
   const errorCode: PlanaErrorCode =
     responseError ?? toPlanaErrorCode(error?.message);
+  const trackedErrorRef = useRef(false);
+
+  useEffect(() => {
+    if (!hasError) {
+      trackedErrorRef.current = false;
+      return;
+    }
+
+    if (trackedErrorRef.current) {
+      return;
+    }
+
+    trackedErrorRef.current = true;
+    track("plana_reply_failed", {
+      error_code: errorCode,
+    });
+  }, [
+    hasError,
+    errorCode,
+  ]);
+
   const planaExpression: PlanaExpression = hasError
     ? "sad"
     : (getLatestAssistantExpression(messages) ??
@@ -426,7 +507,15 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     saveDraft(chatIdRef.current, value);
   }
 
-  async function sendText(text: string) {
+  async function sendText(text: string, suggestion: SuggestionKey | null) {
+    track("plana_message_sent", {
+      is_new_chat: !chatIdRef.current,
+      source: suggestion ? "suggestion" : "composer",
+      suggestion,
+      message_count: messages.length,
+    });
+    replyStartedAtRef.current = Date.now();
+
     clearAllErrors();
     setStatusKey(null);
     updateDraft("");
@@ -454,7 +543,12 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     replaceChatUrl(undefined);
   }
 
-  function regenerateLatest() {
+  function regenerateLatest(source: "button" | "retry") {
+    track("plana_reply_regenerated", {
+      source,
+    });
+    replyStartedAtRef.current = Date.now();
+
     clearAllErrors();
     setStatusKey(null);
     void regenerate();
@@ -462,7 +556,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
 
   function handleRegenerate(assistantMessage: PlanaChatMessage) {
     if (assistantMessage.id === latestAssistantMessageId) {
-      regenerateLatest();
+      regenerateLatest("button");
     }
   }
 
@@ -509,6 +603,8 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     void scrollToBottom();
     pendingSendContextRef.current = persistEdit(edited);
     markSendActive();
+    track("plana_message_edited");
+    replyStartedAtRef.current = Date.now();
 
     try {
       await regenerate();
@@ -542,6 +638,9 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
     setMessages(nextMessages);
     trimBranches(nextMessages, assistantMessage);
     void persistRewind(parentId);
+    track("plana_chat_rewound", {
+      removed_count: messages.length - nextMessages.length,
+    });
     inputRef.current?.focus();
   }
 
@@ -581,7 +680,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
   const composer = (
     <ChatInput
       isBusy={isBusy}
-      onSend={(text) => void sendText(text)}
+      onSend={(text) => void sendText(text, null)}
       onStop={stop}
       onValueChange={updateDraft}
       ref={inputRef}
@@ -664,7 +763,7 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
             composer={composer}
             hasKey={hasKey}
             onOpenSettings={() => setSettingsOpen(true)}
-            onSelectSuggestion={(text) => void sendText(text)}
+            onSelectSuggestion={(text, key) => void sendText(text, key)}
           />
         ) : (
           <>
@@ -739,13 +838,13 @@ export function PlanaChat({ chatId, className }: PlanaChatProps) {
                             ? () => setSettingsOpen(true)
                             : undefined
                         }
-                        onRetry={regenerateLatest}
+                        onRetry={() => regenerateLatest("retry")}
                       />
                     )}
                     {showUnanswered && (
                       <ChatErrorMessage
                         message={t("tools.plana.message.unanswered")}
-                        onRetry={regenerateLatest}
+                        onRetry={() => regenerateLatest("retry")}
                       />
                     )}
                   </>

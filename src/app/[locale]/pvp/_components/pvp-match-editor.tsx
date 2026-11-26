@@ -59,6 +59,7 @@ import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { usePvpMatchDate } from "@/hooks/use-pvp-match-date";
 import { useStudents } from "@/hooks/use-students";
 import { Link, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   correctPvpImportedItem,
   type PvpBattleInfo,
@@ -381,6 +382,13 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
       })),
     });
 
+    track("pvp_formation_preset_saved", {
+      is_new: true,
+      source: "match_editor",
+      match_type: savePresetMatchType,
+      student_count: team.filter((item) => item.student).length,
+    });
+
     setSavePresetDialogOpen(false);
     toast.success(t("tools.pvp.presets.formationSaved"), {
       position: "top-right",
@@ -411,6 +419,12 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
           opponentName: opponentName.trim() || presetName,
           opponentStudentRepId: opponentStudentRep?.id,
         });
+
+    track("pvp_enemy_preset_saved", {
+      is_new: !attachedPreset,
+      source: "match_editor",
+      has_representative: !!opponentStudentRep,
+    });
 
     setEnemyPresetId(id);
     setSaveEnemyPresetDialogOpen(false);
@@ -443,9 +457,23 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
   function handleReportImported(battle: PvpBattleInfo) {
     const students = Object.values(studentMap);
+    const reportOwnTeam = resolvePvpReportTeam(battle.myUnits, students);
+    const reportOpponentTeam = resolvePvpReportTeam(
+      battle.enemyUnits,
+      students,
+    );
 
-    setOwnTeam(resolvePvpReportTeam(battle.myUnits, students));
-    setOpponentTeam(resolvePvpReportTeam(battle.enemyUnits, students));
+    setOwnTeam(reportOwnTeam);
+    setOpponentTeam(reportOpponentTeam);
+
+    track("pvp_combat_report_imported", {
+      source: "match_editor",
+      battle_type: battle.battleType.value ?? "unknown",
+      unresolved_count: [
+        ...reportOwnTeam,
+        ...reportOpponentTeam,
+      ].filter((item) => item.report && !item.student).length,
+    });
 
     if (battle.battleType.value) {
       setMatchType(battle.battleType.value === "ATTACK" ? "attack" : "defense");
@@ -525,6 +553,22 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
         review?.initial.includeInStatistics ?? includeInStatistics,
     };
 
+    const fromCombatReport = !!nameReceiptRef.current;
+    const trackSaved = (isNew: boolean) =>
+      track("pvp_match_saved", {
+        is_new: isNew,
+        match_type: matchData.matchType,
+        result: matchData.result,
+        include_in_statistics: matchData.includeInStatistics,
+        has_video: !!matchData.videoUrl,
+        from_combat_report: fromCombatReport,
+        own_team_size: matchData.ownTeam.filter((item) => item.studentId)
+          .length,
+        opponent_team_size: matchData.opponentTeam.filter(
+          (item) => item.studentId,
+        ).length,
+      });
+
     const cacheReceipt = nameCacheEligibleRef.current
       ? nameReceiptRef.current
       : undefined;
@@ -553,6 +597,8 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
         await cacheSavedName(current._id);
 
+        trackSaved(false);
+
         toast.success(t("tools.pvp.toasts.matchUpdated"), {
           position: "top-right",
         });
@@ -566,6 +612,8 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
 
         rememberDate(date);
 
+        trackSaved(true);
+
         toast.success(t("tools.pvp.toasts.matchRecorded"), {
           position: "top-right",
         });
@@ -574,6 +622,11 @@ export function PVPMatchEditor({ seasonId, current, review }: PVPMatchEditor) {
     } catch (err) {
       setSaveError(true);
       console.error(err);
+      if (!review) {
+        track("pvp_match_save_failed", {
+          is_new: !current,
+        });
+      }
       toast.error(t("tools.pvp.toasts.matchSaveFail"), {
         position: "top-right",
       });

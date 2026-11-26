@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { useQueryWithStatus } from "@/lib/convex";
 import { cn } from "@/lib/utils";
 import { api } from "~convex/api";
@@ -254,6 +255,9 @@ export function PVPSeasonsView({
     try {
       await setSeasonArchived({
         seasonId,
+        archived,
+      });
+      track("pvp_season_archived", {
         archived,
       });
       toast.success(

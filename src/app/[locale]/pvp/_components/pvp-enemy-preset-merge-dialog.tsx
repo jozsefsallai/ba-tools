@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { usePVPEnemyPresetSearch } from "@/hooks/use-pvp-enemy-preset-search";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import { buildStudentPortraitUrl } from "@/lib/url";
 import { api } from "~convex/api";
 import type { Doc, Id } from "~convex/dataModel";
@@ -62,6 +63,7 @@ export function PVPEnemyPresetMergeDialog({
         sourcePresetId: source._id,
         targetPresetId: target.id,
       });
+      track("pvp_enemy_presets_merged");
       onClose();
     } catch {
       setFailed(true);

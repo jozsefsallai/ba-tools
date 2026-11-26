@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { track } from "@/lib/analytics/posthog.client";
 import {
   GAME_SERVER_NAMES,
   GAME_SERVERS,
@@ -78,6 +79,11 @@ export function NewPVPSeasonDialog({
         name,
         gameServer,
         seasonNumber: seasonNumber as (typeof PVP_SEASONS)[number],
+      });
+      track("pvp_season_saved", {
+        is_new: true,
+        game_server: gameServer,
+        season_number: seasonNumber,
       });
       await onCreate?.(seasonId);
       closeRef.current?.click();

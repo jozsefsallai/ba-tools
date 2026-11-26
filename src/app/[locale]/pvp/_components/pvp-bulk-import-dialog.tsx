@@ -19,6 +19,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useStudents } from "@/hooks/use-students";
+import { track } from "@/lib/analytics/posthog.client";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -361,6 +362,11 @@ export function PVPBulkImportDialog({ seasonId }: PVPBulkImportDialogProps) {
         });
         setProcessed(Math.min(index + batch.length, matches.length));
       }
+
+      track("pvp_matches_bulk_imported", {
+        match_count: matches.length,
+        replace_existing: replaceExisting,
+      });
 
       toast.success(
         t("tools.pvp.bulkImport.completed", {

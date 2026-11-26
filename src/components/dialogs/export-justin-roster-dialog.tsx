@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { track } from "@/lib/analytics/posthog.client";
 import { rosterItemsToJustinPlanner } from "@/lib/justin";
 
 export type ExportJustinRosterDialogProps = PropsWithChildren & {
@@ -30,6 +31,10 @@ export function ExportJustinRosterDialog({
   function handleOpenChange(open: boolean) {
     if (open) {
       setExportJson(JSON.stringify(rosterItemsToJustinPlanner(rosterItems)));
+      track("roster_exported", {
+        format: "justin",
+        student_count: rosterItems.length,
+      });
     }
   }
 

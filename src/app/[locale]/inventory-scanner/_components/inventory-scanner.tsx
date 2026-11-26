@@ -34,6 +34,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { track } from "@/lib/analytics/posthog.client";
 import type { ItemIconCatalog } from "@/lib/inventory-scan/catalog-format";
 import { InventoryScanClient } from "@/lib/inventory-scan/client";
 import { type MissingSpot, mergeScreenshots } from "@/lib/inventory-scan/merge";
@@ -513,6 +514,44 @@ export function InventoryScanner({ items }: { items: ScopedItem[] }) {
         ]
       : [];
   });
+
+  const scanTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (!inventory) {
+      scanTrackedRef.current = false;
+      return;
+    }
+
+    if (scanTrackedRef.current) {
+      return;
+    }
+
+    scanTrackedRef.current = true;
+
+    track("inventory_scan_completed", {
+      screenshot_count: screenshots.filter(({ video }) => !video).length,
+      video_count: videos.length,
+      frame_count: screenshots.filter(({ video }) => video).length,
+      failed_count: failed,
+      failed_video_count: failedVideos.length,
+      item_count: inventory.items.length,
+      recognized_count: entries.filter(({ scanned }) => scanned).length,
+      to_check_count: toCheck.length,
+      unknown_count: unknown.length,
+      read_nothing: inventory.items.length === 0 || nothingSupported,
+    });
+  }, [
+    inventory,
+    screenshots,
+    videos,
+    failed,
+    failedVideos,
+    entries,
+    toCheck,
+    unknown,
+    nothingSupported,
+  ]);
 
   function viewEntry({ scanned }: InventoryEntry) {
     if (scanned) {

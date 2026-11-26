@@ -103,6 +103,7 @@
     "pixi-spine": "^4.0.6",
     "pixi.js": "^8.21.0",
     "pixi.js-v7": "npm:pixi.js@^7.4.3",
+    "posthog-js": "^1.455.4",
     "prisma": "7.10.0",
     "radix-ui": "^1.6.7",
     "react": "^19.3.0",

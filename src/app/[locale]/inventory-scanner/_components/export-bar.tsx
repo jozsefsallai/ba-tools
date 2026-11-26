@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import type { InventoryEntry } from "@/app/[locale]/inventory-scanner/_lib/entries";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics/posthog.client";
 import { INVENTORY_EXPORTERS } from "@/lib/inventory-scan/exporters";
 import type { InventoryExporter } from "@/lib/inventory-scan/exporters/types";
 
@@ -29,10 +30,20 @@ function Exporter({
         ],
   );
 
+  function trackExport(method: "download" | "copy") {
+    track("inventory_scan_exported", {
+      exporter: exporter.id,
+      method,
+      item_count: exported.length,
+      supported_count: supported.length,
+    });
+  }
+
   async function copy() {
     try {
       await navigator.clipboard.writeText(exporter.export(exported));
       toast.success(t("tools.inventoryScanner.export.copied"));
+      trackExport("copy");
     } catch {
       toast.error(t("tools.inventoryScanner.export.copyFailed"));
     }
@@ -54,6 +65,7 @@ function Exporter({
     link.href = url;
     link.download = exporter.filename;
     link.click();
+    trackExport("download");
 
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }

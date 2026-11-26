@@ -73,6 +73,15 @@ const clerkOrigin = clerkFrontendApiOrigin();
 const turnstileOrigin = "https://challenges.cloudflare.com";
 const unityGameOrigin = "https://cdn.nimblebun.works";
 
+const posthogOrigin = originOf(
+  process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
+);
+
+const posthogAssetsOrigin = posthogOrigin?.replace(
+  /^https:\/\/([a-z]+)\.i\.posthog\.com$/,
+  "https://$1-assets.i.posthog.com",
+);
+
 function csp(
   directives: Record<string, Array<string | null | undefined | false>>,
 ) {
@@ -100,6 +109,7 @@ const cspDirectives = {
     clerkOrigin,
     turnstileOrigin,
     unityGameOrigin,
+    posthogAssetsOrigin,
   ],
   "style-src": [
     "'self'",
@@ -131,6 +141,8 @@ const cspDirectives = {
     clerkOrigin,
     "https://clerk-telemetry.com",
     unityGameOrigin,
+    posthogOrigin,
+    posthogAssetsOrigin,
     isDev && "ws:",
   ],
   "frame-src": [

@@ -100,6 +100,7 @@
     "nav": {
       "terms": "Terms",
       "privacy": "Privacy",
+      "analytics": "Analytics",
       "credits": "Credits",
       "api": "API",
       "sourceCode": "Source code"
@@ -383,6 +384,16 @@
     "railroadPuzzleSolver": "Railroad Puzzle Solver"
   },
 
+  "analytics": {
+    "title": "Analytics",
+    "description": "Anonymous usage statistics help us see which tools people use and fix errors.",
+    "bannerText": "We'd like to collect anonymous usage statistics and error reports to improve Joe's Blue Archive Tools. They aren't linked to your account, and nothing you type is collected. See our <a>Privacy Policy</a>.",
+    "accept": "Allow",
+    "decline": "Decline",
+    "enable": "Share anonymous usage statistics",
+    "enableHint": "Pages viewed, features used and errors, with a random identifier stored on this device, which does not link to your account. Applies to this browser right away. <a>Privacy Policy</a>"
+  },
+
   "userPreferences": {
     "title": "User Preferences",
     "savePreferences": "Save Preferences",
@@ -524,7 +535,7 @@
       },
       "admin": {
         "title": "Administration",
-        "description": "Manage Blue Archive Tools."
+        "description": "Manage Joe's Blue Archive Tools."
       },
       "user": {
         "title": "My tools",

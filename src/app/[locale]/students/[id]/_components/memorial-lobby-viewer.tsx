@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { track } from "@/lib/analytics/posthog.client";
 import type {
   MemorialLobbyInteraction,
   MemorialLobbyRenderer,
@@ -54,6 +55,7 @@ export const ZONE_LEGEND = [
 type MemorialLobbyViewerProps = {
   lobbies: ResolvedMemorialLobby[];
   posterUrl: string;
+  studentId?: string;
   autoPlay?: boolean;
   compact?: boolean;
   showZones?: boolean;
@@ -62,6 +64,7 @@ type MemorialLobbyViewerProps = {
 export function MemorialLobbyViewer({
   lobbies,
   posterUrl,
+  studentId,
   autoPlay = false,
   compact = false,
   showZones: showZonesProp,
@@ -268,6 +271,13 @@ export function MemorialLobbyViewer({
     }
 
     toast.success(t("tools.students.detail.memorialLobby.screenshotCopied"));
+    if (studentId) {
+      track("memorial_lobby_screenshot_copied", {
+        student_id: studentId,
+        lobby_index: lobbyIndex,
+        fullscreen: isFullscreen,
+      });
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -357,7 +367,15 @@ export function MemorialLobbyViewer({
         {status === "idle" ? (
           <button
             type="button"
-            onClick={() => setStatus("loading")}
+            onClick={() => {
+              setStatus("loading");
+              if (studentId) {
+                track("memorial_lobby_started", {
+                  student_id: studentId,
+                  lobby_index: lobbyIndex,
+                });
+              }
+            }}
             className="group absolute inset-0 flex items-center justify-center"
           >
             <img

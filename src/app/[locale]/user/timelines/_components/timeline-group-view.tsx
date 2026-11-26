@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getInitialAutoName, useAutoName } from "@/hooks/use-auto-name";
+import { track } from "@/lib/analytics/posthog.client";
 import { useQueryWithStatus } from "@/lib/convex";
 import {
   inferGroupRaid,
@@ -142,6 +143,14 @@ export function TimelineGroupView({
         autoName: autoName && name.length > 0,
       });
 
+      track("timeline_group_saved", {
+        is_new: false,
+        timeline_count: items.length,
+        visibility,
+        show_creator: visibility === "public" ? showCreator : false,
+        raid_type: raid?.type ?? null,
+      });
+
       toast.success(t("tools.myTimelines.editGroup.toasts.success"));
     } catch (err) {
       console.error("Failed to update timeline group", err);
@@ -153,6 +162,8 @@ export function TimelineGroupView({
     const url = new URL(`/timelines/g/${groupId}`, window.location.origin);
 
     await navigator.clipboard.writeText(url.toString());
+
+    track("timeline_group_link_copied");
 
     toast.success(t("tools.myTimelines.editGroup.toasts.linkCopied"));
   }

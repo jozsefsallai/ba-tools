@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 import { preventTouchContextMenu, TOUCH_DRAG_CLASS } from "@/lib/dnd-mobile";
 import { api } from "~convex/api";
 import type { Id } from "~convex/dataModel";
@@ -59,6 +60,11 @@ export function OwnTimelineEntry({
 
     await destroyMutation({
       id: entry._id as Id<"timeline">,
+    });
+
+    track("timeline_deleted", {
+      visibility: entry.visibility,
+      from_group: !!onWantsToDeleteFromGroup,
     });
 
     onWantsToDeleteFromGroup?.(entry._id);

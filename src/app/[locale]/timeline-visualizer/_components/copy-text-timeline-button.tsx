@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { TimelineItem } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics/posthog.client";
 import { serializeTimelineToText } from "@/lib/timeline-text-format";
 
 export type CopyTextTimelineButtonProps = {
@@ -18,6 +19,10 @@ export function CopyTextTimelineButton({ items }: CopyTextTimelineButtonProps) {
   async function copyToClipboard() {
     const output = serializeTimelineToText(items);
     await navigator.clipboard.writeText(output);
+    track("timeline_text_copied", {
+      source: "view",
+      item_count: items.length,
+    });
 
     toast.success(t("tools.timeline.copy.copiedToast"));
 

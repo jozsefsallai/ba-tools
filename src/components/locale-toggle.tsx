@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { SupportedLocale } from "@/i18n/constants";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/posthog.client";
 
 export function LocaleToggle() {
   const locale = useLocale();
@@ -27,6 +28,11 @@ export function LocaleToggle() {
     if (locale === newLocale) {
       return;
     }
+
+    track("locale_changed", {
+      from: locale,
+      to: newLocale,
+    });
 
     router.replace(pathname, {
       locale: newLocale,
