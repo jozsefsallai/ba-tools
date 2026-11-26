@@ -1,7 +1,12 @@
 /// <reference lib="webworker" />
 
 import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import type {
+  PrecacheEntry,
+  RouteMatchCallbackOptions,
+  RuntimeCaching,
+  SerwistGlobalConfig,
+} from "serwist";
 import {
   CacheableResponsePlugin,
   CacheFirst,
@@ -24,6 +29,35 @@ declare const self: ServiceWorkerGlobalScope;
 const ocrAssetUrl = getPvpOcrAssetBaseUrl();
 const iconAssetUrl = getPvpIconAssetBaseUrl();
 const iconCatalogUrl = getPvpIconCatalogUrl();
+
+const workerOrigins = new Set([
+  self.location.origin,
+  ocrAssetUrl.origin,
+  iconAssetUrl.origin,
+]);
+
+function matchesEntry(
+  matcher: RuntimeCaching["matcher"],
+  options: RouteMatchCallbackOptions,
+) {
+  if (typeof matcher === "function") {
+    return Boolean(matcher(options));
+  }
+
+  if (matcher instanceof RegExp) {
+    const match = matcher.exec(options.url.href);
+    return Boolean(match) && (options.sameOrigin || match?.index === 0);
+  }
+
+  return options.url.href === new URL(matcher, self.location.href).href;
+}
+
+const ownOriginCache: RuntimeCaching[] = defaultCache.map((entry) => ({
+  ...entry,
+  matcher: (options) =>
+    workerOrigins.has(options.url.origin) &&
+    matchesEntry(entry.matcher, options),
+}));
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -82,7 +116,7 @@ const serwist = new Serwist({
         ],
       }),
     },
-    ...defaultCache,
+    ...ownOriginCache,
   ],
 });
 serwist.addEventListeners();

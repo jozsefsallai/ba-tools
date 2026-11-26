@@ -21,6 +21,12 @@ const withSerwist = withSerwistInit({
   exclude: [
     /./,
   ],
+  additionalPrecacheEntries: [
+    {
+      url: "/manifest.webmanifest",
+      revision: process.env.VERCEL_GIT_COMMIT_SHA ?? Date.now().toString(),
+    },
+  ],
   disable: process.env.NODE_ENV === "development",
 });
 
