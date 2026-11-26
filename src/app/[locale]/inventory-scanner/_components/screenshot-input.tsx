@@ -138,7 +138,7 @@ export function ScreenshotInput({
                   key={upload.id}
                   className={cn(
                     "relative overflow-hidden rounded-md border",
-                    problem && "border-destructive",
+                    problem && "border-destructive dark:border-red-400",
                   )}
                   title={problem ? t(problem) : name}
                 >
@@ -198,7 +198,7 @@ export function ScreenshotInput({
                     ))}
 
                   {problem && (
-                    <TriangleAlertIcon className="text-destructive pointer-events-none absolute inset-0 m-auto size-5" />
+                    <TriangleAlertIcon className="text-destructive dark:text-red-400 pointer-events-none absolute inset-0 m-auto size-5" />
                   )}
 
                   <button
