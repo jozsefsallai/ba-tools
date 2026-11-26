@@ -51,44 +51,85 @@ function difference(a: Uint8Array, b: Uint8Array) {
   return total / a.length;
 }
 
-function loadVideo(video: HTMLVideoElement, signal: AbortSignal) {
+function abortError() {
+  return new DOMException("Scan canceled", "AbortError");
+}
+
+/**
+ * Only an unsupported source or a failed decode means the format is the
+ * problem; other media errors (like running out of memory) are plain failures.
+ */
+function mediaError(video: HTMLVideoElement) {
+  const code = video.error?.code;
+
+  if (
+    code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
+    code === MediaError.MEDIA_ERR_DECODE
+  ) {
+    return new UnsupportedVideoError();
+  }
+
+  return new Error(
+    `The video couldn't be played: ${video.error?.message || `error ${code}`}`,
+  );
+}
+
+/** Resolves on the event, rejects on a media error, a timeout or an abort. */
+function waitFor(
+  video: HTMLVideoElement,
+  event: string,
+  signal: AbortSignal,
+  timeoutMessage: string,
+) {
   return new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(
-      () => reject(new UnsupportedVideoError()),
-      LOAD_TIMEOUT,
-    );
-    const done = () => clearTimeout(timeout);
+    const cleanup = () => {
+      clearTimeout(timeout);
+      video.removeEventListener(event, onEvent);
+      video.removeEventListener("error", onError);
+      signal.removeEventListener("abort", onAbort);
+    };
+    const onEvent = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = () => {
+      cleanup();
+      reject(mediaError(video));
+    };
+    const onAbort = () => {
+      cleanup();
+      reject(abortError());
+    };
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error(timeoutMessage));
+    }, LOAD_TIMEOUT);
 
-    video.addEventListener(
-      "loadeddata",
-      () => {
-        done();
-
-        if (video.videoWidth === 0) {
-          reject(new UnsupportedVideoError());
-        } else {
-          resolve();
-        }
-      },
-      {
-        once: true,
-      },
-    );
-    video.addEventListener(
-      "error",
-      () => {
-        done();
-        reject(new UnsupportedVideoError());
-      },
-      {
-        once: true,
-      },
-    );
-    signal.addEventListener("abort", () => {
-      done();
-      reject(new DOMException("Scan canceled", "AbortError"));
-    });
+    video.addEventListener(event, onEvent);
+    video.addEventListener("error", onError);
+    signal.addEventListener("abort", onAbort);
   });
+}
+
+/**
+ * Waits for the video's size and length. iOS doesn't load any frames until the
+ * video plays (it ignores preload), so waiting for the first frame here would
+ * never end there.
+ */
+async function loadMetadata(video: HTMLVideoElement, signal: AbortSignal) {
+  if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+    await waitFor(
+      video,
+      "loadedmetadata",
+      signal,
+      "The video's details didn't load",
+    );
+  }
+
+  // A video track the browser can't decode often has no size
+  if (video.videoWidth === 0) {
+    throw new UnsupportedVideoError();
+  }
 }
 
 export async function readVideoFrames(
@@ -114,6 +155,20 @@ export async function readVideoFrames(
   video.muted = true;
   video.playsInline = true;
   video.preload = "auto";
+  video.disableRemotePlayback = true;
+  // WebKit pauses muted videos that aren't on the page or on the screen, so
+  // the video is kept on screen, too small and faint to notice
+  Object.assign(video.style, {
+    position: "fixed",
+    left: "0",
+    top: "0",
+    width: "1px",
+    height: "1px",
+    opacity: "0.01",
+    pointerEvents: "none",
+  });
+  video.setAttribute("aria-hidden", "true");
+  document.body.append(video);
   video.src = url;
 
   const thumbCanvas = document.createElement("canvas");
@@ -140,8 +195,15 @@ export async function readVideoFrames(
   let failure: unknown = null;
   let reportedPercent = -1;
 
+  // Playing until the end, then seeking (to fill in what playback skipped, or
+  // throughout when it may not play), when it mustn't start playing again
+  let seeking = false;
+
   const shouldPlay = () =>
-    pending.size < MAX_PENDING && !document.hidden && !signal.aborted;
+    !seeking &&
+    pending.size < MAX_PENDING &&
+    !document.hidden &&
+    !signal.aborted;
 
   const resume = () => {
     if (shouldPlay() && video.paused && !video.ended) {
@@ -234,46 +296,95 @@ export async function readVideoFrames(
     }
   }
 
+  // Steps through the video by seeking, for when it isn't allowed to play
+  // (like in iOS Low Power Mode). Slower, but sees every sampled frame
+  async function seekThrough() {
+    for (let time = 0; time < video.duration; time += SAMPLE_INTERVAL) {
+      while (pending.size >= MAX_PENDING) {
+        await Promise.race(pending);
+      }
+
+      if (signal.aborted) {
+        throw abortError();
+      }
+
+      video.currentTime = time;
+      await waitFor(video, "seeked", signal, "The video stopped loading");
+      consider(time);
+    }
+  }
+
   try {
-    await loadVideo(video, signal);
+    await loadMetadata(video, signal);
     document.addEventListener("visibilitychange", onVisibilityChange);
     video.playbackRate = PLAYBACK_RATE;
 
-    await new Promise<void>((resolve, reject) => {
+    const played = await new Promise<boolean>((resolve, reject) => {
+      let started = false;
+      // iOS only loads the video once it plays, so this is where a video that
+      // won't load shows up
+      const stalled = setTimeout(() => {
+        if (!started) {
+          reject(new Error("The video didn't start playing"));
+        }
+      }, LOAD_TIMEOUT);
+      const finish = (result: boolean) => {
+        clearTimeout(stalled);
+        resolve(result);
+      };
+
       const onVideoFrame = (
         _now: number,
         metadata: VideoFrameCallbackMetadata,
       ) => {
-        if (signal.aborted) {
+        // Seeks show frames too, which the seeking code reads itself
+        if (signal.aborted || seeking) {
           return;
         }
 
+        started = true;
         consider(metadata.mediaTime);
         video.requestVideoFrameCallback(onVideoFrame);
       };
 
       video.requestVideoFrameCallback(onVideoFrame);
-      video.addEventListener("ended", () => resolve(), {
+      video.addEventListener("ended", () => finish(true), {
         once: true,
       });
       video.addEventListener(
         "error",
-        () => reject(new UnsupportedVideoError()),
+        () => {
+          clearTimeout(stalled);
+          reject(mediaError(video));
+        },
         {
           once: true,
         },
       );
-      signal.addEventListener("abort", () =>
-        reject(new DOMException("Scan canceled", "AbortError")),
-      );
+      signal.addEventListener("abort", () => {
+        clearTimeout(stalled);
+        reject(abortError());
+      });
 
-      // A pause right after starting interrupts play(), which isn't an error
       video.play().catch((error: unknown) => {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
+        if (!(error instanceof DOMException)) {
+          clearTimeout(stalled);
           reject(error);
+        } else if (error.name === "NotAllowedError" && !started) {
+          // Autoplay is blocked, even muted
+          finish(false);
         }
+        // A pause right after starting interrupts play() (AbortError), which
+        // isn't an error
       });
     });
+
+    seeking = true;
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+
+    if (!played) {
+      await seekThrough();
+    }
 
     // Fill in what playback skipped, a frame every MAX_GAP
     for (const [from, to] of holes) {
@@ -283,15 +394,11 @@ export async function readVideoFrames(
         }
 
         if (signal.aborted) {
-          throw new DOMException("Scan canceled", "AbortError");
+          throw abortError();
         }
 
         video.currentTime = time;
-        await new Promise((resolve) =>
-          video.addEventListener("seeked", resolve, {
-            once: true,
-          }),
-        );
+        await waitFor(video, "seeked", signal, "The video stopped loading");
         readFrame(time);
       }
     }
@@ -308,5 +415,6 @@ export async function readVideoFrames(
     video.removeAttribute("src");
     video.load();
     URL.revokeObjectURL(url);
+    video.remove();
   }
 }
