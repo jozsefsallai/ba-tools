@@ -333,6 +333,9 @@ importers:
       '@formatjs/icu-messageformat-parser':
         specifier: ^3.5.22
         version: 3.5.22
+      '@posthog/nextjs-config':
+        specifier: ^1.12.2
+        version: 1.12.2(next@16.3.5(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(posthog-js@1.455.4(@types/react@19.3.0)(react@19.3.0))(webpack@5.101.2(esbuild@0.27.0))
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
@@ -2083,11 +2086,31 @@ packages:
   '@posthog/browser-common@0.14.2':
     resolution: {integrity: sha512-oqDCqFYG9R4ydOwA8qaC8yGERxXCW7Ar5U1WjGZ+wFbI6pHFVty67h0Jq7+3Svd3XfH8zGQh1Ib8eDcXSYo9mw==}
 
+  '@posthog/cli@0.19.4':
+    resolution: {integrity: sha512-wDS1yNMfKYEVpWJNX0DVdmQA9//zQV6+I7Eq2NcgRL30g2TKzN/wAzob0iAI/ysibcON7D6o/LtBxfh+8JTGDw==}
+    engines: {node: '>=14.14', npm: '>=6'}
+    hasBin: true
+
   '@posthog/core@1.69.2':
     resolution: {integrity: sha512-toMfPKklwLW+a4ZY3/EzM3GNMVXmk2ylGb8NPJXRH4igXMoI8wgNL2jqXOiglWAXqFBLZGYFN1oQx6LVmUTxTg==}
 
+  '@posthog/nextjs-config@1.12.2':
+    resolution: {integrity: sha512-U5aZcbUn7onR87MWyAaET52HZtOiMWWIMNYZPsPGzOx8nslCdXyMpQId2B98kkrJN0J7KzXThjKZgEXVr/fPDA==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      next: '>12.1.0'
+      posthog-js: '>=1.438.5'
+
+  '@posthog/plugin-utils@2.0.1':
+    resolution: {integrity: sha512-ZiQfUcgY65EjF2vkqL4Aau6sx0aqvSWoXaGSGu9Solnmv6e6VRjQbAU0SCKbxpJxcEsCJof9vmvnrFTQIEOUAQ==}
+
   '@posthog/types@1.427.2':
     resolution: {integrity: sha512-86GJtdFt7zkk6tDpCFKfxyTtuXyLpiWPmTn5nlLDGlxGeky4s4l2fiWSRvYi6Lfn5MRrjiHE24RgKR4A75K+xA==}
+
+  '@posthog/webpack-plugin@1.8.1':
+    resolution: {integrity: sha512-dV91fUcS41iAKXLiP1Dk/H9qHwE2v+RflfoMT6HVZ69pBY2aoLiW53DcKy1r75cx2KXWEpQhstUiy3G0w4kJwg==}
+    peerDependencies:
+      webpack: ^5
 
   '@prisma/adapter-neon@7.10.0':
     resolution: {integrity: sha512-2MbMamV0URbYwQ7JFZkWdHydrqqtc+GT2WbTw3VoCQmiecGYAvn6y7vkVDNR7CL/w8QOs4bCMLrhyY1Crxzoyg==}
@@ -9442,11 +9465,37 @@ snapshots:
     transitivePeerDependencies:
       - preact-render-to-string
 
+  '@posthog/cli@0.19.4':
+    dependencies:
+      detect-libc: 2.1.2
+
   '@posthog/core@1.69.2':
     dependencies:
       '@posthog/types': 1.427.2
 
+  '@posthog/nextjs-config@1.12.2(next@16.3.5(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(posthog-js@1.455.4(@types/react@19.3.0)(react@19.3.0))(webpack@5.101.2(esbuild@0.27.0))':
+    dependencies:
+      '@posthog/cli': 0.19.4
+      '@posthog/plugin-utils': 2.0.1
+      '@posthog/webpack-plugin': 1.8.1(webpack@5.101.2(esbuild@0.27.0))
+      next: 16.3.5(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      posthog-js: 1.455.4(@types/react@19.3.0)(react@19.3.0)
+      semver: 7.8.5
+    transitivePeerDependencies:
+      - webpack
+
+  '@posthog/plugin-utils@2.0.1':
+    dependencies:
+      cross-spawn: 7.0.6
+
   '@posthog/types@1.427.2': {}
+
+  '@posthog/webpack-plugin@1.8.1(webpack@5.101.2(esbuild@0.27.0))':
+    dependencies:
+      '@posthog/cli': 0.19.4
+      '@posthog/core': 1.69.2
+      '@posthog/plugin-utils': 2.0.1
+      webpack: 5.101.2(esbuild@0.27.0)
 
   '@prisma/adapter-neon@7.10.0':
     dependencies:

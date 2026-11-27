@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import createMDX from "@next/mdx";
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import withSerwistInit from "@serwist/next";
 import { createNextYaakdoc } from "@yaakdoc/next";
 import type { NextConfig } from "next";
@@ -402,7 +403,7 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({});
 
-export default async function configuration(
+async function configuration(
   phase: string,
   {
     defaultConfig,
@@ -447,3 +448,19 @@ export default async function configuration(
     defaultConfig,
   });
 }
+
+const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY;
+const posthogProjectId = process.env.POSTHOG_PROJECT_ID;
+
+// Posthog must stay the outermost wrapper
+export default withPostHogConfig(configuration, {
+  personalApiKey: posthogPersonalApiKey ?? "",
+  projectId: posthogProjectId,
+  host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+  sourcemaps: {
+    enabled: Boolean(posthogPersonalApiKey && posthogProjectId) && !isDev,
+    releaseName: "ba-tools",
+    releaseVersion: process.env.VERCEL_GIT_COMMIT_SHA,
+    deleteAfterUpload: true,
+  },
+});
