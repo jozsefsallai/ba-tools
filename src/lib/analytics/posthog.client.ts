@@ -54,12 +54,47 @@ function stripSensitiveParams(value: unknown) {
   }
 }
 
+// Exceptions nothing can be done about:
+// - the browser's harmless ResizeObserver warning (triggered by virtua and Radix)
+// - "Script error." from cross-origin scripts that hide everything else
+// - crypto wallets' injected scripts
+const IGNORED_EXCEPTIONS = [
+  /^ResizeObserver loop/,
+  /^Script error\.?$/,
+  /window\.ethereum/,
+];
+
+function isIgnoredException(properties: CaptureResult["properties"]) {
+  const list: unknown = properties.$exception_list;
+
+  if (!Array.isArray(list) || list.length === 0) {
+    return false;
+  }
+
+  return list.every((exception) => {
+    const value = (
+      exception as {
+        value?: unknown;
+      }
+    )?.value;
+    return (
+      typeof value === "string" &&
+      IGNORED_EXCEPTIONS.some((pattern) => pattern.test(value))
+    );
+  });
+}
+
 function beforeSend(event: CaptureResult | null): CaptureResult | null {
   if (!event) {
     return null;
   }
 
   const properties = event.properties;
+
+  if (event.event === "$exception" && isIgnoredException(properties)) {
+    return null;
+  }
+
   const pathname =
     typeof properties.$pathname === "string" ? properties.$pathname : "";
 

@@ -4,8 +4,8 @@ import type { RecruitmentKind } from "@/lib/recruitment";
 import type { api } from "~convex/api";
 
 /** An account with its sessions, as `api.recruitment.getAccount` returns it. */
-export type AccountWithSessions = FunctionReturnType<
-  typeof api.recruitment.getAccount
+export type AccountWithSessions = NonNullable<
+  FunctionReturnType<typeof api.recruitment.getAccount>
 >;
 
 export type Account = AccountWithSessions["account"];

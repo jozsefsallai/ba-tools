@@ -391,7 +391,16 @@ export const getAccount = authenticatedQuery({
     accountId: v.id("recruitmentAccount"),
   },
   handler: async (ctx, { accountId }) => {
-    const account = await assertAccount(ctx, accountId);
+    const account = await ctx.db.get(accountId);
+
+    if (!account) {
+      return null;
+    }
+
+    if (account.userId !== ctx.user._id) {
+      throw notFound("Recruitment account not found.");
+    }
+
     const sessions = await getSessions(ctx, accountId, "desc");
     const latestIds = latestSessionIds(sessions);
 

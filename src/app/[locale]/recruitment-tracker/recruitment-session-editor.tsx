@@ -410,7 +410,7 @@ export function RecruitmentSessionEditor({
     return <MessageBox>{t("common.loading")}</MessageBox>;
   }
 
-  if (sessionId && !sessionResult) {
+  if (!accountResult || (sessionId && !sessionResult)) {
     return <MessageBox>{t("tools.recruitment.failedToLoad")}</MessageBox>;
   }
 

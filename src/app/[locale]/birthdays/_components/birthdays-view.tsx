@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FilterBar } from "@/app/[locale]/birthdays/_components/filter-bar";
 import { MonthCard } from "@/app/[locale]/birthdays/_components/month-card";
 import { TodaySpotlight } from "@/app/[locale]/birthdays/_components/today-spotlight";
@@ -17,6 +17,8 @@ import {
 } from "@/lib/birthdays";
 import { buildStudentIconUrlFromId } from "@/lib/url";
 import type { ItemRarity } from "~prisma";
+
+const EPOCH = new Date(0);
 
 const MONTH_NUMBERS = Array.from(
   {
@@ -45,7 +47,13 @@ export function BirthdaysView({
   const t = useTranslations();
 
   const [search, setSearch] = useState("");
-  const today = new Date();
+
+  const [clientToday, setClientToday] = useState<Date | null>(null);
+  useEffect(() => {
+    setClientToday(new Date());
+  }, []);
+
+  const today = clientToday ?? EPOCH;
   const currentYear = today.getFullYear();
   const normalizedSearch = search.trim().toLowerCase();
 
@@ -100,7 +108,7 @@ export function BirthdaysView({
     today,
   ]);
 
-  if (students.length === 0) {
+  if (students.length === 0 || !clientToday) {
     return <div className="h-56 animate-pulse rounded-xl border bg-muted/30" />;
   }
 

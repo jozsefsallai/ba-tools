@@ -32,9 +32,15 @@ const SESSION_UPDATE_KEYS = [
 ] as const;
 
 async function findAccount(userId: string, accountId: string) {
-  return await userQuery(userId, api.recruitment.getAccount, {
+  const result = await userQuery(userId, api.recruitment.getAccount, {
     accountId: accountId as Id<"recruitmentAccount">,
   });
+
+  if (!result) {
+    throw notFound("Recruitment account not found.");
+  }
+
+  return result;
 }
 
 async function findSession(
