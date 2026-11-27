@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { useStudents } from "@/hooks/use-students";
 import { currentTimeJST, resetTimeForDateJST } from "@/lib/date";
 import { buildStudentPortraitUrl } from "@/lib/url";
@@ -22,6 +23,7 @@ type SOTDView = "global" | "user";
 export function StudentOfTheDay() {
   const { students } = useStudents();
   const { user } = useUser();
+  const currentUser = useCurrentUser();
   const t = useTranslations();
 
   const [view, setView] = useState<SOTDView>("global");
@@ -88,9 +90,10 @@ export function StudentOfTheDay() {
       return null;
     }
 
-    return user.fullName ?? user.username;
+    return currentUser?.name ?? user.username;
   }, [
     user,
+    currentUser,
   ]);
 
   return (

@@ -1,8 +1,8 @@
 type SenseiNameUser = {
-  firstName?: string | null;
+  name?: string | null;
   username?: string | null;
 };
 
 export function getSenseiDisplayName(user: SenseiNameUser | null | undefined) {
-  return user?.firstName?.trim() || user?.username?.trim() || undefined;
+  return user?.name?.trim() || user?.username?.trim() || undefined;
 }

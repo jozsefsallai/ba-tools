@@ -1,11 +1,11 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { PlanaChatAvatar } from "@/app/[locale]/plana-ai/_components/plana-chat-avatar";
 import { getSenseiDisplayName } from "@/app/[locale]/plana-ai/_lib/sensei-name";
 import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 
 export type SuggestionKey =
@@ -35,8 +35,8 @@ export function ChatEmptyState({
   onSelectSuggestion: (message: string, key: SuggestionKey) => void;
 }) {
   const t = useTranslations();
-  const { user } = useUser();
-  const senseiName = getSenseiDisplayName(user);
+  const currentUser = useCurrentUser();
+  const senseiName = getSenseiDisplayName(currentUser);
   const getGreetingSuggestion = () => {
     const hour = new Date().getHours();
 

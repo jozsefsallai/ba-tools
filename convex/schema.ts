@@ -273,6 +273,9 @@ export const planaAssistantVariant = v.object({
 export default defineSchema({
   users: defineTable({
     name: v.optional(v.string()),
+    // The Clerk names behind `name`, minus Google's fill-ins
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     username: v.string(),
     avatar: v.optional(v.string()),
     externalId: v.string(),

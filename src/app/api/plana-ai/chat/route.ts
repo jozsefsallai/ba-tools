@@ -107,7 +107,8 @@ export async function POST(req: NextRequest) {
     }
 
     const provider = await getPlanaProvider();
-    const senseiName = getSenseiDisplayName(user);
+    const me = await userQuery(userId, api.users.getMe, {}).catch(() => null);
+    const senseiName = getSenseiDisplayName(me ?? user);
     let markFinished = () => {};
     const finished = new Promise<void>((resolve) => {
       markFinished = resolve;
