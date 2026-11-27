@@ -333,9 +333,12 @@ importers:
       '@formatjs/icu-messageformat-parser':
         specifier: ^3.5.22
         version: 3.5.22
-      '@posthog/nextjs-config':
-        specifier: ^1.12.2
-        version: 1.12.2(next@16.3.5(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(posthog-js@1.455.4(@types/react@19.3.0)(react@19.3.0))(webpack@5.101.2(esbuild@0.27.0))
+      '@posthog/cli':
+        specifier: ~0.19.4
+        version: 0.19.4
+      '@posthog/webpack-plugin':
+        specifier: ^1.8.1
+        version: 1.8.1(webpack@5.101.2(esbuild@0.27.0))
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
@@ -2093,13 +2096,6 @@ packages:
 
   '@posthog/core@1.69.2':
     resolution: {integrity: sha512-toMfPKklwLW+a4ZY3/EzM3GNMVXmk2ylGb8NPJXRH4igXMoI8wgNL2jqXOiglWAXqFBLZGYFN1oQx6LVmUTxTg==}
-
-  '@posthog/nextjs-config@1.12.2':
-    resolution: {integrity: sha512-U5aZcbUn7onR87MWyAaET52HZtOiMWWIMNYZPsPGzOx8nslCdXyMpQId2B98kkrJN0J7KzXThjKZgEXVr/fPDA==}
-    engines: {node: ^20.20.0 || >=22.22.0}
-    peerDependencies:
-      next: '>12.1.0'
-      posthog-js: '>=1.438.5'
 
   '@posthog/plugin-utils@2.0.1':
     resolution: {integrity: sha512-ZiQfUcgY65EjF2vkqL4Aau6sx0aqvSWoXaGSGu9Solnmv6e6VRjQbAU0SCKbxpJxcEsCJof9vmvnrFTQIEOUAQ==}
@@ -9472,17 +9468,6 @@ snapshots:
   '@posthog/core@1.69.2':
     dependencies:
       '@posthog/types': 1.427.2
-
-  '@posthog/nextjs-config@1.12.2(next@16.3.5(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(posthog-js@1.455.4(@types/react@19.3.0)(react@19.3.0))(webpack@5.101.2(esbuild@0.27.0))':
-    dependencies:
-      '@posthog/cli': 0.19.4
-      '@posthog/plugin-utils': 2.0.1
-      '@posthog/webpack-plugin': 1.8.1(webpack@5.101.2(esbuild@0.27.0))
-      next: 16.3.5(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      posthog-js: 1.455.4(@types/react@19.3.0)(react@19.3.0)
-      semver: 7.8.5
-    transitivePeerDependencies:
-      - webpack
 
   '@posthog/plugin-utils@2.0.1':
     dependencies:

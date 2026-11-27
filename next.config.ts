@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import createMDX from "@next/mdx";
-import { withPostHogConfig } from "@posthog/nextjs-config";
+import { PosthogWebpackPlugin } from "@posthog/webpack-plugin";
 import withSerwistInit from "@serwist/next";
 import { createNextYaakdoc } from "@yaakdoc/next";
 import type { NextConfig } from "next";
@@ -83,6 +83,26 @@ const unityGameOrigin = "https://cdn.nimblebun.works";
 const posthogOrigin = originOf(
   process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
 );
+
+const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY;
+const posthogProjectId = process.env.POSTHOG_PROJECT_ID;
+
+function posthogSourceMaps() {
+  if (!posthogPersonalApiKey || !posthogProjectId) {
+    return null;
+  }
+
+  return new PosthogWebpackPlugin({
+    personalApiKey: posthogPersonalApiKey,
+    projectId: posthogProjectId,
+    host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    sourcemaps: {
+      releaseName: "ba-tools",
+      releaseVersion: process.env.VERCEL_GIT_COMMIT_SHA,
+      deleteAfterUpload: true,
+    },
+  });
+}
 
 const posthogAssetsOrigin = posthogOrigin?.replace(
   /^https:\/\/([a-z]+)\.i\.posthog\.com$/,
@@ -233,7 +253,7 @@ const nextConfig: NextConfig = {
     },
   },
 
-  webpack(config) {
+  webpack(config, { dev, isServer }) {
     const assetQuery = /[?&]og-asset(?:&|$)/;
 
     for (const rule of config.module.rules) {
@@ -257,6 +277,11 @@ const nextConfig: NextConfig = {
         "./scripts/loaders/glsl.cjs",
       ],
     });
+
+    const sourceMaps = !dev && !isServer && posthogSourceMaps();
+    if (sourceMaps) {
+      config.plugins.push(sourceMaps);
+    }
 
     return config;
   },
@@ -403,7 +428,7 @@ const nextConfig: NextConfig = {
 
 const withMDX = createMDX({});
 
-async function configuration(
+export default async function configuration(
   phase: string,
   {
     defaultConfig,
@@ -448,19 +473,3 @@ async function configuration(
     defaultConfig,
   });
 }
-
-const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY;
-const posthogProjectId = process.env.POSTHOG_PROJECT_ID;
-
-// Posthog must stay the outermost wrapper
-export default withPostHogConfig(configuration, {
-  personalApiKey: posthogPersonalApiKey ?? "",
-  projectId: posthogProjectId,
-  host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-  sourcemaps: {
-    enabled: Boolean(posthogPersonalApiKey && posthogProjectId) && !isDev,
-    releaseName: "ba-tools",
-    releaseVersion: process.env.VERCEL_GIT_COMMIT_SHA,
-    deleteAfterUpload: true,
-  },
-});
