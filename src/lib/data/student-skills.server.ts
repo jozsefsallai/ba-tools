@@ -2,7 +2,10 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import { LAYOUT_GAME_DATA_REVALIDATE } from "@/lib/data/students.server";
+import {
+  LAYOUT_GAME_DATA_REVALIDATE,
+  SKILL_CARD_VARIANTS_CACHE_TAG,
+} from "@/lib/data/layout-cache";
 import { db } from "@/lib/db";
 import type {
   SkillEffectCategory,
@@ -238,7 +241,7 @@ export const getSkillCardVariants = unstable_cache(
   {
     revalidate: LAYOUT_GAME_DATA_REVALIDATE,
     tags: [
-      "skill-card-variants",
+      SKILL_CARD_VARIANTS_CACHE_TAG,
     ],
   },
 );

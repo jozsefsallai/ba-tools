@@ -30,6 +30,7 @@ import {
   MapIcon,
   MessageCircleHeartIcon,
   RectangleEllipsisIcon,
+  RefreshCwIcon,
   ScanLineIcon,
   ShieldIcon,
   SquareText,
@@ -83,6 +84,7 @@ type NavLink = {
   href: string;
   text: string;
   icon: LucideIcon;
+  isRoute?: boolean;
   recentItems?: {
     type: "timeline" | "formation";
     viewAllHref: string;
@@ -202,10 +204,17 @@ function NavItem({ link, isActive }: { link: NavLink; isActive: boolean }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} tooltip={link.text}>
-        <Link href={link.href} onClick={closeMobileSidebar}>
-          <link.icon />
-          <span>{link.text}</span>
-        </Link>
+        {link.isRoute ? (
+          <a href={link.href}>
+            <link.icon />
+            <span>{link.text}</span>
+          </a>
+        ) : (
+          <Link href={link.href} onClick={closeMobileSidebar}>
+            <link.icon />
+            <span>{link.text}</span>
+          </Link>
+        )}
       </SidebarMenuButton>
       {RecentItemsComponent && (
         <Authenticated>
@@ -397,6 +406,12 @@ export function AppSidebar() {
           href: "/admin/roadmap",
           text: t("common.header.nav.admin.roadmap"),
           icon: CalendarCogIcon,
+        },
+        {
+          href: "/api/admin/revalidate-game-data",
+          text: t("common.header.nav.admin.invalidateDbCache"),
+          icon: RefreshCwIcon,
+          isRoute: true,
         },
       ]
     : [];

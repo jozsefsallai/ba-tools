@@ -90,7 +90,8 @@
       "admin": {
         "title": "Admin",
         "banners": "Manage Banners",
-        "roadmap": "Manage Roadmap"
+        "roadmap": "Manage Roadmap",
+        "invalidateDbCache": "Invalidate DB Cache"
       }
     }
   },
