@@ -46,7 +46,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
+import { useSkillCardVariants } from "@/hooks/use-students";
+import {
+  DEFAULT_SKILL_CARD_VARIANT,
+  findSkillCardVariant,
+} from "@/lib/skill-card";
 import {
   DEFAULT_HIGHLIGHT_COLOR,
   getSessionHighlightColor,
@@ -252,7 +256,7 @@ export function TimelineItemPopover({
 
   const handleVariantUpdate = useCallback(
     (variantId: string) => {
-      if (variantId === "default") {
+      if (variantId === DEFAULT_SKILL_CARD_VARIANT) {
         onWantsToUpdate(item.id, {
           variantId: undefined,
         });
@@ -379,18 +383,12 @@ export function TimelineItemPopover({
     setItems,
   ]);
 
-  const skillVariants = useMemo(() => {
-    if (item.type !== "student") {
-      return [];
-    }
-    const variants = skillCardVariantMap[item.student.id as SkillCardVariant];
-    if (!variants) {
-      return [];
-    }
-    return variants;
-  }, [
-    item,
-  ]);
+  const studentId = item.type === "student" ? item.student.id : undefined;
+  const skillVariants = useSkillCardVariants(studentId);
+  const selectedVariant =
+    item.type === "student"
+      ? findSkillCardVariant(skillVariants, item.student.id, item.variantId)
+      : undefined;
 
   useLayoutEffect(() => {
     if (item.type !== "student" || !autoFocusTrigger) {
@@ -611,7 +609,7 @@ export function TimelineItemPopover({
                   htmlFor={`pop-variant-${item.id}`}
                 >
                   <Select
-                    value={item.variantId ?? "default"}
+                    value={selectedVariant?.id ?? DEFAULT_SKILL_CARD_VARIANT}
                     onValueChange={handleVariantUpdate}
                   >
                     <SelectTrigger
@@ -619,12 +617,14 @@ export function TimelineItemPopover({
                       className="h-8 w-full"
                     >
                       <span className="truncate">
-                        {skillVariants.find((v) => v.id === item.variantId)
-                          ?.name ??
+                        {selectedVariant?.name ??
                           t("tools.timeline.editor.student.variant.default")}
                       </span>
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value={DEFAULT_SKILL_CARD_VARIANT}>
+                        {t("tools.timeline.editor.student.variant.default")}
+                      </SelectItem>
                       {skillVariants.map((variant) => (
                         <SelectItem key={variant.id} value={variant.id}>
                           {variant.name}

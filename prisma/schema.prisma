@@ -517,11 +517,12 @@ model StudentSkill {
   parent   StudentSkill?  @relation("StudentSkillChildren", fields: [parentId], references: [id])
   children StudentSkill[] @relation("StudentSkillChildren")
 
-  iconName   String
-  maxLevel   Int
-  levelCount Int
-  costs      Int[]
-  stats      String[]
+  iconName    String
+  cardTexture String?
+  maxLevel    Int
+  levelCount  Int
+  costs       Int[]
+  stats       String[]
 
   texts   StudentSkillText[]
   effects StudentSkillEffect[]

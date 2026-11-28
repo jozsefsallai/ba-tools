@@ -1,132 +1,50 @@
-import { buildAlternativeSkillPortraitUrl } from "@/lib/url";
-
 export type SkillCardVariantData = {
   id: string;
   name: string;
   image: string | null;
 };
 
-export const skillCardVariantMap = {
-  ibuki: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "iroha_t_s_a",
-      name: "Iroha T.S.A",
-      image: buildAlternativeSkillPortraitUrl(
-        "Skill_Portrait_Ibuki_Interaction",
-      ),
-    },
-  ],
+export const DEFAULT_SKILL_CARD_VARIANT = "default";
 
-  toki: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "abi_eshuh",
-      name: "Abi Eshuh",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0187Mod"),
-    },
-  ],
+const LEGACY_VARIANT_IDS: Record<string, Record<string, string>> = {
+  ibuki: {
+    iroha_t_s_a: "Skill_Portrait_Ibuki_Interaction",
+  },
+  toki: {
+    abi_eshuh: "Skill_Portrait_CH0187Mod",
+  },
+  hina_dress: {
+    shot_1: "Skill_Portrait_CH0230_01",
+    shot_2: "Skill_Portrait_CH0230_02",
+    shot_3: "Skill_Portrait_CH0230_03",
+  },
+  noa_pajama: {
+    angry: "Skill_Portrait_CH0285_01",
+  },
+  neru_uniform: {
+    angry: "Skill_Portrait_CH0280_01",
+  },
+  mika_swimsuit: {
+    rapidfire: "Skill_Portrait_CH0294_01",
+  },
+  aris_battle: {
+    stance_1: "Skill_Portrait_CH0334_01",
+    stance_2: "Skill_Portrait_CH0334_02",
+  },
+  shun_swimsuit: {
+    redraw: "Skill_Portrait_CH0355_01_01",
+  },
+};
 
-  hina_dress: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "shot_1",
-      name: "Shot 1",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0230_01"),
-    },
-    {
-      id: "shot_2",
-      name: "Shot 2",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0230_02"),
-    },
-    {
-      id: "shot_3",
-      name: "Shot 3",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0230_03"),
-    },
-  ],
+export function findSkillCardVariant(
+  variants: SkillCardVariantData[] | undefined,
+  studentId: string,
+  variantId: string | undefined,
+): SkillCardVariantData | undefined {
+  if (!variants || !variantId) {
+    return undefined;
+  }
 
-  noa_pajama: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "angry",
-      name: "Angry",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0285_01"),
-    },
-  ],
-
-  neru_uniform: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "angry",
-      name: "Angry",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0280_01"),
-    },
-  ],
-
-  mika_swimsuit: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "rapidfire",
-      name: "Rapid Fire",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0294_01"),
-    },
-  ],
-
-  aris_battle: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "stance_1",
-      name: "Stance 1",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0334_01"),
-    },
-    {
-      id: "stance_2",
-      name: "Stance 2",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0334_02"),
-    },
-  ],
-
-  shun_swimsuit: [
-    {
-      id: "default",
-      name: "Default",
-      image: null,
-    },
-    {
-      id: "redraw",
-      name: "Redraw",
-      image: buildAlternativeSkillPortraitUrl("Skill_Portrait_CH0355_01_1"),
-    },
-  ],
-} as const satisfies Record<string, SkillCardVariantData[]>;
-
-export type SkillCardVariant = keyof typeof skillCardVariantMap;
+  const id = LEGACY_VARIANT_IDS[studentId]?.[variantId] ?? variantId;
+  return variants.find((v) => v.id === id);
+}

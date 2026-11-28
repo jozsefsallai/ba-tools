@@ -39,8 +39,8 @@ export function buildSkillPortraitUrl(student: Pick<Student, "devName">) {
   );
 }
 
-export function buildAlternativeSkillPortraitUrl(key: string) {
-  return buildCDNUrl(`v2/images/skill-portraits/${key}.png`);
+export function buildSkillCardVariantUrl(texture: string) {
+  return buildCDNUrl(`v2/images/skill-portraits/variants/${texture}.png`);
 }
 
 export function buildSkillIconUrl(iconName: string) {

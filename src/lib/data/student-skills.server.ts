@@ -1,6 +1,8 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
+import { LAYOUT_GAME_DATA_REVALIDATE } from "@/lib/data/students.server";
 import { db } from "@/lib/db";
 import type {
   SkillEffectCategory,
@@ -8,7 +10,12 @@ import type {
   SkillType,
   StudentSkillSource,
 } from "@/lib/db/client";
-import { buildEffectIconUrl, buildSkillIconUrl } from "@/lib/url";
+import type { SkillCardVariantData } from "@/lib/skill-card";
+import {
+  buildEffectIconUrl,
+  buildSkillCardVariantUrl,
+  buildSkillIconUrl,
+} from "@/lib/url";
 
 const TEXT_LOCALES: Record<string, SkillLocale[]> = {
   en: [
@@ -32,6 +39,7 @@ export type StudentSkillView = {
   upgradeOfId: string | null;
   parentId: string | null;
   iconUrl: string | null;
+  cardVariantId: string | null;
   maxLevel: number;
   costs: number[];
   name: string;
@@ -155,6 +163,7 @@ export const getStudentSkills = cache(
         upgradeOfId: row.upgradeOfId,
         parentId: row.parentId,
         iconUrl: row.iconName ? buildSkillIconUrl(row.iconName) : null,
+        cardVariantId: row.cardTexture,
         maxLevel: row.maxLevel,
         costs: row.costs,
         name: text.name,
@@ -171,5 +180,65 @@ export const getStudentSkills = cache(
       skills,
       effects,
     };
+  },
+);
+
+export const getSkillCardVariants = unstable_cache(
+  async (locale: string): Promise<Record<string, SkillCardVariantData[]>> => {
+    const locales = TEXT_LOCALES[locale] ?? TEXT_LOCALES.en;
+
+    const rows = await db.studentSkill.findMany({
+      where: {
+        cardTexture: {
+          not: null,
+        },
+      },
+      orderBy: {
+        sortOrder: "asc",
+      },
+      select: {
+        studentId: true,
+        cardTexture: true,
+        texts: {
+          where: {
+            locale: {
+              in: locales,
+            },
+          },
+          select: {
+            locale: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    const variants: Record<string, SkillCardVariantData[]> = {};
+    for (const row of rows) {
+      const id = row.cardTexture;
+      variants[row.studentId] ??= [];
+
+      const list = variants[row.studentId];
+      if (!id || list.some((v) => v.id === id)) {
+        continue;
+      }
+
+      list.push({
+        id,
+        name: pick(row.texts, locales)?.name ?? id,
+        image: buildSkillCardVariantUrl(id),
+      });
+    }
+
+    return variants;
+  },
+  [
+    "skill-card-variants",
+  ],
+  {
+    revalidate: LAYOUT_GAME_DATA_REVALIDATE,
+    tags: [
+      "skill-card-variants",
+    ],
   },
 );

@@ -781,6 +781,13 @@ export interface StudentSkillData {
   /** The select card (`SelectEx`) or the skill whose tooltip shows it (`Additional`). */
   parentId: string | null;
   iconName: string;
+  /**
+   * EX skills whose card shows another portrait than the student's default
+   * one: its texture name (`Skill_Portrait_CH0230_01`), published at
+   * `v2/images/skill-portraits/variants/{cardTexture}.png`. Skills sharing a
+   * texture show the same card.
+   */
+  cardTexture: string | null;
   /** Highest level in the game: 5 for EX skills, 10 for the others. */
   maxLevel: number;
   /** Levels in the data, which can be more than `maxLevel`. */

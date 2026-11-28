@@ -5,7 +5,8 @@ import iconMulliganYellow from "@/assets/images/icon_mulligan_yellow.png";
 
 import { StudentRoleIcon } from "@/components/common/student-role-icon";
 import { StudentStar } from "@/components/common/student-star";
-import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
+import { useSkillCardVariants } from "@/hooks/use-students";
+import { findSkillCardVariant } from "@/lib/skill-card";
 
 import type { StarLevel, Student, UELevel } from "@/lib/types";
 import { buildSkillPortraitUrl, buildStudentIconUrl } from "@/lib/url";
@@ -49,11 +50,9 @@ export function StudentCard({
     ? buildSkillPortraitUrl(student)
     : buildStudentIconUrl(student);
 
-  let iconUrl = fallback;
-  if (variantId) {
-    const variant = skillCardVariantMap[student.id as SkillCardVariant];
-    iconUrl = variant?.find((v) => v.id === variantId)?.image ?? fallback;
-  }
+  const variants = useSkillCardVariants(variantId ? student.id : undefined);
+  const iconUrl =
+    findSkillCardVariant(variants, student.id, variantId)?.image ?? fallback;
 
   return (
     <div className="flex relative" style={style}>

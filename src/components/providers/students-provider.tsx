@@ -3,6 +3,7 @@
 import { type Locale, useLocale } from "next-intl";
 import { type PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { studentsContext } from "@/hooks/use-students";
+import type { SkillCardVariantData } from "@/lib/skill-card";
 import type { Student } from "~prisma";
 
 function getStudentName(student: Student, locale: Locale) {
@@ -18,9 +19,11 @@ function getStudentName(student: Student, locale: Locale) {
 
 export function StudentsProvider({
   loadedStudents,
+  skillCardVariants,
   children,
 }: PropsWithChildren<{
   loadedStudents: Student[];
+  skillCardVariants: Record<string, SkillCardVariantData[]>;
 }>) {
   const locale = useLocale();
 
@@ -54,6 +57,7 @@ export function StudentsProvider({
       value={{
         students,
         studentMap,
+        skillCardVariants,
       }}
     >
       {children}

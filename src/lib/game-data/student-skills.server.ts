@@ -103,6 +103,7 @@ export async function saveStudentSkills(
           upgradeOfId: skill.upgradeOfId,
           parentId: skill.parentId,
           iconName: skill.iconName,
+          cardTexture: skill.cardTexture,
           maxLevel: skill.maxLevel,
           levelCount: skill.levelCount,
           costs: skill.costs,

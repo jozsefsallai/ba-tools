@@ -17,7 +17,8 @@ import { ThemedClerkProvider } from "@/components/providers/themed-clerk-provide
 import { UserPreferencesProvider } from "@/components/providers/user-preferences-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { routing } from "@/i18n/routing";
-import { db } from "@/lib/db";
+import { getSkillCardVariants } from "@/lib/data/student-skills.server";
+import { getCachedStudents } from "@/lib/data/students.server";
 import { getCardMetadata, SITE_ORIGIN } from "@/lib/og-metadata.server";
 
 import "../globals.css";
@@ -72,13 +73,12 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const students = await db.student.findMany({
-    orderBy: {
-      defaultOrder: "asc",
-    },
-  });
-
   const locale = await getLocale();
+
+  const [students, skillCardVariants] = await Promise.all([
+    getCachedStudents(),
+    getSkillCardVariants(locale),
+  ]);
 
   return (
     <html
@@ -101,7 +101,10 @@ export default async function LocaleLayout({
             <ThemedClerkProvider>
               <ConvexClientProvider>
                 <NavigationGuardProvider>
-                  <StudentsProvider loadedStudents={students}>
+                  <StudentsProvider
+                    loadedStudents={students}
+                    skillCardVariants={skillCardVariants}
+                  >
                     <UserPreferencesProvider>
                       <AppShell
                         commitHash={

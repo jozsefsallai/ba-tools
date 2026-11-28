@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { resolveStudentIdentifier } from "@/lib/student-resolve.server";
 import { orderStudentsByFuzzyNameQuery } from "@/lib/student-search-query";
@@ -16,6 +17,26 @@ import type {
   School,
   WeaponType,
 } from "~prisma";
+
+export const LAYOUT_GAME_DATA_REVALIDATE = 3600;
+
+export const getCachedStudents = unstable_cache(
+  () =>
+    db.student.findMany({
+      orderBy: {
+        defaultOrder: "asc",
+      },
+    }),
+  [
+    "layout-students",
+  ],
+  {
+    revalidate: LAYOUT_GAME_DATA_REVALIDATE,
+    tags: [
+      "students",
+    ],
+  },
+);
 
 export type StudentSearchFilters = {
   query?: string;

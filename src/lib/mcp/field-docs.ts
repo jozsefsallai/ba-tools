@@ -5,7 +5,6 @@ import { colorEnum } from "@/lib/combat-colors";
 import type { FieldDocs } from "@/lib/mcp/convex-to-zod";
 import { describeEnumInput } from "@/lib/mcp/enrich.server";
 import { DEFENSE_TYPES } from "@/lib/raid-info";
-import { skillCardVariantMap } from "@/lib/skill-card";
 import {
   BORROW_SLOT_GAMEMODE_NAMES,
   GAME_SERVER_NAMES,
@@ -165,13 +164,6 @@ export const formationDocs: FieldDocs<typeof formationArgs> = {
   groupsVertical: `${FORMATION_VERTICAL} ${FROM_PREFERENCE}`,
 };
 
-const VARIANTS = Object.entries(skillCardVariantMap)
-  .map(
-    ([studentId, variants]) =>
-      `${studentId}: ${variants.map(({ id }) => id).join(", ")}`,
-  )
-  .join("; ");
-
 export const timelineDocs: FieldDocs<typeof timelineArgs> = {
   name: "Timeline name. Sent names are kept as they are; see `autoName`.",
   description:
@@ -190,7 +182,8 @@ export const timelineDocs: FieldDocs<typeof timelineArgs> = {
       extraTargetIds:
         "`student` items: further targets when the skill hits several students (up to 9, for 10 in total with `targetId`). Don't repeat `targetId`.",
       copy: "`student` items: marks the card as a copied skill card, shown with a copy glow. Use it when the skill is used through a copy of the card rather than the student's original.",
-      variantId: `\`student\` items: alternate skill card art. Only these students have any: ${VARIANTS}.`,
+      variantId:
+        "`student` items: alternate skill card art, for EX skills that show their own (stances, Hina (Dress)'s shots, Ibuki riding the tank). The ids are the `cardVariantId`s of the student's EX skills in `get_student_skills`; leave it out for the default card.",
       notes:
         "`student` items: a few words shown under the card, such as `after boss shield`. New lines are allowed. Long notes push the next cards far apart.",
       highlightColor:

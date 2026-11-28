@@ -12,13 +12,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import {
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type SetStateAction, useCallback, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { TimelineItemTargetPicker } from "@/app/[locale]/timeline-visualizer/_components/timeline-item-target-picker";
 import type { TimelineItem as TimelineItemType } from "@/app/[locale]/timeline-visualizer/_components/timeline-preview";
@@ -36,7 +30,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { type SkillCardVariant, skillCardVariantMap } from "@/lib/skill-card";
+import { useSkillCardVariants } from "@/hooks/use-students";
+import {
+  DEFAULT_SKILL_CARD_VARIANT,
+  findSkillCardVariant,
+} from "@/lib/skill-card";
 import { buildStudentIconUrl } from "@/lib/url";
 import type { Student } from "~prisma";
 
@@ -208,7 +206,7 @@ export function TimelineItem({
 
   const handleVariantUpdate = useCallback(
     (variantId: string) => {
-      if (variantId === "default") {
+      if (variantId === DEFAULT_SKILL_CARD_VARIANT) {
         onWantsToUpdate(item.id, {
           variantId: undefined,
         });
@@ -315,20 +313,12 @@ export function TimelineItem({
     setItems,
   ]);
 
-  const skillVariants = useMemo(() => {
-    if (item.type !== "student") {
-      return [];
-    }
-
-    const variants = skillCardVariantMap[item.student.id as SkillCardVariant];
-    if (!variants) {
-      return [];
-    }
-
-    return variants;
-  }, [
-    item,
-  ]);
+  const studentId = item.type === "student" ? item.student.id : undefined;
+  const skillVariants = useSkillCardVariants(studentId);
+  const selectedVariant =
+    item.type === "student"
+      ? findSkillCardVariant(skillVariants, item.student.id, item.variantId)
+      : undefined;
 
   useEffect(() => {
     if (!separatorOverride) {
@@ -402,16 +392,20 @@ export function TimelineItem({
                       </Label>
 
                       <Select
-                        value={item.variantId ?? "default"}
+                        value={
+                          selectedVariant?.id ?? DEFAULT_SKILL_CARD_VARIANT
+                        }
                         onValueChange={handleVariantUpdate}
                       >
                         <SelectTrigger>
-                          {skillVariants.find((v) => v.id === item.variantId)
-                            ?.name ??
+                          {selectedVariant?.name ??
                             t("tools.timeline.editor.student.variant.default")}
                         </SelectTrigger>
 
                         <SelectContent>
+                          <SelectItem value={DEFAULT_SKILL_CARD_VARIANT}>
+                            {t("tools.timeline.editor.student.variant.default")}
+                          </SelectItem>
                           {skillVariants.map((variant) => (
                             <SelectItem key={variant.id} value={variant.id}>
                               {variant.name}
