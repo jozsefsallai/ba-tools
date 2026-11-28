@@ -70,6 +70,34 @@ export interface ImageStudent {
   pathName: string;
 }
 
+/** A playable student, as the sprite links see them. */
+export interface SpriteStudent extends ImageStudent {
+  /**
+   * The family's base student's `pathName` (the `baseVariantId`, or the
+   * student's own id). A family's students and non-playable variants are
+   * linked to one another.
+   */
+  family: string;
+  /** Matched against scenario characters' names to find non-playable variants. */
+  firstNameJP: string;
+  /** Release order (`defaultOrder`); a family's students are listed in it. */
+  order: number;
+}
+
+/**
+ * A reviewed scenario skeleton, keyed by its lowercased name without `_spr`
+ * (`np0186`).
+ */
+export interface SpriteVariantOverride {
+  /**
+   * The family it belongs to, for skeletons the names don't tell apart
+   * (Shiroko and Shiroko＊Terror); `null` leaves it out of the gallery.
+   */
+  family?: string | null;
+  /** Hidden until the viewer reveals it. */
+  spoiler?: boolean;
+}
+
 export interface ExtractImageAssetsOptions {
   sqlcipherKey?: string;
   students: ImageStudent[];
@@ -80,16 +108,47 @@ export interface ExtractImageAssetsOptions {
   memorialLobbies?: boolean;
   renderThreads?: number;
   reuseExisting?: boolean;
+  /**
+   * Every playable student. With it (and `spineSprites`), the run renders the
+   * non-playable variants of `students`' families and updates the links in
+   * every student's sprite manifest, including students it doesn't render.
+   */
+  spriteStudents?: SpriteStudent[];
+  spriteVariantOverrides?: Record<string, SpriteVariantOverride>;
+  /**
+   * Reads a file already on the CDN (`null` when there's none). Needed with
+   * `spriteStudents`: links are added to the published manifests of students
+   * the run doesn't render, and variants already published aren't rendered again.
+   */
+  readPublished?: (key: string) => Promise<string | null>;
+  /** Render non-playable variants again even when they're published. */
+  refreshSpriteVariants?: boolean;
+  /**
+   * Render the variants of every family, not only `students`' (for a first
+   * run, or after adding overrides), without rendering the students.
+   */
+  allSpriteVariants?: boolean;
 }
 
+/**
+ * `v2/images/students/spine/<pathName>/manifest.json` for a student, and
+ * `v2/images/students/spine/_other/<id>/manifest.json` for a non-playable
+ * variant (`id` being its skeleton's lowercased name without `_spr`).
+ */
 export interface StudentSpriteManifest {
-  /** 2 added `face`. */
-  version: 1 | 2;
+  /** 2 added `face`, 3 `related`, `spoiler` and `thumbnails`. */
+  version: 1 | 2 | 3;
   gameVersion: string;
   skeleton: string;
   width: number;
   height: number;
+  /** Expression names; `Idle_01` alone for skeletons without expressions. */
   sprites: string[];
+  /**
+   * Each sprite also has a 400px tall lossy thumbnail, `thumbs/<sprite>.webp`,
+   * for galleries. The sprites themselves are lossless.
+   */
+  thumbnails?: boolean;
   /**
    * The center of the face in sprite pixels (from the top left), found from
    * the slots the expressions change. Missing before version 2, and for
@@ -99,6 +158,17 @@ export interface StudentSpriteManifest {
     x: number;
     y: number;
   };
+  /**
+   * A student's family, to show after its own sprites: the other playable
+   * students (`pathName`s, in release order), then the non-playable variants
+   * (`_other` ids). Only on students' manifests, and only when there are any.
+   */
+  related?: {
+    students: string[];
+    others: string[];
+  };
+  /** A non-playable variant that gives away the story. */
+  spoiler?: boolean;
 }
 
 export interface MemorialLobbySkeleton {

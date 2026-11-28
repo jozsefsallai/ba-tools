@@ -6,6 +6,7 @@ import {
   ChevronRightIcon,
   CopyIcon,
   ExternalLinkIcon,
+  EyeOffIcon,
   LayoutGridIcon,
   LoaderCircleIcon,
   XIcon,
@@ -17,21 +18,24 @@ import {
   type PointerEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { toast } from "sonner";
 import { FallbackImage } from "@/components/common/fallback-image";
 import { Button } from "@/components/ui/button";
+import { useStudents } from "@/hooks/use-students";
 import { track } from "@/lib/analytics/posthog.client";
-import { fetchStudentSprites } from "@/lib/student-spine";
+import {
+  fetchRelatedSpriteGroups,
+  fetchStudentSprites,
+  type SpriteGroup,
+  type SpriteSet,
+  type StudentSpriteManifest,
+} from "@/lib/student-spine";
 import { buildStudentDefaultSpriteUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-
-export type StudentSprite = {
-  key: string;
-  url: string;
-};
 
 type StudentSpriteCarouselProps = {
   studentId: string;
@@ -41,15 +45,6 @@ type StudentSpriteCarouselProps = {
 
 const DEFAULT_SPRITE_KEY = "00";
 
-function getDefaultSprites(studentId: string): StudentSprite[] {
-  return [
-    {
-      key: DEFAULT_SPRITE_KEY,
-      url: buildStudentDefaultSpriteUrl(studentId),
-    },
-  ];
-}
-
 /** Where the face sits in the sprites, to frame wide ones around the head. */
 type SpriteFraming = {
   /** The face's horizontal center, as a fraction of the sprite's width. */
@@ -58,34 +53,102 @@ type SpriteFraming = {
   aspect: number;
 };
 
-async function fetchSprites(studentId: string): Promise<{
-  sprites: StudentSprite[];
+type SpriteItem = {
+  key: string;
+  sprite: string;
+  url: string;
+  thumbnailUrl: string;
+  setId: string;
+  groupIndex: number;
+  spoiler: boolean;
   framing: SpriteFraming | null;
+};
+
+function getDefaultGroup(studentId: string): SpriteGroup {
+  return {
+    kind: "student",
+    studentId,
+    sets: [
+      {
+        id: studentId,
+        version: 3,
+        gameVersion: "",
+        skeleton: "",
+        width: 0,
+        height: 0,
+        sprites: [
+          DEFAULT_SPRITE_KEY,
+        ],
+        urls: {
+          [DEFAULT_SPRITE_KEY]: buildStudentDefaultSpriteUrl(studentId),
+        },
+        thumbnailUrls: {
+          [DEFAULT_SPRITE_KEY]: buildStudentDefaultSpriteUrl(studentId),
+        },
+      },
+    ],
+  };
+}
+
+function getFraming(set: SpriteSet): SpriteFraming | null {
+  return set.face
+    ? {
+        focusX: set.face.x / set.width,
+        aspect: set.width / set.height,
+      }
+    : null;
+}
+
+function orderedSprites(set: SpriteSet) {
+  return [
+    ...set.sprites.filter((key) => key === DEFAULT_SPRITE_KEY),
+    ...set.sprites.filter((key) => key !== DEFAULT_SPRITE_KEY),
+  ];
+}
+
+function buildItems(groups: SpriteGroup[], studentId: string): SpriteItem[] {
+  return groups.flatMap((group, groupIndex) =>
+    group.sets.flatMap((set) => {
+      const framing = getFraming(set);
+      return orderedSprites(set).map((sprite) => ({
+        // The student's own keys stay plain, as before related sprites existed
+        key: set.id === studentId ? sprite : `${set.id}/${sprite}`,
+        sprite,
+        url: set.urls[sprite],
+        thumbnailUrl: set.thumbnailUrls[sprite],
+        setId: set.id,
+        groupIndex,
+        spoiler: !!set.spoiler,
+        framing,
+      }));
+    }),
+  );
+}
+
+async function fetchOwnSprites(studentId: string): Promise<{
+  group: SpriteGroup;
+  related: StudentSpriteManifest["related"];
 }> {
   const manifest = await fetchStudentSprites(studentId);
   if (!manifest || manifest.sprites.length === 0) {
     return {
-      sprites: getDefaultSprites(studentId),
-      framing: null,
+      group: getDefaultGroup(studentId),
+      related: undefined,
     };
   }
 
-  const keys = [
-    ...manifest.sprites.filter((key) => key === DEFAULT_SPRITE_KEY),
-    ...manifest.sprites.filter((key) => key !== DEFAULT_SPRITE_KEY),
-  ];
-
   return {
-    sprites: keys.map((key) => ({
-      key,
-      url: manifest.urls[key],
-    })),
-    framing: manifest.face
-      ? {
-          focusX: manifest.face.x / manifest.width,
-          aspect: manifest.width / manifest.height,
-        }
-      : null,
+    group: {
+      kind: "student",
+      studentId,
+      sets: [
+        {
+          ...manifest,
+          id: studentId,
+        },
+      ],
+    },
+    related: manifest.related,
   };
 }
 
@@ -137,22 +200,49 @@ export function StudentSpriteCarousel({
 }: StudentSpriteCarouselProps) {
   const t = useTranslations();
 
-  const [sprites, setSprites] = useState(() => getDefaultSprites(studentId));
-  const [framing, setFraming] = useState<SpriteFraming | null>(null);
+  const { studentMap } = useStudents();
+
+  const [groups, setGroups] = useState<SpriteGroup[]>(() => [
+    getDefaultGroup(studentId),
+  ]);
   const [isManifestLoaded, setIsManifestLoaded] = useState(false);
+  const [revealed, setRevealed] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
 
   useEffect(() => {
     let cancelled = false;
 
-    fetchSprites(studentId)
-      .then((loaded) => {
-        if (!cancelled) {
-          setSprites(loaded.sprites);
-          setFraming(loaded.framing);
+    setGroups([
+      getDefaultGroup(studentId),
+    ]);
+    setRevealed(new Set());
+
+    fetchOwnSprites(studentId)
+      .then(async ({ group, related }) => {
+        if (cancelled) {
+          return;
+        }
+
+        setGroups([
+          group,
+        ]);
+        setIsManifestLoaded(true);
+
+        if (!related) {
+          return;
+        }
+
+        const relatedGroups = await fetchRelatedSpriteGroups(related);
+        if (!cancelled && relatedGroups.length > 0) {
+          setGroups([
+            group,
+            ...relatedGroups,
+          ]);
         }
       })
-      .catch((err) => console.error("Failed to load sprite manifest", err))
-      .finally(() => {
+      .catch((err) => {
+        console.error("Failed to load sprite manifest", err);
         if (!cancelled) {
           setIsManifestLoaded(true);
         }
@@ -164,6 +254,33 @@ export function StudentSpriteCarousel({
   }, [
     studentId,
   ]);
+
+  const sprites = useMemo(
+    () => buildItems(groups, studentId),
+    [
+      groups,
+      studentId,
+    ],
+  );
+
+  function groupLabel(group: SpriteGroup) {
+    if (group.kind === "others") {
+      return t("tools.students.detail.sprite.others");
+    }
+
+    if (group.studentId === studentId) {
+      return name;
+    }
+
+    return studentMap[group.studentId]?.name ?? group.studentId;
+  }
+
+  const isHidden = (item: SpriteItem) =>
+    item.spoiler && !revealed.has(item.setId);
+
+  function reveal(setId: string) {
+    setRevealed((current) => new Set(current).add(setId));
+  }
 
   const scrollerRef = useRef<HTMLElement>(null);
   const dragRef = useRef<{
@@ -179,6 +296,22 @@ export function StudentSpriteCarousel({
 
   const total = sprites.length;
   const current = sprites[index] ?? sprites[0];
+
+  const galleryGroups = groups.map((group, groupIndex) => ({
+    key: group.kind === "others" ? "others" : group.studentId,
+    label: groupLabel(group),
+    sets: group.sets.map((set) => ({
+      id: set.id,
+      items: sprites
+        .map((item, idx) => ({
+          item,
+          idx,
+        }))
+        .filter(
+          ({ item }) => item.groupIndex === groupIndex && item.setId === set.id,
+        ),
+    })),
+  }));
 
   const scrollToIndex = useCallback(
     (target: number, behavior: ScrollBehavior = "smooth") => {
@@ -339,31 +472,58 @@ export function StudentSpriteCarousel({
           isGalleryOpen && "scale-90 opacity-0",
         )}
       >
-        {sprites.map((sprite, idx) => (
-          <div
-            key={sprite.key}
-            className="relative h-full w-full shrink-0 snap-center overflow-hidden [container-type:size]"
-          >
-            <FallbackImage
-              src={sprite.url}
-              fallbackSrc={idx === 0 ? fallbackSrc : undefined}
-              alt={name}
-              draggable={false}
-              loading={idx === 0 ? "eager" : "lazy"}
-              fetchPriority={idx === 0 ? "high" : "auto"}
-              // Without a face position, scaled to fit the box both ways so
-              // wide sprites shrink instead of being cropped off-center.
-              className={cn(
-                "pointer-events-none absolute transition-opacity duration-200",
-                framing
-                  ? "top-0 h-full w-auto max-w-none"
-                  : "inset-0 h-full w-full object-contain",
-                !isManifestLoaded && "opacity-0",
+        {sprites.map((sprite, idx) => {
+          const hidden = isHidden(sprite);
+
+          return (
+            <div
+              key={sprite.key}
+              className="relative h-full w-full shrink-0 snap-center overflow-hidden [container-type:size]"
+            >
+              <FallbackImage
+                src={sprite.url}
+                fallbackSrc={idx === 0 ? fallbackSrc : undefined}
+                alt={name}
+                draggable={false}
+                loading={idx === 0 ? "eager" : "lazy"}
+                fetchPriority={idx === 0 ? "high" : "auto"}
+                // Without a face position, scaled to fit the box both ways so
+                // wide sprites shrink instead of being cropped off-center.
+                className={cn(
+                  "pointer-events-none absolute transition-[opacity,filter] duration-200",
+                  sprite.framing
+                    ? "top-0 h-full w-auto max-w-none"
+                    : "inset-0 h-full w-full object-contain",
+                  !isManifestLoaded && "opacity-0",
+                  hidden && "opacity-60 blur-2xl",
+                )}
+                style={
+                  sprite.framing ? getFramedStyle(sprite.framing) : undefined
+                }
+              />
+
+              {hidden && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+                  <EyeOffIcon className="text-muted-foreground size-6" />
+                  <p className="text-sm font-medium">
+                    {t("tools.students.detail.sprite.spoiler")}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-background/80 backdrop-blur"
+                    tabIndex={idx === index && !isGalleryOpen ? 0 : -1}
+                    // Keeps the carousel's mouse drag from taking the click
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onClick={() => reveal(sprite.setId)}
+                  >
+                    {t("tools.students.detail.sprite.reveal")}
+                  </Button>
+                </div>
               )}
-              style={framing ? getFramedStyle(framing) : undefined}
-            />
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </section>
 
       {!isManifestLoaded && (
@@ -382,35 +542,61 @@ export function StudentSpriteCarousel({
               : "invisible scale-105 opacity-0",
           )}
         >
-          <div className="grid grid-cols-3 gap-2">
-            {sprites.map((sprite, idx) => (
-              <button
-                key={sprite.key}
-                type="button"
-                tabIndex={isGalleryOpen ? 0 : -1}
-                onClick={() => selectFromGallery(idx)}
-                aria-current={idx === index}
-                aria-label={`${name} ${idx + 1}`}
-                style={{
-                  transitionDelay: isGalleryOpen
-                    ? `${Math.min(idx, 12) * 25}ms, ${Math.min(idx, 12) * 25}ms, 0ms`
-                    : undefined,
-                }}
-                className={cn(
-                  "bg-muted/40 hover:bg-muted relative aspect-[3/4] overflow-hidden rounded-lg border transition-[opacity,translate,background-color] duration-300 ease-out motion-reduce:transition-none",
-                  idx === index && "ring-primary ring-2",
-                  isGalleryOpen ? "opacity-100" : "translate-y-3 opacity-0",
+          <div className="flex flex-col gap-5">
+            {galleryGroups.map((group) => (
+              <section key={group.key} className="flex flex-col gap-2">
+                {galleryGroups.length > 1 && (
+                  <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                    {group.label}
+                  </h3>
                 )}
-              >
-                <FallbackImage
-                  src={sprite.url}
-                  fallbackSrc={idx === 0 ? fallbackSrc : undefined}
-                  alt=""
-                  draggable={false}
-                  loading="lazy"
-                  className="pointer-events-none absolute inset-0 h-full w-full object-contain p-1"
-                />
-              </button>
+
+                {group.sets.map((set) => (
+                  <div
+                    key={set.id}
+                    className="grid grid-cols-3 gap-2 [&+&]:border-t [&+&]:border-dashed [&+&]:pt-2"
+                  >
+                    {set.items.map(({ item, idx }) => (
+                      <button
+                        key={item.key}
+                        type="button"
+                        tabIndex={isGalleryOpen ? 0 : -1}
+                        onClick={() => selectFromGallery(idx)}
+                        aria-current={idx === index}
+                        aria-label={`${group.label} ${idx + 1}`}
+                        style={{
+                          transitionDelay: isGalleryOpen
+                            ? `${Math.min(idx, 12) * 25}ms, ${Math.min(idx, 12) * 25}ms, 0ms`
+                            : undefined,
+                        }}
+                        className={cn(
+                          "bg-muted/40 hover:bg-muted relative aspect-[3/4] overflow-hidden rounded-lg border transition-[opacity,translate,background-color] duration-300 ease-out motion-reduce:transition-none",
+                          idx === index && "ring-primary ring-2",
+                          isGalleryOpen
+                            ? "opacity-100"
+                            : "translate-y-3 opacity-0",
+                        )}
+                      >
+                        <FallbackImage
+                          src={item.thumbnailUrl}
+                          fallbackSrc={idx === 0 ? fallbackSrc : undefined}
+                          alt=""
+                          draggable={false}
+                          loading="lazy"
+                          className={cn(
+                            "pointer-events-none absolute inset-0 h-full w-full object-contain p-1",
+                            isHidden(item) && "opacity-60 blur-lg",
+                          )}
+                        />
+
+                        {isHidden(item) && (
+                          <EyeOffIcon className="text-muted-foreground absolute inset-0 m-auto size-5" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </section>
             ))}
           </div>
         </div>
@@ -426,6 +612,12 @@ export function StudentSpriteCarousel({
       >
         {!isGalleryOpen && (
           <>
+            {current.groupIndex > 0 && (
+              <span className="bg-background/80 animate-in fade-in max-w-40 truncate rounded-full border px-2.5 py-1 text-xs font-semibold backdrop-blur duration-300">
+                {galleryGroups[current.groupIndex]?.label}
+              </span>
+            )}
+
             {total > 1 && (
               <span className="bg-background/80 animate-in fade-in rounded-full border px-2.5 py-1 text-xs font-semibold tabular-nums backdrop-blur duration-300">
                 {index + 1}/{total}
@@ -437,7 +629,7 @@ export function StudentSpriteCarousel({
               size="icon-sm"
               className={cn(OVERLAY_BUTTON_CLASS, OVERLAY_ENTER_CLASS)}
               onClick={copyToClipboard}
-              disabled={copied}
+              disabled={copied || isHidden(current)}
               title={t("tools.students.detail.sprite.copy")}
             >
               {copied ? <CheckIcon /> : <CopyIcon />}
@@ -450,9 +642,15 @@ export function StudentSpriteCarousel({
               asChild
               variant="outline"
               size="icon-sm"
-              className={cn(OVERLAY_BUTTON_CLASS, OVERLAY_ENTER_CLASS)}
+              className={cn(
+                OVERLAY_BUTTON_CLASS,
+                OVERLAY_ENTER_CLASS,
+                isHidden(current) && "pointer-events-none opacity-50",
+              )}
             >
               <a
+                aria-disabled={isHidden(current)}
+                tabIndex={isHidden(current) ? -1 : undefined}
                 href={current.url}
                 target="_blank"
                 rel="noreferrer"

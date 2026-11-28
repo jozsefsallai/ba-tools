@@ -117,7 +117,7 @@ These are sent when an action succeeds: after a save goes through, or when a dow
 
 | Event                              | When                                                                                       | Properties                                | Used for                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------ |
-| `student_sprite_copied`            | You copy a student's sprite image                                                          | `student_id`; `variant` (sprite key)      | Which sprites people use                   |
+| `student_sprite_copied`            | You copy a student's sprite image                                                          | `student_id`; `variant` (sprite key, prefixed with the other student's or outfit's id for sprites from the rest of the family) | Which sprites people use                   |
 | `memorial_lobby_started`           | You start a memorial lobby from its poster. Lobbies that play on their own aren't counted. | `student_id`; `lobby_index`               | How much the memorial lobby viewer is used |
 | `memorial_lobby_screenshot_copied` | You copy a memorial lobby screenshot                                                       | `student_id`; `lobby_index`; `fullscreen` | Whether screenshots are useful             |
 

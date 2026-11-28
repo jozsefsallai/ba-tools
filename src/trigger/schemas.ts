@@ -105,6 +105,7 @@ export const syncImageAssetsPayload = z.object({
   overwrite: z.boolean().default(true),
   spineSprites: z.boolean().default(true),
   memorialLobbies: z.boolean().default(true),
+  refreshSpriteVariants: z.boolean().default(false),
 });
 
 export type SyncImageAssetsPayload = z.input<typeof syncImageAssetsPayload>;

@@ -56,6 +56,18 @@ export type ChangelogItemData = {
 
 export const CHANGELOG: ChangelogItemData[] = [
   {
+    date: "November 28, 2026",
+    features: [
+      {
+        scope: CHANGELOG_SCOPES.students,
+        description:
+          "Added various other alternative sprites to the sprite gallery of student pages.",
+      },
+    ],
+    changes: [],
+    fixes: [],
+  },
+  {
     date: "November 26, 2026",
     features: [
       {

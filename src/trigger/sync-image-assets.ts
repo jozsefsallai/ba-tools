@@ -2,8 +2,15 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { logger, type Task, task } from "@trigger.dev/sdk";
-import { resolveImageStudents } from "../lib/game-data/existing-students.server";
-import { uploadImages } from "../lib/game-data/upload-images.server";
+import {
+  resolveImageStudents,
+  resolveSpriteStudents,
+} from "../lib/game-data/existing-students.server";
+import { SPRITE_VARIANT_OVERRIDES } from "../lib/game-data/sprite-variants";
+import {
+  createPublishedReader,
+  uploadImages,
+} from "../lib/game-data/upload-images.server";
 import { loadMxDataSync } from "./lib/mx-data-sync";
 import { type SyncImageAssetsPayload, syncImageAssetsPayload } from "./schemas";
 
@@ -31,6 +38,7 @@ export const syncImageAssetsTask: Task<
       overwrite,
       spineSprites,
       memorialLobbies,
+      refreshSpriteVariants,
     } = syncImageAssetsPayload.parse(payload);
 
     const { extractImageAssets } = await loadMxDataSync();
@@ -45,6 +53,12 @@ export const syncImageAssetsTask: Task<
       spineSprites,
       memorialLobbies,
       renderThreads: Math.floor(ctx.machine?.cpu ?? 1) - 1,
+      ...(spineSprites && {
+        spriteStudents: await resolveSpriteStudents(),
+        spriteVariantOverrides: SPRITE_VARIANT_OVERRIDES,
+        readPublished: createPublishedReader(),
+        refreshSpriteVariants,
+      }),
     });
 
     const upload = dryRun

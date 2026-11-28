@@ -2027,7 +2027,10 @@
         "copied": "Sprite copied to clipboard",
         "copyFailed": "Couldn't copy the sprite",
         "gallery": "Show all sprites",
-        "closeGallery": "Close sprite gallery"
+        "closeGallery": "Close sprite gallery",
+        "others": "Others",
+        "spoiler": "This sprite contains story spoilers",
+        "reveal": "Show anyway"
       },
       "variants": {
         "original": "Original"

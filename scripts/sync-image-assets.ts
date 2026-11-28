@@ -3,8 +3,13 @@ import { parseArgs } from "node:util";
 import {
   resolveAllImageStudents,
   resolveImageStudents,
+  resolveSpriteStudents,
 } from "@/lib/game-data/existing-students.server";
-import { uploadImages } from "@/lib/game-data/upload-images.server";
+import { SPRITE_VARIANT_OVERRIDES } from "@/lib/game-data/sprite-variants";
+import {
+  createPublishedReader,
+  uploadImages,
+} from "@/lib/game-data/upload-images.server";
 import {
   cacheDir,
   loadMxDataSync,
@@ -46,6 +51,14 @@ const { values } = parseArgs({
       type: "boolean",
       default: false,
     },
+    "refresh-variants": {
+      type: "boolean",
+      default: false,
+    },
+    "all-variants": {
+      type: "boolean",
+      default: false,
+    },
     "render-threads": {
       type: "string",
     },
@@ -82,6 +95,8 @@ if (
 
 const { extractImageAssets } = await loadMxDataSync();
 
+const spineSprites = !values["no-spine-sprites"];
+
 const result = await extractImageAssets({
   sqlcipherKey,
   students: values["no-students"]
@@ -92,9 +107,16 @@ const result = await extractImageAssets({
   outDir: values.out,
   cacheDir,
   logger,
-  spineSprites: !values["no-spine-sprites"],
+  spineSprites,
   memorialLobbies: !values["no-memorial-lobbies"],
   reuseExisting: !values.fresh,
+  ...(spineSprites && {
+    spriteStudents: await resolveSpriteStudents(),
+    spriteVariantOverrides: SPRITE_VARIANT_OVERRIDES,
+    readPublished: createPublishedReader(),
+    refreshSpriteVariants: values["refresh-variants"],
+    allSpriteVariants: values["all-variants"],
+  }),
   renderThreads:
     values["render-threads"] === undefined
       ? undefined

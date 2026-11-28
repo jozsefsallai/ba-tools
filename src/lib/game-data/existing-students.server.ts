@@ -1,5 +1,5 @@
 import { db } from "../db";
-import type { ExistingStudents, ImageStudent } from "./contract";
+import type { ExistingStudents, ImageStudent, SpriteStudent } from "./contract";
 
 export async function getExistingStudents(): Promise<ExistingStudents> {
   const rows = await db.student.findMany({
@@ -33,6 +33,28 @@ export async function resolveAllImageStudents(): Promise<ImageStudent[]> {
     devName: row.devName,
     characterId: row.schaleDbId,
     pathName: row.id,
+  }));
+}
+
+export async function resolveSpriteStudents(): Promise<SpriteStudent[]> {
+  const rows = await db.student.findMany({
+    select: {
+      id: true,
+      devName: true,
+      schaleDbId: true,
+      firstNameJP: true,
+      defaultOrder: true,
+      baseVariantId: true,
+    },
+  });
+
+  return rows.map((row) => ({
+    devName: row.devName,
+    characterId: row.schaleDbId,
+    pathName: row.id,
+    family: row.baseVariantId ?? row.id,
+    firstNameJP: row.firstNameJP,
+    order: row.defaultOrder,
   }));
 }
 

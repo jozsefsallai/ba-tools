@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
 import {
+  GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -47,6 +48,76 @@ function required(name: string) {
   return value;
 }
 
+function createClient() {
+  return new S3Client({
+    region: "auto",
+    endpoint: `https://${required("R2_ACCOUNT_ID")}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: required("R2_ACCESS_KEY_ID"),
+      secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
+    },
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
+  });
+}
+
+export function createPublishedReader(): (
+  key: string,
+) => Promise<string | null> {
+  if (process.env.R2_ACCOUNT_ID && process.env.R2_BUCKET_NAME) {
+    const bucket = required("R2_BUCKET_NAME");
+    const client = createClient();
+
+    return async (key) => {
+      try {
+        const object = await client.send(
+          new GetObjectCommand({
+            Bucket: bucket,
+            Key: key,
+          }),
+        );
+
+        return (await object.Body?.transformToString("utf-8")) ?? null;
+      } catch (err) {
+        if (
+          err instanceof S3ServiceException &&
+          err.$metadata.httpStatusCode === 404
+        ) {
+          return null;
+        }
+
+        throw err;
+      }
+    };
+  }
+
+  const base = process.env.NEXT_PUBLIC_IMAGE_CDN_URL?.replace(/\/+$/, "");
+
+  if (!base) {
+    throw new Error(
+      "R2 credentials or NEXT_PUBLIC_IMAGE_CDN_URL are needed to read published files",
+    );
+  }
+
+  const startedAt = Date.now();
+
+  return async (key) => {
+    const res = await fetch(`${base}/${key}?t=${startedAt}`, {
+      cache: "no-store",
+    });
+
+    if (res.status === 404 || res.status === 403) {
+      return null;
+    }
+
+    if (!res.ok) {
+      throw new Error(`Failed to read ${key}: ${res.status}`);
+    }
+
+    return res.text();
+  };
+}
+
 export interface UploadImagesResult {
   uploaded: string[];
   unchanged: string[];
@@ -64,16 +135,7 @@ export async function uploadImages(
 ): Promise<UploadImagesResult> {
   const bucket = required("R2_BUCKET_NAME");
 
-  const client = new S3Client({
-    region: "auto",
-    endpoint: `https://${required("R2_ACCOUNT_ID")}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: required("R2_ACCESS_KEY_ID"),
-      secretAccessKey: required("R2_SECRET_ACCESS_KEY"),
-    },
-    requestChecksumCalculation: "WHEN_REQUIRED",
-    responseChecksumValidation: "WHEN_REQUIRED",
-  });
+  const client = createClient();
 
   const result: UploadImagesResult = {
     uploaded: [],
