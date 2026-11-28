@@ -63,8 +63,18 @@ export const CHANGELOG: ChangelogItemData[] = [
         description:
           "Added various other alternative sprites to the sprite gallery of student pages.",
       },
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description:
+          "Added missing skill card variants for Kisaki (Swimsuit) and Ibuki (Swimsuit).",
+      },
     ],
-    changes: [],
+    changes: [
+      {
+        scope: CHANGELOG_SCOPES.timelineVisualizer,
+        description: "Improved skill card variant extraction.",
+      },
+    ],
     fixes: [],
   },
   {
